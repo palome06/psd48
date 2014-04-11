@@ -404,99 +404,59 @@ namespace PSD.PSDGamepkg
                         rstage = "R" + rounder + "ZW"; break;
                     case "ZW":
                         {
+                            // TODO: to substitude old ZW event on considering the capability
                             Board.PosHinders.Clear();
-                            Board.PosHinders.AddRange(Board.Garden.Values.Where(p => p.IsAlive &&
-                                p.Team == Board.Rounder.OppTeam).Select(p => p.Uid.ToString()).ToList());
+                            List<ushort> hMember = Board.Garden.Values.Where(p => p.IsAlive &&
+                                p.Team == Board.Rounder.OppTeam).Select(p => p.Uid).ToList();
+                            Board.PosHinders.AddRange(hMember.Select(p => "T" + p).ToList());
                             Board.PosSupporters.Clear();
-                            Board.PosSupporters.AddRange(Board.Garden.Values.Where(p => p.IsAlive &&
-                                p.Team == Board.Rounder.Team).Select(p => p.Uid.ToString()).ToList());
-                            Board.PosHinders.Add("0");
-                            Board.PosSupporters.Add("0");
+                            List<ushort> sMember = Board.Garden.Values.Where(p => p.IsAlive &&
+                                p.Team == Board.Rounder.Team).Select(p => p.Uid).ToList();
+                            Board.PosSupporters.AddRange(sMember.Select(p => "T" + p).ToList());
+                            Board.AllowNoSupport = true;
+                            Board.AllowNoHinder = true;
                             RunQuadStage(rstage, 0);
-                            string strSupports = Board.PosSupporters.Count > 0 ? string.Join(",", Board.PosSupporters) : "0";
-                            string strHinders = Board.PosHinders.Count > 0 ? string.Join(",", Board.PosHinders) : "0";
+                            // Trigger side
+                            bool isFight = false; // decide to show fight or just pass
+                            string sps = string.Format("#支援者—选择{0}:{1}则不支援,", Board.Rounder.Uid,
+                                 tuple.HL.InstanceHero(Board.Rounder.SelectHero).Name);
+                            if (Board.AllowNoSupport)
+                                sps += "/";
+                            if (Board.PosSupporters.Count > 0)
+                                sps += "J1(p" + string.Join("p", Board.PosSupporters) + ")";
+                            else
+                                sps = "/";
+                            string decision = MajorAsyncInput(Board.Rounder.Uid, sps, sMember, delegate(ushort ut, string str) {
+                                WI.Send(rstage + "3," + ut + "," + str, sMember);
+                                WI.Send(rstage + "3," + ut, ExceptStaff(sMember));
+                                WI.Live(rstage + "3," + ut);
+                            });
+                            ushort sprUid = 0;
+                            if (decision.StartsWith("T")) {
+                                ushort who = ushort.Parse(decision.Substring("T".Length));
+                                sprUid = who;
+                                if (who == Board.Rounder.Uid) // solo
+                                {
+                                    isFight = true; Board.Supporter = null;
+                                }
+                                else // Standard case
+                                {
+                                    isFight = true; Board.Supporter = Board.Garden[who];
+                                }
+                            } else if (decision.StartsWith("P")) {
+                                ushort cdCode = ushort.Parse(decision.Substring("PT".Length));
+                                Monster monster = LibTuple.ML.Decode(cdCode);
+                                if (monster != null)
+                                {
+                                    Player lumberjack = Board.Lumberjack(monster, cdCode);
+                                    isFight = true; Board.Supporter = lumberjack;
+                                    sprUid = lumberjack.Uid;
+                                }
+                            } else if (decision.StartsWith("/")) {
+                                isFight = false; Board.Supporter = null; sprUid = 0;
+                            }
+                            RaiseGMessage("G2HS,1," + sprUid);
 
-                            foreach (Player player in Board.Garden.Values)
-                            {
-                                if (player.Uid == Board.Rounder.Uid)
-                                    WI.Send(rstage + "1,0,0," + Board.Rounder.Uid + "," + strSupports, 0, player.Uid);
-                                //else if (player.Uid == Board.Opponent.Uid)
-                                //    WI.Send(rstage + "1,1,0," + strHinders, 0, player.Uid);
-                                else if (player.Team == Board.Rounder.Team)
-                                    WI.Send(rstage + "1,0,1," + Board.Rounder.Uid + "," + strSupports, 0, player.Uid);
-                                //else if (player.Team == Board.Rounder.OppTeam)
-                                //    WI.Send(rstage + "1,1,1," + strHinders, 0, player.Uid);
-                                else
-                                    WI.Send(rstage + "1,0,2," + Board.Rounder.Uid, 0, player.Uid);
-                            }
-                            WI.Live(rstage + "1,0,2," + Board.Rounder.Uid);
-                            bool isFight = false;
-                            bool repliedRounder = false;
-                            WI.RecvInfStart();
-                            while (!repliedRounder)
-                            {
-                                Base.VW.Msgs msg = WI.RecvInfRecvPending();
-                                if (msg.Msg.StartsWith(rstage + "2"))
-                                {
-                                    string advice = msg.Msg.Substring(msg.Msg.IndexOf(',') + 1);
-                                    if (Board.Garden[msg.From].Team == Board.Rounder.Team)
-                                    {
-                                        ushort[] invs = new ushort[] { Board.Rounder.Uid, msg.From };
-                                        WI.Send(rstage + "3," + msg.From + "," + advice, invs);
-                                        WI.Send(rstage + "3," + msg.From, ExceptStaff(invs));
-                                        WI.Live(rstage + "3," + msg.From);
-                                    }
-                                }
-                                else if (msg.Msg.StartsWith(rstage + "4"))
-                                {
-                                    string advice = msg.Msg.Substring(msg.Msg.IndexOf(',') + 1);
-                                    ushort who;
-                                    if (ushort.TryParse(advice, out who))
-                                    {
-                                        if (msg.From == Board.Rounder.Uid)
-                                        {
-                                            if (who == 0)
-                                                isFight = false;
-                                            else if (who == Board.Rounder.Uid) // solo
-                                            {
-                                                isFight = true; Board.Supporter = null;
-                                                RaiseGMessage("G2HS,1,0");
-                                            }
-                                            else // Normal
-                                            {
-                                                isFight = true; Board.Supporter = Board.Garden[who];
-                                                RaiseGMessage("G2HS,1," + who);
-                                            }
-                                            WI.Send(rstage + "5," + msg.From + "," + who, 0, Board.Rounder.Uid);
-                                            WI.Send(rstage + "5," + msg.From, ExceptStaff(Board.Rounder.Uid));
-                                            WI.Live(rstage + "5," + msg.From);
-                                            //involved[msg.From] = true;
-                                            repliedRounder = true;
-                                        }
-                                    }
-                                    else if (advice.StartsWith("P"))
-                                    {
-                                        ushort cdCode = ushort.Parse(advice.Substring("PT".Length));
-                                        //ushort cdCode = LibTuple.ML.Encode(advice);
-                                        Monster monster = LibTuple.ML.Decode(cdCode);
-                                        if (monster != null)
-                                        {
-                                            Player lumberjack = Board.Lumberjack(monster, cdCode);
-                                            if (msg.From == Board.Rounder.Uid)
-                                            {
-                                                isFight = true; Board.Supporter = lumberjack;
-                                                RaiseGMessage("G2HS,1," + (cdCode + 1000));
-                                                WI.Send(rstage + "5," + msg.From + "," + lumberjack.Uid, 0, Board.Rounder.Uid);
-                                                WI.Send(rstage + "5," + msg.From, ExceptStaff(Board.Rounder.Uid));
-                                                WI.Live(rstage + "5," + msg.From);
-                                                //involved[msg.From] = true;
-                                                repliedRounder = true;
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                            WI.RecvInfEnd();
                             if (!isFight)
                             {
                                 // Ensure XI.Board.Mon1From == 0
@@ -508,89 +468,233 @@ namespace PSD.PSDGamepkg
                                 WI.BCast(rstage + "7,0," + mons);
                                 WI.BCast("G2QC," + mons);
                                 rstage = "R" + rounder + "ZF";
-                            }
-                            else
-                            {
-                                WI.BCast(rstage + "7,1," + Board.Supporter.Uid);
-                                foreach (Player player in Board.Garden.Values)
-                                {
-                                    //if (player.Uid == Board.Rounder.Uid)
-                                    //    WI.Send(rstage + "1,0,0," + strSupports, 0, player.Uid);
-                                    if (player.Uid == Board.Opponent.Uid)
-                                        WI.Send(rstage + "1,1,0," + Board.Opponent.Uid + "," + strHinders, 0, player.Uid);
-                                    //else if (player.Team == Board.Rounder.Team)
-                                    //    WI.Send(rstage + "1,0,1," + strSupports, 0, player.Uid);
-                                    else if (player.Team == Board.Rounder.OppTeam)
-                                        WI.Send(rstage + "1,1,1," + Board.Opponent.Uid + "," + strHinders, 0, player.Uid);
-                                    else
-                                        WI.Send(rstage + "1,1,2," + Board.Opponent.Uid, 0, player.Uid);
-                                }
-                                WI.Live(rstage + "1,1,2," + Board.Opponent.Uid);
-                                bool repliedOppment = false;
-                                //bool[] involved = new bool[garden.Count + 1];
-                                //Fill(involved, false); involved[0] = true;
-                                WI.RecvInfStart();
-                                while (!repliedOppment)
-                                {
-                                    Base.VW.Msgs msg = WI.RecvInfRecvPending();
-                                    if (msg.Msg.StartsWith(rstage + "2"))
+                            } else {
+                                // Hinder side
+                                bool isFight = false; // decide to show fight or just pass
+                                string hns = "#妨碍者,";
+                                if (Board.AllowNoHinder)
+                                    hns += "/";
+                                if (Board.PosHinders.Count > 0)
+                                    hns += "J1(p" + string.Join("p", Board.PosHinders) + ")";
+                                else
+                                    hns = "/";
+                                string decision = MajorAsyncInput(Board.Opponent.Uid, hns, hMember, delegate(ushort ut, string str) {
+                                    WI.Send(rstage + "3," + ut + "," + str, hMember);
+                                    WI.Send(rstage + "3," + ut, ExceptStaff(hMember));
+                                    WI.Live(rstage + "3," + ut);
+                                });
+                                ushort hndUid = 0;
+                                if (decision.StartsWith("T")) {
+                                    ushort who = ushort.Parse(decision.Substring("T".Length));
+                                    hndUid = who;
+                                    Board.Hinder = Board.Garden[who];
+                                } else if (decision.StartsWith("P")) {
+                                    ushort cdCode = ushort.Parse(decision.Substring("PT".Length));
+                                    Monster monster = LibTuple.ML.Decode(cdCode);
+                                    if (monster != null)
                                     {
-                                        string advice = msg.Msg.Substring(msg.Msg.IndexOf(',') + 1);
-                                        if (Board.Garden[msg.From].Team == Board.Rounder.OppTeam)
-                                        {
-                                            ushort[] invs = new ushort[] { Board.Opponent.Uid, msg.From };
-                                            WI.Send(rstage + "3," + msg.From + "," + advice, invs);
-                                            WI.Send(rstage + "3," + msg.From, ExceptStaff(invs));
-                                            WI.Live(rstage + "3," + msg.From);
-                                        }
-                                        //involved[msg.From] = true;
+                                        Player lumberjack = Board.Lumberjack(monster, cdCode);
+                                        Board.Hinder = lumberjack;
+                                        hndUid = lumberjack.Uid;
                                     }
-                                    else if (msg.Msg.StartsWith(rstage + "4"))
-                                    {
-                                        string advice = msg.Msg.Substring(msg.Msg.IndexOf(',') + 1);
-                                        ushort who;
-                                        if (ushort.TryParse(advice, out who))
-                                        {
-                                            if (msg.From == Board.Opponent.Uid)
-                                            {
-                                                if (who == Board.Rounder.Uid || who == 0)
-                                                {
-                                                    Board.Hinder = null;
-                                                    RaiseGMessage("G2HS,2,0");
-                                                }
-                                                else
-                                                {
-                                                    Board.Hinder = Board.Garden[who];
-                                                    RaiseGMessage("G2HS,2," + who);
-                                                }
-                                                //involved[msg.From] = true;
-                                                repliedOppment = true;
-                                            }
-                                        }
-                                        else if (advice.StartsWith("P"))
-                                        {
-                                            ushort cdCode = ushort.Parse(advice.Substring("PT".Length));
-                                            //ushort cdCode = LibTuple.ML.Encode(advice);
-                                            Monster monster = LibTuple.ML.Decode(cdCode);
-                                            if (monster != null)
-                                            {
-                                                Player lumberjack = Board.Lumberjack(monster, cdCode);
-                                                if (msg.From == Board.Opponent.Uid)
-                                                {
-                                                    Board.Hinder = lumberjack;
-                                                    RaiseGMessage("G2HS,2," + (cdCode + 1000));
-                                                    repliedOppment = true;
-                                                }
-                                            }
-                                        }
-                                    }
+                                } else if (decision.StartsWith("/")) {
+                                    Board.Hinder = null; hndUid = 0;
                                 }
-                                WI.RecvInfEnd();
+                                RaiseGMessage("G2HS,2," + hndUid);
                                 WI.BCast(rstage + "7,2," + Board.Hinder.Uid);
                                 rstage = "R" + rounder + "ZU";
                             }
-                            break;
                         }
+                        break;
+                    // case "ZW0":
+                    //     {
+                    //         Board.PosHinders.Clear();
+                    //         Board.PosHinders.AddRange(Board.Garden.Values.Where(p => p.IsAlive &&
+                    //             p.Team == Board.Rounder.OppTeam).Select(p => p.Uid.ToString()).ToList());
+                    //         Board.PosSupporters.Clear();
+                    //         Board.PosSupporters.AddRange(Board.Garden.Values.Where(p => p.IsAlive &&
+                    //             p.Team == Board.Rounder.Team).Select(p => p.Uid.ToString()).ToList());
+                    //         Board.PosHinders.Add("0");
+                    //         Board.PosSupporters.Add("0");
+                    //         RunQuadStage(rstage, 0);
+                    //         string strSupports = Board.PosSupporters.Count > 0 ? string.Join(",", Board.PosSupporters) : "0";
+                    //         string strHinders = Board.PosHinders.Count > 0 ? string.Join(",", Board.PosHinders) : "0";
+
+                    //         foreach (Player player in Board.Garden.Values)
+                    //         {
+                    //             if (player.Uid == Board.Rounder.Uid)
+                    //                 WI.Send(rstage + "1,0,0," + Board.Rounder.Uid + "," + strSupports, 0, player.Uid);
+                    //             //else if (player.Uid == Board.Opponent.Uid)
+                    //             //    WI.Send(rstage + "1,1,0," + strHinders, 0, player.Uid);
+                    //             else if (player.Team == Board.Rounder.Team)
+                    //                 WI.Send(rstage + "1,0,1," + Board.Rounder.Uid + "," + strSupports, 0, player.Uid);
+                    //             //else if (player.Team == Board.Rounder.OppTeam)
+                    //             //    WI.Send(rstage + "1,1,1," + strHinders, 0, player.Uid);
+                    //             else
+                    //                 WI.Send(rstage + "1,0,2," + Board.Rounder.Uid, 0, player.Uid);
+                    //         }
+                    //         WI.Live(rstage + "1,0,2," + Board.Rounder.Uid);
+                    //         bool isFight = false;
+                    //         bool repliedRounder = false;
+                    //         WI.RecvInfStart();
+                    //         while (!repliedRounder)
+                    //         {
+                    //             Base.VW.Msgs msg = WI.RecvInfRecvPending();
+                    //             if (msg.Msg.StartsWith(rstage + "2"))
+                    //             {
+                    //                 string advice = msg.Msg.Substring(msg.Msg.IndexOf(',') + 1);
+                    //                 if (Board.Garden[msg.From].Team == Board.Rounder.Team)
+                    //                 {
+                    //                     ushort[] invs = new ushort[] { Board.Rounder.Uid, msg.From };
+                    //                     WI.Send(rstage + "3," + msg.From + "," + advice, invs);
+                    //                     WI.Send(rstage + "3," + msg.From, ExceptStaff(invs));
+                    //                     WI.Live(rstage + "3," + msg.From);
+                    //                 }
+                    //             }
+                    //             else if (msg.Msg.StartsWith(rstage + "4"))
+                    //             {
+                    //                 string advice = msg.Msg.Substring(msg.Msg.IndexOf(',') + 1);
+                    //                 ushort who;
+                    //                 if (ushort.TryParse(advice, out who))
+                    //                 {
+                    //                     if (msg.From == Board.Rounder.Uid)
+                    //                     {
+                    //                         if (who == 0)
+                    //                             isFight = false;
+                    //                         else if (who == Board.Rounder.Uid) // solo
+                    //                         {
+                    //                             isFight = true; Board.Supporter = null;
+                    //                             RaiseGMessage("G2HS,1,0");
+                    //                         }
+                    //                         else // Normal
+                    //                         {
+                    //                             isFight = true; Board.Supporter = Board.Garden[who];
+                    //                             RaiseGMessage("G2HS,1," + who);
+                    //                         }
+                    //                         WI.Send(rstage + "5," + msg.From + "," + who, 0, Board.Rounder.Uid);
+                    //                         WI.Send(rstage + "5," + msg.From, ExceptStaff(Board.Rounder.Uid));
+                    //                         WI.Live(rstage + "5," + msg.From);
+                    //                         //involved[msg.From] = true;
+                    //                         repliedRounder = true;
+                    //                     }
+                    //                 }
+                    //                 else if (advice.StartsWith("P"))
+                    //                 {
+                    //                     ushort cdCode = ushort.Parse(advice.Substring("PT".Length));
+                    //                     //ushort cdCode = LibTuple.ML.Encode(advice);
+                    //                     Monster monster = LibTuple.ML.Decode(cdCode);
+                    //                     if (monster != null)
+                    //                     {
+                    //                         Player lumberjack = Board.Lumberjack(monster, cdCode);
+                    //                         if (msg.From == Board.Rounder.Uid)
+                    //                         {
+                    //                             isFight = true; Board.Supporter = lumberjack;
+                    //                             RaiseGMessage("G2HS,1," + (cdCode + 1000));
+                    //                             WI.Send(rstage + "5," + msg.From + "," + lumberjack.Uid, 0, Board.Rounder.Uid);
+                    //                             WI.Send(rstage + "5," + msg.From, ExceptStaff(Board.Rounder.Uid));
+                    //                             WI.Live(rstage + "5," + msg.From);
+                    //                             //involved[msg.From] = true;
+                    //                             repliedRounder = true;
+                    //                         }
+                    //                     }
+                    //                 }
+                    //             }
+                    //         }
+                    //         WI.RecvInfEnd();
+                    //         if (!isFight)
+                    //         {
+                    //             // Ensure XI.Board.Mon1From == 0
+                    //             ushort mons = DequeueOfPile(Board.MonPiles);
+                    //             RaiseGMessage("G2IN,1,1");
+                    //             Board.MonDises.Add(mons);
+                    //             RaiseGMessage("G2ON,1," + mons);
+                    //             Board.Battler = null;
+                    //             WI.BCast(rstage + "7,0," + mons);
+                    //             WI.BCast("G2QC," + mons);
+                    //             rstage = "R" + rounder + "ZF";
+                    //         }
+                    //         else
+                    //         {
+                    //             WI.BCast(rstage + "7,1," + Board.Supporter.Uid);
+                    //             foreach (Player player in Board.Garden.Values)
+                    //             {
+                    //                 //if (player.Uid == Board.Rounder.Uid)
+                    //                 //    WI.Send(rstage + "1,0,0," + strSupports, 0, player.Uid);
+                    //                 if (player.Uid == Board.Opponent.Uid)
+                    //                     WI.Send(rstage + "1,1,0," + Board.Opponent.Uid + "," + strHinders, 0, player.Uid);
+                    //                 //else if (player.Team == Board.Rounder.Team)
+                    //                 //    WI.Send(rstage + "1,0,1," + strSupports, 0, player.Uid);
+                    //                 else if (player.Team == Board.Rounder.OppTeam)
+                    //                     WI.Send(rstage + "1,1,1," + Board.Opponent.Uid + "," + strHinders, 0, player.Uid);
+                    //                 else
+                    //                     WI.Send(rstage + "1,1,2," + Board.Opponent.Uid, 0, player.Uid);
+                    //             }
+                    //             WI.Live(rstage + "1,1,2," + Board.Opponent.Uid);
+                    //             bool repliedOppment = false;
+                    //             //bool[] involved = new bool[garden.Count + 1];
+                    //             //Fill(involved, false); involved[0] = true;
+                    //             WI.RecvInfStart();
+                    //             while (!repliedOppment)
+                    //             {
+                    //                 Base.VW.Msgs msg = WI.RecvInfRecvPending();
+                    //                 if (msg.Msg.StartsWith(rstage + "2"))
+                    //                 {
+                    //                     string advice = msg.Msg.Substring(msg.Msg.IndexOf(',') + 1);
+                    //                     if (Board.Garden[msg.From].Team == Board.Rounder.OppTeam)
+                    //                     {
+                    //                         ushort[] invs = new ushort[] { Board.Opponent.Uid, msg.From };
+                    //                         WI.Send(rstage + "3," + msg.From + "," + advice, invs);
+                    //                         WI.Send(rstage + "3," + msg.From, ExceptStaff(invs));
+                    //                         WI.Live(rstage + "3," + msg.From);
+                    //                     }
+                    //                     //involved[msg.From] = true;
+                    //                 }
+                    //                 else if (msg.Msg.StartsWith(rstage + "4"))
+                    //                 {
+                    //                     string advice = msg.Msg.Substring(msg.Msg.IndexOf(',') + 1);
+                    //                     ushort who;
+                    //                     if (ushort.TryParse(advice, out who))
+                    //                     {
+                    //                         if (msg.From == Board.Opponent.Uid)
+                    //                         {
+                    //                             if (who == Board.Rounder.Uid || who == 0)
+                    //                             {
+                    //                                 Board.Hinder = null;
+                    //                                 RaiseGMessage("G2HS,2,0");
+                    //                             }
+                    //                             else
+                    //                             {
+                    //                                 Board.Hinder = Board.Garden[who];
+                    //                                 RaiseGMessage("G2HS,2," + who);
+                    //                             }
+                    //                             //involved[msg.From] = true;
+                    //                             repliedOppment = true;
+                    //                         }
+                    //                     }
+                    //                     else if (advice.StartsWith("P"))
+                    //                     {
+                    //                         ushort cdCode = ushort.Parse(advice.Substring("PT".Length));
+                    //                         //ushort cdCode = LibTuple.ML.Encode(advice);
+                    //                         Monster monster = LibTuple.ML.Decode(cdCode);
+                    //                         if (monster != null)
+                    //                         {
+                    //                             Player lumberjack = Board.Lumberjack(monster, cdCode);
+                    //                             if (msg.From == Board.Opponent.Uid)
+                    //                             {
+                    //                                 Board.Hinder = lumberjack;
+                    //                                 RaiseGMessage("G2HS,2," + (cdCode + 1000));
+                    //                                 repliedOppment = true;
+                    //                             }
+                    //                         }
+                    //                     }
+                    //                 }
+                    //             }
+                    //             WI.RecvInfEnd();
+                    //             WI.BCast(rstage + "7,2," + Board.Hinder.Uid);
+                    //             rstage = "R" + rounder + "ZU";
+                    //         }
+                    //         break;
+                    //     }
                     case "ZU":
                         RunQuadStage(rstage, 0);
                         rstage = "R" + rounder + "ZM";

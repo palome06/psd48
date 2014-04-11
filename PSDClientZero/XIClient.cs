@@ -541,7 +541,7 @@ namespace PSD.ClientZero
                             if (argv.Length < r1)
                             {
                                 r1 = r2 = argv.Length;
-                                input = VI.Cin(Uid, "请选择{0}名角色为{1}目标，可选{2}{3}.", argv.Length, prevComment, zd.Tux(uss), cancel);
+                                input = VI.Cin(Uid, "请选择{0}名角色为{1}目标，可选{2}{3}.", argv.Length, prevComment, zd.Player(uss), cancel);
                             }
                             else
                                 input = VI.Cin(Uid, "请选择{0}至{1}名角色为{2}目标，可选{3}{4}.", r1, r2, prevComment, zd.Player(uss), cancel);
@@ -826,6 +826,58 @@ namespace PSD.ClientZero
                         inputValid &= (ipValue == r);
                     }
                     prevComment = ""; cancel = "";
+                }
+                if (arg[0] == 'J')
+                {
+                    // format T1~2(p1p3p5),T1(p1p3),#Text
+                    int idx = arg.IndexOf('~');
+                    int jdx = arg.IndexOf('(');
+                    int kdx = arg.IndexOf(')');
+                    // TODO: handle with AND of multiple condition
+                    string input;
+                    if (idx >= 1)
+                    {
+                        int r1 = int.Parse(Substring(arg, 1, idx));
+                        int r2 = int.Parse(Substring(arg, idx + 1, jdx));
+                        if (jdx >= 0)
+                        {
+                            string[] argv = Substring(arg, jdx + "(p".Length, kdx).Split('p');
+                            List<string> judgeArgv = argv.Select(p => p.StartsWith("T") ? p.Substring("T".Length) : p).ToList();
+                            List<string> uss = argv.Select(p => p.StartsWith("T") ? p.Substring("T".Length) : ("!" + p)).ToList();
+                            if (argv.Length < r1)
+                            {
+                                r1 = r2 = argv.Length;
+                                input = VI.Cin(Uid, "请选择{0}人为{1}，可选{2}{3}.", argv.Length, prevComment,
+                                    zd.PlayerWithMonster(uss), cancel);
+                            }
+                            else
+                                input = VI.Cin(Uid, "请选择{0}至{1}人为{2}目标，可选{3}{4}.", r1, r2,
+                                    prevComment, zd.PlayerWithMonster(uss), cancel);
+                            inputValid &= input.Split(',').Intersect(judgeArgv).Any();
+                        }
+                        else
+                            input = VI.Cin(Uid, "请选择{0}至{1}人为{2}目标{3}.", r1, r2, prevComment, cancel);
+                        inputValid &= !(CountItemFromComma(input) < r1 || CountItemFromComma(input) > r2);
+                    }
+                    else
+                    {
+                        int r = int.Parse(Substring(arg, 1, jdx));
+                        if (jdx >= 0)
+                        {
+                            string[] argv = Substring(arg, jdx + "(p".Length, kdx).Split('p');
+                            List<string> judgeArgv = argv.Select(p => p.StartsWith("T") ? p.Substring("T".Length) : p).ToList();
+                            List<string> uss = argv.Select(p => p.StartsWith("T") ? p.Substring("T".Length) : ("!" + p)).ToList();
+                            if (argv.Length < r)
+                                r = argv.Length;
+                            input = VI.Cin(Uid, "请选择{0}人为{1}目标，可选{2}{3}.", r, prevComment, zd.PlayerWithMonster(uss), cancel);
+                            inputValid &= input.Split(',').Intersect(judgeArgv).Any();
+                        }
+                        else
+                            input = VI.Cin(Uid, "请选择{0}人为{1}目标{2}.", r, prevComment, cancel);
+                        inputValid &= CountItemFromComma(input) == r;
+                    }
+                    prevComment = ""; cancel = "";
+                    roundInput = input;
                 }
                 else if (arg[0] == '!')
                 {
