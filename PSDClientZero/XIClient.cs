@@ -410,7 +410,7 @@ namespace PSD.ClientZero
         #endregion Board & Requests
 
         #region Message Main
-
+        // return whether can be interrupted
         private bool HMMain(object pararu)
         {
             string readLine = (string)pararu;
@@ -454,24 +454,17 @@ namespace PSD.ClientZero
                 }
                 return true;
             }
-            else if (cop.StartsWith("V0"))
+            else if (cop.StartsWith("V"))
             {
-                StartCinEtc();
-                string[] blocks = readLine.Split(',');
-                int invCount = int.Parse(blocks[1]);
-                string input =  FormattedInputWithCancelFlag(string.Join(
-                        ",", Util.TakeRange(blocks, 2 + invCount, blocks.Length)));
-                VI.CloseCinTunnel(Uid);
-                WI.Send("V1," + input, Uid, 0);
-                return true;
-            }
-            else if (cop.StartsWith("V3"))
-            {
-                string[] splits = readLine.Substring("V3,".Length).Split(',');
-                List<ushort> invs = Util.TakeRange(splits, 0, splits.Length)
-                    .Select(p => ushort.Parse(p)).ToList();
-                VI.Cout(Uid, "等待{0}响应.", zd.Player(invs));
-                return false;
+                char rank = cop[1];
+                switch (rank)
+                {
+                    case '0': return HandleV0Message(readLine.Substring("V0,".Length));
+                    case '2': return HandleV2Message(readLine.Substring("V2,".Length));
+                    case '3': return HandleV3Message(readLine.Substring("V3,".Length));
+                    case '5': return HandleV5Message(readLine.Substring("V5,".Length));
+                    default: return true;
+                }
             }
             else if (cop.StartsWith("R"))
                 return HandleRMessage(readLine);
@@ -847,16 +840,18 @@ namespace PSD.ClientZero
                             if (argv.Length < r1)
                             {
                                 r1 = r2 = argv.Length;
-                                input = VI.Cin(Uid, "请选择{0}人为{1}，可选{2}{3}.", argv.Length, prevComment,
+                                input = VI.Cin(Uid, "请以{0}人{1}，可选{2}{3}.", argv.Length, prevComment,
                                     zd.PlayerWithMonster(uss), cancel);
                             }
                             else
-                                input = VI.Cin(Uid, "请选择{0}至{1}人为{2}目标，可选{3}{4}.", r1, r2,
+                                input = VI.Cin(Uid, "请以{0}至{1}人{2}，可选{3}{4}.", r1, r2,
                                     prevComment, zd.PlayerWithMonster(uss), cancel);
+                            if (input.Length > 0 && Char.IsDigit(input[0]))
+                                input = "T" + input;
                             inputValid &= input.Split(',').Intersect(judgeArgv).Any();
                         }
                         else
-                            input = VI.Cin(Uid, "请选择{0}至{1}人为{2}目标{3}.", r1, r2, prevComment, cancel);
+                            input = VI.Cin(Uid, "请以{0}至{1}人{2}{3}.", r1, r2, prevComment, cancel);
                         inputValid &= !(CountItemFromComma(input) < r1 || CountItemFromComma(input) > r2);
                     }
                     else
@@ -869,13 +864,16 @@ namespace PSD.ClientZero
                             List<string> uss = argv.Select(p => p.StartsWith("T") ? p.Substring("T".Length) : ("!" + p)).ToList();
                             if (argv.Length < r)
                                 r = argv.Length;
-                            input = VI.Cin(Uid, "请选择{0}人为{1}目标，可选{2}{3}.", r, prevComment, zd.PlayerWithMonster(uss), cancel);
+                            input = VI.Cin(Uid, "请以{0}人{1}，可选{2}{3}.", r, prevComment, zd.PlayerWithMonster(uss), cancel);
                             inputValid &= input.Split(',').Intersect(judgeArgv).Any();
                         }
                         else
-                            input = VI.Cin(Uid, "请选择{0}人为{1}目标{2}.", r, prevComment, cancel);
+                            input = VI.Cin(Uid, "请以{0}人{1}{2}.", r, prevComment, cancel);
                         inputValid &= CountItemFromComma(input) == r;
                     }
+                    // T-ed non 0 target
+                    if (input.Length > 0 && input != "0" && Char.IsDigit(input[0]))
+                        input = "T" + input;
                     prevComment = ""; cancel = "";
                     roundInput = input;
                 }
@@ -2058,6 +2056,8 @@ namespace PSD.ClientZero
                         string msg = "";
                         for (int i = 1; i < args.Length; i += 2)
                         {
+                            if (args[i] == "0")
+                                msg += "不触发战斗.";
                             if (args[i] == "1")
                             {
                                 ushort id = ushort.Parse(args[i + 1]);
@@ -2266,6 +2266,50 @@ namespace PSD.ClientZero
             return false;
         }
         #endregion U
+        #region V
+        public bool HandleV0Message(string cmdrst)
+        {
+            StartCinEtc();
+            string[] blocks = cmdrst.Split(',');
+            int invCount = int.Parse(blocks[0]);
+            string input = FormattedInputWithCancelFlag(string.Join(
+                    ",", Util.TakeRange(blocks, 1 + invCount, blocks.Length)));
+            VI.CloseCinTunnel(Uid);
+            WI.Send("V1," + input, Uid, 0);
+            return true;
+        }
+        public bool HandleV2Message(string cmdrst)
+        {
+            StartCinEtc();
+            int idx = cmdrst.IndexOf(',');
+            ushort major = ushort.Parse(cmdrst.Substring(0, idx));
+            string input = FormattedInputWithCancelFlag(cmdrst.Substring(idx + 1));
+            if (input != VI.CinSentinel)
+            {
+                VI.CloseCinTunnel(Uid);
+                WI.Send("V4," + input, Uid, 0);
+                return true;
+            }
+            else
+            {
+                VI.CloseCinTunnel(Uid);
+                return false;
+            }
+        }
+        public bool HandleV3Message(string cmdrst)
+        {
+            string[] splits = cmdrst.Split(',');
+            List<ushort> invs = Util.TakeRange(splits, 0, splits.Length)
+                .Select(p => ushort.Parse(p)).ToList();
+            VI.Cout(Uid, "等待{0}响应.", zd.Player(invs));
+            return false;
+        }
+        public bool HandleV5Message(string cmdrst)
+        {
+            VI.CloseCinTunnel(Uid);
+            return false;
+        }
+        #endregion V
         #region R
 
         private bool HandleRMessage(string readLine)
@@ -2445,15 +2489,13 @@ namespace PSD.ClientZero
                         {
                             ushort from = ushort.Parse(para.Substring(0, jdx));
                             string advice = para.Substring(jdx + 1);
-                            ushort who;
-                            if (ushort.TryParse(advice, out who))
+                            if (advice.StartsWith("T"))
                             {
-                                if (who == 0)
-                                    VI.Cout(Uid, "{0}{1}不打怪.", zd.Player(from), suggest);
-                                else if (who == rounder)
+                                ushort who = ushort.Parse(advice.Substring("T".Length));
+                                if (who == rounder)
                                     VI.Cout(Uid, "{0}{1}不让其它人参与战斗.", zd.Player(from), suggest);
                                 else
-                                    VI.Cout(Uid, "{0}{1}{2}参与战斗.", zd.Player(from), suggest, zd.Player(who));
+                                    VI.Cout(Uid, "{0}{1}{2}参与战斗.", zd.Player(from), suggest, zd.Player(who)); 
                             }
                             else if (advice.StartsWith("G"))
                             {
@@ -2461,6 +2503,8 @@ namespace PSD.ClientZero
                                 if (monCode > 0)
                                     VI.Cout(Uid, "{0}{1}{2}参与战斗.", zd.Player(from), suggest, zd.Monster(monCode));
                             }
+                            else if (advice.StartsWith("/"))
+                                VI.Cout(Uid, "{0}{1}不打怪.", zd.Player(from), suggest);
                         }
                         else
                         {

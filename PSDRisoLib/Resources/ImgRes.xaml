@@ -1,0 +1,554 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    
+    <Image x:Key="loginBackground" Source="Logo/LoginBgimg.jpg"/>
+    
+    <Image x:Key="rankGIchi" Source="Players/GIchi.png"/>
+    <Image x:Key="rankGNi" Source="Players/GNi.png"/>
+    <Image x:Key="rankGSan" Source="Players/GSan.png"/>
+    <Image x:Key="rankGYong" Source="Players/GYong.png"/>
+    <Image x:Key="rankGGo" Source="Players/GGo.png"/>
+    <Image x:Key="rankGRoku" Source="Players/GRoku.png"/>
+
+    <ImageBrush x:Key="redBallImg"
+                ImageSource="pack://application:,,,/PSDRisoLib;component/Resources/PilesField/RedBall.png"/>
+    <ImageBrush x:Key="blueBallImg"
+                ImageSource="pack://application:,,,/PSDRisoLib;component/Resources/PilesField/BlueBall.png"/>
+    <BitmapImage x:Key="barborder11" UriSource="pack://application:,,,/PSDRisoLib;component/Resources/Logo/Border11.png"/>
+    <BitmapImage x:Key="barborder12" UriSource="pack://application:,,,/PSDRisoLib;component/Resources/Logo/Border12.png"/>
+
+    <Image x:Key="petsnapGS01" Source="PetsSnap/GS01.png" ToolTip="千杯不醉"/>
+    <Image x:Key="petsnapGS02" Source="PetsSnap/GS02.png" ToolTip="五毒兽"/>
+    <Image x:Key="petsnapGS03" Source="PetsSnap/GS03.png" ToolTip="蛇妖男"/>
+    <Image x:Key="petsnapGS04" Source="PetsSnap/GS04.png" ToolTip="水魔兽"/>
+
+    <Image x:Key="petsnapGH01" Source="PetsSnap/GH01.png" ToolTip="赝月"/>
+    <Image x:Key="petsnapGH02" Source="PetsSnap/GH02.png" ToolTip="肥肥"/>
+    <Image x:Key="petsnapGH03" Source="PetsSnap/GH03.png" ToolTip="狐妖女"/>
+    <Image x:Key="petsnapGH04" Source="PetsSnap/GH04.png" ToolTip="熔炎兽王"/>
+
+    <Image x:Key="petsnapGL01" Source="PetsSnap/GL01.png" ToolTip="积粮稳者"/>
+    <Image x:Key="petsnapGL02" Source="PetsSnap/GL02.png" ToolTip="赤鬼王"/>
+    <Image x:Key="petsnapGL03" Source="PetsSnap/GL03.png" ToolTip="毒娘子"/>
+    <Image x:Key="petsnapGL04" Source="PetsSnap/GL04.png" ToolTip="邪剑仙"/>
+
+    <Image x:Key="petsnapGF01" Source="PetsSnap/GF01.png" ToolTip="叶灵"/>
+    <Image x:Key="petsnapGF02" Source="PetsSnap/GF02.png" ToolTip="暗香"/>
+    <Image x:Key="petsnapGF03" Source="PetsSnap/GF03.png" ToolTip="句芒"/>
+    <Image x:Key="petsnapGF04" Source="PetsSnap/GF04.png" ToolTip="彩依"/>
+
+    <Image x:Key="petsnapGT01" Source="PetsSnap/GT01.png" ToolTip="璇龟"/>
+    <Image x:Key="petsnapGT02" Source="PetsSnap/GT02.png" ToolTip="刑天"/>
+    <Image x:Key="petsnapGT03" Source="PetsSnap/GT03.png" ToolTip="金蟾鬼母"/>
+    <Image x:Key="petsnapGT04" Source="PetsSnap/GT04.png" ToolTip="天鬼王"/>
+
+    <Image x:Key="petsnapGST1" Source="PetsSnap/GST1.png" ToolTip="TR画妖"/>
+    <Image x:Key="petsnapGST2" Source="PetsSnap/GST2.png" ToolTip="TR帝江神兽"/>
+    <Image x:Key="petsnapGHT1" Source="PetsSnap/GHT1.png" ToolTip="TR火麒麟"/>
+    <Image x:Key="petsnapGHT2" Source="PetsSnap/GHT2.png" ToolTip="TR镇狱明王"/>
+    <Image x:Key="petsnapGLT1" Source="PetsSnap/GLT1.png" ToolTip="TR纸马"/>
+    <Image x:Key="petsnapGLT2" Source="PetsSnap/GLT2.png" ToolTip="TR菜刀婆婆"/>
+    <Image x:Key="petsnapGFT1" Source="PetsSnap/GFT1.png" ToolTip="TR羽民"/>
+    <Image x:Key="petsnapGFT2" Source="PetsSnap/GFT2.png" ToolTip="TR金翅凤凰"/>
+    <Image x:Key="petsnapGTT1" Source="PetsSnap/GTT1.png" ToolTip="TR财神爷"/>
+    <Image x:Key="petsnapGTT2" Source="PetsSnap/GTT2.png" ToolTip="TR罗刹鬼婆"/>
+    <Image x:Key="petsnapGST3" Source="PetsSnap/GST3.png" ToolTip="TR雪女"/>
+    <Image x:Key="petsnapGST4" Source="PetsSnap/GST4.png" ToolTip="TR冰麟"/>
+    <Image x:Key="petsnapGHT3" Source="PetsSnap/GHT3.png" ToolTip="TR厉鬼"/>
+    <Image x:Key="petsnapGHT4" Source="PetsSnap/GHT4.png" ToolTip="TR炎舞"/>
+    <Image x:Key="petsnapGLT3" Source="PetsSnap/GLT3.png" ToolTip="TR丝萝"/>
+    <Image x:Key="petsnapGLT4" Source="PetsSnap/GLT4.png" ToolTip="TR穹武"/>
+    <Image x:Key="petsnapGFT3" Source="PetsSnap/GFT3.png" ToolTip="TR流萤"/>
+    <Image x:Key="petsnapGFT4" Source="PetsSnap/GFT4.png" ToolTip="TR岚翼"/>
+    <Image x:Key="petsnapGTT3" Source="PetsSnap/GTT3.png" ToolTip="TR醉月"/>
+    <Image x:Key="petsnapGTT4" Source="PetsSnap/GTT4.png" ToolTip="TR峰龟"/>
+
+    <Image x:Key="npcsnapNC101" Source="PetsSnap/NC101.png" ToolTip="NPC李逍遥"/>
+    <Image x:Key="npcsnapNC102" Source="PetsSnap/NC102.png" ToolTip="NPC赵灵儿"/>
+    <Image x:Key="npcsnapNC103" Source="PetsSnap/NC103.png" ToolTip="NPC赵灵儿·梦蛇"/>
+    <Image x:Key="npcsnapNC105" Source="PetsSnap/NC105.png" ToolTip="NPC阿奴"/>
+    <Image x:Key="npcsnapNC306" Source="PetsSnap/NC306.png" ToolTip="NPC重楼"/>
+    <Image x:Key="npcsnapN3W02" Source="PetsSnap/N3W02.png" ToolTip="NPC温慧"/>
+    <Image x:Key="npcsnapNC401" Source="PetsSnap/NC401.png" ToolTip="NPC云天河"/>
+    <Image x:Key="npcsnapNC503" Source="PetsSnap/NC503.png" ToolTip="NPC龙幽"/>
+
+    <Image x:Key="npcsnapNC506" Source="PetsSnap/NC506.png" ToolTip="NPC魔翳"/>
+    <Image x:Key="npcsnapNC507" Source="PetsSnap/NC507.png" ToolTip="NPC湮世穹兵"/>
+    <Image x:Key="npcsnapNCT02" Source="PetsSnap/NCT02.png" ToolTip="NPC-TR徐长卿"/>
+    <Image x:Key="npcsnapNCT04" Source="PetsSnap/NCT04.png" ToolTip="NPC-TR凌音"/>
+    <Image x:Key="npcsnapNCT05" Source="PetsSnap/NCT05.png" ToolTip="NPC-TR凌波"/>
+    <Image x:Key="npcsnapNCT09" Source="PetsSnap/NCT09.png" ToolTip="NPC-TR瑕"/>
+    <Image x:Key="npcsnapNCT13" Source="PetsSnap/NCT13.png" ToolTip="NPC-TR谢沧行"/>
+
+    <Image x:Key="wersnapTPT2" Source="PetsSnap/TPT2.png" ToolTip="TR天仙玉露"/>
+
+    <ImageBrush x:Key="heroHead000Brush" ImageSource="Heros/00000.png"/>
+    <Image x:Key="heroHead000" Source="Heros/00000.png"/>
+    <Image x:Key="heroHead10101" Source="Heros/10101.png"/>
+    <Image x:Key="heroHead10102" Source="Heros/10102.png"/>
+    <Image x:Key="heroHead10103" Source="Heros/10103.png"/>
+    <Image x:Key="heroHead10104" Source="Heros/10104.png"/>
+    <Image x:Key="heroHead10105" Source="Heros/10105.png"/>
+    <Image x:Key="heroHead10106" Source="Heros/10106.png"/>
+    <Image x:Key="heroHead10107" Source="Heros/10107.png"/>
+    <Image x:Key="heroHead10201" Source="Heros/10201.png"/>
+    <Image x:Key="heroHead10202" Source="Heros/10202.png"/>
+    <Image x:Key="heroHead10203" Source="Heros/10203.png"/>
+    <Image x:Key="heroHead10204" Source="Heros/10204.png"/>
+    <Image x:Key="heroHead10206" Source="Heros/10206.png"/>
+    <Image x:Key="heroHead10207" Source="Heros/10207.png"/>
+    <Image x:Key="heroHead10301" Source="Heros/10301.png"/>
+    <Image x:Key="heroHead10302" Source="Heros/10302.png"/>
+    <Image x:Key="heroHead10303" Source="Heros/10303.png"/>
+    <Image x:Key="heroHead10304" Source="Heros/10304.png"/>
+    <Image x:Key="heroHead10305" Source="Heros/10305.png"/>
+    <Image x:Key="heroHead10306" Source="Heros/10306.png"/>
+    <Image x:Key="heroHead10307" Source="Heros/10307.png"/>
+    <Image x:Key="heroHead10401" Source="Heros/10401.png"/>
+    <Image x:Key="heroHead10402" Source="Heros/10402.png"/>
+    <Image x:Key="heroHead10403" Source="Heros/10403.png"/>
+    <Image x:Key="heroHead10404" Source="Heros/10404.png"/>
+    <Image x:Key="heroHead10405" Source="Heros/10405.png"/>
+    <Image x:Key="heroHead10501" Source="Heros/10501.png"/>
+    <Image x:Key="heroHead10502" Source="Heros/10502.png"/>
+    <Image x:Key="heroHead10503" Source="Heros/10503.png"/>
+    <Image x:Key="heroHead10504" Source="Heros/10504.png"/>
+    <Image x:Key="heroHead10505" Source="Heros/10505.png"/>
+    <Image x:Key="heroHead10601" Source="Heros/10601.png"/>
+    <Image x:Key="heroHead10602" Source="Heros/10602.png"/>
+    <Image x:Key="heroHead10603" Source="Heros/10603.png"/>
+    <Image x:Key="heroHead10604" Source="Heros/10604.png"/>
+    <Image x:Key="heroHead10605" Source="Heros/10605.png"/>
+    <Image x:Key="heroHead10606" Source="Heros/10606.png"/>
+    <Image x:Key="heroHead10607" Source="Heros/10607.png"/>
+    <Image x:Key="heroHead10608" Source="Heros/10608.png"/>
+    <Image x:Key="heroHead15001" Source="Heros/15001.png"/>
+    <Image x:Key="heroHead15002" Source="Heros/15002.png"/>
+    <Image x:Key="heroHead15003" Source="Heros/15003.png"/>
+    <Image x:Key="heroHead15004" Source="Heros/15004.png"/>
+    <Image x:Key="heroHead15005" Source="Heros/15005.png"/>
+    <Image x:Key="heroHead15006" Source="Heros/15006.png"/>
+    <Image x:Key="heroHead15007" Source="Heros/15007.png"/>
+    <Image x:Key="heroHead15008" Source="Heros/15008.png"/>
+    <Image x:Key="heroHead15009" Source="Heros/15009.png"/>
+    
+    <Image x:Key="heroHead17001" Source="Heros/17001.png"/>
+    <Image x:Key="heroHead17002" Source="Heros/17002.png"/>
+    <Image x:Key="heroHead17003" Source="Heros/17003.png"/>
+    <Image x:Key="heroHead17004" Source="Heros/17004.png"/>
+    <Image x:Key="heroHead17005" Source="Heros/17005.png"/>
+    <Image x:Key="heroHead17006" Source="Heros/17006.png"/>
+
+    <Image x:Key="heroHead17008" Source="Heros/17008.png"/>
+    <Image x:Key="heroHead17009" Source="Heros/17009.png"/>
+    <Image x:Key="heroHead17010" Source="Heros/17010.png"/>
+    <Image x:Key="heroHead17011" Source="Heros/17011.png"/>
+    <Image x:Key="heroHead17012" Source="Heros/17012.png"/>
+    <Image x:Key="heroHead17013" Source="Heros/17013.png"/>
+    <Image x:Key="heroHead17014" Source="Heros/17014.png"/>
+    <Image x:Key="heroHead17015" Source="Heros/17015.png"/>
+    <Image x:Key="heroHead17016" Source="Heros/17016.png"/>
+    <Image x:Key="heroHead17017" Source="Heros/17017.png"/>
+    <Image x:Key="heroHead17018" Source="Heros/17018.png"/>
+
+    <Image x:Key="heroHead19001" Source="Heros/19001.png"/>
+    <Image x:Key="heroHead19003" Source="Heros/19003.png"/>
+    <Image x:Key="heroHead19008" Source="Heros/19008.png"/>
+    <Image x:Key="heroHead19012" Source="Heros/19012.png"/>
+
+    <ImageBrush x:Key="nameBar000Brush" ImageSource="NameBar/Name000.png"/>
+    <ImageBrush x:Key="nameBarXJ101" ImageSource="NameBar/NameXJ101.png"/>
+    <ImageBrush x:Key="nameBarXJ102" ImageSource="NameBar/NameXJ102.png"/>
+    <ImageBrush x:Key="nameBarXJ103" ImageSource="NameBar/NameXJ103.png"/>
+    <ImageBrush x:Key="nameBarXJ104" ImageSource="NameBar/NameXJ104.png"/>
+    <ImageBrush x:Key="nameBarXJ105" ImageSource="NameBar/NameXJ105.png"/>
+    <ImageBrush x:Key="nameBarXJ106" ImageSource="NameBar/NameXJ106.png"/>
+    <ImageBrush x:Key="nameBarXJ107" ImageSource="NameBar/NameXJ107.png"/>
+    <ImageBrush x:Key="nameBarXJ201" ImageSource="NameBar/NameXJ201.png"/>
+    <ImageBrush x:Key="nameBarXJ202" ImageSource="NameBar/NameXJ202.png"/>
+    <ImageBrush x:Key="nameBarXJ203" ImageSource="NameBar/NameXJ203.png"/>
+    <ImageBrush x:Key="nameBarXJ206" ImageSource="NameBar/NameXJ206.png"/>
+    <ImageBrush x:Key="nameBarXJ207" ImageSource="NameBar/NameXJ207.png"/>
+    <ImageBrush x:Key="nameBarXJ302" ImageSource="NameBar/NameXJ302.png"/>
+    <ImageBrush x:Key="nameBarXJ303" ImageSource="NameBar/NameXJ303.png"/>
+    <ImageBrush x:Key="nameBarXJ304" ImageSource="NameBar/NameXJ304.png"/>
+    <ImageBrush x:Key="nameBarXJ305" ImageSource="NameBar/NameXJ305.png"/>
+    <ImageBrush x:Key="nameBarXJ306" ImageSource="NameBar/NameXJ306.png"/>
+    <ImageBrush x:Key="nameBarX3W01" ImageSource="NameBar/NameX3W01.png"/>
+    <ImageBrush x:Key="nameBarX3W02" ImageSource="NameBar/NameX3W02.png"/>
+    <ImageBrush x:Key="nameBarX3W03" ImageSource="NameBar/NameX3W03.png"/>
+    <ImageBrush x:Key="nameBarX3W04" ImageSource="NameBar/NameX3W04.png"/>
+    <ImageBrush x:Key="nameBarXJ401" ImageSource="NameBar/NameXJ401.png"/>
+    <ImageBrush x:Key="nameBarXJ402" ImageSource="NameBar/NameXJ402.png"/>
+    <ImageBrush x:Key="nameBarXJ403" ImageSource="NameBar/NameXJ403.png"/>
+    <ImageBrush x:Key="nameBarXJ404" ImageSource="NameBar/NameXJ404.png"/>
+    <ImageBrush x:Key="nameBarXJ405" ImageSource="NameBar/NameXJ405.png"/>
+    <ImageBrush x:Key="nameBarXJ501" ImageSource="NameBar/NameXJ501.png"/>
+    <ImageBrush x:Key="nameBarXJ502" ImageSource="NameBar/NameXJ502.png"/>
+    <ImageBrush x:Key="nameBarXJ503" ImageSource="NameBar/NameXJ503.png"/>
+    <ImageBrush x:Key="nameBarXJ504" ImageSource="NameBar/NameXJ504.png"/>
+    <ImageBrush x:Key="nameBarXJ505" ImageSource="NameBar/NameXJ505.png"/>
+    <ImageBrush x:Key="nameBarXJ506" ImageSource="NameBar/NameXJ506.png"/>
+    <ImageBrush x:Key="nameBarXJ507" ImageSource="NameBar/NameXJ507.png"/>
+    <ImageBrush x:Key="nameBarXJ508" ImageSource="NameBar/NameXJ508.png"/>
+
+    <ImageBrush x:Key="nameBarSP301" ImageSource="NameBar/NameSP301.png"/>
+    <ImageBrush x:Key="nameBarTR001" ImageSource="NameBar/NameTR001.png"/>
+    <ImageBrush x:Key="nameBarTR002" ImageSource="NameBar/NameTR002.png"/>
+    <ImageBrush x:Key="nameBarTR003" ImageSource="NameBar/NameTR003.png"/>
+    <ImageBrush x:Key="nameBarTR004" ImageSource="NameBar/NameTR004.png"/>
+    <ImageBrush x:Key="nameBarTR005" ImageSource="NameBar/NameTR005.png"/>
+    <ImageBrush x:Key="nameBarTR006" ImageSource="NameBar/NameTR006.png"/>
+    <ImageBrush x:Key="nameBarTR007" ImageSource="NameBar/NameTR007.png"/>
+    <ImageBrush x:Key="nameBarTR008" ImageSource="NameBar/NameTR008.png"/>
+    <ImageBrush x:Key="nameBarTR009" ImageSource="NameBar/NameTR009.png"/>
+    <ImageBrush x:Key="nameBarTR010" ImageSource="NameBar/NameTR010.png"/>
+    <ImageBrush x:Key="nameBarTR011" ImageSource="NameBar/NameTR011.png"/>
+    <ImageBrush x:Key="nameBarTR012" ImageSource="NameBar/NameTR012.png"/>
+    <ImageBrush x:Key="nameBarTR013" ImageSource="NameBar/NameTR013.png"/>
+    <ImageBrush x:Key="nameBarTR014" ImageSource="NameBar/NameTR014.png"/>
+    <ImageBrush x:Key="nameBarTR015" ImageSource="NameBar/NameTR015.png"/>
+    <ImageBrush x:Key="nameBarTR016" ImageSource="NameBar/NameTR016.png"/>
+    <ImageBrush x:Key="nameBarTR017" ImageSource="NameBar/NameTR017.png"/>
+    <ImageBrush x:Key="nameBarTR018" ImageSource="NameBar/NameTR018.png"/>
+
+    <ImageBrush x:Key="nameBarHL001" ImageSource="NameBar/NameHL001.png"/>
+    <ImageBrush x:Key="nameBarHL003" ImageSource="NameBar/NameHL003.png"/>
+    <ImageBrush x:Key="nameBarHL008" ImageSource="NameBar/NameHL008.png"/>
+    <ImageBrush x:Key="nameBarHL012" ImageSource="NameBar/NameHL012.png"/>
+
+    <SolidColorBrush x:Key="hpBrush" Color="Red"/>
+    <SolidColorBrush x:Key="dexBrush" Color="Blue"/>
+    <SolidColorBrush x:Key="dexAppBrush" Color="DarkBlue"/>
+    <SolidColorBrush x:Key="strBrush" Color="Green"/>
+    <SolidColorBrush x:Key="strAppBrush" Color="DarkGreen"/>
+
+    <ImageBrush x:Key="staEp00" ImageSource="EquipSnap/WP00.png"/>
+    <ImageBrush x:Key="staEpWQ00" ImageSource="EquipSnap/WQ000.png"/>
+    <ImageBrush x:Key="staEpWQ01" ImageSource="EquipSnap/WQ01.png"/>
+    <ImageBrush x:Key="staEpWQ02" ImageSource="EquipSnap/WQ02.png"/>
+    <ImageBrush x:Key="staEpWQ03" ImageSource="EquipSnap/WQ03.png"/>
+    <ImageBrush x:Key="staEpWQ04" ImageSource="EquipSnap/WQ04.png"/>
+    <ImageBrush x:Key="staEpWQ05" ImageSource="EquipSnap/WQ05.png"/>
+    <ImageBrush x:Key="staEpFJ00" ImageSource="EquipSnap/FJ000.png"/>
+    <ImageBrush x:Key="staEpFJ01" ImageSource="EquipSnap/FJ01.png"/>
+    <ImageBrush x:Key="staEpFJ02" ImageSource="EquipSnap/FJ02.png"/>
+    <ImageBrush x:Key="staEpFJ03" ImageSource="EquipSnap/FJ03.png"/>
+    <ImageBrush x:Key="staEpFJ04" ImageSource="EquipSnap/FJ04.png"/>
+    <ImageBrush x:Key="staEpFJ05" ImageSource="EquipSnap/FJ05.png"/>
+
+    <ImageBrush x:Key="staEpWQT1" ImageSource="EquipSnap/WQT1.png"/>
+    <ImageBrush x:Key="staEpWQT2" ImageSource="EquipSnap/WQT2.png"/>
+    <ImageBrush x:Key="staEpFJT1" ImageSource="EquipSnap/FJT1.png"/>
+    <ImageBrush x:Key="staEpFJT2" ImageSource="EquipSnap/FJT2.png"/>
+    <ImageBrush x:Key="staEpXB00" ImageSource="EquipSnap/XB000.png"/>
+    <ImageBrush x:Key="staEpXBT1" ImageSource="EquipSnap/XBT1.png"/>
+    <ImageBrush x:Key="staEpXBT2" ImageSource="EquipSnap/XBT2.png"/>
+    <ImageBrush x:Key="staEpXBT3" ImageSource="EquipSnap/XBT3.png"/>
+    <ImageBrush x:Key="staEpXBT4" ImageSource="EquipSnap/XBT4.png"/>
+    <ImageBrush x:Key="staEpXBH1" ImageSource="EquipSnap/XBH1.png"/>
+    <ImageBrush x:Key="staEpXBH2" ImageSource="EquipSnap/XBH2.png"/>
+
+    <BitmapImage x:Key="statusDs" UriSource="StatusIcon/Ds.png"/>
+    <BitmapImage x:Key="statusLvd" UriSource="StatusIcon/lvd.png"/>
+    <BitmapImage x:Key="status0pt" UriSource="StatusIcon/nopet.png"/>
+
+    <BitmapImage x:Key="snapTRXJ405" UriSource="Token/TR405.png"/>
+    <BitmapImage x:Key="snapTKXJ508_1" UriSource="Token/TK50801.png"/>
+    <BitmapImage x:Key="snapTKXJ508_2" UriSource="Token/TK50802.png"/>
+    <BitmapImage x:Key="snapTKXJ508_3" UriSource="Token/TK50803.png"/>
+    <BitmapImage x:Key="snapTKXJ508_4" UriSource="Token/TK50804.png"/>
+    <BitmapImage x:Key="snapTRSP502" UriSource="Token/TRS05.png"/>
+    <BitmapImage x:Key="snapTRTR008" UriSource="Token/TRT08.png"/>
+    <BitmapImage x:Key="snapTKHL001_1" UriSource="Token/TKH0101.png"/>
+    <BitmapImage x:Key="snapTKHL001_2" UriSource="Token/TKH0102.png"/>
+    <BitmapImage x:Key="snapTKHL001_3" UriSource="Token/TKH0103.png"/>
+    <BitmapImage x:Key="snapTKHL001_4" UriSource="Token/TKH0104.png"/>
+    <BitmapImage x:Key="snapTKHL001_5" UriSource="Token/TKH0105.png"/>
+    <BitmapImage x:Key="snapTKHL001_6" UriSource="Token/TKH0106.png"/>
+    <BitmapImage x:Key="snapTKHL001_7" UriSource="Token/TKH0107.png"/>
+    <BitmapImage x:Key="snapTKHL001_8" UriSource="Token/TKH0108.png"/>
+    <BitmapImage x:Key="snapTKHL003_1" UriSource="Token/TKH0301.png"/>
+
+    <Image x:Key="exspCard1" Source="Card/ExSp/EP001.png"/>
+    <Image x:Key="exspCard2" Source="Card/ExSp/EP002.png"/>
+    <Image x:Key="exspCard3" Source="Card/ExSp/EP003.png"/>
+    <Image x:Key="exspCard4" Source="Card/ExSp/EP004.png"/>
+    <Image x:Key="exspCard5" Source="Card/ExSp/EP005.png"/>
+
+    <BitmapImage x:Key="eveCard000src" UriSource="Card/Eve00.png"/>
+    <Image x:Key="eveCard000" Source="Card/Eve00.png"/>
+    <Image x:Key="eveCardSJ101" Source="Card/Eve/SJ101.png"/>
+    <Image x:Key="eveCardSJ102" Source="Card/Eve/SJ102.png"/>
+    <Image x:Key="eveCardSJ103" Source="Card/Eve/SJ103.png"/>
+    <Image x:Key="eveCardSJ104" Source="Card/Eve/SJ104.png"/>
+    <Image x:Key="eveCardSJ201" Source="Card/Eve/SJ201.png"/>
+    <Image x:Key="eveCardSJ202" Source="Card/Eve/SJ202.png"/>
+    <Image x:Key="eveCardSJ301" Source="Card/Eve/SJ301.png"/>
+    <Image x:Key="eveCardSJ302" Source="Card/Eve/SJ302.png"/>
+    <Image x:Key="eveCardSJ303" Source="Card/Eve/SJ303.png"/>
+    <Image x:Key="eveCardS3W01" Source="Card/Eve/S3W01.png"/>
+    <Image x:Key="eveCardS3W02" Source="Card/Eve/S3W02.png"/>
+    <Image x:Key="eveCardSJ401" Source="Card/Eve/SJ401.png"/>
+    <Image x:Key="eveCardSJ402" Source="Card/Eve/SJ402.png"/>
+    <Image x:Key="eveCardSJ501" Source="Card/Eve/SJ501.png"/>
+
+    <Image x:Key="eveCardSJT01" Source="Card/Eve/SJT01.png"/>
+    <Image x:Key="eveCardSJT02" Source="Card/Eve/SJT02.png"/>
+    <Image x:Key="eveCardSJT03" Source="Card/Eve/SJT03.png"/>
+    <Image x:Key="eveCardSJT04" Source="Card/Eve/SJT04.png"/>
+    <Image x:Key="eveCardSJT05" Source="Card/Eve/SJT05.png"/>
+    <Image x:Key="eveCardSJT06" Source="Card/Eve/SJT06.png"/>
+    <Image x:Key="eveCardSJT07" Source="Card/Eve/SJT07.png"/>
+    <Image x:Key="eveCardSJT08" Source="Card/Eve/SJT08.png"/>
+    <Image x:Key="eveCardSJT09" Source="Card/Eve/SJT09.png"/>
+    <Image x:Key="eveCardSJT10" Source="Card/Eve/SJT10.png"/>
+
+    <BitmapImage x:Key="monCard000src" UriSource="Card/Mon00.png"/>
+    <Image x:Key="monCard000" Source="Card/Mon00.png"/>
+    <Image x:Key="monCardGS01" Source="Card/NMB/GS01.png"/>
+    <Image x:Key="monCardGS02" Source="Card/NMB/GS02.png"/>
+    <Image x:Key="monCardGS03" Source="Card/NMB/GS03.png"/>
+    <Image x:Key="monCardGS04" Source="Card/NMB/GS04.png" ToolTip="水魔兽"/>
+    <Image x:Key="monCardGH01" Source="Card/NMB/GH01.png"/>
+    <Image x:Key="monCardGH02" Source="Card/NMB/GH02.png" ToolTip="肥肥"/>
+    <Image x:Key="monCardGH03" Source="Card/NMB/GH03.png"/>
+    <Image x:Key="monCardGH04" Source="Card/NMB/GH04.png"/>
+    <Image x:Key="monCardGL01" Source="Card/NMB/GL01.png"/>
+    <Image x:Key="monCardGL02" Source="Card/NMB/GL02.png"/>
+    <Image x:Key="monCardGL03" Source="Card/NMB/GL03.png"/>
+    <Image x:Key="monCardGL04" Source="Card/NMB/GL04.png"/>
+    <Image x:Key="monCardGF01" Source="Card/NMB/GF01.png"/>
+    <Image x:Key="monCardGF02" Source="Card/NMB/GF02.png"/>
+    <Image x:Key="monCardGF03" Source="Card/NMB/GF03.png"/>
+    <Image x:Key="monCardGF04" Source="Card/NMB/GF04.png"/>
+    <Image x:Key="monCardGT01" Source="Card/NMB/GT01.png"/>
+    <Image x:Key="monCardGT02" Source="Card/NMB/GT02.png"/>
+    <Image x:Key="monCardGT03" Source="Card/NMB/GT03.png"/>
+    <Image x:Key="monCardGT04" Source="Card/NMB/GT04.png"/>    
+    <Image x:Key="monCardNC101" Source="Card/NMB/NC101.png"/>
+	<Image x:Key="monCardNC102" Source="Card/NMB/NC102.png"/>
+	<Image x:Key="monCardNC103" Source="Card/NMB/NC103.png"/>
+	<Image x:Key="monCardNC104" Source="Card/NMB/NC104.png"/>
+	<Image x:Key="monCardNC105" Source="Card/NMB/NC105.png"/>
+	<Image x:Key="monCardNC106" Source="Card/NMB/NC106.png"/>
+	<Image x:Key="monCardNC107" Source="Card/NMB/NC107.png"/>
+	<Image x:Key="monCardNC201" Source="Card/NMB/NC201.png"/>
+	<Image x:Key="monCardNC202" Source="Card/NMB/NC202.png"/>
+	<Image x:Key="monCardNC203" Source="Card/NMB/NC203.png"/>
+	<Image x:Key="monCardNC206" Source="Card/NMB/NC206.png"/>
+	<Image x:Key="monCardNC207" Source="Card/NMB/NC207.png"/>
+	<Image x:Key="monCardNC302" Source="Card/NMB/NC302.png"/>
+	<Image x:Key="monCardNC305" Source="Card/NMB/NC305.png"/>
+	<Image x:Key="monCardNC306" Source="Card/NMB/NC306.png"/>
+	<Image x:Key="monCardN3W01" Source="Card/NMB/N3W01.png"/>
+	<Image x:Key="monCardN3W02" Source="Card/NMB/N3W02.png"/>
+	<Image x:Key="monCardN3W03" Source="Card/NMB/N3W03.png"/>
+	<Image x:Key="monCardN3W04" Source="Card/NMB/N3W04.png"/>
+	<Image x:Key="monCardNC401" Source="Card/NMB/NC401.png"/>
+	<Image x:Key="monCardNC402" Source="Card/NMB/NC402.png"/>
+	<Image x:Key="monCardNC403" Source="Card/NMB/NC403.png"/>
+	<Image x:Key="monCardNC404" Source="Card/NMB/NC404.png"/>
+	<Image x:Key="monCardNC405" Source="Card/NMB/NC405.png"/>
+	<Image x:Key="monCardNC503" Source="Card/NMB/NC503.png"/>
+	<Image x:Key="monCardNC504" Source="Card/NMB/NC504.png"/>
+
+    <Image x:Key="monCardGST1" Source="Card/NMB/GST1.png"/>
+    <Image x:Key="monCardGST2" Source="Card/NMB/GST2.png"/>
+    <Image x:Key="monCardGHT1" Source="Card/NMB/GHT1.png"/>
+    <Image x:Key="monCardGHT2" Source="Card/NMB/GHT2.png"/>
+    <Image x:Key="monCardGLT1" Source="Card/NMB/GLT1.png"/>
+    <Image x:Key="monCardGLT2" Source="Card/NMB/GLT2.png"/>
+    <Image x:Key="monCardGFT1" Source="Card/NMB/GFT1.png"/>
+    <Image x:Key="monCardGFT2" Source="Card/NMB/GFT2.png"/>
+    <Image x:Key="monCardGTT1" Source="Card/NMB/GTT1.png"/>
+    <Image x:Key="monCardGTT2" Source="Card/NMB/GTT2.png"/>
+    <Image x:Key="monCardGST3" Source="Card/NMB/GST3.png"/>
+    <Image x:Key="monCardGST4" Source="Card/NMB/GST4.png"/>
+    <Image x:Key="monCardGHT3" Source="Card/NMB/GHT3.png"/>
+    <Image x:Key="monCardGHT4" Source="Card/NMB/GHT4.png"/>
+    <Image x:Key="monCardGLT3" Source="Card/NMB/GLT3.png"/>
+    <Image x:Key="monCardGLT4" Source="Card/NMB/GLT4.png"/>
+    <Image x:Key="monCardGFT3" Source="Card/NMB/GFT3.png"/>
+    <Image x:Key="monCardGFT4" Source="Card/NMB/GFT4.png"/>
+    <Image x:Key="monCardGTT3" Source="Card/NMB/GTT3.png"/>
+    <Image x:Key="monCardGTT4" Source="Card/NMB/GTT4.png"/>
+    <Image x:Key="monCardNC303" Source="Card/NMB/NC303.jpg"/>
+    <Image x:Key="monCardNC304" Source="Card/NMB/NC304.jpg"/>
+    <Image x:Key="monCardNC501" Source="Card/NMB/NC501.jpg"/>
+    <Image x:Key="monCardNC502" Source="Card/NMB/NC502.jpg"/>
+    <Image x:Key="monCardNC505" Source="Card/NMB/NC505.jpg"/>
+    <Image x:Key="monCardNC506" Source="Card/NMB/NC506.jpg"/>
+    <Image x:Key="monCardNC507" Source="Card/NMB/NC507.jpg"/>
+    <Image x:Key="monCardNC508" Source="Card/NMB/NC508.jpg"/>
+    <Image x:Key="monCardNCT01" Source="Card/NMB/NCT01.jpg"/>
+    <Image x:Key="monCardNCT02" Source="Card/NMB/NCT02.jpg"/>
+    <Image x:Key="monCardNCT03" Source="Card/NMB/NCT03.jpg"/>
+    <Image x:Key="monCardNCT04" Source="Card/NMB/NCT04.jpg"/>
+    <Image x:Key="monCardNCT05" Source="Card/NMB/NCT05.jpg"/>
+    <Image x:Key="monCardNCT06" Source="Card/NMB/NCT06.jpg"/>
+    <Image x:Key="monCardNCT07" Source="Card/NMB/NCT07.jpg"/>
+    <Image x:Key="monCardNCT08" Source="Card/NMB/NCT08.png"/>
+    <Image x:Key="monCardNCT09" Source="Card/NMB/NCT09.png"/>
+    <Image x:Key="monCardNCT10" Source="Card/NMB/NCT10.png"/>
+    <Image x:Key="monCardNCT11" Source="Card/NMB/NCT11.png"/>
+    <Image x:Key="monCardNCT12" Source="Card/NMB/NCT12.png"/>
+    <Image x:Key="monCardNCT13" Source="Card/NMB/NCT13.png"/>
+    <Image x:Key="monCardNCT14" Source="Card/NMB/NCT14.png"/>
+    <Image x:Key="monCardNCT15" Source="Card/NMB/NCT15.png"/>
+    <Image x:Key="monCardNCT16" Source="Card/NMB/NCT16.png"/>
+    <Image x:Key="monCardNCT17" Source="Card/NMB/NCT17.png"/>
+    <Image x:Key="monCardNCT18" Source="Card/NMB/NCT18.png"/>
+
+    <Image x:Key="tuxCard000" Source="Card/Tux00.png"/>
+    <Image x:Key="tuxCardJP01" Source="Card/Tux/JP01.png"/>
+    <Image x:Key="tuxCardJP02" Source="Card/Tux/JP02.png"/>
+    <Image x:Key="tuxCardJP03" Source="Card/Tux/JP03.png"/>
+    <Image x:Key="tuxCardJP04" Source="Card/Tux/JP04.png"/>
+    <Image x:Key="tuxCardJP05" Source="Card/Tux/JP05.png"/>
+    <Image x:Key="tuxCardJP06" Source="Card/Tux/JP06.png"/>
+    <Image x:Key="tuxCardTP01" Source="Card/Tux/TP01.png"/>
+    <Image x:Key="tuxCardTP02" Source="Card/Tux/TP02.png"/>
+    <Image x:Key="tuxCardTP03" Source="Card/Tux/TP03.png"/>
+    <Image x:Key="tuxCardTP04" Source="Card/Tux/TP04.png"/>
+    <Image x:Key="tuxCardZP01" Source="Card/Tux/ZP01.png"/>
+    <Image x:Key="tuxCardZP02" Source="Card/Tux/ZP02.png"/>
+    <Image x:Key="tuxCardZP03" Source="Card/Tux/ZP03.png"/>
+    <Image x:Key="tuxCardZP04" Source="Card/Tux/ZP04.png"/>
+    <Image x:Key="tuxCardWQ01" Source="Card/Tux/WQ01.png"/>
+    <Image x:Key="tuxCardWQ02" Source="Card/Tux/WQ02.png"/>
+    <Image x:Key="tuxCardWQ03" Source="Card/Tux/WQ03.png"/>
+    <Image x:Key="tuxCardWQ04" Source="Card/Tux/WQ04.png"/>
+    <Image x:Key="tuxCardWQ05" Source="Card/Tux/WQ05.png"/>
+    <Image x:Key="tuxCardFJ01" Source="Card/Tux/FJ01.png"/>
+    <Image x:Key="tuxCardFJ02" Source="Card/Tux/FJ02.png"/>
+    <Image x:Key="tuxCardFJ03" Source="Card/Tux/FJ03.png"/>
+    <Image x:Key="tuxCardFJ04" Source="Card/Tux/FJ04.png"/>
+    <Image x:Key="tuxCardFJ05" Source="Card/Tux/FJ05.png"/>
+
+    <Image x:Key="tuxCardJPT1" Source="Card/Tux/JPT1.png"/>
+    <Image x:Key="tuxCardJPT2" Source="Card/Tux/JPT2.png"/>
+    <Image x:Key="tuxCardZPT1" Source="Card/Tux/ZPT1.png"/>
+    <Image x:Key="tuxCardTPT1" Source="Card/Tux/TPT1.png"/>
+    <Image x:Key="tuxCardTPT2" Source="Card/Tux/TPT2.png"/>
+    <Image x:Key="tuxCardWQT1" Source="Card/Tux/WQT1.png"/>
+    <Image x:Key="tuxCardWQT2" Source="Card/Tux/WQT2.png"/>
+    <Image x:Key="tuxCardFJT1" Source="Card/Tux/FJT1.png"/>
+    <Image x:Key="tuxCardFJT2" Source="Card/Tux/FJT2.png"/>
+    <Image x:Key="tuxCardJPT3" Source="Card/Tux/JPT3.png"/>
+    <Image x:Key="tuxCardJPT4" Source="Card/Tux/JPT4.png"/>
+    <Image x:Key="tuxCardJPT5" Source="Card/Tux/JPT5.png"/>
+    <Image x:Key="tuxCardZPT2" Source="Card/Tux/ZPT2.png"/>
+    <Image x:Key="tuxCardZPT3" Source="Card/Tux/ZPT3.png"/>
+    <Image x:Key="tuxCardTPT3" Source="Card/Tux/TPT3.png"/>
+    <Image x:Key="tuxCardXBT1" Source="Card/Tux/XBT1.png"/>
+    <Image x:Key="tuxCardXBT2" Source="Card/Tux/XBT2.png"/>
+    <Image x:Key="tuxCardXBT3" Source="Card/Tux/XBT3.png"/>
+    <Image x:Key="tuxCardXBT4" Source="Card/Tux/XBT4.png"/>
+
+    <Image x:Key="diceImg000" Source="Card/Dice00.png"/>
+    <Image x:Key="diceImg1" Source="Card/Dices/Dice1.png"/>
+    <Image x:Key="diceImg2" Source="Card/Dices/Dice2.png"/>
+    <Image x:Key="diceImg3" Source="Card/Dices/Dice3.png"/>
+    <Image x:Key="diceImg4" Source="Card/Dices/Dice4.png"/>
+    <Image x:Key="diceImg5" Source="Card/Dices/Dice5.png"/>
+    <Image x:Key="diceImg6" Source="Card/Dices/Dice6.png"/>
+    <Image x:Key="diceImg7" Source="Card/Dices/Dice6Plus.png"/>
+
+    <Image x:Key="hroCard000" Source="Card/Hro00.png"/>
+    <Image x:Key="hroCardXJ101" Source="Card/Heros/XJ101.png"/>
+    <Image x:Key="hroCardXJ102" Source="Card/Heros/XJ102.png"/>
+    <Image x:Key="hroCardXJ103" Source="Card/Heros/XJ103.png"/>
+    <Image x:Key="hroCardXJ104" Source="Card/Heros/XJ104.png"/>
+    <Image x:Key="hroCardXJ105" Source="Card/Heros/XJ105.png"/>
+    <Image x:Key="hroCardXJ106" Source="Card/Heros/XJ106.png"/>
+    <Image x:Key="hroCardXJ107" Source="Card/Heros/XJ107.png"/>
+    <Image x:Key="hroCardXJ201" Source="Card/Heros/XJ201.png"/>
+    <Image x:Key="hroCardXJ202" Source="Card/Heros/XJ202.png"/>
+    <Image x:Key="hroCardXJ203" Source="Card/Heros/XJ203.png"/>
+    <Image x:Key="hroCardXJ206" Source="Card/Heros/XJ206.png"/>
+    <Image x:Key="hroCardXJ207" Source="Card/Heros/XJ207.png"/>
+    <Image x:Key="hroCardXJ302" Source="Card/Heros/XJ302.png"/>
+    <Image x:Key="hroCardXJ303" Source="Card/Heros/XJ303.png"/>
+    <Image x:Key="hroCardXJ304" Source="Card/Heros/XJ304.png"/>
+    <Image x:Key="hroCardXJ305" Source="Card/Heros/XJ305.png"/>
+    <Image x:Key="hroCardXJ306" Source="Card/Heros/XJ306.png"/>
+    <Image x:Key="hroCardX3W01" Source="Card/Heros/X3W01.png"/>
+    <Image x:Key="hroCardX3W02" Source="Card/Heros/X3W02.png"/>
+    <Image x:Key="hroCardX3W03" Source="Card/Heros/X3W03.png"/>
+    <Image x:Key="hroCardX3W04" Source="Card/Heros/X3W04.png"/>
+    <Image x:Key="hroCardXJ401" Source="Card/Heros/XJ401.png"/>
+    <Image x:Key="hroCardXJ402" Source="Card/Heros/XJ402.png"/>
+    <Image x:Key="hroCardXJ403" Source="Card/Heros/XJ403.png"/>
+    <Image x:Key="hroCardXJ404" Source="Card/Heros/XJ404.png"/>
+    <Image x:Key="hroCardXJ405" Source="Card/Heros/XJ405.png"/>
+    <Image x:Key="hroCardXJ501" Source="Card/Heros/XJ501.png"/>
+    <Image x:Key="hroCardXJ502" Source="Card/Heros/XJ502.png"/>
+    <Image x:Key="hroCardXJ503" Source="Card/Heros/XJ503.png"/>
+    <Image x:Key="hroCardXJ504" Source="Card/Heros/XJ504.png"/>
+    <Image x:Key="hroCardXJ505" Source="Card/Heros/XJ505.png"/>
+    <Image x:Key="hroCardXJ506" Source="Card/Heros/XJ506.png"/>
+    <Image x:Key="hroCardXJ507" Source="Card/Heros/XJ507.png"/>
+    <Image x:Key="hroCardXJ508" Source="Card/Heros/XJ508.png"/>
+    <Image x:Key="hroCardSP101" Source="Card/Heros/SP101.png"/>
+    <Image x:Key="hroCardSP102" Source="Card/Heros/SP102.png"/>
+    <Image x:Key="hroCardSP103" Source="Card/Heros/SP103.png"/>
+    <Image x:Key="hroCardSP301" Source="Card/Heros/SP301.png"/>
+    <Image x:Key="hroCardSP306" Source="Card/Heros/SP306.png"/>
+    <Image x:Key="hroCardSP501" Source="Card/Heros/SP501.png"/>
+    <Image x:Key="hroCardSP502" Source="Card/Heros/SP502.png"/>
+    <Image x:Key="hroCardSP503" Source="Card/Heros/SP503.png"/>
+    <Image x:Key="hroCardSP504" Source="Card/Heros/SP504.png"/>
+    <Image x:Key="hroCardTR001" Source="Card/Heros/TR001.png"/>
+    <Image x:Key="hroCardTR002" Source="Card/Heros/TR002.png"/>
+    <Image x:Key="hroCardTR003" Source="Card/Heros/TR003.png"/>
+    <Image x:Key="hroCardTR004" Source="Card/Heros/TR004.png"/>
+    <Image x:Key="hroCardTR005" Source="Card/Heros/TR005.png"/>
+    <Image x:Key="hroCardTR006" Source="Card/Heros/TR006.png"/>
+
+    <Image x:Key="hroCardTR008" Source="Card/Heros/TR008.png"/>
+    <Image x:Key="hroCardTR009" Source="Card/Heros/TR009.png"/>
+    <Image x:Key="hroCardTR010" Source="Card/Heros/TR010.png"/>
+    <Image x:Key="hroCardTR011" Source="Card/Heros/TR011.png"/>
+    <Image x:Key="hroCardTR012" Source="Card/Heros/TR012.png"/>
+    <Image x:Key="hroCardTR013" Source="Card/Heros/TR013.png"/>
+    <Image x:Key="hroCardTR014" Source="Card/Heros/TR014.png"/>
+    <Image x:Key="hroCardTR015" Source="Card/Heros/TR015.png"/>
+    <Image x:Key="hroCardTR016" Source="Card/Heros/TR016.png"/>
+    <Image x:Key="hroCardTR017" Source="Card/Heros/TR017.png"/>
+    <Image x:Key="hroCardTR018" Source="Card/Heros/TR018.png"/>
+
+    <Image x:Key="hroCardHL001" Source="Card/Heros/HL001.png"/>
+    <Image x:Key="hroCardHL003" Source="Card/Heros/HL003.png"/>
+    <Image x:Key="hroCardHL008" Source="Card/Heros/HL008.png"/>
+    <Image x:Key="hroCardHL012" Source="Card/Heros/HL012.png"/>
+
+    <ImageBrush x:Key="dt01Bg" ImageSource="Logo/DT01.png" Opacity="0.9"/>
+    <ImageBrush x:Key="dt02Bg" ImageSource="Logo/DT02.png" Opacity="0.9"/>
+    <ImageBrush x:Key="dt03Bg" ImageSource="Logo/DT03.png" Opacity="0.9"/>
+    <ImageBrush x:Key="dt04Bg" ImageSource="Logo/DT04.png" Opacity="0.9"/>
+    <ImageBrush x:Key="dt05Bg" ImageSource="Logo/DT05.png" Opacity="0.9"/>
+
+    <ImageBrush x:Key="cz00ButtonImg" ImageSource="Logo/CZ00.png"/>
+    <ImageBrush x:Key="cz01ButtonImg" ImageSource="Logo/CZ01.png"/>
+    <ImageBrush x:Key="cz02ButtonImg" ImageSource="Logo/CZ02.png"/>
+    <ImageBrush x:Key="cz03ButtonImg" ImageSource="Logo/CZ03.png"/>
+    <ImageBrush x:Key="cz04ButtonImg" ImageSource="Logo/CZ04.png"/>
+    <ImageBrush x:Key="cz05ButtonImg" ImageSource="Logo/CZ05.png"/>
+    <ImageBrush x:Key="bz01ButtonImg" ImageSource="Logo/BZ01.png"/>
+    <ImageBrush x:Key="bz02ButtonImg" ImageSource="Logo/BZ02.png"/>
+    <ImageBrush x:Key="bz03ButtonImg" ImageSource="Logo/BZ03.png"/>
+    
+    <ImageBrush x:Key="spderNextIcon" ImageSource="Logo/SpderNext.png"/>
+    <ImageBrush x:Key="spderPlayIcon" ImageSource="Logo/SpderPlay.png"/>
+    <ImageBrush x:Key="spderPrevIcon" ImageSource="Logo/SpderPrev.png"/>
+    <ImageBrush x:Key="spderPauseIcon" ImageSource="Logo/SpderPause.png"/>
+
+    <ImageBrush x:Key="smoothOpIcon" ImageSource="Logo/Smooth.png"/>
+
+    <!--<SoundPlayerAction x:Key="mainLoginWave" Source="Sound/MainLogin.wav"/>-->
+
+    <BitmapImage x:Key="canan01paints" UriSource="Logo/Canan01.png"/>
+    <BitmapImage x:Key="canan02paints" UriSource="Logo/Canan02.png"/>
+    <BitmapImage x:Key="canan03paints" UriSource="Logo/Canan03.png"/>
+</ResourceDictionary>

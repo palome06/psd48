@@ -2214,6 +2214,8 @@ namespace PSD.ClientAo
                         string msg = "";
                         for (int i = 1; i < args.Length; i += 2)
                         {
+                            if (args[i] == "0")
+                                msg += "不触发战斗.";
                             if (args[i] == "1")
                             {
                                 ushort s = ushort.Parse(args[i + 1]);
@@ -2687,22 +2689,22 @@ namespace PSD.ClientAo
                         {
                             ushort from = ushort.Parse(para.Substring(0, jdx));
                             string advice = para.Substring(jdx + 1);
-                            ushort who;
-                            if (ushort.TryParse(advice, out who))
+                            if (advice.StartsWith("T"))
                             {
-                                if (who == 0)
-                                    VI.Cout(Uid, "{0}{1}不打怪.", zd.Player(from), suggest);
-                                else if (who == rounder)
+                                ushort who = ushort.Parse(advice.Substring("T".Length));
+                                if (who == rounder)
                                     VI.Cout(Uid, "{0}{1}不让其它人参与战斗.", zd.Player(from), suggest);
                                 else
                                     VI.Cout(Uid, "{0}{1}{2}参与战斗.", zd.Player(from), suggest, zd.Player(who));
                             }
-                            else if (advice.StartsWith("P"))
+                            else if (advice.StartsWith("G"))
                             {
-                                ushort monCode = ushort.Parse(advice.Substring("PT".Length));
+                                ushort monCode = Tuple.ML.Encode(advice);
                                 if (monCode > 0)
                                     VI.Cout(Uid, "{0}{1}{2}参与战斗.", zd.Player(from), suggest, zd.Monster(monCode));
                             }
+                            else if (advice.StartsWith("/"))
+                                VI.Cout(Uid, "{0}{1}不打怪.", zd.Player(from), suggest);
                             if (cop[2] != '3')
                                 ad.HideProgressBar(from);
                         }

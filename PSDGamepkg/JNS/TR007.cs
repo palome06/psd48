@@ -700,7 +700,7 @@ namespace PSD.PSDGamepkg.JNS
                 XI.RaiseGMessage("G0JM,R" + tar + "ZW");
             }
             else if (type == 1)
-                XI.Board.PosSupporters.Remove("0");
+                XI.Board.AllowNoSupport = false;
             else if (type == 2)
             {
                 player.RAMUshort = 0;

@@ -621,7 +621,7 @@ namespace PSD.PSDGamepkg.JNS
                     XI.InnerGMessage("G0DH" + g0dh, 41);
             }
             else if (type == 2)
-                XI.Board.PosSupporters.Remove("0");
+                XI.Board.AllowNoSupport = false;
         }
         #endregion XJ106 - Jiujianxian
         #region XJ107 - Baiyue Lord

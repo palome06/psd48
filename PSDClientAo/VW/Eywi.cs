@@ -122,6 +122,18 @@ namespace PSD.ClientAo.VW
             {
                 if (line.StartsWith("H0SM"))
                     line += ",5";
+                else if (line[0] == 'R' && line.Substring(2, 3) == "ZW5")
+                {
+                    string[] blocks = line.Split(',');
+                    if (blocks.Length >= 3)
+                    {
+                        if (Char.IsDigit(blocks[2][0]))
+                            blocks[2] = "T" + blocks[2];
+                        else if (blocks[2] == "0")
+                            blocks[2] = "/0";
+                        line = string.Join(",", blocks);
+                    }
+                }
             }
             if (Version <= 101)
             {

@@ -962,7 +962,7 @@ namespace PSD.PSDGamepkg.JNS
                         XI.Board.Mon1From = who;
                         XI.Board.Monster1 = mon;
                         XI.RaiseGMessage("G2YM,0," + mon + "," + who);
-                        XI.Board.PosSupporters.Remove("0");
+                        XI.Board.AllowNoSupport = false;
                         break;
                     }
                 }

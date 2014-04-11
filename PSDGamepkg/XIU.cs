@@ -487,34 +487,38 @@ namespace PSD.PSDGamepkg
         // Major Query Case, $citizens contains who can vote for advice and its input format
         // $handleCitizenAdvices tell how to handle with advice.
         // return the major's decision.
-        public string MajorAsyncInput(ushort major, string majorMsg, IDictionary<ushort, string> citizens,
-        	Action<ushort, string> handleCitizenAdvices)
+        public string MajorAsyncInput(ushort major, string majorMsg,
+            IDictionary<ushort, string> citizens, Action<ushort, string> handleCitizenAdvices)
         {
-        	WI.Send("V2," + major + "," + majorMsg, 0, major);
-        	foreach (var pair in citizens)
-        		WI.Send("V2," + major + "," + pair.Value, 0, pair.Key);
-        	List<ushort> invs = citizens.Keys.ToList().Add(major);
-    		WI.Send("V3," + major, ExceptStaff(invs))
-        	WI.Live("V3," + major);
-        	WI.RecvInfStart();
-        	while (true) {
-        		Base.VW.Msgs msg = WI.RecvInfRecvPending();
-        		if (string.IsNullOrEmpty(msg))
-        			break;
-        		if (msg.From == major) {
-        			string decision = msg.Msg.Substring("V4,".Length);
-        			WI.Send("V5,0", ExceptStaff(major));
-        			WI.Live("V5,0");
-        			return msg.Msg.Substring("V4,".Length);
-        		} else if (citizens.ContainsKey(msg.From)) {
-        			string advice = msg.Msg.Substring("V4,".Length);
-        			handleCitizenAdvices(msg.From, advice);
-        		}
-        	}
-        	return "";
+            WI.Send("V2," + major + "," + majorMsg, 0, major);
+            foreach (var pair in citizens)
+                WI.Send("V2," + major + "," + pair.Value, 0, pair.Key);
+            List<ushort> invs = citizens.Keys.ToList(); invs.Add(major);
+            WI.Send("V3," + major, ExceptStaff(invs.ToArray()));
+            WI.Live("V3," + major);
+            WI.RecvInfStart();
+            while (true)
+            {
+                Base.VW.Msgs msg = WI.RecvInfRecvPending();
+                if (string.IsNullOrEmpty(msg.Msg))
+                    break;
+                if (msg.From == major)
+                {
+                    string decision = msg.Msg.Substring("V4,".Length);
+                    WI.Send("V5,0", ExceptStaff(major));
+                    WI.Live("V5,0");
+                    return msg.Msg.Substring("V4,".Length);
+                }
+                else if (citizens.ContainsKey(msg.From))
+                {
+                    string advice = msg.Msg.Substring("V4,".Length);
+                    handleCitizenAdvices(msg.From, advice);
+                }
+            }
+            return "";
         }
-        public string MajorAsyncInput(ushort major, string majorMsg, List<ushort> citizens, string citizenMsg,
-        	Action<ushort, string> handleCitizenAdvices)
+        public string MajorAsyncInput(ushort major, string majorMsg, IEnumerable<ushort> citizens,
+            string citizenMsg, Action<ushort, string> handleCitizenAdvices)
         {
         	IDictionary<ushort, string> citizenDict = new Dictionary<ushort, string>();
         	foreach (ushort ut in citizens)

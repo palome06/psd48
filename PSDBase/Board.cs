@@ -35,6 +35,8 @@ namespace PSD.Base
         // Give up:0 ; player.Uid:1 ; NMB:GT03,NC150
         public List<string> PosHinders { private set; get; }
         public List<string> PosSupporters { private set; get; }
+        public bool AllowNoSupport { set; get; }
+        public bool AllowNoHinder { set; get; }
         // 0. fight; 1. Skip fight; 2. not enter the stage.
         //public int IsFight { set; get; }
         // Pool Value of Rounder Side
