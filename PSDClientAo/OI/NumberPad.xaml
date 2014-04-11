@@ -1,0 +1,37 @@
+﻿<UserControl x:Class="PSD.ClientAo.OI.NumberPad"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <UserControl.Resources>
+        <Style TargetType="{x:Type Button}">
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="Width" Value="80"/>
+        </Style>
+    </UserControl.Resources>
+    <Grid Height="75" Width="420">
+        <Grid x:Name="opPanel0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="1*"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="1*"/>
+                <RowDefinition Height="10"/>
+                <RowDefinition Height="1*"/>
+            </Grid.RowDefinitions>
+            <TextBlock x:Name="opTitle" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="5" FontFamily="黑体" FontSize="30"
+                       VerticalAlignment="Center" HorizontalAlignment="Center">请选择一个连接点。</TextBlock>
+            <Button x:Name="opButton1" Grid.Row="2" Grid.Column="0" Click="OpButton1Click">选项一</Button>
+            <Button x:Name="opButton2" Grid.Row="2" Grid.Column="1" Click="OpButton2Click">选项二</Button>
+            <Button x:Name="opButton3" Grid.Row="2" Grid.Column="2" Click="OpButton3Click">选项三</Button>
+            <Button x:Name="opButton4" Grid.Row="2" Grid.Column="3" Click="OpButton4Click">选项四</Button>
+            <Button x:Name="opButton5" Grid.Row="2" Grid.Column="4" Click="OpButton5Click">选项五</Button>
+        </Grid>
+        <Grid x:Name="opPanel1" VerticalAlignment="Bottom">
+            <TextBlock x:Name="opTitleOnly" FontFamily="黑体" FontSize="18"
+                   VerticalAlignment="Center" HorizontalAlignment="Center">请选择一个连接点。</TextBlock>
+        </Grid>
+    </Grid>
+</UserControl>

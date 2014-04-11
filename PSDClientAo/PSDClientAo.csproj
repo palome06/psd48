@@ -1,0 +1,293 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{5EFC2B82-CF5A-4D65-9F5D-4F40FC6D5B9F}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>PSD.ClientAo</RootNamespace>
+    <AssemblyName>PSDClientAo</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <WarningLevel>4</WarningLevel>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>..\bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>Resources\Ao.ico</ApplicationIcon>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject>PSD.ClientAo.App</StartupObject>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Data.SQLite, Version=1.0.66.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\lib\System.Data.SQLite.DLL</HintPath>
+    </Reference>
+    <Reference Include="System.Data.SQLite.Linq, Version=2.0.38.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\lib\System.Data.SQLite.Linq.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xaml" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="WindowsBase" />
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+  </ItemGroup>
+  <ItemGroup>
+    <ApplicationDefinition Include="App.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </ApplicationDefinition>
+    <Compile Include="AoCEE.cs" />
+    <Compile Include="AoMix.cs" />
+    <Compile Include="Auxs\FlashWindowHelper.cs" />
+    <Compile Include="CananPaint.xaml.cs">
+      <DependentUpon>CananPaint.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Card\MoveThumb.cs" />
+    <Compile Include="Card\Ruban.xaml.cs">
+      <DependentUpon>Ruban.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Card\RubanBox.xaml.cs">
+      <DependentUpon>RubanBox.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Card\RubanLock.xaml.cs">
+      <DependentUpon>RubanLock.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Card\ShipRule.cs" />
+    <Compile Include="Login\RoomView.xaml.cs">
+      <DependentUpon>RoomView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Moonlight.xaml.cs">
+      <DependentUpon>Moonlight.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="OI\AoArena.cs" />
+    <Compile Include="OI\AoDeal.cs" />
+    <Compile Include="AoField.cs" />
+    <Compile Include="AoMe.cs" />
+    <Compile Include="AoOrchis.cs" />
+    <Compile Include="OI\AoMinami.cs" />
+    <Compile Include="OI\AoTV.cs" />
+    <Compile Include="OI\Arena.xaml.cs">
+      <DependentUpon>Arena.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="OI\DealTable.xaml.cs">
+      <DependentUpon>DealTable.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="JoyStick.xaml.cs">
+      <DependentUpon>JoyStick.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Login\LoginDoor.xaml.cs">
+      <DependentUpon>LoginDoor.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="OI\MovePanelThumb.cs" />
+    <Compile Include="OI\NumberPad.xaml.cs">
+      <DependentUpon>NumberPad.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="OI\Television.xaml.cs">
+      <DependentUpon>Television.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Orchis40.xaml.cs">
+      <DependentUpon>Orchis40.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="PersonalBag.xaml.cs">
+      <DependentUpon>PersonalBag.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="PilesBar.xaml.cs">
+      <DependentUpon>PilesBar.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="RepoAngle.xaml.cs">
+      <DependentUpon>RepoAngle.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="SMC.cs" />
+    <Compile Include="AoPlayer.cs" />
+    <Compile Include="Card\Suban.xaml.cs">
+      <DependentUpon>Suban.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Speeder.xaml.cs">
+      <DependentUpon>Speeder.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Tips\IchiDisplay.cs" />
+    <Compile Include="TupleAdjuster.cs" />
+    <Compile Include="Util.cs" />
+    <Compile Include="VW\Cyvi.cs" />
+    <Compile Include="VW\Bywi.cs" />
+    <Compile Include="VW\Eywi.cs" />
+    <Compile Include="XIVisi.cs" />
+    <Compile Include="ZeroDisplay.cs" />
+    <Compile Include="ZI.cs" />
+    <Page Include="CananPaint.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Card\Ruban.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Card\RubanBox.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Card\RubanLock.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Login\RoomView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Moonlight.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="OI\Arena.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="OI\DealTable.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="JoyStick.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Login\LoginDoor.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="AoDisplay.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Compile Include="App.xaml.cs">
+      <DependentUpon>App.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="AoDisplay.xaml.cs">
+      <DependentUpon>AoDisplay.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Page Include="OI\NumberPad.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="OI\Television.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Orchis40.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="PersonalBag.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="PilesBar.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="PlayerBoard.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="RepoAngle.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Card\Suban.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Speeder.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="PlayerBoard.xaml.cs">
+      <DependentUpon>PlayerBoard.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\AssemblyInfo.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <None Include="app.config">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <AppDesigner Include="Properties\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\PSDBase\Base.csproj">
+      <Project>{bd84fefe-8831-403f-ba0e-29ba160830b2}</Project>
+      <Name>Base</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\PSDRisoLib\PSDRisoLib.csproj">
+      <Project>{4ffadf4e-b06c-4307-9d2e-d1a44d5f00b7}</Project>
+      <Name>PSDRisoLib</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Ao.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Resources\fmxy.mp3">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

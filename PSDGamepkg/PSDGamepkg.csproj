@@ -1,0 +1,107 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{5F5242F5-D554-4D62-A416-88F1ADD081B4}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>PSD.PSDGamepkg</RootNamespace>
+    <AssemblyName>PSDGamepkg</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <PlatformTarget>x86</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>..\bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <PlatformTarget>x86</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject>PSD.PSDGamepkg.XI</StartupObject>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>Resources\GPkg.ico</ApplicationIcon>
+  </PropertyGroup>
+  <PropertyGroup />
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Data.SQLite, Version=1.0.66.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\lib\System.Data.SQLite.DLL</HintPath>
+    </Reference>
+    <Reference Include="System.Data.SQLite.Linq, Version=2.0.38.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\lib\System.Data.SQLite.Linq.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Artiad\Harm.cs" />
+    <Compile Include="DS\PriorityQueue.cs" />
+    <Compile Include="DS\UFSet.cs" />
+    <Compile Include="JNS\CZ02.cs" />
+    <Compile Include="JNS\FG04.cs" />
+    <Compile Include="JNS\JP06.cs" />
+    <Compile Include="JNS\NC303.cs" />
+    <Compile Include="JNS\SJ101.cs" />
+    <Compile Include="JNS\TR007.cs" />
+    <Compile Include="JNS\XJ405.cs" />
+    <Compile Include="Log.cs" />
+    <Compile Include="VW\Aywi.cs" />
+    <Compile Include="VW\Neayer.cs" />
+    <Compile Include="XIS.cs" />
+    <Compile Include="XIU.cs" />
+    <Compile Include="Util.cs" />
+    <Compile Include="VW\Djvi.cs" />
+    <Compile Include="VW\Djwi.cs" />
+    <Compile Include="XI.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="XIG.cs" />
+    <Compile Include="XIR.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Resources\GPkg.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\PSDBase\Base.csproj">
+      <Project>{bd84fefe-8831-403f-ba0e-29ba160830b2}</Project>
+      <Name>Base</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\PSDClientZero\PSDClientZero.csproj">
+      <Project>{6e038ffe-3898-4c10-85f8-c55139a63373}</Project>
+      <Name>PSDClientZero</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

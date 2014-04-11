@@ -1,0 +1,212 @@
+﻿<ContentControl x:Class="PSD.ClientAo.Card.Ruban"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:cd="clr-namespace:PSD.ClientAo.Card"
+             Height="120" Width="90"
+             ToolTip="牌不是万能的，但是没牌是万万不能的。">
+    <ContentControl.Resources>
+        <ControlTemplate x:Key="MoveThumbTemplate" TargetType="{x:Type cd:MoveThumb}">
+            <Rectangle Fill="Transparent"/>
+        </ControlTemplate>
+        <ControlTemplate x:Key="RubanItemTemplate" TargetType="ContentControl">
+            <Grid DataContext="{Binding RelativeSource={RelativeSource TemplatedParent}}">
+                <cd:MoveThumb Template="{StaticResource MoveThumbTemplate}" Cursor="SizeAll"/>
+                <ContentPresenter Content="{TemplateBinding ContentControl.Content}"/>
+            </Grid>
+        </ControlTemplate>
+        <ControlTemplate x:Key="MoziItemTemplate" TargetType="ContentControl">
+            <Grid DataContext="{Binding RelativeSource={RelativeSource TemplatedParent}}">
+                <ContentPresenter Content="{TemplateBinding ContentControl.Content}"/>
+            </Grid>
+        </ControlTemplate>
+
+        <DoubleAnimation x:Key="tcOverAni" Storyboard.TargetProperty="StrokeThickness" To="3" Duration="0:0:1"/>
+        <DoubleAnimation x:Key="tcLeaveAni" Storyboard.TargetProperty="StrokeThickness" To="0" Duration="0:0:1"/>
+        
+        <ControlTemplate x:Key="ActiveCardBag" TargetType="ContentControl">
+            <Canvas>
+                <Grid Name="tcGrid" Canvas.Top="20">
+                    <Rectangle Canvas.Left="3.4" Canvas.Top="1.4" Height="117.2" Width="83.2" Fill="White"/>
+                    <ContentPresenter Name="tcCps" Height="120" Width="90" 
+                                   Content="{TemplateBinding Property=ContentControl.Content}"/>
+                    <Rectangle Name="tcBorder" RadiusX="4" RadiusY="4" Fill="Transparent"/>
+                    <Rectangle Name="tcMask" Height="120" Width="90" Fill="Gray" Opacity="0"/>
+                </Grid>
+            </Canvas>
+            <ControlTemplate.Triggers>
+                <Trigger Property="UIElement.IsMouseOver" Value="True">
+                    <Setter TargetName="tcBorder" Property="Stroke" Value="Yellow"/>
+                    <Trigger.EnterActions>
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <DoubleAnimation Storyboard.TargetName="tcBorder"
+                                                 Storyboard.TargetProperty="StrokeThickness"
+                                                 From="0" To="3" Duration="0:0:0.2"/>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </Trigger.EnterActions>
+                    <Trigger.ExitActions>
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <DoubleAnimation Storyboard.TargetName="tcBorder"
+                                                 Storyboard.TargetProperty="StrokeThickness"
+                                                 From="3" To="0" Duration="0:0:0.2"/>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </Trigger.ExitActions>
+                </Trigger>
+                <!--<Trigger Property="UIElement.IsEnabled"  Value="False">
+                    <Setter TargetName="tcCps" Property="Opacity" Value="0.7"/>
+                    <Setter TargetName="tcMask" Property="Opacity" Value="0.2"/>
+                </Trigger>-->
+                <Trigger Property="CheckBox.IsChecked" Value="True">
+                    <Trigger.EnterActions>
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <DoubleAnimation Storyboard.TargetName="tcGrid"
+                                                 Storyboard.TargetProperty="(Canvas.Top)"
+                                                 From="20" To="0" Duration="0:0:0.4"/>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </Trigger.EnterActions>
+                    <Trigger.ExitActions>
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <DoubleAnimation Storyboard.TargetName="tcGrid"
+                                                 Storyboard.TargetProperty="(Canvas.Top)"
+                                                 From="0" To="20" Duration="0:0:0.4"/>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </Trigger.ExitActions>
+                </Trigger>
+            </ControlTemplate.Triggers>
+        </ControlTemplate>
+        <ControlTemplate x:Key="ActiveCardDeal" TargetType="ContentControl">
+            <Canvas>
+                <Grid Name="tcGrid">
+                    <Rectangle Canvas.Left="3.4" Canvas.Top="1.4" Height="117.2" Width="83.2" Fill="White"/>
+                    <ContentPresenter Name="tcCps" Height="120" Width="90" 
+                                       Content="{TemplateBinding Property=ContentControl.Content}"/>
+                    <Rectangle Name="tcBorder" RadiusX="4" RadiusY="4" Fill="Transparent"/>
+                    <Rectangle x:Name="tcSelMask" Height="120" Width="90" Fill="Yellow" Opacity="0"/>
+                    <Rectangle Name="tcMask" Height="120" Width="90" Fill="Gray" Opacity="0"/>
+                </Grid>
+            </Canvas>
+            <ControlTemplate.Triggers>
+                <Trigger Property="UIElement.IsMouseOver" Value="True">
+                    <Setter TargetName="tcBorder" Property="Stroke" Value="Yellow"/>
+                    <Trigger.EnterActions>
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <DoubleAnimation Storyboard.TargetName="tcBorder"
+                                                 Storyboard.TargetProperty="StrokeThickness"
+                                                 From="0" To="3" Duration="0:0:0.2"/>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </Trigger.EnterActions>
+                    <Trigger.ExitActions>
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <DoubleAnimation Storyboard.TargetName="tcBorder"
+                                                 Storyboard.TargetProperty="StrokeThickness"
+                                                 From="3" To="0" Duration="0:0:0.2"/>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </Trigger.ExitActions>
+                </Trigger>
+                <!--<Trigger Property="UIElement.IsEnabled"  Value="False">
+                        <Setter TargetName="tcCps" Property="Opacity" Value="0.7"/>
+                        <Setter TargetName="tcMask" Property="Opacity" Value="0.2"/>
+                    </Trigger>-->
+                <Trigger Property="CheckBox.IsChecked" Value="True">
+                    <Trigger.EnterActions>
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <DoubleAnimation Storyboard.TargetName="tcSelMask"
+                                                 Storyboard.TargetProperty="Opacity"
+                                                 From="0" To="0.3" Duration="0:0:0.2"/>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </Trigger.EnterActions>
+                    <Trigger.ExitActions>
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <DoubleAnimation Storyboard.TargetName="tcSelMask"
+                                                 Storyboard.TargetProperty="Opacity"
+                                                 From="0.3" To="0" Duration="0:0:0.2"/>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </Trigger.ExitActions>
+                </Trigger>
+            </ControlTemplate.Triggers>
+        </ControlTemplate>
+
+        <ControlTemplate x:Key="SoundCardWatcher" TargetType="ContentControl">
+            <Canvas>
+                <Grid Name="tcGrid">
+                    <Rectangle Canvas.Left="3.4" Canvas.Top="1.4" Height="117.2" Width="83.2" Fill="White"/>
+                    <ContentPresenter Name="tcCps" Height="120" Width="90" 
+                                       Content="{TemplateBinding Property=ContentControl.Content}"/>
+                </Grid>
+            </Canvas>
+        </ControlTemplate>
+        
+        <ControlTemplate x:Key="LumberjackCardBag" TargetType="ContentControl">
+            <Canvas>
+                <Grid Name="tcGrid" Canvas.Top="20" IsHitTestVisible="False">
+                    <Rectangle Canvas.Left="3.4" Canvas.Top="1.4" Height="117.2" Width="83.2" Fill="White"/>
+                    <ContentPresenter Name="tcCps" Height="120" Width="90" Opacity="0.7"
+                                Content="{TemplateBinding ContentControl.Content}"/>
+                    <Rectangle Name="tcMask" Height="120" Width="90" Fill="Gray" Opacity="0.2"/>
+                </Grid>
+            </Canvas>
+        </ControlTemplate>
+        <ControlTemplate x:Key="LumberjackCardDeal" TargetType="ContentControl">
+            <Canvas>
+                <Grid Name="tcGrid">
+                    <Rectangle Canvas.Left="3.4" Canvas.Top="1.4" Height="117.2" Width="83.2" Fill="White"/>
+                    <ContentPresenter Name="tcCps" Height="120" Width="90" Opacity="0.6"
+                                       Content="{TemplateBinding Property=ContentControl.Content}"/>
+                    <Rectangle Name="tcMask" Height="120" Width="90" Fill="Gray" Opacity="0.3"/>
+                </Grid>
+            </Canvas>
+        </ControlTemplate>
+        <ControlTemplate x:Key="AoMaskCard" TargetType="ContentControl">
+            <Canvas>
+                <Grid Name="tcGrid">
+                    <Rectangle Canvas.Left="3.4" Canvas.Top="1.4" Height="117.2" Width="83.2" Fill="White"/>
+                    <ContentPresenter Name="tcCps" Height="120" Width="90" Opacity="0.6"
+                                       Content="{TemplateBinding Property=ContentControl.Content}"/>
+                    <Rectangle Name="tcMask" Height="120" Width="90" Fill="Blue" Opacity="0.3"/>
+                </Grid>
+            </Canvas>
+        </ControlTemplate>
+        <ControlTemplate x:Key="AkaMaskCard" TargetType="ContentControl">
+            <Canvas>
+                <Grid Name="tcGrid">
+                    <Rectangle Canvas.Left="3.4" Canvas.Top="1.4" Height="117.2" Width="83.2" Fill="White"/>
+                    <ContentPresenter Name="tcCps" Height="120" Width="90" Opacity="0.6"
+                                       Content="{TemplateBinding Property=ContentControl.Content}"/>
+                    <Rectangle Name="tcMask" Height="120" Width="90" Fill="Red" Opacity="0.3"/>
+                </Grid>
+            </Canvas>
+        </ControlTemplate>
+        <ControlTemplate x:Key="PistonCardDeal" TargetType="ContentControl">
+            <Grid DataContext="{Binding RelativeSource={RelativeSource TemplatedParent}}">
+                <cd:MoveThumb Template="{StaticResource MoveThumbTemplate}"/>
+                <Canvas>
+                    <Grid Name="tcGrid">
+                        <Rectangle Canvas.Left="3.4" Canvas.Top="1.4" Height="117.2" Width="83.2" Fill="White"/>
+                        <ContentPresenter Name="tcCps" Height="120" Width="90"
+                                   Content="{TemplateBinding ContentControl.Content}"/>
+                        <Rectangle Name="tcMask" Height="120" Width="90" Fill="Gray" Opacity="0"/>
+                    </Grid>
+                </Canvas>
+            </Grid>
+        </ControlTemplate>
+    </ContentControl.Resources>
+    
+    <!--<Thumb Content>-->
+    <CheckBox x:Name="cardBody" Template="{StaticResource LumberjackCardBag}" IsHitTestVisible="False"/>
+    <!--</Thumb>-->
+</ContentControl>

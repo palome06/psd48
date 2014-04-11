@@ -1,0 +1,21 @@
+﻿<UserControl x:Class="PSD.ClientAo.PersonalBag"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:self="clr-namespace:PSD.ClientAo">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="pack://application:,,,/PSDRisoLib;component/Resources/ImgRes.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+    <Canvas x:Name="mainCanvas" Height="140" Width="480">
+        <!--<CheckBox Template="{StaticResource touchableCard}">
+            <Image Source="Resources/Card/Tux/TP01.png"/>
+        </CheckBox>-->
+    </Canvas>
+    <!--<Grid>
+        <self:Hitori/>
+    </Grid>-->
+</UserControl>

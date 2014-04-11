@@ -1,0 +1,23 @@
+﻿<UserControl x:Class="PSD.ClientAo.Card.Mystic"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <UserControl.Resources>
+        <ControlTemplate x:Key="soundCard">
+            <Canvas>
+                <Grid Name="scGrid">
+                    <Rectangle Height="120" Width="90" Fill="White"/>
+                    <ContentPresenter Name="scCps" Height="120" Width="90" 
+                                   Content="{TemplateBinding Property=ContentControl.Content}"/>
+                    <Rectangle Name="scMask" Height="120" Width="90" Fill="Gray" Opacity="0"/>
+                </Grid>
+            </Canvas>
+            <ControlTemplate.Triggers>
+                <Trigger Property="UIElement.IsEnabled" Value="False">
+                    <Setter TargetName="scCps" Property="Opacity" Value="0.6"/>
+                    <Setter TargetName="scMask" Property="Opacity" Value="0.2"/> 
+                </Trigger>
+            </ControlTemplate.Triggers>
+        </ControlTemplate>
+    </UserControl.Resources>
+    <CheckBox x:Name="cardCheckBox" Template="{StaticResource soundCard}"/>
+</UserControl>

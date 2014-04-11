@@ -1,0 +1,621 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace PSD.Base.Card
+{
+    public class Tux
+    {
+        public enum TuxType { HX, JP, ZP, TP, WQ, FJ, XB };
+
+        public TuxType Type { private set; get; }
+        // Tux hand name, (e.g.) Tianxuanwuyin
+        public string Name { private set; get; }
+        // avatar = serial, (e.g.) 50204
+        //public int Avatar { private set; get; }
+        public string Code { private set; get; }
+
+        //public int Count { private set; get; }
+        // package contains all the tux involved in (e.g.) { 1, 4 }
+        public int[] Package { protected set; get; }
+        // Package contains the tux number range in given package
+        // (e.g.) { 1, 2, 82, 84 } means 1~2 in package 1# an 82~84 in package 4#
+        public ushort[] Range { protected set; get; }
+
+        public string Description { private set; get; }
+        public string Special { private set; get; }
+
+        public int[] Priorities { protected set; get; }
+        public string[] Occurs { protected set; get; }
+        public string[] Parasitism { get; protected set; }
+
+        public char[] Targets { protected set; get; }
+        public bool[] IsTermini { protected set; get; }
+        // whether is equipped or used directly
+        public bool[] IsEq { protected set; get; }
+        // whether only can work for the owner himself
+        //public bool IsSelfType { private set; get; }
+
+        public delegate void ActionDelegate(Player player, int type, string fuse, string argst);
+        public delegate bool ValidDelegate(Player player, int type, string fuse);
+        public delegate string InputDelegate(Player player, int type, string fuse, string prev);
+        public delegate string InputHolderDelegate(Player provider, Player user, int type, string fuse, string prev);
+        public delegate string EncryptDelegate(string args);
+
+        private ActionDelegate mAction;
+        public ActionDelegate Action
+        {
+            set { mAction = value; }
+            get { return mAction ?? DefAction; }
+        }
+
+        private InputDelegate mInput;
+        public InputDelegate Input
+        {
+            set { mInput = value; }
+            get { return mInput ?? DefInput; }
+        }
+        private InputHolderDelegate mInputHolder;
+        public InputHolderDelegate InputHolder
+        {
+            set { mInputHolder = value; }
+            get { return mInputHolder ?? DefInputHolder; }
+        }
+
+        private ValidDelegate mValid, mBribe;
+        public ValidDelegate Valid
+        {
+            set { mValid = value; }
+            get { return mValid ?? DefValid; }
+        }
+        public ValidDelegate Bribe
+        {
+            set { mBribe = value; }
+            get { return mBribe ?? DefValid; }
+        }
+
+        private EncryptDelegate mEncrypt;
+        public EncryptDelegate Encrypt
+        {
+            set { mEncrypt = value; }
+            get { return mEncrypt ?? DefEncrypt; }
+        }
+
+        protected static ActionDelegate DefAction = new ActionDelegate(
+            delegate(Player player, int type, string fuse, string argst) { });
+        protected static ValidDelegate DefValid = new ValidDelegate(
+            delegate(Player player, int type, string fuse) { return true; });
+        protected static InputDelegate DefInput = new InputDelegate(
+            delegate(Player player, int type, string fuse, string prev) { return ""; });
+        protected static InputHolderDelegate DefInputHolder = new InputHolderDelegate(
+            delegate(Player provider, Player user, int type, string fuse, string prev) { return ""; });
+        protected static EncryptDelegate DefEncrypt = new EncryptDelegate(
+            delegate(string args) { return args; });
+
+        // public Delegate Type of Handling events
+        internal Tux(string name, string code, TuxType type, string description, string special)
+        {
+            this.Name = name; this.Code = code;
+            //this.Count = count;
+            this.Type = type;
+            this.Description = description; this.Special = special;
+            //this.IsSelfType = isSelfType;
+        }
+
+        public virtual bool IsTuxEqiup() { return false; }
+
+        internal virtual void Parse(string countStr, string occurStr, string parasitismStr,
+            string priorStr, string isEqStr, string tarStr, string terminiStr)
+        {
+            if (countStr != "")
+            {
+                string[] counts = countStr.Split(',');
+                Package = new int[counts.Length / 3];
+                Range = new ushort[(counts.Length / 3) * 2];
+                for (int i = 0; i < counts.Length; i += 3)
+                {
+                    Package[i / 3] = int.Parse(counts[i]);
+                    Range[(i / 3) * 2] = ushort.Parse(counts[i + 1]);
+                    Range[(i / 3) * 2 + 1] = ushort.Parse(counts[i + 2]);
+                }
+            }
+            int sz;
+            if (occurStr != "" && occurStr != "^")
+            {
+                string[] occurs = occurStr.Split(',');
+                sz = occurs.Length;
+                Occurs = new string[sz];
+                for (int i = 0; i < sz; ++i)
+                    Occurs[i] = occurs[i];
+            }
+            else
+                sz = 0;
+            if (parasitismStr != null && parasitismStr != "" && parasitismStr != "^")
+                Parasitism = parasitismStr.Split('&');
+            else
+                Parasitism = new string[0];
+            if (priorStr != "" && priorStr != "^")
+            {
+                string[] priors = priorStr.Split(',');
+                Priorities = new int[sz];
+                for (int i = 0; i < sz; ++i)
+                    Priorities[i] = int.Parse(priors[i]);
+            }
+            if (isEqStr != "" && isEqStr != "^")
+            {
+                string[] eqs = isEqStr.Split(',');
+                IsEq = new bool[sz];
+                for (int i = 0; i < sz; ++i)
+                    IsEq[i] = (eqs[i][0] == '1');
+            }
+            if (tarStr != "")
+            {
+                string[] tars = tarStr.Split(',');
+                Targets = new char[sz];
+                for (int i = 0; i < sz; ++i)
+                    Targets[i] = tars[i][0];
+            }
+            if (terminiStr != "")
+            {
+                string[] ters = terminiStr.Split(',');
+                IsTermini = new bool[sz];
+                for (int i = 0; i < sz; ++i)
+                    IsTermini[i] = (ters[i][0] == '1');
+            }
+            else
+            {
+                IsTermini = new bool[sz];
+                for (int i = 0; i < sz; ++i)
+                    IsTermini[i] = false;
+            }
+        }
+
+        public virtual string OccurString()
+        {
+            if (Occurs != null)
+                return string.Join(",", Occurs);
+            else return "";
+        }
+    }
+
+    public class TuxLib
+    {
+        public List<Tux> Firsts { private set; get; }
+
+        private IDictionary<ushort, Tux> dicts;
+
+        private Utils.ReadonlySQL sql;
+
+        public TuxLib(string path)
+        {
+            Firsts = new List<Tux>();
+            string[] lines = System.IO.File.ReadAllLines(path);
+            foreach (string line in lines)
+            {
+                if (line != null && line.Length > 0)
+                {
+                    string[] content = line.Split('\t');
+                    string code = content[0]; // code, e.g. (ZP04)
+                    string name = content[1]; // name, e.g. (Tianxuanwuyin)
+                    //ushort count = ushort.Parse(content[2]);
+                    Tux.TuxType type;
+                    switch (code.Substring(0, 2))
+                    {
+                        case "JP": type = Tux.TuxType.JP; break;
+                        case "ZP": type = Tux.TuxType.ZP; break;
+                        case "TP": type = Tux.TuxType.TP; break;
+                        case "WQ": type = Tux.TuxType.WQ; break;
+                        case "FJ": type = Tux.TuxType.FJ; break;
+                        case "XB": type = Tux.TuxType.XB; break;
+                        default: type = Tux.TuxType.HX; break;
+                    }
+                    string countStr = content[2];
+                    string occur = content[3];
+                    string priority = content[4];
+                    string parasitismStr = content[5];
+                    string description = content[6];
+                    string special = content[7];
+                    string isEqs = content[8];
+                    string targets = content[9];
+                    string growup = content[10];
+                    string terminiStr = content[11];
+                    if (type == Tux.TuxType.WQ || type == Tux.TuxType.FJ || type == Tux.TuxType.XB)
+                    {
+                        var tux = new TuxEqiup(name, code, type, description, special, growup);
+                        tux.Parse(countStr, occur, parasitismStr, priority, isEqs, targets, terminiStr);
+                        Firsts.Add(tux);
+                    }
+                    else
+                    {
+                        var tux = new Tux(name, code, type, description, special);
+                        tux.Parse(countStr, occur, parasitismStr, priority, isEqs, targets, terminiStr);
+                        Firsts.Add(tux);
+                    }
+                }
+            }
+            //ushort cardx = 1;
+            dicts = new Dictionary<ushort, Tux>();
+            foreach (Tux tux in Firsts)
+            {
+                for (int i = 0; i < tux.Range.Length; i += 2)
+                {
+                    for (ushort j = tux.Range[i]; j <= tux.Range[i + 1]; ++j)
+                        dicts.Add(j, tux);
+                }
+            }
+        }
+
+        public TuxLib()
+        {
+            Firsts = new List<Tux>();
+            sql = new Utils.ReadonlySQL("psd.db3");
+            List<string> list = new string[] {
+                "CODE", "NAME", "COUNT", "OCCURS", "PRIORS", "PARASITISM",
+                "DESCRIPTION", "SPECIAL", "ISEQ", "TARGET", "GROWUP", "TERMINI"
+            }.ToList();
+            System.Data.DataRowCollection datas = sql.Query(list, "Tux");
+            foreach (System.Data.DataRow data in datas)
+            {
+                string code = (string)data["CODE"];
+                string name = (string)data["NAME"];
+                //ushort count = (ushort)((short)data["COUNT"]);
+                Tux.TuxType type;
+                switch (code.Substring(0, 2))
+                {
+                    case "JP": type = Tux.TuxType.JP; break;
+                    case "ZP": type = Tux.TuxType.ZP; break;
+                    case "TP": type = Tux.TuxType.TP; break;
+                    case "WQ": type = Tux.TuxType.WQ; break;
+                    case "FJ": type = Tux.TuxType.FJ; break;
+                    case "XB": type = Tux.TuxType.XB; break;
+                    default: type = Tux.TuxType.HX; break;
+                }
+                string countStr = (string)data["COUNT"];
+                string occur = (string)data["OCCURS"];
+                string priority = (string)data["PRIORS"];
+                string parasitismStr = (string)data["PARASITISM"];
+                string description = (string)data["DESCRIPTION"];
+                string special = (string)data["SPECIAL"];
+                string isEqs = (string)data["ISEQ"];
+                string targets = (string)data["TARGET"];
+                string terministr = (string)data["TERMINI"];
+                if (type == Tux.TuxType.WQ || type == Tux.TuxType.FJ || type == Tux.TuxType.XB)
+                {
+                    string growup = (string)data["GROWUP"];
+                    var tux = new TuxEqiup(name, code, type, description,
+                        special, growup);
+                    tux.Parse(countStr, occur, parasitismStr, priority, isEqs, targets, terministr);
+                    Firsts.Add(tux);
+                }
+                else
+                {
+                    var tux = new Tux(name, code, type, description, special);
+                    tux.Parse(countStr, occur, parasitismStr, priority, isEqs, targets, terministr);
+                    Firsts.Add(tux);
+                }
+            }
+            //ushort cardx = 1;
+            dicts = new Dictionary<ushort, Tux>();
+            foreach (Tux tux in Firsts)
+            {
+                for (int i = 0; i < tux.Range.Length; i += 2)
+                {
+                    for (ushort j = tux.Range[i]; j <= tux.Range[i + 1]; ++j)
+                        dicts.Add(j, tux);
+                }
+            }
+        }
+
+        public int Size { get { return dicts.Count; } }
+
+        public const int DEF_PRIORTY = 110;
+
+        public Tux DecodeTux(ushort code)
+        {
+            Tux tux;
+            if (dicts.TryGetValue(code, out tux))
+                return tux;
+            else return null;
+        }
+        public Tux EncodeTuxCode(string code)
+        {
+            foreach (Tux tux in Firsts)
+            {
+                if (tux.Code.Equals(code))
+                    return tux;
+            }
+            return null;
+        }
+        public List<Tux> ListAllTuxs(int groups)
+        {
+            if (groups == 0)
+                return Firsts.ToList();
+            else
+                return Firsts.Where(p => p.Package.Any(q => (groups & (1 << (q - 1))) != 0)).ToList();
+        }
+        public List<ushort> ListAllTuxCodes(int groups)
+        {
+            if (groups == 0)
+                return dicts.Keys.ToList();
+            List<Tux> txs = ListAllTuxs(groups);
+            List<ushort> us = new List<ushort>();
+            foreach (Tux tux in txs)
+            {
+                for (int i = 0; i < tux.Package.Length; ++i)
+                {
+                    if ((groups & (1 << (tux.Package[i] - 1))) != 0)
+                    {
+                        for (ushort j = tux.Range[i * 2]; j <= tux.Range[i * 2 + 1]; ++j)
+                            us.Add(j);
+                    }
+                }
+            }
+            return us;
+        }
+    }
+
+    public class TuxEqiup : Tux
+    {
+        public int IncrOfSTR { set; get; }
+        public int IncrOfDEX { set; get; }
+
+        public int[][] CsPriorites { private set; get; }
+
+        public string[][] CsOccur { private set; get; }
+
+        public bool[][] CsLock { private set; get; }
+
+        public bool[][] CsIsTermini { private set; get; }
+
+        public delegate void CrActionDelegate(Player player);
+        public delegate void CsActionDelegate(Player player,
+            int consumeType, int type, string fuse, string argst);
+        public delegate void CsActionHolderDelegate(Player provider, Player user,
+            int consumeType, int type, string fuse, string argst);
+        public delegate bool CsValidDelegate(Player player,
+            int consumeType, int type, string fuse);
+        public delegate bool CsValidHolderDelegate(Player provider, Player user,
+            int consumeType, int type, string fuse);
+        public delegate string CsInputDelegate(Player player,
+            int consumeType, int type, string fuse, string prev);
+        public delegate string CsInputHolderDelegate(Player provider, Player user,
+            int consumeType, int type, string fuse, string prev);
+        public delegate void CsUseActionDelegate(ushort cardUt, Player player);
+
+        private CrActionDelegate mIncrAction, mDecrAction;
+        private CsActionDelegate mConsumeAction;
+        private CsActionHolderDelegate mConsumeActionHolder;
+        private CrActionDelegate mInsAction, mDelAction;
+
+        public CrActionDelegate IncrAction
+        {
+            set { mIncrAction = value; }
+            get { return mIncrAction ?? DefCrAction; }
+        }
+        public CrActionDelegate DecrAction
+        {
+            set { mDecrAction = value; }
+            get { return mDecrAction ?? DefCrAction; }
+        }
+        public CrActionDelegate InsAction
+        {
+            set { mInsAction = value; }
+            get { return mInsAction ?? DefCrAction; }
+        }
+        public CrActionDelegate DelAction
+        {
+            set { mDelAction = value; }
+            get { return mDelAction ?? DefCrAction; }
+        }
+        public CsActionDelegate ConsumeAction
+        {
+            set { mConsumeAction = value; }
+            get { return mConsumeAction ?? DefCsAction; }
+        }
+        public CsActionHolderDelegate ConsumeActionHolder
+        {
+            set { mConsumeActionHolder = value; }
+            get { return mConsumeActionHolder ?? DefCsActionHolder; }
+        }
+
+        private CsInputDelegate mConsumeInput;
+        public CsInputDelegate ConsumeInput
+        {
+            set { mConsumeInput = value; }
+            get { return mConsumeInput ?? DefCsInput; }
+        }
+        private CsInputHolderDelegate mConsumeInputHolder;
+        public CsInputHolderDelegate ConsumeInputHolder
+        {
+            set { mConsumeInputHolder = value; }
+            get { return mConsumeInputHolder ?? DefCsInputHolder; }
+        }
+
+        private CsValidDelegate mConsumeValid;
+        public CsValidDelegate ConsumeValid
+        {
+            set { mConsumeValid = value; }
+            get { return mConsumeValid ?? DefCsValid; }
+        }
+        private CsValidHolderDelegate mConsumeValidHolder;
+        public CsValidHolderDelegate ConsumeValidHolder
+        {
+            set { mConsumeValidHolder = value; }
+            get { return mConsumeValidHolder ?? DefCsValidHolder; }
+        }
+
+        private CsUseActionDelegate mUseAction; // use/equip the card
+        public CsUseActionDelegate UseAction
+        {
+            set { mUseAction = value; }
+            get { return mUseAction ?? DefCsUseAction; }
+        }
+
+        protected static CrActionDelegate DefCrAction = new CrActionDelegate(delegate(Player player) { });
+        protected static CsActionDelegate DefCsAction = new CsActionDelegate(
+            delegate(Player player, int consumeType, int type, string fuse, string argst) { });
+        protected static CsActionHolderDelegate DefCsActionHolder = new CsActionHolderDelegate(
+            delegate(Player provider, Player user, int consumeType, int type, string fuse, string argst) { });
+        protected static CsValidDelegate DefCsValid = new CsValidDelegate(
+            delegate(Player player, int consumeType, int type, string fuse) { return true; });
+        protected static CsValidHolderDelegate DefCsValidHolder = new CsValidHolderDelegate(
+            delegate(Player provider, Player user, int consumeType, int type, string fuse) { return true; });
+        protected static CsInputDelegate DefCsInput = new CsInputDelegate(
+            delegate(Player player, int consumeType, int type, string fuse, string prev) { return ""; });
+        protected static CsInputHolderDelegate DefCsInputHolder = new CsInputHolderDelegate(
+            delegate(Player provider, Player user, int consumeType, int type, string fuse, string prev) { return ""; });
+        protected static CsUseActionDelegate DefCsUseAction = new CsUseActionDelegate(
+            delegate(ushort cardUt, Player player) { });
+
+        public override bool IsTuxEqiup() { return true; }
+
+        internal override void Parse(string countStr, string occurStr, string parasitismStr,
+            string priorStr, string isEqStr, string tarStr, string terministr)
+        {
+            if (countStr != "")
+            {
+                string[] counts = countStr.Split(',');
+                Package = new int[counts.Length / 3];
+                Range = new ushort[(counts.Length / 3) * 2];
+                for (int i = 0; i < counts.Length; i += 3)
+                {
+                    Package[i / 3] = int.Parse(counts[i]);
+                    Range[(i / 3) * 2] = ushort.Parse(counts[i + 1]);
+                    Range[(i / 3) * 2 + 1] = ushort.Parse(counts[i + 2]);
+                }
+            }
+            string[] occurStrss = occurStr.Split(';');
+            if (occurStrss.Length > 1)
+            {
+                CsOccur = new string[occurStrss.Length - 1][];
+                CsLock = new bool[occurStrss.Length - 1][];
+            }
+            for (int i = 0; i < occurStrss.Length; ++i)
+            {
+                if (occurStrss[i] != "" && occurStrss[i] != "^")
+                {
+                    if (i == 0)
+                    {
+                        string[] occurs = occurStrss[i].Split(',');
+                        Occurs = new string[occurs.Length];
+                        for (int j = 0; j < occurs.Length; ++j)
+                            Occurs[j] = occurs[j];
+                    }
+                    else
+                    {
+                        string[] occurs = occurStrss[i].Split(',');
+                        CsOccur[i - 1] = new string[occurs.Length];
+                        CsLock[i - 1] = new bool[occurs.Length];
+                        for (int j = 0; j < occurs.Length; ++j)
+                        {
+                            if (occurs[j].StartsWith("!"))
+                            {
+                                CsOccur[i - 1][j] = occurs[j].Substring(1);
+                                CsLock[i - 1][j] = true;
+                            }
+                            else
+                            {
+                                CsOccur[i - 1][j] = occurs[j];
+                                CsLock[i - 1][j] = false;
+                            }
+                        }
+                    }
+                }
+            }
+            if (parasitismStr != null && parasitismStr != "" && parasitismStr != "^")
+                Parasitism = parasitismStr.Split('&');
+            else
+                Parasitism = new string[0];
+            string[] priorStrss = priorStr.Split(';');
+            if (priorStrss.Length > 1)
+                CsPriorites = new int[priorStrss.Length - 1][];
+            for (int i = 0; i < priorStrss.Length; ++i)
+            {
+                if (priorStrss[i] != "" && priorStrss[i] != "^")
+                {
+                    if (i == 0)
+                    {
+                        string[] priors = priorStrss[i].Split(',');
+                        Priorities = new int[priors.Length];
+                        for (int j = 0; j < priors.Length; ++j)
+                            Priorities[j] = int.Parse(priors[j]);
+                    }
+                    else
+                    {
+                        string[] priors = priorStrss[i].Split(',');
+                        CsPriorites[i - 1] = new int[priors.Length];
+                        for (int j = 0; j < priors.Length; ++j)
+                            CsPriorites[i - 1][j] = int.Parse(priors[j]);
+                    }
+                }
+            }
+            string[] tars = tarStr.Split(',');
+            Targets = new char[tars.Length];
+            for (int i = 0; i < tars.Length; ++i)
+                Targets[i] = tars[i][0];
+            string[] isEqs = isEqStr.Split(',');
+            IsEq = new bool[isEqs.Length];
+            for (int i = 0; i < isEqs.Length; ++i)
+                IsEq[i] = (isEqs[i][0] == '1');
+
+            string[] termins = terministr.Split(';');
+            if (termins.Length > 1)
+                CsIsTermini = new bool[termins.Length - 1][];
+            for (int i = 0; i < termins.Length; ++i)
+            {
+                if (termins[i] != "" && termins[i] != "^")
+                {
+                    if (i == 0)
+                    {
+                        string[] trs = termins[i].Split(',');
+                        IsTermini = new bool[trs.Length];
+                        for (int j = 0; j < trs.Length; ++j)
+                            IsTermini[j] = (trs[j][0] == '1');
+                    }
+                    else
+                    {
+                        string[] trs = termins[i].Split(',');
+                        CsIsTermini[i - 1] = new bool[trs.Length];
+                        for (int j = 0; j < trs.Length; ++j)
+                            CsIsTermini[i - 1][j] = (trs[j][0] == '1');
+                    }
+                }
+            }
+        }
+
+        public override string OccurString()
+        {
+            string ocr = "";
+            if (Occurs != null)
+                ocr += string.Join(",", Occurs);
+            else
+                ocr += "^";
+            if (CsOccur != null)
+                ocr += ";" + string.Join(";", CsOccur.Select(p => (p != null) ? string.Join(",", p) : "^"));
+            else
+                ocr += "^";
+            return ocr;
+        }
+
+        public TuxEqiup(string name, string code, TuxType type,
+                string description, string special, string growup) :
+            base(name, code, type, description, special)
+        {
+            //int idxh = growup.IndexOf('H');
+            int idxa = growup.IndexOf('A');
+            int idxx = growup.IndexOf('X');
+            IncrOfSTR = idxa < 0 ? 0 : int.Parse(Substring(growup, idxa + 1, idxx));
+            IncrOfDEX = idxx < 0 ? 0 : int.Parse(Substring(growup, idxx + 1, -1));
+        }
+
+        private static string Substring(string @string, int idx, int jdx)
+        {
+            if (idx < 0)
+                return "";
+            else if (jdx == -1)
+                return @string.Substring(idx);
+            else
+                return @string.Substring(idx, jdx - idx);
+        }
+    }
+}

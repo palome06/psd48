@@ -1,0 +1,1192 @@
+﻿using PSD.Base;
+using PSD.Base.Card;
+using PSD.ClientZero;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+
+namespace PSD.PSDGamepkg
+{
+    public partial class XI
+    {
+        private bool isFinished;
+
+        private List<Thread> listOfThreads;
+
+        private string jumpTareget, jumpEnd;
+
+        private Random randomSeed;
+
+        //private bool IsGameCompete { set; get; }
+
+        #region DebugCondition
+        private void DebugCondition()
+        {
+            //RaiseGMessage("G0HQ,1,0,1,10,56,37,4,47,48,49,50,51,52,53,54,55,12");
+            //RaiseGMessage("G0HQ,2,0,1,40,42,38,14,11");
+            //RaiseGMessage("G0HQ,3,0,1,3");
+            //RaiseGMessage("G0HQ,2,0,1,44");
+            //RaiseGMessage("G0HQ,1,0,1,10,11,12,52,36,4,1,33");
+            //RaiseGMessage("G0HQ,2,0,1,48,34,7");
+            //RaiseGMessage("G0HQ,3,0,1,34");
+            //RaiseGMessage("G0HQ,1,0,1,54,49");
+            //RaiseGMessage("G0HQ,2,3,0,44,8,16");
+            //RaiseGMessage("G0HQ,2,6,0,28,42,4");
+            //RaiseGMessage("G0HQ,2,5,0,24,31,45");
+            //RaiseGMessage("G0HQ,2,1,0,47,48");//7,1,13
+            //RaiseGMessage("G0HQ,2,2,0,15,32");//54
+            //RaiseGMessage("G0HQ,2,4,0,51,26");//33
+            //RaiseGMessage("G0HQ,2,1,0,53,51");
+            //RaiseGMessage("G0HQ,2,2,0,46");
+            //RaiseGMessage("G0IJ,5,0,4");
+            //RaiseGMessage("G0IX,5,0,2");
+            //garden[2].Weapon = 51;
+            //garden[1].Pets[3] = 16;
+            //garden[1].Pets[4] = 20;
+            //garden[2].Pets[0] = 4;
+            //Board.MonPiles.PushBack(7);
+            //Board.MonPiles.PushBack(1012);
+            //Board.MonPiles.PushBack(1);
+            //RaiseGMessage("G0HC,0,1,19");
+            //Board.MonPiles.PushBack(1007);
+            Board.MonPiles.PushBack(1004);
+            Board.MonPiles.PushBack(1);
+            //Board.MonPiles.PushBack(24);
+            //Board.MonPiles.PushBack(25);
+            //Board.MonPiles.PushBack(24);
+            //Board.MonPiles.PushBack(23);
+            //Board.MonPiles.PushBack(22);
+            //Board.MonPiles.PushBack(21);
+            //Board.MonPiles.PushBack(1022);
+            //Board.MonPiles.PushBack(1030);
+            //Board.EvePiles.PushBack(8);
+            //Board.EvePiles.PushBack(1);
+            //Board.EvePiles.PushBack(23);
+            //Board.EvePiles.PushBack(6);
+            //Board.EvePiles.PushBack(29);
+            //Board.RestNPCPiles.PushBack(1004);
+            //Board.EvePiles.PushBack(23);
+            //while (Board.MonPiles.Count > 0)
+            //    Board.MonPiles.Dequeue();
+            //Board.MonPiles.PushBack(28);
+            //Board.MonPiles.PushBack(1019);
+            //Board.MonPiles.PushBack(1022);
+            //Board.MonPiles.PushBack(7);
+            //Board.MonPiles.PushBack(1015);
+            //Board.MonPiles.PushBack(28);
+            //Board.MonPiles.PushBack(1013);
+            //Board.MonPiles.PushBack(1003);
+            //Board.MonPiles.PushBack(4);
+            //Board.MonPiles.PushBack(1001);
+            //Board.MonPiles.PushBack(15);
+            //Board.MonPiles.PushBack(8);
+            //Board.MonPiles.PushBack(1003);
+            //Board.MonPiles.PushBack(7);
+            //Board.MonPiles.PushBack(1030);
+            //Board.MonPiles.PushBack(23);
+            //Board.MonPiles.PushBack(19);
+            //Board.MonPiles.PushBack(2);
+            //Board.MonPiles.PushBack(37);
+            //Board.MonPiles.PushBack(1003);
+            //List<ushort> mons = new List<ushort>()
+            //{
+            //    31,32,33,34,35,36,37,38,39,40
+            //};
+            //mons.Shuffle();
+            //foreach (ushort mon in mons)
+            //    Board.MonPiles.PushBack(mons);
+
+            //Board.MonPiles.PushBack(1006);
+            //Board.MonPiles.PushBack(37);
+            //Board.MonPiles.PushBack(8);
+            //Board.MonPiles.PushBack(1045);
+            //Board.MonPiles.PushBack(5);
+            //Board.MonPiles.PushBack(1040);
+            //Board.MonPiles.PushBack(9);
+            //Board.MonPiles.PushBack(1031);
+            //Board.MonPiles.PushBack(1);
+            //Board.MonPiles.PushBack(1007);
+            //RaiseGMessage("G0HQ,2,1,0,52,10,11");
+            //RaiseGMessage("G0HQ,2,1,0,47,49,10,11,12");
+            //Board.MonPiles.PushBack(17);
+            //RaiseGMessage("G0IJ,1,0,3");
+            //Board.MonPiles.PushBack(1016);
+            //Board.MonPiles.PushBack(6);
+            //Board.TuxPiles.Dequeue(30); // 56 - 18 = 38
+            //RaiseGMessage("G0IJ,6,0,1");
+            //RaiseGMessage("G0HQ,2,1,0,10,47,53,6");
+            //RaiseGMessage("G0HQ,2,3,0,20,26");
+            //RaiseGMessage("G0HQ,2,1,0,48,49");
+            //RaiseGMessage("G0HQ,2,3,0,25");
+            //RaiseGMessage("G0HQ,2,1,0,47,50,49,5,63,8,69");
+            //RaiseGMessage("G0HQ,2,1,0,10,11,12");
+            //RaiseGMessage("G0HQ,2,1,0,86");
+            //RaiseGMessage("G0HQ,2,3,0,87");
+            //RaiseGMessage("G0HQ,2,3,0,19,73");
+            //RaiseGMessage("G0HQ,2,4,0,47,48,52");
+            //RaiseGMessage("G0HQ,2,5,0,26");
+            //RaiseGMessage("G0HQ,2,2,0,48");
+            //RaiseGMessage("G0HQ,2,1,0,61,64,73,74,75,76,65,17,69,71,10,70");
+            //RaiseGMessage("G0IJ,3,0,1");
+            //RaiseGMessage("G0IJ,3,0,1");
+            //RaiseGMessage("G0IX,5,0,1");
+            //RaiseGMessage("G0HQ,2,2,0,66,57");
+            //RaiseGMessage("G0HQ,2,3,0,72,40,34");
+            //RaiseGMessage("G0HQ,2,1,0,10,11,12,69,75");
+            //RaiseGMessage("G0HQ,2,2,0,25,65");
+            //RaiseGMessage("G0HQ,2,3,0,26");
+            //RaiseGMessage("G0HQ,2,5,0,54");
+            //RaiseGMessage("G0HQ,2,2,0,34");
+            //RaiseGMessage("G0HQ,2,1,0,47,49,55");
+            //RaiseGMessage("G0HQ,2,1,0,77,78,60,10,11,12");
+            //RaiseGMessage("G0HQ,2,6,0,47,48");
+            //RaiseGMessage("G0HQ,2,3,0,47,52");
+            //RaiseGMessage("G0HQ,2,3,0,41");
+            RaiseGMessage("G0HQ,2,1,0,40,37,34");
+            RaiseGMessage("G0HQ,2,4,0,33,35");
+            //RaiseGMessage("G0HQ,2,3,0,36,39");
+            //RaiseGMessage("G0HQ,2,1,0,69,70");
+            //RaiseGMessage("G0HQ,2,2,0,57");
+            //RaiseGMessage("G0HQ,2,1,0,10,11,12,47,48,5");
+            //RaiseGMessage("G0HQ,2,1,0,10,38,39");
+            //RaiseGMessage("G0HQ,2,1,0,1,47,48,49,51,52");
+            //RaiseGMessage("G0HQ,2,1,0,71,72,10,79,8");
+            //RaiseGMessage("G0HQ,2,2,0,55,84");
+            //RaiseGMessage("G0HQ,2,3,0,49");
+            //RaiseGMessage("G0HQ,2,4,0,50,32,1,2");
+            //RaiseGMessage("G0HQ,2,5,0,51");
+            //RaiseGMessage("G0HQ,2,6,0,52");
+            //RaiseGMessage("G0HQ,2,1,0,51,37,10,53,11,40,16,18,25");
+            //RaiseGMessage("G0HQ,2,2,0,48,49,13,14,34");
+            //RaiseGMessage("G0HQ,2,3,0,1,52");
+            //RaiseGMessage("G0HQ,2,4,0,2,4,5,6");
+            //RaiseGMessage("G0HQ,2,1,0,10,34,50,40");
+            //RaiseGMessage("G0HQ,2,2,0,42,6,3,49");
+            //RaiseGMessage("G0HQ,2,3,0,23,41,20");
+            //RaiseGMessage("G0HQ,2,4,0,16,19,43");
+            //RaiseGMessage("G0HQ,2,5,0,37,5,27");
+            //RaiseGMessage("G0HQ,2,6,0,32,46,53");
+            //Board.EvePiles.PushBack(3);
+            //Board.EvePiles.PushBack(1);
+            //Board.RestNPCPiles.PushBack(1001);
+            //RaiseGMessage("G0HQ,2,3,0,50");
+            //RaiseGMessage("G0ZB,3,0,50");
+            //RaiseGMessage("G0HQ,2,1,0,1,50,49");
+            //RaiseGMessage("G0HQ,2,2,0,44,51");
+            //RaiseGMessage("G0HQ,2,1,0,16,43");
+            //Board.MonPiles.Dequeue(30);
+            //Board.MonPiles.PushBack(1009);
+            //RaiseGMessage("G0ZB,6,0,47");
+            //RaiseGMessage("G0ZB,2,0,55");
+            //RaiseGMessage("G0ZB,1,0,73");
+            //RaiseGMessage("G0ZB,1,0,74");
+            //RaiseGMessage("G0ZB,4,0,52");
+            //RaiseGMessage("G0ZB,5,0,54");
+            //RaiseGMessage("G0ZB,2,0,49");
+            //RaiseGMessage("G0ZB,3,0,52");
+            //RaiseGMessage("G0ZB,2,0,55");
+            //RaiseGMessage("G0ZB,2,0,51");
+            //RaiseGMessage("G0HQ,2,1,0,49");
+            //RaiseGMessage("G0HQ,2,3,0,19,73");
+            //RaiseGMessage("G0HQ,2,4,0,47,48,52");
+            //RaiseGMessage("G0ZB,1,0,49");
+            //RaiseGMessage("G0ZB,3,0,73");
+            //RaiseGMessage("G0ZB,4,0,47");
+            //RaiseGMessage("G0ZB,4,0,48");
+            //RaiseGMessage("G0ZB,4,0,52");
+            //RaiseGMessage("G0HD,1,5,0,5");
+            //RaiseGMessage("G0HD,1,5,0,17");
+            //RaiseGMessage("G0HD,1,1,0,16");
+            //RaiseGMessage("G0HD,1,1,0,30");
+            //RaiseGMessage("G0HD,1,2,0,36");
+            //RaiseGMessage("G0HD,1,6,0,16");
+            //RaiseGMessage("G0HD,1,2,0,37");
+            //RaiseGMessage("G0HD,1,2,0,31");
+            //RaiseGMessage("G0HD,1,1,0,30");
+            //RaiseGMessage("G0HD,1,4,0,6");
+            //RaiseGMessage("G0HD,1,6,0,9");
+            //RaiseGMessage("G0HD,1,5,0,15");
+            //RaiseGMessage("G0HQ,1,0,1,16,5,44,50");
+            //RaiseGMessage("G0HQ,4,0,1,43");
+            //RaiseGMessage("G0OH,1,0,0,5,2,0,0,4,3,0,0,5,4,0,0,5,5,0,0,5,6,0,0,5");
+            //RaiseGMessage("G0OH,2,0,0,2,3,0,0,3,4,0,0,5,6,0,0,2");
+            //RaiseGMessage("G0OH,1,0,4,12,2,0,4,12");
+            //foreach (Player player in Board.Garden.Values)
+            //    RaiseGMessage("G0HQ,2," + player.Uid + ",1,3");
+            RaiseGMessage("G0HQ,2,2,1,3");
+            RaiseGMessage("G0HQ,2,3,1,3");
+            RaiseGMessage("G0HQ,2,4,1,1");
+            RaiseGMessage("G0HQ,2,5,1,3");
+            RaiseGMessage("G0HQ,2,6,1,3");
+        }
+        #endregion DebugCondition
+
+        public void Run(int pkgCode, bool inDebug)
+        {
+            var garden = Board.Garden;
+            ConstructPiles(pkgCode);
+            WI.BCast(string.Format("H0DP,{0},{1},{2}",
+                Board.TuxPiles.Count, Board.MonPiles.Count, Board.EvePiles.Count));
+            tx01 = new JNS.TuxCottage(this, VI).RegisterDelegates(LibTuple.TL, pkgCode);
+            sk01 = new JNS.SkillCottage(this, VI).RegisterDelegates(LibTuple.SL);
+            cz01 = new JNS.OperationCottage(this, VI).RegisterDelegates(LibTuple.ZL);
+            nj01 = new JNS.NPCCottage(this, VI).RegisterDelegates(LibTuple.NJL);
+            ev01 = new JNS.EveCottage(this, VI).RegisterDelegates(LibTuple.EL);
+            MappingSksp(out sk02, out sk03, pkgCode);
+            mt01 = new JNS.MonsterCottage(this, VI).RegisterDelegates(LibTuple.ML);
+
+            IDictionary<ushort, int> hipc = new Dictionary<ushort, int>();
+            foreach (Player player in garden.Values)
+            {
+                Base.Card.Hero hero = LibTuple.HL.InstanceHero(player.SelectHero);
+                player.InitFromHero(hero);
+            }
+                //hipc.Add(player.Uid, player.SelectHero);
+                //xiclients[player.Uid].Heros = hipc;
+            foreach (Player player in garden.Values)
+            {
+                Base.Card.Hero hero = LibTuple.HL.InstanceHero(player.SelectHero);
+                if (hero.Skills.Count > 0)
+                    RaiseGMessage("G0IS," + player.Uid + ",0," + string.Join(",", hero.Skills));
+            }
+            Board.RoundIN = "H0ST";
+            RunQuadStage("H0ST", 0); // Game start stage
+            if (inDebug)
+                DebugCondition();
+            else
+            {
+                foreach (Player player in garden.Values)
+                    RaiseGMessage("G0HQ,2," + player.Uid + ",1,3");
+            }
+
+            listOfThreads = new List<Thread>();
+            jumpTareget = "R100"; jumpEnd = "H0TM";
+            while (!isFinished)
+            {
+                System.Threading.Thread.Sleep(1000);
+                bool valid;
+                lock (jumpTareget)
+                {
+                    valid = (jumpTareget != "" && jumpEnd != "");
+                }
+                if (valid)
+                {
+                    foreach (Thread td in listOfThreads)
+                        td.Abort();
+                    listOfThreads.Clear();
+                    string jt = jumpTareget.ToString();
+                    string je = jumpEnd.ToString();
+                    var thread0 = new Thread(() => Util.SafeExecute(() => RunRound(jt, je),
+                        delegate(Exception e)
+                        {
+                            if (!(e is ThreadAbortException))
+                                Log.Logger(e.ToString());
+                        }));
+                    thread0.Start();
+                    listOfThreads.Add(thread0);
+                    jumpTareget = ""; jumpEnd = "";
+                }
+            }
+            //RunRound("R100", "H0TM");
+        }
+
+        public void RunRound(string rstage, string endRstage)
+        {
+            while (rstage != null && !rstage.Equals(endRstage))
+            {
+                if (rstage[0] != 'R')
+                    break;
+                if (Board.JumpTable.ContainsKey(rstage))
+                {
+                    string[] infos = Board.JumpTable[rstage].Split(',');
+                    string next = infos[0];
+                    for (int i = 1; i < infos.Length; ++i)
+                        Board.JumpTable.Remove(infos[i]);
+                    Board.JumpTable.Remove(rstage);
+                    rstage = next;
+                }
+                ushort rounder = (ushort)(rstage[1] - '0');
+                Board.Rounder = Board.Garden[rounder];
+                Board.RoundIN = rstage;
+                //string sage = rstage.Substring(2);
+                //ushort[] staff = garden.Keys.ToArray();
+                //VI.Cout(0, "☆◇○" + rstage + "○◇☆");
+                Log.Logger(rstage);
+                switch (rstage.Substring(2))
+                {
+                    case "00":
+                        Board.Garden[rounder].ResetRAM();
+                        if (!Board.Garden[rounder].Immobilized)
+                        {
+                            WI.BCast(rstage + "1,0");
+                            rstage = "R" + rounder + "OC";
+                        }
+                        else
+                        {
+                            //--Board.Garden[rounder].Immobilized;
+                            //if (Board.Garden[rounder].Immobilized != 0)
+                            //    WI.BCast(rstage + "1,1");
+                            //else
+                            //    WI.BCast(rstage + "1,2");
+                            Board.Garden[rounder].Immobilized = false;
+                            WI.BCast(rstage + "1,2");
+                            RaiseGMessage("G0QR," + rounder);
+                            rstage = "R" + rounder + "ED";
+                        }
+                        break;
+                    case "OC":
+                        RunQuadStage(rstage, 0);
+                        rstage = "R" + rounder + "ST";
+                        break;
+                    case "ST":
+                        WI.BCast(rstage + ",0");
+                        RunQuadStage(rstage, 0);
+                        WI.BCast(rstage + ",1");
+                        rstage = "R" + rounder + "EP";
+                        break;
+                    case "EP":
+                        RunQuadStage(rstage, 0);
+                        rstage = "R" + rounder + "EV";
+                        break;
+                    case "EV":
+                        {
+                            WI.BCast(rstage + "1,0");
+                            string replyEve = AsyncInput(rounder, "#请决定是否翻看事件牌##不翻看##翻看,Y2",
+                                "R" + rounder + "EV1", "0");
+                            if (replyEve == "2")
+                            {
+                                //ushort eveCard = DequeueOfPile(Board.EvePiles);
+                                //RaiseGMessage("G2IN,2,1");
+                                //WI.BCast("R" + rounder + "EV2," + eveCard);
+                                //if (Board.Eve != 0)
+                                //{
+                                //    Board.EveDises.Add(Board.Eve);
+                                //    RaiseGMessage("G2ON,2," + Board.Eve);
+                                //    RaiseGMessage("G2YM,2,0,0");
+                                //    Board.Eve = 0;
+                                //}
+                                //Board.Eve = eveCard;
+                                //RaiseGMessage("G0YM,2," + Board.Eve + ",0");
+                                //Base.Card.Evenement eve = LibTuple.EL.DecodeEvenement(eveCard);
+                                //RunQuadStage(rstage, 0);
+                                //eve.Action();
+                                RaiseGMessage("G1EV," + rounder + ",0");
+                            }
+                            else
+                                WI.BCast("R" + rounder + "EV2,0");
+                            rstage = "R" + rounder + "EE";
+                        }
+                        break;
+                    case "EE":
+                        RunQuadStage(rstage, 0);
+                        rstage = "R" + rounder + "GR"; break;
+                    case "GR":
+                        WI.BCast(rstage + ",0");
+                        RunQuadStage(rstage, 3);
+                        WI.BCast(rstage + ",1");
+                        rstage = "R" + rounder + "GE"; break;
+                    case "GE":
+                        RunQuadStage(rstage, 0);
+                        rstage = "R" + rounder + "GF"; break;
+                    //rstage = rounder == 1 ?"R200":"R100"; break;
+                    case "GF":
+                        RunQuadStage(rstage, 0);
+                        rstage = "R" + rounder + "Z0"; break;
+                    case "Z0":
+                        Board.Monster1 = 0; Board.Monster2 = 0;
+                        Board.RPool = 0; Board.OPool = 0;
+                        Board.Battler = null;
+                        RaiseGMessage("G1SG,0");
+                        RunQuadStage(rstage, 0);
+                        rstage = "R" + rounder + "ZW"; break;
+                    case "ZW":
+                        {
+                            Board.PosHinders.Clear();
+                            Board.PosHinders.AddRange(Board.Garden.Values.Where(p => p.IsAlive &&
+                                p.Team == Board.Rounder.OppTeam).Select(p => p.Uid.ToString()).ToList());
+                            Board.PosSupporters.Clear();
+                            Board.PosSupporters.AddRange(Board.Garden.Values.Where(p => p.IsAlive &&
+                                p.Team == Board.Rounder.Team).Select(p => p.Uid.ToString()).ToList());
+                            Board.PosHinders.Add("0");
+                            Board.PosSupporters.Add("0");
+                            RunQuadStage(rstage, 0);
+                            string strSupports = Board.PosSupporters.Count > 0 ? string.Join(",", Board.PosSupporters) : "0";
+                            string strHinders = Board.PosHinders.Count > 0 ? string.Join(",", Board.PosHinders) : "0";
+
+                            foreach (Player player in Board.Garden.Values)
+                            {
+                                if (player.Uid == Board.Rounder.Uid)
+                                    WI.Send(rstage + "1,0,0," + Board.Rounder.Uid + "," + strSupports, 0, player.Uid);
+                                //else if (player.Uid == Board.Opponent.Uid)
+                                //    WI.Send(rstage + "1,1,0," + strHinders, 0, player.Uid);
+                                else if (player.Team == Board.Rounder.Team)
+                                    WI.Send(rstage + "1,0,1," + Board.Rounder.Uid + "," + strSupports, 0, player.Uid);
+                                //else if (player.Team == Board.Rounder.OppTeam)
+                                //    WI.Send(rstage + "1,1,1," + strHinders, 0, player.Uid);
+                                else
+                                    WI.Send(rstage + "1,0,2," + Board.Rounder.Uid, 0, player.Uid);
+                            }
+                            WI.Live(rstage + "1,0,2," + Board.Rounder.Uid);
+                            bool isFight = false;
+                            bool repliedRounder = false;
+                            WI.RecvInfStart();
+                            while (!repliedRounder)
+                            {
+                                Base.VW.Msgs msg = WI.RecvInfRecvPending();
+                                if (msg.Msg.StartsWith(rstage + "2"))
+                                {
+                                    string advice = msg.Msg.Substring(msg.Msg.IndexOf(',') + 1);
+                                    if (Board.Garden[msg.From].Team == Board.Rounder.Team)
+                                    {
+                                        ushort[] invs = new ushort[] { Board.Rounder.Uid, msg.From };
+                                        WI.Send(rstage + "3," + msg.From + "," + advice, invs);
+                                        WI.Send(rstage + "3," + msg.From, ExceptStaff(invs));
+                                        WI.Live(rstage + "3," + msg.From);
+                                    }
+                                }
+                                else if (msg.Msg.StartsWith(rstage + "4"))
+                                {
+                                    string advice = msg.Msg.Substring(msg.Msg.IndexOf(',') + 1);
+                                    ushort who;
+                                    if (ushort.TryParse(advice, out who))
+                                    {
+                                        if (msg.From == Board.Rounder.Uid)
+                                        {
+                                            if (who == 0)
+                                                isFight = false;
+                                            else if (who == Board.Rounder.Uid) // solo
+                                            {
+                                                isFight = true; Board.Supporter = null;
+                                                RaiseGMessage("G2HS,1,0");
+                                            }
+                                            else // Normal
+                                            {
+                                                isFight = true; Board.Supporter = Board.Garden[who];
+                                                RaiseGMessage("G2HS,1," + who);
+                                            }
+                                            WI.Send(rstage + "5," + msg.From + "," + who, 0, Board.Rounder.Uid);
+                                            WI.Send(rstage + "5," + msg.From, ExceptStaff(Board.Rounder.Uid));
+                                            WI.Live(rstage + "5," + msg.From);
+                                            //involved[msg.From] = true;
+                                            repliedRounder = true;
+                                        }
+                                    }
+                                    else if (advice.StartsWith("P"))
+                                    {
+                                        ushort cdCode = ushort.Parse(advice.Substring("PT".Length));
+                                        //ushort cdCode = LibTuple.ML.Encode(advice);
+                                        Monster monster = LibTuple.ML.Decode(cdCode);
+                                        if (monster != null)
+                                        {
+                                            Player lumberjack = Board.Lumberjack(monster, cdCode);
+                                            if (msg.From == Board.Rounder.Uid)
+                                            {
+                                                isFight = true; Board.Supporter = lumberjack;
+                                                RaiseGMessage("G2HS,1," + (cdCode + 1000));
+                                                WI.Send(rstage + "5," + msg.From + "," + lumberjack.Uid, 0, Board.Rounder.Uid);
+                                                WI.Send(rstage + "5," + msg.From, ExceptStaff(Board.Rounder.Uid));
+                                                WI.Live(rstage + "5," + msg.From);
+                                                //involved[msg.From] = true;
+                                                repliedRounder = true;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            WI.RecvInfEnd();
+                            if (!isFight)
+                            {
+                                // Ensure XI.Board.Mon1From == 0
+                                ushort mons = DequeueOfPile(Board.MonPiles);
+                                RaiseGMessage("G2IN,1,1");
+                                Board.MonDises.Add(mons);
+                                RaiseGMessage("G2ON,1," + mons);
+                                Board.Battler = null;
+                                WI.BCast(rstage + "7,0," + mons);
+                                WI.BCast("G2QC," + mons);
+                                rstage = "R" + rounder + "ZF";
+                            }
+                            else
+                            {
+                                WI.BCast(rstage + "7,1," + Board.Supporter.Uid);
+                                foreach (Player player in Board.Garden.Values)
+                                {
+                                    //if (player.Uid == Board.Rounder.Uid)
+                                    //    WI.Send(rstage + "1,0,0," + strSupports, 0, player.Uid);
+                                    if (player.Uid == Board.Opponent.Uid)
+                                        WI.Send(rstage + "1,1,0," + Board.Opponent.Uid + "," + strHinders, 0, player.Uid);
+                                    //else if (player.Team == Board.Rounder.Team)
+                                    //    WI.Send(rstage + "1,0,1," + strSupports, 0, player.Uid);
+                                    else if (player.Team == Board.Rounder.OppTeam)
+                                        WI.Send(rstage + "1,1,1," + Board.Opponent.Uid + "," + strHinders, 0, player.Uid);
+                                    else
+                                        WI.Send(rstage + "1,1,2," + Board.Opponent.Uid, 0, player.Uid);
+                                }
+                                WI.Live(rstage + "1,1,2," + Board.Opponent.Uid);
+                                bool repliedOppment = false;
+                                //bool[] involved = new bool[garden.Count + 1];
+                                //Fill(involved, false); involved[0] = true;
+                                WI.RecvInfStart();
+                                while (!repliedOppment)
+                                {
+                                    Base.VW.Msgs msg = WI.RecvInfRecvPending();
+                                    if (msg.Msg.StartsWith(rstage + "2"))
+                                    {
+                                        string advice = msg.Msg.Substring(msg.Msg.IndexOf(',') + 1);
+                                        if (Board.Garden[msg.From].Team == Board.Rounder.OppTeam)
+                                        {
+                                            ushort[] invs = new ushort[] { Board.Opponent.Uid, msg.From };
+                                            WI.Send(rstage + "3," + msg.From + "," + advice, invs);
+                                            WI.Send(rstage + "3," + msg.From, ExceptStaff(invs));
+                                            WI.Live(rstage + "3," + msg.From);
+                                        }
+                                        //involved[msg.From] = true;
+                                    }
+                                    else if (msg.Msg.StartsWith(rstage + "4"))
+                                    {
+                                        string advice = msg.Msg.Substring(msg.Msg.IndexOf(',') + 1);
+                                        ushort who;
+                                        if (ushort.TryParse(advice, out who))
+                                        {
+                                            if (msg.From == Board.Opponent.Uid)
+                                            {
+                                                if (who == Board.Rounder.Uid || who == 0)
+                                                {
+                                                    Board.Hinder = null;
+                                                    RaiseGMessage("G2HS,2,0");
+                                                }
+                                                else
+                                                {
+                                                    Board.Hinder = Board.Garden[who];
+                                                    RaiseGMessage("G2HS,2," + who);
+                                                }
+                                                //involved[msg.From] = true;
+                                                repliedOppment = true;
+                                            }
+                                        }
+                                        else if (advice.StartsWith("P"))
+                                        {
+                                            ushort cdCode = ushort.Parse(advice.Substring("PT".Length));
+                                            //ushort cdCode = LibTuple.ML.Encode(advice);
+                                            Monster monster = LibTuple.ML.Decode(cdCode);
+                                            if (monster != null)
+                                            {
+                                                Player lumberjack = Board.Lumberjack(monster, cdCode);
+                                                if (msg.From == Board.Opponent.Uid)
+                                                {
+                                                    Board.Hinder = lumberjack;
+                                                    RaiseGMessage("G2HS,2," + (cdCode + 1000));
+                                                    repliedOppment = true;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                                WI.RecvInfEnd();
+                                WI.BCast(rstage + "7,2," + Board.Hinder.Uid);
+                                rstage = "R" + rounder + "ZU";
+                            }
+                            break;
+                        }
+                    case "ZU":
+                        RunQuadStage(rstage, 0);
+                        rstage = "R" + rounder + "ZM";
+                        break;
+                    case "ZM":
+                        {
+                            //Board.Monster1 = 0; Board.Monster2 = 0;
+                            //Board.IsTangled = false;
+                            if (Board.Mon1From == 0)　// Board.Monster1 hasn't been set ready.
+                            {
+                                ushort mons = DequeueOfPile(Board.MonPiles);
+                                RaiseGMessage("G2IN,1,1");
+                                // actually judge who wins won't happens here
+                                //if (mons == 0) { rstage = "H0TM"; break; }
+                                Board.Monster1 = mons;
+                            }
+                            WI.BCast("R" + rounder + "ZM1," + Board.Monster1);
+                            RaiseGMessage("G2YM,0," + Board.Monster1 + "," + Board.Mon1From);
+                            Board.Battler = NMBLib.Decode(Board.Monster1, LibTuple.ML, LibTuple.NL);
+                            RunQuadStage(rstage, 0);
+                            if (NMBLib.IsNPC(Board.Monster1))
+                                rstage = "R" + rounder + "NP";
+                            else if (NMBLib.IsMonster(Board.Monster1))
+                                rstage = "R" + rounder + "Z7";
+                            else
+                                rstage = "H0TM";
+                            break;
+                        }
+                    case "NP":
+                        {
+                            WI.BCast(rstage + "1,0");
+                            NPC npc = LibTuple.NL.Decode(NMBLib.OriginalNPC(Board.Monster1));
+                            UEchoCode r5ed = HandleWithNPCEffect(Board.Rounder, npc, true);
+                            if (r5ed == UEchoCode.NO_OPTIONS) // cannot take any action, check whether finished
+                            {
+                                if (Board.MonPiles.Count <= 0)
+                                    RaiseGMessage("G1WJ,0");
+                            }
+                            if (r5ed != UEchoCode.END_ACTION) // not take action, skip
+                            {
+                                Board.MonDises.Add(Board.Monster1);
+                                RaiseGMessage("G2ON,1," + Board.Monster1);
+                                Board.Monster1 = 0;
+                                if (Board.MonPiles.Count > 0)
+                                {
+                                    ushort mons = DequeueOfPile(Board.MonPiles);
+                                    RaiseGMessage("G2IN,1,1");
+                                    Board.Monster1 = mons;
+                                    Board.Battler = NMBLib.Decode(Board.Monster1,
+                                        LibTuple.ML, LibTuple.NL);
+                                    WI.BCast(rstage + "2," + Board.Monster1);
+                                    RaiseGMessage("G2YM,0," + Board.Monster1 + "," + Board.Mon1From);
+                                    if (NMBLib.IsNPC(Board.Monster1))
+                                        rstage = "R" + rounder + "NP";
+                                    else if (NMBLib.IsMonster(Board.Monster1))
+                                        rstage = "R" + rounder + "Z7";
+                                    else
+                                        rstage = "H0TM";
+                                }
+                                else
+                                    RaiseGMessage("G1WJ,0");
+                            }
+                            else // take action
+                            {
+                                WI.BCast(rstage + "1,1");
+                                if (Board.Monster1 != 0) // In case Monster1 has been taken
+                                {
+                                    Board.MonDises.Add(Board.Monster1);
+                                    RaiseGMessage("G2ON,1," + Board.Monster1);
+                                    Board.Monster1 = 0;
+                                }
+                                rstage = "R" + rounder + "Z3";
+                            }
+                            break;
+                        }
+                    case "Z7":
+                        RunQuadStage(rstage, 0);
+                        rstage = "R" + rounder + "Z1"; break;
+                    case "Z1":
+                        WI.BCast(rstage + ",0");
+                        RaiseGMessage("G09P,0");
+                        RunQuadStage(rstage, 0);
+                        WI.BCast(rstage + ",1");
+                        RaiseGMessage("G0CZ,2");
+                        rstage = "R" + rounder + "Z8"; break;
+                    case "Z8":
+                        RunQuadStage(rstage, 0);
+                        rstage = "R" + rounder + "CC"; break;
+                    case "CC":
+                        WI.BCast(rstage + ",0");
+                        RunQuadStage(rstage, 0);
+                        WI.BCast(rstage + ",1");
+                        //Board.Battler.Debut();
+                        LibTuple.ML.Decode(Board.Monster1).Debut();
+                        rstage = "R" + rounder + "PD"; break;
+                    case "PD":
+                        RunQuadStage(rstage, 0);
+                        rstage = "R" + rounder + "ZC"; break;
+                    case "ZC":
+                        Board.InFight = true;
+                        RunQuadStage(rstage, 0);
+                        RaiseGMessage("G09P,0");
+                        rstage = "R" + rounder + "ZD"; break;
+                    case "ZD":
+                        WI.BCast(rstage + ",0");
+                        //bool roundWay = true; // IsGameCompete
+                        //if (roundWay)
+                        //{
+                        //    bool ichi = false, ni = false;
+                        //    while (!ichi || !ni)
+                        //    {
+                        //        bool adv = Board.CalculateRPool() >= Board.CalculateOPool();
+                        //        if (adv ^ ichi)
+                        //            Board.UseCardRound = Board.Garden[rounder].OppTeam;
+                        //        else
+                        //            Board.UseCardRound = Board.Garden[rounder].Team;
+                        //        if (RunQuadStage(rstage, 5)) { ichi = false; ni = false; }
+                        //        else if (!ichi) { ichi = true; }
+                        //        else { ni = true; }
+                        //    }
+                        //    Board.UseCardRound = 0;
+                        //}
+                        //else
+                        //    RunQuadStage(rstage, 1);
+                        RunSeperateStage(rstage, 1, delegate(Board bd)
+                            { return bd.IsRounderBattleWin(); });
+                        WI.BCast(rstage + ",1");
+                        rstage = "R" + rounder + "ZN"; break;
+                    case "ZN":
+                        Board.IsBattleWin = Board.IsRounderBattleWin();
+                        WI.BCast(rstage + "," + (Board.IsBattleWin ? "0" : "1"));
+                        RunQuadStage(rstage, 0);
+                        rstage = "R" + rounder + "VS"; break;
+                    case "VT":
+                        {
+                            Board.InFight = false;
+                            //WI.BCast(rstage + "1,0");
+                            //Board.IsBattleWin = Board.IsRounderBattleWin();
+                            bool mon1zero = false, mon2zero = false;
+                            if (Board.IsBattleWin) // OK, win
+                            {
+                                bool hasMonster2 = Board.Monster2 != 0 && NMBLib.IsMonster(Board.Monster2);
+                                RaiseGMessage("G0HC,0," + Board.Rounder.Uid +
+                                    "," + Board.Mon1From + "," + Board.Monster1);
+                                mon1zero = true;
+                                if (hasMonster2)
+                                {
+                                    RaiseGMessage("G0HC,0," + Board.Rounder.Uid + ",0," + Board.Monster2);
+                                    mon2zero = true;
+                                }
+                            }
+                            //WI.BCast(rstage + "2," + (Board.IsBattleWin ? "0" : "1"));
+                            RunQuadStage(rstage, 0);
+
+                            RecycleMonster(mon1zero, mon2zero);
+                            RaiseGMessage("G1ZK,1");
+                            RaiseGMessage("G1HK,1");
+                            WI.BCast(rstage + "3");
+                            rstage = "R" + rounder + "Z2"; break;
+                        }
+                    case "VS":
+                        {
+                            Board.InFight = false;
+                            //WI.BCast(rstage + "1,0");
+                            //Board.IsBattleWin = Board.IsRounderBattleWin();
+                            bool mon1zero = false, mon2zero = false;
+                            Board.Mon1Catchable = true; Board.Mon2Catchable = true;
+                            if (Board.IsBattleWin) // OK, win
+                            {
+                                if (Board.Monster1 != 0)
+                                {
+                                    var mon1 = LibTuple.ML.Decode(Board.Monster1);
+                                    mon1.WinEff();
+                                }
+                                bool hasMonster2 = Board.Monster2 != 0 && NMBLib.IsMonster(Board.Monster2);
+                                if (hasMonster2)
+                                {
+                                    var mon2 = LibTuple.ML.Decode(Board.Monster2);
+                                    mon2.WinEff();
+                                }
+                                if (Board.Monster1 != 0 && Board.Mon1Catchable)
+                                {
+                                    RaiseGMessage("G0HC,0," + Board.Rounder.Uid +
+                                        "," + Board.Mon1From + "," + Board.Monster1);
+                                    mon1zero = true;
+                                }
+                                if (hasMonster2 && Board.Mon2Catchable)
+                                {
+                                    RaiseGMessage("G0HC,0," + Board.Rounder.Uid + ",0," + Board.Monster2);
+                                    mon2zero = true;
+                                }
+                            }
+                            else
+                            {
+                                if (Board.Monster1 != 0)
+                                {
+                                    var mon1 = LibTuple.ML.Decode(Board.Monster1);
+                                    mon1.LoseEff();
+                                }
+                                if (Board.Monster2 != 0 && NMBLib.IsMonster(Board.Monster2))
+                                {
+                                    var mon2 = LibTuple.ML.Decode(Board.Monster2);
+                                    mon2.LoseEff();
+                                }
+                            }
+                            //WI.BCast(rstage + "2," + (Board.IsBattleWin ? "0" : "1"));
+                            RunQuadStage(rstage, 0);
+
+                            RecycleMonster(mon1zero, mon2zero);
+                            RaiseGMessage("G1ZK,1");
+                            RaiseGMessage("G1HK,1");
+                            WI.BCast(rstage + "3");
+                            rstage = "R" + rounder + "Z2"; break;
+                        }
+                    case "Z2":
+                        Board.InFight = false;
+                        WI.BCast(rstage + ",0");
+                        RaiseGMessage("G1ZK,1");
+                        RaiseGMessage("G1HK,1");
+                        foreach (Player player in Board.Garden.Values)
+                            RaiseGMessage("G0AX," + player.Uid);
+                        RunQuadStage(rstage, 0);
+                        rstage = "R" + rounder + "Z3"; break;
+                    case "Z3":
+                        Board.InFight = false;
+                        Board.RPool = 0; Board.OPool = 0;
+                        RecycleMonster(false, false);
+                        WI.BCast(rstage + ",0");
+                        RunQuadStage(rstage, 0);
+                        Board.Supporter = null; Board.Hinder = null;
+                        Board.SupportSucc = false; Board.HinderSucc = false;
+                        rstage = "R" + rounder + "ZZ"; break;
+                    case "ZF":
+                        WI.BCast(rstage + ",0");
+                        Board.InFight = false;
+                        foreach (Player player in Board.Garden.Values)
+                            RaiseGMessage("G0AX," + player.Uid);
+                        RunQuadStage(rstage, 0);
+                        Board.Supporter = null; Board.Hinder = null;
+                        Board.SupportSucc = false; Board.HinderSucc = false;
+                        rstage = "R" + rounder + "ZZ"; break;
+                    case "ZZ":
+                        RaiseGMessage("G2KI," + string.Join(",", Board.Garden.Values.Where(
+                            p => p.Uid != rounder).Select(p => p.Uid + ",0")) + "," + rounder + ",1");
+                        RunQuadStage(rstage, 0);
+                        rstage = "R" + rounder + "BC"; break;
+                    case "BC":
+                        WI.BCast(rstage + ",0");
+                        Board.InFight = false;
+                        RunQuadStage(rstage, 0);
+                        if (Board.Battler != null)
+                            RaiseGMessage("G0HT," + Board.Rounder.Uid + ",2");
+                        else
+                            RaiseGMessage("G0HT," + Board.Rounder.Uid + ",1");
+                        rstage = "R" + rounder + "BD"; break;
+                    case "BD":
+                        RunQuadStage(rstage, 0);
+                        rstage = "R" + rounder + "QR"; break;
+                    case "QR":
+                        RunQuadStage(rstage, 0);
+                        RaiseGMessage("G0QR," + Board.Rounder.Uid);
+                        rstage = "R" + rounder + "TM"; break;
+                    case "TM":
+                        WI.BCast(rstage + ",0");
+                        Board.InFight = false;
+                        Board.Battler = null; Board.Supporter = null; Board.Hinder = null;
+                        RunQuadStage(rstage, 0);
+                        rstage = "R" + rounder + "ED"; break;
+                    case "ED":
+                        {
+                            WI.BCast(rstage + ",0");
+                            Board.InFight = false;
+                            if (Board.MonPiles.Count <= 0)
+                                RaiseGMessage("G1WJ,0");
+                            RecycleMonster(false, false);
+                            if (Board.Eve != 0)
+                            {
+                                Board.EveDises.Add(Board.Eve);
+                                RaiseGMessage("G2ON,2," + Board.Eve);
+                                RaiseGMessage("G2YM,2,0,0");
+                                Board.Eve = 0;
+                            }
+                            foreach (Player player in Board.Garden.Values)
+                                RaiseGMessage("G0AX," + player.Uid);
+                            List<ushort> ordered = Board.OrderedPlayer();
+                            bool found = false;
+                            foreach (ushort ut in ordered)
+                            {
+                                if (ut != rounder && Board.Garden[ut].IsAlive)
+                                {
+                                    found = true;
+                                    rstage = "R" + ut + "00";
+                                    break;
+                                }
+                            }
+                            if (!found)
+                            {
+                                if (Board.Rounder.IsAlive)
+                                    RaiseGMessage("G0WN," + Board.Rounder.Team);
+                                else
+                                    RaiseGMessage("G0WN,0");
+                            }
+                            foreach (Player player in Board.Garden.Values)
+                                player.ResetRAM();
+                        }
+                        break;
+                }
+            }
+        }
+        //private void RunQuadStage(string zero) { RunQuadStage(zero, 1); }
+        // return whether actual action has been taken
+        private bool RunQuadStage(string zero, int sina)
+        {
+            var garden = Board.Garden;
+            if (!sk02.ContainsKey(zero))
+                return false;
+            List<SKE> pocket = ParseFromSKTriples(sk02[zero], zero, (sina & 4) != 0);
+
+            bool[] involved = new bool[garden.Count + 1];
+            string[] pris = new string[garden.Count + 1];
+
+            bool actualAction = false;
+            WI.RecvInfStart();
+            do
+            {
+                Fill(involved, false);
+                Fill(pris, "");
+                List<string> locks = new List<string>();
+                List<SKE> purse = new List<SKE>();
+                foreach (SKE ske in pocket)
+                {
+                    if ((sina & 1) != 0 && ske.Type == SKTType.TX && garden[ske.Tg].IsAlive)
+                        involved[ske.Tg] = true;
+                    bool ias = SKE2Message(ske, zero, involved, pris, locks);
+                    if (ias)
+                        purse.Add(ske);
+                }
+
+                // round mode, priority not needed.
+                if (locks.Count > 0)
+                {
+                    locks.Sort(LockSkillCompare);
+                    Queue<string> queue = new Queue<string>(locks);
+                    while (queue.Count > 0)
+                    {
+                        string msg = queue.Dequeue();
+                        int idx = msg.IndexOf(',');
+                        ushort me = ushort.Parse(msg.Substring(0, idx));
+                        int jdx = msg.LastIndexOf(';');
+                        string mai = Util.Substring(msg, idx + 1, jdx);
+                        string inType = Util.Substring(msg, jdx + 1, -1);
+
+                        string skName;
+                        mai = DecodeSimplifiedCommand(mai, out skName);
+                        SKE ske = SKE.Find(skName, me, purse);
+                        if (ske != null)
+                            HandleU24Message(me, involved, mai, ske);
+                        //UKEvenMessage(involved, pocket, null);
+                    }
+                }
+                if (!garden.Keys.Where(p => involved[p]).Any())
+                    break; // No skills could be called, cancel
+                foreach (ushort ut in Board.Garden.Keys)
+                    if (pris[ut] != "")
+                        pris[ut] = pris[ut].Substring(1);
+                SendOutU1Message(involved, pris, sina);
+                UEchoCode echo = UKEvenMessage(involved, purse, pris, sina);
+                actualAction |= (echo == UEchoCode.END_ACTION);
+                if (actualAction && ((sina & 4) != 0))
+                    break;
+                //actualAction |= UKEvenMessage(involved, purse, pris, sina);
+                //if (actualAction && ((sina & 4) != 0))
+                //    break;
+            } while (!IsAllClear(involved, false));
+            RaiseGMessage("G2AS,0");
+            WI.RecvInfEnd();
+            return actualAction;
+        }
+        // Run in Separate Ways
+        // return whether actual action has been taken
+        private bool RunSeperateStage(string zero, int sina, Func<Board, bool> judge)
+        {
+            var garden = Board.Garden;
+            if (!sk02.ContainsKey(zero))
+                return false;
+            List<SKE> pocket = ParseFromSKTriples(sk02[zero], zero, false);
+
+            bool[] involved = new bool[garden.Count + 1];
+            string[] pris = new string[garden.Count + 1];
+
+            WI.RecvInfStart();
+            int insstage = 0; // 0: ichi=F, 1: ichi=T,ni=F, 2:ni=T
+            ushort rounder = (ushort)(zero[1] - '0');
+            while (insstage < 2)
+            {
+                bool adv = judge(Board);
+                int side;
+                if (insstage == 0)
+                    side = adv ? garden[rounder].OppTeam : garden[rounder].Team;
+                else if (insstage == 1)
+                    side = !adv ? garden[rounder].OppTeam : garden[rounder].Team;
+                else
+                    side = 0;
+
+                bool actualAction = false;
+                do
+                {
+                    Fill(involved, false);
+                    Fill(pris, "");
+                    List<string> locks = new List<string>();
+                    List<SKE> purse = new List<SKE>();
+                    foreach (SKE ske in pocket)
+                    {
+                        if (garden[ske.Tg].Team == side)
+                        {
+                            if ((sina & 1) != 0 && ske.Type == SKTType.TX && garden[ske.Tg].IsAlive)
+                                involved[ske.Tg] = true;
+                            bool ias = SKE2Message(ske, zero, involved, pris, locks);
+                            if (ias)
+                                purse.Add(ske);
+                        }
+                    }
+                    // round mode, priority not needed.
+                    if (locks.Count > 0)
+                    {
+                        locks.Sort(LockSkillCompare);
+                        Queue<string> queue = new Queue<string>(locks);
+                        while (queue.Count > 0)
+                        {
+                            string msg = queue.Dequeue();
+                            int idx = msg.IndexOf(',');
+                            ushort me = ushort.Parse(msg.Substring(0, idx));
+                            int jdx = msg.LastIndexOf(';');
+                            string mai = Util.Substring(msg, idx + 1, jdx);
+                            string inType = Util.Substring(msg, jdx + 1, -1);
+
+                            string skName;
+                            mai = DecodeSimplifiedCommand(mai, out skName);
+                            SKE ske = SKE.Find(skName, me, purse);
+                            if (ske != null)
+                                HandleU24Message(me, involved, mai, ske);
+                            //UKEvenMessage(involved, pocket, null);
+                        }
+                    }
+                    if (!garden.Keys.Where(p => involved[p]).Any())
+                        break; // No skills could be called, cancel
+                    foreach (ushort ut in Board.Garden.Keys)
+                        if (pris[ut] != "")
+                            pris[ut] = pris[ut].Substring(1);
+                    SendOutU1Message(involved, pris, sina);
+                    UEchoCode echo = UKEvenMessage(involved, purse, pris, sina);
+                    actualAction |= (echo == UEchoCode.END_ACTION);
+                    // if actualAction happens, force back to insstage = 0;
+                    // else continue until all involved solved, increase insstage
+                    if (actualAction)
+                    {
+                        insstage = 0;
+                        break;
+                    }
+                } while (!IsAllClear(involved, false));
+                if (!actualAction)
+                {
+                    if (insstage == 0)
+                        insstage = 1; // ask advantage side
+                    else if (insstage == 1)
+                        insstage = 2; // both cancel
+                }
+            }
+            RaiseGMessage("G2AS,0");
+            WI.RecvInfEnd();
+            return true;
+        }
+        private UEchoCode UKEvenMessage(bool[] involved,
+            List<SKE> purse, string[] pris, int sina)
+        {
+            return UKEvenMessage(involved, purse, pris, Util.RepeatToArray(sina, involved.Length));
+        }
+        // return whether actual action has been taken, otherwise all cancel.
+        private UEchoCode UKEvenMessage(bool[] involved,
+            List<SKE> purse, string[] pris, int[] sina)
+        {
+            involved[0] = false;
+            var garden = Board.Garden;
+            //bool isUK5Received = false;
+            //while (!isUK5Received && !IsAllClear(involved, false))
+            while (!IsAllClear(involved, false))
+            {
+                Base.VW.Msgs msg = WI.RecvInfRecvPending();
+                UEchoCode next = HandleUMessage(msg.Msg, purse, msg.From, involved, sina);
+                if (next == UEchoCode.END_ACTION || next == UEchoCode.END_TERMIN)
+                    //isUK5Received = true;
+                    return next;
+                else if (next == UEchoCode.RE_REQUEST)
+                    ResendU1Message(msg.From, involved, pris, false, sina);
+            }
+            return UEchoCode.END_CANCEL;
+            //return isUK5Received;
+        }
+        // $zero1 means $monster1 has been taken to another places, only set to 0
+        // otherwise, handle with it
+        private void RecycleMonster(bool zero1, bool zero2)
+        {
+            if (Board.Monster1 != 0)
+            {
+                Monster mon1 = LibTuple.ML.Decode(NMBLib.OriginalMonster(Board.Monster1));
+                if (mon1 != null)
+                    mon1.Curtain();
+                if (!zero1)
+                {
+                    if (Board.Mon1From != 0)
+                        RaiseGMessage("G0WB," + Board.Monster1);
+                    else
+                    {
+                        RaiseGMessage("G2ON,1," + Board.Monster1);
+                        RaiseGMessage("G0WB," + Board.Monster1);
+                        Board.MonDises.Add(Board.Monster1);
+                    }
+                    RaiseGMessage("G2YM,0,0,0");
+                }
+                Board.Mon1From = 0;
+                Board.Monster1 = 0;
+            }
+            if (Board.Monster2 != 0)
+            {
+                Monster mon2 = LibTuple.ML.Decode(NMBLib.OriginalMonster(Board.Monster2));
+                //if (mon2 != null)
+                //    mon2.Curtain();
+                if (!zero2)
+                {
+                    RaiseGMessage("G2ON,1," + Board.Monster2);
+                    RaiseGMessage("G0WB," + Board.Monster2);
+                    Board.MonDises.Add(Board.Monster2);
+                    RaiseGMessage("G2YM,1,0,0");
+                }
+                Board.Monster2 = 0;
+            }
+        }
+        // Handle With NPC
+        public UEchoCode HandleWithNPCEffect(Player player, NPC npc, bool watchValid)
+        {
+            string rstage = Board.RoundIN;
+            ushort rd = player.Uid;
+
+            bool[] involved = new bool[Board.Garden.Count + 1];
+            string[] pris = new string[Board.Garden.Count + 1];
+            Fill(involved, false);
+            Fill(pris, "");
+            List<SKE> purse = new List<SKE>();
+            foreach (string npsk in npc.Skills)
+                if (nj01.ContainsKey(npsk))
+                {
+                    string nfuse = npc.Code + ";" + rstage;
+                    if (nj01[npsk].Valid(player, nfuse))
+                    {
+                        SKE skt = new SKE(new SkTriple()
+                        {
+                            Name = npsk,
+                            Priorty = 0,
+                            Owner = 0,
+                            InType = 0,
+                            Type = SKTType.NJ,
+                            Consume = 0,
+                            Lock = false,
+                            IsOnce = false,
+                        }) { Tg = player.Uid, Fuse = nfuse };
+                        purse.Add(skt);
+                        string ip = nj01[npsk].Input(player, nfuse, "");
+                        if (ip != "") ip = "," + ip;
+                        pris[rd] += ";" + npsk + ip;
+                    }
+                }
+            UEchoCode r5ed = UEchoCode.END_CANCEL;
+            if (pris[rd] != "")
+            {
+                pris[rd] = pris[rd].Substring(1);
+                involved[rd] = true;
+                if (watchValid)
+                    RaiseGMessage("G1SG,0");
+                SendOutU1Message(involved, pris, 0);
+                WI.RecvInfStart();
+                while (r5ed != UEchoCode.END_ACTION && r5ed != UEchoCode.END_TERMIN && involved[rd])
+                {
+                    Base.VW.Msgs msg = WI.RecvInfRecvPending();
+                    r5ed = HandleUMessage(msg.Msg, purse, msg.From, involved, 0);
+                    if (r5ed == UEchoCode.RE_REQUEST)
+                        ResendU1Message(msg.From, involved, pris, false, 0);
+                    else if (r5ed == UEchoCode.END_CANCEL && Board.MonPiles.Count <= 0
+                            && msg.From == player.Uid)
+                        ResendU1Message(player.Uid, involved, pris, true, 0);
+                    // critical, must take action.
+                }
+                WI.RecvInfEnd();
+            }
+            else
+                r5ed = UEchoCode.NO_OPTIONS; // cannot take any action, seem as skip
+            return r5ed;
+        }
+    }
+}

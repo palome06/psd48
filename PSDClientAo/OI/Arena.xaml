@@ -1,0 +1,30 @@
+﻿<UserControl x:Class="PSD.ClientAo.OI.Arena"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <UserControl.Resources>
+        <ResourceDictionary>            
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="pack://application:,,,/PSDRisoLib;component/Resources/ImgRes.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+    <Grid x:Name="mainGrid" Width="850" Height="565" Background="{StaticResource dt03Bg}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="27"/>
+            <RowDefinition Height="1*"/>
+            <RowDefinition Height="5"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="18"/>
+            <ColumnDefinition Width="1*"/>
+            <ColumnDefinition Width="5"/>
+        </Grid.ColumnDefinitions>
+        <Button x:Name="okButton" Grid.Row="0" Grid.ColumnSpan="3" Height="20" Width="20"
+                HorizontalAlignment="Left" VerticalAlignment="Top" Click="okButtonClick">
+            <Grid>
+                <Ellipse Width="16" Height="16" StrokeThickness="4" Stroke="Black"/>
+            </Grid>
+        </Button>
+        <Canvas x:Name="mainBoard" Grid.Row="1" Grid.Column="1" Width="840" Height="555"/>
+    </Grid>
+</UserControl>

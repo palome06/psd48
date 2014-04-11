@@ -1,0 +1,19 @@
+﻿<ContentControl x:Class="PSD.ClientAo.Card.Suban"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:cd="clr-namespace:PSD.ClientAo.Card"
+             Width="120" Height="90"
+             ToolTip="牌不是万能的，但是没牌是万万不能的。">
+    <ContentControl.Resources>
+        <ControlTemplate x:Key="SoundCardWatcher" TargetType="ContentControl">
+            <Canvas>
+                <Grid Name="tcGrid">
+                    <Rectangle Canvas.Left="1.4" Canvas.Top="3.4" Width="117.2" Height="83.2" Fill="White"/>
+                    <ContentPresenter Name="tcCps" Height="90" Width="120" 
+                                           Content="{TemplateBinding Property=ContentControl.Content}"/>
+                </Grid>
+            </Canvas>
+        </ControlTemplate>
+    </ContentControl.Resources>
+    <CheckBox x:Name="cardBody" Template="{StaticResource SoundCardWatcher}" IsHitTestVisible="False"/>
+</ContentControl>

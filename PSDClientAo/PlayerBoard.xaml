@@ -1,0 +1,237 @@
+﻿<UserControl x:Class="PSD.ClientAo.PlayerBoard"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Height="138" Width="263"
+             xmlns:self="clr-namespace:PSD.ClientAo"
+             xmlns:cd="clr-namespace:PSD.ClientAo.Card">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="pack://application:,,,/PSDRisoLib;component/Resources/ImgRes.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+            <self:BoolVisibleConvert x:Key="blivConv"/>
+            <self:TeamColorConvert x:Key="teamConv"/>
+            
+            <ControlTemplate x:Key="activeBdTemplate" TargetType="CheckBox">
+                <Canvas>
+                    <Border x:Name="goldenBorder" Height="145" Width="270" Canvas.Left="-5" Canvas.Top="-5"
+                            CornerRadius="4" IsHitTestVisible="True" BorderThickness="3">
+                        <Border.Style>
+                            <Style TargetType="Border">
+                                <Setter Property="Border.BorderBrush" Value="Black"/>
+                                <Style.Triggers>
+                                    <Trigger Property="Border.IsMouseOver" Value="True">
+                                        <Setter Property="Border.BorderBrush" Value="Yellow"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Border.Style>
+                        <Grid x:Name="goldenMask" Width="263" Height="138" Background="White">
+                            <ContentPresenter Name="tcCps" Width="263" Height="138"
+                                Content="{TemplateBinding Property=ContentControl.Content}"/>
+                        </Grid>
+                    </Border>                    
+                </Canvas>
+                <ControlTemplate.Triggers>
+                    <Trigger Property="IsChecked" Value="True">
+                        <Setter TargetName="goldenBorder" Property="Border.BorderBrush" Value="Gold"/>
+                    </Trigger>
+                </ControlTemplate.Triggers>
+            </ControlTemplate>
+
+            <ControlTemplate x:Key="inactiveBdTemplate" TargetType="CheckBox">
+                <Canvas>
+                    <Border x:Name="goldenBorder" Height="145" Width="270" Canvas.Left="-5" Canvas.Top="-5"
+                            CornerRadius="4" IsHitTestVisible="True" BorderBrush="Black" BorderThickness="3">
+                        <Grid x:Name="goldenMask" Height="135" Width="260" Canvas.Left="0" Canvas.Top="0"
+                              IsHitTestVisible="True" Background="White">
+                            <ContentPresenter Name="tcCps" Width="263" Height="138" 
+                                    Content="{TemplateBinding Property=ContentControl.Content}"/>
+                        </Grid>
+                    </Border>
+                </Canvas>
+                <!--<ControlTemplate.Triggers>
+                    <Trigger Property="IsChecked" Value="True">
+                        <Setter Property="IsChecked" Value="False"/>
+                    </Trigger>
+                </ControlTemplate.Triggers>-->
+            </ControlTemplate>
+
+            <ControlTemplate x:Key="lockBdTemplate" TargetType="CheckBox">
+                <Canvas>
+                    <Border x:Name="goldenBorder" Height="145" Width="270" Canvas.Left="-5" Canvas.Top="-5"
+                            CornerRadius="4" IsHitTestVisible="True" BorderBrush="Gold" BorderThickness="3">
+                        <Grid x:Name="goldenMask" Height="135" Width="260" Canvas.Left="0" Canvas.Top="0"
+                              IsHitTestVisible="False" Background="White">
+                            <ContentPresenter Name="tcCps" Width="263" Height="138" 
+                                    Content="{TemplateBinding Property=ContentControl.Content}"/>
+                        </Grid>
+                    </Border>
+                </Canvas>
+            </ControlTemplate>
+
+            <!--<Style x:Key="activeBoard" TargetType="CheckBox">
+                <Setter Property="Border.BorderBrush" Value="DarkGray"/>
+                <Style.Triggers>
+                    <Trigger Property="Border.IsMouseOver" Value="True">
+                        <Setter Property="Border.BorderBrush" Value="Green" />
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+            <Style x:Key="inactiveBdTg" TargetType="Border"/>-->
+            
+            <SolidColorBrush x:Key="maskOfRounder" Color="#FF62FF"/>
+            <SolidColorBrush x:Key="maskOfSpSuccess" Color="LimeGreen"/> <!--"#408000" -->
+            <!--<SolidColorBrush x:Key="maskOfSpFail" Color="#33401C" />-->
+            <SolidColorBrush x:Key="maskOfSpFail" Color="#C8BFE7" />
+            <SolidColorBrush x:Key="maskOfDelegate" Color="#D172FA" />
+        </ResourceDictionary>
+    </UserControl.Resources>
+    <CheckBox x:Name="mainGrid" Height="138" Width="263" Template="{StaticResource activeBdTemplate}">
+        <!--<Border x:Name="mainGrid" BorderThickness="1.5" Height="138" Width="263">-->
+        <Canvas Margin="85,20">
+            <!--<Rectangle x:Name="weaponBar" Canvas.Left="-72" Canvas.Top="20" Width="88" Height="20">
+                <Rectangle.Fill>
+                    <SolidColorBrush Color="Pink"/>
+                </Rectangle.Fill>
+            </Rectangle>-->
+            <cd:RubanLock x:Name="weaponLock" Canvas.Left="-82" Canvas.Top="3" Width="99" Height="23"
+                          Face="{StaticResource staEpWQ00}"/>
+            <!--<Rectangle Canvas.Left="-72" Canvas.Top="20" Width="88" Height="20" Fill="Red" Opacity="0.3"/>-->
+            <!--<Rectangle x:Name="armorBar" Canvas.Left="-72" Canvas.Top="45" Width="74" Height="20">
+                <Rectangle.Fill>
+                    <SolidColorBrush Color="BlueViolet"/>
+                </Rectangle.Fill>
+            </Rectangle>-->
+            <cd:RubanLock x:Name="armorLock" Canvas.Left="-82" Canvas.Top="27" Width="87" Height="23"
+                          Face="{StaticResource staEpFJ00}"/>
+            <!--<Rectangle Canvas.Left="-72" Canvas.Top="45" Width="88" Height="20" Fill="Blue" Opacity="0.3"/>-->
+            <cd:RubanBox x:Name="lugBox" Canvas.Left="-82" Canvas.Top="51" Width="90" Height="23"
+                          Face="{StaticResource staEpXB00}" Visibility="Collapsed"/>
+            <cd:RubanLock x:Name="lugLock" Canvas.Left="-82" Canvas.Top="51" Width="90" Height="23"
+                          Face="{StaticResource staEpXB00}"/>
+
+            <Button x:Name="expeopleBar" Canvas.Left="-82" Canvas.Top="75" Width="98" Height="23"
+                    BorderThickness="0" Visibility="Collapsed" Click="expeopleBarClick">
+                <Button.Background>
+                    <SolidColorBrush Color="YellowGreen"/>
+                </Button.Background>
+                <TextBlock x:Name="expeopleText" TextAlignment="Center" Background="Transparent"/>
+            </Button>
+            <Button x:Name="excardBar" Canvas.Left="-82" Canvas.Top="75" Width="98" Height="23"
+                    BorderThickness="0" Visibility="Hidden" Click="excardBarClick">
+                <Button.Background>
+                    <SolidColorBrush Color="YellowGreen"/>
+                </Button.Background>
+                <TextBlock x:Name="excardText" TextAlignment="Center" Background="Transparent"/>
+            </Button>
+            <cd:RubanLock x:Name="exEquipLock" Canvas.Left="-82" Canvas.Top="75" Width="98" Height="23"
+                          Face="{StaticResource staEpWQ00}" Visibility="Hidden"/>
+            
+            <Border x:Name="excardBorder" Canvas.Left="-82" Canvas.Top="75" Width="98" Height="23"
+                    Visibility="Collapsed" CornerRadius="2" BorderBrush="Black"
+                    BorderThickness="2" IsHitTestVisible="False"/>
+
+            <TextBlock x:Name="hpText" Canvas.Top="0" Canvas.Right="-72"
+                       FontSize="12" HorizontalAlignment="Right">HP:0/0</TextBlock>
+            <Grid x:Name="hpBase" Canvas.Left="84" Canvas.Top="13" Width="82" Height="12">
+                <Grid x:Name="hpBar" Width="0" Height="12" HorizontalAlignment="Left">
+                    <Rectangle x:Name="hpBarCt" Width="82" Height="12" Fill="Red"/>
+                </Grid>
+                <Border Width="82" Height="12" BorderBrush="Black" BorderThickness="1.5"/>
+            </Grid>
+
+            <TextBlock x:Name="strText" Canvas.Top="24" Canvas.Right="-72"
+                       FontSize="12" HorizontalAlignment="Right">战力:0/0</TextBlock>
+            <Grid x:Name="strBase" Canvas.Left="96" Canvas.Top="38" Width="70" Height="12">
+                <Grid x:Name="strBar" Width="0" Height="12" HorizontalAlignment="Left">
+                    <Rectangle x:Name="strBarCt" Width="70" Height="12" Fill="Green"/>
+                </Grid>
+                <Grid x:Name="strAppBar" Width="0" Height="12" HorizontalAlignment="Left">
+                    <Rectangle x:Name="strAppBarCt" Width="70" Height="12" Fill="DarkGreen"/>
+                </Grid>
+                <Border Width="70" Height="12" BorderBrush="Black" BorderThickness="1.5"/>
+            </Grid>
+
+            <TextBlock x:Name="dexText" Canvas.Top="48" Canvas.Right="-72"
+                       FontSize="12" HorizontalAlignment="Right">命中:0/0</TextBlock>
+            <Grid x:Name="dexBase" Canvas.Left="93" Canvas.Top="62" Width="73" Height="12">
+                <Grid x:Name="dexBar" Width="0" Height="12" HorizontalAlignment="Left">
+                    <Rectangle x:Name="dexBarCt" Width="75" Height="12" Fill="Blue"/>
+                </Grid>
+                <Grid x:Name="dexAppBar" Width="0" Height="12" HorizontalAlignment="Left">
+                    <Rectangle x:Name="dexAppBarCt" Width="75" Height="12" Fill="DarkBlue"/>
+                </Grid>
+                <Border Width="73" Height="12" BorderBrush="Black" BorderThickness="1.5"/>
+            </Grid>
+
+            <!--<Ellipse Canvas.Left="-15" Canvas.Top="-15" Width="130" Height="130" Fill="Aqua"/>-->
+            <Ellipse x:Name="portrait" Canvas.Left="0" Canvas.Top="0" Width="100" Height="100"
+                     Fill="{StaticResource heroHead000Brush}"/>
+            <Rectangle x:Name="nameBarBrush" Canvas.Top="90" Canvas.Left="-8" Height="30" Width="113"
+                       Fill="{StaticResource nameBar000Brush}"/>
+
+            <StackPanel x:Name="tokenStack" Orientation="Horizontal" FlowDirection="RightToLeft"
+                        Canvas.Right="100" Canvas.Top="98">
+                    <Image x:Name="tkTake" Source="{StaticResource snapTKXJ508_4}" Height="18" Width="18"
+                       Visibility="Collapsed"/>
+                <!--<Image x:Name="trGiven" Source="{StaticResource snapTRXJ405}" Height="18" Width="18"
+                       Visibility="Collapsed"/>-->
+            </StackPanel>
+
+            <StackPanel x:Name="statusStack" Orientation="Horizontal" Canvas.Left="95" Canvas.Top="96">
+                <Image x:Name="suImmobe" Source="{StaticResource statusDs}" Height="18" Width="18"
+                       Visibility="{Binding Path=Immobilized, Converter={StaticResource blivConv}}"/>
+                <Image x:Name="suLoved" Source="{StaticResource statusLvd}" Height="18" Width="18"
+                       Visibility="{Binding Path=IsLoved, Converter={StaticResource blivConv}}"/>
+                <Image x:Name="su0Pet" Source="{StaticResource status0pt}" Height="18" Width="18"
+                       Visibility="{Binding Path=PetDisabled, Converter={StaticResource blivConv}}"/>
+            </StackPanel>
+
+            <!-- Pets and etc slide -->
+            <StackPanel Canvas.Right="-80" Canvas.Top="-20" MaxWidth="170" Height="23"
+                        Orientation="Horizontal" FlowDirection="RightToLeft">
+                <Border x:Name="petBorder" Canvas.Right="-80" Canvas.Top="-20" Height="23"
+                    CornerRadius="1.5" BorderBrush="Transparent" BorderThickness="1.5">
+                    <Button x:Name="petButton" MaxWidth="170" Height="20"
+                            Visibility="Collapsed" Click="petButtonClick">                    
+                        <StackPanel x:Name="petStack" Orientation="Horizontal" FlowDirection="RightToLeft">
+                            <!--<Rectangle Width="20" Height="20" Fill="GreenYellow"/>-->
+                        </StackPanel>
+                    </Button>
+                </Border>
+                <StackPanel x:Name="npcspStack" Orientation="Horizontal" FlowDirection="RightToLeft"/>
+                <Border x:Name="werBorder" Canvas.Right="-80" Canvas.Top="-20" Height="23"
+                    CornerRadius="1.5" BorderBrush="Transparent" BorderThickness="1.5">
+                    <Button x:Name="werButton" MaxWidth="170" Height="20"
+                            Visibility="Collapsed" Click="werButtonClick">
+                        <StackPanel x:Name="werspStack" Orientation="Horizontal" FlowDirection="RightToLeft"/>
+                    </Button>
+                </Border>
+            </StackPanel>
+            <!--<Border x:Name="petBorder" Canvas.Right="-80" Canvas.Top="-20" Height="20"
+                    Width="{Binding ElementName=petButton, Path=ActualWidth}"
+                    Visibility="Hidden" CornerRadius="2" BorderBrush="Black"
+                    BorderThickness="2" IsHitTestVisible="False"/>-->
+            <!--<Border x:Name="werBorder" Canvas.Right="-80" Canvas.Top="-20" Height="20"
+                    Width="{Binding ElementName=werButton, Path=ActualWidth}"
+                    Visibility="Hidden" CornerRadius="2" BorderBrush="Black"
+                    BorderThickness="2" IsHitTestVisible="False"/>-->
+
+            <TextBlock x:Name="nickName" Canvas.Top="-19" Canvas.Left="-50" Height="20" Width="100"
+                       TextAlignment="Left" FontSize="16" Text="{Binding Path=Nick, Mode=TwoWay}"/>
+            <Border x:Name="playerRankB" Canvas.Left="-90" Canvas.Top="-21" Height="28" Width="30"/>
+            <!--<TextBlock x:Name="tuxCount" Canvas.Top="3" Canvas.Left="-4" Width="18"-->
+            <TextBlock x:Name="tuxCount" Canvas.Top="78" Canvas.Left="84" Width="16" Height="16"
+                       FontSize="14" FontFamily="Times New Roman" TextAlignment="Center"
+                       Background="{Binding Path=Team, Mode=TwoWay, Converter={StaticResource teamConv}}"
+                       Foreground="White" Text="{Binding Path=TuxCount, Mode=OneWay}"/>
+
+            <!--<TextBlock Canvas.Top="78" Canvas.Left="84" Width="16" Height="16"
+                       FontSize="14" FontFamily="Times New Roman" TextAlignment="Center"
+                       Background="Blue" Foreground="Wheat">4</TextBlock>-->
+
+            <Rectangle x:Name="azureMask" Height="133" Width="258" Canvas.Left="-84" Canvas.Top="-19"
+                  RadiusX="8" RadiusY="8" IsHitTestVisible="False" Fill="Azure" Opacity="0"/>
+        </Canvas>
+    </CheckBox>
+</UserControl>

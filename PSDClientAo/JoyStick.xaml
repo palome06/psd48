@@ -1,0 +1,85 @@
+﻿<UserControl x:Class="PSD.ClientAo.JoyStick"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:self="clr-namespace:PSD.ClientAo">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="pack://application:,,,/PSDRisoLib;component/Resources/ImgRes.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+            <self:BoolVisibleConvert x:Key="blivConv"/>
+            <!--<self:StringVisibleConvert x:Key="srivConv"/>-->
+            <self:SkillVisibleConvert x:Key="skivConv"/>
+            <self:SkillNameConvert x:Key="sknmConv"/>
+            <self:SkillToolTopConvert x:Key="sktpConv"/>
+        </ResourceDictionary>
+    </UserControl.Resources>
+    <Grid>
+        <Canvas Height="160" Width="230">
+            <Rectangle Width="160" Height="160" Fill="{StaticResource cz00ButtonImg}"/>
+            <Button Canvas.Left="60" Canvas.Top="50" Width="32" Height="32" Click="DecideButtonClick" 
+                    Background="{StaticResource bz01ButtonImg}" IsEnabled="{Binding Path=DecideValid}"/>
+            <Button Canvas.Left="60" Width="32" Height="32" IsEnabled="{Binding Path=CZ01Valid}"
+                    Background="{StaticResource cz01ButtonImg}" Click="CZ01ButtonClick"/>
+            <Button Canvas.Left="107" Canvas.Top="29" Width="32" Height="32" IsEnabled="{Binding Path=CZ02Valid}"
+                    Background="{StaticResource cz02ButtonImg}" Click="CZ02ButtonClick"/>
+            <Button Canvas.Left="107" Canvas.Top="75" Width="32" Height="32" IsEnabled="{Binding Path=CZ03Valid}"
+                    Background="{StaticResource cz03ButtonImg}" Click="CZ03ButtonClick"/>
+            <Button Canvas.Left="23" Canvas.Top="75" Width="32" Height="32" IsEnabled="{Binding Path=CZ05Valid}"
+                    Background="{StaticResource cz05ButtonImg}" Click="CZ05ButtonClick"/>
+            <Button Canvas.Left="60" Width="32" Height="32" Canvas.Top="100" Click="PetButtonClick" Visibility="Collapsed"
+                    Background="{StaticResource bz02ButtonImg}" IsEnabled="{Binding Path=PetValid}"/>
+            <Button Canvas.Left="23" Width="32" Height="32" Canvas.Top="29" Click="CancelButtonClick"
+                    Background="{StaticResource bz03ButtonImg}" IsEnabled="{Binding Path=CancelValid}"/>
+            
+            <Button Canvas.Left="139" Width="72" Height="26" Canvas.Top="10" Background="LightSeaGreen"
+                    IsEnabled="{Binding Path=Skill1Valid}"
+                    ToolTip="{Binding Path=Skill1, Converter={StaticResource sktpConv}}"
+                    Visibility="{Binding Path=Skill1, Converter={StaticResource skivConv}}"
+                    Click="Skill1ButtonClick">
+                <TextBlock x:Name="skillText1" FontSize="12"
+                           Text="{Binding Path=Skill1, Converter={StaticResource sknmConv}}"/>
+            </Button>
+            <Button Canvas.Left="157" Width="72" Height="26" Canvas.Top="41" Background="LightSeaGreen"
+                    IsEnabled="{Binding Path=Skill2Valid}"
+                    ToolTip="{Binding Path=Skill2, Converter={StaticResource sktpConv}}"
+                    Visibility="{Binding Path=Skill2, Converter={StaticResource skivConv}}"
+                    Click="Skill2ButtonClick">
+                <TextBlock x:Name="skillText2" FontSize="12"
+                           Text="{Binding Path=Skill2, Converter={StaticResource sknmConv}}"/>
+            </Button>
+            <Button Canvas.Left="157" Width="72" Height="26" Canvas.Top="72" Background="LightSeaGreen"
+                    IsEnabled="{Binding Path=Skill3Valid}"
+                    ToolTip="{Binding Path=Skill3, Converter={StaticResource sktpConv}}"
+                    Visibility="{Binding Path=Skill3, Converter={StaticResource skivConv}}"
+                    Click="Skill3ButtonClick">
+                <TextBlock x:Name="skillText3" FontSize="12"
+                           Text="{Binding Path=Skill3, Converter={StaticResource sknmConv}}"/>
+            </Button>
+            <Button Canvas.Left="139" Width="72" Height="26" Canvas.Top="104" Background="LightSeaGreen"
+                    IsEnabled="{Binding Path=Skill4Valid}"
+                    ToolTip="{Binding Path=Skill4, Converter={StaticResource sktpConv}}"
+                    Visibility="{Binding Path=Skill4, Converter={StaticResource skivConv}}"
+                    Click="Skill4ButtonClick">
+                <TextBlock x:Name="skillText4" FontSize="12"
+                           Text="{Binding Path=Skill4, Converter={StaticResource sknmConv}}"/>
+            </Button>
+            <Button Canvas.Left="168" Width="61" Height="20" Canvas.Top="-20" Background="DodgerBlue"
+                    IsEnabled="{Binding Path=ExtSkill1Valid}"
+                     ToolTip="{Binding Path=ExtSkill1, Converter={StaticResource sktpConv}}"
+                    Visibility="{Binding Path=ExtSkill1, Converter={StaticResource skivConv}}"
+                    Click="ExtSkill1ButtonClick">
+                <TextBlock x:Name="skillExtText1" FontSize="10"
+                           Text="{Binding Path=ExtSkill1, Converter={StaticResource sknmConv}}"/>
+            </Button>
+            <StackPanel Orientation="Vertical" Canvas.Right="0" Canvas.Bottom="0">
+                <CheckBox FontFamily="Simsun" Checked="SkOptChecked"
+                          Unchecked="SkOptUnchecked" IsChecked="True">技能优化</CheckBox>
+                <CheckBox FontFamily="Simsun" Checked="TpOptChecked"
+                          Unchecked="TpOptUnchecked" IsChecked="True">卡牌优化</CheckBox>
+            </StackPanel>
+            <Button Background="{StaticResource smoothOpIcon}" Height="20" Width="20"
+                    Canvas.Left="137" Canvas.Bottom="0" Click="SmoothForceClick" ToolTip="润滑"/>
+        </Canvas>
+    </Grid>
+</UserControl>

@@ -1,0 +1,68 @@
+﻿<UserControl x:Class="PSD.ClientAo.Card.RubanBox"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:cd="clr-namespace:PSD.ClientAo.Card"
+             Height="24" Width="98">
+    <UserControl.Resources>
+        <DoubleAnimation x:Key="tcOverAni" Storyboard.TargetProperty="StrokeThickness" To="2" Duration="0:0:1"/>
+        <DoubleAnimation x:Key="tcLeaveAni" Storyboard.TargetProperty="StrokeThickness" To="0" Duration="0:0:1"/>
+
+        <ControlTemplate x:Key="soundEqiup" TargetType="CheckBox">
+            <Grid>
+                <ContentPresenter Name="tcCps"
+                                Content="{TemplateBinding Property=ContentControl.Content}"/>
+                <Border x:Name="goldenBorder" CornerRadius="2" BorderThickness="2">
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <Setter Property="Border.BorderBrush" Value="Transparent"/>
+                        </Style>
+                    </Border.Style>
+                </Border>
+            </Grid>
+            <ControlTemplate.Triggers>
+                <Trigger Property="IsChecked" Value="True">
+                    <Setter TargetName="goldenBorder" Property="Border.BorderBrush" Value="Gold"/>
+                </Trigger>
+            </ControlTemplate.Triggers>
+        </ControlTemplate>
+
+        <ControlTemplate x:Key="activeEqiup" TargetType="CheckBox">
+            <Grid>
+                <ContentPresenter Name="tcCps"
+                                Content="{TemplateBinding Property=ContentControl.Content}"/>
+                <Border x:Name="goldenBorder" Height="24" Width="98"
+                                CornerRadius="2" BorderThickness="2">
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <Setter Property="Border.BorderBrush" Value="Black"/>
+                            <Style.Triggers>
+                                <Trigger Property="Border.IsMouseOver" Value="True">
+                                    <Setter Property="Border.BorderBrush" Value="LightCyan"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+                </Border>
+            </Grid>
+            <ControlTemplate.Triggers>
+                <Trigger Property="IsChecked" Value="True">
+                    <Setter TargetName="goldenBorder" Property="Border.BorderBrush" Value="Gold"/>
+                </Trigger>
+            </ControlTemplate.Triggers>
+        </ControlTemplate>
+    </UserControl.Resources>
+
+    <!--<Thumb Content>-->
+    <CheckBox x:Name="cardBody" Template="{StaticResource soundEqiup}">
+        <Grid x:Name="cardGrid" Background="Aqua">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="7*"/>
+                <ColumnDefinition Width="3*"/>
+            </Grid.ColumnDefinitions>
+            <Button x:Name="cardPad" Background="Transparent" Grid.Column="1" Click="PadClick"/>
+            <Border x:Name="contentBorder" CornerRadius="2" BorderThickness="2"
+                    BorderBrush="Transparent" Grid.Column="2" IsHitTestVisible="False"/>
+        </Grid>
+    </CheckBox>
+    <!--</Thumb>-->
+</UserControl>

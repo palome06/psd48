@@ -1,0 +1,73 @@
+﻿<Window x:Class="PSD.ClientAo.AoDisplay"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:self="clr-namespace:PSD.ClientAo"
+        xmlns:besu="clr-namespace:PSD.Base;assembly=Base"
+        xmlns:besucd="clr-namespace:PSD.Base.Card;assembly=Base"
+        xmlns:sfio="clr-namespace:PSD.ClientAo.OI"
+        Title="PSDClientAo v0.4.4" Height="640" Width="1260" ResizeMode="NoResize"
+        Closed="WindowClosed">
+    <Window.Resources>
+        <besu:LibGroup x:Key="libGroup"/>
+        <ImageBrush x:Key="migibg" 
+                    ImageSource="pack://application:,,,/PSDRisoLib;component/Resources/Logo/MigiBackground.jpg"/>
+    </Window.Resources>
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+        <Grid Height="610" Width="1230">
+        <!--<StackPanel Orientation="Horizontal">
+            <Border BorderThickness="5" BorderBrush="Black" Height="160" Width="300">
+                <self:PlayerBoard x:Name="pb" Focusable="True"/>
+            </Border>
+            <self:PilesBar/>
+            <self:PersonalBag/>
+            <self:JoyStick/>
+        </StackPanel>-->
+            <Canvas x:Name="greatCanvas">
+                <TextBlock x:Name="yfRoomNumber" Canvas.Top="0" Canvas.Left="943" Width="60" Height="60"
+                           FontSize="24" FontFamily="Fixedsys" TextAlignment="Right"/>
+                <self:PilesBar x:Name="yfPilesBar" Canvas.Top="0" Canvas.Left="78" Tuple="{StaticResource libGroup}"/>
+
+                <self:Moonlight x:Name="yfMoonlightO1" Canvas.Top="208" Canvas.Left="110"/>
+                <self:Moonlight x:Name="yfMoonlightO2" Canvas.Top="208" Canvas.Left="390"/>
+                <self:Moonlight x:Name="yfMoonlightO3" Canvas.Top="208" Canvas.Left="670"/>
+                <self:Moonlight x:Name="yfMoonlightR1" Canvas.Top="383" Canvas.Left="35"/>
+                <self:Moonlight x:Name="yfMoonlightR2" Canvas.Top="413" Canvas.Left="85"/>
+                <self:Moonlight x:Name="yfMoonlightR3" Canvas.Top="383" Canvas.Left="770"/>
+
+                <self:PlayerBoard x:Name="yfPlayerO1" Canvas.Top="70" Canvas.Left="80" Tuple="{StaticResource libGroup}"/>
+                <self:PlayerBoard x:Name="yfPlayerO2" Canvas.Top="70" Canvas.Left="360" Tuple="{StaticResource libGroup}"/>
+                <self:PlayerBoard x:Name="yfPlayerO3" Canvas.Top="70" Canvas.Left="640" Tuple="{StaticResource libGroup}"/>
+
+                <self:PlayerBoard x:Name="yfPlayerR1" Canvas.Top="245" Canvas.Left="5" Tuple="{StaticResource libGroup}"/>
+                <self:PlayerBoard x:Name="yfPlayerR3" Canvas.Top="245" Canvas.Left="740" Tuple="{StaticResource libGroup}"/>
+
+                <!--<self:Orchis x:Name="yfOrchis" Canvas.Left="300" Canvas.Top="230" Tuple="{StaticResource libGroup}"/>-->
+
+                <!--<Line Canvas.Top="404" Width="1024" StrokeThickness="3"/>-->
+
+                <self:PlayerBoard x:Name="yfPlayerR2" Canvas.Top="445" Canvas.Left="0" Tuple="{StaticResource libGroup}"/>
+                <self:PersonalBag x:Name="yfBag" Canvas.Top="445" Canvas.Left="260"
+                                  Height="140" Width="480" Tuple="{StaticResource libGroup}"/>
+                <self:JoyStick x:Name="yfJoy" Canvas.Top="440" Canvas.Left="740" Tuple="{StaticResource libGroup}"/>
+
+                <self:Orchis40 x:Name="yfOrchis40" IsHitTestVisible="False" Tuple="{StaticResource libGroup}"/>
+                
+                <Line X1="0" Y1="62" X2="1024" Y2="62" StrokeThickness="2" Stroke="Black"/>
+                <Line X1="0" Y1="440" X2="1024" Y2="440" StrokeThickness="2" Stroke="Black"/>
+
+                <TextBlock x:Name="yfMsgShort" Height="60" Width="480" Canvas.Left="255" Canvas.Top="381" />
+                <sfio:DealTable x:Name="yfDeal" Canvas.Left="300" Canvas.Top="130"
+                                Tuple="{StaticResource libGroup}" Visibility="Visible"/>
+
+                <!--<sfio:Television x:Name="yfTelevision" Canvas.Left="300" Canvas.Top="170"/>-->
+
+                <sfio:NumberPad x:Name="yfMinami" Canvas.Left="290" Canvas.Top="360"/>
+                <sfio:Arena x:Name="yfArena" Width="850" Height="565" Opacity="0.9" Visibility="Hidden"
+                            Canvas.Left="53" Canvas.Top="10" Tuple="{StaticResource libGroup}"/>
+                <self:CananPaint x:Name="yfCanan" Canvas.Left="330" Canvas.Top="208" Visibility="Collapsed"/>
+                <self:RepoAngle x:Name="yfMigi" Canvas.Left="1005"/>
+                <self:Speeder x:Name="yfSpeeder" Canvas.Left="735" Canvas.Top="415" Visibility="Collapsed"/>
+            </Canvas>
+        </Grid>
+    </ScrollViewer>
+</Window>

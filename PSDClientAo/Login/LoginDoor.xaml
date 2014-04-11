@@ -1,0 +1,243 @@
+﻿<Window x:Class="PSD.ClientAo.Login.LoginDoor"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="psd 登陆界面" Height="567" Width="768" Closed="WindowClosed">
+    <Window.Background>
+        <ImageBrush ImageSource="pack://application:,,,/PSDRisoLib;component/Resources/Logo/LoginBgimg.jpg"/>
+    </Window.Background>
+    <Border BorderThickness="5" BorderBrush="Black" CornerRadius="30"
+                Margin="40,40,40,40" Background="Gray" Opacity="0.8">
+        <Grid VerticalAlignment="Center" HorizontalAlignment="Center">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="130"/>
+                <ColumnDefinition Width="280"/>
+                <ColumnDefinition Width="128"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="15"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="15"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="15"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <TextBlock Grid.Column="0" Grid.Row="0" FontFamily="LiSu" FontSize="20">服务器地址：</TextBlock>
+            <TextBox x:Name="addrTextBox" FontFamily="KaiTi" FontSize="20" Grid.Column="1" Grid.Row="0"/>
+            <TextBlock Grid.Column="0" Grid.Row="2" FontFamily="LiSu" FontSize="20">用户名：</TextBlock>
+            <TextBox x:Name="userTextBox" FontFamily="KaiTi" FontSize="20" Grid.Column="1" Grid.Row="2"/>
+            
+            <Button Grid.Column="3" Grid.Row="0" Grid.RowSpan="4" Height="80" Width="80">
+                <Button.Background>
+                    <ImageBrush ImageSource="pack://application:,,,/PSDRisoLib;component/Resources/Logo/LoginBgimg.jpg"/>
+                </Button.Background>
+            </Button>
+            
+            <TabControl Grid.Column="0" Grid.ColumnSpan="3" Grid.Row="4"
+		                SelectionChanged="TabControlSelectionChanged">
+                <TabItem x:Name="HallTab" FontFamily="KaiTi" FontSize="18">
+                    <TabItem.Header>
+                        <TextBlock FontSize="20" FontFamily="LiSu" Margin="5,5,5,5">大厅模式</TextBlock>
+                    </TabItem.Header>
+                    
+                    <Grid Background="#FFE5E5E5">
+                        <StackPanel Orientation="Vertical" Margin="5,5">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="1*"/>
+                                    <ColumnDefinition Width="1*"/>
+                                    <ColumnDefinition Width="1*"/>
+                                </Grid.ColumnDefinitions>
+                                <CheckBox Grid.Column="0" ToolTip="请选择是否旁观，不参与游戏。"
+                                  Checked="HallWatchChecked" Unchecked="HallWatchUnChecked">旁观</CheckBox>
+                                <CheckBox Grid.Column="1" ToolTip="请选择是否记录当前战报。"
+                                  Checked="HallRecordChecked" Unchecked="HallRecordUnChecked">记录战报</CheckBox>
+                                <CheckBox Grid.Column="2" ToolTip="请选择是否保存日志。" IsChecked="True"
+                                  Checked="HallMsgLogChecked" Unchecked="HallMsgLogUnChecked">保存日志</CheckBox>
+                            </Grid>
+                            <Grid Height="5" Background="Gray"/>
+                            <Grid x:Name="SelDetailGrid">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="1*"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="10"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="10"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <CheckBox x:Name="HallSelModeCB" Grid.Column="0" Grid.Row="0"
+                                          Checked="HallSelModeEnabled" Unchecked="HallSelModeDisabled">
+                                    指定选将模式：</CheckBox>
+                                <WrapPanel x:Name="HallSelModePanel" Grid.Column="1" Grid.Row="0">
+                                    <RadioButton Content="三选一" Width="120" GroupName="SelOptGroup"
+                                                 Checked="Sel31Decided" IsChecked="True"
+                                                 ToolTip="每人随机发给三个人物从中选择一名作为上场人物，如不满意可用一名随机新角色随机替换一名待选人物。"/>
+                                    <RadioButton Content="北软禁选" Width="120" GroupName="SelOptGroup"
+                                                 Checked="SelSSDecided"
+                                                 ToolTip="总共亮出16名角色，由双方队长依次禁选一名角色，然后按照一名-两名-两名的顺序依次选取人物。最后队长将我方已选人物中选出三名作为我方上场人物。"/>
+                                    <RadioButton Content="昭鹰" Width="120" GroupName="SelOptGroup"
+                                                 Checked="SelZYDecided"
+                                                 ToolTip="双方第一名玩家执行三选一，然后同时亮出；由第二名玩家执行四选一，同理第三名玩家执行五选一。"/>
+                                    <RadioButton Content="六明六暗" Width="120" GroupName="SelOptGroup"
+                                                 Checked="SelTCDecided"
+                                                 ToolTip="总共抽出12名角色，6名明置6名暗置，然后由双方队长依次按照一名-两名-两名的顺序依次选取人物。最后队长将我方已选人物中选出三名作为我方上场人物。"/>
+                                    <RadioButton Content="随机" Width="120" GroupName="SelOptGroup"
+                                                 Checked="SelRMDecided"
+                                                 ToolTip="所有玩家随机决定上场角色。"/>
+                                    <RadioButton Content="标准禁选" Width="120" GroupName="SelOptGroup"
+                                                 Checked="SelBPDecided"
+                                                 ToolTip="总共亮出18名角色，然后由双方每名玩家依次禁选一名，然后选择自己的上场人物。"/>
+                                    <RadioButton Content="轮选" Width="120" GroupName="SelOptGroup"
+                                                 Checked="SelRDDecided"
+                                                 ToolTip="总共亮出12名角色，然后由双方每名玩家依次选择自己的上场人物。"/>                                    
+                                    <RadioButton Content="协同" Width="120" GroupName="SelOptGroup"
+                                                 Checked="SelCPDecided"
+                                                 ToolTip="每方各分配8名角色，然后队友间通过商议分别选出自己的上场人物。"/>
+                                    <RadioButton Content="客栈" Width="120" GroupName="SelOptGroup"
+                                                 Checked="SelINDecided" IsEnabled="False"
+                                                 ToolTip="客栈中初始有6名角色，然后由每名玩家依次将一名角色踢出客栈，然后选择自己的上场人物。每当有角色离开客栈，补充相应的任务。"/>
+                                    <RadioButton Content="召唤" Width="120" GroupName="SelOptGroup"
+                                                 Checked="SelCJDecided"
+                                                 ToolTip="每名玩家选择自己最希望玩到的角色。如果有多人选择了同一角色，则随机满足一人召唤，其余获得随机角色。"/>
+                                    <StackPanel Orientation="Horizontal">
+                                        <RadioButton x:Name="Sel00Radio" Content="小黑屋" Width="80" GroupName="SelOptGroup"
+                                                     Checked="Sel00Decided" IsEnabled="False"
+                                                     ToolTip="咦嘻嘻嘻嘻~~"/>
+                                        <TextBox Width="40" TextChanged="Mode00Gate" ToolTip="咦嘻嘻嘻嘻~~"/>
+                                    </StackPanel>
+                                </WrapPanel>
+
+                                <CheckBox x:Name="HallPkgCB" Grid.Column="0" Grid.Row="2" 
+                                          Checked="HallPkgEnabled" Unchecked="HallPkgDisabled">
+                                    指定游戏包：</CheckBox>
+                                <WrapPanel x:Name="HallPkgPanel" Grid.Column="1" Grid.Row="2">
+                                    <CheckBox x:Name="Pkg1CheckBox" Content="标准包" Width="120"
+                                              IsChecked="True" IsEnabled="False"/>
+                                    <CheckBox x:Name="Pkg2CheckBox" Content="凤鸣玉誓" Width="120"
+                                              IsChecked="True" />
+                                    <CheckBox x:Name="Pkg3CheckBox" Content="SP" Width="120"
+                                              IsChecked="True" />
+                                    <CheckBox x:Name="Pkg4CheckBox" Content="三世轮回" Width="120"
+                                              IsChecked="True" />
+                                    <CheckBox x:Name="Pkg5CheckBox" Content="云来奇缘" Width="120"
+                                              IsChecked="True" />
+                                    <CheckBox x:Name="Pkg6CheckBox" Content="宿命篇" Width="120"
+                                              IsChecked="True" />
+                                </WrapPanel>
+
+                                <CheckBox x:Name="HallTeamCB" Grid.Column="0" Grid.Row="4"
+                                          Checked="HallTeamEnabled" Unchecked="HallTeamDisabled">
+                                    选队倾向：</CheckBox>
+                                <StackPanel x:Name="HallTeamPanel" Grid.Column="1" Grid.Row="4" Orientation="Vertical">
+                                    <WrapPanel>
+                                        <RadioButton Content="禁止选队" Width="120" GroupName="TeamOptGroup"
+                                                 Checked="HallTeamNoDecided"/>
+                                    </WrapPanel>
+                                    <WrapPanel>
+                                        <RadioButton Content="蜀山派" Width="120" GroupName="TeamOptGroup"
+                                                 Checked="HallTeamAkaDecided"/>
+                                        <RadioButton Content="琼华派" Width="120" GroupName="TeamOptGroup"
+                                                 Checked="HallTeamAoDecided"/>
+                                    </WrapPanel>
+                                    <WrapPanel>
+                                        <RadioButton Content="任意选队" Width="120" GroupName="TeamOptGroup"
+                                                 Checked="HallTeamYesDecided" IsChecked="True"/>
+                                        <RadioButton Content="IP优先匹配" Width="120" GroupName="TeamOptGroup"
+                                                 Checked="HallTeamIPDecided"/>
+                                    </WrapPanel>
+                                </StackPanel>
+                            </Grid>
+                            <Grid x:Name="RoomListGrid" Height="180" Visibility="Collapsed">
+                                <ScrollViewer>
+                                    <ListBox x:Name="RoomListBox" SelectionChanged="WatchListSelectionChanged"/>
+                                </ScrollViewer>
+                            </Grid>
+                        </StackPanel>
+                    </Grid>
+                </TabItem>
+                <TabItem x:Name="DirTab" FontFamily="KaiTi" FontSize="18">
+                    <TabItem.Header>
+                        <TextBlock FontSize="20" FontFamily="LiSu" Margin="5,5,5,5">互联模式</TextBlock>
+                    </TabItem.Header>
+                    <Grid Background="#FFE5E5E5">
+                        <StackPanel Orientation="Vertical" Margin="5,5">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="150"/>
+                                    <ColumnDefinition Width="1*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0">房间号：</TextBlock>
+                                <TextBox x:Name="DirRoomTextBox" Grid.Column="1">0</TextBox>
+                            </Grid>
+                            <Grid Height="8"/>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="1*"/>
+                                    <ColumnDefinition Width="1*"/>
+                                    <ColumnDefinition Width="1*"/>
+                                </Grid.ColumnDefinitions>
+                                <CheckBox Grid.Column="0" ToolTip="请选择是否旁观，不参与游戏。"
+                                  Checked="DirWatchChecked" Unchecked="DirWatchUnChecked">旁观</CheckBox>
+                                <CheckBox Grid.Column="1" ToolTip="请选择是否记录当前战报。"
+                                  Checked="DirRecordChecked" Unchecked="DirRecordUnChecked">记录战报</CheckBox>
+                                <CheckBox Grid.Column="2" ToolTip="请选择是否保存日志。" IsChecked="True"
+                                  Checked="DirMsgLogChecked" Unchecked="DirMsgLogUnChecked">保存日志</CheckBox>
+                            </Grid>
+                            <Grid Height="5" Background="Gray"/>
+                            <Grid x:Name="WatchSelDetailGrid">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="1*"/>
+                                </Grid.ColumnDefinitions>
+                                <CheckBox x:Name="DirTeamCB" Grid.Column="0" Grid.Row="4" Checked="DirTeamEnabled"
+                                          Unchecked="DirTeamDisabled">选队倾向：</CheckBox>
+                                <WrapPanel x:Name="DirTeamPanel" Grid.Column="1" Grid.Row="4">
+                                    <RadioButton Content="蜀山派" Width="120" GroupName="DirTeamOptGroup"
+                                                 Checked="DirTeamAkaDecided" IsChecked="True"/>
+                                    <RadioButton Content="琼华派" Width="120" GroupName="DirTeamOptGroup"
+                                                 Checked="DirTeamAoDecided"/>
+                                    <RadioButton Content="IP优先匹配" Width="120" GroupName="DirTeamOptGroup"
+                                                 Checked="DirTeamIPDecided"/>
+                                </WrapPanel>
+                            </Grid>
+                        </StackPanel>
+                    </Grid>
+                </TabItem>
+                <TabItem x:Name="VideoTab" FontFamily="KaiTi" FontSize="18">
+                    <TabItem.Header>
+                        <TextBlock FontSize="20" FontFamily="LiSu" Margin="5,5,5,5">看片模式</TextBlock>
+                    </TabItem.Header>
+                    <Grid Background="#FFE5E5E5">
+                        <StackPanel Orientation="Vertical" Margin="5,5">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="100"/>
+                                    <ColumnDefinition Width="1*"/>
+                                    <ColumnDefinition Width="80"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0">文件路径：</TextBlock>
+                                <TextBox x:Name="VideoPathBox" Grid.Column="1">0</TextBox>
+                                <Button x:Name="VideoBrowseButton" Grid.Column="2"
+                                        Click="VideoBrowseButtonClick">浏览...</Button>
+                            </Grid>
+                        </StackPanel>
+                    </Grid>
+                </TabItem>
+            </TabControl>
+            <Grid Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="3">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="2*"/>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="2*"/>
+                    <ColumnDefinition Width="1*"/>
+                </Grid.ColumnDefinitions>
+                <Button Grid.Column="1" FontSize="20" FontFamily="LiSu" Click="ButtonOKClick">确定</Button>
+                <Button Grid.Column="3" FontSize="20" FontFamily="LiSu" Click="ButtonResetClick">重置</Button>
+            </Grid>
+        </Grid>
+    </Border>
+</Window>
