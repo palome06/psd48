@@ -3320,7 +3320,7 @@ namespace PSD.ClientZero
                     {
                         ushort who = ushort.Parse(cmdrst);
                         if (who != 0)
-                            VI.Cout(Uid, "玩家{0}#断线，游戏终结。", who);
+                            VI.Cout(Uid, "玩家{0}#逃跑，游戏终结。", who);
                         else
                             VI.Cout(Uid, "服务器被延帝抓走啦，游戏结束。", who);
                     }
@@ -3330,6 +3330,12 @@ namespace PSD.ClientZero
                         ushort who = ushort.Parse(cmdrst);
                         if (who != 0)
                             VI.Cout(Uid, "玩家{0}#断线，请耐心等待其重连～", who);
+                    }
+                    break;
+                case "H0WD":
+                    {
+                        int secLeft = int.Parse(cmdrst);
+                        VI.Cout(Uid, "房间将在{0}秒后彻底关闭。");
                     }
                     break;
                 case "H0BK":

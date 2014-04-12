@@ -227,6 +227,7 @@ namespace PSD.PSDGamepkg
         public void Run(int pkgCode, bool inDebug)
         {
             var garden = Board.Garden;
+            LastUVs = new Dictionary<ushort, string>();
             ConstructPiles(pkgCode);
             WI.BCast(string.Format("H0DP,{0},{1},{2}",
                 Board.TuxPiles.Count, Board.MonPiles.Count, Board.EvePiles.Count));
@@ -486,8 +487,8 @@ namespace PSD.PSDGamepkg
                                 decision = MajorAsyncInput(Board.Opponent.Uid, hnsm + hnsb, hMember.Except(
                                     new ushort[] { Board.Opponent.Uid }), hnsn + hnsb, (advUt, advStr) =>
                                     {
-                                        WI.Send(rstage + "3," + advUt + "," + advStr, sMember);
-                                        WI.Send(rstage + "3," + advUt, ExceptStaff(sMember));
+                                        WI.Send(rstage + "3," + advUt + "," + advStr, hMember);
+                                        WI.Send(rstage + "3," + advUt, ExceptStaff(hMember));
                                         WI.Live(rstage + "3," + advUt);
                                     });
                                 ushort hndUid = 0;

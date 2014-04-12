@@ -19,7 +19,8 @@ namespace PSD.PSDGamepkg.VW
     {
         private List<Thread> recvThread;
         private Thread sendThread;
-        private Thread waitingThread; // Thread when someone lost connection and wait for rejoin;
+        // Thread when someone lost connection and wait for rejoin;
+        private Thread waitingThread;
         //private Thread watchReceptionThread;
 
         private TcpListener listener;
@@ -27,6 +28,10 @@ namespace PSD.PSDGamepkg.VW
 
         //public string PipeName { set; get; }
         public NamedPipeClientStream Ps { set; get; }
+        // Action to block all U/V inputs
+        public Action OnBlockUVInputs { private set; get; }
+        // Action to notify the finish of reconstructing the room
+        public Action OnReconstructRoom { private get; set; }
 
         private IDictionary<ushort, Neayer> neayers;
         private IDictionary<ushort, Netcher> netchers;
@@ -479,11 +484,8 @@ namespace PSD.PSDGamepkg.VW
         // Start a new thread to listen to waiting stage
         private bool StartWaitingStage()
         {
+            int timeout = 0;
             do {
-                if (!updateNeayersInWaiting.Any()) {
-                    Thread.Sleep(100);
-                    continue;
-                }
                 string news;
                 while (updateNeayersInWaiting.TryDequeue(out news))
                 {
@@ -508,11 +510,27 @@ namespace PSD.PSDGamepkg.VW
                                 // OK, all gathered.
                                 BCast("H0RK,0");
                                 WriteBytes(Ps, "C3RV,0");
-                                // TODO: BCast H09* message
+                                isRecvBlocked = false;
+                                if (OnReconstructRoom != null)
+                                    OnReconstructRoom();
                                 return true;
                             }
                         }
                     }
+                }
+                Thread.Sleep(100);
+                ++timeout;
+                // Warning happens at 5 minuts and 7 minuts
+                // Time out time set as 8 minutes
+                if (timeout == 3000 || timeout == 4200)
+                {
+                    int left = (4800 - timeout) / 10;
+                    Send("H0WD," + left, neayers.Where(p => p.Value.Alive).Select(p => p.Key).ToArray());
+                    Live("H0WD," + left);
+                }
+                else if (timeout == 4800)
+                {
+                    OnBrokenConnection(); return false;
                 }
             } while (true);
         }
@@ -529,8 +547,8 @@ namespace PSD.PSDGamepkg.VW
                 if (vi != null) vi.Cout(0, "玩家{0}掉线，房间等待重连中.", who);
                 Send("H0WT," + who, neayers.Where(p => p.Value.Alive).Select(p => p.Key).ToArray());
                 Live("H0WT," + who);
-                // Step 1: block all U/V input                
-                // TODO:
+                // Step 1: block all U/V input
+                isRecvBlocked = true;
 
                 // Step 2: Start Waiting thread and init news signal queue.
                 if (updateNeayersInWaiting == null)
@@ -547,12 +565,16 @@ namespace PSD.PSDGamepkg.VW
                 lock (neayers)
                 {
                     if (neayers.Count(p => p.Value.Alive) == 0 && netchers.Count == 0)
+                    {
+                        WriteBytes(Ps, "C3LV,0");
                         Environment.Exit(0);
+                    }
                 }
             }
         }
         // completetly lose connection, then terminate the room
-        private void OnBrokenConnection() {
+        private void OnBrokenConnection()
+        {
             if (vi != null) vi.Cout(0, "房间严重损坏，本场游戏终结.");
             Send("H0LT,0", neayers.Where(p => p.Value.Alive).Select(p => p.Key).ToArray());
             Live("H0LT,0");

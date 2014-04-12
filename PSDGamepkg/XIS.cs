@@ -129,6 +129,7 @@ namespace PSD.PSDGamepkg
 
                 Log.Start();
                 aywi.TcpListenerStart();
+                aywi.OnReconstructRoom = ResumeLostInputEvent;
                 Board.Garden = aywi.Connect(VI, teamMode, null);
                 Board.SortGarden();
 
@@ -165,6 +166,7 @@ namespace PSD.PSDGamepkg
             VI.Init(); // VI inits here?
             Log.Start();
             aywi.TcpListenerStart();
+            aywi.OnReconstructRoom = ResumeLostInputEvent;
             ps = new NamedPipeClientStream(pipeName);
             ps.Connect();
             aywi.Ps = ps;
@@ -203,27 +205,6 @@ namespace PSD.PSDGamepkg
             Run(opts[2], opts[1] == Base.Rules.RuleCode.MODE_00);
         }
         
-		private void HandleHoldOfReconnect(ushort wuid) {
-			VW.Aywi aywi = WI as VW.Aywi;
-			VI.Cout(0, "{0}#玩家恢复连接。", wuid);
-            // If detected all recovered, BCase H0RK,0
-            string h09m = "H09M," + PCS.Groups;
-            WI.Send(h09m, 0, wuid);
-            if (Board.RoundIN != "H0PR")
-            {
-                string h09n = "H09N," + string.Join(",",
-                    Board.Garden.Values.Select(p => p.Uid + "," + p.Name));
-                WI.Send(h09n, 0, wuid);
-                WI.Send("H09G," + Board.GenerateSerialGamerMessage(), 0, wuid);
-                string h09p = Board.GenerateSerialFieldMessage();
-                WI.Send("H09P," + h09p + "," + string.Join(",",
-                    CalculatePetsScore().Select(p => p.Key + "," + p.Value)), 0, wuid);
-                // TODO: remove the score field, calculate on the demand
-                WI.Send("H09F," + Board.GeneratePrivateMessage(wuid), 0, wuid);
-            }
-            HandleHoldOfWatcher(wuid);
-            // TODO: needs private data (e.g. Tux) in such connection
-		}
 		private void HandleHoldOfWatcher(ushort wuid) {
 			VW.Aywi aywi = WI as VW.Aywi;
             WI.Send("H0SM," + SelCode + "," + PCS.Groups, 0, wuid);
@@ -276,6 +257,26 @@ namespace PSD.PSDGamepkg
                 }
             }
 		}
+        private void HandleHoldOfReconnect(ushort wuid)
+        {
+            VW.Aywi aywi = WI as VW.Aywi;
+            VI.Cout(0, "{0}#玩家恢复连接。", wuid);
+            // If detected all recovered, BCase H0RK,0
+            WI.Send("H0SM," + SelCode + "," + PCS.Groups, 0, wuid);
+            if (Board.RoundIN != "H0PR")
+            {
+                string h09n = "H09N," + string.Join(",",
+                    Board.Garden.Values.Select(p => p.Uid + "," + p.Name));
+                WI.Send(h09n, 0, wuid);
+                WI.Send("H09G," + Board.GenerateSerialGamerMessage(), 0, wuid);
+                string h09p = Board.GenerateSerialFieldMessage();
+                WI.Send("H09P," + h09p + "," + string.Join(",",
+                    CalculatePetsScore().Select(p => p.Key + "," + p.Value)), 0, wuid);
+                // TODO: remove the score field, calculate on the demand
+                WI.Send("H09F," + Board.GeneratePrivateMessage(wuid), 0, wuid);
+            }
+            // TODO: needs private data (e.g. Tux) in such connection
+        }
         private void HoldRoomTunnel()
         {
             new Thread(() => Util.SafeExecute(() =>

@@ -120,7 +120,57 @@ namespace PSD.PSDGamepkg
         /// <summary>
         /// The last U/V message to be handled, used for re-broadcasting in re-connection
         /// </summary>
-        public string LastUVLight { private set; get; }
+        public IDictionary<ushort, string> LastUVs { private set; get; }
+
+        private void PushIntoLastUV(ushort who, string msg)
+        {
+            // U5, U7, V3, V5 is not accepted
+            //if (!LastUVs.ContainsKey(who))
+            //    LastUVs.Add(who, new Stack<string>());
+            //LastUVs[who].Push(msg);
+            LastUVs[who] = msg;
+        }
+        private void PushIntoLastUV(IEnumerable<ushort> whos, string msg)
+        {
+            foreach (ushort ut in whos)
+                PushIntoLastUV(ut, msg);
+        }
+        private bool MatchedPopFromLastUV(ushort who, string msg)
+        {
+            if (LastUVs.ContainsKey(who) && LastUVs[who] != null)
+            {
+                string lsg = LastUVs[who];
+                bool u2 = msg.StartsWith("U2") && lsg.StartsWith("U1");
+                bool u4 = msg.StartsWith("U4") && lsg.StartsWith("U3");
+                bool u24 = msg.StartsWith("U24") && (lsg.StartsWith("U1") || lsg.StartsWith("U3"));
+                bool u8 = msg.StartsWith("U8") && lsg.StartsWith("U7");
+                bool v1 = msg.StartsWith("V1") && lsg.StartsWith("V0");
+                bool v4 = msg.StartsWith("V4") && lsg.StartsWith("V2");
+                bool v5 = msg.StartsWith("V5") && lsg.StartsWith("V2");
+                if (u2 || u4 || u24 || u8 || v1 || v4 || v5)
+                {
+                    //LastUVs[who].Pop();
+                    LastUVs[who] = null;
+                    return true;
+                }
+            }
+            return false;
+        }
+        private bool MatchedPopFromLastUV(IEnumerable<ushort> whos, string msg)
+        {
+            bool ans = true;
+            foreach (ushort ut in whos)
+                ans &= MatchedPopFromLastUV(ut, msg);
+            return ans;
+        }
+        private void ResumeLostInputEvent()
+        {
+            foreach (var pair in LastUVs)
+            {
+                if (pair.Value != null)
+                    WI.Send(pair.Value, 0, pair.Key);
+            }
+        }
 
         private UEchoCode HandleUMessage(string msg, List<SKE> purse,
             ushort from, bool[] involved, int sina)
@@ -134,7 +184,6 @@ namespace PSD.PSDGamepkg
                 return UEchoCode.END_CANCEL;
             else
             {
-                LastUVLight = msg;
                 int idx = msg.IndexOf(',');
                 string cop = msg.Substring(0, idx);
                 string[] rests = Util.Splits(msg.Substring(idx + 1), ";;");
@@ -145,7 +194,6 @@ namespace PSD.PSDGamepkg
                     code = HandleU4Message(from, involved, purse, rests[0]);
                 else
                     code = UEchoCode.STRANGE;
-                LastUVLight = null;
                 return code;
             }
         }
@@ -163,6 +211,7 @@ namespace PSD.PSDGamepkg
                     if ((sina[from] & 2) == 0)
                         WI.BCast("UC," + from + ";;0");
                 }
+                MatchedPopFromLastUV(from, "U2");
                 return UEchoCode.END_CANCEL;
             }
             else if (mai.StartsWith("0,"))
@@ -174,6 +223,7 @@ namespace PSD.PSDGamepkg
                     if ((sina[from] & 2) == 0)
                         WI.BCast("UC," + from + ";;0," + sina[from]);
                 }
+                MatchedPopFromLastUV(from, "U2");
                 return UEchoCode.END_CANCEL;
             }
             else
@@ -187,8 +237,11 @@ namespace PSD.PSDGamepkg
         private UEchoCode HandleU4Message(ushort from, bool[] involved, List<SKE> pocket, string mai)
         {
             var garden = Board.Garden;
-            if (mai.Equals("0")) // Cancel the action
+            if (mai.Equals("0"))
+            { // Cancel the action
+                MatchedPopFromLastUV(from, "U4");
                 return UEchoCode.RE_REQUEST;
+            }
             else
             {
                 int idx = mai.IndexOf(',');
@@ -201,6 +254,7 @@ namespace PSD.PSDGamepkg
         {
             var garden = Board.Garden;
             UEchoCode u5ed = UEchoCode.END_CANCEL; int idx = mai.IndexOf(',');
+            MatchedPopFromLastUV(from, "U24");
             var skName = ske != null ? ske.Name : null;
             if (ske != null && sk01.ContainsKey(skName))
             {
@@ -215,16 +269,22 @@ namespace PSD.PSDGamepkg
                     string enc = skill.Encrypt(args);
                     string sTop = "U5," + from + ";;" + skName;
                     string sType = ";;" + ske.InType;
-                    WI.Send(sTop + (args != "" ? "," + args : "") + sType, 0, from);
-                    WI.Send(sTop + (enc != "" ? "," + enc : "") + sType, ExceptStaff(from));
-                    WI.Live(sTop + (enc != "" ? "," + enc : "") + sType);
+
+                    string mMsg = sTop + (args != "" ? "," + args : "") + sType;
+                    string mEnc = sTop + (enc != "" ? "," + enc : "") + sType;
+
+                    WI.Send(mMsg, 0, from);
+                    WI.Send(mEnc, ExceptStaff(from));
+                    WI.Live(mEnc + sType);
                     skill.Action(garden[from], ske.InType, lf, args);
                     ++ske.Tick;
                     u5ed = ske.IsTermini ? UEchoCode.END_TERMIN : UEchoCode.END_ACTION;
                 }
                 else // need further support
                 {
-                    WI.Send("U3," + otherPara + ";;" + mai + ";;" + ske.InType, 0, from);
+                    string mU3 = "U3," + otherPara + ";;" + mai + ";;" + ske.InType;
+                    PushIntoLastUV(from, mU3);
+                    WI.Send(mU3, 0, from);
                     u5ed = UEchoCode.NEXT_STEP;
                 }
             }
@@ -244,9 +304,10 @@ namespace PSD.PSDGamepkg
                         string enc = tux.Encrypt(args);
                         string sTop = "U5," + from + ";;" + skName;
                         string sType = ";;" + ske.InType;
-                        WI.Send(sTop + "," + args + sType, 0, from);
-                        WI.Send(sTop + (enc != "" ? "," + enc : "") + sType, ExceptStaff(from));
-                        WI.Live(sTop + (enc != "" ? "," + enc : "") + sType);
+
+                        string mMsg = sTop + (args != "" ? "," + args : "") + sType;
+                        string mEnc = sTop + (enc != "" ? "," + enc : "") + sType;
+
                         string cargs = (args == "^") ? "" : "," + args;
                         if (tux.Type == Base.Card.Tux.TuxType.ZP)
                             RaiseGMessage("G0CZ,0," + from);
@@ -256,7 +317,9 @@ namespace PSD.PSDGamepkg
                     }
                     else // need further support
                     {
-                        WI.Send("U3," + otherPara + ";;" + mai + ";;" + ske.InType, 0, from);
+                        string mU3 = "U3," + otherPara + ";;" + mai + ";;" + ske.InType;
+                        PushIntoLastUV(from, mU3);
+                        WI.Send(mU3, 0, from);
                         u5ed = UEchoCode.NEXT_STEP;
                     }
                 }
@@ -288,16 +351,22 @@ namespace PSD.PSDGamepkg
                         string enc = tue.Encrypt(args);
                         string sTop = "U5," + from + ";;" + skName;
                         string sType = ";;" + ske.InType + "!" + consumeCode;
-                        WI.Send(sTop + "," + args + sType, 0, from);
-                        WI.Send(sTop + (enc != "" ? "," + enc : "") + sType, ExceptStaff(from));
-                        WI.Live(sTop + (enc != "" ? "," + enc : "") + sType);
+
+                        string mMsg = sTop + "," + args + sType;
+                        string mEnc = sTop + (enc != "" ? "," + enc : "") + sType;
+
+                        WI.Send(mMsg, 0, from);
+                        WI.Send(mEnc, ExceptStaff(from));
+                        WI.Live(mEnc);
                         RaiseGMessage("G0ZC," + from + "," + consumeCode +
                                "," + args + ";" + ske.InType + "," + ske.Fuse);
                         u5ed = ske.IsTermini ? UEchoCode.END_TERMIN : UEchoCode.END_ACTION;
                     }
                     else // need further support
                     {
-                        WI.Send("U3," + otherPara + ";;" + mai + ";;" + ske.InType + "!" + consumeCode, 0, from);
+                        string mU3 = "U3," + otherPara + ";;" + mai + ";;" + ske.InType + "!" + consumeCode;
+                        PushIntoLastUV(from, mU3);
+                        WI.Send(mU3, 0, from);
                         u5ed = UEchoCode.NEXT_STEP;
                     }
                 }
@@ -321,7 +390,9 @@ namespace PSD.PSDGamepkg
                 }
                 else // need further support
                 {
-                    WI.Send("U3," + otherPara + ";;" + mai + ";;" + ske.InType, 0, from);
+                    string mU3 = "U3," + otherPara + ";;" + mai + ";;" + ske.InType;
+                    PushIntoLastUV(from, mU3);
+                    WI.Send(mU3, 0, from);
                     u5ed = UEchoCode.NEXT_STEP;
                 }
             }
@@ -344,7 +415,9 @@ namespace PSD.PSDGamepkg
                 }
                 else // need further support
                 {
-                    WI.Send("U3," + otherPara + ";;" + mai + ";;" + ske.InType, 0, from);
+                    string mU3 = "U3," + otherPara + ";;" + mai + ";;" + ske.InType;
+                    PushIntoLastUV(from, mU3);
+                    WI.Send(mU3, 0, from);
                     u5ed = UEchoCode.NEXT_STEP;
                 }
             }
@@ -369,7 +442,9 @@ namespace PSD.PSDGamepkg
                 }
                 else // need further support
                 {
-                    WI.Send("U3," + otherPara + ";;" + mai + ";;" + ske.InType + "!" + consumeCode, 0, from);
+                    string mU3 = "U3," + otherPara + ";;" + mai + ";;" + ske.InType + "!" + consumeCode;
+                    PushIntoLastUV(from, mU3);
+                    WI.Send(mU3, 0, from);
                     u5ed = UEchoCode.NEXT_STEP;
                 }
             }
@@ -396,7 +471,9 @@ namespace PSD.PSDGamepkg
             {
                 WI.Send("U9," + who + ";;" + prev + ";;" + inType, ExceptStaff(who));
                 WI.Live("U9," + who + ";;" + prev + ";;" + inType);
-                WI.Send("U7," + who + ";;" + mai + ";;" + prev + ";;" + inType, 0, who);
+                string mU7 = "U7," + who + ";;" + mai + ";;" + prev + ";;" + inType;
+                PushIntoLastUV(who, mU7);
+                WI.Send(mU7, 0, who);
                 string input = WI.Recv(0, who);
                 while (input == null || !input.StartsWith("U8,"))
                 {
@@ -404,6 +481,7 @@ namespace PSD.PSDGamepkg
                     System.Threading.Thread.Sleep(100);
                 }
                 // Format: U8,K,x2,y2
+                MatchedPopFromLastUV(who, input);
                 string result = input.Substring("U8,".Length);
                 return result.Substring(prev.Length + 1);
             } else
@@ -419,12 +497,15 @@ namespace PSD.PSDGamepkg
             string inv = string.Join(",", Board.Garden.Keys.Where(p => invs[p]));
             foreach (ushort ut in Board.Garden.Keys)
             {
+                string mU1;
                 if (mais[ut] != "" && mais[ut] != "0")
-                    WI.Send("U1," + inv + ";;" + mais[ut], 0, ut);
+                    mU1 = "U1," + inv + ";;" + mais[ut];
                 else if (Board.Garden[ut].IsAlive)
-                    WI.Send("U1," + inv + ";;0," + sina[ut], 0, ut);
+                    mU1 = "U1," + inv + ";;0," + sina[ut];
                 else
-                    WI.Send("U1," + inv + ";;0," + (sina[0] & (~1)), 0, ut);
+                    mU1 = "U1," + inv + ";;0," + (sina[0] & (~1));
+                PushIntoLastUV(ut, mU1);
+                WI.Send(mU1, 0, ut);
             }
             WI.Live("U1," + inv + ";;0," + (sina[0] & (~1)));
         }
@@ -444,10 +525,13 @@ namespace PSD.PSDGamepkg
             if (invs[who])
             {
                 string inv = string.Join(",", Board.Garden.Keys.Where(p => invs[p]));
+                string mU1;
                 if (mais[who] != "" && mais[who] != "0")
-                    WI.Send("U1," + inv + ";;" + mais[who], 0, who);
+                    mU1 = "U1," + inv + ";;" + mais[who];
                 else
-                    WI.Send("U1," + inv + ";;0," + sina[who], 0, who);
+                    mU1 = "U1," + inv + ";;0," + sina[who];
+                PushIntoLastUV(who, mU1);
+                WI.Send(mU1, 0, who);
             }
         }
         public void SendOutU5Message(ushort who, string mai, string inType)
@@ -465,8 +549,9 @@ namespace PSD.PSDGamepkg
             {
                 foreach (var pair in dicts)
                 {
-                    WI.Send("V0," + dicts.Count + "," + string.Join(
-                        ",", dicts.Keys) + "," + pair.Value, 0, pair.Key);
+                    string mV0 = "V0," + dicts.Count + "," + string.Join(",", dicts.Keys) + "," + pair.Value;
+                    PushIntoLastUV(pair.Key, mV0);
+                    WI.Send(mV0, 0, pair.Key);
                 }
                 // notify the others of waiting
                 WI.Send("V3," + string.Join(",", dicts.Keys),
@@ -476,6 +561,7 @@ namespace PSD.PSDGamepkg
                 while (dicts.Count > 0)
                 {
                     Base.VW.Msgs msg = WI.RecvInfRecvPending();
+                    MatchedPopFromLastUV(msg.From, msg.Msg);
                     result.Add(msg.From, msg.Msg.Substring("V1,".Length));
                     dicts.Remove(msg.From);
                     RaiseGMessage("G2AS," + msg.From);
@@ -490,9 +576,15 @@ namespace PSD.PSDGamepkg
         public string MajorAsyncInput(ushort major, string majorMsg,
             IDictionary<ushort, string> citizens, Action<ushort, string> handleCitizenAdvices)
         {
-            WI.Send("V2," + major + "," + majorMsg, 0, major);
+            string mV2 = "V2," + major + "," + majorMsg;
+            PushIntoLastUV(major, mV2);
+            WI.Send(mV2, 0, major);
             foreach (var pair in citizens)
-                WI.Send("V2," + major + "," + pair.Value, 0, pair.Key);
+            {
+                mV2 = "V2," + major + "," + pair.Value;
+                PushIntoLastUV(pair.Key, mV2);
+                WI.Send(mV2, 0, pair.Key);
+            }
             List<ushort> invs = citizens.Keys.ToList(); invs.Add(major);
             WI.Send("V3," + major, ExceptStaff(invs.ToArray()));
             WI.Live("V3," + major);
@@ -504,7 +596,9 @@ namespace PSD.PSDGamepkg
                     break;
                 if (msg.From == major)
                 {
+                    MatchedPopFromLastUV(msg.From, msg.Msg);
                     string decision = msg.Msg.Substring("V4,".Length);
+                    MatchedPopFromLastUV(ExceptStaff(major), "V5,0");
                     WI.Send("V5,0", ExceptStaff(major));
                     WI.Live("V5,0");
                     return msg.Msg.Substring("V4,".Length);
