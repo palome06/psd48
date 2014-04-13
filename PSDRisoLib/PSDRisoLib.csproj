@@ -1196,6 +1196,27 @@
     <Resource Include="Resources\NameBar\NameHL006.png" />
     <Resource Include="Resources\NameBar\NameHL018.png" />
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Token\TKH0601.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Token\TKH1901.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Token\TKH1902.png" />
+    <Resource Include="Resources\Token\TKH1903.png" />
+    <Resource Include="Resources\Token\TKH1904.png" />
+    <Resource Include="Resources\Token\TKH1905.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Heros\19019.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Card\Heros\HL019.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\NameBar\NameHL019.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

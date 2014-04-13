@@ -157,6 +157,7 @@
     <Image x:Key="heroHead19008" Source="Heros/19008.png"/>
     <Image x:Key="heroHead19012" Source="Heros/19012.png"/>
     <Image x:Key="heroHead19018" Source="Heros/19018.png"/>
+    <Image x:Key="heroHead19019" Source="Heros/19019.png"/>
 
     <ImageBrush x:Key="nameBar000Brush" ImageSource="NameBar/Name000.png"/>
     <ImageBrush x:Key="nameBarXJ101" ImageSource="NameBar/NameXJ101.png"/>
@@ -220,6 +221,7 @@
     <ImageBrush x:Key="nameBarHL008" ImageSource="NameBar/NameHL008.png"/>
     <ImageBrush x:Key="nameBarHL012" ImageSource="NameBar/NameHL012.png"/>
     <ImageBrush x:Key="nameBarHL018" ImageSource="NameBar/NameHL018.png"/>
+    <ImageBrush x:Key="nameBarHL019" ImageSource="NameBar/NameHL019.png"/>
 
     <SolidColorBrush x:Key="hpBrush" Color="Red"/>
     <SolidColorBrush x:Key="dexBrush" Color="Blue"/>
@@ -273,6 +275,12 @@
     <BitmapImage x:Key="snapTKHL001_7" UriSource="Token/TKH0107.png"/>
     <BitmapImage x:Key="snapTKHL001_8" UriSource="Token/TKH0108.png"/>
     <BitmapImage x:Key="snapTKHL003_1" UriSource="Token/TKH0301.png"/>
+    <BitmapImage x:Key="snapTKHL006_1" UriSource="Token/TKH0601.png"/>
+    <BitmapImage x:Key="snapTKHL019_1" UriSource="Token/TKH1901.png"/>
+    <BitmapImage x:Key="snapTKHL019_2" UriSource="Token/TKH1902.png"/>
+    <BitmapImage x:Key="snapTKHL019_3" UriSource="Token/TKH1903.png"/>
+    <BitmapImage x:Key="snapTKHL019_4" UriSource="Token/TKH1904.png"/>
+    <BitmapImage x:Key="snapTKHL019_5" UriSource="Token/TKH1905.png"/>
 
     <Image x:Key="exspCard1" Source="Card/ExSp/EP001.png"/>
     <Image x:Key="exspCard2" Source="Card/ExSp/EP002.png"/>
@@ -528,6 +536,7 @@
     <Image x:Key="hroCardHL008" Source="Card/Heros/HL008.png"/>
     <Image x:Key="hroCardHL012" Source="Card/Heros/HL012.png"/>
     <Image x:Key="hroCardHL018" Source="Card/Heros/HL018.png"/>
+    <Image x:Key="hroCardHL019" Source="Card/Heros/HL019.png"/>
 
     <ImageBrush x:Key="dt01Bg" ImageSource="Logo/DT01.png" Opacity="0.9"/>
     <ImageBrush x:Key="dt02Bg" ImageSource="Logo/DT02.png" Opacity="0.9"/>

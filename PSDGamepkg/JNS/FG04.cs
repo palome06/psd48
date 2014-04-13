@@ -1607,7 +1607,7 @@ namespace PSD.PSDGamepkg.JNS
             if (XI.Board.Hinder.IsValidPlayer())
                 Harm("GHT3", XI.Board.Hinder, 2);
         }
-        public void GHT3LoseEff() { Harm("GSH3", XI.Board.Rounder, 2); }
+        public void GHT3LoseEff() { Harm("GHT3", XI.Board.Rounder, 2); }
 
         public void GHT4Debut()
         {

@@ -70,7 +70,8 @@ namespace PSD.PSDGamepkg
             //19012, 17013, 17015, 10603, 15005, 17016
             //10403, 17013, 15009, 10302, 15005, 17016
             //19001, 10302, 10102, 10606, 10203, 10608
-            10603, 19018, 10605, 10501, 15003, 10505
+            //10603, 19018, 10605, 10501, 15003, 10505
+            10502, 19006, 10605, 10501, 15003, 10505
         };
 
         #region Memeber Declaration & Constructor
@@ -238,7 +239,7 @@ namespace PSD.PSDGamepkg
                     return null;
             }
         }
-        private ushort DequeueOfPile(Base.Utils.Rueue<ushort> queue)
+        public ushort DequeueOfPile(Base.Utils.Rueue<ushort> queue)
         {
             if (queue.Count > 0)
                 return queue.Dequeue();

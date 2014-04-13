@@ -935,8 +935,8 @@ namespace PSD.PSDGamepkg.JNS
             ISet<Player> invs = new HashSet<Player>();
             foreach (Artiad.Harm harm in harms)
             {
-                if (XI.Board.Garden[harm.Who].IsAlive && harm.N > 0 &&
-                        !Artiad.IntHelper.IsMaskSet(harm.Mask, GiftMask.TERMIN))
+                if (XI.Board.Garden[harm.Who].IsAlive && harm.N > 0 && harm.Element != FiveElement.LOVE
+                        && !Artiad.IntHelper.IsMaskSet(harm.Mask, GiftMask.TERMIN))
                     invs.Add(XI.Board.Garden[harm.Who]);
             }
             if (invs.Count > 0)

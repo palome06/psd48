@@ -2435,6 +2435,306 @@ namespace PSD.PSDGamepkg.JNS
             return false;
         }
         #endregion HL003 - YangTai
+        #region HL006 - ZhaoWen
+        public bool JNH0601Valid(Player player, int type, string fuse)
+        {
+            // G1DI,!G0DH,!G0QZ,!G1D1
+            if (type == 0)
+            {
+                string[] blocks = fuse.Split(',');
+                for (int jdx = 1; jdx < blocks.Length; )
+                {
+                    ushort who = ushort.Parse(blocks[jdx]);
+                    ushort inOut = ushort.Parse(blocks[jdx + 1]);
+                    ushort n = ushort.Parse(blocks[jdx + 2]);
+                    if (who == player.Uid && inOut == 1)
+                    {
+                        List<string> rests = Util.TakeRange(blocks, jdx + 3, jdx + 3 + n).ToList();
+                        for (int i = jdx + 3; i < jdx + 3 + n; ++i)
+                            if (!player.ROMCards.Contains("T" + blocks[i]))
+                                return true;
+                    }
+                    jdx += (n + 3);
+                }
+            }
+            //else if (type == 1)
+            //{
+            //    string[] blocks = fuse.Split(',');
+            //    for (int jdx = 1; jdx < blocks.Length; )
+            //    {
+            //        ushort who = ushort.Parse(blocks[jdx]);
+            //        ushort inOut = ushort.Parse(blocks[jdx + 1]);
+            //        ushort n = ushort.Parse(blocks[jdx + 2]);
+            //        if (who == player.Uid && inOut == 1)
+            //        {
+            //            List<ushort> rests = Util.TakeRange(blocks, jdx + 3, jdx + 3 + n)
+            //                .Select(p => ushort.Parse(p)).ToList();
+            //            for (int i = jdx + 3; i < jdx + 3 + n; ++i)
+            //            {
+            //                ushort ut = rests[i];
+            //                Base.Card.Tux tux = XI.LibTuple.TL.DecodeTux(ut);
+            //                if (tux != null)
+            //                {
+            //                    bool isEquip = tux.Type == Tux.TuxType.WQ || tux.Type == Tux.TuxType.FJ
+            //                        || tux.Type == Tux.TuxType.XB;
+            //                    bool isNotInEquip = player.Tux.Contains(ut);
+            //                    if (isNotInEquip || isEquip)
+            //                        return true;
+            //                }
+            //            }
+            //        }
+            //        jdx += (n + 3);
+            //    }
+            //}
+            else if (type == 2)
+            {
+                string[] blocks = fuse.Split(',');
+                if (blocks[1] == player.Uid.ToString())
+                {
+                    for (int jdx = 2; jdx < blocks.Length; ++jdx)
+                    {
+                        ushort ut = ushort.Parse(blocks[jdx]);
+                        Base.Card.Tux tux = XI.LibTuple.TL.DecodeTux(ut);
+                        if (tux != null)
+                        {
+                            bool isEquip = tux.Type == Tux.TuxType.WQ || tux.Type == Tux.TuxType.FJ
+                                || tux.Type == Tux.TuxType.XB;
+                            bool isNotInEquip = player.Tux.Contains(ut);
+                            if (!isNotInEquip && !isEquip)
+                                return true;
+                        }
+                    }
+                }
+            }
+            else if (type == 3)
+            {
+                string[] blocks = fuse.Split(',');
+                bool meIn = false;
+                for (int jdx = 1; jdx < blocks.Length; )
+                {
+                    ushort who = ushort.Parse(blocks[jdx]);
+                    ushort inOut = ushort.Parse(blocks[jdx + 1]);
+                    ushort n = ushort.Parse(blocks[jdx + 2]);
+                    if (who == player.Uid && inOut == 1)
+                    {
+                        meIn = true; break;
+                    //    List<string> rests = Util.TakeRange(blocks, jdx + 3, jdx + 3 + n).ToList();
+                    //    for (int i = jdx + 3; i < jdx + 3 + n; ++i)
+                    //        if (!player.ROMCards.Contains("T" + blocks[i]))
+                    //            return true;
+                    }
+                    jdx += (n + 3);
+                }
+                if (meIn)
+                {
+                    if (player.ROMCards.Count > 0 && !player.ListOutAllCards()
+                                .Select(p => "T" + p).Intersect(player.ROMCards).Any())
+                        return true;
+                }
+            }
+            else if (type == 4)
+            {
+                if (player.ExCards.Count > 0)
+                {
+                    List<Artiad.Cure> cures = Artiad.Cure.Parse(fuse);
+                    foreach (Artiad.Cure cure in cures)
+                    {
+                        if (XI.Board.Garden[cure.Who].IsAlive && cure.N > 0 &&
+                                cure.Element != FiveElement.LOVE)
+                            return true;
+                    }
+                    return false;
+                }
+            }
+            return false;
+        }
+        public void JNH0601Action(Player player, int type, string fuse, string argst)
+        {
+            if (type == 0)
+            {
+                string[] blocks = fuse.Split(',');
+                for (int jdx = 1; jdx < blocks.Length; )
+                {
+                    ushort who = ushort.Parse(blocks[jdx]);
+                    ushort inOut = ushort.Parse(blocks[jdx + 1]);
+                    ushort n = ushort.Parse(blocks[jdx + 2]);
+                    if (who == player.Uid && inOut == 1)
+                    {
+                        List<string> rests = Util.TakeRange(blocks, jdx + 3, jdx + 3 + n).ToList();
+                        for (int i = jdx + 3; i < jdx + 3 + n; ++i)
+                            if (!player.ROMCards.Contains("T" + blocks[i]))
+                            {
+                                ushort ut = XI.DequeueOfPile(XI.Board.TuxPiles);
+                                XI.RaiseGMessage("G2IN,0," + ut);
+                                Base.Card.Tux tux = XI.LibTuple.TL.DecodeTux(ut);
+                                if (tux != null)
+                                {
+                                    bool isEquip = tux.Type == Tux.TuxType.WQ || tux.Type == Tux.TuxType.FJ
+                                        || tux.Type == Tux.TuxType.XB;
+                                    if (!isEquip)
+                                    {
+                                        XI.RaiseGMessage("G0HQ,2," + player.Uid + ",0," + ut);
+                                        XI.RaiseGMessage("G0ZB," + player.Uid + ",2," + ut);
+                                    }
+                                    else
+                                        XI.RaiseGMessage("G2ON,0," + ut);
+                                }
+                                break;
+                            }
+                    }
+                    jdx += (n + 3);
+                }
+            }
+            //else if (type == 1)
+            //{
+            //    string[] blocks = fuse.Split(',');
+            //    for (int jdx = 1; jdx < blocks.Length; )
+            //    {
+            //        ushort who = ushort.Parse(blocks[jdx]);
+            //        ushort inOut = ushort.Parse(blocks[jdx + 1]);
+            //        ushort n = ushort.Parse(blocks[jdx + 2]);
+            //        if (who == player.Uid && inOut == 1)
+            //        {
+            //            List<ushort> rests = Util.TakeRange(blocks, jdx + 3, jdx + 3 + n)
+            //                .Select(p => ushort.Parse(p)).ToList();
+            //            for (int i = jdx + 3; i < jdx + 3 + n; ++i)
+            //            {
+            //                ushort ut = rests[i];
+            //                Base.Card.Tux tux = XI.LibTuple.TL.DecodeTux(ut);
+            //                if (tux != null)
+            //                {
+            //                    bool isEquip = tux.Type == Tux.TuxType.WQ || tux.Type == Tux.TuxType.FJ
+            //                        || tux.Type == Tux.TuxType.XB;
+            //                    bool isNotInEquip = player.Tux.Contains(ut);
+            //                    if (isNotInEquip || isEquip)
+            //                        player.ROMCards.Add("T" + ut);
+            //                }
+            //            }
+            //        }
+            //        jdx += (n + 3);
+            //    }
+            //}
+            else if (type == 2)
+            {
+                string[] blocks = fuse.Split(',');
+                if (blocks[1] == player.Uid.ToString())
+                {
+                    for (int jdx = 2; jdx < blocks.Length; ++jdx)
+                    {
+                        ushort ut = ushort.Parse(blocks[jdx]);
+                        Base.Card.Tux tux = XI.LibTuple.TL.DecodeTux(ut);
+                        if (tux != null)
+                        {
+                            bool isEquip = tux.Type == Tux.TuxType.WQ || tux.Type == Tux.TuxType.FJ
+                                || tux.Type == Tux.TuxType.XB;
+                            bool isNotInEquip = player.Tux.Contains(ut);
+                            if (!isNotInEquip && !isEquip)
+                                player.ROMCards.Add("T" + ut);
+                        }
+                    }
+                }
+            }
+            else if (type == 3)
+            {
+                string[] blocks = fuse.Split(',');
+                player.ROMCards.RemoveAll(p => !player.ListOutAllCards().Contains(
+                    ushort.Parse(p.Substring("T".Length))));
+                //for (int jdx = 1; jdx < blocks.Length; )
+                //{
+                //    ushort who = ushort.Parse(blocks[jdx]);
+                //    ushort inOut = ushort.Parse(blocks[jdx + 1]);
+                //    ushort n = ushort.Parse(blocks[jdx + 2]);
+                //    if (who == player.Uid && inOut == 1)
+                //    {
+                //        List<string> rests = Util.TakeRange(blocks, jdx + 3, jdx + 3 + n).ToList();
+                //        for (int i = jdx + 3; i < jdx + 3 + n; ++i)
+                //            if (player.ROMCards.Contains("T" + blocks[i]))
+                //                player.ROMCards.Remove("T" + blocks[i]);
+                //    }
+                //    jdx += (n + 3);
+                //}
+            }
+            else if (type == 4)
+            {
+                ushort card = ushort.Parse(argst);
+                List<Artiad.Cure> cures = Artiad.Cure.Parse(fuse);
+                ISet<Player> invs = new HashSet<Player>();
+                foreach (Artiad.Cure cure in cures)
+                {
+                    if (XI.Board.Garden[cure.Who].IsAlive && cure.N > 0
+                            && cure.Element != FiveElement.LOVE)
+                        invs.Add(XI.Board.Garden[cure.Who]);
+                }
+                if (invs.Count > 0)
+                {
+                    XI.RaiseGMessage("G0QZ," + player.Uid + "," + card);
+                    Cure(player, invs, 1);
+                }
+            }
+        }
+        public string JNH0601Input(Player player, int type, string fuse, string prev)
+        {
+            if (type == 4 && prev == "")
+                return "/Q1(p" + string.Join("p", player.ExCards) + ")";
+            else
+                return "";
+        }
+        public bool JNH0602Valid(Player player, int type, string fuse)
+        {
+            if (type == 0)
+            {
+                if (player.ROMToken == 0)
+                {
+                    List<Artiad.Harm> harms = Artiad.Harm.Parse(fuse);
+                    return harms.Any(p => p.Element != FiveElement.LOVE);
+                }
+            }
+            else if (type == 1)
+            {
+                if (player.ROMToken == 1)
+                {
+                    List<Artiad.Harm> harms = Artiad.Harm.Parse(fuse);
+                    return harms.Any(p => p.Element != FiveElement.LOVE
+                        && p.Element != FiveElement.SOL);
+                }
+            }
+            else if (type == 2)
+                return player.ROMToken == 1;
+            return false;
+        }
+        public void JNH0602Action(Player player, int type, string fuse, string argst)
+        {
+            if (type == 0)
+            {
+                XI.RaiseGMessage("G0IJ," + player.Uid + ",0,1");
+                List<Artiad.Harm> harms = Artiad.Harm.Parse(fuse);
+                bool twoEnemy = harms.Where(p => p.Element != FiveElement.LOVE &&
+                        XI.Board.Garden[p.Who].Team == player.OppTeam)
+                        .Select(p => p.Who).Distinct().Count() >= 2;
+                bool noFriend = !harms.Any(p => p.Element != FiveElement.LOVE &&
+                        XI.Board.Garden[p.Who].Team == player.Team && p.N > 0);
+                if (twoEnemy && noFriend)
+                    XI.RaiseGMessage("G0DH," + player.Uid + ",0,1");
+            }
+            else if (type == 1)
+            {
+                List<Artiad.Harm> harms = Artiad.Harm.Parse(fuse);
+                List<Artiad.Harm> nHarms = new List<Artiad.Harm>();
+                foreach (Artiad.Harm harm in harms)
+                {
+                    if (harm.Element != FiveElement.LOVE && harm.Element != FiveElement.SOL)
+                    {
+                        if (--harm.N > 0)
+                            nHarms.Add(harm);
+                    }
+                }
+                if (nHarms.Count > 0)
+                    XI.InnerGMessage(Artiad.Harm.ToMessage(nHarms), -149);
+            }
+            else if (type == 2)
+                XI.RaiseGMessage("G0OJ," + player.Uid + ",0,1");
+        }
+        #endregion HL006 - ZhaoWen
         #region HL008 - Yingyu
         public void JNH0801Action(Player player, int type, string fuse, string argst)
         {

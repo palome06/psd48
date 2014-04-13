@@ -291,7 +291,7 @@ namespace PSD.PSDCenter
                                 };
                                 neayers[uid] = ny;
                                 substitudes[uid] = loser.Uid;
-                                Console.WriteLine(user + " has requiring for re-connection.");
+                                Console.WriteLine(user + " has required for re-connection.");
                                 SentByteLine(ns, "C4RM," + uid + "," + loser.Uid + "," + curRoomNo + "," + user + ",#CD0");
 								foundOrg = true; break;
 								// TODO: set the room code as "#CD0" for testing.
