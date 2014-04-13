@@ -404,13 +404,14 @@ namespace PSD.ClientAo.VW
         {
             PreCin(uid);
             ShowTip(comment);
-            List<string> ptss = uss.Where(p => p.StartsWith("!PT")).ToList();
-            List<ushort> pts = ptss.Select(p => ushort.Parse(p.Substring("!PT".Length))).ToList();
-            List<ushort> txs = uss.Except(ptss).Select(p => ushort.Parse(p)).ToList();
-            if (txs.Count > 0)
-                AD.Mix.StartSelectTarget(txs, 1, 1);
-            if (pts.Count > 0)
-                AD.Mix.StartSelectPT(pts, false);
+            List<ushort> pets = uss.Where(p => p.StartsWith("PT")).Select(
+                p => ushort.Parse(p.Substring("PT".Length))).ToList();
+            List<ushort> tars = uss.Where(p => p.StartsWith("T")).Select(
+                p => ushort.Parse(p.Substring("T".Length))).ToList();
+            if (tars.Count > 0)
+                AD.Mix.StartSelectTarget(tars, 1, 1);
+            if (pets.Count > 0)
+                AD.Mix.StartSelectPT(pets, false);
             if (cancellable)
                 AD.yfJoy.CEE.CancelValid = true;
             string result = Cin(uid);
@@ -554,6 +555,8 @@ namespace PSD.ClientAo.VW
                 cvQueues.Enqueue(CinSentinel);
             while (cinReqCount > 0)
                 Thread.Sleep(50);
+            while (cvQueues.Count > 0 && cvQueues.Peek() == CinSentinel)
+                cvQueues.Dequeue();
 
             ++cinReqCount;
             cinGate = true;

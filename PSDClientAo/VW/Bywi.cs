@@ -35,7 +35,6 @@ namespace PSD.ClientAo.VW
         private IDictionary<ushort, IchiPlayer> uidict;
 
         #region Connect Issue
-
         private bool ConnectDo(TcpClient client, bool watch)
         {
             NetworkStream tcpStream = client.GetStream();
@@ -137,6 +136,7 @@ namespace PSD.ClientAo.VW
                     };
                     uidict.Add(ouid, ip);
                     cvi.SetNick(1 + uidict.Count, ip.Name, ip.Avatar);
+                    vi.Cout(Uid, "Newcomer: {0}", Util.Substring(line, jdx + 1, kdx));
                 }
                 else if (line.StartsWith("C2SA,"))
                 {
@@ -156,7 +156,36 @@ namespace PSD.ClientAo.VW
                     return false;
             }
         }
-
+        // Do Reconnection
+        private bool ConnectDoResume(TcpClient client, ushort oldUid, string passCode)
+        {
+            NetworkStream tcpStream = client.GetStream();
+            SentByteLine(tcpStream, "C4CR," + Uid + "," + oldUid + "," + name + "," + passCode);
+            while (true)
+            {
+                string line = ReadByteLine(tcpStream);
+                if (line.StartsWith("C4CS,"))
+                {
+                    ushort ut = ushort.Parse(line.Substring("C4CS,".Length));
+                    if (ut == 0)
+                        return false;
+                    else
+                    {
+                        Uid = ut;
+                        stream = tcpStream;
+                        recvThread = new Thread(() => Util.SafeExecute(() => KeepOnListenRecv(),
+                            delegate(Exception e) { Log.Logg(e.ToString()); }));
+                        recvThread.Start();
+                        sendThread = new Thread(() => Util.SafeExecute(() => KeepOnListenSend(),
+                            delegate(Exception e) { Log.Logg(e.ToString()); }));
+                        sendThread.Start();
+                        return true;
+                    }
+                }
+                else if (line.StartsWith("C"))
+                    return false;
+            }
+        }
         public bool StartConnect(bool watch)
         {
             try
@@ -176,23 +205,23 @@ namespace PSD.ClientAo.VW
             }
             catch (Exception) { return false; }
         }
+        public bool StartConnectResume(ushort oldUid, string passCode)
+        {
+            try
+            {
+                TcpClient client = new TcpClient(serverName, port);
+                return ConnectDoResume(client, oldUid, passCode);
+            }
+            catch (Exception) { return false; }
+        }
 
         private void KeepOnListenRecv()
         {
             byte[] recv = new byte[512];
-            //while (stream.CanRead)
-            //{
-            //    if (stream.DataAvailable)
-            //    {
             try
             {
                 while (true)
                 {
-                    //int bytesRecv = stream.Read(recv, recv.Length, 0);
-                    //string line = Encoding.Unicode.GetString(recv, 0, bytesRecv);
-                    //StreamReader sr = new StreamReader(stream); //Encoding.Unicode
-                    //string line = sr.ReadLine();
-
                     string line = ReadByteLine(stream);
                     //Console.WriteLine("=============>>>> Do Receive:" + line);
                     if (line.StartsWith("\\D"))
@@ -203,14 +232,6 @@ namespace PSD.ClientAo.VW
                     else if (line.StartsWith("\\I"))
                     {
                         line = line.Substring("\\I".Length);
-                        //if (line.StartsWith("Y2"))
-                        //{
-                        //    string grp = line.Substring("Y2,".Length);
-                        //    int idx = grp.IndexOf(',');
-                        //    ushort uit = ushort.Parse(grp.Substring(0, idx));
-                        //    string msgtext = grp.Substring(idx + 1);
-                        //    msgTalk.Enqueue(new Base.VW.Msgs(msgtext, uit, Uid, true));
-                        //}
                         if (line.StartsWith("Y"))
                             msgTalk.Enqueue(line);
                         else
@@ -261,8 +282,8 @@ namespace PSD.ClientAo.VW
         /// </summary>
         private Queue<string> msgNQueues;
         private Queue<string> msg0Queues;
-        //private Queue<Base.VW.Msgs> msgTalk;
         private Queue<string> msgTalk;
+
         private XIVisi visi;
 
         internal Log Log { set; get; }
@@ -281,7 +302,6 @@ namespace PSD.ClientAo.VW
 
             msg0Queues = new Queue<string>();
             msgNQueues = new Queue<string>();
-            //msgTalk = new Queue<Base.VW.Msgs>();
             msgTalk = new Queue<string>();
 
             uidict = new Dictionary<ushort, IchiPlayer>();
@@ -341,7 +361,6 @@ namespace PSD.ClientAo.VW
             }
         }
         // Close the socket for recycling
-        // Close the socket for recycling
         public void Close()
         {
             try
@@ -354,6 +373,12 @@ namespace PSD.ClientAo.VW
             }
             catch (IOException) { }
         }
+        //// Talk text message to others
+        //public void Talk(string msg)
+        //{
+        //    SendDirect("Y1," + msg, Uid);
+        //}
+        // Hear any text message from others
         public string Hear()
         {
             string talk = null;

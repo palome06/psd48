@@ -4017,6 +4017,11 @@ namespace PSD.PSDGamepkg.JNS
             return "(p" + string.Join("p", XI.Board.Garden.Values.Where(
                 p => p.IsAlive && p.Team == py.Team).Select(p => p.Uid)) + ")";
         }
+        private string ATeammatesTared(Player py)
+        {
+            return "(p" + string.Join("p", XI.Board.Garden.Values.Where(
+                p => p.IsTared && p.Team == py.Team).Select(p => p.Uid)) + ")";
+        }
         private string AEnemy(Player py)
         {
             return "(p" + string.Join("p", XI.Board.Garden.Values.Where(

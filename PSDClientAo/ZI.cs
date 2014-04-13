@@ -160,7 +160,6 @@ namespace PSD.ClientAo
                 msgThread.Abort();
         }
         #endregion Hall
-
         #region HallWatcher
         public ZI(string name, string server, int port, bool record, Login.LoginDoor login)
         {
@@ -234,6 +233,58 @@ namespace PSD.ClientAo
             }
         }
         #endregion HallWatcher
+        #region ResumeHall
+        private ZI(string name, string server, int port, bool record,
+            bool msglog, int room, AoDisplay ad)
+        {
+            this.name = name; this.server = server; this.port = port;
+            // selCode and pkgCode pending
+            this.record = record; this.msglog = msglog;
+            roomMates = new List<IchiPlayer>();
+            this.room = room; AD = ad;
+        }
+        public static ZI CreateResumeHall(string name, string server,
+            int port, bool record, bool msglog, int room, AoDisplay ad)
+        {
+            return new ZI(name, server, port, record, msglog, room, ad);
+        }
+        public void ResumeHall()
+        {
+            VW.Cyvi cyvi = new VW.Cyvi(AD, record, msglog);
+            VI = cyvi; VI.Init(); VI.SetInGame(true);
+
+            TcpClient client = new TcpClient(server, port);
+            NetworkStream tcpStream = client.GetStream();
+            SentByteLine(tcpStream, "C4CO," + name + "," + room);
+
+            bool done = false;
+            while (!done)
+            {
+                string line = ReadByteLine(tcpStream);
+                if (line.StartsWith("C4RM,0"))
+                {
+                    done = true;
+                    System.Windows.MessageBox.Show("重连被拒绝.");
+                }
+                else if (line.StartsWith("C4RM,")) // Reconnection case
+                {
+                    string[] parts = line.Split(',');
+                    ushort centerUid = ushort.Parse(parts[1]); // AUid
+                    ushort subUid = ushort.Parse(parts[2]); // Uid
+                    int roomNumber = int.Parse(parts[3]);
+                    string nick = parts[4];
+                    string passcode = parts[5];
+                    // start new connection...
+                    VI.SetInGame(true);
+                    cyvi.SetRoom(roomNumber);
+                    XV = XIVisi.CreateInResumeHall(centerUid, subUid, name, VI,
+                        server, roomNumber, passcode, record, msglog, AD);
+                    XV.RunAsync();
+                    done = true;
+                }
+            }
+        }
+        #endregion ResumeHall
 
         #region Utils Functions
 

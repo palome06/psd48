@@ -64,7 +64,7 @@ namespace PSD.ClientAo
         public PlayerBoard()
         {
             InitializeComponent();
-            SetAsWithXB();
+            SetAsWithOutXB();
 
             //AoPlayer ap = mainGrid.Resources["aoPlayer"] as AoPlayer;
             //ap.SetPlayerBoard(this);
@@ -401,11 +401,11 @@ namespace PSD.ClientAo
             Canvas.SetTop(playerRankB, pbTop);
         }
 
-        public void SetAsWithXB()
+        internal void SetAsWithXB()
         {
             SetEquipCount(-82, 23, 98, 75, 99, 3, 87, 27, true, 28, 30, -90, -21);
         }
-        public void SetAsWithOutXB()
+        internal void SetAsWithOutXB()
         {
             // l(eft), h(eight), ew(idth), et(op)
             SetEquipCount(-82, 23, 98, 70, 91, 20, 86, 45, false, 40, 40, -90, -19);

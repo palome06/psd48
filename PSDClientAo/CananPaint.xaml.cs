@@ -25,6 +25,64 @@ namespace PSD.ClientAo
             InitializeComponent();
         }
 
+        public enum CananSignal
+        {
+            NORMAL = 0x0,
+            ISWIN = 0x1, ISLOSE = 0x2,
+
+            FAIL_CONNECTION = 0x10,
+            LOSE_CONNECTION = 0x11,
+            LOSE_COUNTDOWN_48 = 0x12, LOSE_COUNTDOWN_12 = 0x13,
+
+            CRASH = 0x12,
+        }
+
+        internal void SetCanan(CananSignal signal)
+        {
+            if (signal == CananSignal.NORMAL)
+            {
+                Dispatcher.BeginInvoke((Action)(() => this.Visibility = Visibility.Collapsed));
+            }
+            else if (signal == CananSignal.ISWIN || signal == CananSignal.ISLOSE)
+            {
+                new Thread(delegate()
+                {
+                    Thread.Sleep(1100);
+                    Dispatcher.BeginInvoke((Action)(() =>
+                    {
+                        if (signal == CananSignal.ISWIN)
+                        {
+                            mainImg.Source = TryFindResource("cananWinGamepaint") as ImageSource;
+                            this.Visibility = Visibility.Visible;
+                        }
+                        else
+                        {
+                            mainImg.Source = TryFindResource("cananLoseGamepaint") as ImageSource;
+                            this.Visibility = Visibility.Visible;
+                        }
+                    }));
+                }).Start();
+            }
+            else
+            {
+                Dispatcher.BeginInvoke((Action)(() =>
+                {
+                    switch (signal)
+                    {
+                        case CananSignal.FAIL_CONNECTION:
+                            mainImg.Source = TryFindResource("cananFatalpaint") as ImageSource; break;
+                        case CananSignal.LOSE_CONNECTION:
+                            mainImg.Source = TryFindResource("cananLosepaint") as ImageSource; break;
+                        case CananSignal.LOSE_COUNTDOWN_48:
+                            mainImg.Source = TryFindResource("cananLoseCountdown48paint") as ImageSource; break;
+                        case CananSignal.LOSE_COUNTDOWN_12:
+                            mainImg.Source = TryFindResource("cananLoseCountdown12paint") as ImageSource; break;
+                    }
+                    this.Visibility = Visibility.Visible;
+                }));
+            }
+        }
+
         internal void SetCanan(bool isWin, bool loseConnection)
         {
             if (loseConnection)

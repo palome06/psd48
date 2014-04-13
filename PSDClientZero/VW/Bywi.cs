@@ -109,12 +109,13 @@ namespace PSD.ClientZero.VW
                     for (int i = 1; i < blocks.Length; i += 3)
                     {
                         ushort ouid = ushort.Parse(blocks[i]);
-                        uidict.Add(ouid, new IchiPlayer()
+                        IchiPlayer ip = new IchiPlayer()
                         {
                             Name = blocks[i + 1],
                             Avatar = int.Parse(blocks[i + 2]),
                             Uid = ouid
-                        });
+                        };
+                        uidict.Add(ouid, ip);
                     }
                     vi.Cout(Uid, "Current other gamers: {0}", string.Join(",",
                         uidict.Values.Select(p => p.Name)));
@@ -126,12 +127,13 @@ namespace PSD.ClientZero.VW
                     int kdx = line.LastIndexOf(',');
 
                     ushort ouid = ushort.Parse(Util.Substring(line, idx + 1, jdx));
-                    uidict.Add(ouid, new IchiPlayer()
+                    IchiPlayer ip = new IchiPlayer()
                     {
                         Name = Util.Substring(line, jdx + 1, kdx),
                         Avatar = int.Parse(line.Substring(kdx + 1)),
                         Uid = ouid
-                    });
+                    };
+                    uidict.Add(ouid, ip);
                     vi.Cout(Uid, "Newcomer: {0}", Util.Substring(line, jdx + 1, kdx));
                 }
                 else if (line.StartsWith("C2SA,"))
@@ -213,19 +215,10 @@ namespace PSD.ClientZero.VW
         private void KeepOnListenRecv()
         {
             byte[] recv = new byte[512];
-            //while (stream.CanRead)
-            //{
-            //    if (stream.DataAvailable)
-            //    {
             try
             {
                 while (true)
                 {
-                    //int bytesRecv = stream.Read(recv, recv.Length, 0);
-                    //string line = Encoding.Unicode.GetString(recv, 0, bytesRecv);
-                    //StreamReader sr = new StreamReader(stream); //Encoding.Unicode
-                    //string line = sr.ReadLine();
-
                     string line = ReadByteLine(stream);
                     //Console.WriteLine("=============>>>> Do Receive:" + line);
                     if (line.StartsWith("\\D"))

@@ -955,11 +955,6 @@
     <Resource Include="Resources\Logo\SpderPrev.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Resources\Logo\Canan01.png" />
-    <Resource Include="Resources\Logo\Canan02.png" />
-    <Resource Include="Resources\Logo\Canan03.png" />
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="Resources\Heros\17009.png" />
     <Resource Include="Resources\Heros\17010.png" />
     <Resource Include="Resources\Heros\17011.png" />
@@ -1177,6 +1172,29 @@
     <Resource Include="Resources\NameBar\NameXJ506.png" />
     <Resource Include="Resources\NameBar\NameXJ507.png" />
     <Resource Include="Resources\NameBar\NameXJ508.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Logo\CananCountdown12.png" />
+    <Resource Include="Resources\Logo\CananCountdown48.png" />
+    <Resource Include="Resources\Logo\CananFatal.png" />
+    <Resource Include="Resources\Logo\CananLose.png" />
+    <Resource Include="Resources\Logo\CananLoseGame.png" />
+    <Resource Include="Resources\Logo\CananWinGame.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Logo\Loser.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Heros\19006.png" />
+    <Resource Include="Resources\Heros\19018.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Card\Heros\HL006.png" />
+    <Resource Include="Resources\Card\Heros\HL018.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\NameBar\NameHL006.png" />
+    <Resource Include="Resources\NameBar\NameHL018.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

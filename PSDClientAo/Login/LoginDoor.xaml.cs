@@ -99,11 +99,21 @@ namespace PSD.ClientAo.Login
                 {
                     bool watch = IsHallWatched;
                     bool record = IsHallRecord;
+                    bool resume = IsHallReconnect;
                     bool msglog = true;
                     int mode = IsHallSelModeEnabled ? SelMode : Base.Rules.RuleCode.DEF_CODE;
                     int pkg = GetPkgCode();
                     int team = IsHallTeamEnabled ? HallTeamMode : Base.Rules.RuleCode.DEF_CODE;
-                    if (!watch)
+                    if (resume)
+                    {
+                        int room;
+                        if (!int.TryParse(roomInputTextBox.Text, out room))
+                            room = 0;
+                        AoDisplay a0d = new AoDisplay(nick, addr, room, record, msglog);
+                        a0d.Show();
+                        this.Close();
+                    }
+                    else if (!watch)
                     {
                         AoDisplay a0d = new AoDisplay(addr, nick, ava, record, msglog, mode, pkg, team);
                         a0d.Show();
@@ -144,6 +154,14 @@ namespace PSD.ClientAo.Login
             }
             else
                 selectedRoom = 0;
+        }
+        private void ReconnectRoomInputChecked(object sender, RoutedEventArgs e)
+        {
+            roomInputTextBox.IsEnabled = true;
+        }
+        private void ReconnectRoomInputUnchecked(object sender, RoutedEventArgs e)
+        {
+            roomInputTextBox.IsEnabled = false;
         }
 
         private void ButtonResetClick(object sender, RoutedEventArgs e) { ResetOptions(); }
@@ -192,26 +210,40 @@ namespace PSD.ClientAo.Login
         private bool IsHallMode { set; get; }
 
         private bool IsHallWatched { set; get; }
+        private bool IsHallReconnect { set; get; }
+
         private bool IsHallRecord { set; get; }
         private bool IsHallSelModeEnabled { set; get; }
         private bool IsHallPkgEnabled { set; get; }
         private bool IsHallTeamEnabled { set; get; }
         private bool IsHallMsgLogEnabled { set; get; }
 
+        private void HallPlayChecked(object sender, RoutedEventArgs e)
+        {
+            IsHallWatched = false; IsHallReconnect = false;
+            if (SelDetailGrid != null)
+                SelDetailGrid.Visibility = Visibility.Visible;
+            if (RoomListGrid != null)
+                RoomListGrid.Visibility = Visibility.Collapsed;
+            if (RoomInputGrid != null)
+                RoomInputGrid.Visibility = Visibility.Collapsed;
+        }
         private void HallWatchChecked(object sender, RoutedEventArgs e)
         {
-            IsHallWatched = true;
-            //SelDetailGrid.IsEnabled = false;
+            IsHallWatched = true; IsHallReconnect = false;
             SelDetailGrid.Visibility = Visibility.Collapsed;
             RoomListGrid.Visibility = Visibility.Visible;
+            RoomInputGrid.Visibility = Visibility.Collapsed;
         }
-        private void HallWatchUnChecked(object sender, RoutedEventArgs e)
+        private void HallReconnectChecked(object sender, RoutedEventArgs e)
         {
-            IsHallWatched = false;
-            //SelDetailGrid.IsEnabled = true;
-            SelDetailGrid.Visibility = Visibility.Visible;
+            IsHallWatched = false; IsHallReconnect = true;
+            //SelDetailGrid.IsEnabled = false;
+            SelDetailGrid.Visibility = Visibility.Collapsed;
             RoomListGrid.Visibility = Visibility.Collapsed;
+            RoomInputGrid.Visibility = Visibility.Visible;
         }
+
         private void HallRecordChecked(object sender, RoutedEventArgs e)
         {
             IsHallRecord = true;

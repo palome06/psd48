@@ -75,31 +75,6 @@ namespace PSD.ClientAo
             yhTV = new OI.AoTV(this);
             tvDict = new Dictionary<string, OI.Television>();
         }
-        //// Hall mode
-        //public AoDisplay(string sv, string nick, int ava, bool watch,
-        //    bool record, int mode, int pkg, int team)
-        //{
-        //    InitializeComponent();
-        //    Init();
-        //    mzi = null; mvisi = null;
-        //    visiThread = new Thread(delegate()
-        //    {
-        //        int port = Base.NetworkCode.HALL_PORT;
-        //        if (!watch)
-        //        {
-        //            mzi = new ZI(nick, ava, sv, port, team, mode, pkg, record, this);
-        //            mzi.StartHall();
-        //        }
-        //        else
-        //        {
-        //            mzi = new ZI(nick, sv, port, record, this);
-        //            mzi.StartWatchHall();
-        //        }
-        //    });
-        //    visiThread.Start();
-        //    yhTV = new OI.AoTV(this);
-        //    tvDict = new Dictionary<string, OI.Television>();
-        //}
         // Direct mode
         public AoDisplay(string sv, string nick, int ava, bool watch,
             bool record, bool msglog, int room, int team)
@@ -112,7 +87,8 @@ namespace PSD.ClientAo
                 int port = Base.NetworkCode.DIR_PORT + room;
                 if (port >= 65535)
                     port = Base.NetworkCode.DIR_PORT;
-                mvisi = new XIVisi(sv, port, nick, ava, team, record, watch, msglog, this);
+                mvisi = XIVisi.CreateInDirectConnect(sv, port, nick,
+                    ava, team, record, watch, msglog, this);
                 mvisi.RunAsync();
             });
             visiThread.Start();
@@ -130,6 +106,24 @@ namespace PSD.ClientAo
             {
                 mvisi = new XIVisi(fileName, this);
                 mvisi.RunAsync();
+            });
+            visiThread.Start();
+            yhTV = new OI.AoTV(this);
+            tvDict = new Dictionary<string, OI.Television>();
+        }
+        // Reconnection mode
+        public AoDisplay(string nick, string sv, int room, bool record, bool msglog)
+        {
+            InitializeComponent();
+            var ass = System.Reflection.Assembly.GetExecutingAssembly().GetName();
+            ResetGameTitle(ass.Name + " v" + ass.Version);
+            Init();
+            mzi = null; mvisi = null;
+            visiThread = new Thread(delegate()
+            {
+                int port = Base.NetworkCode.HALL_PORT;
+                mzi = ZI.CreateResumeHall(nick, sv, port, record, msglog, room, this);
+                mzi.ResumeHall();
             });
             visiThread.Start();
             yhTV = new OI.AoTV(this);
@@ -679,6 +673,31 @@ namespace PSD.ClientAo
             else if (yfPlayerR3.AoPlayer.Rank == ut)
                 yfMoonlightR3.AStop();
         }
+
+        internal void SetPlayerXBSlot(bool enabled)
+        {
+            Dispatcher.BeginInvoke((Action)(() =>
+            {
+                if (enabled)
+                {
+                    yfPlayerO1.SetAsWithXB();
+                    yfPlayerO2.SetAsWithXB();
+                    yfPlayerO3.SetAsWithXB();
+                    yfPlayerR1.SetAsWithXB();
+                    yfPlayerR2.SetAsWithXB();
+                    yfPlayerR3.SetAsWithXB();
+                }
+                else
+                {
+                    yfPlayerO1.SetAsWithOutXB();
+                    yfPlayerO2.SetAsWithOutXB();
+                    yfPlayerO3.SetAsWithOutXB();
+                    yfPlayerR1.SetAsWithOutXB();
+                    yfPlayerR2.SetAsWithOutXB();
+                    yfPlayerR3.SetAsWithOutXB();
+                }
+            }));
+        }
         #region Replay Part
         internal void ReplayPrev() { mvisi.ReplayPrev(); }
         internal void ReplayPlay() { mvisi.ReplayPlay(); }
@@ -710,9 +729,9 @@ namespace PSD.ClientAo
                 yfMigi.DisplayChat(nick, null, chatText);
             }));
         }
-        internal void SetCanan(bool isWin, bool loseConnection)
+        internal void SetCanan(CananPaint.CananSignal signal)
         {
-            yfCanan.SetCanan(isWin, loseConnection);
+            yfCanan.SetCanan(signal);
         }
     }
 }

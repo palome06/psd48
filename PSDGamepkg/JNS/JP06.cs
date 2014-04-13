@@ -933,8 +933,9 @@ namespace PSD.PSDGamepkg.JNS
                 List<Artiad.Harm> harms = Artiad.Harm.Parse(fuse);
                 foreach (Artiad.Harm harm in harms)
                 {
-                    if (harm.N > 1 && harm.Element != FiveElement.LOVE &&
-                            harm.Element != FiveElement.YIN && XI.Board.Garden[harm.Who].IsTared)
+                    bool tr = Artiad.IntHelper.IsMaskSet(harm.Mask, GiftMask.TERMIN);
+                    if (harm.N > 1 && harm.Element != FiveElement.YIN &&
+                            harm.Element != FiveElement.LOVE && !tr && XI.Board.Garden[harm.Who].IsTared)
                         return true;
                 }
             }
@@ -984,7 +985,9 @@ namespace PSD.PSDGamepkg.JNS
                     Artiad.Harm solHarm = null;
                     foreach (Artiad.Harm harm in harms)
                     {
-                        if (harm.Who == who && harm.N > 1 && harm.Element != FiveElement.LOVE)
+                        bool tr = Artiad.IntHelper.IsMaskSet(harm.Mask, GiftMask.TERMIN);
+                        if (harm.Who == who && harm.N > 1 && harm.Element != FiveElement.YIN &&
+                            harm.Element != FiveElement.LOVE && !tr)
                         {
                             if (harm.Element != FiveElement.SOL)
                                 harm.N = 1;
@@ -1218,7 +1221,7 @@ namespace PSD.PSDGamepkg.JNS
                 int cmidx = targets.IndexOf(',');
                 ushort iv = ushort.Parse(targets.Substring(0, cmidx));
                 ushort jv = ushort.Parse(targets.Substring(cmidx + 1));
-                int mn = Math.Min(g[iv].Tux.Count, g[jv].Tux.Count);
+                int mn = Math.Min(3, Math.Min(g[iv].Tux.Count, g[jv].Tux.Count));
                 XI.RaiseGMessage("G1XR,2," + iv + "," + jv + ",0," + mn);
             }
             else if (input == "3")
@@ -1253,8 +1256,9 @@ namespace PSD.PSDGamepkg.JNS
                 ushort to = ushort.Parse(XI.AsyncInput(
                     player.Uid, "T1" + Util.SSelect(XI.Board, p => p.IsTared), "JPT4", "0"));
                 VI.Cout(0, "{0}对{1}使用「锁魂钉」.", XI.DisplayPlayer(player.Uid), XI.DisplayPlayer(to));
+                int harm = Math.Max(XI.Board.Garden[to].GetPetCount(), 1);
                 XI.RaiseGMessage(Artiad.Harm.ToMessage(new Artiad.Harm(to, player.Uid,
-                    FiveElement.A, XI.Board.Garden[to].GetPetCount() + 1, maskFromJP)));
+                    FiveElement.A, harm, maskFromJP)));
             }
         }
         public void JPT5Action(Player player, int type, string fuse, string argst)

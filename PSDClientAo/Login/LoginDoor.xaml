@@ -43,16 +43,27 @@
                     <Grid Background="#FFE5E5E5">
                         <StackPanel Orientation="Vertical" Margin="5,5">
                             <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="1*"/>
                                     <ColumnDefinition Width="1*"/>
                                     <ColumnDefinition Width="1*"/>
                                 </Grid.ColumnDefinitions>
-                                <CheckBox Grid.Column="0" ToolTip="请选择是否旁观，不参与游戏。"
-                                  Checked="HallWatchChecked" Unchecked="HallWatchUnChecked">旁观</CheckBox>
-                                <CheckBox Grid.Column="1" ToolTip="请选择是否记录当前战报。"
+                                <RadioButton Grid.Column="0" Grid.Row="0" GroupName="CharOfGameGroup"
+                                             Checked="HallPlayChecked" ToolTip="选择正常参与游戏。" IsChecked="True">
+                                    游戏</RadioButton>
+                                <RadioButton Grid.Column="1" Grid.Row="0" GroupName="CharOfGameGroup"
+                                             Checked="HallWatchChecked" ToolTip="选择旁观，不参与游戏。">
+                                    旁观</RadioButton>
+                                <RadioButton Grid.Column="2" Grid.Row="0" GroupName="CharOfGameGroup"
+                                             Checked="HallReconnectChecked" ToolTip="选择以同身份重新连入进行中的游戏。">
+                                    断线重连</RadioButton>
+                                <CheckBox Grid.Column="0" Grid.Row="1" ToolTip="请选择是否记录当前战报。"
                                   Checked="HallRecordChecked" Unchecked="HallRecordUnChecked">记录战报</CheckBox>
-                                <CheckBox Grid.Column="2" ToolTip="请选择是否保存日志。" IsChecked="True"
+                                <CheckBox Grid.Column="1" Grid.Row="1" ToolTip="请选择是否保存日志。" IsChecked="True"
                                   Checked="HallMsgLogChecked" Unchecked="HallMsgLogUnChecked">保存日志</CheckBox>
                             </Grid>
                             <Grid Height="5" Background="Gray"/>
@@ -155,12 +166,20 @@
                                     <ListBox x:Name="RoomListBox" SelectionChanged="WatchListSelectionChanged"/>
                                 </ScrollViewer>
                             </Grid>
+                            <Grid x:Name="RoomInputGrid" Visibility="Collapsed"
+                                  Height="160" HorizontalAlignment="Center">
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <CheckBox IsChecked="False" Checked="ReconnectRoomInputChecked"
+                                              Unchecked="ReconnectRoomInputUnchecked">指定房间号：</CheckBox>
+                                    <TextBox x:Name="roomInputTextBox" Width="80" IsEnabled="False"></TextBox>
+                                </StackPanel>
+                            </Grid>
                         </StackPanel>
                     </Grid>
                 </TabItem>
                 <TabItem x:Name="DirTab" FontFamily="KaiTi" FontSize="18">
                     <TabItem.Header>
-                        <TextBlock FontSize="20" FontFamily="LiSu" Margin="5,5,5,5">互联模式</TextBlock>
+                        <TextBlock FontSize="20" FontFamily="LiSu" Margin="5,5,5,5">直连模式</TextBlock>
                     </TabItem.Header>
                     <Grid Background="#FFE5E5E5">
                         <StackPanel Orientation="Vertical" Margin="5,5">
@@ -208,7 +227,7 @@
                 </TabItem>
                 <TabItem x:Name="VideoTab" FontFamily="KaiTi" FontSize="18">
                     <TabItem.Header>
-                        <TextBlock FontSize="20" FontFamily="LiSu" Margin="5,5,5,5">看片模式</TextBlock>
+                        <TextBlock FontSize="20" FontFamily="LiSu" Margin="5,5,5,5">观看复盘</TextBlock>
                     </TabItem.Header>
                     <Grid Background="#FFE5E5E5">
                         <StackPanel Orientation="Vertical" Margin="5,5">

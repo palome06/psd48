@@ -2341,6 +2341,37 @@ namespace PSD.PSDGamepkg
                         }
                         break;
                     }
+                case "G0HI":
+                    {
+                        IDictionary<ushort, List<ushort>> imc = new Dictionary<ushort, List<ushort>>();
+                        List<ushort> dices = new List<ushort>();
+                        for (int i = 1; i < args.Length; i += 2)
+                        {
+                            ushort who = ushort.Parse(args[i]);
+                            ushort pet = ushort.Parse(args[i + 1]);
+                            if (Board.InFight)
+                            {
+                                RaiseGMessage("G1HK,0," + who + "," + pet);
+                                if (!imc.ContainsKey(who))
+                                    imc[who] = new List<ushort>();
+                                imc[who].Add(pet);
+                            }
+                            else
+                            {
+                                RaiseGMessage("G0HL," + who + "," + pet);
+                                dices.Add(pet);
+                            }
+                        }
+                        foreach (var pair in imc)
+                            RaiseGMessage("G2HU," + pair.Key + "," + string.Join(",", pair.Value));
+                        if (dices.Count > 0)
+                        {
+                            RaiseGMessage("G2ON,1," + string.Join(",", dices));
+                            Board.MonDises.AddRange(dices);
+                        }
+                        WI.BCast("E0HI," + cmdrst);
+                    }
+                    break;
                 case "G1HK":
                     if (args[1].Equals("0"))
                     {

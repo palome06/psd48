@@ -52,8 +52,11 @@ namespace PSD.PSDGamepkg
             //Board.MonPiles.PushBack(1);
             //RaiseGMessage("G0HC,0,1,19");
             //Board.MonPiles.PushBack(1007);
-            Board.MonPiles.PushBack(1004);
-            Board.MonPiles.PushBack(1);
+            //Board.MonPiles.PushBack(1004);
+            //Board.MonPiles.PushBack(1);
+            Board.MonPiles.PushBack(22);
+            Board.MonPiles.PushBack(13);
+            Board.MonPiles.PushBack(8);
             //Board.MonPiles.PushBack(24);
             //Board.MonPiles.PushBack(25);
             //Board.MonPiles.PushBack(24);
@@ -758,6 +761,9 @@ namespace PSD.PSDGamepkg
                     case "ZZ":
                         RaiseGMessage("G2KI," + string.Join(",", Board.Garden.Values.Where(
                             p => p.Uid != rounder).Select(p => p.Uid + ",0")) + "," + rounder + ",1");
+                        RunQuadStage(rstage, 0);
+                        rstage = "R" + rounder + "BB"; break;
+                    case "BB":
                         RunQuadStage(rstage, 0);
                         rstage = "R" + rounder + "BC"; break;
                     case "BC":

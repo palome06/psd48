@@ -99,6 +99,8 @@ namespace PSD.ClientZero.VW
                 cvQueues.Enqueue(CinSentinel);
             while (cinReqCount > 0)
                 Thread.Sleep(50);
+            while (cvQueues.Count > 0 && cvQueues.Peek() == CinSentinel)
+                cvQueues.Dequeue();
 
             ++cinReqCount;
             cinGate = true;

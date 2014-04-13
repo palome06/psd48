@@ -957,5 +957,20 @@ namespace PSD.ClientAo
             pb.Dispatcher.BeginInvoke((Action)(() => { pb.ResumePets(); }));
         }
         #endregion Battle Issue
+
+        internal void SetAsLoser()
+        {
+            pb.Dispatcher.BeginInvoke((Action)(() =>
+            {
+                pb.loserIcon.Visibility = System.Windows.Visibility.Visible;
+            }));
+        }
+        internal void SetAsBacker()
+        {
+            pb.Dispatcher.BeginInvoke((Action)(() =>
+            {
+                pb.loserIcon.Visibility = System.Windows.Visibility.Collapsed;
+            }));
+        }
     }
 }

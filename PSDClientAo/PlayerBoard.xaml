@@ -232,6 +232,8 @@
 
             <Rectangle x:Name="azureMask" Height="133" Width="258" Canvas.Left="-84" Canvas.Top="-19"
                   RadiusX="8" RadiusY="8" IsHitTestVisible="False" Fill="Azure" Opacity="0"/>
+            <Image x:Name="loserIcon" Source="{StaticResource loserIcon}" Height="100" Width="100"
+                   Canvas.Left="74" Visibility="Collapsed" Canvas.Top="-27"/>
         </Canvas>
     </CheckBox>
 </UserControl>

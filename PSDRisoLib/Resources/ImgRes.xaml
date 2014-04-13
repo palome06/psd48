@@ -60,7 +60,7 @@
     <Image x:Key="petsnapGLT4" Source="PetsSnap/GLT4.png" ToolTip="TR穹武"/>
     <Image x:Key="petsnapGFT3" Source="PetsSnap/GFT3.png" ToolTip="TR流萤"/>
     <Image x:Key="petsnapGFT4" Source="PetsSnap/GFT4.png" ToolTip="TR岚翼"/>
-    <Image x:Key="petsnapGTT3" Source="PetsSnap/GTT3.png" ToolTip="TR醉月"/>
+    <Image x:Key="petsnapGTT3" Source="PetsSnap/GTT3.png" ToolTip="TR槐妖"/>
     <Image x:Key="petsnapGTT4" Source="PetsSnap/GTT4.png" ToolTip="TR峰龟"/>
 
     <Image x:Key="npcsnapNC101" Source="PetsSnap/NC101.png" ToolTip="NPC李逍遥"/>
@@ -153,8 +153,10 @@
 
     <Image x:Key="heroHead19001" Source="Heros/19001.png"/>
     <Image x:Key="heroHead19003" Source="Heros/19003.png"/>
+    <Image x:Key="heroHead19006" Source="Heros/19006.png"/>
     <Image x:Key="heroHead19008" Source="Heros/19008.png"/>
     <Image x:Key="heroHead19012" Source="Heros/19012.png"/>
+    <Image x:Key="heroHead19018" Source="Heros/19018.png"/>
 
     <ImageBrush x:Key="nameBar000Brush" ImageSource="NameBar/Name000.png"/>
     <ImageBrush x:Key="nameBarXJ101" ImageSource="NameBar/NameXJ101.png"/>
@@ -214,8 +216,10 @@
 
     <ImageBrush x:Key="nameBarHL001" ImageSource="NameBar/NameHL001.png"/>
     <ImageBrush x:Key="nameBarHL003" ImageSource="NameBar/NameHL003.png"/>
+    <ImageBrush x:Key="nameBarHL006" ImageSource="NameBar/NameHL006.png"/>
     <ImageBrush x:Key="nameBarHL008" ImageSource="NameBar/NameHL008.png"/>
     <ImageBrush x:Key="nameBarHL012" ImageSource="NameBar/NameHL012.png"/>
+    <ImageBrush x:Key="nameBarHL018" ImageSource="NameBar/NameHL018.png"/>
 
     <SolidColorBrush x:Key="hpBrush" Color="Red"/>
     <SolidColorBrush x:Key="dexBrush" Color="Blue"/>
@@ -520,8 +524,10 @@
 
     <Image x:Key="hroCardHL001" Source="Card/Heros/HL001.png"/>
     <Image x:Key="hroCardHL003" Source="Card/Heros/HL003.png"/>
+    <Image x:Key="hroCardHL006" Source="Card/Heros/HL006.png"/>
     <Image x:Key="hroCardHL008" Source="Card/Heros/HL008.png"/>
     <Image x:Key="hroCardHL012" Source="Card/Heros/HL012.png"/>
+    <Image x:Key="hroCardHL018" Source="Card/Heros/HL018.png"/>
 
     <ImageBrush x:Key="dt01Bg" ImageSource="Logo/DT01.png" Opacity="0.9"/>
     <ImageBrush x:Key="dt02Bg" ImageSource="Logo/DT02.png" Opacity="0.9"/>
@@ -545,10 +551,14 @@
     <ImageBrush x:Key="spderPauseIcon" ImageSource="Logo/SpderPause.png"/>
 
     <ImageBrush x:Key="smoothOpIcon" ImageSource="Logo/Smooth.png"/>
+    <BitmapImage x:Key="loserIcon" UriSource="Logo/Loser.png"/>
 
     <!--<SoundPlayerAction x:Key="mainLoginWave" Source="Sound/MainLogin.wav"/>-->
 
-    <BitmapImage x:Key="canan01paints" UriSource="Logo/Canan01.png"/>
-    <BitmapImage x:Key="canan02paints" UriSource="Logo/Canan02.png"/>
-    <BitmapImage x:Key="canan03paints" UriSource="Logo/Canan03.png"/>
+    <BitmapImage x:Key="cananWinGamepaint" UriSource="Logo/CananWinGame.png"/>
+    <BitmapImage x:Key="cananLoseGamepaint" UriSource="Logo/CananLoseGame.png"/>
+    <BitmapImage x:Key="cananFatalpaint" UriSource="Logo/CananFatal.png"/>
+    <BitmapImage x:Key="cananLosepaint" UriSource="Logo/CananLose.png"/>
+    <BitmapImage x:Key="cananCountdown48paint" UriSource="Logo/CananCountdown48.png"/>
+    <BitmapImage x:Key="cananCountdown12paint" UriSource="Logo/CananCountdown12.png"/>
 </ResourceDictionary>

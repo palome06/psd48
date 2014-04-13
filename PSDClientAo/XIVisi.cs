@@ -18,6 +18,8 @@ namespace PSD.ClientAo
         public const ushort WATCHER_1ST_PERSPECT = 1;
 
         private ushort m_uid;
+        // uid in room, referenced in game procedure
+        // 2 ways to get updated. H0SD events or H09G
         private ushort Uid
         {
             set
@@ -28,7 +30,7 @@ namespace PSD.ClientAo
             }
             get { return m_uid; }
         }
-
+        // uid in center, referenced in tracking player's status
         private readonly ushort auid;
         private readonly string name;
         private readonly int avatar;
@@ -41,7 +43,19 @@ namespace PSD.ClientAo
 
         private int hopeTeam;
         public int SelMode { private set; get; }
-        public int PkgGroups { private set; get; }
+        private int mPkgGroups;
+        public int PkgGroups
+        {
+            private set
+            {
+                if (mPkgGroups < 16 && value >= 16)
+                    ad.SetPlayerXBSlot(true);
+                else if (mPkgGroups >= 16 && value < 16)
+                    ad.SetPlayerXBSlot(false);
+                mPkgGroups = value;
+            }
+            get { return mPkgGroups; }
+        }
         private readonly bool isReplay;
         //private Base.Rules.Casting casting; // exists in yfArena.AoArena
         // Displays Members
@@ -54,6 +68,7 @@ namespace PSD.ClientAo
         public AoCEE A0C { private set; get; }
         public OI.AoDeal A0D { private set; get; }
         public AoOrchis A0O { private set; get; }
+        private bool GameGraceEnd { set; get; }
 
         private Auxs.FlashWindowHelper flashHelper;
         //var helper = new Auxs.FlashWindowHelper(System.Windows.Application.Current);
@@ -95,7 +110,7 @@ namespace PSD.ClientAo
             isReplay = false;
         }
         // Constructor 2#: Used for Direct Connection
-        public XIVisi(string server, int port, string name, int avatar,
+        private XIVisi(string server, int port, string name, int avatar,
             int hopeTeam, bool record, bool watcher, bool msglog, AoDisplay ad)
         {
             this.server = server; this.port = port;
@@ -123,6 +138,12 @@ namespace PSD.ClientAo
             WI.Send("C2ST," + Uid, Uid, 0);
             isReplay = false;
         }
+        public static XIVisi CreateInDirectConnect(string server, int port, string name,
+            int avatar, int hopeTeam, bool record, bool watcher, bool msglog, AoDisplay ad)
+        {
+            return new XIVisi(server, port, name, avatar,
+                hopeTeam, record, watcher, msglog, ad);
+        }        
         // Constructor 3#: Used for Replay mode
         public XIVisi(string fileName, AoDisplay ad)
         {
@@ -136,6 +157,35 @@ namespace PSD.ClientAo
             CommonConstruct();
             this.auid = eywi.Uid;
             isReplay = true;
+        }
+        // Constructor 4#: Used for ResumeHall
+        // passCode is the password for a settled room
+        private XIVisi(ushort newUid, ushort oldUid, string name, Base.VW.IVI vi,
+            string server, int room, string passCode, bool record, bool msglog, AoDisplay ad)
+        {
+            this.auid = newUid;
+            this.name = name; this.VI = vi as VW.Cyvi;
+            this.server = server;
+            this.Room = room;
+            this.port = Base.NetworkCode.HALL_PORT + room;
+            this.ad = ad;
+
+            VW.Bywi bywi = new VW.Bywi(server, port, name, avatar, hopeTeam = 0, newUid, this);
+            Log = new Log(); Log.Start(auid, record, msglog, 0);
+            bywi.Log = Log; VI.Log = Log;
+            WI = bywi;
+            CommonConstruct(); 
+            bywi.StartConnectResume(oldUid, passCode);
+            // After that, Uid get updated.
+            this.Uid = bywi.Uid;
+            VI.Cout(Uid, "游戏继续啦~");
+            isReplay = false;
+        }
+        public static XIVisi CreateInResumeHall(ushort newUid, ushort oldUid, string name,
+            Base.VW.IVI vi, string server, int room, string passCode, bool record,
+            bool msglog, AoDisplay ad)
+        {
+            return new XIVisi(newUid, oldUid, name, vi, server, room, passCode, record, msglog, ad);
         }
 
         public void CommonConstruct()
@@ -186,6 +236,8 @@ namespace PSD.ClientAo
             A0C = ad.yfJoy.CEE;
             A0D = ad.yfDeal.Deal;
             A0O = ad.yfOrchis40.Orch;
+
+            GameGraceEnd = false;
         }
 
         private static ushort RoundUid(ushort uid, int delta)
@@ -212,6 +264,8 @@ namespace PSD.ClientAo
             //    }
             //}, delegate(Exception e) { Log.Logger(e.ToString()); })).Start();
             //SingleThreadMessageStart(new List<string>());
+            if (auid == 0)
+                return;
             new Thread(() => Util.SafeExecute(() =>
             {
                 while (true)
@@ -354,7 +408,7 @@ namespace PSD.ClientAo
             // start a new thread to handle with the message
             int cdx = readLine.IndexOf(',');
             string cop = Util.Substring(readLine, 0, cdx);
-            if (cop == "") { }
+            if (cop == "") { } // Reserved for strange string in replay
             else if (cop.StartsWith("E0"))
             {
                 HandleE0Message(readLine);
@@ -396,32 +450,17 @@ namespace PSD.ClientAo
                 }
                 return true;
             }
-            else if (cop.StartsWith("V0"))
+            else if (cop.StartsWith("V"))
             {
-                StartCinEtc();
-                //ad.ShowProgressBar(Uid);
-                if (!isReplay)
+                char rank = cop[1];
+                switch (rank)
                 {
-                    string[] blocks = readLine.Split(',');
-                    int invCount = int.Parse(blocks[1]);
-                    for (int i = 0; i < invCount; ++i)
-                        ad.ShowProgressBar(ushort.Parse(blocks[i + 2]));
-                    string input = FormattedInputWithCancelFlag(string.Join(
-                        ",", Util.TakeRange(blocks, 2 + invCount, blocks.Length)));
-                    VI.CloseCinTunnel(Uid);
-                    WI.Send("V1," + input, Uid, 0);
+                    case '0': return HandleV0Message(readLine.Substring("V0,".Length));
+                    case '2': return HandleV2Message(readLine.Substring("V2,".Length));
+                    case '3': return HandleV3Message(readLine.Substring("V3,".Length));
+                    case '5': return HandleV5Message(readLine.Substring("V5,".Length));
+                    default: return true;
                 }
-                return true;
-            }
-            else if (cop.StartsWith("V3"))
-            {
-                string[] splits = readLine.Substring("V3,".Length).Split(',');
-                List<ushort> invs = Util.TakeRange(splits, 0, splits.Length)
-                    .Select(p => ushort.Parse(p)).ToList();
-                VI.Cout(Uid, "等待{0}响应.", zd.Player(invs));
-                foreach (ushort ut in invs)
-                    ad.ShowProgressBar(ut);
-                return false;
             }
             else if (cop.StartsWith("R"))
                 return HandleRMessage(readLine);
@@ -882,6 +921,53 @@ namespace PSD.ClientAo
                     roundInput = ipValue.ToString();
                     inputValid &= (ipValue >= r1 && ipValue <= r2);
                     prevComment = ""; cancel = "";
+                }
+                else if (arg[0] == 'J')
+                {
+                    // format T1~2(p1p3p5),T1(p1p3),#Text
+                    int idx = arg.IndexOf('~');
+                    int jdx = arg.IndexOf('(');
+                    int kdx = arg.IndexOf(')');
+                    // TODO: handle with AND of multiple condition
+                    string input;
+                    if (idx >= 1)
+                    {
+                        int r1 = int.Parse(Substring(arg, 1, idx));
+                        int r2 = int.Parse(Substring(arg, idx + 1, jdx));
+                        string[] argv = Substring(arg, jdx + "(p".Length, kdx).Split('p');
+
+                        List<string> judgeArgv = argv.Select(p => p.StartsWith("T") ? p.Substring("T".Length) : p).ToList();
+                        if (argv.Length < r1)
+                        {
+                            r1 = r2 = argv.Length;
+                            string hint = string.Format("请以{0}人{1}.", argv.Length, prevComment);
+                            input = VI.CinTP(Uid, argv, hint, cancellable, false);
+                        }
+                        else
+                        {
+                            string hint = string.Format("请以{0}至{1}人{2}.", r1, r2, prevComment);
+                            input = VI.CinTP(Uid, argv, hint, cancellable, false);
+                        }
+                        inputValid &= input.Split(',').Intersect(judgeArgv).Any();
+                        inputValid &= !(CountItemFromComma(input) < r1 || CountItemFromComma(input) > r2);
+                    }
+                    else
+                    {
+                        int r = int.Parse(Substring(arg, 1, jdx));
+                        string[] argv = Substring(arg, jdx + "(p".Length, kdx).Split('p');
+                        List<string> judgeArgv = argv.Select(p => p.StartsWith("T") ? p.Substring("T".Length) : p).ToList();
+                        if (argv.Length < r)
+                            r = argv.Length;
+                        string hint = string.Format("请以{0}人{1}.", r, prevComment);
+                        input = VI.CinTP(Uid, argv, hint, cancellable, false);
+                        inputValid &= input.Split(',').Intersect(judgeArgv).Any();
+                        inputValid &= CountItemFromComma(input) == r;
+                    }
+                    // T-ed non 0 target
+                    if (input.Length > 0 && input != "0" && Char.IsDigit(input[0]))
+                        input = "T" + input;
+                    prevComment = ""; cancel = "";
+                    roundInput = input;
                 }
                 else if (arg[0] == '!')
                 {
@@ -1846,6 +1932,21 @@ namespace PSD.ClientAo
                             VI.Cout(Uid, "宠物{0}效果{2}被触发.", zd.Monster(mons), type, argvs);
                         break;
                     }
+                case "E0HI":
+                    {
+                        IDictionary<ushort, List<ushort>> imc = new Dictionary<ushort, List<ushort>>();
+                        for (int i = 1; i < args.Length; i += 2)
+                        {
+                            ushort who = ushort.Parse(args[i]);
+                            ushort pet = ushort.Parse(args[i + 1]);
+                            if (!imc.ContainsKey(who))
+                                imc[who] = new List<ushort>();
+                            imc[who].Add(pet);
+                        }
+                        foreach (var pair in imc)
+                            VI.Cout(Uid, "{0}的宠物{1}被爆发.", zd.Player(pair.Key), zd.Monster(pair.Value));
+                    }
+                    break;
                 case "E0HD":
                     {
                         ushort who = ushort.Parse(args[1]);
@@ -1879,9 +1980,12 @@ namespace PSD.ClientAo
                 case "E0HU":
                     {
                         ushort who = ushort.Parse(args[1]);
-                        ushort mon = ushort.Parse(args[2]);
                         List<string> cedcards = new List<string>();
-                        cedcards.Add("M" + mon);
+                        for (int i = 2; i < args.Length; ++i)
+                        {
+                            ushort mon = ushort.Parse(args[i]);
+                            cedcards.Add("M" + mon);
+                        }
                         A0O.FlyingGet(cedcards, who, who);
                     }
                     break;
@@ -2286,12 +2390,12 @@ namespace PSD.ClientAo
                             if (args[1] == A0P[Uid].Team.ToString())
                             {
                                 VI.Cout(Uid, "游戏结束，我方获胜.");
-                                ad.SetCanan(true, false);
+                                ad.SetCanan(CananPaint.CananSignal.ISWIN);
                             }
                             else
                             {
                                 VI.Cout(Uid, "游戏结束，我方告负.");
-                                ad.SetCanan(false, false);
+                                ad.SetCanan(CananPaint.CananSignal.ISLOSE);
                             }
                         }
                         else if (A0P.ContainsKey(WATCHER_1ST_PERSPECT))
@@ -2299,17 +2403,18 @@ namespace PSD.ClientAo
                             if (args[1] == A0P[WATCHER_1ST_PERSPECT].Team.ToString())
                             {
                                 VI.Cout(Uid, "游戏结束，我方获胜.");
-                                ad.SetCanan(true, false);
+                                ad.SetCanan(CananPaint.CananSignal.ISWIN);
                             }
                             else
                             {
                                 VI.Cout(Uid, "游戏结束，我方告负.");
-                                ad.SetCanan(false, false);
+                                ad.SetCanan(CananPaint.CananSignal.ISLOSE);
                             }
                         }
                         else
                             VI.Cout(Uid, "游戏结束，{0}方获胜.", args[1]);
                     }
+                    GameGraceEnd = true;
                     break;
             }
         }
@@ -2493,6 +2598,61 @@ namespace PSD.ClientAo
             return false;
         }
         #endregion U
+        #region V
+        public bool HandleV0Message(string cmdrst)
+        {
+            StartCinEtc();
+            if (!isReplay)
+            {
+                string[] blocks = cmdrst.Split(',');
+                int invCount = int.Parse(blocks[0]);
+                for (int i = 0; i < invCount; ++i)
+                    ad.ShowProgressBar(ushort.Parse(blocks[i + 1]));
+                string input = FormattedInputWithCancelFlag(string.Join(
+                    ",", Util.TakeRange(blocks, 1 + invCount, blocks.Length)));
+                VI.CloseCinTunnel(Uid);
+                WI.Send("V1," + input, Uid, 0);
+            }
+            return true;
+        }
+        public bool HandleV2Message(string cmdrst)
+        {
+            StartCinEtc();
+            if (!isReplay)
+            {
+                int idx = cmdrst.IndexOf(',');
+                ushort major = ushort.Parse(cmdrst.Substring(0, idx));
+                string input = FormattedInputWithCancelFlag(cmdrst.Substring(idx + 1));
+                if (input != VI.CinSentinel)
+                {
+                    VI.CloseCinTunnel(Uid);
+                    WI.Send("V4," + input, Uid, 0);
+                    return true;
+                }
+                else
+                {
+                    VI.CloseCinTunnel(Uid);
+                    return false;
+                }
+            }
+            else return false;
+        }
+        public bool HandleV3Message(string cmdrst)
+        {
+            string[] splits = cmdrst.Split(',');
+            List<ushort> invs = Util.TakeRange(splits, 0, splits.Length)
+                .Select(p => ushort.Parse(p)).ToList();
+            VI.Cout(Uid, "等待{0}响应.", zd.Player(invs));
+            foreach (ushort ut in invs)
+                ad.ShowProgressBar(ut);
+            return false;
+        }
+        public bool HandleV5Message(string cmdrst)
+        {
+            VI.CloseCinTunnel(Uid);
+            return false;
+        }
+        #endregion V
         #region R
         private bool HandleRMessage(string readLine)
         {
@@ -2573,113 +2733,113 @@ namespace PSD.ClientAo
                     else if (para == "1")
                         VI.Cout(Uid, "{0}战牌开始阶段结束.", zd.Player(rounder));
                     break;
-                case "ZW1":
-                    {
-                        string[] args = para.Split(',');
-                        ushort isSupport = ushort.Parse(args[0]);
-                        ushort isDecider = ushort.Parse(args[1]);
-                        ushort centre = ushort.Parse(args[2]);
-                        List<string> candidates = new List<string>();
-                        //string[] candidates = new string[args.Length - 2];
-                        bool cancellable = false;
-                        if (isDecider == 0 || isDecider == 1)
-                        {
-                            for (int i = 3; i < args.Length; ++i)
-                            {
-                                ushort ut;
-                                if (args[i] == "0")
-                                    cancellable = true;
-                                else if (ushort.TryParse(args[i], out ut))
-                                    candidates.Add(args[i]);
-                                else
-                                    candidates.Add("!" + args[i]);
-                            }
-                            //string identity = isSupport != 0 ? "妨碍者{1}—0则不妨碍." :
-                            //    "支援者{1}—{0}则不支援" + (cancellable ? "，0则不打怪." : ".");
-                            cinCalled = StartCinEtc();
-                            ad.ShowProgressBar(centre);
-                        }
-                        string identity = isSupport != 0 ?
-                            "妨碍者{1}—0则不妨碍." : "支援者{1}—{0}则不支援";
-                        if (isDecider == 0) // decider
-                        {
-                            while (true)
-                            {
-                                string hint = "请决定" + (isSupport == 0 ? ("支援者，选择" + zd.PurePlayer(rounder)
-                                    + "则不支援.") : "妨碍者.");
-                                string select = VI.CinTP(Uid, candidates, hint, cancellable, false);
-                                //string select = VI.Cin(uid, "{0}战斗阶段开始，请决定" + identity,
-                                //    zd.Player(rounder), zd.PlayerWithMonster(candidates));
-                                if (candidates.Contains(select) || candidates.Contains("!" + select))
-                                {
-                                    WI.Send("R" + rounder + "ZW4," + select, Uid, 0);
-                                    VI.CloseCinTunnel(Uid);
-                                    break;
-                                }
-                                else if (select == "0")
-                                {
-                                    if (cancellable && isSupport == 0) // Supporter = 0, not fight
-                                    {
-                                        WI.Send("R" + rounder + "ZW4,0", Uid, 0);
-                                        VI.CloseCinTunnel(Uid);
-                                        break;
-                                    }
-                                    else if (isSupport != 0) // Hinder = 0, not hinder
-                                    {
-                                        WI.Send("R" + rounder + "ZW4," + rounder, Uid, 0);
-                                        VI.CloseCinTunnel(Uid);
-                                        break;
-                                    }
-                                }
-                                else if (select == VI.CinSentinel)
-                                    break;
-                            }
-                            Thread.Sleep(100);
-                        }
-                        else if (isDecider == 1)
-                        {
-                            while (true)
-                            {
-                                string hint = "请推选" + (isSupport == 0 ? ("支援者，选择" + zd.PurePlayer(rounder)
-                                    + "则不支援.") : "妨碍者.");
-                                string select = VI.CinTP(Uid, candidates, hint, cancellable, false);
-                                //string select = VI.Cin(uid, "{0}战斗阶段开始，请推选" + identity,
-                                //    zd.Player(rounder), zd.PlayerWithMonster(candidates));
-                                if (candidates.Contains(select) || candidates.Contains("!" + select))
-                                {
-                                    WI.Send("R" + rounder + "ZW2," + select, Uid, 0);
-                                    //VI.CloseCinTunnel(uid);
-                                    break;
-                                }
-                                else if (select == "0")
-                                {
-                                    if (cancellable && isSupport == 0) // Supporter = 0, not fight
-                                    {
-                                        WI.Send("R" + rounder + "ZW2,0", Uid, 0);
-                                        VI.CloseCinTunnel(Uid);
-                                        break;
-                                    }
-                                    else if (isSupport != 0) // Hinder = 0, not hinder
-                                    {
-                                        WI.Send("R" + rounder + "ZW2," + rounder, Uid, 0);
-                                        VI.CloseCinTunnel(Uid);
-                                        break;
-                                    }
-                                }
-                                else if (select == VI.CinSentinel)
-                                    break;
-                            }
-                            Thread.Sleep(100);
-                        }
-                        else if (isDecider == 2)
-                        {
-                            VI.Cout(Uid, "等待{0}决定{1}.", centre, isSupport != 0 ? "妨碍者" : "支援者");
-                            if (centre != Uid)
-                                ad.yfJoy.CEE.DecideValid = false;
-                            ad.ShowProgressBar(centre);
-                        }
-                        break;
-                    }
+                //case "ZW1":
+                //    {
+                //        string[] args = para.Split(',');
+                //        ushort isSupport = ushort.Parse(args[0]);
+                //        ushort isDecider = ushort.Parse(args[1]);
+                //        ushort centre = ushort.Parse(args[2]);
+                //        List<string> candidates = new List<string>();
+                //        //string[] candidates = new string[args.Length - 2];
+                //        bool cancellable = false;
+                //        if (isDecider == 0 || isDecider == 1)
+                //        {
+                //            for (int i = 3; i < args.Length; ++i)
+                //            {
+                //                ushort ut;
+                //                if (args[i] == "0")
+                //                    cancellable = true;
+                //                else if (ushort.TryParse(args[i], out ut))
+                //                    candidates.Add(args[i]);
+                //                else
+                //                    candidates.Add("!" + args[i]);
+                //            }
+                //            //string identity = isSupport != 0 ? "妨碍者{1}—0则不妨碍." :
+                //            //    "支援者{1}—{0}则不支援" + (cancellable ? "，0则不打怪." : ".");
+                //            cinCalled = StartCinEtc();
+                //            ad.ShowProgressBar(centre);
+                //        }
+                //        string identity = isSupport != 0 ?
+                //            "妨碍者{1}—0则不妨碍." : "支援者{1}—{0}则不支援";
+                //        if (isDecider == 0) // decider
+                //        {
+                //            while (true)
+                //            {
+                //                string hint = "请决定" + (isSupport == 0 ? ("支援者，选择" + zd.PurePlayer(rounder)
+                //                    + "则不支援.") : "妨碍者.");
+                //                string select = VI.CinTP(Uid, candidates, hint, cancellable, false);
+                //                //string select = VI.Cin(uid, "{0}战斗阶段开始，请决定" + identity,
+                //                //    zd.Player(rounder), zd.PlayerWithMonster(candidates));
+                //                if (candidates.Contains(select) || candidates.Contains("!" + select))
+                //                {
+                //                    WI.Send("R" + rounder + "ZW4," + select, Uid, 0);
+                //                    VI.CloseCinTunnel(Uid);
+                //                    break;
+                //                }
+                //                else if (select == "0")
+                //                {
+                //                    if (cancellable && isSupport == 0) // Supporter = 0, not fight
+                //                    {
+                //                        WI.Send("R" + rounder + "ZW4,0", Uid, 0);
+                //                        VI.CloseCinTunnel(Uid);
+                //                        break;
+                //                    }
+                //                    else if (isSupport != 0) // Hinder = 0, not hinder
+                //                    {
+                //                        WI.Send("R" + rounder + "ZW4," + rounder, Uid, 0);
+                //                        VI.CloseCinTunnel(Uid);
+                //                        break;
+                //                    }
+                //                }
+                //                else if (select == VI.CinSentinel)
+                //                    break;
+                //            }
+                //            Thread.Sleep(100);
+                //        }
+                //        else if (isDecider == 1)
+                //        {
+                //            while (true)
+                //            {
+                //                string hint = "请推选" + (isSupport == 0 ? ("支援者，选择" + zd.PurePlayer(rounder)
+                //                    + "则不支援.") : "妨碍者.");
+                //                string select = VI.CinTP(Uid, candidates, hint, cancellable, false);
+                //                //string select = VI.Cin(uid, "{0}战斗阶段开始，请推选" + identity,
+                //                //    zd.Player(rounder), zd.PlayerWithMonster(candidates));
+                //                if (candidates.Contains(select) || candidates.Contains("!" + select))
+                //                {
+                //                    WI.Send("R" + rounder + "ZW2," + select, Uid, 0);
+                //                    //VI.CloseCinTunnel(uid);
+                //                    break;
+                //                }
+                //                else if (select == "0")
+                //                {
+                //                    if (cancellable && isSupport == 0) // Supporter = 0, not fight
+                //                    {
+                //                        WI.Send("R" + rounder + "ZW2,0", Uid, 0);
+                //                        VI.CloseCinTunnel(Uid);
+                //                        break;
+                //                    }
+                //                    else if (isSupport != 0) // Hinder = 0, not hinder
+                //                    {
+                //                        WI.Send("R" + rounder + "ZW2," + rounder, Uid, 0);
+                //                        VI.CloseCinTunnel(Uid);
+                //                        break;
+                //                    }
+                //                }
+                //                else if (select == VI.CinSentinel)
+                //                    break;
+                //            }
+                //            Thread.Sleep(100);
+                //        }
+                //        else if (isDecider == 2)
+                //        {
+                //            VI.Cout(Uid, "等待{0}决定{1}.", centre, isSupport != 0 ? "妨碍者" : "支援者");
+                //            if (centre != Uid)
+                //                ad.yfJoy.CEE.DecideValid = false;
+                //            ad.ShowProgressBar(centre);
+                //        }
+                //        break;
+                //    }
                 case "ZW3":
                 case "ZW5":
                     {
@@ -2934,24 +3094,24 @@ namespace PSD.ClientAo
                         }
                     }
                     break;
-        //        case "H1LV":
-        //            //Z0D.Remove(ushort.Parse(cmdrst));
-        //            break;
-        //        case "H1CN":
-        //            VI.Cout(uid, "游戏开始啦！");
-        //            break;
-        //        case "H0ST":
-        //            if (cmdrst.StartsWith("0"))
-        //            {
-        //                VI.Cout(uid, "游戏开始阶段开始...");
-        //                //VI.ReleaseCin(uid);
-        //            }
-        //            else if (cmdrst.StartsWith("1"))
-        //            {
-        //                VI.Cout(uid, "游戏开始阶段结束...");
-        //                //VI.ReleaseCin(uid);
-        //            }
-        //            break;
+                //        case "H1LV":
+                //            //Z0D.Remove(ushort.Parse(cmdrst));
+                //            break;
+                //        case "H1CN":
+                //            VI.Cout(uid, "游戏开始啦！");
+                //            break;
+                //        case "H0ST":
+                //            if (cmdrst.StartsWith("0"))
+                //            {
+                //                VI.Cout(uid, "游戏开始阶段开始...");
+                //                //VI.ReleaseCin(uid);
+                //            }
+                //            else if (cmdrst.StartsWith("1"))
+                //            {
+                //                VI.Cout(uid, "游戏开始阶段结束...");
+                //                //VI.ReleaseCin(uid);
+                //            }
+                //            break;
                 case "H0RT":
                     ad.yfArena.AoArena.Casting = new Base.Rules.CastingPick(); break;
                 case "H0RM":
@@ -3139,7 +3299,7 @@ namespace PSD.ClientAo
                         string[] args = cmdrst.Split(',');
                         ushort puid = ushort.Parse(args[0]);
                         List<int> hrs = Util.TakeRange(args, 1, args.Length)
-                            .Select(p => int.Parse(p)).ToList();                        
+                            .Select(p => int.Parse(p)).ToList();
                         var ct = ad.yfArena.AoArena.Casting as Base.Rules.CastingTable;
                         foreach (int heroCode in hrs)
                         {
@@ -3289,7 +3449,8 @@ namespace PSD.ClientAo
                             VI.Cout(Uid, "{0}方选择了未知人物.", team == 1 ? "红" : "蓝");
                             ad.yfArena.AoArena.PickBy((ushort)team, 0);
                             ad.yfArena.AoArena.Disactive(new int[] { 1, 2 });
-                        } else
+                        }
+                        else
                         {
                             VI.Cout(Uid, "{0}方选择了{1}.", team == 1 ? "红" : "蓝", zd.Hero(selAva));
                             ad.yfArena.AoArena.PickBy((ushort)team, selAva);
@@ -3470,22 +3631,77 @@ namespace PSD.ClientAo
 
                 case "H0SN":
                     ad.yfArena.AoArena.Shutdown(); break;
+
+                case "H0SL":
+                    {
+                        string[] args = cmdrst.Split(',');
+                        for (int i = 0; i < args.Length; i += 2)
+                        {
+                            ushort puid = ushort.Parse(args[i]);
+                            int heroCode = ushort.Parse(args[i + 1]);
+                            //msg += (puid + ":" + zd.Hero(heroCode) + ",");
+                            A0P[puid].SelectHero = heroCode;
+                            A0P[puid].ParseFromHeroLib();
+                        }
+                        VI.Cout(Uid, "选择结果为-" + string.Join(",", A0P.Values
+                            .Where(p => p.SelectHero != 0)
+                            .Select(p => p.Rank + ":" + zd.Hero(p.SelectHero))));
+                    }
+                    break;
+                case "H0DP":
+                    {
+                        string[] args = cmdrst.Split(',');
+                        A0F.TuxCount = int.Parse(args[0]); A0F.TuxDises = 0;
+                        A0F.MonCount = int.Parse(args[1]); A0F.MonDises = 0;
+                        A0F.EveCount = int.Parse(args[2]); A0F.TuxDises = 0;
+                    }
+                    break;
+                case "H0ST":
+                    if (cmdrst.StartsWith("0"))
+                    {
+                        VI.Cout(Uid, "游戏开始阶段开始...");
+                        //VI.ReleaseCin(uid);
+                    }
+                    else if (cmdrst.StartsWith("1"))
+                    {
+                        VI.Cout(Uid, "游戏开始阶段结束...");
+                        //VI.ReleaseCin(uid);
+                    }
+                    break;
+                case "H0TM":
+                    VI.Cout(Uid, "游戏结束啦。");
+                    break;
                 case "H09N":
                     {
                         AoPlayer[] players = new AoPlayer[] {ad.yfPlayerR2.AoPlayer,
                             ad.yfPlayerO2.AoPlayer, ad.yfPlayerR3.AoPlayer, ad.yfPlayerO3.AoPlayer,
                             ad.yfPlayerR1.AoPlayer, ad.yfPlayerO1.AoPlayer};
-                        int [] delta = new int[] { 0, 1, 2, 3, 4, 5 };
+                        ushort besu; int[] delta;
+                        if (IsUtAo())
+                        {
+                            besu = Uid;
+                            delta = new int[] { 0, -1, 2, 1, 4, 3 };
+                        }
+                        else if (IsUtAka())
+                        {
+                            besu = Uid;
+                            delta = new int[] { 0, 1, 2, 3, 4, 5 };
+                        }
+                        else
+                        {
+                            besu = WATCHER_1ST_PERSPECT;
+                            delta = new int[] { 0, 1, 2, 3, 4, 5 };
+                        }
 
                         for (int i = 0; i < totalPlayer; ++i)
-                            A0P.Add(RoundUid(1, delta[i]), players[i]);
+                            A0P.Add(RoundUid(besu, delta[i]), players[i]);
 
                         string[] blocks = cmdrst.Split(',');
                         for (int idx = 0; idx < blocks.Length; idx += 2)
                         {
                             ushort who = ushort.Parse(blocks[idx]);
                             string name = blocks[idx + 1];
-                            A0P[who].Nick = name;
+                            A0P[who].Nick = name; A0P[who].Rank = who;
                         }
                         break;
                     }
@@ -3628,53 +3844,61 @@ namespace PSD.ClientAo
                         }
                     }
                     break;
-                case "H0SL":
-                    {
-                        string[] args = cmdrst.Split(',');
-                        for (int i = 0; i < args.Length; i += 2)
-                        {
-                            ushort puid = ushort.Parse(args[i]);
-                            int heroCode = ushort.Parse(args[i + 1]);
-                            //msg += (puid + ":" + zd.Hero(heroCode) + ",");
-                            A0P[puid].SelectHero = heroCode;
-                            A0P[puid].ParseFromHeroLib();
-                        }
-                        VI.Cout(Uid, "选择结果为-" + string.Join(",", A0P.Values
-                            .Where(p => p.SelectHero != 0)
-                            .Select(p => p.Rank + ":" + zd.Hero(p.SelectHero))));
-                    }
-                    break;
-                case "H0DP":
-                    {
-                        string[] args = cmdrst.Split(',');
-                        A0F.TuxCount = int.Parse(args[0]); A0F.TuxDises = 0;
-                        A0F.MonCount = int.Parse(args[1]); A0F.MonDises = 0;
-                        A0F.EveCount = int.Parse(args[2]); A0F.TuxDises = 0;
-                    }
-                    break;
-                case "H0ST":
-                    if (cmdrst.StartsWith("0"))
-                    {
-                        VI.Cout(Uid, "游戏开始阶段开始...");
-                        //VI.ReleaseCin(uid);
-                    }
-                    else if (cmdrst.StartsWith("1"))
-                    {
-                        VI.Cout(Uid, "游戏开始阶段结束...");
-                        //VI.ReleaseCin(uid);
-                    }
-                    break;
-                case "H0TM":
-                    VI.Cout(Uid, "游戏结束啦。");
-                    break;
                 case "H0LT":
-                    {
+                    if (!GameGraceEnd) {
                         ushort who = ushort.Parse(cmdrst);
                         if (who != 0)
                             VI.Cout(Uid, "玩家{0}#断线，游戏结束。", who);
                         else
                             VI.Cout(Uid, "服务器被延帝抓走啦，游戏结束。");
+                        ad.SetCanan(CananPaint.CananSignal.FAIL_CONNECTION);
+                    }
+                    break;
+                case "H0WT":
+                    if (!GameGraceEnd) {
+                        ushort who = ushort.Parse(cmdrst);
+                        if (who != 0)
+                        {
+                            VI.Cout(Uid, "玩家{0}#断线，请耐心等待其重连～", who);
+                            A0P[who].SetAsLoser();
+                        }
                         ReportConnectionLost();
+                    }
+                    break;
+                case "H0WD":
+                    if (!GameGraceEnd) {
+                        int secLeft = int.Parse(cmdrst);
+                        VI.Cout(Uid, "房间将在{0}秒后彻底关闭。", secLeft);
+                        if (secLeft == 180)
+                            ad.SetCanan(CananPaint.CananSignal.LOSE_COUNTDOWN_48);
+                        else if (secLeft == 60)
+                            ad.SetCanan(CananPaint.CananSignal.LOSE_COUNTDOWN_12);
+                    }
+                    break;
+                case "H0BK":
+                    {
+                        ushort who = ushort.Parse(cmdrst);
+                        if (who != 0 && who != Uid)
+                        {
+                            VI.Cout(Uid, "玩家{0}#恢复连接。", who);
+                            A0P[who].SetAsBacker();
+                        }
+                    }
+                    break;
+                case "H0RK":
+                    VI.Cout(Uid, "房间已恢复正常。");
+                    ad.SetCanan(CananPaint.CananSignal.NORMAL);
+                    break;
+                case "H09F":
+                    {
+                        string[] blocks = cmdrst.Split(',');
+                        int idx = 0;
+                        int tuxCount = int.Parse(blocks[idx]);
+                        ++idx;
+                        List<ushort> tuxes = Util.TakeRange(blocks, idx, idx + tuxCount)
+                            .Select(p => ushort.Parse(p)).ToList();
+                        A0M.insTux(tuxes);
+                        idx += tuxCount;
                     }
                     break;
             }
@@ -3753,8 +3977,11 @@ namespace PSD.ClientAo
         #region Network Report
         internal void ReportConnectionLost()
         {
-            VI.Cout(Uid, "服务器被延帝抓走啦，游戏结束。");
-            ad.SetCanan(false, true);
+            if (!GameGraceEnd)
+            {
+                VI.Cout(Uid, "网络连接故障，等待重连中...");
+                ad.SetCanan(CananPaint.CananSignal.LOSE_CONNECTION);
+            }
         }
         #endregion Network Report
         #region Replay
