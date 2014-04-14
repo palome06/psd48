@@ -74,33 +74,44 @@ namespace PSD.Base
         public ushort Armor { set; get; }
         public ushort Weapon { set; get; }
         public ushort Luggage { set; get; }
+        public bool IsLuggage { set; get; }
+        // Cards in the Luggage, null if it isn't a luggage acutally
+        public List<string> LuggageCapa { private set; get; }
 
         // Another extra Equip, also view as Equip
         public ushort ExEquip { set; get; }
-        public ushort[] Pets { private set; get; }
-        // special zones
+        // extra Equip Slot, not the same as the ExEquip
         public List<ushort> ExCards { private set; get; }
-        public List<ushort> Escue { private set; get; }
-        // Other card as Equip, but not set
+        // special time-lapse cards, the substituaion is set in Board
         public List<ushort> Fakeq { private set; get; }
+
+        public ushort[] Pets { private set; get; }
+        // Escue Npcs
+        public List<ushort> Escue { private set; get; }
 
         #endregion Cards
 
         #region Status
         // cause reason (GL04) / mask code (3)
+        // TODO: consider to handle with non-equip, too.
         private IDictionary<string, int> cardDisabled;
 
         public bool IsAlive { set; get; }
         // whether can become target for special Targets or Tuxes
+        private bool mIsTared;
         public bool IsTared
         {
             set { mIsTared = value; }
             get { return mIsTared && Uid != 0 && IsAlive && IsReal; }
         }
-        private bool mIsTared;
         public bool Immobilized { set; get; }
-        public int RestZP { set; get; }
         public bool Loved { set; get; }
+        public bool PetDisabled { set; get; }
+        // How many ZPs the player can still use
+        public int RestZP { set; get; }
+        // Whether player is disabled to use ZP
+        public bool ZPDisabled { set; get; }
+
         private void SetEquipDisabled(string tag, bool value, int maskCode)
         {
             if (value)
@@ -135,15 +146,29 @@ namespace PSD.Base
         public void SetArmorDisabled(string tag, bool value) { SetEquipDisabled(tag, value, 2); }
         public bool LuggageDisabled { get { return (GetEquipDisabled() & 4) != 0; } }
         public void SetLuggageDisabled(string tag, bool value) { SetEquipDisabled(tag, value, 4); }
-        public bool PetDisabled { set; get; }
-        public bool ZPDisabled { set; get; }
 
         #endregion Status
 
         #region Memory
-        //public ushort ArgUshort { set; get; }
-        //public string ArgString { set; get; }
-        //public List<ushort> ArgUShorts { private set; get; }
+        // TODO: formalize and classify memories
+        // public bool TokenActivate { set; get; } // 0 (e.g. XJ401.2)
+        // public ushort TokenCount { set; get; } // 1 (e.g. XJ608.1)
+        // public List<ushort> TokenTars { set; get; } // 2 (e.g. XJ405,2)
+        // public List<string> TokenExcl { set; get; } // 3 (e.g. XJ606,1)
+        // public List<ushort> TokenFold { set; get; } // 4 (e.g. HL011.2)
+
+        // public ushort ROMUshort { set; get; }
+        // public ushort RAMUshort { set; get; }
+        // public int ROMInt { set; get; }
+        // public int RAMInt { set; get; }
+        // public List<ushort> RAMLists { set; get; }
+        // public string RAMString { set; get; }
+        // public IDictionary<string, object> ROM { private set; get; }
+        // public IDictionary<string, object> RAM { private set; get; }
+
+        //// Cos players Stack, e.g. SP101-SP102-XJ404
+        // public Stack<int> Coss { private set; get; }
+
         public ushort ROMUshort { set; get; } // 0
         public List<string> ROMCards { private set; get; } // 1
         public int ROMToken { set; get; } // 2
@@ -169,11 +194,11 @@ namespace PSD.Base
         internal Player(string name, ushort avatar, ushort uid, bool isReal)
         {
             this.Name = name; this.Avatar = avatar; this.Uid = uid;
+
             this.Tux = new List<ushort>();
             this.Armor = 0; this.Weapon = 0; this.Luggage = 0; this.ExEquip = 0;
-            this.Pets = new ushort[5];
-            for (int i = 0; i < Pets.Length; ++i)
-                Pets[i] = 0;
+
+            this.Pets = new ushort[] { 0, 0, 0, 0, 0 };
             this.ExCards = new List<ushort>();
             Escue = new List<ushort>();
             Fakeq = new List<ushort>();
