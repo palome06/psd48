@@ -57,6 +57,7 @@ namespace PSD.PSDGamepkg.Artiad
                 case GiftMask.STABLE: maskCode = 0x4; break;                
                 case GiftMask.FROM_TUX: maskCode = 0x8; break;
                 case GiftMask.TERMIN: maskCode = 0x10; break;
+                case GiftMask.INCOUNTABLE: maskCode = 0x20; break;
             }
             return (code & maskCode) != 0;
         }
@@ -72,6 +73,7 @@ namespace PSD.PSDGamepkg.Artiad
                 case GiftMask.STABLE: maskCode = 0x4; break;                
                 case GiftMask.FROM_TUX: maskCode = 0x8; break;
                 case GiftMask.TERMIN: maskCode = 0x10; break;
+                case GiftMask.INCOUNTABLE: maskCode = 0x20; break;
             }
             if (isSet)
                 code |= maskCode;

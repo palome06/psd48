@@ -22,6 +22,7 @@ namespace PSD.Base.Card
         ALIVE_DUEL = 0x1, ALIVE_PIS = 0x2, // Choose
 
         ALIVE = 0x3,
-        STABLE = 0x4, FROM_TUX = 0x8, TERMIN = 0x10, // Combined        
+        STABLE = 0x4, FROM_TUX = 0x8, TERMIN = 0x10, // Combined
+        INCOUNTABLE = 0x20
     }
 }

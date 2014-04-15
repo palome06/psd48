@@ -1285,7 +1285,7 @@ namespace PSD.PSDGamepkg.JNS
             List<ushort> tos = Util.TakeRange(blocks, player.RAMUshort + 1, blocks.Length)
                 .Select(p => ushort.Parse(p)).ToList();
             ++player.RAMUshort;
-            int maskDuel = Artiad.IntHelper.SetMask(0, GiftMask.ALIVE, true);
+            int maskDuel = Artiad.IntHelper.SetMask(0, GiftMask.ALIVE_DUEL, true);
             foreach (ushort to in tos)
             {
                 XI.RaiseGMessage("G0TT," + player.Uid);
@@ -3913,7 +3913,7 @@ namespace PSD.PSDGamepkg.JNS
                     }
                 }
                 if (cands.Count > 0)
-                    return "/T1(p" + string.Join(",", cands) + ")";
+                    return "/T1(p" + string.Join("p", cands) + ")";
                 else
                     return "/";
             }
@@ -3929,7 +3929,7 @@ namespace PSD.PSDGamepkg.JNS
                         cands.Add(pt);
                 }
                 if (cands.Count > 0)
-                    return "/M1(p" + string.Join(",", cands) + ")";
+                    return "/M1(p" + string.Join("p", cands) + ")";
                 else
                     return "/";
             }

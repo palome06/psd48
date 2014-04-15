@@ -145,7 +145,8 @@ namespace PSD.PSDGamepkg.JNS
                 ushort target = ushort.Parse(input);
                 Player targetPy = XI.Board.Garden[target];
                 int dHp = targetPy.HP - 1;
-                XI.RaiseGMessage(Artiad.Harm.ToMessage(new Artiad.Harm(target, 0, FiveElement.SOL, dHp, 0)));
+                int maskDuel = Artiad.IntHelper.SetMask(0, GiftMask.INCOUNTABLE, true);
+                XI.RaiseGMessage(Artiad.Harm.ToMessage(new Artiad.Harm(target, 0, FiveElement.SOL, dHp, maskDuel)));
             }
             string msg = Util.SParal(XI.Board, p => p.IsAlive && p.Team.Equals(XI.Board.Rounder.Team),
                 p => p.Uid + ",0,1", ",");
@@ -286,6 +287,8 @@ namespace PSD.PSDGamepkg.JNS
                 && p.Team == rd.Team).Select(p => p.Uid).ToList();
             List<ushort> ops = XI.Board.Garden.Values.Where(p => p.IsAlive
                 && p.Team == rd.OppTeam).Select(p => p.Uid).ToList();
+            ushort[] rpsa = XI.Board.Garden.Values.Where(p => p.Team == rd.Team).Select(p => p.Uid).ToArray();
+            ushort[] opsa = XI.Board.Garden.Values.Where(p => p.Team == rd.OppTeam).Select(p => p.Uid).ToArray();
             string rg = string.Join(",", rps), rf = "(p" + string.Join("p", rps) + ")";
             string og = string.Join(",", ops), of = "(p" + string.Join("p", ops) + ")";
 
@@ -296,18 +299,25 @@ namespace PSD.PSDGamepkg.JNS
             {
                 XI.RaiseGMessage("G2FU,0," + rd.Uid + "," + rps.Count + "," + rg + "," + string.Join(",", pops));
                 string pubTux = Util.SatoWithBracket(XI.Board.PZone, "p", "(p", ")");
-                string input = XI.AsyncInput(rd.Uid, "+Z1" + pubTux + ",#获得卡牌的,/T1" + rf, "SJT03", "0");
-                if (!input.StartsWith("/"))
+                int pubSz = XI.Board.PZone.Count;
+                string pubDig = (pubSz > 1) ? ("+Z1~" + pubSz) : "+Z1";
+                string input = XI.AsyncInput(rd.Uid, pubDig + pubTux + ",#获得卡牌的,/T1" + rf, "SJT03", "0");
+                if (!input.StartsWith("/") && input != VI.CinSentinel)
                 {
                     string[] ips = input.Split(',');
-                    ushort cd;
-                    if (ushort.TryParse(ips[0], out cd) && XI.Board.PZone.Contains(cd))
+                    List<ushort> getxs = Util.TakeRange(0, pubSz - 1).Select(p => ushort.Parse(p))
+                        .Where(p => XI.Board.PZone.Contains(p)).ToList();
+                    ushort to = ushort.Parse(ips[pubSz - 1]);
+                    if (getxs.Count > 0)
                     {
-                        ushort ut = ushort.Parse(ips[1]);
-                        XI.RaiseGMessage("G1OU," + cd);
-                        XI.RaiseGMessage("G2QU,0,0," + cd);
-                        XI.RaiseGMessage("G0HQ,2," + ut + ",0," + cd);
-                        pops.Remove(cd);
+                        XI.RaiseGMessage("G1OU," + string.Join(",", getxs));
+                        XI.RaiseGMessage("G2QU,0," + rpsa.Length + "," +
+                             + string.Join(",", rpsa) + "," + string.Join(",", getxs));
+                        XI.Send("G0HQ,2," + to + ",0," + string.Join(",", getxs), rpsa);
+                        XI.Send("G0HQ,2," + to + ",1," + getxs.Count, opsa);
+                        XI.Live("G0HQ,2," + to + ",1," + getxs.Count);
+                        foreach (ushort getx in getxs)
+                            pops.Remove(getx);
                     }
                 }
                 XI.RaiseGMessage("G2FU,3");
@@ -320,18 +330,25 @@ namespace PSD.PSDGamepkg.JNS
             {
                 XI.RaiseGMessage("G2FU,0," + od.Uid + "," + ops.Count + "," + og + "," + string.Join(",", pops));
                 string pubTux = Util.SatoWithBracket(XI.Board.PZone, "p", "(p", ")");
-                string input = XI.AsyncInput(od.Uid, "+Z1" + pubTux + ",#获得卡牌的,/T1" + of, "SJT03", "0");
-                if (!input.StartsWith("/"))
+                int pubSz = XI.Board.PZone.Count;
+                string pubDig = (pubSz > 1) ? ("+Z1~" + pubSz) : "+Z1";
+                string input = XI.AsyncInput(od.Uid, pubDig + pubTux + ",#获得卡牌的,/T1" + of, "SJT03", "0");
+                if (!input.StartsWith("/") && input != VI.CinSentinel)
                 {
                     string[] ips = input.Split(',');
-                    ushort cd;
-                    if (ushort.TryParse(ips[0], out cd) && XI.Board.PZone.Contains(cd))
+                    List<ushort> getxs = Util.TakeRange(0, pubSz - 1).Select(p => ushort.Parse(p))
+                        .Where(p => XI.Board.PZone.Contains(p)).ToList();
+                    ushort to = ushort.Parse(ips[pubSz - 1]);
+                    if (getxs.Count > 0)
                     {
-                        ushort ut = ushort.Parse(ips[1]);
-                        XI.RaiseGMessage("G1OU," + cd);
-                        XI.RaiseGMessage("G2QU,0,0," + cd);
-                        XI.RaiseGMessage("G0HQ,2," + ut + ",0," + cd);
-                        pops.Remove(cd);
+                        XI.RaiseGMessage("G1OU," + string.Join(",", getxs));
+                        XI.RaiseGMessage("G2QU,0," + opsa.Length + "," +
+                             string.Join(",", opsa) + "," + string.Join(",", getxs));
+                        XI.Send("G0HQ,2," + to + ",0," + string.Join(",", getxs), opsa);
+                        XI.Send("G0HQ,2," + to + ",1," + getxs.Count, rpsa);
+                        XI.Live("G0HQ,2," + to + ",1," + getxs.Count);
+                        foreach (ushort getx in getxs)
+                            pops.Remove(getx);
                     }
                 }
                 XI.RaiseGMessage("G2FU,3");

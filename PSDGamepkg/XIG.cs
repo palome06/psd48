@@ -351,6 +351,11 @@ namespace PSD.PSDGamepkg
                                 if (player.ROMPlayerTar.Count > 0)
                                     RaiseGMessage("G0OJ," + player.Uid + ",2," + string.Join(",", player.ROMPlayerTar));
                                 player.ResetROM(Board);
+                                // Remove others' tar token on the player
+                                foreach (Player py in Board.Garden.Values) {
+                                    if (py.IsAlive && py != player && py.ROMPlayerTar.ContainsKey)
+                                        RaiseGMessage("G0OJ," + py.Uid + ",2," + player.Uid);
+                                }
                             }
                             player.SelectHero = 0;
                         }
