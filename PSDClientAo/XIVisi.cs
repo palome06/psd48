@@ -1267,12 +1267,29 @@ namespace PSD.ClientAo
                     }
                 case "E0QC": // JN40101
                     {
-                        List<ushort> mons = Util.TakeRange(args, 1, args.Length).Select(p => ushort.Parse(p)).ToList();
+                        ushort cardType = ushort.Parse(args[1]);
+                        List<ushort> mons = Util.TakeRange(args, 2, args.Length)
+                            .Select(p => ushort.Parse(p)).ToList();
                         if (mons.Count > 0)
                         {
-                            VI.Cout(Uid, "{0}被弃置.", zd.Monster(mons));
-                            List<string> cedcards = mons.Select(p => "M" + p).ToList();
-                            A0O.FlyingGet(cedcards, 0, 0);
+                            if (cardType == 0)
+                            {
+                                VI.Cout(Uid, "{0}被弃置.", zd.Tux(mons));
+                                List<string> cedcards = mons.Select(p => "C" + p).ToList();
+                                A0O.FlyingGet(cedcards, 0, 0);
+                            }
+                            else if (cardType == 1)
+                            {
+                                VI.Cout(Uid, "{0}被弃置.", zd.Monster(mons));
+                                List<string> cedcards = mons.Select(p => "M" + p).ToList();
+                                A0O.FlyingGet(cedcards, 0, 0);
+                            }
+                            else if (cardType == 2)
+                            {
+                                VI.Cout(Uid, "{0}被弃置.", zd.Eve(mons));
+                                List<string> cedcards = mons.Select(p => "E" + p).ToList();
+                                A0O.FlyingGet(cedcards, 0, 0);
+                            }
                         }
                     }
                     break;
@@ -1617,8 +1634,12 @@ namespace PSD.ClientAo
                                 A0P[me].InsFakeq(card);
                             else if (where == 5)
                                 A0P[me].ExEquip = card;
-                            VI.Cout(Uid, "{0}为{1}装备了{2}到{3}.",
+                            if (from != 0)
+                                VI.Cout(Uid, "{0}为{1}装备了{2}到{3}.",
                                     zd.Player(from), zd.Player(me), zd.Tux(card), words[where - 1]);
+                            else
+                                VI.Cout(Uid, "{0}装备了{1}到{2}.",
+                                    zd.Player(me), zd.Tux(card), words[where - 1]);
                             A0O.FlyingGet("C" + card, from, me);
                         }
                         break;

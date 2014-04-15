@@ -380,6 +380,10 @@ namespace PSD.ClientZero
                             return "全体正式蜀山弟子";
                         else if (p == "!4")
                             return "全体琼华弟子";
+                        else if (p == "!5")
+                            return "指定场上一名女性";
+                        else if (p == "!6")
+                            return "指定场上一人男性";
                         else
                             return "";
                     })));

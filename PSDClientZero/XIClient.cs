@@ -1102,9 +1102,18 @@ namespace PSD.ClientZero
                     }
                 case "E0QC":
                     {
-                        List<ushort> mons = Util.TakeRange(args, 1, args.Length).Select(p => ushort.Parse(p)).ToList();
+                        ushort cardType = ushort.Parse(args[1]);
+                        List<ushort> mons = Util.TakeRange(args, 2, args.Length)
+                            .Select(p => ushort.Parse(p)).ToList();
                         if (mons.Count > 0)
-                            VI.Cout(Uid, "{0}被弃置.", zd.Monster(mons));
+                        {
+                            if (cardType == 0)
+                                VI.Cout(Uid, "{0}被弃置.", zd.Tux(mons));
+                            else if (cardType == 1)
+                                VI.Cout(Uid, "{0}被弃置.", zd.Monster(mons));
+                            else if (cardType == 2)
+                                VI.Cout(Uid, "{0}被弃置.", zd.Eve(mons));
+                        }
                     }
                     break;
                 case "E0QZ":
@@ -1429,8 +1438,12 @@ namespace PSD.ClientZero
                                 Z0D[me].ExEquip = card;
                             else if (where == 6)
                                 Z0D[me].Luggage = card;
-                            VI.Cout(Uid, "{0}为{1}装备了卡牌{2}到{3}.",
+                            if (from != 0)
+                                VI.Cout(Uid, "{0}为{1}装备了卡牌{2}到{3}.",
                                     zd.Player(from), zd.Player(me), zd.Tux(card), words[where - 1]);
+                            else
+                                VI.Cout(Uid, "{0}装备了卡牌{1}到{2}.",
+                                    zd.Player(me), zd.Tux(card), words[where - 1]);
                         }
                         break;
                     }

@@ -156,6 +156,7 @@
     <Image x:Key="heroHead19006" Source="Heros/19006.png"/>
     <Image x:Key="heroHead19008" Source="Heros/19008.png"/>
     <Image x:Key="heroHead19012" Source="Heros/19012.png"/>
+    <Image x:Key="heroHead19017" Source="Heros/19017.png"/>
     <Image x:Key="heroHead19018" Source="Heros/19018.png"/>
     <Image x:Key="heroHead19019" Source="Heros/19019.png"/>
 
@@ -220,6 +221,7 @@
     <ImageBrush x:Key="nameBarHL006" ImageSource="NameBar/NameHL006.png"/>
     <ImageBrush x:Key="nameBarHL008" ImageSource="NameBar/NameHL008.png"/>
     <ImageBrush x:Key="nameBarHL012" ImageSource="NameBar/NameHL012.png"/>
+    <ImageBrush x:Key="nameBarHL017" ImageSource="NameBar/NameHL017.png"/>
     <ImageBrush x:Key="nameBarHL018" ImageSource="NameBar/NameHL018.png"/>
     <ImageBrush x:Key="nameBarHL019" ImageSource="NameBar/NameHL019.png"/>
 
@@ -281,6 +283,7 @@
     <BitmapImage x:Key="snapTKHL019_3" UriSource="Token/TKH1903.png"/>
     <BitmapImage x:Key="snapTKHL019_4" UriSource="Token/TKH1904.png"/>
     <BitmapImage x:Key="snapTKHL019_5" UriSource="Token/TKH1905.png"/>
+    <BitmapImage x:Key="snapTRHL019" UriSource="Token/TRH19.png"/>
 
     <Image x:Key="exspCard1" Source="Card/ExSp/EP001.png"/>
     <Image x:Key="exspCard2" Source="Card/ExSp/EP002.png"/>
@@ -535,6 +538,7 @@
     <Image x:Key="hroCardHL006" Source="Card/Heros/HL006.png"/>
     <Image x:Key="hroCardHL008" Source="Card/Heros/HL008.png"/>
     <Image x:Key="hroCardHL012" Source="Card/Heros/HL012.png"/>
+    <Image x:Key="hroCardHL017" Source="Card/Heros/HL017.png"/>
     <Image x:Key="hroCardHL018" Source="Card/Heros/HL018.png"/>
     <Image x:Key="hroCardHL019" Source="Card/Heros/HL019.png"/>
 

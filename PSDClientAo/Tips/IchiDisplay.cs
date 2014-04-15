@@ -86,6 +86,10 @@ namespace PSD.ClientAo.Tips
                     spouses.Add("全体正式蜀山弟子");
                 else if (sp == "!4")
                     spouses.Add("全体琼华弟子");
+                else if (sp == "!5")
+                    spouses.Add("指定场上一名女性");
+                else if (sp == "!6")
+                    spouses.Add("指定场上一人男性");
             }
 
             if (spouses.Count > 0)
@@ -447,6 +451,10 @@ namespace PSD.ClientAo.Tips
                             spouses.Add("全体正式蜀山弟子");
                         else if (sp == "!4")
                             spouses.Add("全体琼华弟子");
+                        else if (sp == "!5")
+                            spouses.Add("指定场上一名女性");
+                        else if (sp == "!6")
+                            spouses.Add("指定场上一人男性");
                     }
                     if (spouses.Count > 0)
                     {

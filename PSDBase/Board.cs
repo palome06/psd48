@@ -52,7 +52,9 @@ namespace PSD.Base
         public int OPool { get; set; }
         // Whether current battle is won
         public bool IsBattleWin { get; set; }
-        // Whether monster can be catched as pet
+        // Final difference of pool in Battle
+        public int PoolDelta { set; get; }
+        // Whether monster can be caught as pet
         public bool Mon1Catchable { get; set; }
         public bool Mon2Catchable { get; set; }
 

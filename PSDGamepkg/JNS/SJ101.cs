@@ -118,7 +118,7 @@ namespace PSD.PSDGamepkg.JNS
                         ushort ut = ushort.Parse(ips[1]);
                         XI.RaiseGMessage("G1OU," + cd);
                         XI.RaiseGMessage("G2QU,0,0," + cd);
-                        XI.RaiseGMessage("G0HQ,2," + ut + ",0," + cd);
+                        XI.RaiseGMessage("G0HQ,2," + ut + ",0,0," + cd);
                         pops.Remove(cd);
                         idxs = (idxs + 1) % 2;
                     }
@@ -246,7 +246,7 @@ namespace PSD.PSDGamepkg.JNS
         }
         #endregion Eve Of Pal5
 
-        #region Package 4#
+        #region Package 5#
         public void SJT01()
         {
             Player rd = XI.Board.Rounder;
@@ -305,17 +305,16 @@ namespace PSD.PSDGamepkg.JNS
                 if (!input.StartsWith("/") && input != VI.CinSentinel)
                 {
                     string[] ips = input.Split(',');
-                    List<ushort> getxs = Util.TakeRange(0, pubSz - 1).Select(p => ushort.Parse(p))
+                    List<ushort> getxs = Util.TakeRange(ips, 0, pubSz - 1).Select(p => ushort.Parse(p))
                         .Where(p => XI.Board.PZone.Contains(p)).ToList();
                     ushort to = ushort.Parse(ips[pubSz - 1]);
                     if (getxs.Count > 0)
                     {
                         XI.RaiseGMessage("G1OU," + string.Join(",", getxs));
                         XI.RaiseGMessage("G2QU,0," + rpsa.Length + "," +
-                             + string.Join(",", rpsa) + "," + string.Join(",", getxs));
-                        XI.Send("G0HQ,2," + to + ",0," + string.Join(",", getxs), rpsa);
-                        XI.Send("G0HQ,2," + to + ",1," + getxs.Count, opsa);
-                        XI.Live("G0HQ,2," + to + ",1," + getxs.Count);
+                             string.Join(",", rpsa) + "," + string.Join(",", getxs));
+                        XI.RaiseGMessage("G0HQ,2," + to + ",0," + rpsa.Length + "," +
+                            string.Join(",", rpsa) + "," + string.Join(",", getxs));
                         foreach (ushort getx in getxs)
                             pops.Remove(getx);
                     }
@@ -336,7 +335,7 @@ namespace PSD.PSDGamepkg.JNS
                 if (!input.StartsWith("/") && input != VI.CinSentinel)
                 {
                     string[] ips = input.Split(',');
-                    List<ushort> getxs = Util.TakeRange(0, pubSz - 1).Select(p => ushort.Parse(p))
+                    List<ushort> getxs = Util.TakeRange(ips, 0, pubSz - 1).Select(p => ushort.Parse(p))
                         .Where(p => XI.Board.PZone.Contains(p)).ToList();
                     ushort to = ushort.Parse(ips[pubSz - 1]);
                     if (getxs.Count > 0)
@@ -344,9 +343,8 @@ namespace PSD.PSDGamepkg.JNS
                         XI.RaiseGMessage("G1OU," + string.Join(",", getxs));
                         XI.RaiseGMessage("G2QU,0," + opsa.Length + "," +
                              string.Join(",", opsa) + "," + string.Join(",", getxs));
-                        XI.Send("G0HQ,2," + to + ",0," + string.Join(",", getxs), opsa);
-                        XI.Send("G0HQ,2," + to + ",1," + getxs.Count, rpsa);
-                        XI.Live("G0HQ,2," + to + ",1," + getxs.Count);
+                        XI.RaiseGMessage("G0HQ,2," + to + ",0," + opsa.Length + "," +
+                            string.Join(",", opsa) + "," + string.Join(",", getxs));
                         foreach (ushort getx in getxs)
                             pops.Remove(getx);
                     }
@@ -393,6 +391,7 @@ namespace PSD.PSDGamepkg.JNS
                         {
                             ushort ut = ushort.Parse(ips[1]);
                             XI.RaiseGMessage("G1OU," + cd);
+                            uts.Remove(cd);
                             XI.RaiseGMessage("G2QU,0,0," + cd);
                             XI.RaiseGMessage("G0HQ,2," + ut + ",0," + cd);
                             // CongQIPaiDuiLiQiDiao
@@ -406,6 +405,8 @@ namespace PSD.PSDGamepkg.JNS
                         }
                     }
                 } while (true);
+                if (uts.Count > 0)
+                    XI.RaiseGMessage("G1OU," + string.Join(",", uts));
             }
         }
         //public void SJT04Pers()
@@ -511,7 +512,7 @@ namespace PSD.PSDGamepkg.JNS
                 XI.RaiseGMessage("G2YM,3,0,0");
             }
         }
-        #endregion Package 4#
+        #endregion Package 5#
 
         public void SJ001()
         {

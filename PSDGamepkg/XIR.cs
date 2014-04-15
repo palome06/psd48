@@ -473,7 +473,7 @@ namespace PSD.PSDGamepkg
                                 RaiseGMessage("G2ON,1," + mons);
                                 Board.Battler = null;
                                 WI.BCast(rstage + "7,0," + mons);
-                                WI.BCast("G2QC," + mons);
+                                WI.BCast("G2QC,1," + mons);
                                 rstage = "R" + rounder + "ZF";
                             } else {
                                 RaiseGMessage("G2HS,1," + sprUid);
@@ -647,6 +647,7 @@ namespace PSD.PSDGamepkg
                         rstage = "R" + rounder + "ZN"; break;
                     case "ZN":
                         Board.IsBattleWin = Board.IsRounderBattleWin();
+                        Board.PoolDelta = Board.CalculateRPool() - Board.CalculateOPool();
                         WI.BCast(rstage + "," + (Board.IsBattleWin ? "0" : "1"));
                         RunQuadStage(rstage, 0);
                         rstage = "R" + rounder + "VS"; break;

@@ -879,7 +879,7 @@ namespace PSD.PSDGamepkg.JNS
                             ushort ut = ushort.Parse(ips[1]);
                             XI.RaiseGMessage("G1OU," + cd);
                             XI.RaiseGMessage("G2QU,0,0," + cd);
-                            XI.RaiseGMessage("G0HQ,2," + ut + ",0," + cd);
+                            XI.RaiseGMessage("G0HQ,2," + ut + ",0,0," + cd);
                             pops.Remove(cd);
                             idxs = (idxs + 1) % 2;
                         }

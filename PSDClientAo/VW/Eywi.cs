@@ -118,6 +118,11 @@ namespace PSD.ClientAo.VW
         #region Version
         private void HandleWithVersion(ref string line, int Version)
         {
+            if (Version <= 112)
+            {
+                if (line.StartsWith("E0QC,"))
+                    line = "E0QC,1," + line.Substring("E0QC,".Length);
+            }
             if (Version <= 110)
             {
                 if (line.StartsWith("H0SM"))

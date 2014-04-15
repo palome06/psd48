@@ -353,7 +353,7 @@ namespace PSD.PSDGamepkg
                                 player.ResetROM(Board);
                                 // Remove others' tar token on the player
                                 foreach (Player py in Board.Garden.Values) {
-                                    if (py.IsAlive && py != player && py.ROMPlayerTar.ContainsKey)
+                                    if (py.IsAlive && py != player && py.ROMPlayerTar.Contains(player.Uid))
                                         RaiseGMessage("G0OJ," + py.Uid + ",2," + player.Uid);
                                 }
                             }
@@ -899,7 +899,9 @@ namespace PSD.PSDGamepkg
                             ushort utype = ushort.Parse(args[3]);
                             if (utype == 0)
                             {
-                                List<ushort> card = Util.TakeRange(args, 4, args.Length).Select(p => ushort.Parse(p)).ToList();
+                                ushort seesz = ushort.Parse(args[4]);
+                                List<ushort> card = Util.TakeRange(args, 5 + seesz, args.Length)
+                                    .Select(p => ushort.Parse(p)).ToList();
                                 ushort[] pzs = Board.PZone.Intersect(card).ToArray();
                                 if (pzs.Length > 0)
                                 {
@@ -917,7 +919,16 @@ namespace PSD.PSDGamepkg
                                 //Board.TuxDises.Intersect(card);
                                 VI.Cout(0, "{0}正面向上获得手牌{1}.", DisplayPlayer(me), DisplayTux(card));
                                 RaiseGMessage("G0IT," + me + "," + card.Count() + "," + string.Join(",", card));
-                                WI.BCast("E0HQ,2," + me + "," + string.Join(",", card));
+                                if (seesz == 0)
+                                    WI.BCast("E0HQ,2," + me + "," + string.Join(",", card));
+                                else
+                                {
+                                    ushort[] invs = Util.TakeRange(args, 5, 5 + seesz)
+                                        .Select(p => ushort.Parse(p)).ToArray();
+                                    WI.Send("E0HQ,2," + me + "," + string.Join(",", card), invs);
+                                    WI.Send("E0HQ,3," + me + "," + card.Count, ExceptStaff(invs));
+                                    WI.Live("E0HQ,3," + me + "," + card.Count);
+                                }
                             }
                             else if (utype == 1)
                             {
@@ -1124,10 +1135,18 @@ namespace PSD.PSDGamepkg
                                     else
                                     {
                                         int spo = int.Parse(spos.Substring("!".Length));
-                                        if (spo == 1) //!1:MurongZiying
+                                        //!1:MurongZiying, !5:Yushen, !6:Kongxiu
+                                        if (spo == 1 || spo == 5 || spo == 6)
                                         {
+                                            Func<Player, bool> genJudge;
+                                            if (spo == 5)
+                                                genJudge = p => p.Gender == 'F';
+                                            else if (spo == 6)
+                                                genJudge = p => p.Gender == 'M';
+                                            else
+                                                genJudge = p => true;
                                             var pos = Board.Garden.Values.Where(p => p.IsAlive &&
-                                                p.HP > 0 && p.Uid != player.Uid).Select(p => p.Uid);
+                                                p.HP > 0 && p.Uid != player.Uid && genJudge(p)).Select(p => p.Uid);
                                             if (pos.Any())
                                             {
                                                 string input = AsyncInput(player.Uid, "#您倾慕,/T1(p" +
@@ -1154,34 +1173,20 @@ namespace PSD.PSDGamepkg
                                                 candidates.Add("!PT" + card);
                                             }
                                         }
-                                        else if (spo == 3) // !3:TR-Lingyin
+                                        // !3:TR-Lingyin, !4:TR-Xuanji
+                                        else if (spo == 3 || spo == 4)
                                         {
-                                            //List<int> shushans = new List<int>() {
-                                            //    10101, 10106, 10601, 10602, 10603, 17002, 17005, 17013
-                                            //};
-                                            //var pys = Board.Garden.Values.Where(
-                                            //    p => shushans.Contains(p.SelectHero)).ToList();
+                                            Func<Player, bool> genJudge;
+                                            if (spo == 3)
+                                                genJudge = p => LibTuple.HL
+                                                    .InstanceHero(p.SelectHero).Bio.Contains("A");
+                                            else if (spo == 4)
+                                                genJudge = p => LibTuple.HL
+                                                    .InstanceHero(p.SelectHero).Bio.Contains("B");
+                                            else
+                                                genJudge = p => true;
                                             var pys = Board.Garden.Values.Where(p => p.IsAlive && p.HP > 0 &&
-                                                p.SelectHero != player.SelectHero && LibTuple.HL
-                                                .InstanceHero(p.SelectHero).Bio.Contains("A")).ToList();
-                                            foreach (Player py in pys)
-                                            {
-                                                candidates.Add(py.Uid.ToString());
-                                                player.Loved = true;
-                                                if (loses.ContainsKey(py.Uid))
-                                                    loses[py.Uid] = loses[py.Uid] + 1;
-                                                else
-                                                    loses.Add(py.Uid, 1);
-                                            }
-                                        }
-                                        else if (spo == 4) // !4:TR-Xuanji
-                                        {
-                                            //List<int> qionghua = new List<int>() {
-                                            //    10501, 10502, 10503, 10504, 10505, 17001, 17003, 17017
-                                            //};
-                                            var pys = Board.Garden.Values.Where(p => p.IsAlive && p.HP > 0 &&
-                                                p.SelectHero != player.SelectHero && LibTuple.HL
-                                                .InstanceHero(p.SelectHero).Bio.Contains("B")).ToList();
+                                                p.SelectHero != player.SelectHero && genJudge(p)).ToList();
                                             foreach (Player py in pys)
                                             {
                                                 candidates.Add(py.Uid.ToString());
@@ -1488,12 +1493,13 @@ namespace PSD.PSDGamepkg
                             ushort card = ushort.Parse(args[i]);
                             //Player player = Board.Garden[from];
                             Player pm = Board.Garden[me];
-                            Player pf = Board.Garden[from];
+                            Player pf = (from == 0) ? null : Board.Garden[from];
                             Tux tux = LibTuple.TL.DecodeTux(card);
-                            if (pf.ListOutAllCards().Contains(card) && tux.IsTuxEqiup())
+                            if ((from == 0 || pf.ListOutAllCards().Contains(card)) && tux.IsTuxEqiup())
                             {
                                 TuxEqiup te = tux as TuxEqiup;
-                                RaiseGMessage("G0OT," + from + ",1," + card);
+                                if (from != 0)
+                                    RaiseGMessage("G0OT," + from + ",1," + card);
                                 if (tux.Type == Tux.TuxType.WQ && pm.Weapon != card)
                                 {
                                     if (pm.Weapon != 0)
@@ -1525,9 +1531,10 @@ namespace PSD.PSDGamepkg
                                         te.InsAction(Board.Garden[me]);
                                 }
                             }
-                            else if (pf.ListOutAllEquips().Contains(card))
+                            else if (from == 0 || pf.ListOutAllEquips().Contains(card))
                             {
-                                RaiseGMessage("G0OT," + from + ",1," + card);
+                                if (from != 0)
+                                    RaiseGMessage("G0OT," + from + ",1," + card);
                                 pm.Fakeq.Add(card);
                                 WI.BCast("E0ZB," + me + ",1," + from + ",4," + card);
                             }

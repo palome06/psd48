@@ -297,7 +297,7 @@ namespace PSD.PSDGamepkg.JNS
                 ushort pop = XI.Board.MonPiles.Dequeue();
                 XI.Board.MonDises.Add(pop);
                 XI.RaiseGMessage("G2IN,1,1");
-                XI.RaiseGMessage("G2QC," + pop);
+                XI.RaiseGMessage("G2QC,1," + pop);
                 XI.RaiseGMessage("G2ON,1," + pop);
             }
         }
