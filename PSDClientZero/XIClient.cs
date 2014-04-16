@@ -2084,40 +2084,46 @@ namespace PSD.ClientZero
                         }
                     }
                     break;
-                case "E0HS":
-                    {
-                        string msg = "";
-                        for (int i = 1; i < args.Length; i += 2)
-                        {
-                            if (args[i] == "0")
-                                msg += "不触发战斗.";
-                            if (args[i] == "1")
-                            {
-                                ushort id = ushort.Parse(args[i + 1]);
-                                string name = (id == 0 ? "无人" :
-                                    (id < 1000 ? zd.Player(id) : zd.Monster((ushort)(id - 1000))));
-                                msg += string.Format("{0}进行支援.", name);
-                                Z0F.Supporter = id;
-                            }
-                            else if (args[i] == "2")
-                            {
-                                ushort id = ushort.Parse(args[i + 1]);
-                                string name = (id == 0 ? "无人" :
-                                    (id < 1000 ? zd.Player(id) : zd.Monster((ushort)(id - 1000))));
-                                msg += string.Format("{0}进行妨碍.", name);
-                                Z0F.Hinder = id;
-                            }
-                            if (msg.Length > 0)
-                                VI.Cout(Uid, msg);
-                        }
-                    break;
-                    }
                 case "E0HR":
                     if (args[1] == "0")
                         VI.Cout(Uid, "当前行动顺序变为正方向。");
                     else if (args[1] == "1")
                         VI.Cout(Uid, "当前行动顺序变成逆方向。");
-                    break;                    
+                    break;
+                case "E0AF":
+                    if (args[1] == "0")
+                        VI.Cout(Uid, "不触发战斗.");
+                    else {
+                        string msg = "";
+                        for (int i = 1; i < args.Length; i += 2)
+                        {
+                            ushort s = ushort.Parse(args[i + 1]);
+                            string name = (s == 0 ? "无人" :
+                                (s < 1000 ? zd.Player(s) : zd.Monster((ushort)(s - 1000))));
+                            if (args[i] == "1")
+                            {
+                                msg += string.Format("{0}进行支援.", name);
+                                Z0F.Supporter = s;
+                            }
+                            else if (args[i] == "2")
+                            {
+                                msg += string.Format("{0}进行妨碍.", name);
+                                Z0F.Hinder = s;
+                            } else if (args[i] == "5")
+                            {
+                                msg += string.Format("{0}不再支援.", name);
+                                if (Z0F.Supporter == s)
+                                    Z0F.Supporter = 0;
+                            } else if (args[i] == "6")
+                            {
+                                msg += string.Format("{0}不再妨碍.", name);
+                                if (Z0F.Hinder == s)
+                                    Z0F.Hinder = 0;
+                            }
+                            if (msg.Length > 0)
+                                VI.Cout(Uid, msg);
+                        }
+                    }
             }
         }
         #endregion E

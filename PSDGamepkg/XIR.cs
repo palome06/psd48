@@ -441,31 +441,18 @@ namespace PSD.PSDGamepkg
                             ushort sprUid = 0;
                             if (decision.StartsWith("T")) {
                                 ushort who = ushort.Parse(decision.Substring("T".Length));
-                                if (who == Board.Rounder.Uid) // solo
-                                {
-                                    isFight = true; Board.Supporter = null; sprUid = 0;
-                                }
-                                else // Standard case
-                                {
-                                    isFight = true; Board.Supporter = Board.Garden[who];
-                                    sprUid = who;
-                                }
+                                sprUid = (who != Board.rounder.Uid) ? who : 0;
+                                isFight = true;
                             } else if (decision.StartsWith("P")) {
                                 ushort cdCode = ushort.Parse(decision.Substring("PT".Length));
-                                Monster monster = LibTuple.ML.Decode(cdCode);
-                                if (monster != null)
-                                {
-                                    Player lumberjack = Board.Lumberjack(monster, cdCode);
-                                    isFight = true; Board.Supporter = lumberjack;
-                                    sprUid = lumberjack.Uid;
-                                }
+                                isFight = true; sprUid = cdCode + 1000;
                             } else if (decision.StartsWith("/")) {
-                                isFight = false; Board.Supporter = null; sprUid = 0;
+                                isFight = false; sprUid = 0;
                             }
 
                             if (!isFight)
                             {
-                                RaiseGMessage("G2HS,0,0");
+                                RaiseGMessage("G0AF,0,0");
                                 // Ensure XI.Board.Mon1From == 0
                                 ushort mons = DequeueOfPile(Board.MonPiles);
                                 RaiseGMessage("G2IN,1,1");
@@ -476,7 +463,7 @@ namespace PSD.PSDGamepkg
                                 WI.BCast("G2QC,1," + mons);
                                 rstage = "R" + rounder + "ZF";
                             } else {
-                                RaiseGMessage("G2HS,1," + sprUid);
+                                RaiseGMessage("G0AF,1," + sprUid);
                                 // Hinder side
                                 isFight = false; // decide to show fight or just pass
                                 string hnsm = "#妨碍者(决定)", hnsn = "#妨碍者(建议)";
@@ -498,20 +485,12 @@ namespace PSD.PSDGamepkg
                                 if (decision.StartsWith("T")) {
                                     ushort who = ushort.Parse(decision.Substring("T".Length));
                                     hndUid = who;
-                                    Board.Hinder = Board.Garden[who];
                                 } else if (decision.StartsWith("P")) {
                                     ushort cdCode = ushort.Parse(decision.Substring("PT".Length));
-                                    Monster monster = LibTuple.ML.Decode(cdCode);
-                                    if (monster != null)
-                                    {
-                                        Player lumberjack = Board.Lumberjack(monster, cdCode);
-                                        Board.Hinder = lumberjack;
-                                        hndUid = lumberjack.Uid;
-                                    }
-                                } else if (decision.StartsWith("/")) {
-                                    Board.Hinder = null; hndUid = 0;
-                                }
-                                RaiseGMessage("G2HS,2," + hndUid);
+                                    hndUid = cdCode + 1000;
+                                } else if (decision.StartsWith("/"))
+                                    hndUid = 0;
+                                RaiseGMessage("G0AF,2," + hndUid);
                                 WI.BCast(rstage + "7,2," + Board.Hinder.Uid);
                                 rstage = "R" + rounder + "ZU";
                             }

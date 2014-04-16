@@ -2985,6 +2985,49 @@ namespace PSD.PSDGamepkg
                         }
                     }
                     break;
+                case "G0AF":
+                    if (args[1] == "0" ) // Not show fight
+                        WI.BCast("E0AF,0");
+                    else {
+                        IDictionary<ushort, int> selecto = new Dictionary<ushort, int>();
+                        for (int i = 1; i < args.Length; i += 2) {
+                            ushort who = ushort.Parse(args[i]);
+                            int delta = int.Parse(args[i + 1]);
+                            if (selecto.ContainsKey(who)) {
+                                if (delta > 4 && selecto[who] < 0)
+                                    selecto[who] = delta;
+                            } else
+                                select[who] = delta;
+                        }
+                        foreach (var pair in selecto) {
+                            if (pair.Value == 5 && Board.Supporter.Uid == pair.Key)
+                                Board.Supporter = null;
+                            else if (pair.Value == 6 && Board.Hinder.Uid == pair.Value)
+                                Board.Hinder = null;
+                            else {
+                                Player py;
+                                if (pair.Key > 0 && pair.Key < 1000)
+                                    py = Board.Garden[pair.Key];
+                                else {
+                                    ushort mut = (ushort)(pair.Key - 1000);
+                                    Base.Card.NMB nmb = LibTuple.NMBLib.Decode(mut, LibTuple.ML, LibTuple.NL);
+                                    if (nmb != null)
+                                        py = Board.Lumberjack(nmb, mut);
+                                    else
+                                        py = null;
+                                }
+                                if (pair.Value == 1)
+                                    Board.Supporter = py;
+                                else if (pair.Value == 2)
+                                    Board.Hinder = py;
+                            }
+                        }
+                        string e0af = string.Join(",", selectto.Select(
+                            p => (p.Value > 4 ? p.Value : 0) + "," + p.Key));
+                        if (e0af.Length > 0)
+                            WI.BCast("E0AF," + e0af);
+                    }
+                    break;
             }
         }
         #endregion G-Detail
