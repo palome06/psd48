@@ -120,6 +120,8 @@ namespace PSD.ClientAo
                 return Hero(int.Parse(code.Substring("H".Length)));
             else if (code.StartsWith("I"))
                 return ExspI(int.Parse(code.Substring("I".Length)));
+            else if (code.StartsWith("C"))
+                return Tux(ushort.Parse(code.Substring("C".Length)));
             else
                 return null;
         }

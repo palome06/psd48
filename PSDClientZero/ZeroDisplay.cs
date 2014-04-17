@@ -121,6 +121,8 @@ namespace PSD.ClientZero
                 return Hero(int.Parse(code.Substring("H".Length)));
             else if (code.StartsWith("I"))
                 return ExspI(int.Parse(code.Substring("I".Length)));
+            else if (code.StartsWith("C"))
+                return Tux(ushort.Parse(code.Substring("C".Length)));
             else
                 return null;
         }
@@ -134,7 +136,7 @@ namespace PSD.ClientZero
         internal string ExspI(int code)
         {
             Base.Card.Exsp exsp = tuple.ESL.Encode("I" + code);
-            return (exsp != null) ? exsp.Name : "喵";
+            return (exsp != null) ? (code + ":" + exsp.Name) : "0:喵";
         }
         internal string ExspIWithCode(int code)
         {

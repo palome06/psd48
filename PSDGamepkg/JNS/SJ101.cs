@@ -305,9 +305,9 @@ namespace PSD.PSDGamepkg.JNS
                 if (!input.StartsWith("/") && input != VI.CinSentinel)
                 {
                     string[] ips = input.Split(',');
-                    List<ushort> getxs = Util.TakeRange(ips, 0, pubSz - 1).Select(p => ushort.Parse(p))
+                    List<ushort> getxs = Util.TakeRange(ips, 0, ips.Length - 1).Select(p => ushort.Parse(p))
                         .Where(p => XI.Board.PZone.Contains(p)).ToList();
-                    ushort to = ushort.Parse(ips[pubSz - 1]);
+                    ushort to = ushort.Parse(ips[ips.Length - 1]);
                     if (getxs.Count > 0)
                     {
                         XI.RaiseGMessage("G1OU," + string.Join(",", getxs));
@@ -335,9 +335,9 @@ namespace PSD.PSDGamepkg.JNS
                 if (!input.StartsWith("/") && input != VI.CinSentinel)
                 {
                     string[] ips = input.Split(',');
-                    List<ushort> getxs = Util.TakeRange(ips, 0, pubSz - 1).Select(p => ushort.Parse(p))
+                    List<ushort> getxs = Util.TakeRange(ips, 0, ips.Length - 1).Select(p => ushort.Parse(p))
                         .Where(p => XI.Board.PZone.Contains(p)).ToList();
-                    ushort to = ushort.Parse(ips[pubSz - 1]);
+                    ushort to = ushort.Parse(ips[ips.Length - 1]);
                     if (getxs.Count > 0)
                     {
                         XI.RaiseGMessage("G1OU," + string.Join(",", getxs));

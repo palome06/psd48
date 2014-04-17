@@ -2258,6 +2258,8 @@ namespace PSD.PSDGamepkg.JNS
                 string[] blocks = fuse.Split(',');
                 int idx = 1;
                 Player oy = XI.Board.Garden[owner];
+                if (!oy.IsAlive)
+                    return false;
                 while (idx < blocks.Length)
                 {
                     if (blocks[idx + 1] == "0")
@@ -3045,6 +3047,19 @@ namespace PSD.PSDGamepkg.JNS
                     return false;
                 }
             }
+            else if (type == 5)
+            {
+                string[] e0af = fuse.Split(',');
+                if (e0af[1] != "0" && player.RAMUshort == 1 && XI.Board.InFight)
+                {
+                    for (int i = 1; i < e0af.Length; ++i)
+                    {
+                        if (e0af[i + 1] == player.Uid.ToString())
+                            return true;
+                    }
+                }
+                return false;
+            }
             return false;
         }
         public void JN60501Action(Player player, int type, string fuse, string argst)
@@ -3079,6 +3094,21 @@ namespace PSD.PSDGamepkg.JNS
                 if (player.RAMInt > 0)
                     XI.RaiseGMessage("G0IP," + player.Team + "," + player.RAMInt);
                 //XI.InnerGMessage(fuse, 121);
+            }
+            else if (type == 5)
+            {
+                if (XI.Board.IsAttendWar(player))
+                {
+                    player.RAMInt = player.HPb - player.HP;
+                    if (player.RAMInt > 0)
+                        XI.RaiseGMessage("G0IP," + player.Team + "," + player.RAMInt);
+                }
+                else
+                {
+                    player.RAMInt = player.HPb - player.HP;
+                    if (player.RAMInt > 0)
+                        XI.RaiseGMessage("G0OP," + player.Team + "," + player.RAMInt);
+                }
             }
         }
         public bool JN60502Valid(Player player, int type, string fuse)
@@ -3164,15 +3194,14 @@ namespace PSD.PSDGamepkg.JNS
         public void JN60602Action(Player player, int type, string fuse, string argst)
         {
             XI.RaiseGMessage("G0DH," + player.Uid + ",3");
-            foreach (ushort ut in player.Pets)
+            List<ushort> pets = player.Pets.Where(p => p != 0).ToList();
+            foreach (ushort ut in pets)
             {
-                if (ut != 0)
-                {
-                    XI.RaiseGMessage("G0HL," + player.Uid + "," + ut);
-                    XI.Board.MonDises.Add(ut);
-                    XI.RaiseGMessage("G2ON,1," + ut);
-                }
+                XI.RaiseGMessage("G0HL," + player.Uid + "," + ut);
+                XI.Board.MonDises.Add(ut);
             }
+            if (pets.Count > 0)
+                XI.RaiseGMessage("G2ON," + pets.Count + "," + string.Join(",", pets));
             List<int> souls = player.ROMCards.Where(p => p.StartsWith("H"))
                 .Select(p => int.Parse(p.Substring("H".Length))).ToList();
             if (souls.Count > 0)

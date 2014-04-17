@@ -6,7 +6,7 @@
         <ImageBrush ImageSource="pack://application:,,,/PSDRisoLib;component/Resources/Logo/LoginBgimg.jpg"/>
     </Window.Background>
     <Border BorderThickness="5" BorderBrush="Black" CornerRadius="30"
-                Margin="40,40,40,40" Background="Gray" Opacity="0.8">
+                Margin="40,32,40,32" Background="Gray" Opacity="0.8">
         <Grid VerticalAlignment="Center" HorizontalAlignment="Center">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="130"/>
@@ -121,22 +121,28 @@
                                     </StackPanel>
                                 </WrapPanel>
 
-                                <CheckBox x:Name="HallPkgCB" Grid.Column="0" Grid.Row="2" 
-                                          Checked="HallPkgEnabled" Unchecked="HallPkgDisabled">
-                                    指定游戏包：</CheckBox>
+                                <Grid Grid.Column="0" Grid.Row="2">
+                                    <CheckBox x:Name="HallPkgCB" VerticalAlignment="Top"
+                                              Checked="HallPkgEnabled" Unchecked="HallPkgDisabled">
+                                        指定游戏包：</CheckBox>
+                                    <Button x:Name="HallPkgAllSel" VerticalAlignment="Bottom" Click="HallPkgAllSelClick"
+                                            Width="100" Height="26" Background="LightGray">全部选择</Button>
+                                </Grid>
                                 <WrapPanel x:Name="HallPkgPanel" Grid.Column="1" Grid.Row="2">
                                     <CheckBox x:Name="Pkg1CheckBox" Content="标准包" Width="120"
                                               IsChecked="True" IsEnabled="False"/>
                                     <CheckBox x:Name="Pkg2CheckBox" Content="凤鸣玉誓" Width="120"
                                               IsChecked="True" />
                                     <CheckBox x:Name="Pkg3CheckBox" Content="SP" Width="120"
-                                              IsChecked="True" />
+                                              IsChecked="False" />
                                     <CheckBox x:Name="Pkg4CheckBox" Content="三世轮回" Width="120"
                                               IsChecked="True" />
                                     <CheckBox x:Name="Pkg5CheckBox" Content="云来奇缘" Width="120"
                                               IsChecked="True" />
-                                    <CheckBox x:Name="Pkg6CheckBox" Content="宿命篇" Width="120"
-                                              IsChecked="True" />
+                                    <CheckBox x:Name="Pkg6CheckBox" Content="逍遥幻境" Width="120"
+                                              IsChecked="False" />
+                                    <CheckBox x:Name="Pkg7CheckBox" Content="宿命篇" Width="120"
+                                              IsChecked="False" />
                                 </WrapPanel>
 
                                 <CheckBox x:Name="HallTeamCB" Grid.Column="0" Grid.Row="4"

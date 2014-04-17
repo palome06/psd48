@@ -91,10 +91,11 @@ namespace PSD.PSDGamepkg
             {
                 string teamModeStr = GetValue(args, 3, "请选择是否支持选队(YJ:选队/NJ:不允许选队)");
                 bool teamMode = (teamModeStr == "YJ") ? true : false;
-                string pkg = GetValue(args, 4, "采用包，求和(1:标包/2:凤鸣玉誓/4:SP/8:TR三世轮回/16:TR云来奇缘)");
+                string pkg = GetValue(args, 4, "采用包，求和(1:标包/2:凤鸣玉誓/4:SP" +
+                    "/8:TR三世轮回/16:TR云来奇缘/32:宿命篇/64:逍遥幻境)");
                 
                 if (!int.TryParse(pkg, out pkgCode) || pkgCode <= 0 || pkgCode > RuleCode.PKG_ALL)
-                    pkgCode = RuleCode.PKG_ALL;
+                    pkgCode = RuleCode.PKG_STD;
                 //string gameModeStr = GetValue(args, 5, "请选择游戏模式(JY:休闲模式/CT:竞技模式)");
                 //IsGameCompete = (gameModeStr == "CT") ? true : false; // true -> CT
                 string portStr = GetValue(args, 5, "请输入房间编号(0为默认值)");

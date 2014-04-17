@@ -82,10 +82,15 @@ namespace PSD.Base.Rules
         public const int XJ_TR2 = 0x8; // [4] Sanshilunhui
         public const int XJ_TR3 = 0x10; // [5] Yunlaiqiyuan
         public const int XJ_HL = 0x20; // [6] Holiday Serial
+        public const int XJ_TR4 = 0x40; // [7] Xiaoyaohuanjing
 
         public static int PKG_ALL
         {
-            get { return XJ_STANDARD | XJ_EXT1 | XJ_SP | XJ_TR2 | XJ_TR3 | XJ_HL; }
+            get { return XJ_STANDARD | XJ_EXT1 | XJ_SP | XJ_TR2 | XJ_TR3 | XJ_HL | XJ_TR4; }
+        }
+        public static int PKG_STD
+        {
+            get { return XJ_STANDARD | XJ_EXT1 | XJ_TR2 | XJ_TR3; }
         }
         #endregion Package Selection
     }

@@ -312,7 +312,7 @@ namespace PSD.ClientAo.Login
                 return 0;
             int result = 0;
             CheckBox[] cbs = new CheckBox[] { Pkg1CheckBox, Pkg2CheckBox, Pkg3CheckBox,
-                Pkg4CheckBox, Pkg5CheckBox, Pkg6CheckBox };
+                Pkg4CheckBox, Pkg5CheckBox, Pkg7CheckBox, Pkg6CheckBox };
             int besu = 1;
             for (int i = 0; i < cbs.Length; ++i, besu <<= 1)
             {
@@ -320,6 +320,14 @@ namespace PSD.ClientAo.Login
                     result |= besu;
             }
             return result;
+        }
+        private void HallPkgAllSelClick(object sender, RoutedEventArgs e)
+        {
+            CheckBox[] cbs = new CheckBox[] { Pkg1CheckBox, Pkg2CheckBox, Pkg3CheckBox,
+                Pkg4CheckBox, Pkg5CheckBox, Pkg7CheckBox, Pkg6CheckBox };
+            foreach (CheckBox cb in cbs)
+                cb.IsChecked = true;
+            HallPkgCB.IsChecked = true;
         }
 
         private int HallTeamMode { set; get; }

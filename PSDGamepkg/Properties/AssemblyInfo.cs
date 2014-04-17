@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("PSDGamepkg v0.4.5")]
+[assembly: AssemblyTitle("PSDGamepkg v0.4.6")]
 [assembly: AssemblyDescription("PSDGamepkg")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("iptcg")]
@@ -32,5 +32,5 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("0.4.5.113")]
-[assembly: AssemblyFileVersion("0.4.5.113")]
+[assembly: AssemblyVersion("0.4.6.114")]
+[assembly: AssemblyFileVersion("0.4.6.114")]

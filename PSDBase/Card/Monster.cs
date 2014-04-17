@@ -24,7 +24,8 @@ namespace PSD.Base.Card
 
         public int STR { set; get; }
         public ushort STRb { private set; get; }
-        public int AGL { private set; get; }
+        public int AGL { set; get; }
+        public ushort AGLb { private set; get; }
 
         public string[][] EAOccurs { private set; get; }
         public int[][] EAProperties { private set; get; }
@@ -224,7 +225,8 @@ namespace PSD.Base.Card
         {
             this.Name = name; this.Code = code; this.Group = group;
             this.Element = element; this.Level = level;
-            this.STRb = strb; this.STR = this.STRb; this.AGL = agl;
+            this.STRb = strb; this.STR = this.STRb;
+            this.AGLb = agl; this.AGL = this.AGLb;
             this.EAOccurs = eaoccurs;
             this.EAProperties = eaprops;
             this.EALocks = ealocks;

@@ -210,11 +210,11 @@ namespace PSD.ClientAo.VW
             return any;
         }
         internal string CinI(ushort uid, string prevComment,
-            int r1, int r2, List<ushort> uss, bool cancellable, bool keep)
+            int r1, int r2, IEnumerable<string> uss, bool cancellable, bool keep)
         {
             PreCin(uid);
             ShowTip(prevComment);
-            AD.yfDeal.Deal.Show(uss.Select(p => "I" + p), null, r1, r2, cancellable, keep);
+            AD.yfDeal.Deal.Show(uss, null, r1, r2, cancellable, keep);
             string result = Cin(uid);
             if (result != CinSentinel)
                 HideTip();

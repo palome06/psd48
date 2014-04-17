@@ -2071,6 +2071,38 @@ namespace PSD.PSDGamepkg
                         }
                         break;
                     }
+                case "G0IW":
+                    {
+                        ushort x = ushort.Parse(args[1]);
+                        int n = ushort.Parse(args[2]);
+                        NMB nmb = NMBLib.Decode(x, LibTuple.ML, LibTuple.NL);
+                        if (nmb.IsMonster())
+                        {
+                            Monster mon = (Monster)nmb;
+                            mon.AGL += (ushort)n;
+                            WI.BCast("E0IW," + x + "," + n + "," + mon.AGL);
+                            if (Board.InFight)
+                                RaiseGMessage("G09P,0");
+                        }
+                        break;
+                    }
+                case "G0OW":
+                    {
+                        ushort x = ushort.Parse(args[1]);
+                        int n = ushort.Parse(args[2]);
+                        NMB nmb = NMBLib.Decode(x, LibTuple.ML, LibTuple.NL);
+                        if (nmb.IsMonster())
+                        {
+                            Monster mon = (Monster)nmb;
+                            if (mon.AGL < n)
+                                n = mon.AGL;
+                            mon.AGL -= (ushort)n;
+                            WI.BCast("E0OW," + x + "," + n + "," + mon.AGL);
+                            if (Board.InFight)
+                                RaiseGMessage("G09P,0");
+                        }
+                        break;
+                    }
                 case "G0WB":
                     {
                         ushort x = ushort.Parse(args[1]);
@@ -2078,13 +2110,21 @@ namespace PSD.PSDGamepkg
                         if (nmb.IsMonster())
                         {
                             Monster mon = (Monster)nmb;
+                            bool change = false;
                             if (mon.STR != mon.STRb)
                             {
                                 mon.STR = mon.STRb;
-                                WI.BCast("E0WB," + x + "," + mon.STR);
+                                change |= true;
                                 RaiseGMessage("G2WK," + string.Join(",",
                                     CalculatePetsScore().Select(p => p.Key + "," + p.Value)));
                             }
+                            if (mon.AGL != mon.AGLb)
+                            {
+                                mon.AGL = mon.AGLb;
+                                change |= true;
+                            }
+                            if (change)
+                                WI.BCast("E0WB," + x + "," + mon.STR + "," + mon.AGL);
                         }
                         else if (nmb.IsNPC())
                         {
@@ -2724,15 +2764,27 @@ namespace PSD.PSDGamepkg
                     }
                     break;
                 case "G0LH":
-                    for (int i = 1; i < args.Length; i += 3)
                     {
-                        ushort incr = ushort.Parse(args[i]);
-                        ushort ut = ushort.Parse(args[i + 1]);
-                        ushort to = ushort.Parse(args[i + 2]);
-                        if (incr == 0 || incr == 1)
-                            Board.Garden[ut].HPb = to;
+                        ISet<Player> fullBye = new HashSet<Player>();
+                        for (int i = 1; i < args.Length; i += 3)
+                        {
+                            ushort incr = ushort.Parse(args[i]);
+                            ushort ut = ushort.Parse(args[i + 1]);
+                            ushort to = ushort.Parse(args[i + 2]);
+                            if (incr == 0 || incr == 1)
+                            {
+                                if (to <= 0) { to = 0; args[i + 2] = "0"; }
+                                Board.Garden[ut].HPb = to;
+                                if (Board.Garden[ut].HP > Board.Garden[ut].HPb)
+                                    Board.Garden[ut].HP = Board.Garden[ut].HPb;
+                                if (Board.Garden[ut].HPb == 0)
+                                    fullBye.Add(Board.Garden[ut]);
+                            }
+                        }
+                        WI.BCast("E0LH," + string.Join(",", Util.TakeRange(args, 1, args.Length)));
+                        if (fullBye.Count > 0)
+                            RaiseGMessage("G0ZW," + string.Join(",", fullBye.Select(p => p.Uid)));
                     }
-                    WI.BCast("E0LH," + string.Join(",", Util.TakeRange(args, 1, args.Length)));
                     break;
                 case "G0IV":
                     {
@@ -2986,8 +3038,8 @@ namespace PSD.PSDGamepkg
                     }
                     break;
                 case "G0AF":
-                    if (args[1] == "0" ) // Not show fight
-                        WI.BCast("E0AF,0");
+                    if (args[2] == "0") // Not show fight
+                        WI.BCast("E0AF,0,0");
                     else {
                         IDictionary<ushort, int> selecto = new Dictionary<ushort, int>();
                         for (int i = 1; i < args.Length; i += 2) {
@@ -2997,7 +3049,7 @@ namespace PSD.PSDGamepkg
                                 if (delta > 4 && selecto[who] < 0)
                                     selecto[who] = delta;
                             } else
-                                select[who] = delta;
+                                selecto[who] = delta;
                         }
                         foreach (var pair in selecto) {
                             if (pair.Value == 5 && Board.Supporter.Uid == pair.Key)
@@ -3010,7 +3062,7 @@ namespace PSD.PSDGamepkg
                                     py = Board.Garden[pair.Key];
                                 else {
                                     ushort mut = (ushort)(pair.Key - 1000);
-                                    Base.Card.NMB nmb = LibTuple.NMBLib.Decode(mut, LibTuple.ML, LibTuple.NL);
+                                    Base.Card.NMB nmb = Base.Card.NMBLib.Decode(mut, LibTuple.ML, LibTuple.NL);
                                     if (nmb != null)
                                         py = Board.Lumberjack(nmb, mut);
                                     else
@@ -3022,8 +3074,8 @@ namespace PSD.PSDGamepkg
                                     Board.Hinder = py;
                             }
                         }
-                        string e0af = string.Join(",", selectto.Select(
-                            p => (p.Value > 4 ? p.Value : 0) + "," + p.Key));
+                        string e0af = string.Join(",", selecto.Select(
+                            p => (p.Value > 4 ? 0 : p.Value) + "," + p.Key));
                         if (e0af.Length > 0)
                             WI.BCast("E0AF," + e0af);
                     }

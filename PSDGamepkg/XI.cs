@@ -71,7 +71,8 @@ namespace PSD.PSDGamepkg
             //10403, 17013, 15009, 10302, 15005, 17016
             //19001, 10302, 10102, 10606, 10203, 10608
             //10603, 19018, 10605, 10501, 15003, 10505
-            10502, 19006, 10605, 10501, 15003, 10505
+            //17022, 19006, 10605, 10501, 15003, 10505
+            17004, 17022, 17012, 10401, 10501, 10302
         };
 
         #region Memeber Declaration & Constructor
@@ -95,6 +96,7 @@ namespace PSD.PSDGamepkg
         private IDictionary<string, Operation> cz01;
         // nj01 for mapping from npc effect name to object
         private IDictionary<string, Base.NCAction> nj01;
+        public IDictionary<string, Base.NCAction> Nj01 { get { return nj01; } }
         // ev01 for mapping from eve code pers effect name to object
         private IDictionary<string, Base.Card.Evenement> ev01;
 
@@ -597,9 +599,9 @@ namespace PSD.PSDGamepkg
 
             string[] g0 = new string[] { "IT", "OT", "HQ", "QZ", "DH", "IH", "OH", "ZH", "LV", "ZW",
                  "IY", "OY", "DS", "CC", "CD", "CE", "XZ", "ZB", "ZC", "ZS", "ZL", "IA", "OA", "IX",
-                 "OX", "AX", "IB", "OB", "WB", "9P", "IP", "OP", "CZ", "HC", "HD", "HH", "HI", "HL",
-                 "IC", "OC", "HT", "QR", "HZ", "TT", "JM", "WN", "IJ", "OJ", "IE", "OE", "YM", "IS",
-                 "OS", "LH", "IV", "OV", "PB", "HR", "AF"
+                 "OX", "AX", "IB", "OB", "IW", "OW", "WB", "9P", "IP", "OP", "CZ", "HC", "HD", "HH",
+                 "HI", "HL", "IC", "OC", "HT", "QR", "HZ", "TT", "JM", "WN", "IJ", "OJ", "IE", "OE",
+                 "YM", "IS", "OS", "LH", "IV", "OV", "PB", "HR", "AF"
             };
             string[] g1 = new string[] { "DI", "IU", "OU", "ZK", "IZ", "OZ", "SG", "HK", "WJ", "JG",
                  "XR", "EV", "CK" };

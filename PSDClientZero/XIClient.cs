@@ -660,20 +660,51 @@ namespace PSD.ClientZero
                 }
                 else if (arg[0] == 'Z')
                 {
+                    int idx = arg.IndexOf('~');
                     int jdx = arg.IndexOf('(');
                     int kdx = arg.IndexOf(')');
                     string input;
-                    int r = int.Parse(Substring(arg, 1, jdx));
-                    if (jdx >= 0)
+                    if (idx >= 1)
                     {
-                        string[] argv = Substring(arg, jdx + "(p".Length, kdx).Split('p');
-                        var uss = argv.Select(p => ushort.Parse(p));
-                        input = VI.Cin(Uid, "请选择{0}张公共卡牌为{1}目标，可选{2}{3}.", r, prevComment, zd.Tux(uss), cancel);
-                        inputValid &= input.Split(',').Intersect(argv).Any();
+                        int r1 = int.Parse(Substring(arg, 1, idx));
+                        int r2 = int.Parse(Substring(arg, idx + 1, jdx));
+                        if (jdx >= 0)
+                        {
+                            string[] argv = Substring(arg, jdx + "(p".Length, kdx).Split('p');
+                            var uss = argv.Select(p => ushort.Parse(p));
+                            if (argv.Length < r1)
+                            {
+                                r1 = r2 = argv.Length;
+                                input = VI.Cin(Uid, "请选择{0}张公共卡牌为{1}目标，可选{2}{3}.",
+                                    argv.Length, prevComment, zd.Tux(uss), cancel);
+                            }
+                            else
+                                input = VI.Cin(Uid, "请选择{0}至{1}张公共卡牌为{2}目标，可选{3}{4}.",
+                                    r1, r2, prevComment, zd.Tux(uss), cancel);
+                            inputValid &= input.Split(',').Intersect(argv).Any();
+                        }
+                        else
+                            input = VI.Cin(Uid, "请选择{0}至{1}张卡牌为{2}目标{3}.", r1, r2, prevComment, cancel);
+                        inputValid &= !(CountItemFromComma(input) < r1 || CountItemFromComma(input) > r2);
                     }
                     else
-                        input = VI.Cin(Uid, "请选择{0}张公共卡牌为{1}目标{2}.", r, prevComment, cancel);
-                    inputValid &= CountItemFromComma(input) == r;
+                    {
+                        int r = int.Parse(Substring(arg, 1, jdx));
+                        if (jdx >= 0)
+                        {
+                            string[] argv = Substring(arg, jdx + "(p".Length, kdx).Split('p');
+                            var uss = argv.Select(p => ushort.Parse(p));
+                            if (argv.Length < r)
+                                r = argv.Length;
+                            input = VI.Cin(Uid, "请选择{0}张公共卡牌为{1}目标，可选{2}{3}.",
+                                r, prevComment, zd.Tux(uss), cancel);
+                            inputValid &= input.Split(',').Intersect(argv).Any();
+                        }
+                        else
+                            input = VI.Cin(Uid, "请选择{0}张公共卡牌为{1}目标{2}.",
+                                r, prevComment, cancel);
+                        inputValid &= CountItemFromComma(input) == r;
+                    }
                     prevComment = ""; cancel = "";
                     roundInput = input;
                 }
@@ -738,15 +769,17 @@ namespace PSD.ClientZero
                         r1 = r2 = int.Parse(Substring(arg, 1, jdx));
 
                     string[] argv = Substring(arg, jdx + "(p".Length, kdx).Split('p');
-                    List<int> uss = argv.Select(p => int.Parse(p)).ToList();
+                    List<string> uss = argv.Select(p => p.Substring("I".Length)).ToList();
                     if (argv.Length < r1)
                         r1 = r2 = argv.Length;
                     if (r1 != r2)
-                        input = VI.Cin(Uid, "请选择{0}至{1}张专属牌为{2}目标，可选{3}{4}.", r1, r2, prevComment, zd.ExspIWithCode(uss), cancel);
+                        input = VI.Cin(Uid, "请选择{0}至{1}张专属牌为{2}目标，可选{3}{4}.",
+                            r1, r2, prevComment, zd.MixedCards(argv), cancel);
                     else
-                        input = VI.Cin(Uid, "请选择{0}张专属牌为{1}目标，可选{2}{3}.", r1, prevComment, zd.ExspIWithCode(uss), cancel);
+                        input = VI.Cin(Uid, "请选择{0}张专属牌为{1}目标，可选{2}{3}.",
+                            r1, prevComment, zd.MixedCards(argv), cancel);
                     inputValid &= !(CountItemFromComma(input) < r1 || CountItemFromComma(input) > r2);
-                    inputValid &= input.Split(',').Intersect(argv).Any();
+                    inputValid &= input.Split(',').Intersect(uss).Any();
                     prevComment = ""; cancel = "";
                     roundInput = input;
                 }
@@ -1258,12 +1291,12 @@ namespace PSD.ClientZero
                         if (type == 0)
                         {
                             int n = int.Parse(args[3]);
-                            VI.Cout(Uid, "{0}被定身{1}回合.", zd.Player(who), n);
+                            VI.Cout(Uid, "{0}被横置.", zd.Player(who), n);
                             Z0D[who].Immobilized = true;
                         }
                         else if (type == 1)
                         {
-                            VI.Cout(Uid, "{0}解除定身.", zd.Player(who));
+                            VI.Cout(Uid, "{0}解除横置.", zd.Player(who));
                             Z0D[who].Immobilized = false;
                         }
                         break;
@@ -1649,11 +1682,32 @@ namespace PSD.ClientZero
                         VI.Cout(Uid, "{0}战力-{1},现在为{2}.", zd.Monster(x), delta, cur);
                         break;
                     }
+                case "E0IW":
+                    {
+                        ushort x = ushort.Parse(args[1]);
+                        int delta = ushort.Parse(args[2]);
+                        int cur = int.Parse(args[3]);
+                        VI.Cout(Uid, "{0}闪避+{1},现在为{2}.", zd.Monster(x), delta, cur);
+                        break;
+                    }
+                case "E0OW":
+                    {
+                        ushort x = ushort.Parse(args[1]);
+                        int delta = int.Parse(args[2]);
+                        int cur = int.Parse(args[3]);
+                        VI.Cout(Uid, "{0}闪避-{1},现在为{2}.", zd.Monster(x), delta, cur);
+                        break;
+                    }
                 case "E0WB":
                     {
                         ushort x = ushort.Parse(args[1]);
                         int cur = int.Parse(args[2]);
-                        VI.Cout(Uid, "{0}战力恢复为{1}.", zd.Monster(x), cur);
+                        if (args.Length >= 4)
+                        {
+                            int agl = int.Parse(args[3]);
+                            VI.Cout(Uid, "{0}战力恢复为{1}，闪避恢复为{2}.", zd.Monster(x), cur, agl);
+                        } else
+                            VI.Cout(Uid, "{0}战力恢复为{1}.", zd.Monster(x), cur);
                     }
                     break;
                 case "E09P":
@@ -2038,6 +2092,8 @@ namespace PSD.ClientZero
                         ushort to = ushort.Parse(args[i + 2]);
                         VI.Cout(Uid, "{0}HP上限{1}为{2}点.", zd.Player(ut), (incr == 0 ? "减少" : "增加"), to);
                         Z0D[ut].HPa = to;
+                        if (Z0D[ut].HP > Z0D[ut].HPa)
+                            Z0D[ut].HP = Z0D[ut].HPa;
                     }
                     break;
                 case "E0IV":
@@ -2091,7 +2147,7 @@ namespace PSD.ClientZero
                         VI.Cout(Uid, "当前行动顺序变成逆方向。");
                     break;
                 case "E0AF":
-                    if (args[1] == "0")
+                    if (args[2] == "0")
                         VI.Cout(Uid, "不触发战斗.");
                     else {
                         string msg = "";
@@ -2124,6 +2180,7 @@ namespace PSD.ClientZero
                                 VI.Cout(Uid, msg);
                         }
                     }
+                    break;
             }
         }
         #endregion E

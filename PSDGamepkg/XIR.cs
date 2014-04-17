@@ -67,7 +67,7 @@ namespace PSD.PSDGamepkg
             //Board.MonPiles.PushBack(1030);
             //Board.EvePiles.PushBack(8);
             //Board.EvePiles.PushBack(1);
-            //Board.EvePiles.PushBack(23);
+            Board.EvePiles.PushBack(22);
             //Board.EvePiles.PushBack(6);
             //Board.EvePiles.PushBack(29);
             //Board.RestNPCPiles.PushBack(1004);
@@ -148,8 +148,8 @@ namespace PSD.PSDGamepkg
             //RaiseGMessage("G0HQ,2,6,0,47,48");
             //RaiseGMessage("G0HQ,2,3,0,47,52");
             //RaiseGMessage("G0HQ,2,3,0,41");
-            RaiseGMessage("G0HQ,2,1,0,40,37,34");
-            RaiseGMessage("G0HQ,2,4,0,33,35");
+            RaiseGMessage("G0HQ,2,1,0,0,47,9,10");
+            //RaiseGMessage("G0HQ,2,4,0,0,33,35");
             //RaiseGMessage("G0HQ,2,3,0,36,39");
             //RaiseGMessage("G0HQ,2,1,0,69,70");
             //RaiseGMessage("G0HQ,2,2,0,57");
@@ -221,7 +221,7 @@ namespace PSD.PSDGamepkg
             //    RaiseGMessage("G0HQ,2," + player.Uid + ",1,3");
             RaiseGMessage("G0HQ,2,2,1,3");
             RaiseGMessage("G0HQ,2,3,1,3");
-            RaiseGMessage("G0HQ,2,4,1,1");
+            RaiseGMessage("G0HQ,2,4,1,3");
             RaiseGMessage("G0HQ,2,5,1,3");
             RaiseGMessage("G0HQ,2,6,1,3");
         }
@@ -441,11 +441,11 @@ namespace PSD.PSDGamepkg
                             ushort sprUid = 0;
                             if (decision.StartsWith("T")) {
                                 ushort who = ushort.Parse(decision.Substring("T".Length));
-                                sprUid = (who != Board.rounder.Uid) ? who : 0;
+                                sprUid = (who != Board.Rounder.Uid) ? who : (ushort)0;
                                 isFight = true;
                             } else if (decision.StartsWith("P")) {
                                 ushort cdCode = ushort.Parse(decision.Substring("PT".Length));
-                                isFight = true; sprUid = cdCode + 1000;
+                                isFight = true; sprUid = (ushort)(cdCode + 1000);
                             } else if (decision.StartsWith("/")) {
                                 isFight = false; sprUid = 0;
                             }
@@ -463,7 +463,7 @@ namespace PSD.PSDGamepkg
                                 WI.BCast("G2QC,1," + mons);
                                 rstage = "R" + rounder + "ZF";
                             } else {
-                                RaiseGMessage("G0AF,1," + sprUid);
+                                RaiseGMessage("G0AF," + sprUid + ",1");
                                 // Hinder side
                                 isFight = false; // decide to show fight or just pass
                                 string hnsm = "#妨碍者(决定)", hnsn = "#妨碍者(建议)";
@@ -487,10 +487,10 @@ namespace PSD.PSDGamepkg
                                     hndUid = who;
                                 } else if (decision.StartsWith("P")) {
                                     ushort cdCode = ushort.Parse(decision.Substring("PT".Length));
-                                    hndUid = cdCode + 1000;
+                                    hndUid = (ushort)(cdCode + 1000);
                                 } else if (decision.StartsWith("/"))
                                     hndUid = 0;
-                                RaiseGMessage("G0AF,2," + hndUid);
+                                RaiseGMessage("G0AF," + hndUid + ",2");
                                 WI.BCast(rstage + "7,2," + Board.Hinder.Uid);
                                 rstage = "R" + rounder + "ZU";
                             }

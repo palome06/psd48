@@ -100,7 +100,11 @@ namespace PSD.PSDCenter
                             string.Join(",", reqRoom.players);
                         string pg = "psd48pipe" + reqRoom.Number;
                         //string pgr = "psd48piper" + reqRoom.Number;
-                        Process.Start("PSDGamepkg.exe", ag);
+                        new Thread(delegate()
+                        {
+                            Thread.Sleep(1000);
+                            Process.Start("PSDGamepkg.exe", ag);
+                        }).Start();
                         reqRoom.Ps = new NamedPipeServerStream(pg, PipeDirection.InOut);
                         var ps = reqRoom.Ps;
                         ps.WaitForConnection();
@@ -408,7 +412,7 @@ namespace PSD.PSDCenter
                 if (selCode == RuleCode.DEF_CODE)
                     selCode = RuleCode.MODE_31;
                 if (pkgCode == RuleCode.DEF_CODE)
-                    pkgCode = RuleCode.PKG_ALL;
+                    pkgCode = RuleCode.PKG_STD;
                 Room room = new Room(RequestRoom(), teamCode, selCode, pkgCode);
                 Console.WriteLine("Room {0}# is created. [{1}][{2}][{3}]",
                     room.Number, room.OptTeam, room.OptSel, room.OptPkg);
