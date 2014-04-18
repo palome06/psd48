@@ -130,23 +130,14 @@ namespace PSD.PSDGamepkg
 
         #region Piles Operation
 
-        private void RiffleTux()
+        private static void Riffle(Utils.Rueue<ushort> piles, List<ushort> dises)
         {
-            while (Board.TuxPiles.Count > 0)
-                Board.TuxDises.Add(Board.TuxPiles.Dequeue());
-            Board.TuxDises.Shuffle();
-            foreach (ushort id in Board.TuxDises)
-                Board.TuxPiles.Enqueue(id);
-            Board.TuxDises.Clear();
-        }
-        private void RiffleEve()
-        {
-            while (Board.EvePiles.Count > 0)
-                Board.EveDises.Add(Board.EvePiles.Dequeue());
-            Board.EveDises.Shuffle();
-            foreach (ushort id in Board.EveDises)
-                Board.EvePiles.Enqueue(id);
-            Board.EveDises.Clear();
+            while (piles.Count > 0)
+                dises.Add(piles.Dequeue());
+            dises.Shuffle();
+            foreach (ushort id in dises)
+                piles.Enqueue(id);
+            dises.Clear();
         }
         private void ConstructPiles(int pkgCode)
         {
@@ -195,6 +186,11 @@ namespace PSD.PSDGamepkg
             restNPC.Shuffle();
             Board.RestNPCPiles = new Base.Utils.Rueue<ushort>(restNPC);
             Board.RestNPCDises = new List<ushort>();
+
+            List<ushort> restMon = Util.TakeRange(monLst.ToArray(), 21, monLst.Count).ToList();
+            restMon.Shuffle();
+            Board.RestMonPiles = new Base.Utils.Rueue<ushort>(restMon);
+            Board.RestMonDises = new List<ushort>();
         }
         public ushort[] DequeueOfPile(Base.Utils.Rueue<ushort> queue, int count)
         {
@@ -207,24 +203,21 @@ namespace PSD.PSDGamepkg
             }
             else
             {
-                if (queue.Equals(Board.TuxPiles))
+                if (queue.Equals(Board.TuxPiles) || queue.Equals(Board.EvePiles)
+                     || queue.Equals(Board.RestNPCPiles) || queue.Equals(Board.RestMonPiles))
                 {
                     ushort[] ret = new ushort[count];
                     int qCount = queue.Count;
                     for (int i = 0; i < qCount; ++i)
                         ret[i] = queue.Dequeue();
-                    RiffleTux();
-                    for (int i = qCount; i < count; ++i)
-                        ret[i] = queue.Dequeue();
-                    return ret;
-                }
-                else if (queue.Equals(Board.EvePiles))
-                {
-                    ushort[] ret = new ushort[count];
-                    int qCount = queue.Count;
-                    for (int i = 0; i < qCount; ++i)
-                        ret[i] = queue.Dequeue();
-                    RiffleEve();
+                    if (queue.Equals(Board.TuxPiles))
+                        Riffle(Board.TuxPiles, Board.TuxDises);
+                    else if (queue.Equals(Board.EvePiles))
+                        Riffle(Board.EvePiles, Board.EveDises);
+                    else if (queue.Equals(Board.RestNPCPiles))
+                        Riffle(Board.RestNPCPiles, Board.RestNPCDises);
+                    else if (queue.Equals(Board.RestMonPiles))
+                        Riffle(Board.RestMonPiles, Board.RestMonDises);
                     for (int i = qCount; i < count; ++i)
                         ret[i] = queue.Dequeue();
                     return ret;
@@ -249,12 +242,22 @@ namespace PSD.PSDGamepkg
             {
                 if (queue.Equals(Board.TuxPiles))
                 {
-                    RiffleTux();
+                    Riffle(Board.TuxPiles, Board.TuxDises);
                     return queue.Dequeue();
                 }
                 else if (queue.Equals(Board.EvePiles))
                 {
-                    RiffleEve();
+                    Riffle(Board.EvePiles, Board.EveDises);
+                    return queue.Dequeue();
+                }
+                else if (queue.Equals(Board.RestNPCPiles))
+                {
+                    Riffle(Board.RestNPCPiles, Board.RestNPCDises);
+                    return queue.Dequeue();
+                }
+                else if (queue.Equals(Board.RestMonPiles))
+                {
+                    Riffle(Board.RestMonPiles, Board.RestMonDises);
                     return queue.Dequeue();
                 }
                 else if (queue.Equals(Board.MonPiles))
@@ -266,15 +269,6 @@ namespace PSD.PSDGamepkg
         private IEnumerable<ushort> WatchFromPile(Base.Utils.Rueue<ushort> queue, int count)
         {
             return queue.Watch(count);
-        }
-        private bool AddToDises(ushort value, List<ushort> dises)
-        {
-            if (dises.Contains(value))
-            {
-                dises.Add(value);
-                return true;
-            }
-            else return false;
         }
 
         #endregion Piles Operation
@@ -289,67 +283,6 @@ namespace PSD.PSDGamepkg
             links = new Dictionary<string, List<string>>();
             //IDictionary<string, List<SkTriple>> par = new Dictionary<string, List<SkTriple>>();
             List<SkTriple> parasitism = new List<SkTriple>();
-            //foreach (Player player in Board.Garden.Values)
-            //{
-            //    Base.Card.Hero hero = LibTuple.HL.InstanceHero(player.SelectHero);
-            //    foreach (string skillStr in hero.Skills)
-            //    {
-            //        Skill skill;
-            //        if (!sk01.TryGetValue(skillStr, out skill))
-            //            continue;
-
-            //        for (int i = 0; i < skill.Occurs.Length; ++i)
-            //        {
-            //            string occur = skill.Occurs[i];
-            //            SkTriple skt = new SkTriple()
-            //            {
-            //                Name = skill.Code,
-            //                Priorty = skill.Priorties[i],
-            //                Owner = player.Uid,
-            //                InType = i,
-            //                Type = skill.IsBK ? SKTType.BK : SKTType.SK,
-            //                Lock = skill.Lock[i],
-            //                IsOnce = skill.IsOnce[i],
-            //                Occur = occur,
-            //                IsTermini = skill.IsTermini[i]
-            //            };
-            //            if (occur.StartsWith("&"))
-            //            {
-            //                int nexdex = occur.IndexOf('&', 1);
-            //                int start = int.Parse(Util.Substring(occur, "&".Length, nexdex));
-            //                int end = int.Parse(Util.Substring(occur, nexdex + 1, -1));
-            //                //skt.Occur = string.Join("&", Util.TakeRange(skill.Parasitism, start, end));
-            //                List<string> parList = new List<string>();
-            //                for (int j = start; j < end; ++j)
-            //                {
-            //                    parList.Add(skill.Parasitism[j]);
-            //                    string sktKey = skt.Name + "," + skt.InType;
-            //                    Util.AddToMultiMap(links, skill.Parasitism[j], sktKey); // myself
-            //                }
-            //                skt.Occur = string.Join("&", parList);
-            //                parasitism.Add(skt);
-            //            }
-            //            else
-            //            {
-            //                if (occur.Contains('#'))
-            //                    Util.AddToMultiMap(dict, occur.Replace("#", player.Uid.ToString()), skt);
-            //                else if (occur.Contains('$'))
-            //                {
-            //                    foreach (ushort p in Board.Garden.Keys)
-            //                        if (p != player.Uid)
-            //                            Util.AddToMultiMap(dict, occur.Replace("$", p.ToString()), skt);
-            //                }
-            //                else if (occur.Contains('*'))
-            //                {
-            //                    foreach (ushort p in Board.Garden.Keys)
-            //                        Util.AddToMultiMap(dict, occur.Replace("*", p.ToString()), skt);
-            //                }
-            //                else
-            //                    Util.AddToMultiMap(dict, occur, skt);
-            //            }
-            //        }
-            //    }
-            //}
             foreach (Base.Card.Tux tux in LibTuple.TL.ListAllTuxs(pkgCode))
             {
                 //string[] blocks = tux.Occur.Split(';');

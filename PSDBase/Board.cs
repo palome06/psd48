@@ -39,11 +39,7 @@ namespace PSD.Base
         public bool AllowNoHinder { set; get; }
         // 0. fight; 1. Skip fight; 2. not enter the stage.
         //public int IsFight { set; get; }
-        // Pool Value of Rounder Side
-        //public int RPool { get; set; }
-        // Pool Value of Opponent Side
-        //public int OPool { get; set; }
-        public bool ClockWised;
+        public bool ClockWised { set; get; }
 
         // Whether in a fight/battle, consequence excluded
         public bool InFight { set; get; }
@@ -60,7 +56,7 @@ namespace PSD.Base
         // Whether monster can be caught as pet
         public bool Mon1Catchable { get; set; }
         public bool Mon2Catchable { get; set; }
-
+        // nmb in the battle ring
         public ushort Monster1 { set; get; }
         public ushort Monster2 { set; get; }
         public ushort Mon1From { set; get; }
@@ -86,8 +82,10 @@ namespace PSD.Base
 
         public Utils.Rueue<int> HeroPiles { set; get; }
         public Utils.Rueue<ushort> RestNPCPiles { set; get; }
+        public Utils.Rueue<ushort> RestMonPiles { set; get; }
         public List<int> HeroDises { set; get; }
         public List<ushort> RestNPCDises { set; get; }
+        public List<ushort> RestMonDises { set; get; }
 
         public List<int> BannedHero { private set; get; }
         public List<ushort> ProtectedTux { private set; get; }
@@ -238,7 +236,7 @@ namespace PSD.Base
         private readonly Player ghost = new Player("鬼", 0, 0, false);
 
         #region Serialize the Game Situation
-        public string GenerateSerialGamerMessage()
+        public static GenerateSerialGamerMessage(LibGroup tuple)
         {
             StringBuilder h09g = new StringBuilder();
             foreach (Player py in Garden.Values)
@@ -252,14 +250,19 @@ namespace PSD.Base
                 h09g.Append("," + state);
                 h09g.Append("," + py.HP + "," + py.HPb + "," + py.STR + "," + py.STRa
                     + "," + py.DEX + "," + py.DEXa + "," + py.Tux.Count
-                    + "," + py.Weapon + "," + py.Armor + "," + py.ExEquip);
+                    + "," + py.Weapon + "," + py.Armor + "," + py.Trove + "," + py.ExEquip);
+                Card.Luggage lug = tuple.TL.DecodeTux(py.Trove) as Card.Luggage;
+                if (lug != null && lug.Capacities.Count > 0)
+                    h09g.Append("," + lug.Capacities.Count + "," + string.Join(",", lug.Capacities));
+                else
+                    h09g.Append(",0");
                 h09g.Append("," + string.Join(",", py.Pets));
                 h09g.Append("," + py.ExCards.Count);
                 if (py.ExCards.Count > 0)
                     h09g.Append("," + string.Join(",", py.ExCards));
                 h09g.Append("," + py.Fakeq.Count);
                 if (py.Fakeq.Count > 0)
-                    h09g.Append("," + string.Join(",", py.Fakeq));
+                    h09g.Append("," + string.Join(",", py.Fakeq.Select(p => p.Key + "," + p.Value)));
                 h09g.Append("," + py.ROMToken);
                 h09g.Append("," + py.ROMCards.Count);
                 if (py.ROMCards.Count > 0)
@@ -267,6 +270,8 @@ namespace PSD.Base
                 h09g.Append("," + py.ROMPlayerTar.Count);
                 if (py.ROMPlayerTar.Count > 0)
                     h09g.Append("," + string.Join(",", py.ROMPlayerTar));
+                h09g.Append("," + (py.ROMAwake ? "1" : "0"));
+                h09g.Append("," + py.ROMFolder.Count);
                 h09g.Append("," + py.Escue.Count);
                 if (py.Escue.Count > 0)
                     h09g.Append("," + string.Join(",", py.Escue));
@@ -286,12 +291,14 @@ namespace PSD.Base
         public string GeneratePrivateMessage(ushort ut)
         {
             Player py = Garden[ut];
-            StringBuilder h09f = new StringBuilder();
-            h09f.Append(py.Tux.Count);
+            List<string> h09f = new List<string>();
+            h09f.Add(py.Tux.Count.ToString());
             if (py.Tux.Count > 0)
-                h09f.Append("," + string.Join(",", py.Tux));
-            // TODO: reserved for private cover cards
-            return h09f.ToString();
+                h09f.Append(string.Join(",", py.Tux));
+            h09f.Add(py.ROMFolder.Count.ToString());
+            if (Py.ROMFolder.Count > 0)
+                h09f.Append(string.Join(",", py.ROMFolder));
+            return string.Join(",", h09f);
         }
         #endregion Serialize the Game Situation
     }

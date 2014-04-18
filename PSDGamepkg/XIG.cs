@@ -175,6 +175,7 @@ namespace PSD.PSDGamepkg
                     }
                     else if (priority == 200)
                     {
+                        // TODO: to change g0zh message int a kind of all suitable.
                         ISet<ushort> death = new HashSet<ushort>();
                         List<Artiad.Harm> harms = Artiad.Harm.Parse(cmd);
                         foreach (Artiad.Harm harm in harms)
@@ -3116,13 +3117,7 @@ namespace PSD.PSDGamepkg
                         {
                             ushort who = ushort.Parse(args[i]);
                             int delta = int.Parse(args[i + 1]);
-                            if (selecto.ContainsKey(who))
-                            {
-                                if (delta > 4 && selecto[who] < 0)
-                                    selecto[who] = delta;
-                            }
-                            else
-                                selecto[who] = delta;
+                            selecto[who] = delta;
                         }
                         foreach (var pair in selecto)
                         {

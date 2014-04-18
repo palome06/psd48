@@ -180,6 +180,38 @@ namespace PSD.ClientAo.VW
                         }
                     }
                 }
+                else if (line.StartsWith("H09G"))
+                {
+                    string[] blocks = line.Split(',');
+                    for (int idx = 1; idx < blocks.Length; )
+                    {
+                        blocks[idx + 12] = "0," + blocks[idx + 12] + ",0" // insert trove and lug into exq;
+
+                        int nextIdx = idx + 18;
+                        int excdsz = int.Parse(blocks[nextIdx]);
+                        nextIdx += 1;
+                        nextIdx += excdsz;
+                        int fakeqsz = int.Parse(blocks[nextIdx]);
+                        nextIdx += 1;
+                        for (int i = nextIdx; i < nextIdx + fakeqsz; ++i)
+                            blocks[i] = blocks[i] + ",0";
+                        nextIdx += fakeqsz;
+                        int token = int.Parse(blocks[nextIdx]);
+                        nextIdx += 1;
+                        int peoplesz = int.Parse(blocks[nextIdx]);
+                        nextIdx += 1;
+                        nextIdx += peoplesz;
+                        int tarsz = int.Parse(blocks[nextIdx]);
+                        nextIdx += 1;
+                        nextIdx += tarsz;
+                        blocks[nextIdx] = "0,0," + blocks[nextIdx]; // insert awake and folder into escuesz
+                        int escuesz = int.Parse(blocks[nextIdx]);
+                        nextIdx += 1;
+                        nextIdx += escuesz;
+                    }
+                }
+                else if (line.StartsWith("H09F"))
+                    line += ",0";
             }
             if (Version <= 112)
             {

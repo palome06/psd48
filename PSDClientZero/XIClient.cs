@@ -3425,12 +3425,17 @@ namespace PSD.ClientZero
                             int tuxCount = int.Parse(blocks[idx + 9]);
                             ushort wp = ushort.Parse(blocks[idx + 10]);
                             ushort am = ushort.Parse(blocks[idx + 11]);
-                            //ushort lg = ushort.Parse(blocks[idx + 12]);
-                            ushort exq = ushort.Parse(blocks[idx + 12]);
-                            ushort[] pets = Util.TakeRange(blocks, idx + 13,
-                                idx + 18).Select(p => ushort.Parse(p)).ToArray();
+                            ushort tr = ushort.Parse(blocks[idx + 12]);
+                            ushort exq = ushort.Parse(blocks[idx + 13]);
 
-                            int nextIdx = idx + 18;
+                            int lugsz = int.Parse(blocks[idx + 14]);
+                            int nextIdx = idx + 15;
+                            List<string> lugs = Util.TakeRange(blocks, nextIdx,
+                                nextIdx + lugsz).ToList();
+                            nextIdx += lugsz;
+                            ushort[] pets = Util.TakeRange(blocks, nextIdx,
+                                nextIdx + 5).Select(p => ushort.Parse(p)).ToArray();
+                            nextIdx += 5;
                             int excdsz = int.Parse(blocks[nextIdx]);
                             nextIdx += 1;
                             List<ushort> excards = Util.TakeRange(blocks, nextIdx,
@@ -3438,9 +3443,9 @@ namespace PSD.ClientZero
                             nextIdx += excdsz;
                             int fakeqsz = int.Parse(blocks[nextIdx]);
                             nextIdx += 1;
-                            List<ushort> fakeqs = Util.TakeRange(blocks, nextIdx,
-                                nextIdx + fakeqsz).Select(p => ushort.Parse(p)).ToList();
-                            nextIdx += fakeqsz;
+                            List<string> fakeqpairs = Util.TakeRange(blocks, nextIdx,
+                                nextIdx + fakeqsz * 2).ToList();
+                            nextIdx += fakeqsz * 2;
                             int token = int.Parse(blocks[nextIdx]);
                             nextIdx += 1;
                             int peoplesz = int.Parse(blocks[nextIdx]);
@@ -3453,6 +3458,10 @@ namespace PSD.ClientZero
                             List<ushort> tars = Util.TakeRange(blocks, nextIdx,
                                 nextIdx + tarsz).Select(p => ushort.Parse(p)).ToList();
                             nextIdx += tarsz;
+                            bool awake = blocks[nextIdx] == "1";
+                            nextIdx += 1;
+                            int foldsz = int.Parse(blocks[nextIdx]);
+                            nextIdx += 1;
                             int escuesz = int.Parse(blocks[nextIdx]);
                             nextIdx += 1;
                             List<ushort> escues = Util.TakeRange(blocks, nextIdx,
@@ -3469,17 +3478,20 @@ namespace PSD.ClientZero
                                 zp.STR = str; zp.STRa = str;
                                 zp.DEX = dex; zp.DEXa = dexa;
                                 zp.TuxCount = tuxCount;
-                                zp.Weapon = wp; zp.Armor = am; zp.ExEquip = exq;
+                                zp.Weapon = wp; zp.Armor = am; zp.Trove = tr; zp.ExEquip = exq;
+                                if (lugs.Count > 0)
+                                    zp.Treasures[tr].AddRange(lugs);
                                 zp.Pets = pets;
                                 zp.ExCards = excards;
-                                foreach (var fakeq in fakeqs)
-                                    zp.Fakeq[fakeq] = "0";
+                                for (int i = 0; i < fakeqpairs.Count; i += 2)
+                                    zp.Fakeq[ushort.Parse(fakeqpairs[i])] = fakeqpairs[i + 1];
                                 zp.Token = token;
                                 zp.SpecialCards.Clear();
                                 zp.SpecialCards.AddRange(peoples);
-                                //zp.PlayerTar = playertar;
                                 zp.PlayerTars.Clear();
                                 zp.PlayerTars.AddRange(tars);
+                                zp.AwakeSignal = awake;
+                                zp.FolderCount = foldsz;
                                 zp.Escue.AddRange(escues);
 
                                 zp.IsAlive = ((state & 1) != 0);
@@ -3565,6 +3577,12 @@ namespace PSD.ClientZero
                             .Select(p => ushort.Parse(p)).ToList();
                         Z0M.Tux = tuxes;
                         idx += tuxCount;
+                        int folderCount = int.Parse(blocks[idx]);
+                        ++idx;
+                        List<ushort> folders = Util.TakeRange(blocks, idx, idx + folderCount)
+                            .Select(p => ushort.Parse(p)).ToList();
+                        Z0M.Folder = folders;
+                        idx += folderCount;
                     }
                     break;
             }

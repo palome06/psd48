@@ -214,7 +214,7 @@ namespace PSD.PSDGamepkg
                 string h09n = "H09N," + string.Join(",",
                     Board.Garden.Values.Select(p => p.Uid + "," + p.Name));
                 WI.Send(h09n, 0, wuid);
-                WI.Send("H09G," + Board.GenerateSerialGamerMessage(), 0, wuid);
+                WI.Send("H09G," + Board.GenerateSerialGamerMessage(LibTuple), 0, wuid);
                 string h09p = Board.GenerateSerialFieldMessage();
                 WI.Send("H09P," + h09p + "," + string.Join(",",
                     CalculatePetsScore().Select(p => p.Key + "," + p.Value)), 0, wuid);
@@ -269,7 +269,7 @@ namespace PSD.PSDGamepkg
                 string h09n = "H09N," + string.Join(",",
                     Board.Garden.Values.Select(p => p.Uid + "," + p.Name));
                 WI.Send(h09n, 0, wuid);
-                WI.Send("H09G," + Board.GenerateSerialGamerMessage(), 0, wuid);
+                WI.Send("H09G," + Board.GenerateSerialGamerMessage(LibTuple), 0, wuid);
                 string h09p = Board.GenerateSerialFieldMessage();
                 WI.Send("H09P," + h09p + "," + string.Join(",",
                     CalculatePetsScore().Select(p => p.Key + "," + p.Value)), 0, wuid);
