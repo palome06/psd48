@@ -530,7 +530,7 @@ namespace PSD.PSDGamepkg
                                 {
                                     ushort mons = DequeueOfPile(Board.MonPiles);
                                     RaiseGMessage("G2IN,1,1");
-                                    Board.Monster1 = mons;
+                                    Board.Monster1 = mons; Board.Mon1From = 0;
                                     Board.Battler = NMBLib.Decode(Board.Monster1,
                                         LibTuple.ML, LibTuple.NL);
                                     WI.BCast(rstage + "2," + Board.Monster1);

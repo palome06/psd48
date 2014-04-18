@@ -500,9 +500,10 @@ namespace PSD.Base.Card
         public List<ushort> ListAllSeleable(int groups)
         {
             if (groups == 0)
-                return dicts.Keys.ToList();
+                return dicts.Where(p => p.Value.Group > 0).Select(p => p.Key).ToList();
             else
-                return dicts.Where(p => ((groups & (1 << (p.Value.Group - 1))) != 0)).Select(p => p.Key).ToList();
+                return dicts.Where(p => p.Value.Group > 0 && 
+                    ((groups & (1 << (p.Value.Group - 1))) != 0)).Select(p => p.Key).ToList();
         }
 
         public List<Monster> ListAllMonster(int groups)
@@ -510,7 +511,7 @@ namespace PSD.Base.Card
             if (groups == 0)
                 return dicts.Values.ToList();
             else
-                return dicts.Where(p => ((groups & (1 << (p.Value.Group - 1))) != 0)).Select(p => p.Value).ToList();
+                return dicts.Values.Where(p => ((groups & (1 << (Math.Abs(p.Group) - 1))) != 0)).ToList();
         }
     }
 }

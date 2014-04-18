@@ -3623,7 +3623,7 @@ namespace PSD.PSDGamepkg.JNS
                     .Select(p => p.Uid)) + ")";
             else
                 return "";
-        }        
+        }
         public bool JNS0502Valid(Player player, int type, string fuse)
         {
             if (!XI.Board.Garden.Values.Where(p => p.IsTared &&

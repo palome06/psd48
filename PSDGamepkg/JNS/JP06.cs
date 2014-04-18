@@ -43,6 +43,11 @@ namespace PSD.PSDGamepkg.JNS
                     {
                         return (bool)methodBribe.Invoke(tc, new object[] { player, type, fuse });
                     });
+                else
+                    tux.Bribe += new Tux.ValidDelegate(delegate(Player player, int type, string fuse)
+                    {
+                        return (bool)GeneralTuxBride(Player player);
+                    });
                 var methodValid = tc.GetType().GetMethod(cardCode + "Valid");
                 if (methodValid != null)
                     tux.Valid += new Tux.ValidDelegate(delegate(Player player, int type, string fuse)
@@ -435,10 +440,10 @@ namespace PSD.PSDGamepkg.JNS
             if (type == 0)
             {
                 Player r = XI.Board.Rounder;
-                return r != null && r.Uid == player.Uid;
+                return r != null && r.Uid == player.Uid && !r.DrTuxDisabled;
             }
             else
-                return true;
+                return !player.DrTuxDisabled;
         }
         public void TP02Action(Player player, int type, string fuse, string args)
         {
@@ -815,7 +820,7 @@ namespace PSD.PSDGamepkg.JNS
         #region ZP
         public bool ZP01Bribe(Player player, int type, string fuse)
         {
-            return player.RestZP > 0 && !player.ZPDisabled;
+            return player.RestZP > 0 && !player.ZPDisabled && !player.DrTuxDisabled;
         }
         public bool ZP01Valid(Player player, int type, string fuse)
         {
@@ -829,7 +834,7 @@ namespace PSD.PSDGamepkg.JNS
         // Tiangangzhanqi
         public bool ZP02Bribe(Player player, int type, string fuse)
         {
-            return player.RestZP > 0 && !player.ZPDisabled;
+            return player.RestZP > 0 && !player.ZPDisabled && !player.DrTuxDisabled;
         }
         public bool ZP02Valid(Player player, int type, string fuse)
         {
@@ -843,7 +848,7 @@ namespace PSD.PSDGamepkg.JNS
         // Jincanwang
         public bool ZP03Bribe(Player player, int type, string fuse)
         {
-            return player.RestZP > 0 && !player.ZPDisabled;
+            return player.RestZP > 0 && !player.ZPDisabled && !player.DrTuxDisabled;
         }
         public bool ZP03Valid(Player player, int type, string fuse)
         {
@@ -856,7 +861,7 @@ namespace PSD.PSDGamepkg.JNS
         // Tianxuanwuyin
         public bool ZP04Bribe(Player player, int type, string fuse)
         {
-            return player.RestZP > 0 && !player.ZPDisabled;
+            return player.RestZP > 0 && !player.ZPDisabled && !player.DrTuxDisabled;
         }
         public void ZP04Action(Player player, int type, string fuse, string argst)
         {
@@ -987,7 +992,7 @@ namespace PSD.PSDGamepkg.JNS
         }
         public bool ZPT1Bribe(Player player, int type, string fuse)
         {
-            return player.RestZP > 0 && !player.ZPDisabled;
+            return player.RestZP > 0 && !player.ZPDisabled && !player.DrTuxDisabled;
         }
         public void ZPT1Action(Player player, int type, string fuse, string argst)
         {
@@ -1451,7 +1456,7 @@ namespace PSD.PSDGamepkg.JNS
         }
         public bool ZPT2Bribe(Player player, int type, string fuse)
         {
-            return player.RestZP > 0 && !player.ZPDisabled;
+            return player.RestZP > 0 && !player.ZPDisabled && !player.DrTuxDisabled;
         }
         public bool ZPT2Valid(Player player, int type, string fuse)
         {
@@ -1479,7 +1484,7 @@ namespace PSD.PSDGamepkg.JNS
         }
         public bool ZPT3Bribe(Player player, int type, string fuse)
         {
-            return player.RestZP > 0 && !player.ZPDisabled;
+            return player.RestZP > 0 && !player.ZPDisabled && !player.DrTuxDisabled;
         }
         public bool TPT3Valid(Player player, int type, string fuse)
         {
@@ -2342,6 +2347,10 @@ namespace PSD.PSDGamepkg.JNS
         {
             XI.RaiseGMessage(Artiad.Harm.ToMessage(
                 new Artiad.Harm(py.Uid, src == null ? 0 : src.Uid, five, n, mask)));
+        }
+        private bool GeneralTuxBride(Player player)
+        {
+            return !player.DrTuxDisabled;
         }
         private void GeneralLocustAction(Player player, int type, string fuse,
             string argst, string cdFuse, Player locuster, Tux locus)

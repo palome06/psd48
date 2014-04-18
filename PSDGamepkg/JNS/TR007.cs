@@ -2523,6 +2523,94 @@ namespace PSD.PSDGamepkg.JNS
             return g0hzs[1] == player.Uid.ToString() && g0hzs[2] != "0";
         }
         #endregion HL001 - Yanfeng
+        #region HL002 - YangYue
+        public bool JNH0201Valid(Player player, int type, string fuse)
+        {
+        	if (player.ROMUshort != 2 && player.HP < 7)
+        	{
+        		List<Artiad.Harm> harms = Artiad.Harm.Parse(fuse);
+        		return harms.Any(p => p.Element != FiveElement.SOL && p.Element != FiveElement.LOVE);
+        	} else return false;
+        }
+        public void JNH0201Action(Player player, int type, string fuse)
+        {
+        	float factor = (player.HP < 3) ? 2.0f : 1.5f;
+        	foreach (Artiad.Harm harm in harms)
+        	{
+        		if (harm.Element != FiveElement.SOL && harm.Element != FiveElement.LOVE)
+        			harm.N = (int)(harm.N * factor);
+        	}
+        	player.ROMUshort = 1;
+        	XI.InnerGMessage(Artiad.Harm.ToMessage(harms), -199);
+        }
+        public bool JNH0202Valid(Player player, int type, string fuse)
+        {
+        	if (player.ROMUshort != 1)
+        	{
+	            if (type == 0)
+	                return XI.Board.IsAttendWar(player) && XI.Board.Garden.Values.Any(p =>
+	                	XI.Board.IsAttendWar(p) && p.Team == player.OppTeam && p.IsTared && p.Tux.Count > 0);
+	            else if (type == 1)
+	            {
+	                int idxc = fuse.IndexOf(',');
+	                ushort ut = ushort.Parse(fuse.Substring(idxc + 1));
+	                return player.ROMPlayerTar.Count > 0 && ut == player.ROMPlayerTar[0];
+	            }
+            }
+            return false;
+        }
+        public void JNH0202Action(Player player, int type, string fuse, string argst)
+        {
+            if (type == 0)
+            {
+                ushort target = ushort.Parse(argst);
+                XI.RaiseGMessage("G0IJ," + player.Uid + ",2,1," + target);
+                Player tar = XI.Board.Garden[ut];
+                string c0 = Util.RepeatString("p0", tar.Tux.Count);
+	            XI.AsyncInput(player.Uid, "#弃置的,C1(" + c0 + ")", "JNH0202" , "0");
+	            List<ushort> vals = tar.Tux.ToList();
+	            vals.Shuffle();
+	            ushort randomCard = vals[0];
+	            XI.RaiseGMessage("G0QZ," + ut + "," + randomCard);
+
+	            Base.Card.Tux tux = XI.LibTuple.TL.Decode(randomCard);
+	            if (tux.TuxType == Base.Card.Tux.TuxType.JP)
+	            	Harm(tar, player, 1);
+            	else if (tux.TuxType == Base.Card.Tux.TuxType.ZP)
+            	{
+            		int delta = tar.STR - tar.STR / 2;
+            		if (delta > 0)
+            			XI.RaiseGMessage("G0OA," + ut + ",1," + delta);
+            	} else if (tux.TuxType == Base.Card.Tux.TuxType.TP)
+            		tar.DrTuxDisabled = true;
+        		else if (tux.TuxType == Base.Card.Tux.TuxType.ZP)
+        		{
+        			XI.RaiseGMessage("G2CN,0,1");
+        			XI.RaiseGMessage("G0ZB," + ut + ",1,0," + randomCard);
+        			Cure(tar, player, 2);
+        		}
+        		XI.RaiseGMessage("G0DH," + player.Uid + ",0,1");
+        		player.ROMUshort = 2;
+            }
+            else if (type == 1)
+            {
+                if (player.ROMPlayerTar.Count > 0)
+                {
+                    XI.RaiseGMessage("G0OJ," + player.Uid + ",2,1," + player.ROMPlayerTar[0]);
+                    XI.Board.Garden[player.ROMPlayerTar[0]].DrTuxDisabled = false;
+                }
+            }
+        }
+        public string JNH0202Input(Player player, int type, string fuse, string prev)
+        {
+            if (type == 0 && prev == "")
+                return "/T1(p" + string.Join("p", XI.Board.Garden.Values.Where(p =>
+	                	XI.Board.IsAttendWar(p) && p.Team == player.OppTeam &&
+	                	p.IsTared && p.Tux.Count > 0).Select(p => p.Uid)) + ")";
+            else
+                return "";
+        }
+        #endregion HL002 - YangYue
         #region HL003 - YangTai
         public bool JNH0301Valid(Player player, int type, string fuse)
         {
@@ -3123,7 +3211,7 @@ namespace PSD.PSDGamepkg.JNS
                 if (rest == 0)
                 {
                     XI.RaiseGMessage("G0IJ," + player.Uid + ",1,1,M" + npcUt);
-                    XI.RaiseGMessage("G2TZ,0," + player.Uid + ",M" + npcUt);
+                    XI.RaiseGMessage("G2TZ," + player.Uid + ",0,M" + npcUt);
                     foreach (var pair in dict)
                         pair.Value.Remove(npcUt);
                 }
@@ -3618,8 +3706,8 @@ namespace PSD.PSDGamepkg.JNS
                 }
             } else if (type == 2)
             {
-                XI.RaiseGMessage("G0OY,0," + player.Uid);
-                XI.RaiseGMessage("G0IY,0," + player.Uid + ",19015");
+                XI.RaiseGMessage("G0OY,1," + player.Uid);
+                XI.RaiseGMessage("G0IY,1," + player.Uid + ",19015");
             }
         }
         #endregion HL009 - Lingjian
@@ -3642,7 +3730,7 @@ namespace PSD.PSDGamepkg.JNS
             else if (type == 4)
             {
             	Player r = XI.Board.Rounder;
-            	return r.Team == player.Team && r.GetPetCount() > 0
+            	return r.Team == player.Team && r.GetPetCount() > 0 && r.Tux.Count == 0
             		 && XI.Board.RoundIN == "R" + r.Uid + "BC";
             }
     		else

@@ -282,6 +282,8 @@ namespace PSD.PSDGamepkg.JNS
             {
                 player.Escue.Add(ut);
                 XI.RaiseGMessage("G2IL," + player.Uid + "," + ut);
+                if (XI.Board.Monster1 == ut)
+                    XI.Board.Monster1 = 0;
             }
         }
         public bool NJT1Valid(Player player, string fuse)

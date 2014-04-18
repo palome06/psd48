@@ -574,6 +574,7 @@ namespace PSD.PSDGamepkg
         }
 
         // Parse from SKTriple list to SKT list
+        // $ucr: user's round, old controller for R*ZD.
         private List<SKE> ParseFromSKTriples(List<SkTriple> list, string zero, bool ucr)
         {
             List<SKE> result = new List<SKE>();
@@ -1341,6 +1342,8 @@ namespace PSD.PSDGamepkg
                 if (prpr < 0)
                     prpr = 3;
                 if (PCS.ListAllSeleableHeros().Length >= 48)
+                    ++prpr;
+                if (PCS.ListAllSeleableHeros().Length >= 72)
                     ++prpr;
                 CastingPick cp = new CastingPick(); Casting = cp;
                 Base.Card.Hero[] heros = PCS.AllocateHerosRM((prpr + 1) * garden.Count);

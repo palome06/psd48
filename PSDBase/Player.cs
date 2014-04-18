@@ -108,6 +108,8 @@ namespace PSD.Base
         public int RestZP { set; get; }
         // Whether player is disabled to use ZP
         public bool ZPDisabled { set; get; }
+        // Whether player can use tux from hand directly or not
+        public bool DrTuxDisabled { set; get; }
 
         private void SetEquipDisabled(string tag, bool value, int maskCode)
         {
@@ -219,6 +221,7 @@ namespace PSD.Base
             ZPDisabled = false;
             IsAlive = false;
             Loved = false;
+            DrTuxDisabled = false;
 
             IsTPOpt = true;
             IsSKOpt = true;
@@ -244,6 +247,7 @@ namespace PSD.Base
             RAMPeoples.Clear();
             RAMString = "";
             ZPDisabled = false;
+            DrTuxDisabled = false;
         }
 
         public void ResetROM(Board board)

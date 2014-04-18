@@ -3083,9 +3083,9 @@ namespace PSD.ClientAo
                         {
                             ushort mons = ushort.Parse(args[1]);
                             VI.Cout(Uid, "{0}决定不打怪，放弃怪物{1}.", zd.Player(rounder), zd.Monster(mons));
-                            List<string> cedcards = new List<string>();
-                            cedcards.Add("M" + mons);
-                            A0O.FlyingGet(cedcards, 0, 0);
+                            //List<string> cedcards = new List<string>();
+                            //cedcards.Add("M" + mons);
+                            //A0O.FlyingGet(cedcards, 0, 0);
                         }
                         else if (args[0] == "1")
                         {
