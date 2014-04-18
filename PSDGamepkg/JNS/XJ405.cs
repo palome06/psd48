@@ -2899,18 +2899,22 @@ namespace PSD.PSDGamepkg.JNS
                 }
             }
             else if (type == 3 || type == 4)
-                return IsMathISOS("JN60501", player, fuse);
+                return IsMathISOS("JN60501", player, fuse) && player.HP < player.HPb;
             else if (type == 5)
             {
-                string[] e0af = fuse.Split(',');
-                if (e0af[1] != "0" && player.RAMUshort == 1 && XI.Board.InFight)
-                {
-                    for (int i = 1; i < e0af.Length; ++i)
+                string[] g0af = fuse.Split(',');
+                if (g0af[1] != "0" && XI.Board.InFight && player.HP < player.HPb)
+                    for (int i = 1; i < g0af.Length; i += 2)
                     {
-                        if (e0af[i + 1] == player.Uid.ToString())
-                            return true;
+                        ushort ut = ushort.Parse(g0af[i + 1]);
+                        if (ut == player.Uid) {
+                            ushort delta = ushort.Parse(g0af[i]);
+                            if (delta > 4 && player.RAMInt > 0)
+                                return true;
+                            else if (delta <= 4 && player.RAMInt == 0)
+                                return true;
+                        }
                     }
-                }
                 return false;
             }
             return false;
@@ -2943,9 +2947,9 @@ namespace PSD.PSDGamepkg.JNS
             }
             else if (type == 4)
             {
-                player.RAMInt = player.HPb - player.HP;
                 if (player.RAMInt > 0)
                     XI.RaiseGMessage("G0IP," + player.Team + "," + player.RAMInt);
+                player.RAMInt = 0;
                 //XI.InnerGMessage(fuse, 121);
             }
             else if (type == 5)
@@ -2958,9 +2962,9 @@ namespace PSD.PSDGamepkg.JNS
                 }
                 else
                 {
-                    player.RAMInt = player.HPb - player.HP;
                     if (player.RAMInt > 0)
                         XI.RaiseGMessage("G0OP," + player.Team + "," + player.RAMInt);
+                    player.RAMInt = 0;
                 }
             }
         }

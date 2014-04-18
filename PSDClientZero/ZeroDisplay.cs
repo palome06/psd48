@@ -252,6 +252,22 @@ namespace PSD.ClientZero
             }
             return "特殊状态";
         }
+        internal string HeroFolderAlias(params int[] heros)
+        {
+            foreach (int hero in heros)
+            {
+                if (hero != 0)
+                {
+                    if (hero != 0)
+                    {
+                        Base.Card.Hero hro = tuple.HL.InstanceHero(hero);
+                        if (hro != null && hro.FolderAlias != null)
+                            return hro.FolderAlias;
+                    }
+                }
+            }
+            return "盖牌";
+        }
         internal string Prop(ushort prop)
         {
             switch (prop)

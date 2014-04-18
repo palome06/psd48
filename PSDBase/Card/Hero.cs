@@ -35,6 +35,7 @@ namespace PSD.Base.Card
         public string PlayerTarAlias { set; get; }
         public string ExCardsAlias { set; get; }
         public string AwakeAlias { set; get; }
+        public string FolderAlias { set; get; }
 
         public Hero(string name, int avatar, int group, char gender, ushort hp, ushort str, ushort dex,
             List<string> spouses, List<int> isomorphic, int archetype, List<string> skills, string bio)
@@ -154,16 +155,17 @@ namespace PSD.Base.Card
                     List<string> skill = string.IsNullOrEmpty(skills) ?
                         new List<string>() : skills.Split(',').ToList();
                     string[] aliass = (data["ALIAS"] as string ?? "").Split(',');
-                    string[] alias = new string[5];
+                    string[] alias = new string[6];
                     for (int i = 0; i < aliass.Length; i += 2)
                     {
                         switch (aliass[i])
                         {
                             case "K": alias[0] = aliass[i + 1]; break;
-                            case "C": alias[1] = alias[i + 1]; break;
-                            case "T": alias[2] = alias[i + 1]; break;
-                            case "E": alias[3] = alias[i + 1]; break;
-                            case "A": alias[4] = alias[i + 1]; break;
+                            case "C": alias[1] = aliass[i + 1]; break;
+                            case "T": alias[2] = aliass[i + 1]; break;
+                            case "E": alias[3] = aliass[i + 1]; break;
+                            case "A": alias[4] = aliass[i + 1]; break;
+                            case "F": alias[5] = aliass[i + 1]; break;
                         }
                     }
                     string bio = data["BIO"] as string ?? "";
@@ -174,7 +176,8 @@ namespace PSD.Base.Card
                         PeopleAlias = alias[1],
                         PlayerTarAlias = alias[2],
                         ExCardsAlias = alias[3],
-                        AwakeAlias = alias[4]
+                        AwakeAlias = alias[4],
+                        FolderAlias = alias[5]
                     };
                     dicts.Add(code, hero);
                 }

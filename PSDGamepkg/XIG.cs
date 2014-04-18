@@ -2611,111 +2611,109 @@ namespace PSD.PSDGamepkg
                     break;
                 case "G0IJ":
                     {
-                        string e0ij = "";
-                        for (int idx = 1; idx < args.Length; )
+                        ushort who = ushort.Parse(args[1]);
+                        Player py = Board.Garden[who];
+                        ushort type = ushort.Parse(args[2]);
+                        if (type == 0)
                         {
-                            ushort who = ushort.Parse(args[idx]);
-                            Player py = Board.Garden[who];
-                            ushort type = ushort.Parse(args[idx + 1]);
-                            if (type == 0)
-                            {
-                                ushort n = ushort.Parse(args[idx + 2]);
-                                py.ROMToken += n;
-                                e0ij += ("," + who + ",0," + n + "," + py.ROMToken);
-                                idx += 3;
-                            }
-                            else if (type == 1)
-                            {
-                                int n = int.Parse(args[idx + 2]);
-                                List<string> heros = Util.TakeRange(args, idx + 3, idx + 3 + n).ToList();
-                                py.ROMCards.AddRange(heros);
-                                e0ij += ("," + who + ",1," + n + "," + string.Join(",", heros) +
-                                    "," + py.ROMCards.Count + "," + string.Join(",", py.ROMCards));
-                                idx += (3 + n);
-                            }
-                            else if (type == 2)
-                            {
-                                int n = int.Parse(args[idx + 2]);
-                                List<ushort> tars = Util.TakeRange(args, idx + 3, idx + 3 + n)
-                                    .Select(p => ushort.Parse(p)).ToList();
-                                py.ROMPlayerTar.AddRange(tars);
-                                e0ij += ("," + who + ",2," + n + "," + string.Join(",", tars) +
-                                    "," + py.ROMPlayerTar.Count + "," + string.Join(",", py.ROMPlayerTar));
-                                idx += (3 + n);
-                            }
-                            else if (type == 3)
-                            {
-                                if (!py.ROMAwake)
-                                {
-                                    py.ROMAwake = true;
-                                    e0ij += ("," + who + ",3");
-                                }
-                                idx += 2;
-                            }
-                            else
-                                break;
+                            ushort n = ushort.Parse(args[3]);
+                            py.ROMToken += n;
+                            WI.BCast("E0IJ," + who + ",0," + n + "," + py.ROMToken);
                         }
-                        if (e0ij != "")
-                            WI.BCast("E0IJ" + e0ij);
+                        else if (type == 1)
+                        {
+                            int n = int.Parse(args[3]);
+                            List<string> heros = Util.TakeRange(args, 4, 4 + n).ToList();
+                            py.ROMCards.AddRange(heros);
+                            WI.BCast("E0IJ," + who + ",1," + n + "," + string.Join(",", heros) +
+                                "," + py.ROMCards.Count + "," + string.Join(",", py.ROMCards));
+                        }
+                        else if (type == 2)
+                        {
+                            int n = int.Parse(args[3]);
+                            List<ushort> tars = Util.TakeRange(args, 4, 4 + n)
+                                .Select(p => ushort.Parse(p)).ToList();
+                            py.ROMPlayerTar.AddRange(tars);
+                            WI.BCast("E0IJ," + who + ",2," + n + "," + string.Join(",", tars) +
+                                "," + py.ROMPlayerTar.Count + "," + string.Join(",", py.ROMPlayerTar));
+                        }
+                        else if (type == 3)
+                        {
+                            if (!py.ROMAwake)
+                            {
+                                py.ROMAwake = true;
+                                WI.BCast("E0IJ," + who + ",3");
+                            }
+                        } 
+                        else if (type == 4)
+                        {
+                            int n = int.Parse(args[3]);
+                            List<string> folders = Util.TakeRange(args, 4, 4 + n).ToList();
+                            py.ROMFolder.AddRange(folders);
+                            WI.Send("E0IJ," + who + ",4,0," + n + "," + string.Join(",", folders) +
+                                "," + py.ROMFolder.Count + "," + string.Join(",", py.ROMFolder), 0, who);
+                            WI.Send("E0IJ," + who + ",4,1," + n + "," + py.ROMFolders.Count, ExceptStaff(who));
+                            WI.Live("E0IJ," + who + ",4,1," + n + "," + py.ROMFolders.Count);
+                        }
                     }
                     break;
                 case "G0OJ":
-                    {
-                        string e0oj = "";
-                        for (int idx = 1; idx < args.Length; )
+                        ushort who = ushort.Parse(args[1]);
+                        Player py = Board.Garden[who];
+                        ushort type = ushort.Parse(args[2]);
+                        if (type == 0)
                         {
-                            ushort who = ushort.Parse(args[idx]);
-                            Player py = Board.Garden[who];
-                            ushort type = ushort.Parse(args[idx + 1]);
-                            if (type == 0)
-                            {
-                                ushort n = ushort.Parse(args[idx + 2]);
-                                py.ROMToken -= n;
-                                e0oj += ("," + who + ",0," + n + "," + py.ROMToken);
-                                idx += 3;
-                            }
-                            else if (type == 1)
-                            {
-                                int n = int.Parse(args[idx + 2]);
-                                List<string> heros = Util.TakeRange(args, idx + 3, idx + 3 + n).ToList();
-                                py.ROMCards.RemoveAll(p => heros.Contains(p));
-                                if (py.ROMCards.Count > 0)
-                                    e0oj += ("," + who + ",1," + n + "," + string.Join(",", heros) +
-                                        "," + py.ROMCards.Count + "," + string.Join(",", py.ROMCards));
-                                else
-                                    e0oj += ("," + who + ",1," + n + "," + string.Join(",", heros) + ",0");
-                                idx += (3 + n);
-                            }
-                            else if (type == 2)
-                            {
-                                int n = int.Parse(args[idx + 2]);
-                                List<ushort> tars = Util.TakeRange(args, idx + 3, idx + 3 + n)
-                                    .Select(p => ushort.Parse(p)).ToList();
-                                py.ROMPlayerTar.RemoveAll(p => tars.Contains(p));
-                                if (py.ROMPlayerTar.Count > 0)
-                                    e0oj += ("," + who + ",2," + n + "," + string.Join(",", tars) +
-                                        "," + py.ROMPlayerTar.Count + "," + string.Join(",", py.ROMPlayerTar));
-                                else
-                                    e0oj += ("," + who + ",2," + n + "," + string.Join(",", tars) + ",0");
-                                idx += (3 + n);
-                            }
-                            else if (type == 3)
-                            {
-                                if (py.ROMAwake)
-                                {
-                                    py.ROMAwake = false;
-                                    e0oj += ("," + who + ",3");
-                                }
-                                idx += 2;
-                            }
-                            else
-                                break;
+                            ushort n = ushort.Parse(args[3]);
+                            py.ROMToken -= n;
+                            WI.BCast("E0OJ," + who + ",0," + n + "," + py.ROMToken);
                         }
-                        if (e0oj != "")
-                            WI.BCast("E0OJ" + e0oj);
+                        else if (type == 1)
+                        {
+                            int n = int.Parse(args[3]);
+                            List<string> heros = Util.TakeRange(args, 4, 4 + n).ToList();
+                            py.ROMCards.RemoveAll(p => heros.Contains(p));
+                            if (py.ROMCards.Count > 0)
+                                WI.BCast("E0OJ," + who + ",1," + n + "," + string.Join(",", heros) +
+                                    "," + py.ROMCards.Count + "," + string.Join(",", py.ROMCards));
+                            else
+                                WI.BCast("E0OJ," + who + ",1," + n + "," + string.Join(",", heros) + ",0");
+                        }
+                        else if (type == 2)
+                        {
+                            int n = int.Parse(args[3]);
+                            List<ushort> tars = Util.TakeRange(args, 4, 4 + n)
+                                .Select(p => ushort.Parse(p)).ToList();
+                            py.ROMPlayerTar.RemoveAll(p => tars.Contains(p));
+                            if (py.ROMPlayerTar.Count > 0)
+                                WI.BCast("E0OJ," + who + ",2," + n + "," + string.Join(",", tars) +
+                                    "," + py.ROMPlayerTar.Count + "," + string.Join(",", py.ROMPlayerTar));
+                            else
+                                WI.BCast("E0OJ," + who + ",2," + n + "," + string.Join(",", tars) + ",0");
+                        }
+                        else if (type == 3)
+                        {
+                            if (py.ROMAwake)
+                            {
+                                py.ROMAwake = false;
+                                WI.BCast("E0OJ," + who + ",3");
+                            }
+                        }
+                        else if (type == 4)
+                        {
+                            int n = int.Parse(args[idx + 2]);
+                            List<string> folders = Util.TakeRange(args, idx + 3, idx + 3 + n).ToList();
+                            py.ROMFolder.RemoveAll(p => folders.Contains(p));
+                            if (py.ROMFolder.Count > 0)
+                                WI.Send("E0OJ," + who + ",4,0," + n + "," + string.Join(",", folders) +
+                                    "," + py.ROMFolder.Count + "," + string.Join(",", py.ROMFolder), 0, who);
+                            else
+                                WI.Send("E0OJ," + who + ",4,0," + n + ","
+                                    + string.Join(",", folders) + ",0", 0, who);
+                            WI.Send("E0OJ," + who + ",4,1," + n + "," + py.ROMFolder.Count, ExceptStaff(who));
+                            WI.Live("E0OJ," + who + ",4,1," + n + "," + py.ROMFolder.Count);
+                        }
                     }
                     break;
-                default: break;
                 case "G0IE":
                     {
                         string ioc = "", e0ie = "";

@@ -239,16 +239,7 @@ namespace PSD.PSDGamepkg.JNS
                 return false;
             }
             else if (type == 1)
-            {
-                string[] parts = fuse.Split(',');
-                if (parts[1] == player.Uid.ToString())
-                {
-                    for (int i = 3; i < parts.Length; ++i)
-                        if (parts[i] == "JNT0401")
-                            return true;
-                }
-                return false;
-            }
+                return IsMathISOS("JNT0401", player, fuse);
             else
                 return false;
         }
@@ -3029,6 +3020,315 @@ namespace PSD.PSDGamepkg.JNS
                 XI.RaiseGMessage("G0OJ," + player.Uid + ",3");
         }
         #endregion HL006 - ZhaoWen
+        #region HL007 - Yingyue
+        public bool JNH0701Valid(Player player, int type, string fuse)
+        {
+            if (type == 0)
+            {
+                string[] blocks = fuse.Split(',');
+                for (int idx = 1; idx < blocks.Length; )
+                {
+                    string fromZone = blocks[idx];
+                    string cardType = blocks[idx + 1];
+                    int cnt = int.Parse(blocks[idx + 2]);
+                    if (cardType == "M" && cnt > 0)
+                    {
+                        for (int i = idx + 3; i < idx + 3 + cnt; ++i) {
+                            ushort ut = ushort.Parse(blocks[i]);
+                            if (NMBLib.IsNPC(ut))
+                                return true;
+                        }
+                    }
+                    idx += (3 + cnt);
+                }
+            } else if (type == 1) // Z1
+            {
+                bool stucken = (XI.Board.IsAttendWar(player) && player.ROMCards.Count > 0) ||
+                    player.ROMCards.Any(p => XI.LibTuple.NL.Decode(
+                    (ushort)(int.Parse(p.Substring("M".Length)) - 1000)).STR >= 5);
+                return stucken;
+            } else if (type == 2) // AF
+            {
+                bool waken = player.ROMCards.Any(p => XI.LibTuple.NL.Decode(
+                    (ushort)(int.Parse(p.Substring("M".Length)) - 1000)).STR < 5);
+                string[] g0af = fuse.Split(',');
+                if (g0af[1] != "0" && XI.Board.InFight && waken)
+                    for (int i = 1; i < g0af.Length; i += 2)
+                    {
+                        ushort ut = ushort.Parse(g0af[i + 1]);
+                        if (ut == player.Uid) {
+                            ushort delta = ushort.Parse(g0af[i]);
+                            if (delta > 4 && player.RAMInt > 0)
+                                return true;
+                            else if (delta <= 4 && player.RAMInt == 0)
+                                return true;
+                        }
+                    }
+                return false;
+            } else if (type == 3 || type == 4) // IS/OS
+            {
+                if (IsMathISOS("JNH0801", player, fuse) && XI.Board.InFight)
+                {
+                    return (XI.Board.IsAttendWar(player) && player.ROMCards.Count > 0) ||
+                    player.ROMCards.Any(p => XI.LibTuple.NL.Decode(
+                        (ushort)(int.Parse(p.Substring("M".Length)) - 1000)).STR >= 5);
+                } else return false;
+            }
+        }
+        public void JNH0701Action(Player player, int type, string fuse, string argst)
+        {
+            if (type == 0) {
+                IDictionary<ushort, List<ushort>> dict = new Dictionary<ushort, List<ushort>>();
+                string n0on = "";
+                string[] blocks = fuse.Split(',');
+                for (int idx = 1; idx < blocks.Length; )
+                {
+                    string fromZone = blocks[idx];
+                    string cardType = blocks[idx + 1];
+                    int cnt = int.Parse(blocks[idx + 2]);
+                    if (cardType == "M" && cnt > 0)
+                    {
+                        for (int i = idx + 3; i < idx + 3 + cnt; ++i) {
+                            ushort ut = ushort.Parse(blocks[i]);
+                            if (NMBLib.IsNPC(ut))
+                                Util.AddToMultiMap(dict, fromZone, ut);
+                        }
+                    } else
+                        mons += "," + string.Join(",", Util.TakeRange(blocks, idx, idx + 3 + cnt));
+                    idx += (3 + cnt);
+                }
+
+                ushort npcUt = ushort.Parse(argst);
+                NPC npc = LibTuple.NL.Decode(NMBLib.OriginalNPC(npcUt));
+                int rest = npc.STR;
+                foreach (ushort ut in XI.Board.OrderedPlayer())
+                {
+                    Player py = XI.Board.Garden[ut];
+                    if (py.IsAlive && py.Team == player.Team && py.Tux.Count > 0)
+                    {
+                        if (rest <= 0)
+                            break;
+                        int mn = Math.Min(rest, py.Tux.Count);
+                        string hint = "#弃置(共还需弃置" + rest + "张,/T1" +
+                            ((mn > 0) ? ("~" + mn) : "") + "(p" + string.Join("p", py.Tux) + ")";
+                        string input = XI.AsyncInput(py.Uid, hint, "JNH0701", "0");
+                        if (input != VI.CinSentinel && !input.StartsWith("/"))
+                        {
+                            string[] parts = input.Split(',');
+                            XI.RaiseGMessage("G0QZ," + ut + "," + input);
+                            rest -= parts.Length;
+                        }
+                    }
+                }
+                if (rest == 0)
+                {
+                    XI.RaiseGMessage("G0IJ," + player.Uid + ",2,1,M" + ut);
+                    foreach (var pair in dict)
+                        pair.Value.Remove(ut);
+                    if ()
+                }
+                string mAdd = string.Join(",", dict.Where(p => p.Value.Count > 0)
+                    .Select(p => p.Key + ",M," + p.Value.Count + "," + string.Join(",", p.Value)));
+                if (mAdd.Length > 0)
+                    n0on += "," + mAdd;
+                if (n0on.Length > 0)
+                    XI.InnerGMessage("G0ON" + n0on, 30);
+            } else if (type == 1)
+            {
+                int upfive = player.ROMCards.Count(p => XI.LibTuple.NL.Decode(
+                    (ushort)(int.Parse(p.Substring("M".Length)) - 1000)).STR >= 5);
+                int dnfive = player.ROMCards.Count; int delta;
+                if (XI.Board.IsAttendWar(player))
+                    delta = dnfive - player.RAMInt;
+                else
+                    delta = upfive - player.RAMInt;
+                player.RAMInt = dnfive;
+                if (delta > 0)
+                    XI.RaiseGMessage("G0IP," + player.Team + "," + delta);
+                else if (delta < 0)
+                    XI.RaiseGMessage("G0OP," + player.Team + "," + (-delta));
+            }
+            else if (type == 2)
+            {
+                int dnfive = player.ROMCards.Count(p => XI.LibTuple.NL.Decode(
+                    (ushort)(int.Parse(p.Substring("M".Length)) - 1000)).STR < 5);
+                if (XI.Board.IsAttendWar(player))
+                {
+                    player.RAMInt += dnfive;
+                    XI.RaiseGMessage("G0IP," + player.Team + "," + dnfive);
+                }
+                else
+                {
+                    player.RAMInt -= dnfive;
+                    XI.RaiseGMessage("G0OP," + player.Team + "," + dnfive);
+                }
+            }
+            else if (type == 3)
+            {
+                int upfive = player.ROMCards.Count(p => XI.LibTuple.NL.Decode(
+                    (ushort)(int.Parse(p.Substring("M".Length)) - 1000)).STR >= 5);
+                int dnfive = player.ROMCards.Count;
+                int delta = XI.Board.IsAttendWar(player) ? dnfive : upfive;
+                player.RAMInt = delta;
+                if (delta > 0)
+                    XI.RaiseGMessage("G0IP," + player.Team + "," + delta);
+            }
+            else if (type == 4)
+            {
+                if (player.RAMInt > 0)
+                {
+                    XI.RaiseGMessage("G0OP," + player.Team + "," + player.RAMInt);
+                    player.RAMInt = 0;
+                }
+            }
+        }
+        public string JNH0701Input(Player player, int type, string fuse, string prev)
+        {
+            if (type == 0 && prev == "")
+            {
+                List<ushort> mons = new List<ushort>();
+                string[] blocks = fuse.Split(',');
+                for (int idx = 1; idx < blocks.Length; )
+                {
+                    string fromZone = blocks[idx];
+                    string cardType = blocks[idx + 1];
+                    int cnt = int.Parse(blocks[idx + 2]);
+                    if (cardType == "M" && cnt > 0)
+                    {
+                        for (int i = idx + 3; i < idx + 3 + cnt; ++i) {
+                            ushort ut = ushort.Parse(blocks[i]);
+                            if (NMBLib.IsNPC(ut))
+                                mons.Add(ut);
+                        }
+                    }
+                    idx += (3 + cnt);
+                }
+                if (mons.Count > 0)
+                    return "#收为「魅心」,/M1(p" + string.Join("p", mons) + ")";
+                else
+                    return "/";
+            } else
+                return "";
+        }
+        public bool JNH0702Valid(Player player, int type, string fuse)
+        {
+            if (XI.Board.Garden.Values.Where(p => p.IsTared && p.Team == player.Team &&
+                !p.Immobilized).Except(player.RAMPeoples).Any())
+            {
+                string[] g1ev = fuse.Split(',');
+                Player trigger = XI.Board.Garden[ushort.Parse(g1ev[1])];
+                return trigger != null && trigger.Team == player.Team;
+            } else
+                return false;
+        }
+        public void JNH0702Action(Player player, int type, string fuse, string argst)
+        {
+            ushort ut = ushort.Parse(argst);
+            XI.RaiseGMessage("G0DS," + ut+ ",0,1");
+            player.RAMPeoples.Add(ut);
+
+            XI.RaiseGMessage("G0ON,10,E,1," + Board.Eve);
+            XI.RaiseGMessage("G0YM,2,0,0");
+            Board.Eve = 0;
+
+            string[] g1ev = fuse.Split(',');
+            XI.RaiseGMessage("G1EV," + g1ev[1] + "," + g1ev[2]);
+        }
+        public string JNH0702Input(Player player, int type, string fuse, string prev)
+        {
+            if (prev == "")
+                return "#横置,/T1(p" + string.Join("p", XI.Board.Garden.Values
+                    .Where(p => p.IsTared && p.Team == player.Team && !p.Immobilized)
+                    .Except(player.RAMPeoples).Select(p => p.Uid)) + ")";
+            else
+                return "";
+        }
+        public bool JNH0703Valid(Player player, int type, string fuse)
+        {
+            string[] g1di = fuse.Split(',');
+            for (int idx = 1; idx < g1di.Length; )
+            {
+                ushort who = ushort.Parse(g1di[idx]);
+                bool drIn = g1di[idx + 1] == "0";
+                int n = int.Parse(g1di[idx + 2]);
+                if (who != player.Uid && XI.Board.Garden[who].IsTared && !drIn && n >= 2)
+                    return true;
+                idx += (3 + n);
+            }
+            return false;
+        }
+        public void JNH0703Action(Player player, int type, string fuse, string argst)
+        {
+            string[] blocks = argst.Split(',');
+            string[] g1di = fuse.Split(',');
+            string n1di = "";
+            List<ushort> rest = new List<ushort>();
+            for (int idx = 1; idx < g1di.Length; )
+            {
+                ushort who = ushort.Parse(g1di[idx]);
+                bool drIn = g1di[idx + 1] == "0";
+                int n = int.Parse(g1di[idx + 2]);
+                string[] tus = Util.TakeRange(g1di, idx, idx + 3 + n);
+                if (who != player.Uid && XI.Board.Garden[who].IsTared && !drIn && n >= 2)
+                    rest.AddRange(tus.Select(p => ushort.Parse(p)));
+                else
+                    n1di += "," + string.Join(",", tus);
+                idx += (3 + n);
+            }
+            ushort tar = ushort.Parse(blocks[0]);
+            ushort ut = ushort.Parse(blocks[1]);
+            if (blocks.Length >= 3)
+                XI.RaiseGMessage("G0HQ,0," + tar + "," + player.Uid + ",1,1," + blocks[2]);
+            XI.RaiseGMessage("G2CN,0,1");
+            XI.Board.TuxDises.Remove(ut);
+            XI.RaiseGMessage("G0HQ,2," + player.Uid + ",0,0," + ut);
+            rest.Remove(ut);
+            if (rest.Count > 0)
+                n1di += "," + tar + ",0," + rest.Count + "," + string.Join(",", rest.Count);
+            if (n1di.Length > 0)
+                XI.InnerGMessage("G1DI" + n1di, 30);
+        }
+        public string JNH0703Input(Player player, int type, string fuse, string prev)
+        {
+            if (prev == "")
+            {
+                ISet<ushort> invs = new HashSet<ushort>();
+                string[] g1di = fuse.Split(',');
+                for (int idx = 1; idx < g1di.Length; )
+                {
+                    ushort who = ushort.Parse(g1di[idx]);
+                    bool drIn = g1di[idx + 1] == "0";
+                    int n = int.Parse(g1di[idx + 2]);
+                    if (who != player.Uid && XI.Board.Garden[who].IsTared && !drIn && n >= 2)
+                        invs.Add(who);
+                    idx += (3 + n);
+                }
+                return "/T1(p" + string.Join("p", invs) + ")";
+            } else if (prev.IndexOf(',') < 0)
+            {
+                ushort ut = ushort.Parse(prev);
+                List<ushort> tuxes = new List<ushort>();
+                string[] g1di = fuse.Split(',');
+                for (int idx = 1; idx < g1di.Length; )
+                {
+                    ushort who = ushort.Parse(g1di[idx]);
+                    bool drIn = g1di[idx + 1] == "0";
+                    int n = int.Parse(g1di[idx + 2]);
+                    if (who == ut && !drIn && n >= 2)
+                    {
+                        tuxes.AddRange(til.TakeRange(g1di, idx + 3, idx + 3 + n)
+                            .Select(p => ushort.Parse(p)));
+                    }
+                    idx += (3 + n);
+                }
+                string p1 = "/C1(p" + string.Join("p", tuxes) + ")";
+                if (XI.Board.Garden[ut].Team == player.OppTeam && player.Tux.Count > 0)
+                    p1 += ",#交予对方的,/T1(p" + string.Join("p", player.Tux) + ")";
+                return p1;
+            } else
+                return "";
+        }
+        #endregion HL007 - Yingyue
         #region HL008 - Yingyu
         public void JNH0801Action(Player player, int type, string fuse, string argst)
         {
@@ -3172,6 +3472,15 @@ namespace PSD.PSDGamepkg.JNS
                 return "";
         }
         #endregion HL008 - Yingyu
+        #region HL011 - ShuiGang
+        public void JNH1102Action(Player player, int type, string fuse, string argst)
+        {
+            if (type == 0)
+            {
+                int n = player.Tux.Count;
+            }
+        }
+        #endregion HL011 - ShuiGang
         #region HL012 - LiuYing'er
         public void JNH1201Action(Player player, int type, string fuse, string argst)
         {

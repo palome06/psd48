@@ -1271,8 +1271,12 @@ namespace PSD.PSDGamepkg.JNS
             XI.RaiseGMessage("G0YM,3," + pop + ",0");
 
             UEchoCode r5ed = XI.HandleWithNPCEffect(XI.Board.Garden[to], npc, false);
-            XI.Board.RestNPCDises.Add(pop);
-            XI.RaiseGMessage("G0YM,3,0,0");
+            if (XI.Board.Monster1 != 0) // In case the NPC has been taken away
+            {
+                XI.RaiseGMessage("G0ON,0,M,1," + pop);
+                // XI.Board.RestNPCDises.Add(pop);
+                XI.RaiseGMessage("G0YM,3,0,0");
+            }
         }
         public void ZPT2Action(Player player, int type, string fuse, string argst)
         {

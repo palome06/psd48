@@ -1778,19 +1778,18 @@ namespace PSD.PSDGamepkg.JNS
         {
             if (consumeType == 0)
             {
-                Base.Card.Monster mon = XI.LibTuple.ML.Decode(XI.LibTuple.ML.Encode("GHT1"));
+                Base.Card.Monster mon = XI.LibTuple.ML.Decode(XI.LibTuple.ML.Encode("GLT4"));
                 if (mon != null)
-                {
                     mon.RAMUshort = (ushort)player.Team;
-                    XI.RaiseGMessage("G0JM,R" + XI.Board.Rounder.Uid + "EE");
-                }
+                string[] g1ev = fuse.Split(',');
+                XI.InnerGMessage("G1EV," + g1ev[1] + "," + g1ev[2], 151);
             }
         }
         public bool GLT4ConsumeValid(Player player, int consumeType, int type, string fuse)
         {
             if (consumeType == 0)
             {
-                Base.Card.Monster mon = XI.LibTuple.ML.Decode(XI.LibTuple.ML.Encode("GHT1"));
+                Base.Card.Monster mon = XI.LibTuple.ML.Decode(XI.LibTuple.ML.Encode("GLT4"));
                 return mon != null && mon.RAMUshort != player.Team;
             }
             return false;

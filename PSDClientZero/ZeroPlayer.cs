@@ -136,11 +136,15 @@ namespace PSD.ClientZero
 
     public class ZeroMe : ZeroBase
     {
+        public int SelectHero { set; get; }
+
         public List<ushort> Tux { set; get; }
+        public List<ushort> Folder { set; get; }
 
         public ZeroMe(XIClient xic): base(xic)
         {
             Tux = new List<ushort>();
+            Folder = new List<ushort>();
         }
 
         public override string ToString()
@@ -148,6 +152,11 @@ namespace PSD.ClientZero
             StringBuilder sb = new StringBuilder();
             Aps(sb, "***************");
             Aps(sb, "您的手牌: {0}", xic.zd.Tux(Tux));
+            if (Folder.Count > 0)
+            {
+                Aps(sb, "    {0}: {1}",
+                 xic.zd.HeroFolderAlias(SelectHero), xic.zd.Tux(Tux))
+            }
             Aps(sb, "***************");
             return sb.ToString();
         }
@@ -194,6 +203,7 @@ namespace PSD.ClientZero
         public List<string> SpecialCards { private set; get; }
         public List<ushort> PlayerTars { private set; get; }
         public bool AwakeSignal { set; get; }
+        public int FolderCount { set; get; }
 
         public ZeroPlayer(string name, XIClient xic) : base(xic)
         {
@@ -214,6 +224,7 @@ namespace PSD.ClientZero
             SpecialCards = new List<string>();
             PlayerTars = new List<ushort>();
             AwakeSignal = false;
+            FolderCount = 0;
         }
 
         public void ParseFromHeroLib()
@@ -275,11 +286,14 @@ namespace PSD.ClientZero
                 special += " {4}：{5}";
             if (AwakeSignal)
                 special += " {6} 已发动.";
+            if (FolderCount > 0)
+                special += " {7}数：{8}"
             if (special != "")
                 Aps(sb, special, xic.zd.HeroTokenAlias(SelectHero, Coss), Token,
                     xic.zd.HeroPeopleAlias(SelectHero, Coss), xic.zd.MixedCards(SpecialCards),
                     xic.zd.HeroPlayerTarAlias(SelectHero, Coss), xic.zd.Player(PlayerTars),
-                    xic.zd.HeroAwakeAlias(SelectHero, Coss));
+                    xic.zd.HeroAwakeAlias(SelectHero, Coss),
+                    xic.zd.HeroFolderAlias(SelectHero, Coss), FolderCount);
             if (Fakeq.Count > 0)
                 Aps(sb, "其它配饰：{0}", xic.zd.Tux(Fakeq));
             Aps(sb, "{0}", "***************");

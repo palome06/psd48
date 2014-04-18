@@ -170,7 +170,8 @@ namespace PSD.Base
         public List<string> ROMCards { private set; get; } // 1
         public int ROMToken { set; get; } // 2
         public List<ushort> ROMPlayerTar { private set; get; } // 3
-        public bool ROMAwake { set; get; }
+        public bool ROMAwake { set; get; } // 4
+        public List<ushort> ROMFolder { private set; get; } // 5
 
         public ushort RAMUshort { set; get; }
         public int RAMInt { set; get; }
@@ -206,6 +207,7 @@ namespace PSD.Base
             ROMCards = new List<string>();
             ROMPlayerTar = new List<ushort>();
             ROMAwake = false;
+            ROMFolder = new List<ushort>();
 
             RAMUshort = 0; RAMInt = 0;
             RAMPeoples = new List<ushort>();
@@ -250,6 +252,7 @@ namespace PSD.Base
             ROMToken = 0;
             ROMPlayerTar.Clear();
             ROMAwake = false;
+            ROMFolder.Clear();
             foreach (string cd in ROMCards)
             {
                 if (cd.StartsWith("H"))

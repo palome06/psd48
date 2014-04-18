@@ -1892,39 +1892,36 @@ namespace PSD.ClientZero
                     VI.Cout(Uid, "{0}掷骰的结果为{1}.", zd.Player(ushort.Parse(args[1])), args[2]);
                     break;
                 case "E0IJ":
-                    for (int idx = 1; idx < args.Length; )
                     {
-                        ushort who = ushort.Parse(args[idx]);
-                        ushort type = ushort.Parse(args[idx + 1]);
+                        ushort who = ushort.Parse(args[1]);
+                        ushort type = ushort.Parse(args[2]);
                         if (type == 0)
                         {
-                            ushort delta = ushort.Parse(args[idx + 2]);
-                            ushort cur = ushort.Parse(args[idx + 3]);
+                            ushort delta = ushort.Parse(args[3]);
+                            ushort cur = ushort.Parse(args[4]);
                             VI.Cout(Uid, "{0}的{1}+{2}，现在为{3}.", zd.Player(who),
                                 zd.HeroTokenAlias(Z0D[who].SelectHero), delta, cur);
                             Z0D[who].Token = cur;
-                            idx += 4;
                         }
                         else if (type == 1)
                         {
-                            int count1 = int.Parse(args[idx + 2]);
-                            List<string> heros1 = Util.TakeRange(args, idx + 3, idx + 3 + count1).ToList();
-                            int count2 = int.Parse(args[idx + 3 + count1]);
-                            List<string> heros2 = Util.TakeRange(args, idx + 4 + count1,
-                                idx + 4 + count1 + count2).ToList();
+                            int count1 = int.Parse(args[3]);
+                            List<string> heros1 = Util.TakeRange(args, 4, 4 + count1).ToList();
+                            int count2 = int.Parse(args[4 + count1]);
+                            List<string> heros2 = Util.TakeRange(args, 5 + count1,
+                                5 + count1 + count2).ToList();
                             VI.Cout(Uid, "{0}的{1}增加{2}，现在为{3}.", zd.Player(who),
                                 zd.HeroPeopleAlias(Z0D[who].SelectHero), zd.MixedCards(heros1), zd.MixedCards(heros2));
                             Z0D[who].SpecialCards.AddRange(heros1);
-                            idx += (4 + count1 + count2);
                         }
                         else if (type == 2)
                         {
-                            int count1 = int.Parse(args[idx + 2]);
-                            List<ushort> tars1 = Util.TakeRange(args, idx + 3, idx + 3 + count1)
+                            int count1 = int.Parse(args[3]);
+                            List<ushort> tars1 = Util.TakeRange(args, 4, 4 + count1)
                                 .Select(p => ushort.Parse(p)).ToList();
-                            int count2 = int.Parse(args[idx + 3 + count1]);
-                            List<ushort> tars2 = Util.TakeRange(args, idx + 4 + count1,
-                                idx + 4 + count1 + count2).Select(p => ushort.Parse(p)).ToList();
+                            int count2 = int.Parse(args[4 + count1]);
+                            List<ushort> tars2 = Util.TakeRange(args, 5 + count1,
+                                5 + count1 + count2).Select(p => ushort.Parse(p)).ToList();
                             if (count1 == count2)
                                 VI.Cout(Uid, "{0}的{1}目标指定为{2}.", zd.Player(who),
                                     zd.HeroPlayerTarAlias(Z0D[who].SelectHero), zd.Player(tars1));
@@ -1932,52 +1929,69 @@ namespace PSD.ClientZero
                                 VI.Cout(Uid, "{0}的{1}目标增加{2}，现在为{3}.", zd.Player(who),
                                     zd.HeroPlayerTarAlias(Z0D[who].SelectHero), zd.Player(tars1), zd.Player(tars2));
                             Z0D[who].PlayerTars.AddRange(tars1);
-                            idx += (4 + count1 + count2);
                         }
                         else if (type == 3)
                         {
                             VI.Cout(Uid, "{0}已发动{1}.", zd.Player(who), zd.HeroAwakeAlias(Z0D[who].SelectHero));
                             Z0D[who].AwakeSignal = true;
-                            idx += 2;
                         }
-                        else
-                            break;
+                        else if (type == 4)
+                        {
+                            bool hind = ushort.Parse(args[3]) != "0";
+                            if (!hind)
+                            {
+                                int count1 = int.Parse(args[3]);
+                                List<string> folder1 = Util.TakeRange(args, 4, 4 + count1).ToList();
+                                int count2 = int.Parse(args[4 + count1]);
+                                List<string> folder2 = Util.TakeRange(args, 5 + count1,
+                                    5 + count1 + count2).ToList();
+                                VI.Cout(Uid, "{0}的{1}增加{2}，现在为{3}.", zd.Player(who),
+                                    zd.HeroFolderAlias(Z0D[who].SelectHero), zd.Tux(folder1), zd.Tux(folder2));
+                                Z0D[who].FolderCount += count1;
+                                Z0M[who].Folder.AddRange(folder1);
+                            }
+                            else
+                            {
+                                int count1 = int.Parse(args[3]);
+                                int count2 = int.Parse(args[4]);
+                                VI.Cout(Uid, "{0}的{1}数增加{2}，现在为{3}.", zd.Player(who),
+                                    zd.HeroFolderAlias(Z0D[who].SelectHero), count1, count2);
+                                Z0D[who].FolderCount -= count1;
+                            }
+                        }
                     }
                     break;
                 case "E0OJ":
-                    for (int idx = 1; idx < args.Length; )
                     {
-                        ushort who = ushort.Parse(args[idx]);
-                        ushort type = ushort.Parse(args[idx + 1]);
+                        ushort who = ushort.Parse(args[1]);
+                        ushort type = ushort.Parse(args[2]);
                         if (type == 0)
                         {
-                            ushort delta = ushort.Parse(args[idx + 2]);
-                            ushort cur = ushort.Parse(args[idx + 3]);
+                            ushort delta = ushort.Parse(args[3]);
+                            ushort cur = ushort.Parse(args[4]);
                             VI.Cout(Uid, "{0}的{1}-{2}，现在为{3}.", zd.Player(who),
                                 zd.HeroTokenAlias(Z0D[who].SelectHero), delta, cur);
                             Z0D[who].Token = cur;
-                            idx += 4;
                         }
                         else if (type == 1)
                         {
-                            int count1 = int.Parse(args[idx + 2]);
-                            List<string> heros1 = Util.TakeRange(args, idx + 3, idx + 3 + count1).ToList();
-                            int count2 = int.Parse(args[idx + 3 + count1]);
-                            List<string> heros2 = Util.TakeRange(args, idx + 4 + count1,
-                                idx + 4 + count1 + count2).ToList();
+                            int count1 = int.Parse(args[3]);
+                            List<string> heros1 = Util.TakeRange(args, 4, 4 + count1).ToList();
+                            int count2 = int.Parse(args[4 + count1]);
+                            List<string> heros2 = Util.TakeRange(args, 5 + count1,
+                                5 + count1 + count2).ToList();
                             VI.Cout(Uid, "{0}的{1}减少{2}，现在为{3}.", zd.Player(who),
                                 zd.HeroPeopleAlias(Z0D[who].SelectHero), zd.MixedCards(heros1), zd.MixedCards(heros2));
                             Z0D[who].SpecialCards.RemoveAll(p => heros1.Contains(p));
-                            idx += (4 + count1 + count2);
                         }
                         else if (type == 2)
                         {
-                            int count1 = int.Parse(args[idx + 2]);
-                            List<ushort> tars1 = Util.TakeRange(args, idx + 3, idx + 3 + count1)
+                            int count1 = int.Parse(args[3]);
+                            List<ushort> tars1 = Util.TakeRange(args, 4, 4 + count1)
                                 .Select(p => ushort.Parse(p)).ToList();
-                            int count2 = int.Parse(args[idx + 3 + count1]);
-                            List<ushort> tars2 = Util.TakeRange(args, idx + 4 + count1,
-                                idx + 4 + count1 + count2).Select(p => ushort.Parse(p)).ToList();
+                            int count2 = int.Parse(args[4 + count1]);
+                            List<ushort> tars2 = Util.TakeRange(args, 5 + count1,
+                                5 + count1 + count2).Select(p => ushort.Parse(p)).ToList();
                             if (count2 == 0)
                                 VI.Cout(Uid, "{0}失去{1}目标.", zd.Player(who),
                                     zd.HeroPlayerTarAlias(Z0D[who].SelectHero));
@@ -1985,16 +1999,40 @@ namespace PSD.ClientZero
                                 VI.Cout(Uid, "{0}的{1}目标减少{2}，现在为{3}.", zd.Player(who),
                                     zd.HeroPlayerTarAlias(Z0D[who].SelectHero), zd.Player(tars1), zd.Player(tars2));
                             Z0D[who].PlayerTars.RemoveAll(p => tars1.Contains(p));
-                            idx += (4 + count1 + count2);
                         }
                         else if (type == 3)
                         {
                             VI.Cout(Uid, "{0}已取消{1}.", zd.Player(who), zd.HeroAwakeAlias(Z0D[who].SelectHero));
                             Z0D[who].AwakeSignal = false;
-                            idx += 2;
                         }
-                        else
-                            break;
+                        else if (type == 4)
+                        {
+                            bool hind = ushort.Parse(args[3]) != "0";
+                            if (!hind)
+                            {
+                                int count1 = int.Parse(args[3]);
+                                List<string> folder1 = Util.TakeRange(args, 4, 4 + count1).ToList();
+                                int count2 = int.Parse(args[4 + count1]);
+                                List<string> folder2 = Util.TakeRange(args, 5 + count1,
+                                    5 + count1 + count2).ToList();
+                                if (count2 == 0)
+                                    VI.Cout(Uid, "{0}的{1}减少{2}.", zd.Player(who),
+                                        zd.HeroFolderAlias(Z0D[who].SelectHero), zd.Tux(folder1));
+                                else
+                                    VI.Cout(Uid, "{0}的{1}减少{2}，现在为{3}.", zd.Player(who),
+                                        zd.HeroFolderAlias(Z0D[who].SelectHero), zd.Tux(folder1), zd.Tux(folder2));
+                                Z0D[who].FolderCount -= count1;
+                                Z0M[who].Folder.RemoveAll(p => p.Contains(folder1));
+                            }
+                            else
+                            {
+                                int count1 = int.Parse(args[3]);
+                                int count2 = int.Parse(args[4]);
+                                VI.Cout(Uid, "{0}的{1}数减少{2}，现在为{3}.", zd.Player(who),
+                                    zd.HeroFolderAlias(Z0D[who].SelectHero), count1, count2);
+                                Z0D[who].FolderCount -= count1;
+                            }
+                        }
                     }
                     break;
                 case "E0WK":
