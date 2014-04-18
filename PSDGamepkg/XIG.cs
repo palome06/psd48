@@ -571,6 +571,21 @@ namespace PSD.PSDGamepkg
                             }
                         }
                     }
+                    break;                    
+                case "G1WJ":
+                    if (priority == 100)
+                    {
+                        IDictionary<int, int> dicts = CalculatePetsScore();
+                        XI.Board.FinalRScore = dicts[1];
+                        XI.Board.FinalOScore = dicts[2];
+                    }
+                    else if (priority == 200)
+                    {
+                        if (XI.Board.FinalRScore > XI.Board.FinalOScore)
+                            RaiseGMessage("G0WN,1"); // Aka wins if Aka is larger
+                        else
+                            RaiseGMessage("G0WN,2"); // Otherwise, Ao wins
+                    }
                     break;
                 case "G1EV":
                     if (priority == 100)
@@ -1392,6 +1407,7 @@ namespace PSD.PSDGamepkg
                         string[] argv = cmd.Substring(0, hdx).Split(',');
 
                         ushort ust = ushort.Parse(argv[1]);
+                        ushort uaction = ushort.Parse(argv[2]);
                         ushort notEq = ushort.Parse(argv[3]);
                         if (notEq == 0)
                         {
@@ -1400,13 +1416,15 @@ namespace PSD.PSDGamepkg
                                 argv[2].Length + argv[3].Length + argv[4].Length + 5, hdx);
                             if (argvt.Length > 0)
                                 argvt = "," + argvt;
-                            WI.BCast("E0CE," + ust + "," + argv[2] + "," + argv[4] + argvt);
-                            tux.Action(Board.Garden[ust], sktInType, sktFuse, argvt);
+                            WI.BCast("E0CE," + ust + "," + uaction + "," + argv[4] + argvt);
+                            if (uaction != 2)
+                                tux.Action(Board.Garden[ust], sktInType, sktFuse, argvt);
                         }
                         else
                         {
                             ushort ut = ushort.Parse(argv[5]);
-                            RaiseGMessage("G0ZB," + Board.Garden[ust].Uid + ",3," + ut + "," + argv[4]);
+                            if (uaction != 2)
+                                RaiseGMessage("G0ZB," + Board.Garden[ust].Uid + ",3," + ut + "," + argv[4]);
                         }
                         break;
                     }
@@ -2613,15 +2631,6 @@ namespace PSD.PSDGamepkg
                             jumpEnd = "H0TM";
                         }
                         System.Threading.Thread.CurrentThread.Abort();
-                    }
-                    break;
-                case "G1WJ":
-                    {
-                        IDictionary<int, int> dicts = CalculatePetsScore();
-                        if (dicts[1] > dicts[2])
-                            RaiseGMessage("G0WN,1"); // Aka wins if Aka is larger
-                        else
-                            RaiseGMessage("G0WN,2"); // Otherwise, Ao wins
                     }
                     break;
                 case "G0IJ":

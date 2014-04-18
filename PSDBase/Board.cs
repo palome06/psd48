@@ -98,6 +98,10 @@ namespace PSD.Base
 
         public IDictionary<string, string> JumpTable { private set; get; }
 
+        // final score
+        public int FinalAkaScore { set; get; }
+        public int FinalAoScore { set; get; }
+
         public Player GetOpponenet(Player player)
         {
             int mycount = 0, opcount = 0;
@@ -215,6 +219,7 @@ namespace PSD.Base
             PetProtecedPlayer = new List<ushort>();
             UseCardRound = 0; ClockWised = true;
             JumpTable = new Dictionary<string, string>();
+            FinalAkaScore = 0; FinalAoScore = 0;
         }
         // Create a lumberjack of monster/NPC, act as normal humans
         public static Player Lumberjack(Card.NMB nmb, ushort orgCode)

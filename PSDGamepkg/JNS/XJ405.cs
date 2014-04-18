@@ -1008,7 +1008,7 @@ namespace PSD.PSDGamepkg.JNS
                 string[] blocks = fuse.Split(',');
                 if (player.RAMUshort == 0 && blocks[1].Equals(player.Uid.ToString()))
                 {
-                    string cardCode = blocks[3];
+                    string cardCode = blocks[4];
                     Base.Card.Tux tux = XI.LibTuple.TL.EncodeTuxCode(cardCode);
                     if (tux != null && tux.Type == Base.Card.Tux.TuxType.JP)
                         return true;
@@ -1029,7 +1029,7 @@ namespace PSD.PSDGamepkg.JNS
             else if (type == 1)
             {
                 string[] blocks = fuse.Split(',');
-                player.RAMString = blocks[3];
+                player.RAMString = blocks[4];
                 //XI.InnerGMessage(fuse, 121);
             }
         }

@@ -43,7 +43,7 @@ namespace PSD.Base.Card
         public delegate string InputHolderDelegate(Player provider, Player user, int type, string fuse, string prev);
         public delegate string EncryptDelegate(string args);
         public delegate void LocustActionDelegate(Player player, int type, string fuse, string argst,
-            Player locuster, Tux locust);
+            string cdFuse, Player locuster, Tux locust);
 
         private ActionDelegate mAction;
         public ActionDelegate Action
@@ -97,7 +97,7 @@ namespace PSD.Base.Card
         protected static InputHolderDelegate DefInputHolder = new InputHolderDelegate(
             delegate(Player provider, Player user, int type, string fuse, string prev) { return ""; });
         protected static EncryptDelegate DefEncrypt = (a) => { return a; };
-        protected static LocustActionDelegate DefLocust = (p, t, f, a, lr, l) => { };
+        protected static LocustActionDelegate DefLocust = (p, t, f, a, cd, lr, l) => { };
 
         // public Delegate Type of Handling events
         internal Tux(string name, string code, TuxType type, string description, string special)
