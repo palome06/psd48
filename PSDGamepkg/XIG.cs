@@ -229,13 +229,13 @@ namespace PSD.PSDGamepkg
                         foreach (ushort ut in players)
                         {
                             Player player = Board.Garden[ut];
+                            List<ushort> g2onuts = new List<ushort>();
                             foreach (ushort pt in player.Pets)
                             {
                                 if (pt != 0)
                                 {
                                     RaiseGMessage("G0HL," + ut + "," + pt);
-                                    Board.MonDises.Add(ut);
-                                    RaiseGMessage("G2ON,1," + ut);
+                                    g2onuts.Add(pt);
                                 }
                             }
                             if (player.Escue.Count > 0)
@@ -244,9 +244,11 @@ namespace PSD.PSDGamepkg
                                 player.Escue.Clear();
                                 RaiseGMessage("G2OL," + string.Join(",", esc.Select(
                                     p => (player.Uid + "," + p))));
-                                Board.MonDises.AddRange(esc);
-                                RaiseGMessage("G2ON,1," + string.Join(",", esc));
+                                g2onuts.AddRange(esc);
                             }
+                            if (g2onuts.Count > 0)
+                                RaiseGMessage("G0ON," + ut + ",M," + g2onuts.Count
+                                     + "," + string.Join(",", g2onuts));
                         }
                     }
                     else if (priority == 300) // let teammates obtain tux
@@ -424,10 +426,7 @@ namespace PSD.PSDGamepkg
                         {
                             RaiseGMessage("G0OT," + ust + "," + cards.Count() + "," + string.Join(",", cards));
                             if (!tux.IsEq[sktInType])
-                            {
-                                RaiseGMessage("G2ON,0," + string.Join(",", cards));
-                                Board.TuxDises.AddRange(cards);
-                            }
+                                RaiseGMessage("G0ON," + ust + ",C," + cards.Count + "," + string.Join(",", cards));
                             else
                             {
                                 ushort owner = (hst == 0 ? ust : hst);
@@ -474,10 +473,7 @@ namespace PSD.PSDGamepkg
                                 Board.PendingTux.Remove(rm);
                         }
                         if (accu.Count > 0)
-                        {
-                            RaiseGMessage("G2ON,0," + string.Join(",", accu));
-                            Board.TuxDises.AddRange(accu);
-                        }
+                            RaiseGMessage("G0ON,10,C," + accu.Count + "," + string.Join(",", accu));
                     } break;
                 case "G0HZ":
                     if (priority == 100)
@@ -557,8 +553,7 @@ namespace PSD.PSDGamepkg
                         //WI.BCast("E0EV," + eveCard);
                         if (Board.Eve != 0)
                         {
-                            Board.EveDises.Add(Board.Eve);
-                            RaiseGMessage("G2ON,2," + Board.Eve);
+                            RaiseGMessage("G0ON,10,E,1," + Board.Eve);
                             RaiseGMessage("G2YM,2,0,0");
                             Board.Eve = 0;
                         }
@@ -948,9 +943,8 @@ namespace PSD.PSDGamepkg
                     {
                         ushort who = ushort.Parse(args[1]);
                         List<ushort> cards = Util.TakeRange(args, 2, args.Length).Select(p => ushort.Parse(p)).ToList();
-                        RaiseGMessage("G0OT," + who + "," + cards.Count() + "," + string.Join(",", cards));
-                        RaiseGMessage("G2ON,0," + string.Join(",", cards));
-                        Board.TuxDises.AddRange(cards);
+                        RaiseGMessage("G0OT," + who + "," + cards.Count + "," + string.Join(",", cards));
+                        RaiseGMessage("G0ON," + who + ",C," + cards.Count + "," + string.Join(",", cards));
                         WI.BCast("E0QZ," + who + "," + string.Join(",", cards));
                         RaiseGMessage("G1DI," + who + ",1," + cards.Count + "," + string.Join(",", cards));
                     }
@@ -1049,9 +1043,8 @@ namespace PSD.PSDGamepkg
                             g1di += "," + string.Join(",", loses.Select(p =>
                                 p.Key + ",1," + p.Value.Count() + "," + string.Join(",", p.Value)));
                             RaiseGMessage("G0OT," + g1ot);
-                            RaiseGMessage("G2ON,0," + string.Join(",", loses.Values.Select(p => string.Join(",", p))));
-                            foreach (IEnumerable<ushort> tuxs in loses.Values)
-                                Board.TuxDises.AddRange(tuxs);
+                            RaiseGMessage("G0ON," + string.Join(","), loses.Select(p => p.Key + ",C,"
+                                + p.Value.Count + "," + string.Join(",", p.Value)));
                             foreach (var pair in loses)
                                 WI.BCast("E0QZ," + pair.Key + "," + string.Join(",", pair.Value));
                         }
@@ -1644,8 +1637,7 @@ namespace PSD.PSDGamepkg
                             {
                                 RaiseGMessage("G0OT," + me + ",1," + card);
                                 RaiseGMessage("G2ZU,0," + me + "," + card);
-                                RaiseGMessage("G2ON,0," + card);
-                                Board.TuxDises.Add(card);
+                                RaiseGMessage("G0ON," + me + ",C,1," + card);
                             }
                         }
                         else if (consumeType == 0 || consumeType == 1)
@@ -1687,8 +1679,7 @@ namespace PSD.PSDGamepkg
                                         {
                                             RaiseGMessage("G0OT," + me + ",1," + card);
                                             RaiseGMessage("G2ZU,0," + me + "," + card);
-                                            RaiseGMessage("G2ON,0," + card);
-                                            Board.TuxDises.Add(card);
+                                            RaiseGMessage("GOON," + me + ",C,1," + card);
                                         }
                                     }
                                     WI.BCast("E0ZC," + me + "," + consumeType + "," + equipType +
@@ -1737,8 +1728,7 @@ namespace PSD.PSDGamepkg
                                         {
                                             RaiseGMessage("G0OT," + me + ",1," + card);
                                             RaiseGMessage("G2ZU,0," + me + "," + card);
-                                            RaiseGMessage("G2ON,0," + card);
-                                            Board.TuxDises.Add(card);
+                                            RaiseGMessage("G0ON," + me + ",C,1," + card);
                                         }
                                     }
                                     WI.BCast("E0ZC," + me + "," + consumeType + "," + equipType +
@@ -1769,8 +1759,7 @@ namespace PSD.PSDGamepkg
                             {
                                 RaiseGMessage("G0OT," + who + ",1," + ep);
                                 RaiseGMessage("G2ZU,0," + who + "," + ep);
-                                RaiseGMessage("G2ON,0," + ep);
-                                Board.TuxDises.Add(ep);
+                                RaiseGMessage("G0ON," + who + ",C,1," + ep);
                             }
                         }
                         Board.CsEqiups.Clear();
@@ -2235,18 +2224,14 @@ namespace PSD.PSDGamepkg
                                 if (old != 0 && sel != old)
                                 {
                                     RaiseGMessage("G0HL," + who + "," + old);
-                                    RaiseGMessage("G2ON,1," + old);
-                                    Board.MonDises.Add(old);
+                                    RaiseGMessage("G0ON," + who + ",M,1," + old);
                                 }
                                 if (sel != old)
                                     RaiseGMessage("G0HD,0," + who + "," + from + "," + sel);
                                 foreach (ushort ut in cpets[i])
                                 {
                                     if (ut != old && ut != sel)
-                                    {
-                                        RaiseGMessage("G2ON,1," + ut);
-                                        Board.MonDises.Add(ut);
-                                    }
+                                        RaiseGMessage("G0ON," + who + ",M,1," + ut);
                                 }
                             }
                         }
@@ -2378,8 +2363,7 @@ namespace PSD.PSDGamepkg
                                 else
                                 {
                                     RaiseGMessage("G0HL," + me + "," + mons);
-                                    RaiseGMessage("G2ON,1," + mons);
-                                    Board.MonDises.Add(mons);
+                                    RaiseGMessage("G0ON," + me + ",M,1," + mons);
                                 }
                             }
                             // TODO: discard pets after fight finished
@@ -2416,11 +2400,8 @@ namespace PSD.PSDGamepkg
                         }
                         foreach (var pair in imc)
                             RaiseGMessage("G2HU," + pair.Key + "," + string.Join(",", pair.Value));
-                        if (dices.Count > 0)
-                        {
-                            RaiseGMessage("G2ON,1," + string.Join(",", dices));
-                            Board.MonDises.AddRange(dices);
-                        }
+                        if (dices.Count > 0) // Actually from different players, set 10
+                            RaiseGMessage("G0ON,10,M," + dices.Count + "," + string.Join(",", dices));
                         WI.BCast("E0HI," + cmdrst);
                     }
                     break;
@@ -2442,8 +2423,7 @@ namespace PSD.PSDGamepkg
                             if (py.Pets.Contains(mons))
                             {
                                 RaiseGMessage("G0HL," + who + "," + mons);
-                                RaiseGMessage("G2ON,1," + mons);
-                                Board.MonDises.Add(mons);
+                                RaiseGMessage("G0ON," + who + ",M,1," + mons);
                             }
                         }
                         Board.CsPets.Clear();
@@ -3001,11 +2981,11 @@ namespace PSD.PSDGamepkg
                         {
                             RaiseGMessage("G0OT," + string.Join(",", actual.Select(p =>
                                 p.Key + "," + p.Value.Count + "," + string.Join(",", p.Value))));
-                            RaiseGMessage("G2ON,0," + string.Join(",", actual.Values.Select(p => string.Join(",", p))));
                             foreach (var pair in actual)
                             {
-                                Board.TuxDises.AddRange(pair.Value);
                                 WI.BCast("E0QZ," + pair.Key + "," + string.Join(",", pair.Value));
+                                RaiseGMessage("G0ON," + pair.Key + ",C,"
+                                     + pair.Value.Count + string.Join(",", pair.Value));
                             }
                         }
                         foreach (var pair in actual)
@@ -3079,6 +3059,47 @@ namespace PSD.PSDGamepkg
                         if (e0af.Length > 0)
                             WI.BCast("E0AF," + e0af);
                     }
+                    break;
+                case "G05M":
+                    for (int idx = 1; idx < args.Length; ) {
+                        // G05M,FromZone,Count,*
+                        string fromZone = args[idx];
+                        int count = int.Parse(args[idx + 1]);
+                        if (count > 0) {
+                            ushort[] outs = Util.TakeRange(args, idx + 2, idx + 2 + count)
+                                .Select(p => ushort.Parse(p)).ToList();
+                            XI.
+                        }
+                    }
+                    break;
+                case "G05C":
+                    {
+
+                    }
+                    break;
+                case "G05E":
+                    {
+
+                    }
+                    break;
+                case "G0ON":
+                    for (int idx = 1; idx < args.Length; ) {
+                        string fromZone = args[idx];
+                        string cardType = args[idx + 1];
+                        int cnt = int.Parse(args[idx + 2]);
+                        if (cnt > 0) {
+                            List<ushort> cds = Util.TakeRange(args, idx + 3, idx + 3 + count)
+                                .Select(p => ushort.Parse(p)).ToList();
+                            if (cardType == "C")
+                                Board.TuxDises.AddRange(cds);
+                            else if (cardType == "M")
+                                Board.MonDises.AddRange(cds);
+                            else if (cardType == "E")
+                                Board.EveDises.AddRange(cds);
+                        }
+                        idx += (3 + count);
+                    }
+                    WI.BCast("E0ON," + cmdrst);
                     break;
             }
         }

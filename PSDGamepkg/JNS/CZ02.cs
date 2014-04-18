@@ -56,32 +56,32 @@ namespace PSD.PSDGamepkg.JNS
             Tux tux = XI.LibTuple.TL.DecodeTux(card);
             if (player.Tux.Contains(card))
             {
+                int price = 0;
                 if (tux.Code.Equals("JP03"))
-                {
-                    XI.RaiseGMessage("G0OT," + player.Uid + ",1," + card);
-                    XI.RaiseGMessage("G2ZU,0," + player.Uid + "," + card);
-                    XI.RaiseGMessage("G2ON,0," + card);
-                    XI.Board.TuxDises.Add(card);
-                    XI.RaiseGMessage("G0DH," + player.Uid + ",0,1");
-                }
+                    price = 1;
                 else if (tux.Code.Equals("WQ04"))
+                    price = 2;
+                if (price > 0)
                 {
-                    XI.RaiseGMessage("G0OT," + player.Uid + ",1," + card);
+                    //XI.RaiseGMessage("G0OT," + player.Uid + ",1," + card);
                     XI.RaiseGMessage("G2ZU,0," + player.Uid + "," + card);
-                    XI.RaiseGMessage("G2ON,0," + card);                    
-                    XI.Board.TuxDises.Add(card);
-                    XI.RaiseGMessage("G0DH," + player.Uid + ",0,2");
+                    //XI.RaiseGMessage("G0ON," + player.Uid + ",C,1," + card);
+                    XI.RaiseGMessage("G0QZ," + player.Uid + "," + card);
+                    XI.RaiseGMessage("G0DH," + player.Uid + ",0," + price);
                 }
             }
             else if (player.Weapon == card || player.ExEquip == card)
             {
+                int price = 0;
                 if (tux.Code.Equals("WQ04"))
+                    price = 2;
+                if (price > 0)
                 {
-                    XI.RaiseGMessage("G0OT," + player.Uid + ",1," + card);
+                    //XI.RaiseGMessage("G0OT," + player.Uid + ",1," + card);
                     XI.RaiseGMessage("G2ZU,0," + player.Uid + "," + card);
-                    XI.RaiseGMessage("G2ON,0," + card);
-                    XI.Board.TuxDises.Add(card);
-                    XI.RaiseGMessage("G0DH," + player.Uid + ",0,2");
+                    //XI.RaiseGMessage("G0ON," + player.Uid + ",C,1," + card);
+                    XI.RaiseGMessage("G0QZ," + player.Uid + "," + card);
+                    XI.RaiseGMessage("G0DH," + player.Uid + ",0," + price);
                 }
             }
         }
@@ -142,8 +142,7 @@ namespace PSD.PSDGamepkg.JNS
             {
                 player.Escue.Remove(which);
                 XI.RaiseGMessage("G2OL," + player.Uid + "," + which);
-                XI.Board.MonDises.Add(which);
-                XI.RaiseGMessage("G2ON,1," + which);
+                XI.RaiseGMessage("G0ON," + player.Uid + ",M,1," + which);
                 ushort side = ushort.Parse(XI.AsyncInput(player.Uid, "S", "CZ03", "0"));
                 XI.RaiseGMessage("G0IP," + side + ",1");
             }
@@ -172,9 +171,8 @@ namespace PSD.PSDGamepkg.JNS
                 {
                     XI.RaiseGMessage("G0OT," + player.Uid + ",1," + card);
                     XI.RaiseGMessage("G2ZU,0," + player.Uid + "," + card);
-                    XI.RaiseGMessage("G2ON,0," + card);
-                    XI.Board.TuxDises.Add(card);
-                    ushort side = ushort.Parse(XI.AsyncInput(player.Uid, "S", "ZP04", "0"));
+                    XI.RaiseGMessage("G0ON," + player.Uid + ",C,1," + card);
+                    ushort side = ushort.Parse(XI.AsyncInput(player.Uid, "S", "TPT2", "0"));
                     XI.RaiseGMessage("G0IP," + side + ",2");
                 }
             }

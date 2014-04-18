@@ -1318,6 +1318,124 @@ namespace PSD.PSDGamepkg.JNS
         {
             XI.RaiseGMessage("G0DH," + player.Uid + ",0,1");
         }
+        public void XBT1DelAction(Player player)
+        {
+            Base.Card.Luggage lug = XI.LibTuple.TL.EncodeTuxCode("XBT1") as Base.Card.Luggage;
+            if (lug != null && lug.Capacities.Count > 0) {
+                XI.RaiseGMessage("G2TZ," + player.Uid + lug.Capacities.Count +
+                         "," + string.Join(",", lug.Capacities.Select(p => "C" + p));
+                lug.Capacities.Clear();
+            }
+        }
+        public bool XBT1ConsumeValid(Player player, int consumeType, int type, string fuse) {
+            Base.Card.Luggage lug = XI.LibTuple.TL.EncodeTuxCode("XBT1") as Base.Card.Luggage;
+            if (lug != null && consumeType == 0)
+            {
+                if (type == 0) {
+                    if (XI.Board.InFightThrough) {
+                        string[] g0on = fuse.Split(',');
+                        for (int i = 1; i < g0on.Length; ) {
+                            string cardType = g0on[i + 1];
+                            int n = g0on[i + 2];
+                            if (cardType == "M") {
+                                for (int j = i + 3; j < i + 3 + n; ++i)
+                                {
+                                    ushort ut = ushort.Parse(g0on[j]);
+                                    if (XI.LibTuple.NMBLib.IsMonster(ut))
+                                        return true;
+                                }
+                            }
+                            i += (n + 3);
+                        }
+                    }
+                    return false;
+                } else if (type == 1)
+                    return lug.Sum(p => XI.LibTuple.ML.Decode(p).STR) >= 4;
+            }
+            return false;
+        }
+        public void XBT1ConsumeAction(Player player, int consumeType, int type, string fuse, string argst)
+        {
+            Base.Card.Luggage lug = XI.LibTuple.TL.EncodeTuxCode("XBT1") as Base.Card.Luggage;
+            ushort lugCode = XI.LibTuple.TL.UniqueEquipSerial("XBT1");
+            if (lug != null && lugCode != 0 && consumeType == 0)
+            {
+                if (type == 0) {
+                    List<ushort> sns = new List<ushort>();
+                    string[] g0on = fuse.Split(',');
+                    string n0on = "";
+                    for (int i = 1; i < g0on.Length; ) {
+                        string fromZone = g0on[i];
+                        string cardType = g0on[i + 1];
+                        int n = g0on[i + 2];
+                        if (cardType == "M") {
+                            List<ushort> keeps = new List<ushort>();
+                            for (int j = i + 3; j < i + 3 + n; ++i)
+                            {
+                                ushort ut = ushort.Parse(g0on[j]);
+                                if (XI.LibTuple.NMBLib.IsMonster(ut))
+                                    sns.Add(ut);
+                                else
+                                    keeps.Add(ut);
+                            }
+                            if (keeps.Count > 0)
+                                n0on += "," + fromZone + ",M," + keeps.Count + "," + string.Join(",", keeps);
+                        } else
+                            n0on += "," + string.Join(",", Util.TakeRange(g0on, i, i + 3 + n));
+                        i += (n + 3);
+                    }
+                    if (sns.Count > 0)
+                        XI.RaiseGMessage("G0SN," + player.Uid + "," + lugCode 
+                            + "," + string.Join(",", sns.Select(p => "M" + p)));
+                    if (n0on.Length > 0)
+                        XI.InnerGMessage("G0ON" + n0on, 80);
+                } else if (type == 1) {
+                    int total = lug.Sum(p => XI.LibTuple.ML.Decode(p).STR) / 4;
+                    IDictionary<Player, int> sch = new Dictionary<Player, int>();
+                    while (total > 0)
+                    {
+                        if (invs.Count == 1)
+                        {
+                            string word = "#补牌,T1(p" + invs[0].Uid + "),#补牌数,D" + total;
+                            XI.AsyncInput(XI.Board.Rounder.Uid, word, "XBT1", "0");
+                            sch[invs[0]] = total;
+                            total = 0; invs.Clear();
+                        }
+                        else
+                        {
+                            string ichi = total == 1 ? "/D1" : ("/D1~" + total);
+                            string word = "#补牌,T1(p" + string.Join("p",
+                                invs.Select(p => p.Uid)) + "),#补牌数," + ichi;
+                            string input = XI.AsyncInput(XI.Board.Rounder.Uid, word, "XBT1", "0");
+                            if (!input.Contains("/"))
+                            {
+                                string[] ips = input.Split(',');
+                                ushort ut = ushort.Parse(ips[0]);
+                                int zn = int.Parse(ips[1]);
+                                Player py = XI.Board.Garden[ut];
+                                sch[py] = zn;
+                                total -= zn;
+                                invs.Remove(py);
+                            }
+                        }
+                    }
+                    XI.RaiseGMessage("G2TZ," + player.Uid + lug.Capacities.Count +
+                         "," + string.Join(",", lug.Capacities.Select(p => "C" + p));
+                    lug.Capacities.Clear();
+                    XI.RaiseGMessage("G0DH," + sch.Select(p => p.Key.Uid + ",0," + p.Value));
+                }
+            }
+        }
+        // public string XBT1ConsumeInput(Player player, int consumeType, int type, string fuse, string prev)
+        // {
+        //     if (prev == "")
+        //         return "#交给对方,/Q1(p" + string.Join("p", player.Tux) + ")";
+        //     else if (prev.IndexOf(',') < 0)
+        //         return "#交给的,/T1(p" + string.Join("p", XI.Board.Garden.Values.Where(p => p.IsTared &&
+        //                     p.Team == player.OppTeam).Select(p => p.Uid)) + ")";
+        //     else
+        //         return "";
+        // }
         public void XBT2InsAction(Player player)
         {
             XI.RaiseGMessage("G0DH," + player.Uid + ",0,1");

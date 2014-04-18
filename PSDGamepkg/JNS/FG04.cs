@@ -731,8 +731,7 @@ namespace PSD.PSDGamepkg.JNS
                     {
                         Player py = sg.Single();
                         XI.RaiseGMessage("G0HL," + py.Uid + "," + mons);
-                        XI.Board.MonDises.Add(mons);
-                        XI.RaiseGMessage("G2ON,1," + mons);
+                        XI.RaiseGMessage("G0ON," + py.Uid + ",M,1," + mons);
                         ushort gt04code = XI.LibTuple.ML.Encode("GT04");
                         XI.RaiseGMessage("G0HD,1," + py.Uid + ",0," + gt04code);
                         if (XI.Board.Monster1 == gt04code)

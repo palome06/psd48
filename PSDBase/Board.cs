@@ -45,7 +45,10 @@ namespace PSD.Base
         //public int OPool { get; set; }
         public bool ClockWised;
 
+        // Whether in a fight/battle, consequence excluded
         public bool InFight { set; get; }
+        // Whether in a fight/battle, consequence included
+        public bool InFightThrough { set; get; }
         // Bonus Pool Value of Rounder Side
         public int RPool { get; set; }
         // Bonus Pool Value of Opponent Side

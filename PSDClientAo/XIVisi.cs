@@ -409,7 +409,7 @@ namespace PSD.ClientAo
             int cdx = readLine.IndexOf(',');
             string cop = Util.Substring(readLine, 0, cdx);
             if (cop == "") { } // Reserved for strange string in replay
-            else if (DealWithOldMessage(readLine))
+            else if (WI is VW.Eywi && DealWithOldMessage(readLine))
                 return false;
             else if (cop.StartsWith("E0"))
             {
@@ -1163,25 +1163,38 @@ namespace PSD.ClientAo
                     }
                     break;
                 case "E0ON":
-                    {
-                        //ushort type = ushort.Parse(args[1]);
-                        //IEnumerable<ushort> ics = Util.TakeRange(args, 2, args.Length).Select(p => ushort.Parse(p));
-                        //if (type == 0)
-                        //    VI.Cout(uid, "{0}进入弃牌堆.", zd.Tux(ics));
-                        //else if (type == 1)
-                        //    VI.Cout(uid, "{0}进入弃牌堆.", zd.Monster(ics));
-                        //else if (type == 2)
-                        //    VI.Cout(uid, "{0}进入弃牌堆.", zd.Eve(ics));
-                        ushort utype = ushort.Parse(args[1]);
-                        int n = args.Length - 2;
-                        ushort[] cards = Util.TakeRange(args, 2, args.Length)
-                            .Select(p => ushort.Parse(p)).ToArray();
-                        if (utype == 0)
-                            A0F.TuxDises += n;
-                        else if (utype == 1)
-                            A0F.MonDises += n;
-                        else if (utype == 2)
-                            A0F.EveDises += n;
+                    for (int idx = 1; idx < args.Length; ) {
+                        ushort fromZone = ushort.Parse(args[idx]);
+                        string cardType = args[idx + 1];
+                        int cnt = int.Parse(args[idx + 2]);
+                        if (cnt > 0) {
+                            List<ushort> cds = Util.TakeRange(args, idx + 3, idx + 3 + count)
+                                .Select(p => ushort.Parse(p)).ToList();
+                            string cdInfos = null;
+                            if (cardType == "C") {
+                                A0F.TuxDises += n;
+                                if (fromZone == 0)
+                                    cdInfos = zd.Tux(cds);
+                            }
+                            else if (cardType == "M") {
+                                A0F.MonDises += n;
+                                if (fromZone == 0)
+                                    cdInfos = zd.Monster(cds);
+                            }
+                            else if (cardType == "E") {
+                                A0F.EveDises += n;
+                                if (fromZone == 0)
+                                    cdInfos = zd.Eve(cds);
+                            }
+                            if (cdInfos != null)
+                            {
+                                VI.Cout(Uid, "{0}被弃置进入弃牌堆.", cdInfos);
+                                List<string> cedcards = mons.Select(
+                                    p => cardType + p).ToList();
+                                A0O.FlyingGet(cedcards, 0, 0);
+                            }
+                        }
+                        idx += (3 + count);
                     }
                     break;
                 case "E0CN":
@@ -1290,34 +1303,6 @@ namespace PSD.ClientAo
                         }
                         break;
                     }
-                case "E0QC": // JN40101
-                    {
-                        ushort cardType = ushort.Parse(args[1]);
-                        List<ushort> mons = Util.TakeRange(args, 2, args.Length)
-                            .Select(p => ushort.Parse(p)).ToList();
-                        if (mons.Count > 0)
-                        {
-                            if (cardType == 0)
-                            {
-                                VI.Cout(Uid, "{0}被弃置.", zd.Tux(mons));
-                                List<string> cedcards = mons.Select(p => "C" + p).ToList();
-                                A0O.FlyingGet(cedcards, 0, 0);
-                            }
-                            else if (cardType == 1)
-                            {
-                                VI.Cout(Uid, "{0}被弃置.", zd.Monster(mons));
-                                List<string> cedcards = mons.Select(p => "M" + p).ToList();
-                                A0O.FlyingGet(cedcards, 0, 0);
-                            }
-                            else if (cardType == 2)
-                            {
-                                VI.Cout(Uid, "{0}被弃置.", zd.Eve(mons));
-                                List<string> cedcards = mons.Select(p => "E" + p).ToList();
-                                A0O.FlyingGet(cedcards, 0, 0);
-                            }
-                        }
-                    }
-                    break;
                 case "E0QZ":
                     {
                         ushort from = ushort.Parse(args[1]);
@@ -4018,11 +4003,12 @@ namespace PSD.ClientAo
         #endregion Y
         #region Old Versions
         private bool DealWithOldMessage(string readLine) {
+            int version = (WI as VW.Eywi).Version;
             string[] args = readLine.Split(',');
             switch (readLine)
             {
                 case "E0HS":
-                    {
+                    if (version <= 114) {
                         string msg = "";
                         for (int i = 1; i < args.Length; i += 2)
                         {
@@ -4057,6 +4043,37 @@ namespace PSD.ClientAo
                         }
                         return true;
                     }
+                    break;
+                case "E0HQ":
+                    if (version <= 114) // JN40101
+                    {
+                        ushort cardType = ushort.Parse(args[1]);
+                        List<ushort> mons = Util.TakeRange(args, 2, args.Length)
+                            .Select(p => ushort.Parse(p)).ToList();
+                        if (mons.Count > 0)
+                        {
+                            if (cardType == 0)
+                            {
+                                VI.Cout(Uid, "{0}被弃置.", zd.Tux(mons));
+                                List<string> cedcards = mons.Select(p => "C" + p).ToList();
+                                A0O.FlyingGet(cedcards, 0, 0);
+                            }
+                            else if (cardType == 1)
+                            {
+                                VI.Cout(Uid, "{0}被弃置.", zd.Monster(mons));
+                                List<string> cedcards = mons.Select(p => "M" + p).ToList();
+                                A0O.FlyingGet(cedcards, 0, 0);
+                            }
+                            else if (cardType == 2)
+                            {
+                                VI.Cout(Uid, "{0}被弃置.", zd.Eve(mons));
+                                List<string> cedcards = mons.Select(p => "E" + p).ToList();
+                                A0O.FlyingGet(cedcards, 0, 0);
+                            }
+                        }
+                        return true;
+                    }
+                    break;
             }
             return false;
         }

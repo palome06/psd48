@@ -352,6 +352,20 @@ namespace PSD.Base.Card
             }
             return us;
         }
+        // Find the unique equip code number, return 0 when no or duplicated found
+        public ushort UniqueEquipSerial(string code)
+        {
+            ushort ans = 0;
+            foreach (var pair in dicts) {
+                if (pair.Value.Code.Equals(code)) {
+                    if (ans == 0)
+                        ans = pair.Key;
+                    else
+                        return 0;
+                }
+            }
+            return ans;
+        }
     }
 
     public class TuxEqiup : Tux
@@ -468,6 +482,8 @@ namespace PSD.Base.Card
             delegate(ushort cardUt, Player player) { });
 
         public override bool IsTuxEqiup() { return true; }
+
+        public bool IsLuggage() { return false; }
 
         internal override void Parse(string countStr, string occurStr, string parasitismStr,
             string priorStr, string isEqStr, string tarStr, string terministr)
@@ -616,6 +632,21 @@ namespace PSD.Base.Card
                 return @string.Substring(idx);
             else
                 return @string.Substring(idx, jdx - idx);
+        }
+    }
+
+    public class Luggage : TuxEqiup
+    {
+        // Cards Containing in the luggage (C/M/E...)
+        public List<string> Capacities { private set; get; }
+
+        public override bool IsLuggage() { return true; }
+
+        public Luggage(string name, string code, TuxType type,
+                string description, string special, string growup) :
+            base(name, code, type, description, special, growup)
+        {
+            Capacities = new List<string>();
         }
     }
 }

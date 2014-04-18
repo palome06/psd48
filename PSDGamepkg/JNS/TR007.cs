@@ -2187,12 +2187,9 @@ namespace PSD.PSDGamepkg.JNS
             XI.RaiseGMessage("G0DH," + player.Uid + ",3");
             List<ushort> pets = player.Pets.Where(p => p != 0).ToList();
             foreach (ushort ut in pets)
-            {
                 XI.RaiseGMessage("G0HL," + player.Uid + "," + ut);
-                XI.Board.MonDises.Add(ut);
-            }
             if (pets.Count > 0)
-                XI.RaiseGMessage("G2ON," + pets.Count + "," + string.Join(",", pets));
+                XI.RaiseGMessage("G0ON," + player.Uid + ",M," + pets.Count + "," + string.Join(",", pets));
             XI.AsyncInput(player.Uid, "//", "JNT2202", "0");
             XI.Board.RestNPCDises.Add(pop);
             XI.RaiseGMessage("G2YM,3,0,0");
@@ -2310,8 +2307,14 @@ namespace PSD.PSDGamepkg.JNS
         public void JNT2403Action(Player player, int type, string fuse, string argst)
         {
             ushort tar = ushort.Parse(argst);
-            string sel1 = XI.AsyncInput(tar, "#请选择是否立即阵亡.##否##是,Y2", "JNT2403", "0");
-            if (sel1 == "2")
+            Player py = XI.Board.Garden[tar];
+            bool survive = false;
+            if (py.Tux.Count > 0)
+            {
+                string sel1 = XI.AsyncInput(tar, "#请选择是否立即阵亡.##否##是,Y2", "JNT2403", "0");
+                survive = (sel1 != "2");
+            }
+            if (!survive)
             {
                 if (player.IsAlive)
                     XI.RaiseGMessage("G0LH,0," + player.Uid + "," + (player.HPb - 2));
@@ -2319,16 +2322,13 @@ namespace PSD.PSDGamepkg.JNS
             }
             else
             {
-                Player py = XI.Board.Garden[tar];
-                if (py.Tux.Count > 0)
-                {
-                    List<ushort> vals = py.Tux.Except(XI.Board.ProtectedTux).ToList();
-                    string c0 = Util.RepeatString("p0", vals.Count);
-                    XI.AsyncInput(player.Uid, "#作为「幻」的,C1(" + c0 + ")", "JNT2403", "1");
-                    vals.Shuffle();
-                    XI.RaiseGMessage("G0OT," + tar + ",1," + vals[0]);
-                    XI.RaiseGMessage("G0IJ," + player.Uid + ",1,1,C" + vals[0]);
-                }
+                List<ushort> vals = py.Tux.Except(XI.Board.ProtectedTux).ToList();
+                string c0 = Util.RepeatString("p0", vals.Count);
+                XI.AsyncInput(player.Uid, "#作为「幻」的,C1(" + c0 + ")", "JNT2403", "1");
+                vals.Shuffle();
+                XI.RaiseGMessage("G0OT," + tar + ",1," + vals[0]);
+                XI.RaiseGMessage("G0IJ," + player.Uid + ",1,1,C" + vals[0]);
+                
                 XI.RaiseGMessage("G0LH,0," + py.Uid + "," + (py.HPb - 2));
                 if (py.IsAlive)
                 {
@@ -2451,25 +2451,15 @@ namespace PSD.PSDGamepkg.JNS
                     {
                         mon1.Curtain();
                         if (XI.Board.Mon1From != 0)
-                        {
                             XI.RaiseGMessage("G0HL," + XI.Board.Mon1From + "," + XI.Board.Monster1);
-                            XI.RaiseGMessage("G0WB," + XI.Board.Monster1);
-                            XI.Board.MonDises.Add(XI.Board.Monster1);
-                            XI.RaiseGMessage("G2ON,1," + XI.Board.Monster1);
-                        }
-                        else
-                        {
-                            XI.RaiseGMessage("G0WB," + XI.Board.Monster1);
-                            XI.Board.MonDises.Add(XI.Board.Monster1);
-                            XI.RaiseGMessage("G2ON,1," + XI.Board.Monster1);
-                        }
+                        XI.RaiseGMessage("G0WB," + XI.Board.Monster1);
+                        XI.RaiseGMessage("G0ON," + XI.Board.Mon1From + ",M,1," + XI.Board.Monster1);
                         XI.RaiseGMessage("G2YM,0,0,0");
                         XI.Board.Monster1 = 0;
 
                         mon2.WinEff();
                         XI.RaiseGMessage("G0WB," + XI.Board.Monster2);
-                        XI.Board.MonDises.Add(XI.Board.Monster2);
-                        XI.RaiseGMessage("G2ON,1," + XI.Board.Monster2);
+                        XI.RaiseGMessage("G0ON,0,M,1," + XI.Board.Monster2);
                         XI.RaiseGMessage("G2YM,1,0,0");
                         XI.Board.Monster2 = 0;
 
@@ -2517,25 +2507,15 @@ namespace PSD.PSDGamepkg.JNS
                     {
                         mon1.Curtain();
                         if (XI.Board.Mon1From != 0)
-                        {
                             XI.RaiseGMessage("G0HL," + XI.Board.Mon1From + "," + XI.Board.Monster1);
-                            XI.RaiseGMessage("G0WB," + XI.Board.Monster1);
-                            XI.Board.MonDises.Add(XI.Board.Monster1);
-                            XI.RaiseGMessage("G2ON,1," + XI.Board.Monster1);
-                        }
-                        else
-                        {
-                            XI.RaiseGMessage("G0WB," + XI.Board.Monster1);
-                            XI.Board.MonDises.Add(XI.Board.Monster1);
-                            XI.RaiseGMessage("G2ON,1," + XI.Board.Monster1);
-                        }
+                        XI.RaiseGMessage("G0WB," + XI.Board.Monster1);
+                        XI.RaiseGMessage("G0ON," + XI.Board.Mon1From + ",M,1," + XI.Board.Monster1);
                         XI.RaiseGMessage("G2YM,0,0,0");
                         XI.Board.Mon1From = 0;
                         XI.Board.Monster1 = 0;
 
                         XI.HandleWithNPCEffect(player, npc, false);
-                        XI.Board.MonDises.Add(XI.Board.Monster2);
-                        XI.RaiseGMessage("G2ON,1," + XI.Board.Monster2);
+                        XI.RaiseGMessage("G0ON,0,M,1," + XI.Board.Monster2);
                         XI.RaiseGMessage("G2YM,1,0,0");
                         XI.Board.Monster2 = 0;
 
@@ -2876,10 +2856,7 @@ namespace PSD.PSDGamepkg.JNS
                                         XI.RaiseGMessage("G0ZB," + player.Uid + ",2," + ut);
                                     }
                                     else
-                                    {
-                                        XI.RaiseGMessage("G2QC,0," + ut);
-                                        XI.RaiseGMessage("G2ON,0," + ut);
-                                    }
+                                        XI.RaiseGMessage("G0ON,0,C,1," + ut);
                                 }
                                 break;
                             }
@@ -2939,10 +2916,7 @@ namespace PSD.PSDGamepkg.JNS
                         XI.RaiseGMessage("G0ZB," + player.Uid + ",2," + ut);
                     }
                     else
-                    {
-                        XI.RaiseGMessage("G2QC,0," + ut);
-                        XI.RaiseGMessage("G2ON,0," + ut);
-                    }
+                        XI.RaiseGMessage("G0ON,0,C,1," + ut);
                 }
             }
                 //for (int jdx = 1; jdx < blocks.Length; )

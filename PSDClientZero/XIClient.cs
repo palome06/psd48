@@ -1026,23 +1026,33 @@ namespace PSD.ClientZero
                     }
                     break;
                 case "E0ON":
-                    {
-                        //ushort type = ushort.Parse(args[1]);
-                        //IEnumerable<ushort> ics = Util.TakeRange(args, 2, args.Length).Select(p => ushort.Parse(p));
-                        //if (type == 0)
-                        //    VI.Cout(uid, "{0}进入弃牌堆.", zd.Tux(ics));
-                        //else if (type == 1)
-                        //    VI.Cout(uid, "{0}进入弃牌堆.", zd.Monster(ics));
-                        //else if (type == 2)
-                        //    VI.Cout(uid, "{0}进入弃牌堆.", zd.Eve(ics));
-                        ushort utype = ushort.Parse(args[1]);
-                        int n = args.Length - 2;
-                        if (utype == 0)
-                            Z0P.TuxDises += n;
-                        else if (utype == 1)
-                            Z0P.MonDises += n;
-                        else if (utype == 2)
-                            Z0P.EveDises += n;
+                    for (int idx = 1; idx < args.Length; ) {
+                        ushort fromZone = ushort.Parse(args[idx]);
+                        string cardType = args[idx + 1];
+                        int cnt = int.Parse(args[idx + 2]);
+                        if (cnt > 0) {
+                            List<ushort> cds = Util.TakeRange(args, idx + 3, idx + 3 + count)
+                                .Select(p => ushort.Parse(p)).ToList();
+                            string cdInfos = null;
+                            if (cardType == "C") {
+                                Z0P.TuxDises += n;
+                                if (fromZone == 0)
+                                    cdInfos = zd.Tux(cds);
+                            }
+                            else if (cardType == "M") {
+                                Z0P.MonDises += n;
+                                if (fromZone == 0)
+                                    cdInfos = zd.Monster(cds);
+                            }
+                            else if (cardType == "E") {
+                                Z0P.EveDises += n;
+                                if (fromZone == 0)
+                                    cdInfos = zd.Eve(cds);
+                            }
+                            if (cdInfos != null)
+                                VI.Cout(Uid, "{0}被弃置进入弃牌堆.", cdInfos);
+                        }
+                        idx += (3 + count);
                     }
                     break;
                 case "E0CN":
@@ -1133,22 +1143,6 @@ namespace PSD.ClientZero
                         }
                         break;
                     }
-                case "E0QC":
-                    {
-                        ushort cardType = ushort.Parse(args[1]);
-                        List<ushort> mons = Util.TakeRange(args, 2, args.Length)
-                            .Select(p => ushort.Parse(p)).ToList();
-                        if (mons.Count > 0)
-                        {
-                            if (cardType == 0)
-                                VI.Cout(Uid, "{0}被弃置.", zd.Tux(mons));
-                            else if (cardType == 1)
-                                VI.Cout(Uid, "{0}被弃置.", zd.Monster(mons));
-                            else if (cardType == 2)
-                                VI.Cout(Uid, "{0}被弃置.", zd.Eve(mons));
-                        }
-                    }
-                    break;
                 case "E0QZ":
                     {
                         ushort from = ushort.Parse(args[1]);

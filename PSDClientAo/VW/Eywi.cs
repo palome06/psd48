@@ -118,6 +118,22 @@ namespace PSD.ClientAo.VW
         #region Version
         private void HandleWithVersion(ref string line, int Version)
         {
+            if (Version <= 114)
+            {
+                if (line.StartsWith("E0ON,"))
+                {
+                    ushort utype = ushort.Parse(args[1]);
+                    char ch = '';
+                    if (utype == 0)
+                        ch = 'C';
+                    else if (utype == 1)
+                        ch = 'M';
+                    else if (utype == 2)
+                        ch = 'E';
+                    string rest = line.Substring(line.IndexOf(',', line.IndexOf(',') + 1) + 1);
+                    line = "E0ON,10," + ch + "," + n + "," + rest;
+                }
+            }
             if (Version <= 112)
             {
                 if (line.StartsWith("E0QC,"))

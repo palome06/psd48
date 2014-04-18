@@ -361,24 +361,7 @@ namespace PSD.PSDGamepkg
                             string replyEve = AsyncInput(rounder, "#请决定是否翻看事件牌##不翻看##翻看,Y2",
                                 "R" + rounder + "EV1", "0");
                             if (replyEve == "2")
-                            {
-                                //ushort eveCard = DequeueOfPile(Board.EvePiles);
-                                //RaiseGMessage("G2IN,2,1");
-                                //WI.BCast("R" + rounder + "EV2," + eveCard);
-                                //if (Board.Eve != 0)
-                                //{
-                                //    Board.EveDises.Add(Board.Eve);
-                                //    RaiseGMessage("G2ON,2," + Board.Eve);
-                                //    RaiseGMessage("G2YM,2,0,0");
-                                //    Board.Eve = 0;
-                                //}
-                                //Board.Eve = eveCard;
-                                //RaiseGMessage("G0YM,2," + Board.Eve + ",0");
-                                //Base.Card.Evenement eve = LibTuple.EL.DecodeEvenement(eveCard);
-                                //RunQuadStage(rstage, 0);
-                                //eve.Action();
                                 RaiseGMessage("G1EV," + rounder + ",0");
-                            }
                             else
                                 WI.BCast("R" + rounder + "EV2,0");
                             rstage = "R" + rounder + "EE";
@@ -456,11 +439,9 @@ namespace PSD.PSDGamepkg
                                 // Ensure XI.Board.Mon1From == 0
                                 ushort mons = DequeueOfPile(Board.MonPiles);
                                 RaiseGMessage("G2IN,1,1");
-                                Board.MonDises.Add(mons);
-                                RaiseGMessage("G2ON,1," + mons);
                                 Board.Battler = null;
                                 WI.BCast(rstage + "7,0," + mons);
-                                WI.BCast("G2QC,1," + mons);
+                                WI.BCast("G0ON,0,M,1," + mons);
                                 rstage = "R" + rounder + "ZF";
                             } else {
                                 RaiseGMessage("G0AF," + sprUid + ",1");
@@ -536,8 +517,7 @@ namespace PSD.PSDGamepkg
                             }
                             if (r5ed != UEchoCode.END_ACTION) // not take action, skip
                             {
-                                Board.MonDises.Add(Board.Monster1);
-                                RaiseGMessage("G2ON,1," + Board.Monster1);
+                                RaiseGMessage("G0ON,0,M,1," + Board.Monster1);
                                 Board.Monster1 = 0;
                                 if (Board.MonPiles.Count > 0)
                                 {
@@ -563,8 +543,7 @@ namespace PSD.PSDGamepkg
                                 WI.BCast(rstage + "1,1");
                                 if (Board.Monster1 != 0) // In case Monster1 has been taken
                                 {
-                                    Board.MonDises.Add(Board.Monster1);
-                                    RaiseGMessage("G2ON,1," + Board.Monster1);
+                                    RaiseGMessage("G0ON,10,M,1," + Board.Monster1);
                                     Board.Monster1 = 0;
                                 }
                                 rstage = "R" + rounder + "Z3";
@@ -595,7 +574,7 @@ namespace PSD.PSDGamepkg
                         RunQuadStage(rstage, 0);
                         rstage = "R" + rounder + "ZC"; break;
                     case "ZC":
-                        Board.InFight = true;
+                        Board.InFight = true; Board.InFightThrough = true;
                         RunQuadStage(rstage, 0);
                         RaiseGMessage("G09P,0");
                         rstage = "R" + rounder + "ZD"; break;
@@ -652,6 +631,7 @@ namespace PSD.PSDGamepkg
                             RunQuadStage(rstage, 0);
 
                             RecycleMonster(mon1zero, mon2zero);
+                            Board.InFightThrough = false;
                             RaiseGMessage("G1ZK,1");
                             RaiseGMessage("G1HK,1");
                             WI.BCast(rstage + "3");
@@ -706,13 +686,14 @@ namespace PSD.PSDGamepkg
                             RunQuadStage(rstage, 0);
 
                             RecycleMonster(mon1zero, mon2zero);
+                            Board.InFightThrough = false;
                             RaiseGMessage("G1ZK,1");
                             RaiseGMessage("G1HK,1");
                             WI.BCast(rstage + "3");
                             rstage = "R" + rounder + "Z2"; break;
                         }
                     case "Z2":
-                        Board.InFight = false;
+                        Board.InFight = false; Board.InFightThrough = false;
                         WI.BCast(rstage + ",0");
                         RaiseGMessage("G1ZK,1");
                         RaiseGMessage("G1HK,1");
@@ -721,7 +702,7 @@ namespace PSD.PSDGamepkg
                         RunQuadStage(rstage, 0);
                         rstage = "R" + rounder + "Z3"; break;
                     case "Z3":
-                        Board.InFight = false;
+                        Board.InFight = false; Board.InFightThrough = false;
                         Board.RPool = 0; Board.OPool = 0;
                         RecycleMonster(false, false);
                         WI.BCast(rstage + ",0");
@@ -731,7 +712,7 @@ namespace PSD.PSDGamepkg
                         rstage = "R" + rounder + "ZZ"; break;
                     case "ZF":
                         WI.BCast(rstage + ",0");
-                        Board.InFight = false;
+                        Board.InFight = false; Board.InFightThrough = false;
                         foreach (Player player in Board.Garden.Values)
                             RaiseGMessage("G0AX," + player.Uid);
                         RunQuadStage(rstage, 0);
@@ -748,7 +729,7 @@ namespace PSD.PSDGamepkg
                         rstage = "R" + rounder + "BC"; break;
                     case "BC":
                         WI.BCast(rstage + ",0");
-                        Board.InFight = false;
+                        Board.InFight = false; Board.InFightThrough = false;
                         RunQuadStage(rstage, 0);
                         if (Board.Battler != null)
                             RaiseGMessage("G0HT," + Board.Rounder.Uid + ",2");
@@ -764,21 +745,20 @@ namespace PSD.PSDGamepkg
                         rstage = "R" + rounder + "TM"; break;
                     case "TM":
                         WI.BCast(rstage + ",0");
-                        Board.InFight = false;
+                        Board.InFight = false; Board.InFightThrough = false;
                         Board.Battler = null; Board.Supporter = null; Board.Hinder = null;
                         RunQuadStage(rstage, 0);
                         rstage = "R" + rounder + "ED"; break;
                     case "ED":
                         {
                             WI.BCast(rstage + ",0");
-                            Board.InFight = false;
+                            Board.InFight = false; Board.InFightThrough = false;
                             if (Board.MonPiles.Count <= 0)
                                 RaiseGMessage("G1WJ,0");
                             RecycleMonster(false, false);
                             if (Board.Eve != 0)
                             {
-                                Board.EveDises.Add(Board.Eve);
-                                RaiseGMessage("G2ON,2," + Board.Eve);
+                                RaiseGMessage("G0ON,10,E,1," + Board.Eve);
                                 RaiseGMessage("G2YM,2,0,0");
                                 Board.Eve = 0;
                             }
@@ -1013,9 +993,8 @@ namespace PSD.PSDGamepkg
                         RaiseGMessage("G0WB," + Board.Monster1);
                     else
                     {
-                        RaiseGMessage("G2ON,1," + Board.Monster1);
+                        RaiseGMessage("G0ON,10,M,1," + Board.Monster1);
                         RaiseGMessage("G0WB," + Board.Monster1);
-                        Board.MonDises.Add(Board.Monster1);
                     }
                     RaiseGMessage("G2YM,0,0,0");
                 }
@@ -1029,9 +1008,8 @@ namespace PSD.PSDGamepkg
                 //    mon2.Curtain();
                 if (!zero2)
                 {
-                    RaiseGMessage("G2ON,1," + Board.Monster2);
+                    RaiseGMessage("G0ON,10,M,1," + Board.Monster2);
                     RaiseGMessage("G0WB," + Board.Monster2);
-                    Board.MonDises.Add(Board.Monster2);
                     RaiseGMessage("G2YM,1,0,0");
                 }
                 Board.Monster2 = 0;

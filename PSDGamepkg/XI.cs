@@ -601,12 +601,12 @@ namespace PSD.PSDGamepkg
                  "IY", "OY", "DS", "CC", "CD", "CE", "XZ", "ZB", "ZC", "ZS", "ZL", "IA", "OA", "IX",
                  "OX", "AX", "IB", "OB", "IW", "OW", "WB", "9P", "IP", "OP", "CZ", "HC", "HD", "HH",
                  "HI", "HL", "IC", "OC", "HT", "QR", "HZ", "TT", "JM", "WN", "IJ", "OJ", "IE", "OE",
-                 "YM", "IS", "OS", "LH", "IV", "OV", "PB", "HR", "AF"
+                 "YM", "IS", "OS", "LH", "IV", "OV", "PB", "HR", "AF", "ON", "SN"
             };
             string[] g1 = new string[] { "DI", "IU", "OU", "ZK", "IZ", "OZ", "SG", "HK", "WJ", "JG",
                  "XR", "EV", "CK" };
-            string[] g2 = new string[] { "IN", "ON", "RN", "CN", "QC", "FU", "QU", "CL", "ZU", "HU",
-                 "WK", "AK", "IL", "OL", "SW", "AS", "KI" };
+            string[] g2 = new string[] { "IN", "RN", "CN", "QC", "FU", "QU", "CL", "ZU", "HU", "WK",
+                 "AK", "IL", "OL", "SW", "AS", "KI" };
             foreach (string g0event in g0)
                 Util.AddToMultiMap(dict, "G0" + g0event, new SkTriple() { Name = "~100", Priorty = 100 });
             foreach (string g1event in g1)
@@ -886,7 +886,7 @@ namespace PSD.PSDGamepkg
                 {
                     Player player = Board.Rounder;
                     ushort mon1 = Board.Monster1;
-                    if (mon1 != 0 && Board.InFight)
+                    if (mon1 != 0 && Board.InFightThrough)
                     {
                         Base.Card.Monster mon = LibTuple.ML.Decode(mon1);
                         if (mon != null && mt.ConsumeValid(player, consumeType, ske.InType, ske.Fuse))
