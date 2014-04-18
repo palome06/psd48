@@ -780,6 +780,8 @@ namespace PSD.PSDGamepkg
                                 RaiseGMessage("G0ON,10,C," + Board.PendingTux.Count + "," +
                                     string.Join(",", Board.PendingTux.Select(
                                     p => p.Substring(p.LastIndexOf(',') + 1))));
+                            if (!Board.Rounder.IsAlive && Board.Garden.Values.Any(p => p.IsAlive && p.HP == 0))
+                                RaiseGMessage("G0ZH,1");
                             List<ushort> ordered = Board.OrderedPlayer();
                             bool found = false;
                             foreach (ushort ut in ordered)

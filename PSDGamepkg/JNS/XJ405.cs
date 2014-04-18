@@ -1899,21 +1899,16 @@ namespace PSD.PSDGamepkg.JNS
                         if (count > 0)
                             XI.RaiseGMessage("G0IA," + py.Uid + ",0," + count);
                     }
-                //XI.InnerGMessage(fuse, 121);
             }
             else if (type == 3)
             {
-                if (player.IsAlive)
-                {
-                    foreach (Player py in XI.Board.Garden.Values)
-                        if (py.IsAlive && py.Team == player.Team && !py.PetDisabled)
-                        {
-                            int count = py.Pets.Where(p => p != 0).Count();
-                            if (count > 0)
-                                XI.RaiseGMessage("G0OA," + py.Uid + ",0," + count);
-                        }
-                    //XI.InnerGMessage(fuse, 91);
-                }
+                foreach (Player py in XI.Board.Garden.Values)
+                    if (py.IsAlive && py.Team == player.Team && !py.PetDisabled)
+                    {
+                        int count = py.Pets.Where(p => p != 0).Count();
+                        if (count > 0)
+                            XI.RaiseGMessage("G0OA," + py.Uid + ",0," + count);
+                    }
             }
             else if (type == 4)
             {
@@ -1941,21 +1936,8 @@ namespace PSD.PSDGamepkg.JNS
                 }
                 return false;
             }
-            else if (type == 2)
-            { // GOIY,0/1,A,S
-                int heroCode = int.Parse(blocks[3]);
-                var hero = XI.LibTuple.HL.InstanceHero(heroCode);
-                if (hero != null && hero.Avatar == 10503)
-                    return true;
-                else return false;
-            }
-            else if (type == 3)
-            { // GOOY,0/1,A
-                for (int i = 1; i < blocks.Length; i += 2)
-                    if (blocks[i + 1] == player.Uid.ToString())
-                        return true;
-                return false;
-            }
+            else if (type == 2 || type == 3)
+                return IsMathISOS("JN50301", player, fuse);
             else if (type == 4)
             { // G0ZW,[A]
                 for (int i = 1; i < blocks.Length; ++i)

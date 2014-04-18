@@ -175,19 +175,25 @@ namespace PSD.PSDGamepkg
                     }
                     else if (priority == 200)
                     {
-                        // TODO: to change g0zh message int a kind of all suitable.
-                        ISet<ushort> death = new HashSet<ushort>();
-                        List<Artiad.Harm> harms = Artiad.Harm.Parse(cmd);
-                        foreach (Artiad.Harm harm in harms)
+                        List<ushort> zeros = Board.Garden.Values.Where(p => p.IsAlive && p.HP == 0)
+                            .Select(p => p.Uid).ToList();
+                        if (zeros.Count > 0)
                         {
-                            if (Board.Garden[harm.Who].IsAlive && Board.Garden[harm.Who].HP == 0)
-                                death.Add(harm.Who);
+                            WI.BCast("E0ZH," + string.Join(",", zeros));
+                            RaiseGMessage("G0ZH,0");
                         }
-                        if (death.Count > 0)
-                        {
-                            WI.BCast("E0ZH," + string.Join(",", death));
-                            RaiseGMessage("G0ZH," + string.Join(",", death));
-                        }
+                        // ISet<ushort> death = new HashSet<ushort>();
+                        // List<Artiad.Harm> harms = Artiad.Harm.Parse(cmd);
+                        // foreach (Artiad.Harm harm in harms)
+                        // {
+                        //     if (Board.Garden[harm.Who].IsAlive && Board.Garden[harm.Who].HP == 0)
+                        //         death.Add(harm.Who);
+                        // }
+                        // if (death.Count > 0)
+                        // {
+                        //     WI.BCast("E0ZH," + string.Join(",", death));
+                        //     RaiseGMessage("G0ZH," + string.Join(",", death));
+                        // }
                     }
                     break;
                 case "G0ZW":
@@ -1131,48 +1137,105 @@ namespace PSD.PSDGamepkg
                             WI.BCast("E0IH" + result);
                         break;
                     }
-                case "G0ZH":
-                    //WI.BCast("E0ZH," + cmdrst);
-                    RaiseGMessage("G0LV," + cmdrst);
-                    break;
-                case "G0LV":
+                case "G0ZH": // cmdrst of G0ZH won't affect the operations.
                     {
                         IDictionary<ushort, int> loses = new Dictionary<ushort, int>();
                         IDictionary<ushort, List<string>> gains = new Dictionary<ushort, List<string>>();
-                        List<ushort> death = new List<ushort>();
-                        for (int i = 1; i < args.Length; ++i)
+                        List<Player> zeros = Board.Garden.Values.Where(p => p.IsAlive && p.HP == 0 && !p.Loved).ToList();
+                        foreach (Player player in zeros)
                         {
-                            ushort who = ushort.Parse(args[i]);
-                            Player player = Board.Garden[who];
                             List<string> candidates = new List<string>();
-                            if (!player.Loved)
+                            Hero hero = LibTuple.HL.InstanceHero(player.SelectHero);
+                            foreach (string spos in hero.Spouses)
                             {
-                                Hero hero = LibTuple.HL.InstanceHero(player.SelectHero);
-                                foreach (string spos in hero.Spouses)
+                                if (!spos.StartsWith("!"))
                                 {
-                                    if (!spos.StartsWith("!"))
+                                    int spo = int.Parse(spos); // 10303,danshiwoyou,10304
+                                    //var pys = Board.Garden.Values.Where(
+                                    //    p => p.IsAlive && p.HP > 0 && spo == p.SelectHero);
+                                    HashSet<Player> pys = new HashSet<Player>();
+                                    foreach (Player py in Board.Garden.Values)
                                     {
-                                        int spo = int.Parse(spos); // 10303,danshiwoyou,10304
-                                        //var pys = Board.Garden.Values.Where(
-                                        //    p => p.IsAlive && p.HP > 0 && spo == p.SelectHero);
-                                        HashSet<Player> pys = new HashSet<Player>();
-                                        foreach (Player py in Board.Garden.Values)
+                                        if (py.IsAlive && py.HP > 0)
                                         {
-                                            if (py.IsAlive && py.HP > 0)
+                                            if (py.SelectHero == spo)
+                                                pys.Add(py);
+                                            else
                                             {
-                                                if (py.SelectHero == spo)
+                                                Base.Card.Hero hro = LibTuple.HL.InstanceHero(py.SelectHero);
+                                                if (hro != null && hro.Archetype == spo)
                                                     pys.Add(py);
-                                                else
-                                                {
-                                                    Base.Card.Hero hro = LibTuple.HL.InstanceHero(py.SelectHero);
-                                                    if (hro != null && hro.Archetype == spo)
-                                                        pys.Add(py);
-                                                }
                                             }
                                         }
-                                        if (pys.Count > 0)
+                                    }
+                                    if (pys.Count > 0)
+                                    {
+                                        Player py = pys.First();
+                                        candidates.Add(py.Uid.ToString());
+                                        player.Loved = true;
+                                        if (loses.ContainsKey(py.Uid))
+                                            loses[py.Uid] = loses[py.Uid] + 1;
+                                        else
+                                            loses.Add(py.Uid, 1);
+                                    }
+                                }
+                                else
+                                {
+                                    int spo = int.Parse(spos.Substring("!".Length));
+                                    //!1:MurongZiying, !5:Yushen, !6:Kongxiu
+                                    if (spo == 1 || spo == 5 || spo == 6)
+                                    {
+                                        Func<Player, bool> genJudge;
+                                        if (spo == 5)
+                                            genJudge = p => p.Gender == 'F';
+                                        else if (spo == 6)
+                                            genJudge = p => p.Gender == 'M';
+                                        else
+                                            genJudge = p => true;
+                                        var pos = Board.Garden.Values.Where(p => p.IsAlive &&
+                                            p.HP > 0 && p.Uid != player.Uid && genJudge(p)).Select(p => p.Uid);
+                                        if (pos.Any())
                                         {
-                                            Player py = pys.First();
+                                            string input = AsyncInput(player.Uid, "#您倾慕,/T1(p" +
+                                                string.Join("p", pos) + ")", "G0LV", "0");
+                                            player.Loved = true;
+                                            if (input != "0" && input != "" && !input.StartsWith("/"))
+                                            {
+                                                ushort ut = ushort.Parse(input);
+                                                candidates.Add(ut.ToString());
+                                                if (loses.ContainsKey(ut))
+                                                    loses[ut] = loses[ut] + 1;
+                                                else
+                                                    loses.Add(ut, 1);
+                                            }
+                                        }
+                                    }
+                                    else if (spo == 2) // !2:Baiyue
+                                    {
+                                        ushort card = LibTuple.ML.Encode("GS04");
+                                        if (Board.Monster1 == card || Board.Monster2 == card ||
+                                            Board.Garden.Values.Where(p => p.Pets.Contains(card)).Any())
+                                        {
+                                            player.Loved = true;
+                                            candidates.Add("!PT" + card);
+                                        }
+                                    }
+                                    // !3:TR-Lingyin, !4:TR-Xuanji
+                                    else if (spo == 3 || spo == 4)
+                                    {
+                                        Func<Player, bool> genJudge;
+                                        if (spo == 3)
+                                            genJudge = p => LibTuple.HL
+                                                .InstanceHero(p.SelectHero).Bio.Contains("A");
+                                        else if (spo == 4)
+                                            genJudge = p => LibTuple.HL
+                                                .InstanceHero(p.SelectHero).Bio.Contains("B");
+                                        else
+                                            genJudge = p => true;
+                                        var pys = Board.Garden.Values.Where(p => p.IsAlive && p.HP > 0 &&
+                                            p.SelectHero != player.SelectHero && genJudge(p)).ToList();
+                                        foreach (Player py in pys)
+                                        {
                                             candidates.Add(py.Uid.ToString());
                                             player.Loved = true;
                                             if (loses.ContainsKey(py.Uid))
@@ -1181,90 +1244,29 @@ namespace PSD.PSDGamepkg
                                                 loses.Add(py.Uid, 1);
                                         }
                                     }
-                                    else
-                                    {
-                                        int spo = int.Parse(spos.Substring("!".Length));
-                                        //!1:MurongZiying, !5:Yushen, !6:Kongxiu
-                                        if (spo == 1 || spo == 5 || spo == 6)
-                                        {
-                                            Func<Player, bool> genJudge;
-                                            if (spo == 5)
-                                                genJudge = p => p.Gender == 'F';
-                                            else if (spo == 6)
-                                                genJudge = p => p.Gender == 'M';
-                                            else
-                                                genJudge = p => true;
-                                            var pos = Board.Garden.Values.Where(p => p.IsAlive &&
-                                                p.HP > 0 && p.Uid != player.Uid && genJudge(p)).Select(p => p.Uid);
-                                            if (pos.Any())
-                                            {
-                                                string input = AsyncInput(player.Uid, "#您倾慕,/T1(p" +
-                                                    string.Join("p", pos) + ")", "G0LV", "0");
-                                                player.Loved = true;
-                                                if (input != "0" && input != "" && !input.StartsWith("/"))
-                                                {
-                                                    ushort ut = ushort.Parse(input);
-                                                    candidates.Add(ut.ToString());
-                                                    if (loses.ContainsKey(ut))
-                                                        loses[ut] = loses[ut] + 1;
-                                                    else
-                                                        loses.Add(ut, 1);
-                                                }
-                                            }
-                                        }
-                                        else if (spo == 2) // !2:Baiyue
-                                        {
-                                            ushort card = LibTuple.ML.Encode("GS04");
-                                            if (Board.Monster1 == card || Board.Monster2 == card ||
-                                                Board.Garden.Values.Where(p => p.Pets.Contains(card)).Any())
-                                            {
-                                                player.Loved = true;
-                                                candidates.Add("!PT" + card);
-                                            }
-                                        }
-                                        // !3:TR-Lingyin, !4:TR-Xuanji
-                                        else if (spo == 3 || spo == 4)
-                                        {
-                                            Func<Player, bool> genJudge;
-                                            if (spo == 3)
-                                                genJudge = p => LibTuple.HL
-                                                    .InstanceHero(p.SelectHero).Bio.Contains("A");
-                                            else if (spo == 4)
-                                                genJudge = p => LibTuple.HL
-                                                    .InstanceHero(p.SelectHero).Bio.Contains("B");
-                                            else
-                                                genJudge = p => true;
-                                            var pys = Board.Garden.Values.Where(p => p.IsAlive && p.HP > 0 &&
-                                                p.SelectHero != player.SelectHero && genJudge(p)).ToList();
-                                            foreach (Player py in pys)
-                                            {
-                                                candidates.Add(py.Uid.ToString());
-                                                player.Loved = true;
-                                                if (loses.ContainsKey(py.Uid))
-                                                    loses[py.Uid] = loses[py.Uid] + 1;
-                                                else
-                                                    loses.Add(py.Uid, 1);
-                                            }
-                                        }
-                                    }
                                 }
                             }
                             if (candidates.Count > 0)
                                 gains.Add(who, candidates);
-                            else
-                                death.Add(who);
                         }
                         if (gains.Count > 0)
-                            WI.BCast("E0LV," + string.Join(",", gains.Select(p => p.Key + "," + p.Value.Count() + "," + string.Join(",", p.Value))));
+                            RaiseGMessage("G0LV," + string.Join(",", gains.Select(p => p.Key + "," +
+                                 p.Value.Count() + "," + string.Join(",", p.Value))));
                         if (gains.Count > 0)
                             RaiseGMessage(Artiad.Cure.ToMessage(gains.Select(p =>
                                 new Artiad.Cure(p.Key, 0, FiveElement.LOVE, p.Value.Count()))));
                         if (loses.Count > 0)
                             RaiseGMessage(Artiad.Harm.ToMessage(loses.Select(p =>
                                 new Artiad.Harm(p.Key, 0, FiveElement.LOVE, p.Value, 0))));
-                        if (death.Count > 0)
-                            RaiseGMessage("G0ZW," + string.Join(",", death));
+
+                        // if HP is still 0, then marked as death
+                        zeros = Board.Garden.Values.Where(p => p.IsAlive && p.HP == 0).ToList();
+                        if (zeros.Count > 0)
+                            RaiseGMessage("G0ZW," + string.Join(",", zeros.Select(p => p.Uid)));
                     }
+                    break;
+                case "G0LV":
+                    WI.BCast("E0LV," + cmdrst);
                     break;
                 case "G0IY":
                     {

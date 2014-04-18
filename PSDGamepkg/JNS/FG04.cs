@@ -618,35 +618,25 @@ namespace PSD.PSDGamepkg.JNS
         }
         public bool GF04ConsumeValid(Player player, int consumeType, int type, string fuse)
         {
-            string[] blocks = fuse.Split(',');
-            return Util.TakeRange(blocks, 1, blocks.Length).Select(
-                p => XI.Board.Garden[ushort.Parse(p)]).Where(p => p.IsAlive && p.HP == 0).Any();
+            return XI.Board.Garden.Where(p => p.IsAlive && p.HP == 0).Any();
         }
         public void GF04ConsumeAction(Player player, int consumeType, int type, string fuse, string argst)
         {
             if (consumeType == 1)
             {
-                // fuse = G0ZH,A,B,C
-                string[] blocks = fuse.Split(',');
-                List<Player> invs = Util.TakeRange(blocks, 1, blocks.Length).Select(
-                    p => XI.Board.Garden[ushort.Parse(p)]).Where(p => p.IsAlive && p.HP == 0).ToList();
-                string ic = invs.Count > 0 ? "T1(p" + string.Join("p", invs.Select(p => p.Uid)) + ")" : "/";
+                List<ushort> zeros = XI.Board.Garden.Where(p => p.IsAlive && p.HP == 0).Select(p => p.Uid).ToList();
+                string ic = zeros.Count > 0 ? "#复活,T1(p" + string.Join("p", zeros) + ")" : "/";
                 ushort tg = ushort.Parse(XI.AsyncInput(player.Uid, ic, "GF04ConsumeAction", "1"));
-                string result = "";
-                for (int i = 1; i < blocks.Length; ++i)
+
+                if (zeros.Contains(tg))
                 {
-                    ushort pc = ushort.Parse(blocks[i]);
-                    if (tg == pc)
-                    {
-                        VI.Cout(0, "{0}爆发「彩依」，使得{1}满HP复活.", XI.DisplayPlayer(player.Uid), XI.DisplayPlayer(tg));
-                        Player tgp = XI.Board.Garden[tg];
-                        Cure("GF04", tgp, tgp.HPb, FiveElement.SOL);
-                    }
-                    else
-                        result += "," + blocks[i];
+                    VI.Cout(0, "{0}爆发「彩依」，使得{1}满HP复活.", XI.DisplayPlayer(player.Uid), XI.DisplayPlayer(tg));
+                    Player tgp = XI.Board.Garden[tg];
+                    Cure("GF04", tgp, tgp.HPb, FiveElement.SOL);
                 }
-                if (result.Length > 0)
-                    XI.InnerGMessage("G0ZH" + result, 0);
+                zeros = XI.Board.Garden.Where(p => p.IsAlive && p.HP == 0).Select(p => p.Uid).ToList();
+                if (zeros.Length > 0)
+                    XI.InnerGMessage("G0ZH,0", 0);
             }
         }
         #endregion Aero
@@ -2081,6 +2071,80 @@ namespace PSD.PSDGamepkg.JNS
             }
         }
         #endregion Package 5#
+
+        #region Package HL
+        public void GSH2IncrAction(Player player)
+        {
+            XI.Board.PetProtecedPlayer.Add(player.Uid);
+        }
+        public void GSH2DecrAction(Player player)
+        {
+            XI.Board.PetProtecedPlayer.Remove(player.Uid);
+        }
+        public void GSH2ConsumeAction(Player player, int consumeType, int type, string fuse, string argst)
+        {
+            if (consumeType == 0)
+            {
+                int adjust = player.GetPetCount();
+                if (type == 0)
+                    XI.RaiseGMessage("G0IP," + player.Team + "," + adjust);
+                else if (type == 1)
+                {
+                    if (XI.Board.IsAttendWar(player))
+                        XI.RaiseGMessage("G0IP," + player.Team + "," + adjust);
+                    else
+                        XI.RaiseGMessage("G0OP," + player.Team + "," + adjust);
+                }
+                else if (type == 2)
+                    XI.RaiseGMessage("G0IP," + player.Team + "," + adjust);
+                else if (type == 3)
+                    XI.RaiseGMessage("G0OP," + player.Team + "," + adjust);
+            }
+        }
+        public bool GSH2ConsumeValid(Player player, int consumeType, int type, string fuse)
+        {
+            if (consumeType == 0)
+            {
+                if (type == 0) // Z1
+                    return XI.Board.IsAttendWar(player) && player.GetPetCount() > 0;
+                else if (type == 1) // AF
+                {
+                    bool waken = player.GetPetCount() > 0;
+                    string[] g0af = fuse.Split(',');
+                    if (g0af[1] != "0" && XI.Board.InFight && waken)
+                        for (int i = 1; i < g0af.Length; i += 2)
+                        {
+                            ushort ut = ushort.Parse(g0af[i + 1]);
+                            if (ut == player.Uid)
+                            {
+                                ushort delta = ushort.Parse(g0af[i]);
+                                if (delta > 4 && player.RAMInt > 0)
+                                    return true;
+                                else if (delta <= 4 && player.RAMInt == 0)
+                                    return true;
+                            }
+                        }
+                    return false;
+                }
+                else if (type == 2 || type == 3) // IC/OC
+                {
+                    if (XI.Board.InFight && XI.Board.IsAttendWar(player) && player.GetPetCount() > 0)
+                    {
+                        string[] iocs = fuse.Split(',');
+                        for (int idx = 1; idx < iocs.Length; idx += 3)
+                        {
+                            ushort who = ushort.Parse(iocs[idx + 1]);
+                            ushort petUt = ushort.Parse(iocs[idx + 2]);
+                            Monster pet = XI.LibTuple.ML.Decode(petUt);
+                            if (who == player.Uid && pet != null && pet.Code == "GSH2")
+                                return true;
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+        #endregion Package HL
 
         #region Monster Effect Util
 

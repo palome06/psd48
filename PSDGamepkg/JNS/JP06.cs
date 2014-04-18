@@ -450,32 +450,23 @@ namespace PSD.PSDGamepkg.JNS
             }
             else if (type == 1)
             {
-                // fuse = G0ZH,A,B,C
-                string[] blocks = sktFuse.Split(',');
-                List<ushort> zhs = Util.TakeRange(blocks, 1, blocks.Length).Select(p => ushort.Parse(p)).ToList();
-                List<Player> invs = zhs.Select(p => XI.Board.Garden[p]).Where(p => p.IsTared && p.HP == 0).ToList();
-                string ic = invs.Count > 0 ? "T1(p" + string.Join("p", invs.Select(p => p.Uid)) + ")" : "/";
+                List<ushort> invs = XI.Board.Garden.Values.Where(p => p.IsTared && p.HP == 0).Select(p => p.Uid).ToList();
+                string ic = invs.Count > 0 ? "T1(p" + string.Join("p", invs) + ")" : "/";
                 ushort tg = ushort.Parse(XI.AsyncInput(player.Uid, ic, "「灵葫仙丹」", "1"));
-                if (zhs.Contains(tg))
+                if (invs.Contains(tg))
                 {
                     VI.Cout(0, "{0}对{1}使用「灵葫仙丹」.", XI.DisplayPlayer(player.Uid), XI.DisplayPlayer(tg));
                     XI.RaiseGMessage(Artiad.Cure.ToMessage(new Artiad.Cure(tg, player.Uid, FiveElement.A, 2)));
-                    if (XI.Board.Garden[tg].HP > 0)
-                        zhs.Remove(tg);
                 }
-                if (zhs.Length > 0)
-                    XI.InnerGMessage("G0ZH," + string.Join(",", zhs), 0);
+                XI.InnerGMessage("G0ZH,0", 0);
             }
         }
         public bool TP02Valid(Player player, int type, string fuse)
         {
-            if (type == 0) return true;
+            if (type == 0)
+                return true;
             else if (type == 1)
-            {
-                string[] blocks = fuse.Split(',');
-                return Util.TakeRange(blocks, 1, blocks.Length).Select(
-                    p => XI.Board.Garden[ushort.Parse(p)]).Where(p => p.IsTared && p.HP == 0).Any();
-            }
+                return XI.Board.Garden.Values.Where(p => p.IsTared && p.HP == 0).Any();
             else
                 return false;
         }
@@ -487,20 +478,16 @@ namespace PSD.PSDGamepkg.JNS
             {
                 string[] argv = cdFuse.Split(',');
                 XI.RaiseGMessage("G0CE," + argv[1] + ",2,0," + argv[3] + ";" + type + "," + fuse);
-                // fuse = G0ZH,A,B,C
-                string[] blocks = fuse.Split(',');
-                List<ushort> zhs = Util.TakeRange(blocks, 1, blocks.Length).Select(p => ushort.Parse(p)).ToList();
-                List<Player> invs = zhs.Select(p => XI.Board.Garden[p]).Where(p => p.IsTared && p.HP == 0).ToList();
-                string ic = invs.Count > 0 ? "T1(p" + string.Join("p", invs.Select(p => p.Uid)) + ")" : "/";
+                List<ushort> invs = XI.Board.Garden.Values.Where(p => p.IsTared && p.HP == 0).Select(p => p.Uid).ToList();
+                string ic = invs.Count > 0 ? "T1(p" + string.Join("p", invs) + ")" : "/";
                 ushort tg = ushort.Parse(XI.AsyncInput(player.Uid, ic, "「灵葫仙丹」", "1"));
-                if (zhs.Contains(tg))
+                if (invs.Contains(tg))
                 {
                     VI.Cout(0, "{0}对{1}使用「灵葫仙丹」.", XI.DisplayPlayer(player.Uid), XI.DisplayPlayer(tg));
                     XI.RaiseGMessage(Artiad.Cure.ToMessage(new Artiad.Cure(tg, player.Uid, FiveElement.A, 2)));
-                    if (XI.Board.Garden[tg].HP > 0)
-                        zhs.Remove(tg);
                 }
 
+                invs = XI.Board.Garden.Values.Where(p => p.IsAlive && p.HP == 0).Select(p => p.Uid).ToList();
                 ushort owner = locuster.Uid;
                 string last = null; bool locusSucc = false;
                 foreach (string tuxInfo in XI.Board.PendingTux)
@@ -516,9 +503,9 @@ namespace PSD.PSDGamepkg.JNS
                     XI.Board.PendingTux.Remove(last);
                     ushort locustee = ushort.Parse(last.Split(',')[2]);
                     XI.RaiseGMessage("G0ON,10,C,1," + locustee);
-                    if (zhs.Count > 0)
+                    if (invs.Count > 0)
                     {
-                        string newFuse = "G0ZH," + string.Join(",", zhs);
+                        string newFuse = "G0ZH,0";
                         if (locuster.IsAlive && locuster.IsAlive && locus.Valid(locuster, type, newFuse))
                         {
                             XI.InnerGMessage("G0CC," + player.Uid + ",1," + locuster.Uid +
@@ -527,8 +514,9 @@ namespace PSD.PSDGamepkg.JNS
                         }
                     }
                 }
-                if (!locusSucc && zhs.Count > 0)
-                    XI.InnerGMessage("G0ZH," + string.Join(",", zhs), 0);
+                invs = XI.Board.Garden.Values.Where(p => p.IsAlive && p.HP == 0).Select(p => p.Uid).ToList();
+                if (!locusSucc && invs.Count > 0)
+                    XI.InnerGMessage("G0ZH,0", 0);
             }
         }
         // Yin Gu
@@ -660,40 +648,19 @@ namespace PSD.PSDGamepkg.JNS
         public bool FJ01ConsumeValid(Player player, int consumeType, int type, string fuse)
         {
             if (consumeType == 1)
-            {
-                // fuse = G0ZH,A,B,C
-                string[] blocks = fuse.Split(',');
-                for (int i = 1; i < blocks.Length; ++i)
-                {
-                    ushort pc = ushort.Parse(blocks[i]);
-                    if (player.Uid == pc)
-                        return true;
-                }
-                return false;
-            }
+                return player.IsAlive && player.HP == 0;
             else return false;
         }
         public void FJ01ConsumeAction(Player player, int consumeType, int type, string fuse, string argst)
         {
             if (consumeType == 1)
             {
-                // fuse = G0ZH,A,B,C
-                string[] blocks = fuse.Split(',');
-                string result = "";
-                for (int i = 1; i < blocks.Length; ++i)
-                {
-                    ushort pc = ushort.Parse(blocks[i]);
-                    if (player.Uid == pc)
-                    {
-                        VI.Cout(0, "{0}爆发「五彩霞衣」，脱离濒死状态且HP+2.", XI.DisplayPlayer(player.Uid));
-                        XI.RaiseGMessage(Artiad.Cure.ToMessage(
-                            new Artiad.Cure(player.Uid, player.Uid, FiveElement.A, 2)));
-                    }
-                    else
-                        result += "," + blocks[i];
-                }
-                if (result.Length > 0)
-                    XI.InnerGMessage("G0ZH" + result, 0);
+                VI.Cout(0, "{0}爆发「五彩霞衣」，脱离濒死状态且HP+2.", XI.DisplayPlayer(player.Uid));
+                XI.RaiseGMessage(Artiad.Cure.ToMessage(
+                    new Artiad.Cure(player.Uid, player.Uid, FiveElement.A, 2)));
+                List<Player> zeros = XI.Board.Garden.Values.Where(p => p.IsAlive && p.HP == 0).ToList();
+                if (zeros.Length > 0)
+                    XI.InnerGMessage("G0ZH,0", 0);
             }
         }
         public bool FJ02ConsumeValidHolder(Player provider, Player user, int consumeType, int type, string fuse)
