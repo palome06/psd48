@@ -122,6 +122,8 @@ namespace PSD.ClientAo
                 return ExspI(int.Parse(code.Substring("I".Length)));
             else if (code.StartsWith("C"))
                 return Tux(ushort.Parse(code.Substring("C".Length)));
+            else if (code.StartsWith("M"))
+                return Monster(ushort.Parse(code.Substring("M".Length)));
             else
                 return null;
         }
@@ -201,6 +203,22 @@ namespace PSD.ClientAo
                 return hro.PlayerTarAlias ?? "目标角色";
             else
                 return "目标角色";
+        }
+        internal string HeroAwakeAlias(params int[] heros)
+        {
+            foreach (int hero in heros)
+            {
+                if (hero != 0)
+                {
+                    if (hero != 0)
+                    {
+                        Base.Card.Hero hro = tuple.HL.InstanceHero(hero);
+                        if (hro != null && hro.AwakeAlias != null)
+                            return hro.AwakeAlias;
+                    }
+                }
+            }
+            return "特殊状态";
         }
         internal string HeroExCardAlias(int hero)
         {

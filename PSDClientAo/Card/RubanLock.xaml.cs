@@ -19,7 +19,7 @@ namespace PSD.ClientAo.Card
     /// </summary>
     public partial class RubanLock : UserControl
     {
-        public enum Location { NIL, WEAPON, ARMOR };
+        public enum Location { NIL, WEAPON, ARMOR, TROVE };
 
         public enum Category { NIL, ACTIVE, SOUND };
 
@@ -87,13 +87,13 @@ namespace PSD.ClientAo.Card
                 cardBody.IsEnabled = false;
             }
             Border gb = cardBody.Template.FindName("goldenBorder", cardBody) as Border;
-            if (gb != null)
-            {
-                if (mLoc == Location.WEAPON)
-                    gb.Width = 88;
-                else if (mLoc == Location.ARMOR)
-                    gb.Width = 76;
-            }
+            //if (gb != null)
+            //{
+            //    if (mLoc == Location.WEAPON)
+            //        gb.Width = 88;
+            //    else if (mLoc == Location.ARMOR)
+            //        gb.Width = 76;
+            //}
         }
     }
 }

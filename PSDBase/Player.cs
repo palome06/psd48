@@ -73,16 +73,13 @@ namespace PSD.Base
         public List<ushort> Tux { private set; get; }
         public ushort Armor { set; get; }
         public ushort Weapon { set; get; }
-        public ushort Luggage { set; get; }
-        public bool IsLuggage { set; get; }
-        // Cards in the Luggage, null if it isn't a luggage acutally
-        public List<string> LuggageCapa { private set; get; }
+        public ushort Trove { set; get; }
 
         // Another extra Equip, also view as Equip
         public ushort ExEquip { set; get; }
         // extra Equip Slot, not the same as the ExEquip
         public List<ushort> ExCards { private set; get; }
-        // special time-lapse cards, the substituaion is set in Board
+        // special time-lapse cards, the substitution is set in Board
         public List<ushort> Fakeq { private set; get; }
 
         public ushort[] Pets { private set; get; }
@@ -173,6 +170,7 @@ namespace PSD.Base
         public List<string> ROMCards { private set; get; } // 1
         public int ROMToken { set; get; } // 2
         public List<ushort> ROMPlayerTar { private set; get; } // 3
+        public bool ROMAwake { set; get; }
 
         public ushort RAMUshort { set; get; }
         public int RAMInt { set; get; }
@@ -196,7 +194,7 @@ namespace PSD.Base
             this.Name = name; this.Avatar = avatar; this.Uid = uid;
 
             this.Tux = new List<ushort>();
-            this.Armor = 0; this.Weapon = 0; this.Luggage = 0; this.ExEquip = 0;
+            this.Armor = 0; this.Weapon = 0; this.Trove = 0; this.ExEquip = 0;
 
             this.Pets = new ushort[] { 0, 0, 0, 0, 0 };
             this.ExCards = new List<ushort>();
@@ -207,6 +205,7 @@ namespace PSD.Base
             ROMToken = 0;
             ROMCards = new List<string>();
             ROMPlayerTar = new List<ushort>();
+            ROMAwake = false;
 
             RAMUshort = 0; RAMInt = 0;
             RAMPeoples = new List<ushort>();
@@ -250,6 +249,7 @@ namespace PSD.Base
             ROMUshort = 0;
             ROMToken = 0;
             ROMPlayerTar.Clear();
+            ROMAwake = false;
             foreach (string cd in ROMCards)
             {
                 if (cd.StartsWith("H"))
@@ -285,7 +285,7 @@ namespace PSD.Base
             if (Tux.Contains(card)) { Tux.Remove(card); discards.Add(card); return true; }
             else if (Armor == card) { Armor = 0; discards.Add(card); return true; }
             else if (Weapon == card) { Weapon = 0; discards.Add(card); return true; }
-            else if (Luggage == card) { Luggage = 0; discards.Add(card); return true; }
+            else if (Trove == card) { Trove = 0; discards.Add(card); return true; }
             else if (ExEquip == card) { ExEquip = 0; discards.Add(card); return true; }
             else if (ExCards.Contains(card)) { ExCards.Remove(card); discards.Add(card); return true; }
             else if (Fakeq.Contains(card)) { Fakeq.Remove(card); discards.Add(card); return true; }
@@ -297,7 +297,7 @@ namespace PSD.Base
         }
         public bool HasAnyEquips()
         {
-            return Weapon != 0 || Armor != 0 || Luggage != 0 || ExEquip != 0 ||
+            return Weapon != 0 || Armor != 0 || Trove != 0 || ExEquip != 0 ||
                 ExCards.Count > 0 || Fakeq.Count > 0;
         }
         public List<ushort> ListOutAllCards()
@@ -312,7 +312,7 @@ namespace PSD.Base
             List<ushort> result = new List<ushort>();
             if (Weapon != 0) result.Add(Weapon);
             if (Armor != 0) result.Add(Armor);
-            if (Luggage != 0) result.Add(Luggage);
+            if (Trove != 0) result.Add(Trove);
             if (ExEquip != 0) result.Add(ExEquip);
             if (ExCards.Count > 0) result.AddRange(ExCards);
             if (Fakeq.Count > 0) result.AddRange(Fakeq);
@@ -344,8 +344,8 @@ namespace PSD.Base
         }
         public int GetEquipCount()
         {
-            return (Weapon != 0 ? 1 : 0) + (Armor != 0 ? 1 : 0) + (ExEquip != 0 ? 1 : 0) +
-                ExCards.Count + Fakeq.Count;
+            return (Weapon != 0 ? 1 : 0) + (Armor != 0 ? 1 : 0) + (Trove != 0 ? 1 : 0)
+                + (ExEquip != 0 ? 1 : 0) + ExCards.Count + Fakeq.Count;
         }
         public bool IsValidPlayer()
         {

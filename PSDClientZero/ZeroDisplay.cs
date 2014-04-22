@@ -123,6 +123,10 @@ namespace PSD.ClientZero
                 return ExspI(int.Parse(code.Substring("I".Length)));
             else if (code.StartsWith("C"))
                 return Tux(ushort.Parse(code.Substring("C".Length)));
+            else if (code.StartsWith("M"))
+                return Monster(ushort.Parse(code.Substring("M".Length)));
+            else if (code.StartsWith("E"))
+                return Eve(ushort.Parse(code.Substring("E".Length)));
             else
                 return null;
         }
@@ -199,7 +203,7 @@ namespace PSD.ClientZero
                 if (hero != 0)
                 {
                     Base.Card.Hero hro = tuple.HL.InstanceHero(hero);
-                    if (hro != null)
+                    if (hro != null && hro.PeopleAlias != null)
                         return hro.PeopleAlias;
                 }
             }
@@ -212,7 +216,7 @@ namespace PSD.ClientZero
                 if (hero != 0)
                 {
                     Base.Card.Hero hro = tuple.HL.InstanceHero(hero);
-                    if (hro != null)
+                    if (hro != null && hro.PlayerTarAlias != null)
                         return hro.PlayerTarAlias;
                 }
             }
@@ -226,11 +230,27 @@ namespace PSD.ClientZero
                 if (hero != 0)
                 {
                     Base.Card.Hero hro = tuple.HL.InstanceHero(hero);
-                    if (hro != null)
+                    if (hro != null && hro.ExCardsAlias != null)
                         return hro.ExCardsAlias;
                 }
             }
             return "特殊手牌";
+        }
+        internal string HeroAwakeAlias(params int[] heros)
+        {
+            foreach (int hero in heros)
+            {
+                if (hero != 0)
+                {
+                    if (hero != 0)
+                    {
+                        Base.Card.Hero hro = tuple.HL.InstanceHero(hero);
+                        if (hro != null && hro.AwakeAlias != null)
+                            return hro.AwakeAlias;
+                    }
+                }
+            }
+            return "特殊状态";
         }
         internal string Prop(ushort prop)
         {

@@ -76,6 +76,10 @@ namespace PSD.ClientAo
             weaponLock.Cat = Card.RubanLock.Category.SOUND;
             armorLock.Loc = Card.RubanLock.Location.ARMOR;
             armorLock.Cat = Card.RubanLock.Category.SOUND;
+            troveLock.Loc = Card.RubanLock.Location.TROVE;
+            troveLock.Cat = Card.RubanLock.Category.SOUND;
+            troveBox.Loc = Card.RubanBox.Location.TROVE;
+            troveBox.Cat = Card.RubanBox.Category.SOUND;
 
             weaponLock.cardBody.Checked += delegate(object sender, RoutedEventArgs e)
             {
@@ -103,6 +107,26 @@ namespace PSD.ClientAo
                 if (AD != null)
                     AD.DelSelectedCard(armorLock.UT);
             };
+            troveBox.cardBody.Checked += delegate(object sender, RoutedEventArgs e)
+            {
+                if (AD != null)
+                    AD.InsSelectedCard(troveBox.UT);
+            };
+            troveBox.cardBody.Unchecked += delegate(object sender, RoutedEventArgs e)
+            {
+                if (AD != null)
+                    AD.DelSelectedCard(troveBox.UT);
+            };
+            troveLock.cardBody.Checked += delegate(object sender, RoutedEventArgs e)
+            {
+                if (AD != null)
+                    AD.InsSelectedCard(troveLock.UT);
+            };
+            troveLock.cardBody.Unchecked += delegate(object sender, RoutedEventArgs e)
+            {
+                if (AD != null)
+                    AD.DelSelectedCard(troveLock.UT);
+            };
             exEquipLock.cardBody.Checked += delegate(object sender, RoutedEventArgs e)
             {
                 if (AD != null)
@@ -120,6 +144,7 @@ namespace PSD.ClientAo
             enabledPets = new List<ushort>();
             enabledFakeq = new List<ushort>();
             //enabledExEquip = false;
+            troveBox.padClickHandler += inLuggageClick;
         }
 
         private bool isValid;
@@ -218,6 +243,23 @@ namespace PSD.ClientAo
         {
             armorLock.Cat = Card.RubanLock.Category.SOUND;
         }
+        public void EnableTrove()
+        {
+            troveBox.Cat = Card.RubanBox.Category.ACTIVE;
+            troveLock.Cat = Card.RubanLock.Category.ACTIVE;
+        }
+        public void DisableTrove()
+        {
+            troveBox.cardBody.IsChecked = false;
+            troveBox.Cat = Card.RubanBox.Category.SOUND;
+            troveLock.cardBody.IsChecked = false;
+            troveLock.Cat = Card.RubanLock.Category.SOUND;
+        }
+        internal void LockTrove()
+        {
+            troveBox.Cat = Card.RubanBox.Category.SOUND;
+            troveLock.Cat = Card.RubanLock.Category.SOUND;
+        }
         internal void EnableExEquip()
         {
             exEquipLock.Cat = Card.RubanLock.Category.ACTIVE;
@@ -251,6 +293,8 @@ namespace PSD.ClientAo
                 return weaponLock;
             else if (armorLock != null && armorLock.UT == ut)
                 return armorLock;
+            else if (troveLock != null && troveLock.UT == ut)
+                return troveLock;
             else
                 return null;
         }
@@ -351,6 +395,11 @@ namespace PSD.ClientAo
                 }
             }
         }
+        private void inLuggageClick(object sender, RoutedEventArgs e)
+        {
+            if (AD != null)
+                AD.yhTV.Show(AoPlayer.InLuggage, AoPlayer.Rank + "ILG");
+        }
         //private childItem FindVisualChild<childItem>(DependencyObject obj)
         //where childItem : DependencyObject
         //{
@@ -381,7 +430,7 @@ namespace PSD.ClientAo
             Canvas.SetLeft(armorLock, l);
             Canvas.SetTop(armorLock, amTop);
 
-            lugLock.Visibility = lg ? Visibility.Visible : Visibility.Collapsed;
+            troveLock.Visibility = lg ? Visibility.Visible : Visibility.Collapsed;
 
             expeopleBar.Height = h; expeopleBar.Width = ew;
             Canvas.SetLeft(expeopleBar, l);

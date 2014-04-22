@@ -53,8 +53,11 @@ namespace PSD.PSDGamepkg
             //RaiseGMessage("G0HC,0,1,19");
             //Board.MonPiles.PushBack(1007);
             //Board.MonPiles.PushBack(1004);
-            //Board.MonPiles.PushBack(1);
             Board.MonPiles.PushBack(22);
+            Board.MonPiles.PushBack(7);
+            Board.MonPiles.PushBack(1004);
+            Board.MonPiles.PushBack(1);
+            Board.MonPiles.PushBack(17);
             Board.MonPiles.PushBack(13);
             Board.MonPiles.PushBack(8);
             //Board.MonPiles.PushBack(24);
@@ -148,9 +151,10 @@ namespace PSD.PSDGamepkg
             //RaiseGMessage("G0HQ,2,6,0,47,48");
             //RaiseGMessage("G0HQ,2,3,0,47,52");
             //RaiseGMessage("G0HQ,2,3,0,41");
-            RaiseGMessage("G0HQ,2,1,0,0,47,9,10");
+            RaiseGMessage("G0HQ,2,1,0,0,93,94,9,95,96,5,2,71,72,49");
             //RaiseGMessage("G0HQ,2,4,0,0,33,35");
-            //RaiseGMessage("G0HQ,2,3,0,36,39");
+            RaiseGMessage("G0HQ,2,3,0,0,67");
+            RaiseGMessage("G0HQ,2,5,0,0,65,66");
             //RaiseGMessage("G0HQ,2,1,0,69,70");
             //RaiseGMessage("G0HQ,2,2,0,57");
             //RaiseGMessage("G0HQ,2,1,0,10,11,12,47,48,5");
@@ -369,6 +373,9 @@ namespace PSD.PSDGamepkg
                         break;
                     case "EE":
                         RunQuadStage(rstage, 0);
+                        rstage = "R" + rounder + "GS"; break;
+                    case "GS":
+                        RunQuadStage(rstage, 0);
                         rstage = "R" + rounder + "GR"; break;
                     case "GR":
                         WI.BCast(rstage + ",0");
@@ -494,7 +501,7 @@ namespace PSD.PSDGamepkg
                                 Board.Monster1 = mons;
                             }
                             WI.BCast("R" + rounder + "ZM1," + Board.Monster1);
-                            RaiseGMessage("G2YM,0," + Board.Monster1 + "," + Board.Mon1From);
+                            RaiseGMessage("G0YM,0," + Board.Monster1 + "," + Board.Mon1From);
                             Board.Battler = NMBLib.Decode(Board.Monster1, LibTuple.ML, LibTuple.NL);
                             RunQuadStage(rstage, 0);
                             if (NMBLib.IsNPC(Board.Monster1))
@@ -527,7 +534,7 @@ namespace PSD.PSDGamepkg
                                     Board.Battler = NMBLib.Decode(Board.Monster1,
                                         LibTuple.ML, LibTuple.NL);
                                     WI.BCast(rstage + "2," + Board.Monster1);
-                                    RaiseGMessage("G2YM,0," + Board.Monster1 + "," + Board.Mon1From);
+                                    RaiseGMessage("G0YM,0," + Board.Monster1 + "," + Board.Mon1From);
                                     if (NMBLib.IsNPC(Board.Monster1))
                                         rstage = "R" + rounder + "NP";
                                     else if (NMBLib.IsMonster(Board.Monster1))
@@ -551,6 +558,7 @@ namespace PSD.PSDGamepkg
                             break;
                         }
                     case "Z7":
+                        Board.InFightThrough = true;
                         RunQuadStage(rstage, 0);
                         rstage = "R" + rounder + "Z1"; break;
                     case "Z1":
@@ -574,7 +582,7 @@ namespace PSD.PSDGamepkg
                         RunQuadStage(rstage, 0);
                         rstage = "R" + rounder + "ZC"; break;
                     case "ZC":
-                        Board.InFight = true; Board.InFightThrough = true;
+                        Board.InFight = true;
                         RunQuadStage(rstage, 0);
                         RaiseGMessage("G09P,0");
                         rstage = "R" + rounder + "ZD"; break;
@@ -759,7 +767,7 @@ namespace PSD.PSDGamepkg
                             if (Board.Eve != 0)
                             {
                                 RaiseGMessage("G0ON,10,E,1," + Board.Eve);
-                                RaiseGMessage("G2YM,2,0,0");
+                                RaiseGMessage("G0YM,2,0,0");
                                 Board.Eve = 0;
                             }
                             foreach (Player player in Board.Garden.Values)
@@ -996,7 +1004,7 @@ namespace PSD.PSDGamepkg
                         RaiseGMessage("G0ON,10,M,1," + Board.Monster1);
                         RaiseGMessage("G0WB," + Board.Monster1);
                     }
-                    RaiseGMessage("G2YM,0,0,0");
+                    RaiseGMessage("G0YM,0,0,0");
                 }
                 Board.Mon1From = 0;
                 Board.Monster1 = 0;
@@ -1010,7 +1018,7 @@ namespace PSD.PSDGamepkg
                 {
                     RaiseGMessage("G0ON,10,M,1," + Board.Monster2);
                     RaiseGMessage("G0WB," + Board.Monster2);
-                    RaiseGMessage("G2YM,1,0,0");
+                    RaiseGMessage("G0YM,1,0,0");
                 }
                 Board.Monster2 = 0;
             }

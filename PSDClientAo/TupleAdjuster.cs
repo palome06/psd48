@@ -10,6 +10,19 @@ namespace PSD.ClientAo
     {
         public void ConvertTuple(LibGroup tuple, int version)
         {
+            if (version <= 114)
+            {
+                Base.Skill skill = tuple.SL.EncodeSkill("JN50402");
+                if (skill != null)
+                {
+                    skill.ForceChange("Occurs", AppendOnArray(skill.Occurs, "G0IY", 2));
+                    skill.ForceChange("Priorities", AppendOnArray(skill.Priorities, 110, 2));
+                    skill.ForceChange("IsOnce", AppendOnArray(skill.IsOnce, true, 2));
+                    skill.ForceChange("IsTermini", AppendOnArray(skill.IsTermini, false, 2));
+                    skill.ForceChange("Lock", AppendOnArray(skill.Lock, true, 2));
+                    skill.ForceChange("IsHind", AppendOnArray(skill.IsHind, true, 2));
+                }
+            }
             if (version <= 110)
             {
                 Base.Skill skill = tuple.SL.EncodeSkill("JN50502");

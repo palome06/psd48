@@ -105,9 +105,9 @@
             <cd:RubanLock x:Name="armorLock" Canvas.Left="-82" Canvas.Top="27" Width="87" Height="23"
                           Face="{StaticResource staEpFJ00}"/>
             <!--<Rectangle Canvas.Left="-72" Canvas.Top="45" Width="88" Height="20" Fill="Blue" Opacity="0.3"/>-->
-            <cd:RubanBox x:Name="lugBox" Canvas.Left="-82" Canvas.Top="51" Width="90" Height="23"
+            <cd:RubanBox x:Name="troveBox" Canvas.Left="-82" Canvas.Top="51" Width="90" Height="23"
                           Face="{StaticResource staEpXB00}" Visibility="Collapsed"/>
-            <cd:RubanLock x:Name="lugLock" Canvas.Left="-82" Canvas.Top="51" Width="90" Height="23"
+            <cd:RubanLock x:Name="troveLock" Canvas.Left="-82" Canvas.Top="51" Width="90" Height="23"
                           Face="{StaticResource staEpXB00}"/>
 
             <Button x:Name="expeopleBar" Canvas.Left="-82" Canvas.Top="75" Width="98" Height="23"
@@ -172,10 +172,10 @@
 
             <StackPanel x:Name="tokenStack" Orientation="Horizontal" FlowDirection="RightToLeft"
                         Canvas.Right="100" Canvas.Top="98">
-                    <Image x:Name="tkTake" Source="{StaticResource snapTKXJ508_4}" Height="18" Width="18"
-                       Visibility="Collapsed"/>
-                <!--<Image x:Name="trGiven" Source="{StaticResource snapTRXJ405}" Height="18" Width="18"
-                       Visibility="Collapsed"/>-->
+                <Image x:Name="tkTake" Source="{StaticResource snapTKXJ508_4}" Height="18" Width="18"
+                        Visibility="Collapsed"/>
+                <Image x:Name="awTake" Source="{StaticResource snapTAHL003}" Height="18" Width="18"
+                        Visibility="Collapsed"/>
             </StackPanel>
 
             <StackPanel x:Name="statusStack" Orientation="Horizontal" Canvas.Left="95" Canvas.Top="96">

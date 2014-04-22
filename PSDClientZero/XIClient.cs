@@ -1026,25 +1026,30 @@ namespace PSD.ClientZero
                     }
                     break;
                 case "E0ON":
-                    for (int idx = 1; idx < args.Length; ) {
+                    for (int idx = 1; idx < args.Length; )
+                    {
                         ushort fromZone = ushort.Parse(args[idx]);
                         string cardType = args[idx + 1];
-                        int cnt = int.Parse(args[idx + 2]);
-                        if (cnt > 0) {
-                            List<ushort> cds = Util.TakeRange(args, idx + 3, idx + 3 + count)
+                        int n = int.Parse(args[idx + 2]);
+                        if (n > 0)
+                        {
+                            List<ushort> cds = Util.TakeRange(args, idx + 3, idx + 3 + n)
                                 .Select(p => ushort.Parse(p)).ToList();
                             string cdInfos = null;
-                            if (cardType == "C") {
+                            if (cardType == "C")
+                            {
                                 Z0P.TuxDises += n;
                                 if (fromZone == 0)
                                     cdInfos = zd.Tux(cds);
                             }
-                            else if (cardType == "M") {
+                            else if (cardType == "M")
+                            {
                                 Z0P.MonDises += n;
                                 if (fromZone == 0)
                                     cdInfos = zd.Monster(cds);
                             }
-                            else if (cardType == "E") {
+                            else if (cardType == "E")
+                            {
                                 Z0P.EveDises += n;
                                 if (fromZone == 0)
                                     cdInfos = zd.Eve(cds);
@@ -1052,7 +1057,7 @@ namespace PSD.ClientZero
                             if (cdInfos != null)
                                 VI.Cout(Uid, "{0}被弃置进入弃牌堆.", cdInfos);
                         }
-                        idx += (3 + count);
+                        idx += (3 + n);
                     }
                     break;
                 case "E0CN":
@@ -1085,9 +1090,9 @@ namespace PSD.ClientZero
                 case "E0HQ":
                     {
                         ushort type = ushort.Parse(args[1]);
+                        ushort to = ushort.Parse(args[2]);
                         if (type == 0)
                         {
-                            ushort to = ushort.Parse(args[2]);
                             ushort from = ushort.Parse(args[3]);
                             int utype = int.Parse(args[4]);
                             if (utype == 0)
@@ -1125,7 +1130,6 @@ namespace PSD.ClientZero
                         }
                         else if (type == 2)
                         {
-                            ushort to = ushort.Parse(args[2]);
                             List<ushort> cards = Util.TakeRange(args, 3, args.Length)
                                 .Select(p => ushort.Parse(p)).ToList();
                             VI.Cout(Uid, "{0}摸取了{1}.", zd.Player(to), zd.Tux(cards));
@@ -1136,10 +1140,25 @@ namespace PSD.ClientZero
                         }
                         else if (type == 3)
                         {
-                            ushort to = ushort.Parse(args[2]);
                             int n = int.Parse(args[3]);
                             VI.Cout(Uid, "{0}摸取了{1}张牌.", zd.Player(to), n);
                             //Z0D[to].TuxCount += n;
+                        }
+                        else if (type == 4)
+                        {
+                            for (int idx = 3; idx < args.Length; )
+                            {
+                                ushort fromZone = ushort.Parse(args[idx]);
+                                int n = int.Parse(args[idx + 1]);
+                                ushort[] tuxes = Util.TakeRange(args, idx + 2, idx + 2 + n)
+                                    .Select(p => ushort.Parse(p)).ToArray();
+                                if (fromZone != 0)
+                                    VI.Cout(Uid, "{0}从{1}的区域内获得了牌{2}.", zd.Player(to),
+                                        zd.Player(fromZone), zd.Tux(tuxes));
+                                else
+                                    VI.Cout(Uid, "{0}取得了牌{1}.", zd.Player(to), zd.Tux(tuxes));
+                                idx += (n + 2);
+                            }
                         }
                         break;
                     }
@@ -1254,12 +1273,12 @@ namespace PSD.ClientZero
                         {
                             Z0D[who].SelectHero = hero;
                             Z0D[who].IsAlive = true;
-                            if (args[1]=="0")
+                            if (args[1] == "0")
                             {
                                 Z0D[who].ParseFromHeroLib();
                                 VI.Cout(Uid, "{0}#玩家转化为{1}角色.", who, zd.Hero(hero));
                             }
-                            else if(args[1]=="1")
+                            else if (args[1] == "1")
                                 VI.Cout(Uid, "{0}#玩家变身为{1}角色.", who, zd.Hero(hero));
                             else if (args[1] == "2")
                             {
@@ -1442,7 +1461,7 @@ namespace PSD.ClientZero
                             else if (where == 5)
                                 Z0D[me].ExEquip = card;
                             else if (where == 6)
-                                Z0D[me].Luggage = card;
+                                Z0D[me].Trove = card;
                             VI.Cout(Uid, "{0}装备了{1}到{2}.", zd.Player(me), zd.Tux(card), words[where - 1]);
                             //--Z0D[me].TuxCount;
                             //if (me == uid)
@@ -1464,7 +1483,7 @@ namespace PSD.ClientZero
                             else if (where == 5)
                                 Z0D[me].ExEquip = card;
                             else if (where == 6)
-                                Z0D[me].Luggage = card;
+                                Z0D[me].Trove = card;
                             if (from != 0)
                                 VI.Cout(Uid, "{0}为{1}装备了卡牌{2}到{3}.",
                                     zd.Player(from), zd.Player(me), zd.Tux(card), words[where - 1]);
@@ -1499,25 +1518,32 @@ namespace PSD.ClientZero
                         if (argvs != "")
                             argvs = "(" + argvs.Substring(1) + ")";
 
-                        string[] wherestr = new string[] { "", "武器区", "防具区",
-                            "特殊区", "佩戴区", "额外装备区", "秘宝区" };
-                        string[] patstr = new string[] {
-                            "{0}发动了{1}卡牌{2}[{3}]特效{4}.",
-                            "{0}爆发了{1}卡牌{2}[{3}]{4}.", "",
-                            "{0}发动了{1}卡牌{2}[{3}]特效{4},作用于{5}.",
-                            "{0}爆发了{1}卡牌{2}[{3}]{4},作用于{5}."
-                        };
-                        VI.Cout(Uid, patstr[consumeType], zd.Player(me), wherestr[where],
-                            zd.Tux(card), type, argvs, zd.Player(target));
+                        bool hind = false; int acType = consumeType % 2;
+                        Base.Card.TuxEqiup tuxeq = Tuple.TL.DecodeTux(card) as Base.Card.TuxEqiup;
+                        if (tuxeq != null && tuxeq.CsHind[acType][type])
+                            hind = true;
+                        if (!hind)
+                        {
+                            string[] wherestr = new string[] { "", "武器区", "防具区",
+                                "特殊区", "佩戴区", "额外装备区", "秘宝区" };
+                            string[] patstr = new string[] {
+                                "{0}发动了{1}卡牌{2}[{3}]特效{4}.",
+                                "{0}爆发了{1}卡牌{2}[{3}]{4}.", "",
+                                "{0}发动了{1}卡牌{2}[{3}]特效{4},作用于{5}.",
+                                "{0}爆发了{1}卡牌{2}[{3}]{4},作用于{5}."
+                            };
+                            VI.Cout(Uid, patstr[consumeType], zd.Player(me), wherestr[where],
+                                zd.Tux(card), type, argvs, zd.Player(target));
+                        }
                         break;
                     }
-                case "E0ZU":
-                    {
-                        ushort type = ushort.Parse(args[1]);
-                        ushort who = ushort.Parse(args[2]);
-                        ushort card = ushort.Parse(args[3]);
-                    }
-                    break;
+                //case "E0ZU":
+                //    {
+                //        ushort type = ushort.Parse(args[1]);
+                //        ushort who = ushort.Parse(args[2]);
+                //        ushort card = ushort.Parse(args[3]);
+                //    }
+                //    break;
                 case "E0ZL":
                     {
                         string result = "";
@@ -1566,7 +1592,8 @@ namespace PSD.ClientZero
                             }
                             else
                                 VI.Cout(Uid, "{0}战力+{1},当前战力为{2}.", zd.Monster((ushort)(who - 1000)), n, tp);
-                        } else if (type == 3)
+                        }
+                        else if (type == 3)
                             VI.Cout(Uid, "{0}强制战斗胜利.", who == 1 ? "红方" : "蓝方");
                         break;
                     }
@@ -1619,7 +1646,8 @@ namespace PSD.ClientZero
                             }
                             else
                                 VI.Cout(Uid, "{0}命中+{1},当前命中为{2}.", zd.Monster((ushort)(who - 1000)), n, tp);
-                        } else if (type == 3)
+                        }
+                        else if (type == 3)
                             VI.Cout(Uid, "{0}强制命中.", zd.Player(who));
                         break;
                     }
@@ -1700,7 +1728,8 @@ namespace PSD.ClientZero
                         {
                             int agl = int.Parse(args[3]);
                             VI.Cout(Uid, "{0}战力恢复为{1}，闪避恢复为{2}.", zd.Monster(x), cur, agl);
-                        } else
+                        }
+                        else
                             VI.Cout(Uid, "{0}战力恢复为{1}.", zd.Monster(x), cur);
                     }
                     break;
@@ -1905,6 +1934,12 @@ namespace PSD.ClientZero
                             Z0D[who].PlayerTars.AddRange(tars1);
                             idx += (4 + count1 + count2);
                         }
+                        else if (type == 3)
+                        {
+                            VI.Cout(Uid, "{0}已发动{1}.", zd.Player(who), zd.HeroAwakeAlias(Z0D[who].SelectHero));
+                            Z0D[who].AwakeSignal = true;
+                            idx += 2;
+                        }
                         else
                             break;
                     }
@@ -1951,6 +1986,12 @@ namespace PSD.ClientZero
                                     zd.HeroPlayerTarAlias(Z0D[who].SelectHero), zd.Player(tars1), zd.Player(tars2));
                             Z0D[who].PlayerTars.RemoveAll(p => tars1.Contains(p));
                             idx += (4 + count1 + count2);
+                        }
+                        else if (type == 3)
+                        {
+                            VI.Cout(Uid, "{0}已取消{1}.", zd.Player(who), zd.HeroAwakeAlias(Z0D[who].SelectHero));
+                            Z0D[who].AwakeSignal = false;
+                            idx += 2;
                         }
                         else
                             break;
@@ -2079,7 +2120,7 @@ namespace PSD.ClientZero
                     }
                     break;
                 case "E0LH":
-                    for (int i = 1; i < args.Length; i+=3)
+                    for (int i = 1; i < args.Length; i += 3)
                     {
                         ushort incr = ushort.Parse(args[i]);
                         ushort ut = ushort.Parse(args[i + 1]);
@@ -2141,9 +2182,10 @@ namespace PSD.ClientZero
                         VI.Cout(Uid, "当前行动顺序变成逆方向。");
                     break;
                 case "E0AF":
-                    if (args[2] == "0")
+                    if (args[1] == "0")
                         VI.Cout(Uid, "不触发战斗.");
-                    else {
+                    else
+                    {
                         string msg = "";
                         for (int i = 1; i < args.Length; i += 2)
                         {
@@ -2159,12 +2201,14 @@ namespace PSD.ClientZero
                             {
                                 msg += string.Format("{0}进行妨碍.", name);
                                 Z0F.Hinder = s;
-                            } else if (args[i] == "5")
+                            }
+                            else if (args[i] == "5")
                             {
                                 msg += string.Format("{0}不再支援.", name);
                                 if (Z0F.Supporter == s)
                                     Z0F.Supporter = 0;
-                            } else if (args[i] == "6")
+                            }
+                            else if (args[i] == "6")
                             {
                                 msg += string.Format("{0}不再妨碍.", name);
                                 if (Z0F.Hinder == s)
@@ -2172,6 +2216,28 @@ namespace PSD.ClientZero
                             }
                             if (msg.Length > 0)
                                 VI.Cout(Uid, msg);
+                        }
+                    }
+                    break;
+                case "E0SN":
+                    {
+                        ushort who = ushort.Parse(args[1]);
+                        ushort lugUt = ushort.Parse(args[2]);
+                        bool dirIn = args[3] == "0";
+                        string[] cards = Util.TakeRange(args, 4, args.Length);
+                        if (!Z0D[who].Treasures.ContainsKey(lugUt))
+                            Z0D[who].Treasures[lugUt] = new List<string>();
+                        if (dirIn)
+                        {
+                            Z0D[who].Treasures[lugUt].AddRange(cards);
+                            VI.Cout(Uid, "{0}被收入{1}的{2}.",
+                                zd.MixedCards(cards), zd.Player(who), zd.Tux(lugUt));
+                        }
+                        else
+                        {
+                            Z0D[who].Treasures[lugUt].RemoveAll(p => cards.Contains(p));
+                            VI.Cout(Uid, "{0}被从{1}的{2}中取出.",
+                                zd.MixedCards(cards), zd.Player(who), zd.Tux(lugUt));
                         }
                     }
                     break;

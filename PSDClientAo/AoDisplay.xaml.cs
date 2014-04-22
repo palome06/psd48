@@ -391,6 +391,7 @@ namespace PSD.ClientAo
             List<ushort> bags = yfBag.Me.Tux.Intersect(cands).ToList();
             bool weaponEab = wata.Weapon != 0 && cands.Contains(wata.Weapon);
             bool armorEab = wata.Armor != 0 && cands.Contains(wata.Armor);
+            bool troveEab = wata.Trove != 0 && cands.Contains(wata.Trove);
             List<ushort> excs = wata.GetExCardsList().Intersect(cands).ToList();
             bool exeqEab = wata.ExEquip != 0 && cands.Contains(wata.ExEquip);
             List<ushort> fakeq = wata.Fakeq.Intersect(cands).ToList();
@@ -403,6 +404,8 @@ namespace PSD.ClientAo
                 yfPlayerR2.EnableWeapon();
             if (armorEab)
                 yfPlayerR2.EnableArmor();
+            if (troveEab)
+                yfPlayerR2.EnableTrove();
             if (excs.Count > 0)
                 yfPlayerR2.EnableExCards(excs);
             if (exeqEab)
@@ -424,7 +427,7 @@ namespace PSD.ClientAo
                                 EnableJoyDecide(string.Join(",", selectedQard));
                         }
                         else if (selectedQard.Count > r1)
-                            RemoveDupQard(bags, weaponEab, armorEab, excs, fakeq);
+                            RemoveDupQard(bags, weaponEab, armorEab, troveEab, excs, fakeq);
                         else
                             DisableJoyDecide();
                     }
@@ -433,7 +436,7 @@ namespace PSD.ClientAo
                         if (selectedQard.Count >= r1 && selectedQard.Count <= r2)
                             EnableJoyDecide(string.Join(",", selectedQard));
                         else if (selectedQard.Count > r2)
-                            RemoveDupQard(bags, weaponEab, armorEab, excs, fakeq);
+                            RemoveDupQard(bags, weaponEab, armorEab, troveEab, excs, fakeq);
                         else
                             DisableJoyDecide();
                     }
@@ -441,7 +444,7 @@ namespace PSD.ClientAo
             };
         }
         private void RemoveDupQard(List<ushort> bags, bool weaponEab,
-            bool armorEab, List<ushort> excs, List<ushort> fakeq)
+            bool armorEab, bool troveEab, List<ushort> excs, List<ushort> fakeq)
         {
             ushort ut = selectedQard[0];
             if (bags.Contains(ut))
@@ -453,12 +456,17 @@ namespace PSD.ClientAo
                     return;
                 }
             }
-            if (weaponEab || armorEab)
+            if (weaponEab || armorEab || troveEab)
             {
-                Card.RubanLock rubanlock = yfPlayerR2.GetStandardRubanLock(selectedQard[0]);
+                Card.RubanLock rubanlock = yfPlayerR2.GetStandardRubanLock(ut);
                 if (rubanlock != null)
                 {
                     rubanlock.cardBody.IsChecked = false;
+                    return;
+                }
+                else if (troveEab && yfPlayerR2.troveBox != null && yfPlayerR2.troveBox.UT == ut)
+                {
+                    yfPlayerR2.troveBox.cardBody.IsChecked = false;
                     return;
                 }
             }
@@ -496,6 +504,7 @@ namespace PSD.ClientAo
             yfBag.ResumeTux();
             yfPlayerR2.DisableWeapon();
             yfPlayerR2.DisableArmor();
+            yfPlayerR2.DisableTrove();
             yfPlayerR2.ResumeExCards();
             yfPlayerR2.DisableExEquip();
             yfPlayerR2.ResumeFakeq();
@@ -507,6 +516,7 @@ namespace PSD.ClientAo
             yfBag.LockTux();
             yfPlayerR2.LockWeapon();
             yfPlayerR2.LockArmor();
+            yfPlayerR2.LockTrove();
             //yfPlayerR2.LockExCards();
             yfPlayerR2.LockExEquip();
         }
@@ -517,6 +527,7 @@ namespace PSD.ClientAo
             List<ushort> bags = yfBag.Me.Tux.Intersect(cands).ToList();
             bool weaponEab = wata.Weapon != 0 && cands.Contains(wata.Weapon);
             bool armorEab = wata.Armor != 0 && cands.Contains(wata.Armor);
+            bool troveEab = wata.Trove != 0 && cands.Contains(wata.Trove);
             List<ushort> excs = wata.GetExCardsList().Intersect(cands).ToList();
             bool exeqEab = wata.ExEquip != 0 && cands.Contains(wata.ExEquip);
             List<ushort> fakeq = wata.Fakeq.Intersect(cands).ToList();
@@ -529,6 +540,8 @@ namespace PSD.ClientAo
                 yfPlayerR2.EnableWeapon();
             if (armorEab)
                 yfPlayerR2.EnableArmor();
+            if (troveEab)
+                yfPlayerR2.EnableTrove();
             if (excs.Count > 0)
                 yfPlayerR2.EnableExCards(excs);
             if (exeqEab)
@@ -543,7 +556,7 @@ namespace PSD.ClientAo
                     if (selectedQard.Count == 1)
                         EnableJoyDecide("TX" + selectedQard[0]);
                     else if (selectedQard.Count > 1)
-                        RemoveDupQard(bags, weaponEab, armorEab, excs, fakeq);
+                        RemoveDupQard(bags, weaponEab, armorEab, troveEab, excs, fakeq);
                     else
                         DisableJoyDecide();
                 }

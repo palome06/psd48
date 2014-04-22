@@ -345,7 +345,8 @@ namespace PSD.PSDGamepkg
                     // args include card code now.
                     int consumeCode = ske.Consume;
                     string prev = args.IndexOf(',') < 0 ? args : args.Substring(args.IndexOf(',') + 1);
-                    string otherPara = tue.ConsumeInput(garden[from], consumeCode, ske.InType, ske.Fuse, prev);
+                    string lf = (tue.IsLinked(consumeCode, ske.InType) ? ske.LinkFrom + ":" : "") + ske.Fuse;
+                    string otherPara = tue.ConsumeInput(garden[from], consumeCode, ske.InType, lf, prev);
                     if (otherPara == "")
                     {
                         string enc = tue.Encrypt(args);
@@ -359,7 +360,7 @@ namespace PSD.PSDGamepkg
                         WI.Send(mEnc, ExceptStaff(from));
                         WI.Live(mEnc);
                         RaiseGMessage("G0ZC," + from + "," + consumeCode +
-                               "," + args + ";" + ske.InType + "," + ske.Fuse);
+                               "," + args + ";" + ske.InType + "," + lf);
                         u5ed = ske.IsTermini ? UEchoCode.END_TERMIN : UEchoCode.END_ACTION;
                     }
                     else // need further support

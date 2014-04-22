@@ -108,6 +108,20 @@ namespace PSD.PSDGamepkg
                 dict.Add(key, list);
             }
         }
+        public static void AddToUniqueMultiMap<K, V>(IDictionary<K, ISet<V>> dict, K key, V value)
+        {
+            if (dict.ContainsKey(key))
+            {
+                if (!dict[key].Contains(value))
+                    dict[key].Add(value);
+            }
+            else
+            {
+                ISet<V> list = new HashSet<V>();
+                list.Add(value);
+                dict.Add(key, list);
+            }
+        }
         public static T[] TakeRange<T>(T[] blocks, int jdx, int kdx)
         {
             if (jdx <= kdx && kdx <= blocks.Length)

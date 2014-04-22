@@ -19,11 +19,6 @@
                     </Border.Style>
                 </Border>
             </Grid>
-            <ControlTemplate.Triggers>
-                <Trigger Property="IsChecked" Value="True">
-                    <Setter TargetName="goldenBorder" Property="Border.BorderBrush" Value="Gold"/>
-                </Trigger>
-            </ControlTemplate.Triggers>
         </ControlTemplate>
 
         <ControlTemplate x:Key="activeEqiup" TargetType="CheckBox">
@@ -53,16 +48,16 @@
     </UserControl.Resources>
 
     <!--<Thumb Content>-->
-    <CheckBox x:Name="cardBody" Template="{StaticResource soundEqiup}">
-        <Grid x:Name="cardGrid" Background="Aqua">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="7*"/>
-                <ColumnDefinition Width="3*"/>
-            </Grid.ColumnDefinitions>
-            <Button x:Name="cardPad" Background="Transparent" Grid.Column="1" Click="PadClick"/>
-            <Border x:Name="contentBorder" CornerRadius="2" BorderThickness="2"
-                    BorderBrush="Transparent" Grid.Column="2" IsHitTestVisible="False"/>
-        </Grid>
-    </CheckBox>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="7*"/>
+            <ColumnDefinition Width="3*"/>
+            <ColumnDefinition Width="0.5*"/>
+        </Grid.ColumnDefinitions>
+        <CheckBox x:Name="cardBody" Template="{StaticResource soundEqiup}" Grid.Column="0" Grid.ColumnSpan="3">
+            <Grid x:Name="cardGrid" Background="Aqua"/>
+        </CheckBox>
+        <Button x:Name="cardPad" Background="Transparent" Grid.Column="1" Click="PadClick">(0)</Button>
+    </Grid>
     <!--</Thumb>-->
 </UserControl>

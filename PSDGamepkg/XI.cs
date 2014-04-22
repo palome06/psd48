@@ -72,7 +72,7 @@ namespace PSD.PSDGamepkg
             //19001, 10302, 10102, 10606, 10203, 10608
             //10603, 19018, 10605, 10501, 15003, 10505
             //17022, 19006, 10605, 10501, 15003, 10505
-            17004, 17022, 17012, 10401, 10501, 10302
+            10401, 17022, 19001, 10201, 10107, 10302
         };
 
         #region Memeber Declaration & Constructor
@@ -405,7 +405,7 @@ namespace PSD.PSDGamepkg
                                         Lock = tue.CsLock[i][j],
                                         IsOnce = false,
                                         Occur = oc,
-                                        IsTermini = tue.CsIsTermini[i][j]
+                                        IsTermini = tue.CsIsTermini[i][j],
                                     };
                                     if (oc.StartsWith("&"))
                                     {
@@ -533,8 +533,8 @@ namespace PSD.PSDGamepkg
             }
             if (parasitism.Count > 0)
             {
-                IDictionary<string, List<string>> occurTable =
-                    new Dictionary<string, List<string>>();
+                IDictionary<string, ISet<string>> occurTable =
+                    new Dictionary<string, ISet<string>>();
                 ISet<string> occurNotLocked = new HashSet<string>();
                 IDictionary<string, bool> occurLock = new Dictionary<string, bool>();
                 // occurTable: {sktName,InType : occur,priorty,owner}
@@ -545,10 +545,9 @@ namespace PSD.PSDGamepkg
                     {
                         string sktKey = skt.Name + "," + ((skt.Type == SKTType.EQ || skt.Type == SKTType.PT) ?
                             (skt.Consume + "!" + skt.InType) : skt.InType.ToString());
-                        Util.AddToMultiMap(occurTable, sktKey,
-                            pair.Key + "," + skt.Priorty + "," + skt.Owner);
+                        Util.AddToUniqueMultiMap(occurTable, sktKey, skt.Occur + "," + skt.Priorty);
                         if (skt.Lock == false)
-                            occurNotLocked.Add(sktKey);
+                            occurNotLocked.Add(skt.Occur + "," + skt.Priorty);
                     }
                 }
 
@@ -563,7 +562,7 @@ namespace PSD.PSDGamepkg
                     {
                         if (occurTable.ContainsKey(host))
                         {
-                            List<string> ics = occurTable[host];
+                            ISet<string> ics = occurTable[host];
                             foreach (string ic in ics)
                                 Util.AddToMultiMap(registered, ic, host);
                         }
@@ -576,13 +575,14 @@ namespace PSD.PSDGamepkg
                         string[] splits = triple.Split(',');
                         string oc = splits[0];
                         int priority = int.Parse(splits[1]);
-                        ushort owner = ushort.Parse(splits[2]);
+                        //ushort owner = ushort.Parse(splits[2]);
 
                         SkTriple skt = new SkTriple()
                         {
                             Name = para.Name,
                             Priorty = priority,
-                            Owner = para.Owner,
+                            //Owner = para.Owner,
+                            Owner = 0,
                             InType = para.InType,
                             Type = para.Type,
                             Consume = para.Consume,
@@ -592,7 +592,16 @@ namespace PSD.PSDGamepkg
                             LinkFrom = host, // format: TP02,0&TP03,0
                             IsTermini = para.IsTermini
                         };
-                        Util.AddToMultiMap(dict, oc, skt);
+                        if (oc.Contains('#') || oc.Contains('$') || oc.Contains('*'))
+                        {
+                            foreach (Player p in Board.Garden.Values)
+                                Util.AddToMultiMap(dict, oc
+                                    .Replace("#", p.Uid.ToString())
+                                    .Replace("$", p.Uid.ToString())
+                                    .Replace("*", p.Uid.ToString()), skt);
+                        }
+                        else
+                            Util.AddToMultiMap(dict, oc, skt);
                     }
                 }
             }
@@ -601,7 +610,7 @@ namespace PSD.PSDGamepkg
                  "IY", "OY", "DS", "CC", "CD", "CE", "XZ", "ZB", "ZC", "ZS", "ZL", "IA", "OA", "IX",
                  "OX", "AX", "IB", "OB", "IW", "OW", "WB", "9P", "IP", "OP", "CZ", "HC", "HD", "HH",
                  "HI", "HL", "IC", "OC", "HT", "QR", "HZ", "TT", "JM", "WN", "IJ", "OJ", "IE", "OE",
-                 "YM", "IS", "OS", "LH", "IV", "OV", "PB", "HR", "AF", "ON", "SN"
+                 "IS", "OS", "LH", "IV", "OV", "PB", "YM", "HR", "AF", "ON", "SN"
             };
             string[] g1 = new string[] { "DI", "IU", "OU", "ZK", "IZ", "OZ", "SG", "HK", "WJ", "JG",
                  "XR", "EV", "CK" };
@@ -622,6 +631,7 @@ namespace PSD.PSDGamepkg
             Util.AddToMultiMap(dict, "G0OY", new SkTriple() { Name = "~300", Priorty = 300 });
             Util.AddToMultiMap(dict, "G0CC", new SkTriple() { Name = "~200", Priorty = 200 });
             Util.AddToMultiMap(dict, "G0CC", new SkTriple() { Name = "~300", Priorty = 300 });
+            Util.AddToMultiMap(dict, "G0CC", new SkTriple() { Name = "~400", Priorty = 400 });
             Util.AddToMultiMap(dict, "G0HZ", new SkTriple() { Name = "~200", Priorty = 200 });
             Util.AddToMultiMap(dict, "G1EV", new SkTriple() { Name = "~200", Priorty = 200 });
             foreach (string key in dict.Keys)
@@ -748,7 +758,8 @@ namespace PSD.PSDGamepkg
                 Base.Card.Tux tux = tx01[ske.Name];
                 //IEnumerable<Player> detects;
                 Player player = Board.Garden[ske.Tg];
-                if (tux.Valid(player, ske.InType, ske.Fuse) && tux.Bribe(player, ske.InType, ske.Fuse))
+                string lf = (tux.IsLinked(ske.InType) ? ske.LinkFrom + ":" : "") + ske.Fuse;
+                if (tux.Valid(player, ske.InType, lf) && tux.Bribe(player, ske.InType, lf))
                 {
                     //if (g && !tux.IsSelfType)
                     //if (!tux.IsSelfType)
@@ -786,7 +797,7 @@ namespace PSD.PSDGamepkg
                         }
                     }
                     foreach (ushort card in new ushort[] { player.Weapon,
-                        player.Armor, player.Luggage, player.ExEquip })
+                        player.Armor, player.Trove, player.ExEquip })
                     {
                         if (card != 0)
                         {
@@ -800,13 +811,14 @@ namespace PSD.PSDGamepkg
                                 bool vi = (tue.Type == Base.Card.Tux.TuxType.FJ && !player.ArmorDisabled)
                                     || (tue.Type == Base.Card.Tux.TuxType.WQ && !player.WeaponDisabled)
                                     || (tue.Type == Base.Card.Tux.TuxType.XB && !player.LuggageDisabled);
-                                if (vi && tue.ConsumeValid(player, consumeType, ske.InType, ske.Fuse))
+                                string elf = (tue.IsLinked(consumeType, ske.InType) ? ske.LinkFrom + ":" : "") + ske.Fuse;
+                                if (vi && tue.ConsumeValid(player, consumeType, ske.InType, elf))
                                 {
                                     if (ske.Lock == false)
                                     {
                                         // Actually should be the same as skill case
                                         // Only report the first param
-                                        string req = tue.ConsumeInput(garden[player.Uid], consumeType, ske.InType, ske.Fuse, "");
+                                        string req = tue.ConsumeInput(garden[player.Uid], consumeType, ske.InType, elf, "");
                                         string msg = string.IsNullOrEmpty(req) ? "" : "," + req;
                                         //pris[player.Uid] += ";" + skt.Name + "," + card + msg;
                                         pris[player.Uid] += ";TX" + card + msg;

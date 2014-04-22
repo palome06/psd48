@@ -397,20 +397,10 @@ namespace PSD.PSDGamepkg.JNS
         public bool JN10303Valid(Player player, int type, string fuse)
         {
             if (type == 0) return true;
-            else if (type == 1 && XI.Board.InFight)
-            {
-                string[] blocks = fuse.Split(',');
-                return player.Uid.ToString().Equals(blocks[2]);
-            }
-            else if (type == 2 && XI.Board.InFight)
-            {
-                string[] blocks = fuse.Split(',');
-                for (int i = 1; i < blocks.Length; i += 2)
-                    if (player.Uid.ToString() == blocks[i + 1])
-                        return true;
+            else if ((type == 1 || type == 2) && XI.Board.InFight)
+                return IsMathISOS("JN10303", player, fuse);
+            else
                 return false;
-            }
-            else return false;
         }
         public void JN10303Action(Player player, int type, string fuse, string argst)
         {
@@ -1342,7 +1332,7 @@ namespace PSD.PSDGamepkg.JNS
             XI.RaiseGMessage("G0XZ," + player.Uid + ",2,1,3,1");
             ushort[] pops = XI.Board.MonPiles.Dequeue(2);
             XI.RaiseGMessage("G2IN,1,2");
-            XI.RaiseGMessage("GOON,0,M,2," + string.Join(",", pops));
+            XI.RaiseGMessage("G0ON,0,M,2," + string.Join(",", pops));
         }
         public string JN40101Input(Player player, int type, string fuse, string prev)
         {
@@ -2086,18 +2076,13 @@ namespace PSD.PSDGamepkg.JNS
                 return fuse.Substring("G0QR,".Length).Equals(player.Uid.ToString()) &&
                     player.Tux.Count > (player.TuxLimit - 2); // Just show!!
             else if (type == 1)
-                return true;
-            else if (type == 2)
-            {
-                string[] blocks = fuse.Split(',');
-                return player.Uid.ToString().Equals(blocks[2]) &&
-                    XI.Board.Garden.Values.Where(p => p.Uid != player.Uid && p.Team == player.Team).Any();
-            }
-            return false;
+                return IsMathISOS("JN50402", player, fuse);
+            else
+                return false;
         }
         public void JN50402Action(Player player, int type, string fuse, string argst)
         {
-            if (type == 1 || type == 2)
+            if (type == 1)
                 player.TuxLimit += 2;
         }
         #endregion XJ404 - MurongZiying
@@ -2170,16 +2155,7 @@ namespace PSD.PSDGamepkg.JNS
         public bool JN50502Valid(Player player, int type, string fuse)
         {
             if (type == 0)
-            {
-                string[] parts = fuse.Split(',');
-                if (parts[1] == player.Uid.ToString())
-                {
-                    for (int i = 3; i < parts.Length; ++i)
-                        if (parts[i] == "JN50502")
-                            return true;
-                }
-                return false;
-            }
+                return IsMathISOS("JN50502", player, fuse);
             else if (type == 1)
                 return player.ROMPlayerTar.Count > 0 && player.ROMPlayerTar[0] == XI.Board.Rounder.Uid;
             else if (type == 2)
@@ -2316,17 +2292,17 @@ namespace PSD.PSDGamepkg.JNS
                         //    XI.InnerGMessage(blocks[0] + nfuse, 120);
                     }
                     else
-                        XI.InnerGMessage(fuse, 121);
+                        XI.InnerGMessage(fuse, 151);
                 }
                 else
-                    XI.InnerGMessage(fuse, 121);
+                    XI.InnerGMessage(fuse, 151);
             }
             else if (type == 1)
             {
                 ushort to = ushort.Parse(args);
                 Player oy = XI.Board.Garden[to];
                 oy.RAMPeoples.Clear();
-                XI.InnerGMessage(fuse, 122);
+                XI.InnerGMessage(fuse, 152);
             }
         }
         public string JN60102Input(Player player, int type, string fuse, string prev)
@@ -2923,17 +2899,7 @@ namespace PSD.PSDGamepkg.JNS
                 }
             }
             else if (type == 3 || type == 4)
-            {
-                if (XI.Board.InFight && XI.Board.IsAttendWar(player)
-                    && XI.Board.Rounder.Uid != player.Uid)
-                {
-                    string[] blocks = fuse.Split(',');
-                    for (int i = 1; i < blocks.Length; i += 2)
-                        if (blocks[i + 1] == player.Uid.ToString())
-                            return true;
-                    return false;
-                }
-            }
+                return IsMathISOS("JN60501", player, fuse);
             else if (type == 5)
             {
                 string[] e0af = fuse.Split(',');
@@ -3037,16 +3003,7 @@ namespace PSD.PSDGamepkg.JNS
             else if (type == 1)
                 return player.ROMCards.Count > 0;
             else if (type == 2)
-            {
-                if (XI.Board.InFight)
-                {
-                    string[] blocks = fuse.Split(',');
-                    for (int i = 1; i < blocks.Length; i += 2)
-                        if (blocks[i + 1] == player.Uid.ToString())
-                            return true;
-                }
-                return false;
-            }
+                return XI.Board.InFight && IsMathISOS("JN60601", player, fuse);
             else
                 return false;
         }
@@ -3058,8 +3015,9 @@ namespace PSD.PSDGamepkg.JNS
                 List<int> heros = Util.TakeRange(blocks, 1, blocks.Length)
                     .Select(p => ushort.Parse(p)).Where(p => p != player.Uid)
                     .Select(p => XI.Board.Garden[p].SelectHero).ToList();
-                XI.RaiseGMessage("G0IJ," + player.Uid + ",1," + heros.Count + "," +
-                    string.Join(",", heros.Select(p => "H" + p)));
+                string hs = string.Join(",", heros.Select(p => "H" + p));
+                XI.RaiseGMessage("G0IJ," + player.Uid + ",1," + heros.Count + "," + hs);
+                XI.RaiseGMessage("G2TZ," + player.Uid + ",0," + hs);
                 XI.Board.BannedHero.AddRange(heros);
                 if (XI.Board.InFight)
                     XI.RaiseGMessage("G0IP," + player.Team + "," + heros.Count);
@@ -3089,9 +3047,11 @@ namespace PSD.PSDGamepkg.JNS
             List<int> souls = player.ROMCards.Where(p => p.StartsWith("H"))
                 .Select(p => int.Parse(p.Substring("H".Length))).ToList();
             if (souls.Count > 0)
-                XI.RaiseGMessage("G0OJ," + player.Uid + ",1," + souls.Count
-                    + "," + string.Join(",", souls.Select(p => "H" + p)));
-                //XI.RaiseGMessage("G0OJ," + string.Join(",", souls.Select(p => player.Uid + ",1,H" + p)));
+            {
+                string hs = string.Join(",", souls.Select(p => "H" + p));
+                XI.RaiseGMessage("G0OJ," + player.Uid + ",1," + souls.Count + "," + hs);
+                XI.RaiseGMessage("G2TZ,0," + player.Uid + "," + hs);
+            }
             XI.Board.BannedHero.RemoveAll(p => souls.Contains(p));
             XI.RaiseGMessage("G0OY,0," + player.Uid);
             XI.RaiseGMessage("G0IY,0," + player.Uid + ",10607");
@@ -3423,7 +3383,7 @@ namespace PSD.PSDGamepkg.JNS
                     i += (3 + n);
                 }
                 if (g1di.Length > 0)
-                    XI.InnerGMessage("G1DI" + g1di, 141);
+                    XI.InnerGMessage("G1DI" + g1di, 171);
             }
         }
         public bool JNS0801Valid(Player player, int type, string fuse)
@@ -3602,16 +3562,9 @@ namespace PSD.PSDGamepkg.JNS
             if (type == 0)
                 return XI.Board.IsAttendWar(player);
             else if (type == 1)
-            {
-                if (XI.Board.InFight && XI.Board.IsAttendWar(player))
-                {
-                    string[] blocks = fuse.Split(',');
-                    for (int i = 1; i < blocks.Length; i += 2)
-                        if (blocks[i + 1] == player.Uid.ToString())
-                            return true;
-                }
-            }
-            return false;
+                return XI.Board.InFight && XI.Board.IsAttendWar(player) && IsMathISOS("JNS0401", player, fuse);
+            else
+                return false;
         }
         public void JNS0401Action(Player player, int type, string fuse, string argst)
         {
@@ -3864,6 +3817,17 @@ namespace PSD.PSDGamepkg.JNS
                 return obj1.Equals(obj2);
         }
 
+        private bool IsMathISOS(string skillName, Player player, string fuse)
+        {
+            string[] parts = fuse.Split(',');
+            if (parts[1] == player.Uid.ToString())
+            {
+                for (int i = 3; i < parts.Length; ++i)
+                    if (parts[i] == skillName)
+                        return true;
+            }
+            return false;
+        }
         private void Harm(Player src, Player py, int n, FiveElement five = FiveElement.A, int mask = 0)
         {
             XI.RaiseGMessage(Artiad.Harm.ToMessage(

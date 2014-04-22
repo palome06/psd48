@@ -19,10 +19,11 @@ namespace PSD.ClientAo.Card
     /// </summary>
     public partial class RubanBox : UserControl
     {
-        public enum Location { NIL, WEAPON, ARMOR, LUGAGE };
+        public enum Location { NIL, WEAPON, ARMOR, TROVE };
         // SOUND: Cannot operate; SELF: XB itself;
         // CONTENT: tuxes inside XB valid; ACTIVE: both.
-        public enum Category　{ NIL, SOUND, SELF, CONTENT, ACTIVE };
+        //public enum Category　{ NIL, SOUND, SELF, CONTENT, ACTIVE };
+        public enum Category { NIL, SOUND, ACTIVE };
 
         private Location mLoc;
         public Location Loc
@@ -81,53 +82,52 @@ namespace PSD.ClientAo.Card
                 cardBody.ApplyTemplate();
                 cardBody.IsEnabled = false;
             }
-            else if (mCat == Category.SELF)
-            {
-                cardBody.Template = Resources["activeEqiup"] as ControlTemplate;
-                cardBody.ApplyTemplate();
-                cardBody.IsEnabled = true;
+            //else if (mCat == Category.SELF)
+            //{
+            //    cardBody.Template = Resources["activeEqiup"] as ControlTemplate;
+            //    cardBody.ApplyTemplate();
+            //    cardBody.IsEnabled = true;
 
-                contentBorder.BorderBrush = new SolidColorBrush(Colors.Transparent);
-                //cardPad.IsEnabled = false;
-            }
-            else if (mCat == Category.CONTENT)
-            {
-                cardBody.Template = Resources["soundEqiup"] as ControlTemplate;
-                cardBody.ApplyTemplate();
-                cardBody.IsEnabled = true;
+            //    contentBorder.BorderBrush = new SolidColorBrush(Colors.Transparent);
+            //    //cardPad.IsEnabled = false;
+            //}
+            //else if (mCat == Category.CONTENT)
+            //{
+            //    cardBody.Template = Resources["soundEqiup"] as ControlTemplate;
+            //    cardBody.ApplyTemplate();
+            //    cardBody.IsEnabled = true;
 
-                contentBorder.BorderBrush = new SolidColorBrush(Colors.Black);
-                //cardPad.IsEnabled = true;
-            }
+            //    contentBorder.BorderBrush = new SolidColorBrush(Colors.Black);
+            //    //cardPad.IsEnabled = true;
+            //}
             else if (mCat == Category.ACTIVE)
             {
                 cardBody.Template = Resources["activeEqiup"] as ControlTemplate;
                 cardBody.ApplyTemplate();
                 cardBody.IsEnabled = true;
-
-                contentBorder.BorderBrush = new SolidColorBrush(Colors.Black);
+                //contentBorder.BorderBrush = new SolidColorBrush(Colors.Black);
                 //cardPad.IsEnabled = true;
             }
 
             Border gb = cardBody.Template.FindName("goldenBorder", cardBody) as Border;
-            if (gb != null)
-            {
-                if (mLoc == Location.LUGAGE)
-                    gb.Width = 78;
-                //if (mLoc == Location.WEAPON)
-                //    gb.Width = 88;
-                //else if (mLoc == Location.ARMOR)
-                //    gb.Width = 76;
-            }
+            //if (gb != null)
+            //{
+            //    if (mLoc == Location.LUGAGE)
+            //        gb.Width = 78;
+            //    if (mLoc == Location.WEAPON)
+            //        gb.Width = 88;
+            //    else if (mLoc == Location.ARMOR)
+            //        gb.Width = 76;
+            //}
         }
 
-        public delegate void PadClickHandler();
+        public delegate void PadClickHandler(object sender, RoutedEventArgs e);
         public PadClickHandler padClickHandler;
 
         private void PadClick(object sender, RoutedEventArgs e)
         {
             if (padClickHandler != null)
-                padClickHandler();
+                padClickHandler(sender, e);
         }
     }
 }

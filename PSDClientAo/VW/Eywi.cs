@@ -122,16 +122,20 @@ namespace PSD.ClientAo.VW
             {
                 if (line.StartsWith("E0ON,"))
                 {
+                    string[] args = line.Split(',');
                     ushort utype = ushort.Parse(args[1]);
-                    char ch = '';
+                    char ch = '\0';
                     if (utype == 0)
                         ch = 'C';
                     else if (utype == 1)
                         ch = 'M';
                     else if (utype == 2)
                         ch = 'E';
-                    string rest = line.Substring(line.IndexOf(',', line.IndexOf(',') + 1) + 1);
-                    line = "E0ON,10," + ch + "," + n + "," + rest;
+                    if (ch!= '\0')
+                    {
+                        line = "E0ON,10," + ch + "," + (args.Length - 2) + ","
+                            + string.Join(",", Util.TakeRange(args, 2, args.Length));
+                    }
                 }
             }
             if (Version <= 112)

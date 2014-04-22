@@ -269,7 +269,7 @@ namespace PSD.PSDGamepkg.JNS
             foreach (Player py in XI.Board.Garden.Values.Where(p => p.IsAlive))
             {
                 int acc = (py.Weapon != 0 ? 1 : 0) + (py.Armor != 0 ? 1 : 0) +
-                    (py.Luggage != 0 ? 1 : 0) + (py.ExEquip != 0 ? 1 : 0);
+                    (py.Trove != 0 ? 1 : 0) + (py.ExEquip != 0 ? 1 : 0);
                 if (acc > 0)
                     harms.Add(new Artiad.Harm(py.Uid, 0, FiveElement.A, acc, 0));
             }
@@ -393,10 +393,10 @@ namespace PSD.PSDGamepkg.JNS
                             XI.RaiseGMessage("G1OU," + cd);
                             uts.Remove(cd);
                             XI.RaiseGMessage("G2QU,0,0," + cd);
-                            XI.RaiseGMessage("G0HQ,2," + ut + ",0," + cd);
                             // CongQIPaiDuiLiQiDiao
                             XI.RaiseGMessage("G2FU,3");
                             XI.RaiseGMessage("G2CN,0,1");
+                            XI.RaiseGMessage("G0HQ,2," + ut + ",0,0," + cd);
                             XI.Board.TuxDises.Remove(cd);
                             string os = XI.AsyncInput(ut, "#您是否要立即装备？##是##否,Y2", "SJT04", "0");
                             if (os == "1")
@@ -462,11 +462,11 @@ namespace PSD.PSDGamepkg.JNS
 
             ushort pop = XI.Board.RestNPCPiles.Dequeue();
             NPC npc = XI.LibTuple.NL.Decode(NMBLib.OriginalNPC(pop));
-            XI.RaiseGMessage("G2YM,3," + pop + ",0");
+            XI.RaiseGMessage("G0YM,3," + pop + ",0");
 
             UEchoCode r5ed = XI.HandleWithNPCEffect(py, npc, false);
             XI.Board.RestNPCDises.Add(pop);
-            XI.RaiseGMessage("G2YM,3,0,0");
+            XI.RaiseGMessage("G0YM,3,0,0");
         }
         public void SJT08()
         {
@@ -501,7 +501,7 @@ namespace PSD.PSDGamepkg.JNS
             {
                 ushort pop = XI.Board.RestNPCPiles.Dequeue();
                 NPC npc = XI.LibTuple.NL.Decode(NMBLib.OriginalNPC(pop));
-                XI.RaiseGMessage("G2YM,3," + pop + ",0");
+                XI.RaiseGMessage("G0YM,3," + pop + ",0");
                 Player rd = XI.Board.Rounder;
                 int sr = npc.STR < 5 ? npc.STR : 5;
                 if (rd.Tux.Count > sr)
@@ -509,7 +509,7 @@ namespace PSD.PSDGamepkg.JNS
                 else if (rd.Tux.Count < sr)
                     XI.RaiseGMessage("G0DH," + rd.Uid + ",0," + (sr - rd.Tux.Count));
                 XI.Board.RestNPCDises.Add(pop);
-                XI.RaiseGMessage("G2YM,3,0,0");
+                XI.RaiseGMessage("G0YM,3,0,0");
             }
         }
         #endregion Package 5#

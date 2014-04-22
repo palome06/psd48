@@ -282,8 +282,8 @@
     <BitmapImage x:Key="snapTKHL001_6" UriSource="Token/TKH0106.png"/>
     <BitmapImage x:Key="snapTKHL001_7" UriSource="Token/TKH0107.png"/>
     <BitmapImage x:Key="snapTKHL001_8" UriSource="Token/TKH0108.png"/>
-    <BitmapImage x:Key="snapTKHL003_1" UriSource="Token/TKH0301.png"/>
-    <BitmapImage x:Key="snapTKHL006_1" UriSource="Token/TKH0601.png"/>
+    <BitmapImage x:Key="snapTAHL003" UriSource="Token/TAH0301.png"/>
+    <BitmapImage x:Key="snapTAHL006" UriSource="Token/TAH0601.png"/>
     <BitmapImage x:Key="snapTKHL019_1" UriSource="Token/TKH1901.png"/>
     <BitmapImage x:Key="snapTKHL019_2" UriSource="Token/TKH1902.png"/>
     <BitmapImage x:Key="snapTKHL019_3" UriSource="Token/TKH1903.png"/>

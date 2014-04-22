@@ -590,6 +590,7 @@ namespace PSD.ClientAo.VW
             ad.yfPlayerR2.AoPlayer.ResumePets();
             ad.yfPlayerR2.AoPlayer.DisableWeapon();
             ad.yfPlayerR2.AoPlayer.DisableArmor();
+            ad.yfPlayerR2.AoPlayer.DisableTrove();
             ad.yfPlayerR2.AoPlayer.DisableExEquip();
             // Disable pets
             ad.yfJoy.CEE.ResetHightlight();

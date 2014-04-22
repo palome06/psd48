@@ -176,6 +176,11 @@ namespace PSD.Base.Card
                 return string.Join(",", Occurs);
             else return "";
         }
+
+        public bool IsLinked(int inType)
+        {
+            return Occurs != null && Occurs.Length > inType && Occurs[inType].Contains('&');
+        }
     }
 
     public class TuxLib
@@ -251,7 +256,7 @@ namespace PSD.Base.Card
             sql = new Utils.ReadonlySQL("psd.db3");
             List<string> list = new string[] {
                 "CODE", "NAME", "COUNT", "OCCURS", "PRIORS", "PARASITISM",
-                "DESCRIPTION", "SPECIAL", "ISEQ", "TARGET", "GROWUP", "TERMINI"
+                "DESCRIPTION", "SPECIAL", "ISEQ", "TARGET", "GROWUP", "TERMHIND"
             }.ToList();
             System.Data.DataRowCollection datas = sql.Query(list, "Tux");
             foreach (System.Data.DataRow data in datas)
@@ -278,12 +283,19 @@ namespace PSD.Base.Card
                 string special = (string)data["SPECIAL"];
                 string isEqs = (string)data["ISEQ"];
                 string targets = (string)data["TARGET"];
-                string terministr = (string)data["TERMINI"];
-                if (type == Tux.TuxType.WQ || type == Tux.TuxType.FJ || type == Tux.TuxType.XB)
+                string terministr = (string)data["TERMHIND"];
+                if (type == Tux.TuxType.XB && isEqs == "2")
                 {
                     string growup = (string)data["GROWUP"];
-                    var tux = new TuxEqiup(name, code, type, description,
-                        special, growup);
+                    isEqs = "1";
+                    var tux = new Luggage(name, code, type, description, special, growup);
+                    tux.Parse(countStr, occur, parasitismStr, priority, isEqs, targets, terministr);
+                    Firsts.Add(tux);
+                }
+                else if (type == Tux.TuxType.WQ || type == Tux.TuxType.FJ || type == Tux.TuxType.XB)
+                {
+                    string growup = (string)data["GROWUP"];
+                    var tux = new TuxEqiup(name, code, type, description, special, growup);
                     tux.Parse(countStr, occur, parasitismStr, priority, isEqs, targets, terministr);
                     Firsts.Add(tux);
                 }
@@ -374,12 +386,10 @@ namespace PSD.Base.Card
         public int IncrOfDEX { set; get; }
 
         public int[][] CsPriorites { private set; get; }
-
         public string[][] CsOccur { private set; get; }
-
         public bool[][] CsLock { private set; get; }
-
         public bool[][] CsIsTermini { private set; get; }
+        public bool[][] CsHind { private set; get; }
 
         public delegate void CrActionDelegate(Player player);
         public delegate void CsActionDelegate(Player player,
@@ -483,10 +493,10 @@ namespace PSD.Base.Card
 
         public override bool IsTuxEqiup() { return true; }
 
-        public bool IsLuggage() { return false; }
+        public virtual bool IsLuggage() { return false; }
 
         internal override void Parse(string countStr, string occurStr, string parasitismStr,
-            string priorStr, string isEqStr, string tarStr, string terministr)
+            string priorStr, string isEqStr, string tarStr, string tmhdstr)
         {
             if (countStr != "")
             {
@@ -574,26 +584,34 @@ namespace PSD.Base.Card
             for (int i = 0; i < isEqs.Length; ++i)
                 IsEq[i] = (isEqs[i][0] == '1');
 
-            string[] termins = terministr.Split(';');
-            if (termins.Length > 1)
-                CsIsTermini = new bool[termins.Length - 1][];
-            for (int i = 0; i < termins.Length; ++i)
+            string[] tmhd = tmhdstr.Split(';');
+            if (tmhd.Length > 1)
             {
-                if (termins[i] != "" && termins[i] != "^")
+                CsIsTermini = new bool[tmhd.Length - 1][];
+                CsHind = new bool[tmhd.Length - 1][];
+            }
+            for (int i = 0; i < tmhd.Length; ++i)
+            {
+                if (tmhd[i] != "" && tmhd[i] != "^")
                 {
                     if (i == 0)
                     {
-                        string[] trs = termins[i].Split(',');
+                        string[] trs = tmhd[i].Split(',');
                         IsTermini = new bool[trs.Length];
                         for (int j = 0; j < trs.Length; ++j)
                             IsTermini[j] = (trs[j][0] == '1');
                     }
                     else
                     {
-                        string[] trs = termins[i].Split(',');
+                        string[] trs = tmhd[i].Split(',');
                         CsIsTermini[i - 1] = new bool[trs.Length];
+                        CsHind[i - 1] = new bool[trs.Length];
                         for (int j = 0; j < trs.Length; ++j)
-                            CsIsTermini[i - 1][j] = (trs[j][0] == '1');
+                        {
+                            int val = int.Parse(trs[j]);
+                            CsIsTermini[i - 1][j] = (val & 1) != 0;
+                            CsHind[i - 1][j] = (val & 2) != 0;
+                        }
                     }
                 }
             }
@@ -611,6 +629,12 @@ namespace PSD.Base.Card
             else
                 ocr += "^";
             return ocr;
+        }
+
+        public bool IsLinked(int consumeType, int inType)
+        {
+            return CsOccur != null && CsOccur.Length > consumeType &&
+                CsOccur[consumeType].Length > inType && CsOccur[consumeType][inType].Contains('&');
         }
 
         public TuxEqiup(string name, string code, TuxType type,

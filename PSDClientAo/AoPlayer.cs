@@ -37,6 +37,7 @@ namespace PSD.ClientAo
             mExCards = new List<ushort>();
             Fakeq = new List<ushort>();
             Escue = new List<ushort>();
+            mInLuggage = new List<string>();
 
             Token = 0;
             //Peoples = new List<int>();
@@ -434,12 +435,114 @@ namespace PSD.ClientAo
             get { return mArmor; }
         }
 
-        private ushort mLuggage;
+        private ushort mTrove;
+        public ushort Trove
+        {
+            [STAThread]
+            set
+            {
+                if (mTrove != value)
+                {
+                    if (value != 0)
+                    {
+                        Base.Card.TuxEqiup tr = Tuple.TL.DecodeTux(value) as Base.Card.TuxEqiup;
+                        if (tr != null && tr.IsLuggage())
+                        {
+                            string code = tr.Code;
+                            pb.Dispatcher.BeginInvoke((Action)(() =>
+                            {
+                                pb.troveLock.Visibility = System.Windows.Visibility.Collapsed;
+                                pb.troveBox.Visibility = System.Windows.Visibility.Visible;
+                                ImageBrush ib = pb.TryFindResource("staEp" + code) as ImageBrush;
+                                //pb.armorBar.Fill = ib ?? pb.TryFindResource("staEp00") as ImageBrush;
+                                pb.troveBox.Face = ib ?? pb.TryFindResource("staEp00") as ImageBrush;
+                                pb.troveBox.ToolTip = Tips.IchiDisplay.GetTuxTip(Tuple, value);
+                            }));
+                        }
+                        else if (tr != null && !tr.IsLuggage())
+                        {
+                            string code = tr.Code;
+                            pb.Dispatcher.BeginInvoke((Action)(() =>
+                            {
+                                pb.troveLock.Visibility = System.Windows.Visibility.Visible;
+                                pb.troveBox.Visibility = System.Windows.Visibility.Collapsed;
+                                ImageBrush ib = pb.TryFindResource("staEp" + code) as ImageBrush;
+                                //pb.armorBar.Fill = ib ?? pb.TryFindResource("staEp00") as ImageBrush;
+                                pb.troveLock.Face = ib ?? pb.TryFindResource("staEp00") as ImageBrush;
+                                pb.troveLock.ToolTip = Tips.IchiDisplay.GetTuxTip(Tuple, value);
+                            }));
+                        }
+                    }
+                    else
+                    {
+                        //ImageBrush ib = pb.Resources["staEp02"] as ImageBrush;
+                        //pb.weaponBar.Fill = ib ?? pb.Resources["staEp00"] as ImageBrush;
+                        pb.Dispatcher.BeginInvoke((Action)(() =>
+                        {
+                            pb.troveBox.Visibility = System.Windows.Visibility.Collapsed;
+                            pb.troveLock.Visibility = System.Windows.Visibility.Visible;
+                            //pb.armorBar.Fill = new SolidColorBrush(Colors.BlueViolet);
+                            ImageBrush ib = pb.TryFindResource("staEpXB00") as ImageBrush;
+                            pb.troveLock.Face = ib ?? pb.TryFindResource("staEp00") as ImageBrush;
+                            pb.troveLock.ToolTip = null;
+                        }));
+                    }
+                    mTrove = value;
+                    pb.Dispatcher.BeginInvoke((Action)(() =>
+                    {
+                        Base.Card.TuxEqiup tr = Tuple.TL.DecodeTux(value) as Base.Card.TuxEqiup;
+                        if (tr != null && tr.IsLuggage())
+                        {
+                            pb.troveLock.UT = 0;
+                            pb.troveBox.UT = mTrove;
+                        }
+                        else if (tr != null && !tr.IsLuggage())
+                        {
+                            pb.troveLock.UT = mTrove;
+                            pb.troveBox.UT = 0;
+                        }
+                    }));
+                }
+            }
+            get { return mTrove; }
+        }
+
         private List<string> mInLuggage;
-        public ushort Luggage { set { mLuggage = value; } get { return mLuggage; } }
-        public void InsIntoLuggage(List<string> suts) { }
-        public void DelFromLuggage(List<string> suts) { }
-        // TODO: luggage zone
+        public List<string> InLuggage { get { return mInLuggage; } }
+        public void InsIntoLuggage(ushort ut, string code) { InsIntoLuggage(ut, new List<string> { code }); }
+        public void InsIntoLuggage(ushort ut, List<string> codes)
+        {
+            mInLuggage.AddRange(codes);
+            if (ut == pb.troveBox.UT)
+            {
+                pb.Dispatcher.BeginInvoke((Action)(() =>
+                {
+                    Base.Card.Hero hro = Tuple.HL.InstanceHero(mHero);
+                    pb.troveBox.cardPad.Content = "(" + mInLuggage.Count + ")";
+                    if (pb.AD != null && pb.AD.IsTVDictContains(Rank + "ILG"))
+                        pb.AD.yhTV.Show(mInLuggage, Rank + "ILG");
+                }));
+            }
+        }
+        public void DelIntoLuggage(ushort ut, string code) { DelIntoLuggage(ut, new List<string> { code }); }
+        public void DelIntoLuggage(ushort ut, List<string> codes)
+        {
+            mInLuggage.RemoveAll(p => codes.Contains(p));
+            if (ut == pb.troveBox.UT)
+            {
+                pb.Dispatcher.BeginInvoke((Action)(() =>
+                {
+                    Base.Card.Hero hro = Tuple.HL.InstanceHero(mHero);
+                    pb.troveBox.cardPad.Content = "(" + mInLuggage.Count + ")";
+                    if (pb.AD != null && pb.AD.IsTVDictContains(Rank + "ILG"))
+                        pb.AD.yhTV.Show(mInLuggage, Rank + "ILG");
+                }));
+            }
+        }
+        public bool IsLuggageContain(ushort ut, string code)
+        {
+            return Trove == ut && mInLuggage.Contains(code);
+        }
 
         private List<ushort> mExCards;
         public void InsExCards(ushort ut)
@@ -734,6 +837,36 @@ namespace PSD.ClientAo
             }
             get { return mToken; }
         }
+        private bool mAwake;
+        public bool Awake
+        {
+            set
+            {
+                if (mAwake != value)
+                {
+                    mAwake = value;
+                    pb.Dispatcher.BeginInvoke((Action)(() =>
+                    {
+                        if (mAwake)
+                        {
+                            pb.awTake.Visibility = System.Windows.Visibility.Visible;
+                            Base.Card.Hero hero = Tuple.HL.InstanceHero(SelectHero);
+                            if (hero != null)
+                            {
+                                string rename = "snapTA" + hero.Ofcode;
+                                pb.awTake.ToolTip = Tips.IchiDisplay.GetExspTip(Tuple, "TA" + hero.Ofcode);
+                                if (pb.awTake.ToolTip == null)
+                                    pb.awTake.ToolTip = hero.AwakeAlias;
+                                pb.awTake.Source = pb.TryFindResource(rename) as ImageSource;
+                            }
+                        }
+                        else
+                            pb.awTake.Visibility = System.Windows.Visibility.Collapsed;
+                    }));
+                }
+            }
+            get { return mAwake; }
+        }
         private List<string> mExSpCards;
         public List<string> ExSpCards { get { return mExSpCards; } }
         public void InsExSpCard(string code) { InsExSpCard(new List<string> { code }); }
@@ -943,6 +1076,10 @@ namespace PSD.ClientAo
         public void DisableArmor()
         {
             pb.Dispatcher.BeginInvoke((Action)(() => { pb.DisableArmor(); }));
+        }
+        public void DisableTrove()
+        {
+            pb.Dispatcher.BeginInvoke((Action)(() => { pb.DisableTrove(); }));
         }
         public void DisableExEquip()
         {

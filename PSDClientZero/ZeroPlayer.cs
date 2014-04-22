@@ -178,7 +178,7 @@ namespace PSD.ClientZero
         public int TuxCount { set; get; }
         public ushort Weapon { set; get; }
         public ushort Armor { set; get; }
-        public ushort Luggage { set; get; }
+        public ushort Trove { set; get; }
 
         public ushort ExEquip { get; set; }
         public List<ushort> ExCards { set; get; }
@@ -187,11 +187,13 @@ namespace PSD.ClientZero
         public List<ushort> Escue { private set; get; }
         public List<ushort> Fakeq { get; set; }
 
+        public IDictionary<ushort, List<string>> Treasures { private set; get; }
         public int Coss { set; get; }
 
         public int Token { set; get; }
         public List<string> SpecialCards { private set; get; }
         public List<ushort> PlayerTars { private set; get; }
+        public bool AwakeSignal { set; get; }
 
         public ZeroPlayer(string name, XIClient xic) : base(xic)
         {
@@ -201,14 +203,17 @@ namespace PSD.ClientZero
             TuxCount = 0;
             Weapon = 0;
             Armor = 0;
-            Luggage = 0;
+            Trove = 0;
             ExCards = new List<ushort>();
             Escue = new List<ushort>();
             Fakeq = new List<ushort>();
 
+            Treasures = new Dictionary<ushort, List<string>>();
+
             Token = 0;
             SpecialCards = new List<string>();
             PlayerTars = new List<ushort>();
+            AwakeSignal = false;
         }
 
         public void ParseFromHeroLib()
@@ -251,12 +256,15 @@ namespace PSD.ClientZero
                 TuxCount, HP, HPa, STR, STRa, DEX, DEXa);
             string equipBase = "装备: {0} {1}" + ((xic.PkgGroups >= 16) ? " {2}  " : "  ") +
                  ((ExCards.Count > 0 || ExEquip != 0) ? "{3}: {4}" : "");
-            Aps(sb, equipBase, xic.zd.Tux(Weapon), xic.zd.Tux(Armor), xic.zd.Tux(Luggage),
+            Aps(sb, equipBase, xic.zd.Tux(Weapon), xic.zd.Tux(Armor), xic.zd.Tux(Trove),
                 xic.zd.HeroExCardAlias(SelectHero, Coss),
                 (ExCards.Count > 0 ? xic.zd.Tux(ExCards) : xic.zd.Tux(ExEquip)));
             Aps(sb, "宠物: {0}", xic.zd.Monster(Pets.Where(p => p != 0)));
             if (Escue.Count > 0)
                 Aps(sb, "可助战NPC：{0}", xic.zd.Monster(Escue));
+
+            if (Trove != 0 && Treasures.ContainsKey(Trove) && Treasures[Trove].Count > 0)
+                Aps(sb, "行囊中：{0}", xic.zd.MixedCards(Treasures[Trove]));
 
             string special = "";
             if (Token > 0)
@@ -265,10 +273,13 @@ namespace PSD.ClientZero
                 special += " {2}：{3}";
             if (PlayerTars.Count > 0)
                 special += " {4}：{5}";
+            if (AwakeSignal)
+                special += " {6} 已发动.";
             if (special != "")
                 Aps(sb, special, xic.zd.HeroTokenAlias(SelectHero, Coss), Token,
                     xic.zd.HeroPeopleAlias(SelectHero, Coss), xic.zd.MixedCards(SpecialCards),
-                    xic.zd.HeroPlayerTarAlias(SelectHero, Coss), xic.zd.Player(PlayerTars));
+                    xic.zd.HeroPlayerTarAlias(SelectHero, Coss), xic.zd.Player(PlayerTars),
+                    xic.zd.HeroAwakeAlias(SelectHero, Coss));
             if (Fakeq.Count > 0)
                 Aps(sb, "其它配饰：{0}", xic.zd.Tux(Fakeq));
             Aps(sb, "{0}", "***************");

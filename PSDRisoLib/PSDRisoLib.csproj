@@ -77,6 +77,27 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Card\Eve\S3W01.png" />
+    <Resource Include="Resources\Token\TK50801.png" />
+    <Resource Include="Resources\Token\TK50802.png" />
+    <Resource Include="Resources\Token\TK50803.png" />
+    <Resource Include="Resources\Token\TK50804.png" />
+    <Resource Include="Resources\Token\TKH0101.png" />
+    <Resource Include="Resources\Token\TKH0102.png" />
+    <Resource Include="Resources\Token\TKH0103.png" />
+    <Resource Include="Resources\Token\TKH0104.png" />
+    <Resource Include="Resources\Token\TKH0105.png" />
+    <Resource Include="Resources\Token\TKH0106.png" />
+    <Resource Include="Resources\Token\TKH0107.png" />
+    <Resource Include="Resources\Token\TKH0108.png" />
+    <Resource Include="Resources\Token\TKH1901.png" />
+    <Resource Include="Resources\Token\TKH1902.png" />
+    <Resource Include="Resources\Token\TKH1903.png" />
+    <Resource Include="Resources\Token\TKH1904.png" />
+    <Resource Include="Resources\Token\TKH1905.png" />
+    <Resource Include="Resources\Token\TR405.png" />
+    <Resource Include="Resources\Token\TRH19.png" />
+    <Resource Include="Resources\Token\TRS05.png" />
+    <Resource Include="Resources\Token\TRT08.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Card\Eve\S3W02.png" />
@@ -762,15 +783,6 @@
     <Resource Include="Resources\StatusIcon\lvd.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Resources\Token\TK50801.png" />
-    <Resource Include="Resources\Token\TK50802.png" />
-    <Resource Include="Resources\Token\TK50803.png" />
-    <Resource Include="Resources\Token\TK50804.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Token\TR405.png" />
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="Resources\EquipSnap\FJ000.png" />
     <Resource Include="Resources\EquipSnap\WQ000.png" />
   </ItemGroup>
@@ -946,9 +958,6 @@
     <Resource Include="Resources\PetsSnap\TPT2.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Resources\Token\TRS05.png" />
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="Resources\Logo\SpderNext.png" />
     <Resource Include="Resources\Logo\SpderPause.png" />
     <Resource Include="Resources\Logo\SpderPlay.png" />
@@ -985,9 +994,6 @@
     <Resource Include="Resources\Heros\17008.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Resources\Token\TRT08.png" />
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="Resources\Card\NMB\NCT08.png" />
     <Resource Include="Resources\Card\NMB\NCT09.png" />
     <Resource Include="Resources\Card\NMB\NCT10.png" />
@@ -1015,16 +1021,6 @@
     <Resource Include="Resources\Card\Eve\SJT08.png" />
     <Resource Include="Resources\Card\Eve\SJT09.png" />
     <Resource Include="Resources\Card\Eve\SJT10.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Token\TKH0101.png" />
-    <Resource Include="Resources\Token\TKH0102.png" />
-    <Resource Include="Resources\Token\TKH0103.png" />
-    <Resource Include="Resources\Token\TKH0104.png" />
-    <Resource Include="Resources\Token\TKH0105.png" />
-    <Resource Include="Resources\Token\TKH0106.png" />
-    <Resource Include="Resources\Token\TKH0107.png" />
-    <Resource Include="Resources\Token\TKH0108.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Heros\19001.png" />
@@ -1096,9 +1092,6 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Logo\Smooth.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Token\TKH0301.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Card\Heros\HL012.png" />
@@ -1197,18 +1190,6 @@
     <Resource Include="Resources\NameBar\NameHL018.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Resources\Token\TKH0601.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Token\TKH1901.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Token\TKH1902.png" />
-    <Resource Include="Resources\Token\TKH1903.png" />
-    <Resource Include="Resources\Token\TKH1904.png" />
-    <Resource Include="Resources\Token\TKH1905.png" />
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="Resources\Heros\19019.png" />
   </ItemGroup>
   <ItemGroup>
@@ -1216,9 +1197,6 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\NameBar\NameHL019.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Token\TRH19.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Heros\19017.png" />
@@ -1242,6 +1220,10 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Card\Heros\TR024.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Token\TAH0301.png" />
+    <Resource Include="Resources\Token\TAH0601.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

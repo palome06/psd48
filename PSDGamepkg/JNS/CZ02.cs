@@ -169,9 +169,10 @@ namespace PSD.PSDGamepkg.JNS
             {
                 if (tux.Code.Equals("TPT2"))
                 {
-                    XI.RaiseGMessage("G0OT," + player.Uid + ",1," + card);
+                    //XI.RaiseGMessage("G0OT," + player.Uid + ",1," + card);
                     XI.RaiseGMessage("G2ZU,0," + player.Uid + "," + card);
-                    XI.RaiseGMessage("G0ON," + player.Uid + ",C,1," + card);
+                    //XI.RaiseGMessage("G0ON," + player.Uid + ",C,1," + card);
+                    XI.RaiseGMessage("G0QZ," + player.Uid + "," + card);
                     ushort side = ushort.Parse(XI.AsyncInput(player.Uid, "S", "TPT2", "0"));
                     XI.RaiseGMessage("G0IP," + side + ",2");
                 }

@@ -962,7 +962,7 @@ namespace PSD.PSDGamepkg.JNS
                         ushort mon = ushort.Parse(monStr);
                         XI.Board.Mon1From = who;
                         XI.Board.Monster1 = mon;
-                        XI.RaiseGMessage("G2YM,0," + mon + "," + who);
+                        XI.RaiseGMessage("G0YM,0," + mon + "," + who);
                         XI.Board.AllowNoSupport = false;
                         break;
                     }
@@ -1268,11 +1268,11 @@ namespace PSD.PSDGamepkg.JNS
 
             ushort pop = XI.Board.RestNPCPiles.Dequeue();
             NPC npc = XI.LibTuple.NL.Decode(NMBLib.OriginalNPC(pop));
-            XI.RaiseGMessage("G2YM,3," + pop + ",0");
+            XI.RaiseGMessage("G0YM,3," + pop + ",0");
 
             UEchoCode r5ed = XI.HandleWithNPCEffect(XI.Board.Garden[to], npc, false);
             XI.Board.RestNPCDises.Add(pop);
-            XI.RaiseGMessage("G2YM,3,0,0");
+            XI.RaiseGMessage("G0YM,3,0,0");
         }
         public void ZPT2Action(Player player, int type, string fuse, string argst)
         {
@@ -1321,10 +1321,14 @@ namespace PSD.PSDGamepkg.JNS
         public void XBT1DelAction(Player player)
         {
             Base.Card.Luggage lug = XI.LibTuple.TL.EncodeTuxCode("XBT1") as Base.Card.Luggage;
+            ushort lugCode = XI.LibTuple.TL.UniqueEquipSerial("XBT1");
             if (lug != null && lug.Capacities.Count > 0) {
-                XI.RaiseGMessage("G2TZ," + player.Uid + lug.Capacities.Count +
-                         "," + string.Join(",", lug.Capacities.Select(p => "C" + p));
-                lug.Capacities.Clear();
+                List<string> cap = lug.Capacities.ToList();
+                XI.RaiseGMessage("G0SN," + player.Uid + "," + lugCode
+                    + ",1," + string.Join(",", cap));
+                XI.RaiseGMessage("G2TZ,0," + player.Uid + "," + string.Join(",", cap));
+                XI.RaiseGMessage("G0ON," + player.Uid + ",M," + cap.Count + ","
+                    + string.Join(",", cap.Select(p => p.Substring("M".Length))));
             }
         }
         public bool XBT1ConsumeValid(Player player, int consumeType, int type, string fuse) {
@@ -1336,12 +1340,12 @@ namespace PSD.PSDGamepkg.JNS
                         string[] g0on = fuse.Split(',');
                         for (int i = 1; i < g0on.Length; ) {
                             string cardType = g0on[i + 1];
-                            int n = g0on[i + 2];
+                            int n = int.Parse(g0on[i + 2]);
                             if (cardType == "M") {
                                 for (int j = i + 3; j < i + 3 + n; ++i)
                                 {
                                     ushort ut = ushort.Parse(g0on[j]);
-                                    if (XI.LibTuple.NMBLib.IsMonster(ut))
+                                    if (Base.Card.NMBLib.IsMonster(ut))
                                         return true;
                                 }
                             }
@@ -1350,7 +1354,8 @@ namespace PSD.PSDGamepkg.JNS
                     }
                     return false;
                 } else if (type == 1)
-                    return lug.Sum(p => XI.LibTuple.ML.Decode(p).STR) >= 4;
+                    return lug.Capacities.Sum(p => XI.LibTuple.ML.Decode(
+                        ushort.Parse(p.Substring("M".Length))).STR) >= 4;
             }
             return false;
         }
@@ -1367,13 +1372,13 @@ namespace PSD.PSDGamepkg.JNS
                     for (int i = 1; i < g0on.Length; ) {
                         string fromZone = g0on[i];
                         string cardType = g0on[i + 1];
-                        int n = g0on[i + 2];
+                        int n = int.Parse(g0on[i + 2]);
                         if (cardType == "M") {
                             List<ushort> keeps = new List<ushort>();
-                            for (int j = i + 3; j < i + 3 + n; ++i)
+                            for (int j = i + 3; j < i + 3 + n; ++j)
                             {
                                 ushort ut = ushort.Parse(g0on[j]);
-                                if (XI.LibTuple.NMBLib.IsMonster(ut))
+                                if (Base.Card.NMBLib.IsMonster(ut))
                                     sns.Add(ut);
                                 else
                                     keeps.Add(ut);
@@ -1385,15 +1390,22 @@ namespace PSD.PSDGamepkg.JNS
                         i += (n + 3);
                     }
                     if (sns.Count > 0)
-                        XI.RaiseGMessage("G0SN," + player.Uid + "," + lugCode 
-                            + "," + string.Join(",", sns.Select(p => "M" + p)));
+                    {
+                        string ss = string.Join(",", sns.Select(p => "M" + p));
+                        XI.RaiseGMessage("G0SN," + player.Uid + "," + lugCode + ",0," + ss);
+                        XI.RaiseGMessage("G2TZ," + player.Uid + ",0," + ss);
+                    }
                     if (n0on.Length > 0)
-                        XI.InnerGMessage("G0ON" + n0on, 80);
+                        XI.InnerGMessage("G0ON" + n0on, 81);
                 } else if (type == 1) {
-                    int total = lug.Sum(p => XI.LibTuple.ML.Decode(p).STR) / 4;
+                    int total = lug.Capacities.Sum(p => XI.LibTuple.ML.Decode(
+                        ushort.Parse(p.Substring("M".Length))).STR) / 4;
                     IDictionary<Player, int> sch = new Dictionary<Player, int>();
+                    List<Player> invs = XI.Board.Garden.Values.Where(p => p.IsTared).ToList();
                     while (total > 0)
                     {
+                        if (invs.Count == 0)
+                            break;
                         if (invs.Count == 1)
                         {
                             string word = "#补牌,T1(p" + invs[0].Uid + "),#补牌数,D" + total;
@@ -1413,40 +1425,628 @@ namespace PSD.PSDGamepkg.JNS
                                 ushort ut = ushort.Parse(ips[0]);
                                 int zn = int.Parse(ips[1]);
                                 Player py = XI.Board.Garden[ut];
-                                sch[py] = zn;
+                                if (!sch.ContainsKey(py))
+                                    sch[py] = 0;
+                                sch[py] += zn;
                                 total -= zn;
-                                invs.Remove(py);
                             }
                         }
                     }
-                    XI.RaiseGMessage("G2TZ," + player.Uid + lug.Capacities.Count +
-                         "," + string.Join(",", lug.Capacities.Select(p => "C" + p));
-                    lug.Capacities.Clear();
-                    XI.RaiseGMessage("G0DH," + sch.Select(p => p.Key.Uid + ",0," + p.Value));
+                    XI.RaiseGMessage("G2TZ,0," + player.Uid + "," + string.Join(",", lug.Capacities));
+                    XI.RaiseGMessage("G0SN," + player.Uid + "," + lugCode
+                        + ",1," + string.Join(",", lug.Capacities));
+                    if (sch.Count > 0)
+                        XI.RaiseGMessage("G0DH," + string.Join(",", sch.Select(
+                            p => p.Key.Uid + ",0," + p.Value)));
                 }
             }
         }
-        // public string XBT1ConsumeInput(Player player, int consumeType, int type, string fuse, string prev)
-        // {
-        //     if (prev == "")
-        //         return "#交给对方,/Q1(p" + string.Join("p", player.Tux) + ")";
-        //     else if (prev.IndexOf(',') < 0)
-        //         return "#交给的,/T1(p" + string.Join("p", XI.Board.Garden.Values.Where(p => p.IsTared &&
-        //                     p.Team == player.OppTeam).Select(p => p.Uid)) + ")";
-        //     else
-        //         return "";
-        // }
         public void XBT2InsAction(Player player)
         {
             XI.RaiseGMessage("G0DH," + player.Uid + ",0,1");
+        }
+        public void XBT2DelAction(Player player)
+        {
+            Base.Card.Luggage lug = XI.LibTuple.TL.EncodeTuxCode("XBT2") as Base.Card.Luggage;
+            ushort lugCode = XI.LibTuple.TL.UniqueEquipSerial("XBT2");
+            if (lug != null && lug.Capacities.Count > 0)
+            {
+                List<string> cap = lug.Capacities.ToList();
+                XI.RaiseGMessage("G0SN," + player.Uid + "," + lugCode
+                    + ",1," + string.Join(",", cap));
+                XI.RaiseGMessage("G2TZ,0," + player.Uid + "," + string.Join(",", cap));
+                XI.RaiseGMessage("G0ON," + player.Uid + ",C," + cap.Count + ","
+                    + string.Join(",", cap.Select(p => p.Substring("C".Length))));
+            }
+        }
+        public bool XBT2ConsumeValid(Player player, int consumeType, int type, string fuse)
+        {
+            Base.Card.Luggage lug = XI.LibTuple.TL.EncodeTuxCode("XBT2") as Base.Card.Luggage;
+            if (lug != null && consumeType == 0)
+            {
+                if (type == 0)
+                {
+                    string[] g1di = fuse.Split(',');
+                    for (int idx = 1; idx < g1di.Length;) {
+                        ushort who = ushort.Parse(g1di[idx]);
+                        bool drIn = g1di[idx + 1] == "0";
+                        int n = int.Parse(g1di[idx + 2]);
+                        if (who == player.Uid && !drIn && n > 0)
+                            return true;
+                        idx += (3 + n);
+                    }
+                }
+                else if (type == 1)
+                {
+                    bool isRd = XI.Board.RoundIN == "R" + XI.Board.Rounder.Uid + "QR";
+                    if (lug.Capacities.Count >= 2 && isRd)
+                    {
+                        string[] g1di = fuse.Split(',');
+                        for (int idx = 1; idx < g1di.Length; )
+                        {
+                            ushort who = ushort.Parse(g1di[idx]);
+                            bool drIn = g1di[idx + 1] == "0";
+                            int n = int.Parse(g1di[idx + 2]);
+                            if (who != player.Uid && !drIn && n > 0)
+                                return true;
+                            idx += (3 + n);
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+        public void XBT2ConsumeAction(Player player, int consumeType, int type, string fuse, string argst)
+        {
+            Base.Card.Luggage lug = XI.LibTuple.TL.EncodeTuxCode("XBT2") as Base.Card.Luggage;
+            ushort lugCode = XI.LibTuple.TL.UniqueEquipSerial("XBT2");
+            if (lug != null && lugCode != 0 && consumeType == 0)
+            {
+                if (type == 0)
+                {
+                    string n1di = "";
+                    List<ushort> tuxes = new List<ushort>();
+                    string[] g1di = fuse.Split(',');
+                    for (int idx = 1; idx < g1di.Length; )
+                    {
+                        ushort who = ushort.Parse(g1di[idx]);
+                        bool drIn = g1di[idx + 1] == "0";
+                        int n = int.Parse(g1di[idx + 2]);
+                        if (who == player.Uid && !drIn && n > 0)
+                            tuxes.AddRange(Util.TakeRange(
+                                g1di, idx + 3, idx + 3 + n).Select(p => ushort.Parse(p)));
+                        else
+                            n1di += "," + string.Join(",", Util.TakeRange(g1di, idx, idx + 3 + n));
+                        idx += (3 + n);
+                    }
+                    ushort[] revs = argst.Split(',').Select(p => ushort.Parse(p)).ToArray();
+                    if (revs.Length + lug.Capacities.Count <= 4)
+                    {
+                        string ss = string.Join(",", revs.Select(p => "C" + p));
+                        XI.RaiseGMessage("G0SN," + player.Uid + "," + lugCode + ",0," + ss);
+                        XI.RaiseGMessage("G2TZ," + player.Uid + ",0," + ss);
+                    }
+                    else
+                    {
+                        int dif = revs.Length + lug.Capacities.Count - 4;
+                        string dhead = "#「炼蛊皿」中替换,C" + dif + "(p";
+                        string dinput = XI.AsyncInput(player.Uid, dhead + string.Join("p", lug.Capacities
+                            .Select(p => p.Substring("C".Length))) + ")", "XBT2Consume", "1");
+                        ushort[] subs = dinput.Split(',').Select(p => ushort.Parse(p)).ToArray();
+                        XI.RaiseGMessage("G0SN," + player.Uid + "," + lugCode
+                            + ",1," + string.Join(",", subs.Select(p => "C" + p)));
+                        XI.RaiseGMessage("G2TZ,0," + player.Uid + ","
+                            + string.Join(",", subs.Select(p => "C" + p)));
+                        XI.RaiseGMessage("G0SN," + player.Uid + "," + lugCode
+                            + ",0," + string.Join(",", revs.Select(p => "C" + p)));
+                        XI.RaiseGMessage("G2TZ," + player.Uid + ",0,"
+                            + string.Join(",", revs.Select(p => "C" + p)));
+                    }
+                    tuxes.RemoveAll(p => revs.Contains(p));
+                    if (tuxes.Count > 0)
+                        n1di += "," + player.Uid + ",1," + tuxes.Count + "," + string.Join(",", tuxes);
+                    if (n1di.Length > 0)
+                        XI.InnerGMessage("G1DI" + n1di, 41);
+                }
+                else if (type == 1)
+                {
+                    string n1di = "";
+                    IDictionary<ushort, List<ushort>> tuxes = new Dictionary<ushort, List<ushort>>();
+                    IDictionary<ushort, ushort> belongs = new Dictionary<ushort, ushort>();
+                    string[] g1di = fuse.Split(',');
+                    for (int idx = 1; idx < g1di.Length; )
+                    {
+                        ushort who = ushort.Parse(g1di[idx]);
+                        bool drIn = g1di[idx + 1] == "0";
+                        int n = int.Parse(g1di[idx + 2]);
+                        if (who != player.Uid && !drIn && n > 0)
+                        {
+                            for (int j = idx + 3; j < idx + 3 + n; ++j)
+                            {
+                                ushort tx = ushort.Parse(g1di[j]);
+                                Util.AddToMultiMap(tuxes, who, tx);
+                                belongs[tx] = who;
+                            }
+                        }
+                        else
+                            n1di += "," + string.Join(",", Util.TakeRange(g1di, idx, idx + 3 + n));
+                        idx += (3 + n);
+                    }
+                    ushort[] blocks = argst.Split(',').Select(p => ushort.Parse(p)).ToArray();
+                    string ss = "C" + blocks[1] + ",C" + blocks[2];
+                    XI.RaiseGMessage("G0SN," + player.Uid + "," + lugCode + ",1," + ss);
+                    XI.RaiseGMessage("G2TZ,0," + player.Uid + "," + ss);
+                    XI.RaiseGMessage("G2CN,0,1");
+                    XI.Board.TuxDises.Remove(blocks[0]);
+                    XI.RaiseGMessage("G0HQ,2," + player.Uid + ",0,0," + blocks[0]);
+                    ushort belonger = belongs[blocks[0]];
+                    if (tuxes.ContainsKey(belonger))
+                    {
+                        tuxes[belonger].Remove(blocks[0]);
+                        if (tuxes[belonger].Count == 0)
+                            tuxes.Remove(belonger);
+                    }
+                    if (tuxes.Count > 0)
+                        n1di += "," + string.Join(",", tuxes.Select(p => p.Key +
+                            ",1," + p.Value.Count + "," + string.Join(",", p.Value)));
+                    if (n1di.Length > 0)
+                        XI.InnerGMessage("G1DI" + n1di, 141);
+                }
+            }
+        }
+        public string XBT2ConsumeInput(Player player, int consumeType, int type, string fuse, string prev)
+        {
+            Base.Card.Luggage lug = XI.LibTuple.TL.EncodeTuxCode("XBT2") as Base.Card.Luggage;
+            ushort lugCode = XI.LibTuple.TL.UniqueEquipSerial("XBT2");
+            if (lug != null && lugCode != 0 && consumeType == 0)
+            {
+                if (type == 0 && prev == "")
+                {
+                    List<ushort> tuxes = new List<ushort>();
+                    string[] g1di = fuse.Split(',');
+                    for (int idx = 1; idx < g1di.Length; )
+                    {
+                        ushort who = ushort.Parse(g1di[idx]);
+                        bool drIn = g1di[idx + 1] == "0";
+                        int n = int.Parse(g1di[idx + 2]);
+                        if (who == player.Uid && !drIn && n > 0)
+                            tuxes.AddRange(Util.TakeRange(g1di, idx + 3, idx + 3 + n)
+                                .Select(p => ushort.Parse(p)));
+                        idx += (3 + n);
+                    }
+                    int tcnt = tuxes.Count > 4 ? 4 : tuxes.Count;
+                    string head = (tcnt > 1) ? ("/C1~" + tcnt) : "/C1";
+                    return "#置入「炼蛊皿」," + head + "(p" + string.Join("p", tuxes) + ")";
+                }
+                else if (type == 1 && prev == "")
+                {
+                    List<ushort> tuxes = new List<ushort>();
+                    string[] g1di = fuse.Split(',');
+                    for (int idx = 1; idx < g1di.Length; )
+                    {
+                        ushort who = ushort.Parse(g1di[idx]);
+                        bool drIn = g1di[idx + 1] == "0";
+                        int n = int.Parse(g1di[idx + 2]);
+                        if (who != player.Uid && !drIn && n > 0)
+                            tuxes.AddRange(Util.TakeRange(g1di, idx + 3, idx + 3 + n)
+                                .Select(p => ushort.Parse(p)));
+                        idx += (3 + n);
+                    }
+                    return "#获得的,/C1(p" + string.Join("p", tuxes) + "),#弃置的,/C2(p"
+                        + string.Join("p", lug.Capacities.Select(p => p.Substring("C".Length)));
+                }
+            }
+            return "";
         }
         public void XBT3InsAction(Player player)
         {
             XI.RaiseGMessage("G0DH," + player.Uid + ",0,1");
         }
+        public void XBT3DelAction(Player player)
+        {
+            Base.Card.Luggage lug = XI.LibTuple.TL.EncodeTuxCode("XBT3") as Base.Card.Luggage;
+            ushort lugCode = XI.LibTuple.TL.UniqueEquipSerial("XBT3");
+            if (lug != null && lug.Capacities.Count > 0)
+            {
+                List<string> cap = lug.Capacities.ToList();
+                XI.RaiseGMessage("G0SN," + player.Uid + "," + lugCode
+                    + ",1," + string.Join(",", lug.Capacities));
+                if (player.IsAlive)
+                    XI.RaiseGMessage("G0HQ,3," + player.Uid + "," + player.Uid + ","
+                        + cap.Count + "," + string.Join(",", cap.Select(p => p.Substring("C".Length))));
+                else
+                {
+                    string ss = string.Join(",", cap.Select(p => p.Substring("C".Length)));
+                    XI.RaiseGMessage("G0ON," + player.Uid + ",C," + cap.Count + "," + ss);
+                    XI.RaiseGMessage("G2TZ,0," + player.Uid + "," + ss);
+                }
+            }
+        }
+        public void XBT3ConsumeAction(Player player, int consumeType, int type, string fuse, string argst)
+        {
+            Base.Card.Luggage lug = XI.LibTuple.TL.EncodeTuxCode("XBT3") as Base.Card.Luggage;
+            ushort lugCode = XI.LibTuple.TL.UniqueEquipSerial("XBT3");
+            if (lug != null && consumeType == 0)
+            {
+                if (type == 0)
+                {
+                    if (lug.Capacities.Count > 0)
+                    {
+                        List<string> cap = lug.Capacities.ToList();
+                        XI.RaiseGMessage("G0SN," + player.Uid + "," + lugCode
+                            + ",1," + string.Join(",", lug.Capacities));
+                        XI.RaiseGMessage("G0HQ,3," + player.Uid + "," + player.Uid + ","
+                            + cap.Count + "," + string.Join(",", cap.Select(p => p.Substring("C".Length))));
+                    }
+                    if (player.Tux.Count > 0)
+                    {
+                        int tcnt = player.Tux.Count > 2 ? 2 : player.Tux.Count;
+                        string head = (tcnt > 1) ? ("/Q1~" + tcnt) : "/Q1";
+                        string input = XI.AsyncInput(player.Uid, "#置入「梦见樽」," + head +
+                            "(p" + string.Join("p", player.Tux) + ")", "XBT3ConsumeAction", "0");
+                        if (input != VI.CinSentinel && !input.StartsWith("/"))
+                        {
+                            ushort[] cards = input.Split(',').Select(p => ushort.Parse(p)).ToArray();
+                            XI.RaiseGMessage("G0OT," + player.Uid + "," +
+                                cards.Length + "," + string.Join(",", cards));
+                            string ss = string.Join(",", cards.Select(p => "C" + p));
+                            XI.RaiseGMessage("G0SN," + player.Uid + "," + lugCode + ",0," + ss);
+                            XI.RaiseGMessage("G2TZ," + player.Uid + "," + player.Uid + "," + ss);
+                        }
+                    }
+                    XI.InnerGMessage(fuse, 271);
+                }
+                else if (type == 1)
+                {
+                    string linkFuse = fuse;
+                    int lfidx = linkFuse.IndexOf(':');
+                    // linkHeads = { "TP02,0", "TP03,0" };
+                    string[] linkHeads = linkFuse.Substring(0, lfidx).Split('&');
+                    string pureFuse = linkFuse.Substring(lfidx + 1);
+
+                    ushort ut = ushort.Parse(argst);
+                    Base.Card.Tux tux = XI.LibTuple.TL.DecodeTux(ut);
+                    if (tux != null && !tux.IsTuxEqiup())
+                        for (int i = 0; i < linkHeads.Length; ++i)
+                        {
+                            int idx = linkHeads[i].IndexOf(',');
+                            string pureName = linkHeads[i].Substring(0, idx);
+                            string pureTypeStr = linkHeads[i].Substring(idx + 1);
+                            if (!pureTypeStr.Contains("!"))
+                            {
+                                ushort pureType = ushort.Parse(pureTypeStr);
+                                if (tux.Code == pureName && tux.Valid(player, pureType, pureFuse))
+                                {
+                                    XI.RaiseGMessage("G0SN," + player.Uid + "," + lugCode + ",1,C" + ut);
+                                    XI.RaiseGMessage("G2TZ,0," + player.Uid + ",C" + ut);
+                                    if (!tux.IsEq[pureType])
+                                        XI.RaiseGMessage("G0ON," + player.Uid + ",C,1," + ut);
+                                    else
+                                        XI.Board.PendingTux.Enqueue(player.Uid + ",G0ZB," + ut);
+                                    XI.InnerGMessage("G0CC," + player.Uid + ",0," + tux.Code + ","
+                                            + ut + ";" + pureType + "," + pureFuse, 101);
+                                    break;
+                                }
+                            }
+                        }
+                    else if (tux != null)
+                    {
+                        XI.RaiseGMessage("G0SN," + player.Uid + "," + lugCode + ",1,C" + ut);
+                        XI.RaiseGMessage("G0ZB," + player.Uid + ",1,0," + ut);
+                    }
+                }
+            }
+        }
+        public bool XBT3ConsumeValid(Player player, int consumeType, int type, string fuse)
+        {
+            Base.Card.Luggage lug = XI.LibTuple.TL.EncodeTuxCode("XBT3") as Base.Card.Luggage;
+            if (lug != null && consumeType == 0)
+            {
+                if (type == 0)
+                {
+                    string[] blocks = fuse.Split(',');
+                    int idx = 1;
+                    while (idx < blocks.Length)
+                    {
+                        if (blocks[idx + 1] == "0")
+                        {
+                            ushort who = ushort.Parse(blocks[idx]);
+                            ushort n = ushort.Parse(blocks[idx + 2]);
+                            Player py = XI.Board.Garden[who];
+                            if (who == player.Uid && n > 0)
+                                return true;
+                            idx += (n + 3);
+                        }
+                        else
+                        {
+                            ushort n = ushort.Parse(blocks[idx + 2]);
+                            idx += (n + 3);
+                        }
+                    }
+                }
+                else if (type == 1)
+                {
+                    string linkFuse = fuse;
+                    int lfidx = linkFuse.IndexOf(':');
+                    // linkHeads = { "TP02,0", "TP03,0" };
+                    string[] linkHeads = linkFuse.Substring(0, lfidx).Split('&');
+                    string pureFuse = linkFuse.Substring(lfidx + 1);
+
+                    foreach (string ccard in lug.Capacities)
+                    {
+                        ushort ut = ushort.Parse(ccard.Substring("C".Length));
+                        Base.Card.Tux tux = XI.LibTuple.TL.DecodeTux(ut);
+                        if (tux != null)
+                        {
+                            for (int i = 0; i < linkHeads.Length; ++i)
+                            {
+                                int idx = linkHeads[i].IndexOf(',');
+                                string pureName = linkHeads[i].Substring(0, idx);
+                                string pureTypeStr = linkHeads[i].Substring(idx + 1);
+                                //if (pureTypeStr.Contains("!"))
+                                //{
+                                //    int jdx = pureTypeStr.IndexOf('!');
+                                //    ushort pureType = ushort.Parse(pureTypeStr.Substring(0, jdx));
+                                //    ushort pureConsu = ushort.Parse(pureTypeStr.Substring(jdx + 1));
+                                //    if (tux.Code == pureName && tux.IsTuxEqiup())
+                                //    {
+                                //        Base.Card.TuxEqiup tue = tux as Base.Card.TuxEqiup;
+                                //        if (tue.ConsumeValid(player, pureConsu, pureType, pureFuse))
+                                //            return true;
+                                //    }
+                                //} else
+                                if (!pureTypeStr.Contains("!"))
+                                {
+                                    ushort pureType = ushort.Parse(pureTypeStr);
+                                    if (tux.Code == pureName && tux.Valid(player, pureType, pureFuse))
+                                        return true;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+        public string XBT3ConsumeInput(Player player, int consumeType, int type, string fuse, string prev)
+        {
+            Base.Card.Luggage lug = XI.LibTuple.TL.EncodeTuxCode("XBT3") as Base.Card.Luggage;
+            if (lug != null && consumeType == 0 && type == 1 && prev == "")
+            {
+                List<ushort> candidates = new List<ushort>();
+
+                string linkFuse = fuse;
+                int lfidx = linkFuse.IndexOf(':');
+                string[] linkHeads = linkFuse.Substring(0, lfidx).Split('&');
+                string pureFuse = linkFuse.Substring(lfidx + 1);
+
+                foreach (string ccard in lug.Capacities)
+                {
+                    ushort ut = ushort.Parse(ccard.Substring("C".Length));
+                    Base.Card.Tux tux = XI.LibTuple.TL.DecodeTux(ut);
+                    if (tux != null)
+                    {
+                        for (int i = 0; i < linkHeads.Length; ++i)
+                        {
+                            int idx = linkHeads[i].IndexOf(',');
+                            string pureName = linkHeads[i].Substring(0, idx);
+                            string pureTypeStr = linkHeads[i].Substring(idx + 1);
+                            if (!pureTypeStr.Contains("!"))
+                            {
+                                ushort pureType = ushort.Parse(pureTypeStr);
+                                if (tux.Code == pureName && tux.Valid(player, pureType, pureFuse))
+                                {
+                                    candidates.Add(ut); break;
+                                }
+                            }
+                        }
+                    }
+                }
+                return "/C1(p" + string.Join("p", candidates) + ")";
+            }
+            else return "";
+        }
         public void XBT4InsAction(Player player)
         {
             XI.RaiseGMessage("G0DH," + player.Uid + ",0,1");
+        }
+        public void XBT4DelAction(Player player)
+        {
+            Base.Card.Luggage lug = XI.LibTuple.TL.EncodeTuxCode("XBT4") as Base.Card.Luggage;
+            ushort lugCode = XI.LibTuple.TL.UniqueEquipSerial("XBT4");
+            if (lug != null && lug.Capacities.Count > 0)
+            {
+                if (lug.Capacities.Count > 0 && player.IsAlive)
+                {
+                    string revInput = XI.AsyncInput(player.Uid, "#保留,/C1(p" +
+                        string.Join("p", lug.Capacities.Select(p => p.Substring("C".Length))), "XBT4DelAction", "0");
+                    if (revInput != VI.CinSentinel && !revInput.StartsWith("/"))
+                    {
+                        ushort ut = ushort.Parse(revInput);
+                        XI.RaiseGMessage("G0SN," + player.Uid + "," + lugCode + ",1," + ut);
+                        XI.RaiseGMessage("G0HQ,3," + player.Uid + "," + player.Uid + ",1,C" + ut);
+                    }
+                }
+                if (lug.Capacities.Count > 0)
+                {
+                    List<string> cap = lug.Capacities.ToList();
+                    XI.RaiseGMessage("G0SN," + player.Uid + "," + lugCode + ",1," + string.Join(",", cap));
+                    XI.RaiseGMessage("G0ON," + player.Uid + ",C," + lug.Capacities.Count + ","
+                        + string.Join(",", cap.Select(p => p.Substring("C".Length))));
+                    XI.RaiseGMessage("G2TZ,0," + player.Uid + "," + string.Join(",", cap));
+                }
+            }
+        }
+        public bool XBT4ConsumeValid(Player player, int consumeType, int type, string fuse)
+        {
+            Base.Card.Luggage lug = XI.LibTuple.TL.EncodeTuxCode("XBT4") as Base.Card.Luggage;
+            if (lug != null && consumeType == 0)
+            {
+                if (type == 0)
+                {
+                    // G0CC,A,B,TP02,17,36
+                    string[] args = fuse.Split(',');
+                    ushort ust = ushort.Parse(args[1]);
+                    string cardname = args[3];
+                    int hdx = fuse.IndexOf(';');
+                    int idx = fuse.IndexOf(',', hdx);
+
+                    Base.Card.Tux tuxBase = XI.LibTuple.TL.EncodeTuxCode(cardname);
+                    if (tuxBase.Type == Tux.TuxType.ZP)
+                    {
+                        string[] argv = fuse.Substring(0, hdx).Split(',');
+                        List<Base.Card.Tux> cards = Util.TakeRange(argv, 4, argv.Length).Select(p =>
+                            ushort.Parse(p)).Where(p => p > 0 && XI.Board.Garden[ust].Tux.Contains(p))
+                            .Select(p => XI.LibTuple.TL.DecodeTux(p)).ToList();
+                        if (XI.Board.Garden[ust].Team == player.Team &&
+                                cards.Count > 0 && !cards.Any(p => p.Type != Tux.TuxType.ZP))
+                            return true;
+                    }
+                }
+                else if (type == 1)
+                {
+                    string[] g1di = fuse.Split(',');
+                    for (int idx = 1; idx < g1di.Length; )
+                    {
+                        ushort who = ushort.Parse(g1di[idx]);
+                        bool drIn = g1di[idx + 1] == "0";
+                        int n = int.Parse(g1di[idx + 2]);
+                        if (XI.Board.Garden[who].Team == player.Team && !drIn && n > 0)
+                        {
+                            List<Base.Card.Tux> cards = Util.TakeRange(g1di, idx + 3, idx + 3 + n)
+                                .Select(p => XI.LibTuple.TL.DecodeTux(ushort.Parse(p))).ToList();
+                            if (cards.Count > 0 && !cards.Any(p => p.Type != Tux.TuxType.ZP))
+                                return true;
+                        }
+                        idx += (3 + n);
+                    }
+                }
+                else if (type == 2)
+                {
+                    bool meLose = (player.Team == XI.Board.Rounder.Team && !XI.Board.IsBattleWin)
+                        || (player.Team == XI.Board.Rounder.OppTeam && XI.Board.IsBattleWin);
+                    if (meLose)
+                    {
+                        List<string> rms = new List<string>();
+                        foreach (string tuxInfo in XI.Board.PendingTux)
+                        {
+                            List<ushort> accu = new List<ushort>();
+                            string[] parts = tuxInfo.Split(',');
+                            if (parts[1] == "XBT4Consume")
+                                return true;
+                        }
+                    }
+                }
+                else if (type == 3 ||type ==4)
+                {
+                    List<string> rms = new List<string>();
+                    foreach (string tuxInfo in XI.Board.PendingTux)
+                    {
+                        List<ushort> accu = new List<ushort>();
+                        string[] parts = tuxInfo.Split(',');
+                        if (parts[1] == "XBT4Consume")
+                            return true;
+                    }
+                }
+                else if (type == 5)
+                    return lug.Capacities.Count > 0;
+            }
+            return false;
+        }
+        public void XBT4ConsumeAction(Player player, int consumeType, int type, string fuse, string argst)
+        {
+            Base.Card.Luggage lug = XI.LibTuple.TL.EncodeTuxCode("XBT4") as Base.Card.Luggage;
+            ushort lugCode = XI.LibTuple.TL.UniqueEquipSerial("XBT4");
+            if (lug != null && type == 0)
+            {
+                string[] args = fuse.Split(',');
+                // G0CC,A,B,TP02,17,36
+                ushort ust = ushort.Parse(args[1]);
+                ushort hst = ushort.Parse(args[2]);
+                string cardname = args[3];
+                int hdx = fuse.IndexOf(';');
+                int idx = fuse.IndexOf(',', hdx);
+
+                int sktInType = int.Parse(Util.Substring(fuse, hdx + 1, idx));
+                string sktFuse = Util.Substring(fuse, idx + 1, -1);
+                Base.Card.Tux tuxBase = XI.LibTuple.TL.EncodeTuxCode(cardname);
+                string[] argv = fuse.Substring(0, hdx).Split(',');
+
+                List<ushort> cards = Util.TakeRange(argv, 4, argv.Length).Select(p =>
+                    ushort.Parse(p)).Where(p => p > 0 && XI.Board.Garden[ust].Tux.Contains(p)).ToList();
+                if (cards.Count > 0 && XI.Board.Garden[ust].Team == player.Team)
+                {
+                    XI.RaiseGMessage("G0OT," + ust + "," + cards.Count + "," + string.Join(",", cards));
+                    XI.Board.PendingTux.Enqueue(player.Uid + "," + "XBT4Consume," + string.Join(",", cards));
+                    XI.InnerGMessage(fuse, 101);
+                } else
+                    XI.InnerGMessage(fuse, 96);
+            }
+            else if (lug != null && type == 1)
+            {
+                string n1di = "";
+                List<ushort> tuxes = new List<ushort>();
+                string[] g1di = fuse.Split(',');
+                for (int idx = 1; idx < g1di.Length; )
+                {
+                    ushort who = ushort.Parse(g1di[idx]);
+                    bool drIn = g1di[idx + 1] == "0";
+                    int n = int.Parse(g1di[idx + 2]);
+                    if (XI.Board.Garden[who].Team == player.Team && !drIn && n > 0)
+                    {
+                        List<ushort> cds = Util.TakeRange(g1di, idx + 3, idx + 3 + n)
+                            .Select(p => ushort.Parse(p)).ToList();
+                        if (cds.Count > 0 && !cds.Any(p => XI.LibTuple.TL.DecodeTux(p).Type != Tux.TuxType.ZP))
+                        {
+                            XI.RaiseGMessage("G0OT," + who + "," + cds.Count + "," + string.Join(",", cds));
+                            tuxes.AddRange(cds);
+                        }
+                        else
+                            n1di += "," + string.Join(",", Util.TakeRange(g1di, idx, idx + 3 + n));
+                    }
+                    else
+                        n1di += "," + string.Join(",", Util.TakeRange(g1di, idx, idx + 3 + n));
+                    idx += (3 + n);
+                }
+                if (tuxes.Count > 0)
+                    XI.Board.PendingTux.Enqueue(player.Uid + "," + "XBT4Consume," + string.Join(",", tuxes));
+                if (n1di.Length > 0)
+                    XI.InnerGMessage("G1DI" + n1di, 51);
+            }
+            else if (lug != null && (type == 2 || type == 3 || type == 4))
+            {
+                List<ushort> tuxes = new List<ushort>();
+                List<string> rms = new List<string>();
+                foreach (string tuxInfo in XI.Board.PendingTux)
+                {
+                    List<ushort> accu = new List<ushort>();
+                    string[] parts = tuxInfo.Split(',');
+                    string utstr = parts[0];
+                    if (parts[1] == "XBT4Consume")
+                    {
+                        tuxes.AddRange(Util.TakeRange(parts, 2, parts.Length).Select(p => ushort.Parse(p)));
+                        rms.Add(tuxInfo);
+                    }
+                }
+                foreach (string rm in rms)
+                    XI.Board.PendingTux.Remove(rm);
+                if (type == 2)
+                {
+                    string ss = string.Join(",", tuxes.Select(p => "C" + p));
+                    XI.RaiseGMessage("G0SN," + player.Uid + "," + lugCode + ",0," + ss);
+                    XI.RaiseGMessage("G2TZ," + player.Uid + ",0," + ss);
+                }
+                else
+                    XI.RaiseGMessage("G0ON,10,C," + tuxes.Count + "," + string.Join(",", tuxes));
+            }
+            else if (lug != null && type == 5)
+            {
+                List<string> cap = lug.Capacities.ToList();
+                string ss = string.Join(",", cap);
+                XI.RaiseGMessage("G0SN," + player.Uid + "," + lugCode + ",1," + ss);
+                XI.RaiseGMessage("G2TZ,0," + player.Uid + "," + ss);
+                XI.RaiseGMessage("G0IP," + player.Team + "," + cap.Count);
+            }
         }
         #endregion Package of 5
 
