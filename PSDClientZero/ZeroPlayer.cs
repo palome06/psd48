@@ -155,7 +155,7 @@ namespace PSD.ClientZero
             if (Folder.Count > 0)
             {
                 Aps(sb, "    {0}: {1}",
-                 xic.zd.HeroFolderAlias(SelectHero), xic.zd.Tux(Tux))
+                 xic.zd.HeroFolderAlias(SelectHero), xic.zd.Tux(Tux));
             }
             Aps(sb, "***************");
             return sb.ToString();
@@ -194,7 +194,7 @@ namespace PSD.ClientZero
 
         public ushort[] Pets { set; get; }
         public List<ushort> Escue { private set; get; }
-        public List<ushort> Fakeq { get; set; }
+        public IDictionary<ushort, string> Fakeq { get; set; }
 
         public IDictionary<ushort, List<string>> Treasures { private set; get; }
         public int Coss { set; get; }
@@ -216,7 +216,7 @@ namespace PSD.ClientZero
             Trove = 0;
             ExCards = new List<ushort>();
             Escue = new List<ushort>();
-            Fakeq = new List<ushort>();
+            Fakeq = new Dictionary<ushort, string>();
 
             Treasures = new Dictionary<ushort, List<string>>();
 
@@ -287,7 +287,7 @@ namespace PSD.ClientZero
             if (AwakeSignal)
                 special += " {6} 已发动.";
             if (FolderCount > 0)
-                special += " {7}数：{8}"
+                special += " {7}数：{8}";
             if (special != "")
                 Aps(sb, special, xic.zd.HeroTokenAlias(SelectHero, Coss), Token,
                     xic.zd.HeroPeopleAlias(SelectHero, Coss), xic.zd.MixedCards(SpecialCards),
@@ -295,7 +295,7 @@ namespace PSD.ClientZero
                     xic.zd.HeroAwakeAlias(SelectHero, Coss),
                     xic.zd.HeroFolderAlias(SelectHero, Coss), FolderCount);
             if (Fakeq.Count > 0)
-                Aps(sb, "其它配饰：{0}", xic.zd.Tux(Fakeq));
+                Aps(sb, "其它配饰：{0}", xic.zd.TuxAs(Fakeq));
             Aps(sb, "{0}", "***************");
             return sb.ToString();
         }

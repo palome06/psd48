@@ -72,7 +72,7 @@ namespace PSD.PSDGamepkg
             //19001, 10302, 10102, 10606, 10203, 10608
             //10603, 19018, 10605, 10501, 15003, 10505
             //17022, 19006, 10605, 10501, 15003, 10505
-            10401, 17022, 19001, 10201, 10107, 10302
+            19007, 17022, 19001, 19011, 10107, 10302
         };
 
         #region Memeber Declaration & Constructor
@@ -533,8 +533,8 @@ namespace PSD.PSDGamepkg
             }
             if (parasitism.Count > 0)
             {
-                IDictionary<string, ISet<string>> occurTable =
-                    new Dictionary<string, ISet<string>>();
+                IDictionary<string, ISet<SkTriple>> occurTable =
+                    new Dictionary<string, ISet<SkTriple>>();
                 ISet<string> occurNotLocked = new HashSet<string>();
                 IDictionary<string, bool> occurLock = new Dictionary<string, bool>();
                 // occurTable: {sktName,InType : occur,priorty,owner}
@@ -545,7 +545,7 @@ namespace PSD.PSDGamepkg
                     {
                         string sktKey = skt.Name + "," + ((skt.Type == SKTType.EQ || skt.Type == SKTType.PT) ?
                             (skt.Consume + "!" + skt.InType) : skt.InType.ToString());
-                        Util.AddToUniqueMultiMap(occurTable, sktKey, skt.Occur + "," + skt.Priorty);
+                        Util.AddToUniqueMultiMap(occurTable, sktKey, skt);
                         if (skt.Lock == false)
                             occurNotLocked.Add(skt.Occur + "," + skt.Priorty);
                     }
@@ -554,43 +554,40 @@ namespace PSD.PSDGamepkg
                 foreach (SkTriple para in parasitism)
                 {
                     string[] paras = Util.Splits(para.Occur, "&");
-                    IDictionary<string, List<string>> registered =
-                        new Dictionary<string, List<string>>();
+                    IDictionary<SkTriple, List<string>> registered =
+                        new Dictionary<SkTriple, List<string>>();
                     // occurs -> link_from
                     //ISet<string> registered = new HashSet<string>();
                     foreach (string host in paras)
                     {
                         if (occurTable.ContainsKey(host))
                         {
-                            ISet<string> ics = occurTable[host];
-                            foreach (string ic in ics)
+                            ISet<SkTriple> ics = occurTable[host];
+                            foreach (SkTriple ic in ics)
                                 Util.AddToMultiMap(registered, ic, host);
                         }
                     }
                     foreach (var pair in registered)
                     {
-                        string triple = pair.Key;
                         string host = string.Join("&", pair.Value);
-
-                        string[] splits = triple.Split(',');
-                        string oc = splits[0];
-                        int priority = int.Parse(splits[1]);
+                        string oc = pair.Key.Occur;
+                        int priorty = pair.Key.Priorty;
                         //ushort owner = ushort.Parse(splits[2]);
 
                         SkTriple skt = new SkTriple()
                         {
                             Name = para.Name,
-                            Priorty = priority,
+                            Priorty = priorty,
                             //Owner = para.Owner,
                             Owner = 0,
                             InType = para.InType,
                             Type = para.Type,
                             Consume = para.Consume,
-                            Lock = para.Lock & !occurNotLocked.Contains(oc + "," + priority),
-                            IsOnce = para.IsOnce,
+                            Lock = pair.Key.Lock & !occurNotLocked.Contains(oc + "," + priorty),
+                            IsOnce = pair.Key.IsOnce,
                             Occur = oc,
                             LinkFrom = host, // format: TP02,0&TP03,0
-                            IsTermini = para.IsTermini
+                            IsTermini = pair.Key.IsTermini
                         };
                         if (oc.Contains('#') || oc.Contains('$') || oc.Contains('*'))
                         {

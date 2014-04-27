@@ -1481,12 +1481,12 @@ namespace PSD.PSDGamepkg.JNS
                     if (g0dh.Length > 0)
                         XI.RaiseGMessage("G0DH" + g0dh);
                 }
-                else if (type == 1) // G0CC,A,0,KN,x1,x2;TF
+                else if (type == 1) // G0CC,A,0,A,KN,x1,x2;TF
                 {
                     int cmidx = fuse.IndexOf(';');
                     string[] blocks = fuse.Substring(0, cmidx).Split(',');
                     ushort ut = ushort.Parse(blocks[1]);
-                    for (int i = 4; i < blocks.Length; ++i)
+                    for (int i = 5; i < blocks.Length; ++i)
                     {
                         ushort cd = ushort.Parse(blocks[i]);
                         Base.Card.Tux tux = XI.LibTuple.TL.DecodeTux(cd);
@@ -1525,14 +1525,14 @@ namespace PSD.PSDGamepkg.JNS
                         i += (3 + n);
                     }
                 }
-                else if (type == 1) // G0CC,A,0,KN,x1,x2;TF
+                else if (type == 1) // G0CC,A,0,A,KN,x1,x2;TF
                 {
                     int cmidx = fuse.IndexOf(';');
                     string[] blocks = fuse.Substring(0, cmidx).Split(',');
                     ushort ut = ushort.Parse(blocks[1]);
                     if (XI.Board.Garden[ut].Tux.Count <= 0)
                         return false;
-                    for (int i = 4; i < blocks.Length; ++i)
+                    for (int i = 5; i < blocks.Length; ++i)
                     {
                         ushort cd = ushort.Parse(blocks[i]);
                         Base.Card.Tux tux = XI.LibTuple.TL.DecodeTux(cd);
@@ -1814,15 +1814,16 @@ namespace PSD.PSDGamepkg.JNS
         }
         public void GLT4LoseEff()
         {
-            List<Player> py = XI.Board.Garden.Values.Where(p => p.IsAlive && p.GetPetCount() > 0).ToList();
+            List<Player> py = XI.Board.Garden.Values.Where(p => p.IsAlive).ToList();
             if (py.Count > 0)
             {
-                string input = XI.AsyncInput(XI.Board.Opponent.Uid, "#受到伤害,/T1(p" +
+                string input = XI.AsyncInput(XI.Board.Opponent.Uid, "#受到伤害,T1(p" +
                     string.Join("p", py.Select(p => p.Uid)) + ")", "GLT4LoseEff", "0");
                 if (!input.StartsWith("/"))
                 {
                     ushort ut = ushort.Parse(input);
-                    Harm("GLT4", XI.Board.Garden[ut], XI.Board.Garden[ut].GetPetCount());
+                    if (XI.Board.Garden[ut].GetPetCount() > 0)
+                        Harm("GLT4", XI.Board.Garden[ut], XI.Board.Garden[ut].GetPetCount());
                 }
             }
         }

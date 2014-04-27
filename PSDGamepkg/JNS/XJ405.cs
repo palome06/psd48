@@ -712,13 +712,19 @@ namespace PSD.PSDGamepkg.JNS
         }
         public bool JN20202Valid(Player player, int type, string fuse)
         {
-            return player.Tux.Count > 0;
+            if (player.Tux.Count > 0)
+            {
+                string[] blocks = fuse.Split(',');
+                return blocks[2] != "1";
+            }
+            else
+                return false;
         }
         public void JN20202Action(Player player, int type, string fuse, string argst)
         {
             ushort card = ushort.Parse(argst);
             VI.Cout(0, "苏媚使用「拒绝」.");
-            XI.RaiseGMessage("G0CC," + player.Uid + ",0,TP01," + card + ";0," + fuse);
+            XI.RaiseGMessage("G0CC," + player.Uid + ",0," + player.Uid + ",TP01," + card + ";0," + fuse);
         }
         public string JN20202Input(Player player, int type, string fuse, string prev)
         {
@@ -1016,7 +1022,8 @@ namespace PSD.PSDGamepkg.JNS
             {
                 Harm(player, player, 1);
                 if (player.IsAlive)
-                    XI.RaiseGMessage("G0CC," + player.Uid + ",0," + player.RAMString + ",0;0," + fuse);
+                    XI.RaiseGMessage("G0CC," + player.Uid + ",0," +
+                        player.Uid + "," + player.RAMString + ",0;0," + fuse);
                 player.RAMUshort = 1;
             }
             else if (type == 1)
@@ -1446,7 +1453,7 @@ namespace PSD.PSDGamepkg.JNS
         public void JN40301Action(Player player, int type, string fuse, string argst)
         {
             VI.Cout(0, "星璇使用「烹饪」.");
-            XI.RaiseGMessage("G0CC," + player.Uid + ",0,TP02," + argst + ";" + type + "," + fuse);
+            XI.RaiseGMessage("G0CC," + player.Uid + ",0," + player.Uid + ",TP02," + argst + ";" + type + "," + fuse);
         }
         public string JN40301Input(Player player, int type, string fuse, string prev)
         {
@@ -1560,10 +1567,10 @@ namespace PSD.PSDGamepkg.JNS
             {
                 if (type == 6)
                 {
-                    // G0CD,A,KN,x1,x2;TF
+                    // G0CD,A,0,KN,x1,x2;TF
                     string[] blocks = fuse.Substring(0, fuse.IndexOf(';')).Split(',');
                     return (blocks[1] != player.Uid.ToString()) &&
-                        (blocks[2] == "JP01" || blocks[2] == "JP06");
+                        (blocks[3] == "JP01" || blocks[3] == "JP06");
                 }
                 else
                     return true;
@@ -1597,11 +1604,11 @@ namespace PSD.PSDGamepkg.JNS
                 }
                 else if (type == 6)
                 {
-                    // G0CD,A,KN,x1,x2;TF
+                    // G0CD,A,0,KN,x1,x2;TF
                     string[] blocks = fuse.Substring(0, fuse.IndexOf(';')).Split(',');
                     ushort user = ushort.Parse(blocks[1]);
                     return user != 0 && user != player.Uid && XI.Board.Garden[user].Team == player.OppTeam
-                        && (blocks[2] == "JP01" || blocks[2] == "JP06");
+                        && (blocks[3] == "JP01" || blocks[3] == "JP06");
                 }
             }
             return basecon;
@@ -1760,12 +1767,12 @@ namespace PSD.PSDGamepkg.JNS
                 if (choose == 1)
                 {
                     VI.Cout(0, "韩菱纱发动「搜囊探宝」.");
-                    XI.RaiseGMessage("G0CC," + player.Uid + ",0,JP06," + card + ";0," + fuse);
+                    XI.RaiseGMessage("G0CC," + player.Uid + ",0," + player.Uid + ",JP06," + card + ";0," + fuse);
                 }
                 else if (choose == 2)
                 {
                     VI.Cout(0, "韩菱纱发动「搜囊探宝」.");
-                    XI.RaiseGMessage("G0CC," + player.Uid + ",0,JP01," + card + ";0," + fuse);
+                    XI.RaiseGMessage("G0CC," + player.Uid + ",0," + player.Uid + ",JP01," + card + ";0," + fuse);
                 }
             }
         }
@@ -2184,7 +2191,7 @@ namespace PSD.PSDGamepkg.JNS
         {
             ushort card = ushort.Parse(args);
             Base.Card.Tux tux = XI.LibTuple.TL.DecodeTux(card);
-            XI.RaiseGMessage("G0CC," + player.Uid + ",0," + tux.Code + "," + card + ";0," + fuse);
+            XI.RaiseGMessage("G0CC," + player.Uid + ",0," + player.Uid + "," + tux.Code + "," + card + ";0," + fuse);
         }
         public string JN60101Input(Player player, int type, string fuse, string prev)
         {
@@ -2639,7 +2646,7 @@ namespace PSD.PSDGamepkg.JNS
                         }
                         else
                         {
-                            XI.RaiseGMessage("G0CC," + player.Uid + "," + to + "," + tux.Code
+                            XI.RaiseGMessage("G0CC," + player.Uid + ",0," + to + "," + tux.Code
                                     + "," + ut + ";" + inTypeStr + "," + fuse);
                         }
                         return;
@@ -2759,7 +2766,7 @@ namespace PSD.PSDGamepkg.JNS
         {
             ushort card = ushort.Parse(args);
             Base.Card.Tux tux = XI.LibTuple.TL.DecodeTux(card);
-            XI.RaiseGMessage("G0CC," + player.Uid + ",0," + tux.Code + "," + card + ";0," + fuse);
+            XI.RaiseGMessage("G0CC," + player.Uid + ",0," + player.Uid + "," + tux.Code + "," + card + ";0," + fuse);
         }
         public string JN60401Input(Player player, int type, string fuse, string prev)
         {
@@ -3464,7 +3471,7 @@ namespace PSD.PSDGamepkg.JNS
         {
             if (type == 0)
             {
-                // G0CD,A,KN,x1,x2;TF
+                // G0CD,A,T,KN,x1,x2;TF
                 bool basecon = true;
                 basecon = basecon && (player.GetEquipCount() > 0 || player.Tux.Count > 0);
                 basecon = basecon && XI.Board.Garden.Values.Where(p => p.Uid != player.Uid &&
@@ -3472,16 +3479,16 @@ namespace PSD.PSDGamepkg.JNS
                 if (basecon)
                 {
                     string[] blocks = fuse.Substring(0, fuse.IndexOf(';')).Split(',');
-                    return blocks[2] == "JP01" || blocks[2] == "JP06";
+                    return blocks[3] == "JP01" || blocks[3] == "JP06";
                 }
                 else
                     return false;
             }
             else if (type == 1)
             {
-                // G0CE,A,0,KN,y,z;TF
+                // G0CE,A,T,0,KN,y,z;TF
                 string[] blocks = fuse.Substring(0, fuse.IndexOf(';')).Split(',');
-                return blocks[2] == "0" && (blocks[3] == "JP01" || blocks[3] == "JP06");
+                return blocks[3] == "0" && (blocks[4] == "JP01" || blocks[4] == "JP06");
             }
             else return false;
         }

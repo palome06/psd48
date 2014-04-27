@@ -991,7 +991,7 @@ namespace PSD.ClientZero
                                     Z0D[who].Armor = 0;
                                 else if (Z0D[who].ExCards.Contains(ut))
                                     Z0D[who].ExCards.Remove(ut);
-                                else if (Z0D[who].Fakeq.Contains(ut))
+                                else if (Z0D[who].Fakeq.ContainsKey(ut))
                                     Z0D[who].Fakeq.Remove(ut);
                                 else
                                     ++tuxCount;
@@ -1351,15 +1351,17 @@ namespace PSD.ClientZero
                     {
                         // E0CC,A,0,TP02,17,36
                         ushort ust = ushort.Parse(args[1]);
-                        ushort pst = ushort.Parse(args[2]);
-                        List<ushort> ravs = Util.TakeRange(args, 4, args.Length)
+                        ushort adapter = ushort.Parse(args[2]);
+                        ushort pst = ushort.Parse(args[3]);
+                        string txkn = args[4];
+                        List<ushort> ravs = Util.TakeRange(args, 5, args.Length)
                             .Select(p => ushort.Parse(p)).ToList();
-                        if (pst == 0)
+                        if (pst == ust)
                             VI.Cout(Uid, "{0}将卡牌{1}当作卡牌{2}使用.", zd.Player(ust),
-                                zd.Tux(ravs), zd.Tux(args[3]));
+                                zd.Tux(ravs), zd.Tux(txkn));
                         else
                             VI.Cout(Uid, "{0}将卡牌{1}当作卡牌{2}，为{3}使用.", zd.Player(ust),
-                                zd.Tux(ravs), zd.Tux(args[3]), zd.Player(pst));
+                                zd.Tux(ravs), zd.Tux(txkn), zd.Player(pst));
                         //Z0D[ust].TuxCount -= ravs.Count;
                         //if (ust == uid)
                         //    Z0M.Tux.RemoveAll(p => ravs.Contains(p));
@@ -1369,9 +1371,9 @@ namespace PSD.ClientZero
                     {
                         // E0CD,A,JP04,3,1
                         ushort ust = ushort.Parse(args[1]);
-                        List<ushort> argst = Util.TakeRange(args, 3, args.Length)
+                        List<ushort> argst = Util.TakeRange(args, 4, args.Length)
                             .Select(p => ushort.Parse(p)).ToList();
-                        VI.Cout(Uid, "{0}{1}预定作用于{2}.", zd.Tux(args[2]),
+                        VI.Cout(Uid, "{0}{1}预定作用于{2}.", zd.Tux(args[3]),
                             (argst.Count > 0 ? ("(" + string.Join(",", argst) + ")") : ""), zd.Player(ust));
                         break;
                     }
@@ -1379,9 +1381,9 @@ namespace PSD.ClientZero
                     {
                         // E0CE,A,JP04,3,1
                         ushort ust = ushort.Parse(args[1]);
-                        List<ushort> argst = Util.TakeRange(args, 3, args.Length)
+                        List<ushort> argst = Util.TakeRange(args, 4, args.Length)
                             .Select(p => ushort.Parse(p)).ToList();
-                        VI.Cout(Uid, "{0}{1}对{2}生效.", zd.Tux(args[2]),
+                        VI.Cout(Uid, "{0}{1}对{2}生效.", zd.Tux(args[3]),
                             (argst.Count > 0 ? ("(" + string.Join(",", argst) + ")") : ""), zd.Player(ust));
                         break;
                     }
@@ -1457,7 +1459,10 @@ namespace PSD.ClientZero
                             else if (where == 3)
                                 Z0D[me].ExCards.Add(card);
                             else if (where == 4)
-                                Z0D[me].Fakeq.Add(card);
+                            {
+                                string asCode = args[5] == "0" ? Tuple.TL.DecodeTux(card).Code : args[5];
+                                Z0D[me].Fakeq[card] = asCode;
+                            }
                             else if (where == 5)
                                 Z0D[me].ExEquip = card;
                             else if (where == 6)
@@ -1479,7 +1484,10 @@ namespace PSD.ClientZero
                             else if (where == 3)
                                 Z0D[me].ExCards.Add(card);
                             else if (where == 4)
-                                Z0D[me].Fakeq.Add(card);
+                            {
+                                string asCode = args[6] == "0" ? Tuple.TL.DecodeTux(card).Code : args[6];
+                                Z0D[me].Fakeq[card] = asCode;
+                            }
                             else if (where == 5)
                                 Z0D[me].ExEquip = card;
                             else if (where == 6)
@@ -1937,18 +1945,19 @@ namespace PSD.ClientZero
                         }
                         else if (type == 4)
                         {
-                            bool hind = ushort.Parse(args[3]) != "0";
+                            bool hind = args[3] != "0";
                             if (!hind)
                             {
-                                int count1 = int.Parse(args[3]);
-                                List<string> folder1 = Util.TakeRange(args, 4, 4 + count1).ToList();
-                                int count2 = int.Parse(args[4 + count1]);
-                                List<string> folder2 = Util.TakeRange(args, 5 + count1,
-                                    5 + count1 + count2).ToList();
+                                int count1 = int.Parse(args[4]);
+                                List<ushort> folder1 = Util.TakeRange(args, 5, 5 + count1)
+                                    .Select(p => ushort.Parse(p)).ToList();
+                                int count2 = int.Parse(args[5 + count1]);
+                                List<ushort> folder2 = Util.TakeRange(args, 6 + count1,
+                                    6 + count1 + count2).Select(p => ushort.Parse(p)).ToList();
                                 VI.Cout(Uid, "{0}的{1}增加{2}，现在为{3}.", zd.Player(who),
                                     zd.HeroFolderAlias(Z0D[who].SelectHero), zd.Tux(folder1), zd.Tux(folder2));
                                 Z0D[who].FolderCount += count1;
-                                Z0M[who].Folder.AddRange(folder1);
+                                Z0M.Folder.AddRange(folder1);
                             }
                             else
                             {
@@ -1956,7 +1965,7 @@ namespace PSD.ClientZero
                                 int count2 = int.Parse(args[4]);
                                 VI.Cout(Uid, "{0}的{1}数增加{2}，现在为{3}.", zd.Player(who),
                                     zd.HeroFolderAlias(Z0D[who].SelectHero), count1, count2);
-                                Z0D[who].FolderCount -= count1;
+                                Z0D[who].FolderCount += count1;
                             }
                         }
                     }
@@ -2007,14 +2016,15 @@ namespace PSD.ClientZero
                         }
                         else if (type == 4)
                         {
-                            bool hind = ushort.Parse(args[3]) != "0";
+                            bool hind = args[3] != "0";
                             if (!hind)
                             {
-                                int count1 = int.Parse(args[3]);
-                                List<string> folder1 = Util.TakeRange(args, 4, 4 + count1).ToList();
-                                int count2 = int.Parse(args[4 + count1]);
-                                List<string> folder2 = Util.TakeRange(args, 5 + count1,
-                                    5 + count1 + count2).ToList();
+                                int count1 = int.Parse(args[4]);
+                                List<ushort> folder1 = Util.TakeRange(args, 5, 5 + count1)
+                                    .Select(p => ushort.Parse(p)).ToList();
+                                int count2 = int.Parse(args[5 + count1]);
+                                List<ushort> folder2 = Util.TakeRange(args, 6 + count1,
+                                    6 + count1 + count2).Select(p => ushort.Parse(p)).ToList();
                                 if (count2 == 0)
                                     VI.Cout(Uid, "{0}的{1}减少{2}.", zd.Player(who),
                                         zd.HeroFolderAlias(Z0D[who].SelectHero), zd.Tux(folder1));
@@ -2022,12 +2032,12 @@ namespace PSD.ClientZero
                                     VI.Cout(Uid, "{0}的{1}减少{2}，现在为{3}.", zd.Player(who),
                                         zd.HeroFolderAlias(Z0D[who].SelectHero), zd.Tux(folder1), zd.Tux(folder2));
                                 Z0D[who].FolderCount -= count1;
-                                Z0M[who].Folder.RemoveAll(p => p.Contains(folder1));
+                                Z0M.Folder.RemoveAll(p => folder1.Contains(p));
                             }
                             else
                             {
-                                int count1 = int.Parse(args[3]);
-                                int count2 = int.Parse(args[4]);
+                                int count1 = int.Parse(args[4]);
+                                int count2 = int.Parse(args[5]);
                                 VI.Cout(Uid, "{0}的{1}数减少{2}，现在为{3}.", zd.Player(who),
                                     zd.HeroFolderAlias(Z0D[who].SelectHero), count1, count2);
                                 Z0D[who].FolderCount -= count1;
@@ -3462,7 +3472,8 @@ namespace PSD.ClientZero
                                 zp.Weapon = wp; zp.Armor = am; zp.ExEquip = exq;
                                 zp.Pets = pets;
                                 zp.ExCards = excards;
-                                zp.Fakeq = fakeqs;
+                                foreach (var fakeq in fakeqs)
+                                    zp.Fakeq[fakeq] = "0";
                                 zp.Token = token;
                                 zp.SpecialCards.Clear();
                                 zp.SpecialCards.AddRange(peoples);

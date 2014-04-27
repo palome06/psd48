@@ -360,6 +360,11 @@ namespace PSD.ClientAo
             if (AD != null)
                 AD.yhTV.Show(AoPlayer.ExSpCards, AoPlayer.Rank + "EP");
         }
+        private void folderBarClick(object sender, RoutedEventArgs e)
+        {
+            if (AD != null)
+                AD.yhTV.Show(AoPlayer.GetMyFolderMatList(), AoPlayer.Rank + "MFD");
+        }
 
         private void petButtonClick(object sender, RoutedEventArgs e)
         {
@@ -384,13 +389,13 @@ namespace PSD.ClientAo
             {
                 if (enabledFakeq == null || enabledFakeq.Count == 0)
                 {
-                    AD.yhTV.Show(AoPlayer.Fakeq.Select(p => "C" + p).ToList(), AoPlayer.Rank + "FQ");
+                    AD.yhTV.Show(AoPlayer.Fakeq.Keys.Select(p => "C" + p).ToList(), AoPlayer.Rank + "FQ");
                 }
                 else
                 {
                     //MessageBox.Show("C" + enabledFakeq[0]);
                     AD.yhTV.ShowSelectableList(enabledFakeq.Select(p => "C" + p).ToList(),
-                        AoPlayer.Fakeq.Except(enabledFakeq).Select(p => "C" + p).ToList(),
+                        AoPlayer.Fakeq.Keys.Except(enabledFakeq).Select(p => "C" + p).ToList(),
                         AoPlayer.Rank + "SFQ", "TX");
                 }
             }

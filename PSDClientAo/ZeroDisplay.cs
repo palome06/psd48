@@ -220,13 +220,29 @@ namespace PSD.ClientAo
             }
             return "特殊状态";
         }
+        internal string HeroFolderAlias(params int[] heros)
+        {
+            foreach (int hero in heros)
+            {
+                if (hero != 0)
+                {
+                    if (hero != 0)
+                    {
+                        Base.Card.Hero hro = tuple.HL.InstanceHero(hero);
+                        if (hro != null && hro.FolderAlias != null)
+                            return hro.FolderAlias;
+                    }
+                }
+            }
+            return "盖牌";
+        }
         internal string HeroExCardAlias(int hero)
         {
             Base.Card.Hero hro = tuple.HL.InstanceHero(hero);
             if (hro != null)
-                return hro.ExCardsAlias ?? "特殊手牌";
+                return hro.ExCardsAlias ?? "特殊装备";
             else
-                return "特殊手牌";
+                return "特殊装备";
         }
         internal string Prop(ushort prop)
         {

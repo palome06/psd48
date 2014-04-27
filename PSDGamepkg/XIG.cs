@@ -353,11 +353,28 @@ namespace PSD.PSDGamepkg
                                 {
                                     RaiseGMessage("G2TZ,0," + player.Uid + "," + string.Join(",", player.ROMCards));
                                     RaiseGMessage("G0OJ," + player.Uid + ",1," + string.Join(",", player.ROMCards));
+                                    IDictionary<char, List<ushort>> allKinds = new Dictionary<char, List<ushort>>();
+                                    foreach (string cd in player.ROMCards)
+                                    {
+                                        if (cd[0] != 'H')
+                                            Util.AddToMultiMap(allKinds, cd[0], ushort.Parse(cd.Substring(1)));
+                                    }
+                                    if (allKinds.Count > 0)
+                                         RaiseGMessage("G0ON," + string.Join(",", allKinds.Select(p => player.Uid +
+                                             "," + p.Key + "," + p.Value.Count + "," + string.Join(",", p.Value))));
                                 }
                                 if (player.ROMPlayerTar.Count > 0)
                                     RaiseGMessage("G0OJ," + player.Uid + ",2," + string.Join(",", player.ROMPlayerTar));
                                 if (player.ROMAwake)
                                     RaiseGMessage("G0OJ," + player.Uid + ",3");
+                                if (player.ROMFolder.Count > 0)
+                                {
+                                    RaiseGMessage("G2TZ,0," + player.Uid + "," + string.Join(
+                                        ",", player.ROMFolder.Select(p => "C" + p)));
+                                    RaiseGMessage("G0OJ," + player.Uid + ",4," + string.Join(",", player.ROMFolder));
+                                    RaiseGMessage("G0ON," + player.Uid + ",C," + player.ROMFolder.Count + ","
+                                        + string.Join(",", player.ROMFolder));
+                                }
                                 player.ResetROM(Board);
                                 // Remove others' tar token on the player
                                 foreach (Player py in Board.Garden.Values)
@@ -415,10 +432,11 @@ namespace PSD.PSDGamepkg
                 case "G0CC": // prepare to use card
                     if (priority == 100)
                     {
-                        // G0CC,A,B,TP02,17,36
+                        // G0CC,A,T,B,TP02,17,36
                         ushort ust = ushort.Parse(args[1]);
-                        ushort hst = ushort.Parse(args[2]);
-                        string cardname = args[3];
+                        ushort adapter = ushort.Parse(args[2]);
+                        ushort hst = ushort.Parse(args[3]);
+                        string cardname = args[4];
                         int hdx = cmd.IndexOf(';');
                         int idx = cmd.IndexOf(',', hdx);
 
@@ -427,18 +445,17 @@ namespace PSD.PSDGamepkg
                         Base.Card.Tux tux = tx01[cardname];
                         string[] argv = cmd.Substring(0, hdx).Split(',');
 
-                        List<ushort> cards = Util.TakeRange(argv, 4, argv.Length).Select(p =>
+                        List<ushort> cards = Util.TakeRange(argv, 5, argv.Length).Select(p =>
                             ushort.Parse(p)).Where(p => p > 0 && Board.Garden[ust].Tux.Contains(p)).ToList();
                         if (cards.Any())
                         {
                             RaiseGMessage("G0OT," + ust + "," + cards.Count + "," + string.Join(",", cards));
-                            if (!tux.IsEq[sktInType])
+                            if ((tux.IsEq[sktInType] & 3) == 0)
                                 RaiseGMessage("G0ON," + ust + ",C," + cards.Count + "," + string.Join(",", cards));
+                            else if ((tux.IsEq[sktInType] & 1) != 0)
+                                Board.PendingTux.Enqueue(cards.Select(p => hst + ",G0ZB," + tux.Code + "," + p));
                             else
-                            {
-                                ushort owner = (hst == 0 ? ust : hst);
-                                Board.PendingTux.Enqueue(cards.Select(p => owner + ",G0ZB," + p));
-                            }
+                                Board.PendingTux.Enqueue(cards.Select(p => hst + ",G0CC," + p));
                             RaiseGMessage("G2TZ,0," + ust + "," + string.Join(",", cards.Select(p => "C" + p)));
                         }
                     } else if (priority == 200) {
@@ -448,18 +465,14 @@ namespace PSD.PSDGamepkg
                     }
                     else if (priority == 300)
                     {
-                        ushort ust = ushort.Parse(args[1]);
-                        ushort hst = ushort.Parse(args[2]);
-                        if (hst == 0)
-                            RaiseGMessage("G0CD," + ust + "," + string.Join(",", Util.TakeRange(args, 3, args.Length)));
-                        else
-                            RaiseGMessage("G0CD," + hst + "," + string.Join(",", Util.TakeRange(args, 3, args.Length)));
+                        RaiseGMessage("G0CD," + args[3] + "," + args[2] + "," +
+                            string.Join(",", Util.TakeRange(args, 4, args.Length)));
                     }
                     else if (priority == 400)
                     {
                         int hdx = cmd.IndexOf(';');
                         string[] argv = cmd.Substring(0, hdx).Split(',');
-                        List<ushort> cards = Util.TakeRange(argv, 4, argv.Length).Select(p =>
+                        List<ushort> cards = Util.TakeRange(argv, 5, argv.Length).Select(p =>
                             ushort.Parse(p)).ToList();
                         List<ushort> accu = new List<ushort>();
                         foreach (ushort card in cards)
@@ -468,7 +481,7 @@ namespace PSD.PSDGamepkg
                             foreach (string tuxInfo in Board.PendingTux)
                             {
                                 string[] parts = tuxInfo.Split(',');
-                                if (parts[1] == "G0ZB")
+                                if (parts[1] == "G0CC")
                                 {
                                     for (int j = 2; j < parts.Length; ++j)
                                         if (parts[j] == card.ToString())
@@ -476,6 +489,14 @@ namespace PSD.PSDGamepkg
                                             rms.Add(tuxInfo);
                                             accu.Add(card);
                                         }
+                                }
+                                else if (parts[1] == "G0ZB")
+                                {
+                                    if (parts[3] == card.ToString())
+                                    {
+                                        rms.Add(tuxInfo);
+                                        accu.Add(card);
+                                    }
                                 }
                             }
                             foreach (string rm in rms)
@@ -781,7 +802,7 @@ namespace PSD.PSDGamepkg
                                     }
                                     py.ExEquip = 0; bright.Add(card);
                                 }
-                                if (py.Fakeq.Contains(card))
+                                if (py.Fakeq.ContainsKey(card))
                                 {
                                     py.Fakeq.Remove(card); bright.Add(card);
                                 }
@@ -1332,7 +1353,7 @@ namespace PSD.PSDGamepkg
                     break;
                 case "G0CD": // use card and want a target
                     {
-                        // G0CD,A,JP02,17,36;1,G0OH,...
+                        // G0CD,A,T,JP02,17,36;1,G0OH,...
                         int hdx = cmd.IndexOf(';');
                         int idx = cmd.IndexOf(',', hdx);
                         int sktInType = int.Parse(Util.Substring(cmd, hdx + 1, idx));
@@ -1340,28 +1361,25 @@ namespace PSD.PSDGamepkg
 
                         string[] argv = cmd.Substring(0, hdx).Split(',');
                         ushort ust = ushort.Parse(argv[1]);
-                        Base.Card.Tux tux = tx01[argv[2]];
-                        if (!tux.IsEq[sktInType])
-                        {
-                            string input = "";
-                            while (true)
-                            {
-                                string ipt = tux.Input(Board.Garden[ust], sktInType, sktFuse, input);
-                                if (ipt != null && ipt != "")
-                                    input += (input == "" ? "" : ",") + AsyncInput(ust, ipt, argv[2], "0");
-                                else break;
-                            }
-                            if (input.Length > 0)
-                                argv[2] += "," + input;
-                            WI.BCast("E0CD," + argv[1] + "," + argv[2]);
-                            RaiseGMessage("G0CE," + argv[1] + ",0," + argv[2] + ";" + sktInType + "," + sktFuse);
-                        }
-                        else
-                        {
-                            WI.BCast("E0CD," + argv[1] + "," + argv[2]);
-                            RaiseGMessage("G0CE," + argv[1] + ",1," + argv[2] + "," + argv[3] +
+                        Base.Card.Tux tux = tx01[argv[3]];
+                        WI.BCast("E0CD," + argv[1] + "," + argv[2] + "," + argv[3]);
+                        //if (!tux.IsEq[sktInType])
+                            //string input = "";
+                            //while (true)
+                            //{
+                            //    string ipt = tux.Input(Board.Garden[ust], sktInType, sktFuse, input);
+                            //    if (ipt != null && ipt != "")
+                            //        input += (input == "" ? "" : ",") + AsyncInput(ust, ipt, argv[2], "0");
+                            //    else break;
+                            //}
+                            //if (input.Length > 0)
+                            //    argv[3] += "," + input;
+                        if ((tux.IsEq[sktInType] & 1) == 0)
+                            RaiseGMessage("G0CE," + argv[1] + "," + argv[2] + ",0," + argv[3] +
                                 ";" + sktInType + "," + sktFuse);
-                        }
+                        else
+                            RaiseGMessage("G0CE," + argv[1] + "," + argv[2] + ",1," + argv[3] +
+                                "," + argv[4] + ";" + sktInType + "," + sktFuse);
                         break;
                     }
                 case "G0CE": // use card and take action
@@ -1374,21 +1392,21 @@ namespace PSD.PSDGamepkg
                         string[] argv = cmd.Substring(0, hdx).Split(',');
 
                         ushort ust = ushort.Parse(argv[1]);
-                        ushort notEq = ushort.Parse(argv[2]);
+                        ushort notEq = ushort.Parse(argv[3]);
                         if (notEq == 0)
                         {
-                            Base.Card.Tux tux = tx01[argv[3]];
+                            Base.Card.Tux tux = tx01[argv[4]];
                             string argvt = Util.Substring(cmd, argv[0].Length + argv[1].Length +
-                                argv[2].Length + argv[3].Length + 4, hdx);
+                                argv[2].Length + argv[3].Length + argv[4].Length + 5, hdx);
                             if (argvt.Length > 0)
                                 argvt = "," + argvt;
-                            WI.BCast("E0CE," + ust + "," + argv[3] + argvt);
+                            WI.BCast("E0CE," + ust + "," + argv[2] + "," + argv[4] + argvt);
                             tux.Action(Board.Garden[ust], sktInType, sktFuse, argvt);
                         }
                         else
                         {
-                            ushort ut = ushort.Parse(argv[4]);
-                            RaiseGMessage("G0ZB," + Board.Garden[ust].Uid + ",3," + ut);
+                            ushort ut = ushort.Parse(argv[5]);
+                            RaiseGMessage("G0ZB," + Board.Garden[ust].Uid + ",3," + ut + "," + argv[4]);
                         }
                         break;
                     }
@@ -1565,9 +1583,16 @@ namespace PSD.PSDGamepkg
                             else if (from == 0 || pf.ListOutAllEquips().Contains(card))
                             {
                                 if (from != 0)
+                                {
+                                    pm.Fakeq[card] = pf.Fakeq[card];
                                     RaiseGMessage("G0OT," + from + ",1," + card);
-                                pm.Fakeq.Add(card);
-                                WI.BCast("E0ZB," + me + ",1," + from + ",4," + card);
+                                    WI.BCast("E0ZB," + me + ",1," + from + ",4," + card + "," + pm.Fakeq[card]);
+                                }
+                                else
+                                {
+                                    pm.Fakeq[card] = tux.Code;
+                                    WI.BCast("E0ZB," + me + ",1," + from + ",4," + card + "," + tux.Code);
+                                }
                             }
                         }
                     }
@@ -1592,30 +1617,20 @@ namespace PSD.PSDGamepkg
                     {
                         // G0ZB,A,3,x
                         ushort me = ushort.Parse(args[1]);
-                        for (int i = 3; i < args.Length; ++i)
+                        ushort card = ushort.Parse(args[3]);
+                        Player player = Board.Garden[me];
+                        Tux tux = LibTuple.TL.DecodeTux(card);
+                        foreach (string tuxInfo in Board.PendingTux)
                         {
-                            ushort card = ushort.Parse(args[i]);
-                            Player player = Board.Garden[me];
-                            Tux tux = LibTuple.TL.DecodeTux(card);
-                            foreach (string tuxInfo in Board.PendingTux)
+                            string[] parts = tuxInfo.Split(',');
+                            if (parts[0] == me.ToString() && parts[1] == "G0ZB")
                             {
-                                string[] parts = tuxInfo.Split(',');
-                                if (parts[0] == me.ToString() && parts[1] == "G0ZB")
+                                if (parts[3] == card.ToString())
                                 {
-                                    bool anyFound = false;
-                                    for (int j = 2; j < parts.Length; ++j)
-                                    {
-                                        if (parts[j] == card.ToString())
-                                        {
-                                            anyFound = true;
-                                            player.Fakeq.Add(card);
-                                            WI.BCast("E0ZB," + me + ",0,4," + card);
-                                        }
-                                    }
-                                    if (anyFound)
-                                    {
-                                        Board.PendingTux.Remove(tuxInfo); break;
-                                    }
+                                    string cardAs = parts[2];
+                                    player.Fakeq[card] = cardAs;
+                                    WI.BCast("E0ZB," + me + ",0,4," + card + "," + cardAs);
+                                    Board.PendingTux.Remove(tuxInfo); break;
                                 }
                             }
                         }
@@ -2648,16 +2663,18 @@ namespace PSD.PSDGamepkg
                         else if (type == 4)
                         {
                             int n = int.Parse(args[3]);
-                            List<string> folders = Util.TakeRange(args, 4, 4 + n).ToList();
+                            List<ushort> folders = Util.TakeRange(args, 4, 4 + n)
+                                .Select(p => ushort.Parse(p)).ToList();
                             py.ROMFolder.AddRange(folders);
                             WI.Send("E0IJ," + who + ",4,0," + n + "," + string.Join(",", folders) +
                                 "," + py.ROMFolder.Count + "," + string.Join(",", py.ROMFolder), 0, who);
-                            WI.Send("E0IJ," + who + ",4,1," + n + "," + py.ROMFolders.Count, ExceptStaff(who));
-                            WI.Live("E0IJ," + who + ",4,1," + n + "," + py.ROMFolders.Count);
+                            WI.Send("E0IJ," + who + ",4,1," + n + "," + py.ROMFolder.Count, ExceptStaff(who));
+                            WI.Live("E0IJ," + who + ",4,1," + n + "," + py.ROMFolder.Count);
                         }
                     }
                     break;
                 case "G0OJ":
+                    {
                         ushort who = ushort.Parse(args[1]);
                         Player py = Board.Garden[who];
                         ushort type = ushort.Parse(args[2]);
@@ -2700,8 +2717,9 @@ namespace PSD.PSDGamepkg
                         }
                         else if (type == 4)
                         {
-                            int n = int.Parse(args[idx + 2]);
-                            List<string> folders = Util.TakeRange(args, idx + 3, idx + 3 + n).ToList();
+                            int n = int.Parse(args[3]);
+                            List<ushort> folders = Util.TakeRange(args, 4, 4 + n)
+                                .Select(p => ushort.Parse(p)).ToList();
                             py.ROMFolder.RemoveAll(p => folders.Contains(p));
                             if (py.ROMFolder.Count > 0)
                                 WI.Send("E0OJ," + who + ",4,0," + n + "," + string.Join(",", folders) +
@@ -3042,7 +3060,7 @@ namespace PSD.PSDGamepkg
                             {
                                 WI.BCast("E0QZ," + pair.Key + "," + string.Join(",", pair.Value));
                                 RaiseGMessage("G0ON," + pair.Key + ",C,"
-                                     + pair.Value.Count + string.Join(",", pair.Value));
+                                     + pair.Value.Count + "," + string.Join(",", pair.Value));
                             }
                         }
                         foreach (var pair in actual)

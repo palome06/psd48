@@ -311,7 +311,8 @@ namespace PSD.PSDGamepkg
                         string cargs = (args == "^") ? "" : "," + args;
                         if (tux.Type == Base.Card.Tux.TuxType.ZP)
                             RaiseGMessage("G0CZ,0," + from);
-                        RaiseGMessage("G0CC," + from + ",0," + skName + cargs + ";" + ske.InType + "," + ske.Fuse);
+                        RaiseGMessage("G0CC," + from + ",0," + from + "," + skName +
+                            cargs + ";" + ske.InType + "," + ske.Fuse);
                         ++ske.Tick;
                         u5ed = ske.IsTermini ? UEchoCode.END_TERMIN : UEchoCode.END_ACTION;
                     }

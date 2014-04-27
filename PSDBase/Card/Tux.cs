@@ -32,7 +32,8 @@ namespace PSD.Base.Card
         public char[] Targets { protected set; get; }
         public bool[] IsTermini { protected set; get; }
         // whether is equipped or used directly
-        public bool[] IsEq { protected set; get; }
+        // 1-set-eqiup, 2-set-pending
+        public ushort[] IsEq { protected set; get; }
         // whether only can work for the owner himself
         //public bool IsSelfType { private set; get; }
 
@@ -41,6 +42,8 @@ namespace PSD.Base.Card
         public delegate string InputDelegate(Player player, int type, string fuse, string prev);
         public delegate string InputHolderDelegate(Player provider, Player user, int type, string fuse, string prev);
         public delegate string EncryptDelegate(string args);
+        public delegate void LocustActionDelegate(Player player, int type, string fuse, string argst,
+            Player locuster, Tux locust);
 
         private ActionDelegate mAction;
         public ActionDelegate Action
@@ -81,16 +84,20 @@ namespace PSD.Base.Card
             get { return mEncrypt ?? DefEncrypt; }
         }
 
-        protected static ActionDelegate DefAction = new ActionDelegate(
-            delegate(Player player, int type, string fuse, string argst) { });
-        protected static ValidDelegate DefValid = new ValidDelegate(
-            delegate(Player player, int type, string fuse) { return true; });
-        protected static InputDelegate DefInput = new InputDelegate(
-            delegate(Player player, int type, string fuse, string prev) { return ""; });
+        private LocustActionDelegate mLocust;
+        public LocustActionDelegate Locust
+        {
+            set { mLocust = value; }
+            get { return mLocust ?? DefLocust; }
+        }
+
+        protected static ActionDelegate DefAction = (p, t, f, a) => { };
+        protected static ValidDelegate DefValid = (p, t, f) => { return true; };
+        protected static InputDelegate DefInput = (p, t, f, pr) => { return ""; };
         protected static InputHolderDelegate DefInputHolder = new InputHolderDelegate(
             delegate(Player provider, Player user, int type, string fuse, string prev) { return ""; });
-        protected static EncryptDelegate DefEncrypt = new EncryptDelegate(
-            delegate(string args) { return args; });
+        protected static EncryptDelegate DefEncrypt = (a) => { return a; };
+        protected static LocustActionDelegate DefLocust = (p, t, f, a, lr, l) => { };
 
         // public Delegate Type of Handling events
         internal Tux(string name, string code, TuxType type, string description, string special)
@@ -144,9 +151,9 @@ namespace PSD.Base.Card
             if (isEqStr != "" && isEqStr != "^")
             {
                 string[] eqs = isEqStr.Split(',');
-                IsEq = new bool[sz];
+                IsEq = new ushort[sz];
                 for (int i = 0; i < sz; ++i)
-                    IsEq[i] = (eqs[i][0] == '1');
+                    IsEq[i] = ushort.Parse(eqs[i]);
             }
             if (tarStr != "")
             {
@@ -284,7 +291,7 @@ namespace PSD.Base.Card
                 string isEqs = (string)data["ISEQ"];
                 string targets = (string)data["TARGET"];
                 string terministr = (string)data["TERMHIND"];
-                if (type == Tux.TuxType.XB && isEqs == "2")
+                if (type == Tux.TuxType.XB && isEqs == "5")
                 {
                     string growup = (string)data["GROWUP"];
                     isEqs = "1";
@@ -580,9 +587,9 @@ namespace PSD.Base.Card
             for (int i = 0; i < tars.Length; ++i)
                 Targets[i] = tars[i][0];
             string[] isEqs = isEqStr.Split(',');
-            IsEq = new bool[isEqs.Length];
+            IsEq = new ushort[isEqs.Length];
             for (int i = 0; i < isEqs.Length; ++i)
-                IsEq[i] = (isEqs[i][0] == '1');
+                IsEq[i] = ushort.Parse(isEqs[i]);
 
             string[] tmhd = tmhdstr.Split(';');
             if (tmhd.Length > 1)

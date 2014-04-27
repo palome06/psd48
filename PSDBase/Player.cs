@@ -80,7 +80,7 @@ namespace PSD.Base
         // extra Equip Slot, not the same as the ExEquip
         public List<ushort> ExCards { private set; get; }
         // special time-lapse cards, the substitution is set in Board
-        public List<ushort> Fakeq { private set; get; }
+        public IDictionary<ushort, string> Fakeq { private set; get; }
 
         public ushort[] Pets { private set; get; }
         // Escue Npcs
@@ -200,7 +200,7 @@ namespace PSD.Base
             this.Pets = new ushort[] { 0, 0, 0, 0, 0 };
             this.ExCards = new List<ushort>();
             Escue = new List<ushort>();
-            Fakeq = new List<ushort>();
+            Fakeq = new Dictionary<ushort, string>();
 
             this.ROMUshort = 0;
             ROMToken = 0;
@@ -291,7 +291,7 @@ namespace PSD.Base
             else if (Trove == card) { Trove = 0; discards.Add(card); return true; }
             else if (ExEquip == card) { ExEquip = 0; discards.Add(card); return true; }
             else if (ExCards.Contains(card)) { ExCards.Remove(card); discards.Add(card); return true; }
-            else if (Fakeq.Contains(card)) { Fakeq.Remove(card); discards.Add(card); return true; }
+            else if (Fakeq.ContainsKey(card)) { Fakeq.Remove(card); discards.Add(card); return true; }
             else return false;
         }
         public bool HasAnyCards()
@@ -318,7 +318,7 @@ namespace PSD.Base
             if (Trove != 0) result.Add(Trove);
             if (ExEquip != 0) result.Add(ExEquip);
             if (ExCards.Count > 0) result.AddRange(ExCards);
-            if (Fakeq.Count > 0) result.AddRange(Fakeq);
+            if (Fakeq.Count > 0) result.AddRange(Fakeq.Keys);
             return result;
         }
         public List<ushort> ListOutAllTuxsWithEncrypt()

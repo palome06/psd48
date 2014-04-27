@@ -165,9 +165,9 @@ namespace PSD.PSDGamepkg.JNS
             Tux tux = XI.LibTuple.TL.DecodeTux(card);
             if (XI.Board.CsEqiups.Contains(player.Uid + "," + card))
                 return;
-            if (player.Fakeq.Contains(card))
+            if (player.Fakeq.ContainsKey(card))
             {
-                if (tux.Code.Equals("TPT2"))
+                if (player.Fakeq[card] == "TPT2" || (player.Fakeq[card] == "0" && tux.Code.Equals("TPT2")))
                 {
                     //XI.RaiseGMessage("G0OT," + player.Uid + ",1," + card);
                     XI.RaiseGMessage("G2ZU,0," + player.Uid + "," + card);
@@ -182,7 +182,7 @@ namespace PSD.PSDGamepkg.JNS
         {
             if (prev == "")
             {
-                List<ushort> uts = player.Fakeq.Where(p =>
+                List<ushort> uts = player.Fakeq.Keys.Where(p =>
                     !XI.Board.CsEqiups.Contains(player.Uid + "," + p)).ToList();
                 return "/C1(p" + string.Join("p", uts) + ")";
             }
@@ -191,7 +191,7 @@ namespace PSD.PSDGamepkg.JNS
         }
         public bool CZ05Valid(Player player, string fuse)
         {
-            List<ushort> uts = player.Fakeq.Where(p =>
+            List<ushort> uts = player.Fakeq.Keys.Where(p =>
                 !XI.Board.CsEqiups.Contains(player.Uid + "," + p)).ToList();
             return uts.Any();
         }

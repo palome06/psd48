@@ -63,7 +63,7 @@ namespace PSD.PSDGamepkg.JNS
                     {
                         ushort target = ushort.Parse(input);
                         XI.VI.Cout(0, "{0}对{1}预定使用「天雷破」.", XI.DisplayPlayer(rd.Uid), XI.DisplayPlayer(target));
-                        XI.RaiseGMessage("G0CC," + rd.Uid + ",0,JP05,0;1,R" + rd.Uid + "EV," + target);
+                        XI.RaiseGMessage("G0CC," + rd.Uid + ",0," + rd.Uid + ",JP05,0;1,R" + rd.Uid + "EV," + target);
                     }
                     else
                         XI.VI.Cout(0, "{0}放弃使用「天雷破」.", XI.DisplayPlayer(rd.Uid));
@@ -465,7 +465,8 @@ namespace PSD.PSDGamepkg.JNS
             XI.RaiseGMessage("G0YM,3," + pop + ",0");
 
             UEchoCode r5ed = XI.HandleWithNPCEffect(py, npc, false);
-            XI.Board.RestNPCDises.Add(pop);
+            //XI.Board.RestNPCDises.Add(pop);
+            XI.RaiseGMessage("G0ON,0,M,1," + pop);
             XI.RaiseGMessage("G0YM,3,0,0");
         }
         public void SJT08()
@@ -508,7 +509,8 @@ namespace PSD.PSDGamepkg.JNS
                     XI.RaiseGMessage("G0DH," + rd.Uid + ",1," + (rd.Tux.Count - sr));
                 else if (rd.Tux.Count < sr)
                     XI.RaiseGMessage("G0DH," + rd.Uid + ",0," + (sr - rd.Tux.Count));
-                XI.Board.RestNPCDises.Add(pop);
+                //XI.Board.RestNPCDises.Add(pop);
+                XI.RaiseGMessage("G0ON,0,M,1," + pop);
                 XI.RaiseGMessage("G0YM,3,0,0");
             }
         }

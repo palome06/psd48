@@ -120,7 +120,7 @@ namespace PSD.ClientAo.VW
         {
             if (Version <= 114)
             {
-                if (line.StartsWith("E0ON,"))
+                if (line.StartsWith("E0ON"))
                 {
                     string[] args = line.Split(',');
                     ushort utype = ushort.Parse(args[1]);
@@ -135,6 +135,49 @@ namespace PSD.ClientAo.VW
                     {
                         line = "E0ON,10," + ch + "," + (args.Length - 2) + ","
                             + string.Join(",", Util.TakeRange(args, 2, args.Length));
+                    }
+                }
+                else if (line.StartsWith("E0CC"))
+                {
+                    string[] args = line.Split(',');
+                    if (args[2] == "0")
+                        args[2] = args[1];
+                    args[2] = ",0," + args[2];
+                    line = string.Join(",", args);
+                }
+                else if (line.StartsWith("E0CD"))
+                {
+                    string[] args = line.Split(',');
+                    args[1] = args[1] + ",0,";
+                    line = string.Join(",", args);
+                }
+                else if (line.StartsWith("E0CE"))
+                {
+                    string[] args = line.Split(',');
+                    args[1] = args[1] + ",0,";
+                    line = string.Join(",", args);
+                }
+                else if (line.StartsWith("E0ZB"))
+                {
+                    string[] args = line.Split(',');
+                    ushort type = ushort.Parse(args[2]);
+                    if (type == 0)
+                    {
+                        ushort where = ushort.Parse(args[3]);
+                        if (where == 4)
+                        {
+                            args[4] += ",0";
+                            line = string.Join(",", args);
+                        }
+                    }
+                    else if (type == 1)
+                    {
+                        ushort where = ushort.Parse(args[4]);
+                        if (where == 4)
+                        {
+                            args[4] += ",0";
+                            line = string.Join(",", args);
+                        }
                     }
                 }
             }

@@ -394,7 +394,7 @@ namespace PSD.ClientAo
             bool troveEab = wata.Trove != 0 && cands.Contains(wata.Trove);
             List<ushort> excs = wata.GetExCardsList().Intersect(cands).ToList();
             bool exeqEab = wata.ExEquip != 0 && cands.Contains(wata.ExEquip);
-            List<ushort> fakeq = wata.Fakeq.Intersect(cands).ToList();
+            List<ushort> fakeq = wata.Fakeq.Keys.Intersect(cands).ToList();
 
             selectedQard = new ObservableCollection<ushort>();
             //selectedTarget = null;
@@ -530,7 +530,7 @@ namespace PSD.ClientAo
             bool troveEab = wata.Trove != 0 && cands.Contains(wata.Trove);
             List<ushort> excs = wata.GetExCardsList().Intersect(cands).ToList();
             bool exeqEab = wata.ExEquip != 0 && cands.Contains(wata.ExEquip);
-            List<ushort> fakeq = wata.Fakeq.Intersect(cands).ToList();
+            List<ushort> fakeq = wata.Fakeq.Keys.Intersect(cands).ToList();
 
             selectedQard = new ObservableCollection<ushort>();
             //selectedTarget = null;
@@ -627,12 +627,13 @@ namespace PSD.ClientAo
 
         internal void FinishSelectPT()
         {
-            yfPlayerR1.ResumePets();
-            yfPlayerR2.ResumePets();
-            yfPlayerR3.ResumePets();
-            RmvTVDict(yfPlayerR1.AoPlayer.Rank + "SPT");
-            RmvTVDict(yfPlayerR2.AoPlayer.Rank + "SPT");
-            RmvTVDict(yfPlayerR3.AoPlayer.Rank + "SPT");
+            PlayerBoard[] pbs = new PlayerBoard[] { yfPlayerR1, yfPlayerR2,
+                yfPlayerR3,yfPlayerO1, yfPlayerO2, yfPlayerO3};
+            foreach (PlayerBoard pb in pbs)
+            {
+                pb.ResumePets();
+                RmvTVDict(pb.AoPlayer.Rank + "SPT");
+            }
         }
 
         #endregion Cards Selection and Control Panel

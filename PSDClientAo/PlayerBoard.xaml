@@ -126,7 +126,23 @@
             </Button>
             <cd:RubanLock x:Name="exEquipLock" Canvas.Left="-82" Canvas.Top="75" Width="98" Height="23"
                           Face="{StaticResource staEpWQ00}" Visibility="Hidden"/>
-            
+            <!--<Rectangle x:Name="folderRect" Canvas.Left="-82" Canvas.Top="75" Width="98" Height="23"
+                       Visibility="Visible" Fill="MediumSeaGreen"/>-->
+            <Button x:Name="folderBar" Canvas.Left="-82" Canvas.Top="75" Width="98" Height="23"
+                    BorderThickness="0" Visibility="Collapsed" Click="folderBarClick">
+                <Button.Background>
+                    <SolidColorBrush Color="YellowGreen"/>
+                </Button.Background>
+                <TextBlock x:Name="folderBText" TextAlignment="Center" Background="Transparent"/>
+            </Button>
+            <Border x:Name="folderRect" Canvas.Left="-82" Canvas.Top="75" Width="98" Height="23"
+                    Background="MediumSeaGreen" Visibility="Collapsed">
+                <TextBlock x:Name="folderRText" TextAlignment="Center" VerticalAlignment="Center"/>
+            </Border>
+
+            <!--<Rectangle.TextBlock x:Name="expeopleText" TextAlignment="Center" Background="Transparent"/>
+            </Button>-->
+
             <Border x:Name="excardBorder" Canvas.Left="-82" Canvas.Top="75" Width="98" Height="23"
                     Visibility="Collapsed" CornerRadius="2" BorderBrush="Black"
                     BorderThickness="2" IsHitTestVisible="False"/>

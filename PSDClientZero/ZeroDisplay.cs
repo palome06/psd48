@@ -73,6 +73,12 @@ namespace PSD.ClientZero
         {
             return cardName + ":" + tuple.TL.Firsts.Find(p => p.Code == cardName).Name;
         }
+        internal string TuxAs(IDictionary<ushort, string> cards)
+        {
+            return "{" + string.Join(",", cards.Select(p => Tux(p.Key) +
+                ((p.Value == "0" || tuple.TL.DecodeTux(p.Key).Code == p.Value) ?
+                "" : "(" + tuple.TL.DecodeTux(p.Key).Name + ")"))) + "}";
+        }
         internal string Player(ushort player)
         {
             return player == 0 ? "0:天上" : (player < 1000 ? player + ":" + tuple.HL
@@ -234,7 +240,7 @@ namespace PSD.ClientZero
                         return hro.ExCardsAlias;
                 }
             }
-            return "特殊手牌";
+            return "特殊装备";
         }
         internal string HeroAwakeAlias(params int[] heros)
         {

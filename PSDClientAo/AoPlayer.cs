@@ -35,14 +35,16 @@ namespace PSD.ClientAo
             Weapon = 0;
             Armor = 0;
             mExCards = new List<ushort>();
-            Fakeq = new List<ushort>();
+            Fakeq = new Dictionary<ushort, string>();
             Escue = new List<ushort>();
             mInLuggage = new List<string>();
+            FolderCount = 0;
 
             Token = 0;
             //Peoples = new List<int>();
             mExSpCards = new List<string>();
             mPlayerTars = new List<ushort>();
+            mMyFolder = new List<ushort>();
 
             IsLoved = false;
             IsAlive = false;
@@ -296,17 +298,18 @@ namespace PSD.ClientAo
             }
         }
 
-        public List<ushort> Fakeq { set; get; }
+        public IDictionary<ushort, string> Fakeq { set; get; }
         [STAThread]
-        public void InsFakeq(ushort werCd)
+        public void InsFakeq(ushort werCd, string asCode)
         {
             Base.Card.Tux tux = Tuple.TL.DecodeTux(werCd);
             if (tux != null)
             {
-                Fakeq.Add(werCd);
+                Fakeq[werCd] = asCode;
+                string code = (asCode == "0") ? tux.Code : asCode;
                 pb.Dispatcher.BeginInvoke((Action)(() =>
                 {
-                    Image bsimg = pb.TryFindResource("wersnap" + tux.Code) as Image;
+                    Image bsimg = pb.TryFindResource("wersnap" + asCode) as Image;
                     if (bsimg != null)
                     {
                         Image nImg = new Image() { Source = bsimg.Source, ToolTip = bsimg.ToolTip };
@@ -326,10 +329,11 @@ namespace PSD.ClientAo
             Base.Card.Tux tux = Tuple.TL.DecodeTux(werCd);
             if (tux != null)
             {
+                string asCdoe = Fakeq[werCd];
                 Fakeq.Remove(werCd);
                 pb.Dispatcher.BeginInvoke((Action)(() =>
                 {
-                    Image bsimg = pb.TryFindResource("wersnap" + tux.Code) as Image;
+                    Image bsimg = pb.TryFindResource("wersnap" + asCdoe) as Image;
                     foreach (var elem in pb.werspStack.Children)
                     {
                         Image img = elem as Image;
@@ -552,7 +556,7 @@ namespace PSD.ClientAo
             {
                 pb.excardBar.Visibility = System.Windows.Visibility.Visible;
                 Base.Card.Hero hro = Tuple.HL.InstanceHero(mHero);
-                string alias = (hro != null) ? (hro.ExCardsAlias ?? "特殊手牌") : "特殊手牌";
+                string alias = (hro != null) ? (hro.ExCardsAlias ?? "特殊装备") : "特殊装备";
                 pb.excardText.Text = alias + " (" + mExCards.Count + ")";
                 if (pb.AD != null && pb.AD.IsTVDictContains(Rank + "EC"))
                     pb.AD.yhTV.Show(GetExCardsMatList(), Rank + "EC");
@@ -566,7 +570,7 @@ namespace PSD.ClientAo
                 if (mExCards.Count > 0)
                 {
                     Base.Card.Hero hro = Tuple.HL.InstanceHero(mHero);
-                    string alias = (hro != null) ? (hro.ExCardsAlias ?? "特殊手牌") : "特殊手牌";
+                    string alias = (hro != null) ? (hro.ExCardsAlias ?? "特殊装备") : "特殊装备";
                     pb.excardText.Text = alias + " (" + mExCards.Count + ")";
                     if (pb.AD != null && pb.AD.IsTVDictContains(Rank + "EC"))
                         pb.AD.yhTV.Show(GetExCardsMatList(), Rank + "EC");
@@ -634,6 +638,78 @@ namespace PSD.ClientAo
                 }
             }
             get { return mExEquip; }
+        }
+
+        private int mFolderCount;
+        public int FolderCount
+        {
+            [STAThread]
+            set
+            {
+                if (mFolderCount != value)
+                {
+                    pb.Dispatcher.BeginInvoke((Action)(() =>
+                    {
+                        if (mFolderCount > 0)
+                        {
+                            pb.folderRect.Visibility = System.Windows.Visibility.Visible;
+                            Base.Card.Hero hro = Tuple.HL.InstanceHero(mHero);
+                            string alias = (hro != null) ? (hro.FolderAlias ?? "盖牌") : "盖牌";
+                            pb.folderRText.Text = alias + " (" + mFolderCount + ")";
+                        }
+                        else
+                            pb.folderRect.Visibility = System.Windows.Visibility.Collapsed;
+                    }));
+                    mFolderCount = value;
+                }
+            }
+            get { return mFolderCount; }
+        }
+        private List<ushort> mMyFolder;
+        public void InsMyFolder(ushort ut) { InsMyFolder(new ushort[] { ut }.ToList()); }
+        public void InsMyFolder(List<ushort> uts)
+        {
+            mMyFolder.AddRange(uts);
+            pb.Dispatcher.BeginInvoke((Action)(() =>
+            {
+                pb.folderBar.Visibility = System.Windows.Visibility.Visible;
+                Base.Card.Hero hro = Tuple.HL.InstanceHero(mHero);
+                string alias = (hro != null) ? (hro.FolderAlias ?? "盖牌") : "盖牌";
+                pb.folderBText.Text = alias + " (" + mMyFolder.Count + ")";
+                if (pb.AD != null && pb.AD.IsTVDictContains(Rank + "MFD"))
+                    pb.AD.yhTV.Show(GetMyFolderMatList(), Rank + "MFD");
+            }));
+        }
+        public void DelMyFolder(ushort ut) { DelMyFolder(new ushort[] { ut }.ToList()); }
+        public void DelMyFolder(List<ushort> uts)
+        {
+            mMyFolder.RemoveAll(p => uts.Contains(p));
+            pb.Dispatcher.BeginInvoke((Action)(() =>
+            {
+                if (mMyFolder.Count > 0)
+                {
+                    Base.Card.Hero hro = Tuple.HL.InstanceHero(mHero);
+                    string alias = (hro != null) ? (hro.FolderAlias ?? "盖牌") : "盖牌";
+                    pb.folderBText.Text = alias + " (" + mMyFolder.Count + ")";
+                    if (pb.AD != null && pb.AD.IsTVDictContains(Rank + "MFD"))
+                        pb.AD.yhTV.Show(GetMyFolderMatList(), Rank + "MFD");
+                }
+                else
+                {
+                    pb.folderBar.Visibility = System.Windows.Visibility.Hidden;
+                    pb.folderBText.Text = "";
+                    if (pb.AD != null && pb.AD.IsTVDictContains(Rank + "MFD"))
+                        pb.AD.yhTV.Show(GetMyFolderMatList(), Rank + "MFD");
+                }
+            }));
+        }
+        public List<ushort> GetMyFolderList()
+        {
+            return mMyFolder.ToList();
+        }
+        public List<string> GetMyFolderMatList()
+        {
+            return mMyFolder.Select(p => "C" + p.ToString()).ToList();
         }
         #endregion Cards Property
 
@@ -1028,7 +1104,7 @@ namespace PSD.ClientAo
                 if (mExCards.Count > 0)
                 {
                     Base.Card.Hero hro = Tuple.HL.InstanceHero(mHero);
-                    string alias = (hro != null) ? (hro.ExCardsAlias ?? "特殊手牌") : "特殊手牌";
+                    string alias = (hro != null) ? (hro.ExCardsAlias ?? "特殊装备") : "特殊装备";
                     pb.excardText.Text = alias + " (" + mExCards.Count + ")";
                 }
                 if (mExSpCards.Count > 0)

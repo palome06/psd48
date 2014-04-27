@@ -59,7 +59,7 @@ namespace PSD.PSDGamepkg
             Board.MonPiles.PushBack(1);
             Board.MonPiles.PushBack(17);
             Board.MonPiles.PushBack(13);
-            Board.MonPiles.PushBack(8);
+            Board.MonPiles.PushBack(14);
             //Board.MonPiles.PushBack(24);
             //Board.MonPiles.PushBack(25);
             //Board.MonPiles.PushBack(24);
@@ -151,12 +151,12 @@ namespace PSD.PSDGamepkg
             //RaiseGMessage("G0HQ,2,6,0,47,48");
             //RaiseGMessage("G0HQ,2,3,0,47,52");
             //RaiseGMessage("G0HQ,2,3,0,41");
-            RaiseGMessage("G0HQ,2,1,0,0,93,94,9,95,96,5,2,71,72,49");
+            RaiseGMessage("G0HQ,2,1,0,0,93,94,9,66,95,96,5,2,71,72,49,60");
             //RaiseGMessage("G0HQ,2,4,0,0,33,35");
-            RaiseGMessage("G0HQ,2,3,0,0,67");
-            RaiseGMessage("G0HQ,2,5,0,0,65,66");
+            //RaiseGMessage("G0HQ,2,3,0,0,67");
+            //RaiseGMessage("G0HQ,2,5,0,0,65,66");
             //RaiseGMessage("G0HQ,2,1,0,69,70");
-            //RaiseGMessage("G0HQ,2,2,0,57");
+            RaiseGMessage("G0HQ,2,2,0,0,90,34,89,88");
             //RaiseGMessage("G0HQ,2,1,0,10,11,12,47,48,5");
             //RaiseGMessage("G0HQ,2,1,0,10,38,39");
             //RaiseGMessage("G0HQ,2,1,0,1,47,48,49,51,52");
@@ -448,7 +448,7 @@ namespace PSD.PSDGamepkg
                                 RaiseGMessage("G2IN,1,1");
                                 Board.Battler = null;
                                 WI.BCast(rstage + "7,0," + mons);
-                                WI.BCast("G0ON,0,M,1," + mons);
+                                RaiseGMessage("G0ON,0,M,1," + mons);
                                 rstage = "R" + rounder + "ZF";
                             } else {
                                 RaiseGMessage("G0AF," + sprUid + ",1");
@@ -585,6 +585,9 @@ namespace PSD.PSDGamepkg
                         Board.InFight = true;
                         RunQuadStage(rstage, 0);
                         RaiseGMessage("G09P,0");
+                        rstage = "R" + rounder + "ZI"; break;
+                    case "ZI":
+                        RunQuadStage(rstage, 0);
                         rstage = "R" + rounder + "ZD"; break;
                     case "ZD":
                         WI.BCast(rstage + ",0");
@@ -772,6 +775,11 @@ namespace PSD.PSDGamepkg
                             }
                             foreach (Player player in Board.Garden.Values)
                                 RaiseGMessage("G0AX," + player.Uid);
+                            RunQuadStage(rstage, 0);
+                            if (Board.PendingTux.Count > 0)
+                                RaiseGMessage("G0ON,10,C," + Board.PendingTux.Count + "," +
+                                    string.Join(",", Board.PendingTux.Select(
+                                    p => p.Substring(p.LastIndexOf(',') + 1))));
                             List<ushort> ordered = Board.OrderedPlayer();
                             bool found = false;
                             foreach (ushort ut in ordered)
