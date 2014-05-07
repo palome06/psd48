@@ -236,7 +236,7 @@ namespace PSD.Base
         private readonly Player ghost = new Player("鬼", 0, 0, false);
 
         #region Serialize the Game Situation
-        public static GenerateSerialGamerMessage(LibGroup tuple)
+        public string GenerateSerialGamerMessage(LibGroup tuple)
         {
             StringBuilder h09g = new StringBuilder();
             foreach (Player py in Garden.Values)
@@ -294,10 +294,10 @@ namespace PSD.Base
             List<string> h09f = new List<string>();
             h09f.Add(py.Tux.Count.ToString());
             if (py.Tux.Count > 0)
-                h09f.Append(string.Join(",", py.Tux));
+                h09f.Add(string.Join(",", py.Tux));
             h09f.Add(py.ROMFolder.Count.ToString());
-            if (Py.ROMFolder.Count > 0)
-                h09f.Append(string.Join(",", py.ROMFolder));
+            if (py.ROMFolder.Count > 0)
+                h09f.Add(string.Join(",", py.ROMFolder));
             return string.Join(",", h09f);
         }
         #endregion Serialize the Game Situation

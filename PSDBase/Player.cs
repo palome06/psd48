@@ -26,7 +26,8 @@ namespace PSD.Base
 
         public Skill[] Skills { set; get; }
 
-        private int mSTR, mDEX, mSTRa, mDEXa, mSTRb, mDEXb;
+        public int mSTR, mDEX;
+        private int mSTRa, mDEXa, mSTRb, mDEXb;
         public char Gender { set; get; }
 
         public int HP { set; get; }

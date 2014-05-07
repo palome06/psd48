@@ -72,7 +72,8 @@ namespace PSD.PSDGamepkg
             //19001, 10302, 10102, 10606, 10203, 10608
             //10603, 19018, 10605, 10501, 15003, 10505
             //17022, 19006, 10605, 10501, 15003, 10505
-            19007, 17022, 19001, 19011, 10107, 10302
+            //19009, 17022, 19001, 19011, 10107, 10302
+            19009, 10105, 19013, 17010, 19017, 19010
         };
 
         #region Memeber Declaration & Constructor
@@ -130,7 +131,7 @@ namespace PSD.PSDGamepkg
 
         #region Piles Operation
 
-        private static void Riffle(Utils.Rueue<ushort> piles, List<ushort> dises)
+        private static void Riffle(Base.Utils.Rueue<ushort> piles, List<ushort> dises)
         {
             while (piles.Count > 0)
                 dises.Add(piles.Dequeue());
@@ -466,8 +467,8 @@ namespace PSD.PSDGamepkg
             }
             if (parasitism.Count > 0)
             {
-                IDictionary<string, ISet<SkTriple>> occurTable =
-                    new Dictionary<string, ISet<SkTriple>>();
+                IDictionary<string, List<string>> occurTable =
+                    new Dictionary<string, List<string>>();
                 ISet<string> occurNotLocked = new HashSet<string>();
                 IDictionary<string, bool> occurLock = new Dictionary<string, bool>();
                 // occurTable: {sktName,InType : occur,priorty,owner}
@@ -478,60 +479,55 @@ namespace PSD.PSDGamepkg
                     {
                         string sktKey = skt.Name + "," + ((skt.Type == SKTType.EQ || skt.Type == SKTType.PT) ?
                             (skt.Consume + "!" + skt.InType) : skt.InType.ToString());
-                        Util.AddToUniqueMultiMap(occurTable, sktKey, skt);
+                        Util.AddToMultiMap(occurTable, sktKey,
+                            pair.Key + "," + skt.Priorty + "," + skt.Owner + "," + skt.Occur);
                         if (skt.Lock == false)
-                            occurNotLocked.Add(skt.Occur + "," + skt.Priorty);
+                            occurNotLocked.Add(sktKey);
                     }
                 }
 
                 foreach (SkTriple para in parasitism)
                 {
                     string[] paras = Util.Splits(para.Occur, "&");
-                    IDictionary<SkTriple, List<string>> registered =
-                        new Dictionary<SkTriple, List<string>>();
+                    IDictionary<string, List<string>> registered =
+                        new Dictionary<string, List<string>>();
                     // occurs -> link_from
                     //ISet<string> registered = new HashSet<string>();
                     foreach (string host in paras)
                     {
                         if (occurTable.ContainsKey(host))
                         {
-                            ISet<SkTriple> ics = occurTable[host];
-                            foreach (SkTriple ic in ics)
+                            List<string> ics = occurTable[host];
+                            foreach (string ic in ics)
                                 Util.AddToMultiMap(registered, ic, host);
                         }
                     }
                     foreach (var pair in registered)
                     {
+                        string triple = pair.Key;
                         string host = string.Join("&", pair.Value);
-                        string oc = pair.Key.Occur;
-                        int priorty = pair.Key.Priorty;
-                        //ushort owner = ushort.Parse(splits[2]);
+
+                        string[] splits = triple.Split(',');
+                        string oc = splits[0];
+                        int priority = int.Parse(splits[1]);
+                        ushort owner = ushort.Parse(splits[2]);
+                        string acOccur = splits[3];
 
                         SkTriple skt = new SkTriple()
                         {
                             Name = para.Name,
-                            Priorty = priorty,
-                            //Owner = para.Owner,
-                            Owner = 0,
+                            Priorty = priority,
+                            Owner = para.Owner,
                             InType = para.InType,
                             Type = para.Type,
                             Consume = para.Consume,
-                            Lock = pair.Key.Lock & !occurNotLocked.Contains(oc + "," + priorty),
-                            IsOnce = pair.Key.IsOnce,
-                            Occur = oc,
+                            Lock = para.Lock & !occurNotLocked.Contains(oc + "," + priority),
+                            IsOnce = para.IsOnce,
+                            Occur = acOccur,
                             LinkFrom = host, // format: TP02,0&TP03,0
-                            IsTermini = pair.Key.IsTermini
+                            IsTermini = para.IsTermini
                         };
-                        if (oc.Contains('#') || oc.Contains('$') || oc.Contains('*'))
-                        {
-                            foreach (Player p in Board.Garden.Values)
-                                Util.AddToMultiMap(dict, oc
-                                    .Replace("#", p.Uid.ToString())
-                                    .Replace("$", p.Uid.ToString())
-                                    .Replace("*", p.Uid.ToString()), skt);
-                        }
-                        else
-                            Util.AddToMultiMap(dict, oc, skt);
+                        Util.AddToMultiMap(dict, oc, skt);
                     }
                 }
             }
@@ -564,6 +560,7 @@ namespace PSD.PSDGamepkg
             Util.AddToMultiMap(dict, "G0CC", new SkTriple() { Name = "~400", Priorty = 400 });
             Util.AddToMultiMap(dict, "G0HZ", new SkTriple() { Name = "~200", Priorty = 200 });
             Util.AddToMultiMap(dict, "G1EV", new SkTriple() { Name = "~200", Priorty = 200 });
+            Util.AddToMultiMap(dict, "G1WJ", new SkTriple() { Name = "~200", Priorty = 200 });
             foreach (string key in dict.Keys)
             {
                 List<SkTriple> value = dict[key];

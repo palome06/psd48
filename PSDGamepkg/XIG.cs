@@ -359,7 +359,8 @@ namespace PSD.PSDGamepkg
                                 if (player.ROMCards.Count > 0)
                                 {
                                     RaiseGMessage("G2TZ,0," + player.Uid + "," + string.Join(",", player.ROMCards));
-                                    RaiseGMessage("G0OJ," + player.Uid + ",1," + string.Join(",", player.ROMCards));
+                                    RaiseGMessage("G0OJ," + player.Uid + ",1," + player.ROMCards.Count
+                                        + "," + string.Join(",", player.ROMCards));
                                     IDictionary<char, List<ushort>> allKinds = new Dictionary<char, List<ushort>>();
                                     foreach (string cd in player.ROMCards)
                                     {
@@ -371,14 +372,16 @@ namespace PSD.PSDGamepkg
                                              "," + p.Key + "," + p.Value.Count + "," + string.Join(",", p.Value))));
                                 }
                                 if (player.ROMPlayerTar.Count > 0)
-                                    RaiseGMessage("G0OJ," + player.Uid + ",2," + string.Join(",", player.ROMPlayerTar));
+                                    RaiseGMessage("G0OJ," + player.Uid + ",2," + player.ROMPlayerTar.Count
+                                        + "," + string.Join(",", player.ROMPlayerTar));
                                 if (player.ROMAwake)
                                     RaiseGMessage("G0OJ," + player.Uid + ",3");
                                 if (player.ROMFolder.Count > 0)
                                 {
                                     RaiseGMessage("G2TZ,0," + player.Uid + "," + string.Join(
                                         ",", player.ROMFolder.Select(p => "C" + p)));
-                                    RaiseGMessage("G0OJ," + player.Uid + ",4," + string.Join(",", player.ROMFolder));
+                                    RaiseGMessage("G0OJ," + player.Uid + ",4," + player.ROMFolder.Count
+                                        + "," + string.Join(",", player.ROMFolder));
                                     RaiseGMessage("G0ON," + player.Uid + ",C," + player.ROMFolder.Count + ","
                                         + string.Join(",", player.ROMFolder));
                                 }
@@ -387,7 +390,7 @@ namespace PSD.PSDGamepkg
                                 foreach (Player py in Board.Garden.Values)
                                 {
                                     if (py.IsAlive && py != player && py.ROMPlayerTar.Contains(player.Uid))
-                                        RaiseGMessage("G0OJ," + py.Uid + ",2," + player.Uid);
+                                        RaiseGMessage("G0OJ," + py.Uid + ",2,1," + player.Uid);
                                 }
                             }
                             player.SelectHero = 0;
@@ -583,12 +586,12 @@ namespace PSD.PSDGamepkg
                     if (priority == 100)
                     {
                         IDictionary<int, int> dicts = CalculatePetsScore();
-                        XI.Board.FinalRScore = dicts[1];
-                        XI.Board.FinalOScore = dicts[2];
+                        Board.FinalAkaScore = dicts[1];
+                        Board.FinalAoScore = dicts[2];
                     }
                     else if (priority == 200)
                     {
-                        if (XI.Board.FinalRScore > XI.Board.FinalOScore)
+                        if (Board.FinalAkaScore > Board.FinalAoScore)
                             RaiseGMessage("G0WN,1"); // Aka wins if Aka is larger
                         else
                             RaiseGMessage("G0WN,2"); // Otherwise, Ao wins
@@ -1247,7 +1250,7 @@ namespace PSD.PSDGamepkg
                                 }
                             }
                             if (candidates.Count > 0)
-                                gains.Add(who, candidates);
+                                gains.Add(player.Uid, candidates);
                         }
                         if (gains.Count > 0)
                             RaiseGMessage("G0LV," + string.Join(",", gains.Select(p => p.Key + "," +
@@ -1927,7 +1930,7 @@ namespace PSD.PSDGamepkg
                             player = Board.Supporter;
                         if (type == 0)
                         {
-                            player.STR += n;
+                            player.STR = player.mSTR + n;
                             player.STRa += n;
                             player.STRb += n;
                             WI.BCast("E0IA," + me + ",0," + n + "," + player.STRa + "," + player.STR);
@@ -1966,7 +1969,7 @@ namespace PSD.PSDGamepkg
                             player = Board.Supporter;
                         if (type == 0)
                         {
-                            player.STR -= n;
+                            player.STR = player.mSTR - n;
                             player.STRa -= n;
                             player.STRb -= n;
                             WI.BCast("E0OA," + me + ",0," + n + "," + player.STRa + "," + player.STR);
@@ -2007,7 +2010,7 @@ namespace PSD.PSDGamepkg
                         {
                             if (type == 0)
                             {
-                                player.DEX += n;
+                                player.DEX = player.mDEX + n;
                                 player.DEXa += n;
                                 player.DEXb += n;
                                 WI.BCast("E0IX," + me + ",0," + n + "," + player.DEXa + "," + player.DEX);
@@ -2047,7 +2050,7 @@ namespace PSD.PSDGamepkg
                             player = Board.Supporter;
                         if (type == 0)
                         {
-                            player.DEX -= n;
+                            player.DEX = player.mDEX - n;
                             player.DEXa -= n;
                             player.DEXb -= n;
                             WI.BCast("E0OX," + me + ",0," + n + "," + player.DEXa + "," + player.DEX);
@@ -2872,26 +2875,48 @@ namespace PSD.PSDGamepkg
                 case "G0OV":
                     {
                         ushort ut = ushort.Parse(args[1]);
-                        Player py = Board.Garden[ut];
-                        int hero = py.Coss.Pop();
+                        Player player = Board.Garden[ut];
+                        int hero = player.Coss.Pop();
                         WI.BCast("E0OV," + ut + "," + hero);
 
                         List<ushort> excds = new List<ushort>();
-                        if (py.ExEquip != 0)
-                            excds.Add(py.ExEquip);
-                        excds.AddRange(py.ExCards);
+                        if (player.ExEquip != 0)
+                            excds.Add(player.ExEquip);
+                        excds.AddRange(player.ExCards);
                         if (excds.Count > 0)
-                            RaiseGMessage("G0QZ," + py.Uid + "," + string.Join(",", excds));
-                        if (py.ROMToken != 0)
-                            RaiseGMessage("G0OJ," + py.Uid + ",0," + py.ROMToken);
-                        if (py.ROMCards.Count > 0)
+                            RaiseGMessage("G0QZ," + player.Uid + "," + string.Join(",", excds));
+                        if (player.ROMToken != 0)
+                            RaiseGMessage("G0OJ," + player.Uid + ",0," + player.ROMToken);
+                        if (player.ROMCards.Count > 0)
                         {
-                            RaiseGMessage("G2TZ,0," + py.Uid + "," + string.Join(",", py.ROMCards));
-                            RaiseGMessage("G0OJ," + py.Uid + ",1," + string.Join(",", py.ROMCards));
+                            RaiseGMessage("G2TZ,0," + player.Uid + "," + string.Join(",", player.ROMCards));
+                            RaiseGMessage("G0OJ," + player.Uid + ",1," + player.ROMCards.Count
+                                + "," + string.Join(",", player.ROMCards));
+                            IDictionary<char, List<ushort>> allKinds = new Dictionary<char, List<ushort>>();
+                            foreach (string cd in player.ROMCards)
+                            {
+                                if (cd[0] != 'H')
+                                    Util.AddToMultiMap(allKinds, cd[0], ushort.Parse(cd.Substring(1)));
+                            }
+                            if (allKinds.Count > 0)
+                                RaiseGMessage("G0ON," + string.Join(",", allKinds.Select(p => player.Uid +
+                                    "," + p.Key + "," + p.Value.Count + "," + string.Join(",", p.Value))));
                         }
-                        if (py.ROMPlayerTar.Count > 0)
-                            RaiseGMessage("G0OJ," + py.Uid + ",2," + string.Join(",", py.ROMPlayerTar));
-                        py.ResetROM(Board);
+                        if (player.ROMPlayerTar.Count > 0)
+                            RaiseGMessage("G0OJ," + player.Uid + ",2," + player.ROMPlayerTar.Count
+                                + "," + string.Join(",", player.ROMPlayerTar));
+                        if (player.ROMAwake)
+                            RaiseGMessage("G0OJ," + player.Uid + ",3");
+                        if (player.ROMFolder.Count > 0)
+                        {
+                            RaiseGMessage("G2TZ,0," + player.Uid + "," + string.Join(
+                                ",", player.ROMFolder.Select(p => "C" + p)));
+                            RaiseGMessage("G0OJ," + player.Uid + ",4," + player.ROMFolder.Count
+                                + "," + string.Join(",", player.ROMFolder));
+                            RaiseGMessage("G0ON," + player.Uid + ",C," + player.ROMFolder.Count + ","
+                                + string.Join(",", player.ROMFolder));
+                        }
+                        player.ResetROM(Board);
 
                         Hero hro = LibTuple.HL.InstanceHero(hero);
                         if (hro != null)

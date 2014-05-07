@@ -161,8 +161,12 @@
     <Image x:Key="heroHead19006" Source="Heros/19006.png"/>
     <Image x:Key="heroHead19007" Source="Heros/19007.png"/>
     <Image x:Key="heroHead19008" Source="Heros/19008.png"/>
+    <Image x:Key="heroHead19009" Source="Heros/19009.png"/>
+    <Image x:Key="heroHead19010" Source="Heros/19010.png"/>
     <Image x:Key="heroHead19011" Source="Heros/19011.png"/>
     <Image x:Key="heroHead19012" Source="Heros/19012.png"/>
+    <Image x:Key="heroHead19013" Source="Heros/19013.png"/>
+    <Image x:Key="heroHead19015" Source="Heros/19015.png"/>
     <Image x:Key="heroHead19017" Source="Heros/19017.png"/>
     <Image x:Key="heroHead19018" Source="Heros/19018.png"/>
     <Image x:Key="heroHead19019" Source="Heros/19019.png"/>
@@ -231,8 +235,12 @@
     <ImageBrush x:Key="nameBarHL006" ImageSource="NameBar/NameHL006.png"/>
     <ImageBrush x:Key="nameBarHL007" ImageSource="NameBar/NameHL007.png"/>
     <ImageBrush x:Key="nameBarHL008" ImageSource="NameBar/NameHL008.png"/>
+    <ImageBrush x:Key="nameBarHL009" ImageSource="NameBar/NameHL009.png"/>
+    <ImageBrush x:Key="nameBarHL010" ImageSource="NameBar/NameHL010.png"/>
     <ImageBrush x:Key="nameBarHL011" ImageSource="NameBar/NameHL011.png"/>
     <ImageBrush x:Key="nameBarHL012" ImageSource="NameBar/NameHL012.png"/>
+    <ImageBrush x:Key="nameBarHL013" ImageSource="NameBar/NameHL013.png"/>
+    <ImageBrush x:Key="nameBarHL015" ImageSource="NameBar/NameHL015.png"/>
     <ImageBrush x:Key="nameBarHL017" ImageSource="NameBar/NameHL017.png"/>
     <ImageBrush x:Key="nameBarHL018" ImageSource="NameBar/NameHL018.png"/>
     <ImageBrush x:Key="nameBarHL019" ImageSource="NameBar/NameHL019.png"/>
@@ -553,8 +561,12 @@
     <Image x:Key="hroCardHL006" Source="Card/Heros/HL006.png"/>
     <Image x:Key="hroCardHL007" Source="Card/Heros/HL007.png"/>
     <Image x:Key="hroCardHL008" Source="Card/Heros/HL008.png"/>
+    <Image x:Key="hroCardHL009" Source="Card/Heros/HL009.png"/>
+    <Image x:Key="hroCardHL010" Source="Card/Heros/HL010.png"/>
     <Image x:Key="hroCardHL011" Source="Card/Heros/HL011.png"/>
     <Image x:Key="hroCardHL012" Source="Card/Heros/HL012.png"/>
+    <Image x:Key="hroCardHL013" Source="Card/Heros/HL013.png"/>
+    <Image x:Key="hroCardHL015" Source="Card/Heros/HL015.png"/>
     <Image x:Key="hroCardHL017" Source="Card/Heros/HL017.png"/>
     <Image x:Key="hroCardHL018" Source="Card/Heros/HL018.png"/>
     <Image x:Key="hroCardHL019" Source="Card/Heros/HL019.png"/>

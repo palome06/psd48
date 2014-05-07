@@ -1443,11 +1443,8 @@ namespace PSD.PSDGamepkg.JNS
             if (type == 0)
                 return b1;
             else if (type == 1)
-            {
-                string[] blocks = fuse.Split(',');
-                return b1 && Util.TakeRange(blocks, 1, blocks.Length).Select(
-                    p => XI.Board.Garden[ushort.Parse(p)]).Where(p => p.IsTared && p.HP == 0).Any();
-            } else
+                return XI.Board.Garden.Values.Where(p => p.IsTared && p.HP == 0).Any();
+            else
                 return false;
         }
         public void JN40301Action(Player player, int type, string fuse, string argst)

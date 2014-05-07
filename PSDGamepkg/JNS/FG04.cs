@@ -618,13 +618,14 @@ namespace PSD.PSDGamepkg.JNS
         }
         public bool GF04ConsumeValid(Player player, int consumeType, int type, string fuse)
         {
-            return XI.Board.Garden.Where(p => p.IsAlive && p.HP == 0).Any();
+            return XI.Board.Garden.Values.Any(p => p.IsAlive && p.HP == 0);
         }
         public void GF04ConsumeAction(Player player, int consumeType, int type, string fuse, string argst)
         {
             if (consumeType == 1)
             {
-                List<ushort> zeros = XI.Board.Garden.Where(p => p.IsAlive && p.HP == 0).Select(p => p.Uid).ToList();
+                List<ushort> zeros = XI.Board.Garden.Values.Where(
+                    p => p.IsAlive && p.HP == 0).Select(p => p.Uid).ToList();
                 string ic = zeros.Count > 0 ? "#复活,T1(p" + string.Join("p", zeros) + ")" : "/";
                 ushort tg = ushort.Parse(XI.AsyncInput(player.Uid, ic, "GF04ConsumeAction", "1"));
 
@@ -634,8 +635,8 @@ namespace PSD.PSDGamepkg.JNS
                     Player tgp = XI.Board.Garden[tg];
                     Cure("GF04", tgp, tgp.HPb, FiveElement.SOL);
                 }
-                zeros = XI.Board.Garden.Where(p => p.IsAlive && p.HP == 0).Select(p => p.Uid).ToList();
-                if (zeros.Length > 0)
+                zeros = XI.Board.Garden.Values.Where(p => p.IsAlive && p.HP == 0).Select(p => p.Uid).ToList();
+                if (zeros.Count > 0)
                     XI.InnerGMessage("G0ZH,0", 0);
             }
         }

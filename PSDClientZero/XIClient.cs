@@ -2152,6 +2152,12 @@ namespace PSD.ClientZero
                         if (hro != 0)
                             VI.Cout(Uid, "翻出的角色牌为【{0}】.", zd.Hero(hro));
                     }
+                    else if (args[1] == "5")
+                    {
+                        ushort mon = ushort.Parse(args[2]);
+                        if (mon != 0)
+                            VI.Cout(Uid, "翻出怪物牌为【{0}】.", zd.Monster(mon));
+                    }
                     break;
                 case "E0IS":
                     {

@@ -2408,6 +2408,15 @@ namespace PSD.ClientAo
                             A0O.FlyingGet("H" + hro, 0, 0, true);
                         }
                     }
+                    else if (args[1] == "5")
+                    {
+                        ushort mon = ushort.Parse(args[2]);
+                        if (mon != 0)
+                        {
+                            VI.Cout(Uid, "翻出怪物牌为【{0}】.", zd.Monster(mon));
+                            A0O.FlyingGet("M" + mon, 0, 0, true);
+                        }
+                    }
                     break;
                 case "E0LH":
                     for (int i = 1; i < args.Length; i += 3)
@@ -3107,7 +3116,7 @@ namespace PSD.ClientAo
                                 A0P[h].SetAsSpSucc();
                         }
                     }
-                    VI.TerminCinTunnel(Uid);
+                    //VI.TerminCinTunnel(Uid);
                     break;
                 case "ZM1":
                     {
@@ -3987,8 +3996,8 @@ namespace PSD.ClientAo
                                     ap.InsFakeq(ushort.Parse(fakeqpairs[i]), fakeqpairs[i + 1]);
                                 ap.InsExSpCard(peoples);
                                 ap.InsPlayerTar(tars);
-                                zp.AwakeSignal = awake;
-                                zp.FolderCount = foldsz;
+                                ap.Awake = awake;
+                                ap.FolderCount = foldsz;
                                 foreach (ushort ut in escues)
                                     ap.InsEscue(ut);
 
@@ -4114,7 +4123,8 @@ namespace PSD.ClientAo
                         ++idx;
                         List<ushort> folders = Util.TakeRange(blocks, idx, idx + folderCount)
                             .Select(p => ushort.Parse(p)).ToList();
-                        A0M.InsMyFolder(folders);
+                        A0P[Uid].InsMyFolder(folders);
+                        //A0M.InsMyFolder(folders);
                         idx += folderCount;
                     }
                     break;

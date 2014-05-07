@@ -185,7 +185,7 @@ namespace PSD.ClientAo.VW
                     string[] blocks = line.Split(',');
                     for (int idx = 1; idx < blocks.Length; )
                     {
-                        blocks[idx + 12] = "0," + blocks[idx + 12] + ",0" // insert trove and lug into exq;
+                        blocks[idx + 12] = "0," + blocks[idx + 12] + ",0"; // insert trove and lug into exq;
 
                         int nextIdx = idx + 18;
                         int excdsz = int.Parse(blocks[nextIdx]);
