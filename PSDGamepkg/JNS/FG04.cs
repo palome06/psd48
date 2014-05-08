@@ -1936,34 +1936,26 @@ namespace PSD.PSDGamepkg.JNS
         }
         public bool GFT3ConsumeValid(Player player, int consumeType, int type, string fuse)
         {
-            string[] blocks = fuse.Split(',');
-            return Util.TakeRange(blocks, 1, blocks.Length).Select(
-                p => XI.Board.Garden[ushort.Parse(p)]).Where(p => p.IsAlive && p.HP == 0).Any();
+            return XI.Board.Garden.Values.Any(p => p.IsAlive && p.HP == 0);
         }
         public void GFT3ConsumeAction(Player player, int consumeType, int type, string fuse, string argst)
         {
             if (consumeType == 1)
             {
-                // fuse = G0ZH,A,B,C
-                string[] blocks = fuse.Split(',');
-                List<Player> invs = Util.TakeRange(blocks, 1, blocks.Length).Select(
-                    p => XI.Board.Garden[ushort.Parse(p)]).Where(p => p.IsAlive && p.HP == 0).ToList();
-                string ic = invs.Count > 0 ? "T1(p" + string.Join("p", invs.Select(p => p.Uid)) + ")" : "/";
+                List<ushort> zeros = XI.Board.Garden.Values.Where(
+                    p => p.IsAlive && p.HP == 0).Select(p => p.Uid).ToList();
+                string ic = zeros.Count > 0 ? "#HP+2,T1(p" + string.Join("p", zeros) + ")" : "/";
                 ushort tg = ushort.Parse(XI.AsyncInput(player.Uid, ic, "GFT3ConsumeAction", "1"));
-                string result = "";
-                for (int i = 1; i < blocks.Length; ++i)
+
+                if (zeros.Contains(tg))
                 {
-                    ushort pc = ushort.Parse(blocks[i]);
-                    if (tg == pc)
-                    {
-                        Player tgp = XI.Board.Garden[tg];
-                        Cure("GFT3", tgp, 2);
-                    }
-                    else
-                        result += "," + blocks[i];
+                    VI.Cout(0, "{0}爆发「流萤」，令{1}HP+2.", XI.DisplayPlayer(player.Uid), XI.DisplayPlayer(tg));
+                    Player tgp = XI.Board.Garden[tg];
+                    Cure("GFT3", tgp, 2);
                 }
-                if (result.Length > 0)
-                    XI.InnerGMessage("G0ZH" + result, 0);
+                zeros = XI.Board.Garden.Values.Where(p => p.IsAlive && p.HP == 0).Select(p => p.Uid).ToList();
+                if (zeros.Count > 0)
+                    XI.InnerGMessage("G0ZH,0", 0);
             }
         }
         public void GFT4Debut()
@@ -2086,7 +2078,12 @@ namespace PSD.PSDGamepkg.JNS
         {
             if (consumeType == 0)
             {
-                int adjust = player.GetPetCount();
+                bool[] sets = new bool[] { false, false, false, false, false };
+                foreach (Player py in XI.Board.Garden.Values)
+                    if (py.IsAlive && py.Team == player.Team && py.GetPetCount() > 0)
+                        for (int i = 0; i < 5; ++i)
+                            sets[i] |= (py.Pets[i] != 0);
+                int adjust = sets.Count(p => p);
                 if (type == 0)
                     XI.RaiseGMessage("G0IP," + player.Team + "," + adjust);
                 else if (type == 1)
@@ -2107,7 +2104,8 @@ namespace PSD.PSDGamepkg.JNS
             if (consumeType == 0)
             {
                 if (type == 0) // Z1
-                    return XI.Board.IsAttendWar(player) && player.GetPetCount() > 0;
+                    return XI.Board.IsAttendWar(player) && XI.Board.Garden.Values.Any(
+                        p => p.IsAlive && p.Team == player.Team && p.GetPetCount() > 0);
                 else if (type == 1) // AF
                 {
                     bool waken = player.GetPetCount() > 0;

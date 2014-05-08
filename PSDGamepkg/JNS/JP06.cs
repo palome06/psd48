@@ -426,7 +426,14 @@ namespace PSD.PSDGamepkg.JNS
                 if (origin.StartsWith("G0CD"))
                     XI.InnerGMessage(origin, 1);
                 else if (origin.StartsWith("G"))
-                    XI.RaiseGMessage(origin);
+                {
+                    int hdx = fuse.IndexOf(';');
+                    string[] argv = Util.Substring(fuse, 0, hdx).Split(',');
+                    Base.Card.Tux tux = XI.LibTuple.TL.EncodeTuxCode(argv[3]);
+                    int inType = int.Parse(Util.Substring(fuse, hdx + 1, fuse.IndexOf(',', hdx)));
+                    int prior = tux.Priorities[inType];
+                    XI.InnerGMessage(origin, prior);
+                }
             }
         }
         public bool TP01Valid(Player player, int type, string fuse)
@@ -1191,6 +1198,16 @@ namespace PSD.PSDGamepkg.JNS
                     XI.InnerGMessage(Artiad.Harm.ToMessage(harms), 85);
             }
         }
+        public bool TPT2Bribe(Player player, int type, string fuse)
+        {
+            if (type == 0)
+            {
+                Player r = XI.Board.Rounder;
+                return r != null && r.Uid == player.Uid && !r.DrTuxDisabled;
+            }
+            else
+                return !player.DrTuxDisabled;
+        }
         public void TPT2Action(Player player, int type, string fuse, string argst)
         {
             string whoStr = XI.AsyncInput(player.Uid, "#获得补牌的,T1(p" + string.Join("p",
@@ -1441,11 +1458,14 @@ namespace PSD.PSDGamepkg.JNS
             ushort pop = XI.Board.RestNPCPiles.Dequeue();
             NPC npc = XI.LibTuple.NL.Decode(NMBLib.OriginalNPC(pop));
             XI.RaiseGMessage("G0YM,3," + pop + ",0");
-
+            XI.Board.Monster1 = pop;
             UEchoCode r5ed = XI.HandleWithNPCEffect(XI.Board.Garden[to], npc, false);
-            //if (XI.Board.Monster1 != 0) // In case the NPC has been taken away
-            //{
-            XI.RaiseGMessage("G0ON,0,M,1," + pop);
+            
+            if (XI.Board.Monster1 != 0) // In case the NPC has been taken away
+            {
+                XI.Board.Monster1 = 0;
+                XI.RaiseGMessage("G0ON,0,M,1," + pop);
+            }
             // XI.Board.RestNPCDises.Add(pop);
             XI.RaiseGMessage("G0YM,3,0,0");
             //}
@@ -1492,7 +1512,8 @@ namespace PSD.PSDGamepkg.JNS
         }
         public bool TPT3Valid(Player player, int type, string fuse)
         {
-            string[] kekkaiA = new string[] { "ZP01,0", "TP01,0", "TPT1,0", "TPT3,0", "TPT3,1" };
+            string[] kekkaiA = new string[] { "TP01,0", "TPT3,0", "TPT3,1" };
+            string[] kekkaiB = new string[] { "ZP01,0", "TPT1,0" };
             // G0CD,A,T,KN,x..;TF
             if (type == 0)
             {
@@ -1504,7 +1525,7 @@ namespace PSD.PSDGamepkg.JNS
                 string tuxCode = blocks[3];
                 Tux tux = XI.LibTuple.TL.EncodeTuxCode(tuxCode);
                 return py.Team == player.OppTeam && typeMatch && tux != null &&
-                    !kekkaiA.Contains(tuxCode + "," + tuxType);
+                    !kekkaiA.Contains(tuxCode + "," + tuxType) && !kekkaiB.Contains(tuxCode + "," + tuxType);
             }
             else if (type == 1)
             {
@@ -2210,13 +2231,13 @@ namespace PSD.PSDGamepkg.JNS
 
                 List<ushort> cards = Util.TakeRange(argv, 5, argv.Length).Select(p =>
                     ushort.Parse(p)).Where(p => p > 0 && XI.Board.Garden[ust].Tux.Contains(p)).ToList();
-                if (cards.Count > 0 && XI.Board.Garden[ust].Team == player.Team)
-                {
-                    XI.RaiseGMessage("G0OT," + ust + "," + cards.Count + "," + string.Join(",", cards));
-                    XI.Board.PendingTux.Enqueue(player.Uid + "," + "XBT4Consume," + string.Join(",", cards));
-                    XI.InnerGMessage(fuse, 101);
-                } else
-                    XI.InnerGMessage(fuse, 96);
+
+                ushort hst = ushort.Parse(args[3]);
+                foreach (ushort p in cards)
+                    XI.Board.PendingTux.Remove(hst + ",G0CC," + p);
+                XI.Board.PendingTux.Enqueue(player.Uid + ",XBT4Consume," + string.Join(",", cards));
+                XI.RaiseGMessage("G2TZ," + player.Uid + ",0," + string.Join(",", cards.Select(p => "C" + p)));
+                XI.InnerGMessage(fuse, 201);
             }
             //else if (lug != null && type == 1)
             //{

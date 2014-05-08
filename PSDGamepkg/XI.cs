@@ -73,7 +73,8 @@ namespace PSD.PSDGamepkg
             //10603, 19018, 10605, 10501, 15003, 10505
             //17022, 19006, 10605, 10501, 15003, 10505
             //19009, 17022, 19001, 19011, 10107, 10302
-            19009, 10105, 19013, 17010, 19017, 19010
+            //19009, 10105, 19013, 17010, 19017, 19010
+            10602, 10306, 19002, 10104, 19009, 17015
         };
 
         #region Memeber Declaration & Constructor
@@ -1012,7 +1013,7 @@ namespace PSD.PSDGamepkg
                         string sktKey = skt.Name + "," + ((skt.Type == SKTType.EQ || skt.Type == SKTType.PT) ?
                             (skt.Consume + "!" + skt.InType) : skt.InType.ToString());
                         Util.AddToMultiMap(occurTable, sktKey,
-                            pair.Key + "," + skt.Priorty + "," + skt.Owner);
+                            pair.Key + "," + skt.Priorty + "," + skt.Owner + "," + skt.Occur);
                     }
                 }
 
@@ -1041,6 +1042,7 @@ namespace PSD.PSDGamepkg
                         string oc = splits[0];
                         int priority = int.Parse(splits[1]);
                         ushort owner = ushort.Parse(splits[2]);
+                        string acOccur = splits[3];
 
                         SkTriple skt = new SkTriple()
                         {
@@ -1052,7 +1054,7 @@ namespace PSD.PSDGamepkg
                             Consume = para.Consume,
                             Lock = para.Lock,
                             IsOnce = para.IsOnce,
-                            Occur = oc,
+                            Occur = acOccur,
                             LinkFrom = host, // format: TP02,0&TP03,0
                             IsTermini = para.IsTermini
                         };
@@ -2073,7 +2075,8 @@ namespace PSD.PSDGamepkg
                 }
                 if (argType == 0)
                     new XI().StartRoom(args);
-            } else
+            }
+            else
                 new XI().StartRoom(null);
             int 雷杀 = 9, 火杀 = 4;
             if (雷杀 == 火杀)

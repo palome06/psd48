@@ -290,16 +290,6 @@ namespace PSD.PSDGamepkg
                             ushort who = ushort.Parse(args[i + 1]);
                             Player player = Board.Garden[who];
                             Hero hero = LibTuple.HL.InstanceHero(player.SelectHero);
-                            List<string> removeList = new List<string>();
-                            foreach (string sk in hero.Skills)
-                                foreach (var pair in sk02)
-                                {
-                                    pair.Value.RemoveAll(delegate(SkTriple skt) { return skt.Name.Equals(sk); });
-                                    if (pair.Value.Count == 0)
-                                        removeList.Add(pair.Key);
-                                }
-                            foreach (string rv in removeList)
-                                sk02.Remove(rv);
 
                             if (player.Weapon != 0)
                                 g1zl += "," + player.Uid + "," + player.Weapon;
@@ -460,18 +450,39 @@ namespace PSD.PSDGamepkg
                         if (cards.Any())
                         {
                             RaiseGMessage("G0OT," + ust + "," + cards.Count + "," + string.Join(",", cards));
-                            if ((tux.IsEq[sktInType] & 3) == 0)
-                                RaiseGMessage("G0ON," + ust + ",C," + cards.Count + "," + string.Join(",", cards));
-                            else if ((tux.IsEq[sktInType] & 1) != 0)
-                                Board.PendingTux.Enqueue(cards.Select(p => hst + ",G0ZB," + tux.Code + "," + p));
-                            else
-                                Board.PendingTux.Enqueue(cards.Select(p => hst + ",G0CC," + p));
+                            Board.PendingTux.Enqueue(cards.Select(p => hst + ",G0CC," + p));
                             RaiseGMessage("G2TZ,0," + ust + "," + string.Join(",", cards.Select(p => "C" + p)));
                         }
+                        WI.BCast("E0CC," + Util.Substring(cmd, "G0CC,".Length, hdx));
                     } else if (priority == 200) {
-                        int hrdx = cmdrst.IndexOf(';');
-                        string cardAndCode = cmdrst.Substring(0, hrdx);
-                        WI.BCast("E0CC," + cardAndCode);
+                        ushort ust = ushort.Parse(args[1]);
+                        ushort adapter = ushort.Parse(args[2]);
+                        ushort hst = ushort.Parse(args[3]);
+                        string cardname = args[4];
+                        int hdx = cmd.IndexOf(';');
+                        int idx = cmd.IndexOf(',', hdx);
+
+                        int sktInType = int.Parse(Util.Substring(cmd, hdx + 1, idx));
+                        string sktFuse = Util.Substring(cmd, idx + 1, -1);
+                        Base.Card.Tux tux = tx01[cardname];
+                        string[] argv = cmd.Substring(0, hdx).Split(',');
+                        List<ushort> cards = Util.TakeRange(argv, 5, argv.Length).Select(p =>
+                            ushort.Parse(p)).Where(p => p > 0).ToList();
+                        if (cards.Any())
+                        {
+                            if ((tux.IsEq[sktInType] & 3) == 0)
+                            {
+                                foreach (ushort p in cards)
+                                    Board.PendingTux.Remove(hst + ",G0CC," + p);
+                                RaiseGMessage("G0ON," + ust + ",C," + cards.Count + "," + string.Join(",", cards));
+                            }
+                            else if ((tux.IsEq[sktInType] & 1) != 0)
+                            {
+                                foreach (ushort p in cards)
+                                    Board.PendingTux.Remove(hst + ",G0CC," + p);
+                                Board.PendingTux.Enqueue(cards.Select(p => hst + ",G0ZB," + tux.Code + "," + p));
+                            }
+                        }
                     }
                     else if (priority == 300)
                     {

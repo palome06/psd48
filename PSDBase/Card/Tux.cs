@@ -23,7 +23,7 @@ namespace PSD.Base.Card
         public ushort[] Range { protected set; get; }
 
         public string Description { private set; get; }
-        public string Special { private set; get; }
+        public IDictionary<string, string> Special { private set; get; }
 
         public int[] Priorities { protected set; get; }
         public string[] Occurs { protected set; get; }
@@ -100,7 +100,7 @@ namespace PSD.Base.Card
         protected static LocustActionDelegate DefLocust = (p, t, f, a, cd, lr, l) => { };
 
         // public Delegate Type of Handling events
-        internal Tux(string name, string code, TuxType type, string description, string special)
+        internal Tux(string name, string code, TuxType type, string description, IDictionary<string, string> special)
         {
             this.Name = name; this.Code = code;
             //this.Count = count;
@@ -198,64 +198,69 @@ namespace PSD.Base.Card
 
         private Utils.ReadonlySQL sql;
 
-        public TuxLib(string path)
-        {
-            Firsts = new List<Tux>();
-            string[] lines = System.IO.File.ReadAllLines(path);
-            foreach (string line in lines)
-            {
-                if (line != null && line.Length > 0)
-                {
-                    string[] content = line.Split('\t');
-                    string code = content[0]; // code, e.g. (ZP04)
-                    string name = content[1]; // name, e.g. (Tianxuanwuyin)
-                    //ushort count = ushort.Parse(content[2]);
-                    Tux.TuxType type;
-                    switch (code.Substring(0, 2))
-                    {
-                        case "JP": type = Tux.TuxType.JP; break;
-                        case "ZP": type = Tux.TuxType.ZP; break;
-                        case "TP": type = Tux.TuxType.TP; break;
-                        case "WQ": type = Tux.TuxType.WQ; break;
-                        case "FJ": type = Tux.TuxType.FJ; break;
-                        case "XB": type = Tux.TuxType.XB; break;
-                        default: type = Tux.TuxType.HX; break;
-                    }
-                    string countStr = content[2];
-                    string occur = content[3];
-                    string priority = content[4];
-                    string parasitismStr = content[5];
-                    string description = content[6];
-                    string special = content[7];
-                    string isEqs = content[8];
-                    string targets = content[9];
-                    string growup = content[10];
-                    string terminiStr = content[11];
-                    if (type == Tux.TuxType.WQ || type == Tux.TuxType.FJ || type == Tux.TuxType.XB)
-                    {
-                        var tux = new TuxEqiup(name, code, type, description, special, growup);
-                        tux.Parse(countStr, occur, parasitismStr, priority, isEqs, targets, terminiStr);
-                        Firsts.Add(tux);
-                    }
-                    else
-                    {
-                        var tux = new Tux(name, code, type, description, special);
-                        tux.Parse(countStr, occur, parasitismStr, priority, isEqs, targets, terminiStr);
-                        Firsts.Add(tux);
-                    }
-                }
-            }
-            //ushort cardx = 1;
-            dicts = new Dictionary<ushort, Tux>();
-            foreach (Tux tux in Firsts)
-            {
-                for (int i = 0; i < tux.Range.Length; i += 2)
-                {
-                    for (ushort j = tux.Range[i]; j <= tux.Range[i + 1]; ++j)
-                        dicts.Add(j, tux);
-                }
-            }
-        }
+        //public TuxLib(string path)
+        //{
+        //    Firsts = new List<Tux>();
+        //    string[] lines = System.IO.File.ReadAllLines(path);
+        //    foreach (string line in lines)
+        //    {
+        //        if (line != null && line.Length > 0)
+        //        {
+        //            string[] content = line.Split('\t');
+        //            string code = content[0]; // code, e.g. (ZP04)
+        //            string name = content[1]; // name, e.g. (Tianxuanwuyin)
+        //            //ushort count = ushort.Parse(content[2]);
+        //            Tux.TuxType type;
+        //            switch (code.Substring(0, 2))
+        //            {
+        //                case "JP": type = Tux.TuxType.JP; break;
+        //                case "ZP": type = Tux.TuxType.ZP; break;
+        //                case "TP": type = Tux.TuxType.TP; break;
+        //                case "WQ": type = Tux.TuxType.WQ; break;
+        //                case "FJ": type = Tux.TuxType.FJ; break;
+        //                case "XB": type = Tux.TuxType.XB; break;
+        //                default: type = Tux.TuxType.HX; break;
+        //            }
+        //            string countStr = content[2];
+        //            string occur = content[3];
+        //            string priority = content[4];
+        //            string parasitismStr = content[5];
+        //            string description = content[6];
+        //            string descstr = content[7];
+        //            IDictionary<string, string> special = new Dictionary<string, string>();
+        //            string[] descSpt = string.IsNullOrEmpty(descstr) ?
+        //                    new string[] { } : descstr.Split('|');
+        //            for (int i = 1; i < descSpt.Length; i += 2)
+        //                special.Add(descSpt[i], descSpt[i + 1]);
+        //            string isEqs = content[8];
+        //            string targets = content[9];
+        //            string growup = content[10];
+        //            string terminiStr = content[11];
+        //            if (type == Tux.TuxType.WQ || type == Tux.TuxType.FJ || type == Tux.TuxType.XB)
+        //            {
+        //                var tux = new TuxEqiup(name, code, type, description, special, growup);
+        //                tux.Parse(countStr, occur, parasitismStr, priority, isEqs, targets, terminiStr);
+        //                Firsts.Add(tux);
+        //            }
+        //            else
+        //            {
+        //                var tux = new Tux(name, code, type, description, special);
+        //                tux.Parse(countStr, occur, parasitismStr, priority, isEqs, targets, terminiStr);
+        //                Firsts.Add(tux);
+        //            }
+        //        }
+        //    }
+        //    //ushort cardx = 1;
+        //    dicts = new Dictionary<ushort, Tux>();
+        //    foreach (Tux tux in Firsts)
+        //    {
+        //        for (int i = 0; i < tux.Range.Length; i += 2)
+        //        {
+        //            for (ushort j = tux.Range[i]; j <= tux.Range[i + 1]; ++j)
+        //                dicts.Add(j, tux);
+        //        }
+        //    }
+        //}
 
         public TuxLib()
         {
@@ -287,7 +292,12 @@ namespace PSD.Base.Card
                 string priority = (string)data["PRIORS"];
                 string parasitismStr = (string)data["PARASITISM"];
                 string description = (string)data["DESCRIPTION"];
-                string special = (string)data["SPECIAL"];
+                string descstr = (string)data["SPECIAL"];
+                IDictionary<string, string> special = new Dictionary<string, string>();
+                string[] descSpt = string.IsNullOrEmpty(descstr) ?
+                        new string[] { } : descstr.Split('|');
+                for (int i = 1; i < descSpt.Length; i += 2)
+                    special.Add(descSpt[i], descSpt[i + 1]);
                 string isEqs = (string)data["ISEQ"];
                 string targets = (string)data["TARGET"];
                 string terministr = (string)data["TERMHIND"];
@@ -645,7 +655,7 @@ namespace PSD.Base.Card
         }
 
         public TuxEqiup(string name, string code, TuxType type,
-                string description, string special, string growup) :
+                string description, IDictionary<string, string> special, string growup) :
             base(name, code, type, description, special)
         {
             //int idxh = growup.IndexOf('H');
@@ -674,7 +684,7 @@ namespace PSD.Base.Card
         public override bool IsLuggage() { return true; }
 
         public Luggage(string name, string code, TuxType type,
-                string description, string special, string growup) :
+                string description, IDictionary<string, string> special, string growup) :
             base(name, code, type, description, special, growup)
         {
             Capacities = new List<string>();

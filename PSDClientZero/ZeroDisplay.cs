@@ -387,8 +387,13 @@ namespace PSD.ClientZero
                 Aps(sb, "  {0} {1}", tux.Name, tux.Code);
                 if (!string.IsNullOrEmpty(tux.Description))
                     Aps(sb, "{0}", tux.Description);
-                if (!string.IsNullOrEmpty(tux.Special))
-                    Aps(sb, "{0}", tux.Special);
+                foreach (var pair in tux.Special)
+                {
+                    if (!string.IsNullOrEmpty(pair.Key))
+                        Aps(sb, "{0}：{1}", pair.Key, pair.Value);
+                    else
+                        Aps(sb, "{0}", pair.Value);
+                }
                 Aps(sb, "*******************");
             }
             return sb.ToString();

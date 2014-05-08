@@ -110,23 +110,11 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Card\Eve\SJ103.png" />
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="Resources\Card\Eve\SJ104.png" />
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="Resources\Card\Eve\SJ201.png" />
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="Resources\Card\Eve\SJ202.png" />
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="Resources\Card\Eve\SJ301.png" />
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="Resources\Card\Eve\SJ302.png" />
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="Resources\Card\Eve\SJ303.png" />
   </ItemGroup>
   <ItemGroup>
@@ -389,17 +377,9 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Card\Tux\FJ01.png" />
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="Resources\Card\Tux\FJ02.png" />
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="Resources\Card\Tux\FJ03.png" />
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="Resources\Card\Tux\FJ04.png" />
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="Resources\Card\Tux\FJ05.png" />
   </ItemGroup>
   <ItemGroup>
@@ -1024,15 +1004,11 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Heros\19001.png" />
+    <Resource Include="Resources\Heros\19008.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Card\Heros\HL001.png" />
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="Resources\Card\Heros\HL008.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Heros\19008.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Card\NMB\GFT3.png" />
@@ -1045,6 +1021,7 @@
     <Resource Include="Resources\Card\NMB\GST4.png" />
     <Resource Include="Resources\Card\NMB\GTT3.png" />
     <Resource Include="Resources\Card\NMB\GTT4.png" />
+    <Resource Include="Resources\Card\NMB\GSH2.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\PetsSnap\GFT3.png" />
@@ -1057,6 +1034,7 @@
     <Resource Include="Resources\PetsSnap\GST4.png" />
     <Resource Include="Resources\PetsSnap\GTT3.png" />
     <Resource Include="Resources\PetsSnap\GTT4.png" />
+    <Resource Include="Resources\PetsSnap\GSH2.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Heros\19003.png" />
@@ -1165,6 +1143,10 @@
     <Resource Include="Resources\NameBar\NameXJ506.png" />
     <Resource Include="Resources\NameBar\NameXJ507.png" />
     <Resource Include="Resources\NameBar\NameXJ508.png" />
+    <Resource Include="Resources\NameBar\NameHL002.png" />
+    <Resource Include="Resources\NameBar\NameHL006.png" />
+    <Resource Include="Resources\NameBar\NameHL018.png" />
+    <Resource Include="Resources\NameBar\NameHL019.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Logo\CananCountdown12.png" />
@@ -1178,31 +1160,11 @@
     <Resource Include="Resources\Logo\Loser.png" />
   </ItemGroup>
   <ItemGroup>
+    <Resource Include="Resources\Heros\19002.png" />
     <Resource Include="Resources\Heros\19006.png" />
-    <Resource Include="Resources\Heros\19018.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Card\Heros\HL006.png" />
-    <Resource Include="Resources\Card\Heros\HL018.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\NameBar\NameHL006.png" />
-    <Resource Include="Resources\NameBar\NameHL018.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Heros\19019.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Card\Heros\HL019.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\NameBar\NameHL019.png" />
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="Resources\Heros\19017.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Card\Heros\HL017.png" />
+    <Resource Include="Resources\Heros\19018.png" />
+    <Resource Include="Resources\Heros\19019.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\NameBar\NameHL017.png" />
@@ -1226,44 +1188,40 @@
     <Resource Include="Resources\Token\TAH0601.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Resources\Card\Heros\HL007.png" />
-    <Resource Include="Resources\Card\Heros\HL011.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Heros\19007.png" />
-    <Resource Include="Resources\Heros\19011.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\NameBar\NameHL007.png" />
-    <Resource Include="Resources\NameBar\NameHL011.png" />
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="Resources\PetsSnap\JPT2.png" />
     <Resource Include="Resources\PetsSnap\TPT3.png" />
   </ItemGroup>
   <ItemGroup>
+    <Resource Include="Resources\Heros\19007.png" />
     <Resource Include="Resources\Heros\19009.png" />
+    <Resource Include="Resources\Heros\19010.png" />
+    <Resource Include="Resources\Heros\19011.png" />
+    <Resource Include="Resources\Heros\19013.png" />
     <Resource Include="Resources\Heros\19015.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Resources\Card\Heros\HL009.png" />
-    <Resource Include="Resources\Card\Heros\HL015.png" />
-  </ItemGroup>
-  <ItemGroup>
+    <Resource Include="Resources\NameBar\NameHL007.png" />
     <Resource Include="Resources\NameBar\NameHL009.png" />
+    <Resource Include="Resources\NameBar\NameHL010.png" />
+    <Resource Include="Resources\NameBar\NameHL011.png" />
+    <Resource Include="Resources\NameBar\NameHL013.png" />
     <Resource Include="Resources\NameBar\NameHL015.png" />
   </ItemGroup>
   <ItemGroup>
+    <Resource Include="Resources\Card\Heros\HL002.png" />
+	<Resource Include="Resources\Card\Heros\HL006.png" />
+    <Resource Include="Resources\Card\Heros\HL007.png" />
+    <Resource Include="Resources\Card\Heros\HL009.png" />
     <Resource Include="Resources\Card\Heros\HL010.png" />
+    <Resource Include="Resources\Card\Heros\HL011.png" />
     <Resource Include="Resources\Card\Heros\HL013.png" />
+    <Resource Include="Resources\Card\Heros\HL015.png" />
+	<Resource Include="Resources\Card\Heros\HL017.png" />
+	<Resource Include="Resources\Card\Heros\HL018.png" />
+	<Resource Include="Resources\Card\Heros\HL019.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Resources\NameBar\NameHL010.png" />
-    <Resource Include="Resources\NameBar\NameHL013.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Heros\19010.png" />
-    <Resource Include="Resources\Heros\19013.png" />
+    <Resource Include="Resources\Token\TRH02.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

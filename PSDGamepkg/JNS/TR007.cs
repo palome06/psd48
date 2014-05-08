@@ -2542,7 +2542,7 @@ namespace PSD.PSDGamepkg.JNS
         			harm.N = (int)(harm.N * factor);
         	}
         	player.ROMUshort = 1;
-        	XI.InnerGMessage(Artiad.Harm.ToMessage(harms), -199);
+        	XI.InnerGMessage(Artiad.Harm.ToMessage(harms), -189);
         }
         public bool JNH0202Valid(Player player, int type, string fuse)
         {
@@ -2575,30 +2575,31 @@ namespace PSD.PSDGamepkg.JNS
 	            XI.RaiseGMessage("G0QZ," + ut + "," + randomCard);
 
 	            Base.Card.Tux tux = XI.LibTuple.TL.DecodeTux(randomCard);
-	            if (tux.Type == Base.Card.Tux.TuxType.JP)
-	            	Harm(tar, player, 1);
-            	else if (tux.Type == Base.Card.Tux.TuxType.ZP)
-            	{
-            		int delta = tar.STR - tar.STR / 2;
-            		if (delta > 0)
-            			XI.RaiseGMessage("G0OA," + ut + ",1," + delta);
-            	} else if (tux.Type == Base.Card.Tux.TuxType.TP)
-            		tar.DrTuxDisabled = true;
-        		else if (tux.Type == Base.Card.Tux.TuxType.ZP)
-        		{
-        			XI.RaiseGMessage("G2CN,0,1");
-        			XI.RaiseGMessage("G0ZB," + ut + ",1,0," + randomCard);
-        			Cure(tar, player, 2);
-        		}
-        		XI.RaiseGMessage("G0DH," + player.Uid + ",0,1");
+                if (tux.Type == Base.Card.Tux.TuxType.JP)
+                    Harm(player, new Player[] { player, tar }, 1);
+                else if (tux.Type == Base.Card.Tux.TuxType.ZP)
+                {
+                    int delta = tar.STR - tar.STR / 2;
+                    if (delta > 0)
+                        XI.RaiseGMessage("G0OA," + ut + ",1," + delta);
+                }
+                else if (tux.Type == Base.Card.Tux.TuxType.TP)
+                    tar.DrTuxDisabled = true;
+                else if (tux.IsTuxEqiup())
+                {
+                    XI.RaiseGMessage("G2CN,0,1");
+                    XI.RaiseGMessage("G0ZB," + ut + ",1,0," + randomCard);
+                    Cure(player, tar, 2);
+                }
+        		XI.RaiseGMessage("G0DH," + ut + ",0,1");
         		player.ROMUshort = 2;
             }
             else if (type == 1)
             {
                 if (player.ROMPlayerTar.Count > 0)
                 {
-                    XI.RaiseGMessage("G0OJ," + player.Uid + ",2,1," + player.ROMPlayerTar[0]);
                     XI.Board.Garden[player.ROMPlayerTar[0]].DrTuxDisabled = false;
+                    XI.RaiseGMessage("G0OJ," + player.Uid + ",2,1," + player.ROMPlayerTar[0]);
                 }
             }
         }
@@ -2610,6 +2611,49 @@ namespace PSD.PSDGamepkg.JNS
 	                	p.IsTared && p.Tux.Count > 0).Select(p => p.Uid)) + ")";
             else
                 return "";
+        }
+        public bool JNH0203Valid(Player player, int type, string fuse)
+        {
+            bool solo = !XI.Board.Garden.Values.Where(p => p.Uid != player.Uid &&
+                p.IsAlive && p.Team == player.Team).Any();
+            bool apable = !XI.Board.BannedHero.Contains(10107) && !XI.Board.Garden.Values.Where(
+                p => p.IsAlive && p.SelectHero == 10107).Any();
+            return solo && apable;
+        }
+        public void JNH0203Action(Player player, int type, string fuse, string argst)
+        {
+            if (player.Tux.Count > 0)
+                XI.RaiseGMessage("G0DH," + player.Uid + ",2," + player.Tux.Count);
+
+            int sumTR = XI.Board.Garden.Values.Where(p => p.IsAlive && p.Team == player.Team)
+                    .Sum(p => p.Pets.Where(q => q != 0 && XI.LibTuple.ML.Decode(q) != null)
+                    .Sum(q => XI.LibTuple.ML.Decode(q).STR));
+            int sumTO = XI.Board.Garden.Values.Where(p => p.IsAlive && p.Team == player.OppTeam)
+                    .Sum(p => p.Pets.Where(q => q != 0 && XI.LibTuple.ML.Decode(q) != null)
+                    .Sum(q => XI.LibTuple.ML.Decode(q).STR));
+
+            int dif = (sumTO - sumTR) / 2;
+            if (dif > 12)
+                dif = 12;
+            if (dif > 0)
+                XI.RaiseGMessage("G0DH," + player.Uid + ",0," + dif);
+
+            List<ushort> sm = XI.Board.MonDises.Where(p => p != 0 && XI.LibTuple.ML.Decode(p) != null
+                && XI.LibTuple.ML.Decode(p).STR <= 7).ToList();
+            if (sm.Count > 0)
+            {
+                string sl = XI.AsyncInput(player.Uid, "/获得,M1(p" + string.Join("p", sm) + ")", "JNH0203", "0");
+                if (sl != VI.CinSentinel && !sl.StartsWith("/"))
+                {
+                    ushort mon = ushort.Parse(sl);
+                    XI.RaiseGMessage("G2CN,1,1");
+                    XI.Board.MonDises.Remove(mon);
+                    XI.RaiseGMessage("G0HC,1," + player.Uid + ",0,1," + mon);
+                }
+            }
+            XI.RaiseGMessage("G0OY,0," + player.Uid);
+            XI.RaiseGMessage("G0IY,0," + player.Uid + ",10107");
+            XI.InnerGMessage(fuse, 351);
         }
         #endregion HL002 - YangYue
         #region HL003 - YangTai
@@ -3584,24 +3628,35 @@ namespace PSD.PSDGamepkg.JNS
         public void JNH0901Action(Player player, int type, string fuse, string argst)
         {
             XI.RaiseGMessage("G0QZ," + player.Uid + "," + argst);
-            string[] g0cc = Util.Substring(fuse, 0, fuse.IndexOf(';')).Split(',');
+            int hdx = fuse.IndexOf(';');
+            string[] g0cc = Util.Substring(fuse, 0, hdx).Split(',');
+            ushort ust = ushort.Parse(g0cc[1]);
             ushort[] txs = Util.TakeRange(g0cc, 5, g0cc.Length).Select(p => ushort.Parse(p)).ToArray();
-            List<ushort> txis = txs.Where(p => XI.Board.TuxDises.Contains(p)).ToList();
-            if (txis.Count > 0)
+            // List<ushort> txis = txs.Where(p => XI.Board.TuxDises.Contains(p)).ToList();
+            if (txs.Length > 0)
             {
-                XI.RaiseGMessage("G2CN,0," + txis.Count);
-                XI.RaiseGMessage("G0HQ,2," + player.Uid + ",0,0," + string.Join(",", txis));
-                XI.Board.TuxDises.RemoveAll(p => txis.Contains(p));
+                ushort hst = ushort.Parse(g0cc[3]);
+                foreach (ushort p in txs)
+                    XI.Board.PendingTux.Remove(hst + ",G0CC," + p);
+                XI.RaiseGMessage("G0HQ,2," + player.Uid + ",0,0," + string.Join(",", txs));
             }
 
-            int kdx = fuse.IndexOf(',', fuse.IndexOf(';'));
+            int kdx = fuse.IndexOf(',', hdx);
             if (kdx >= 0)
             {
                 string origin = Util.Substring(fuse, kdx + 1, -1);
-                if (origin.StartsWith("G0CC"))
-                    XI.InnerGMessage(origin, 141);
-                else if (origin.StartsWith("G"))
-                    XI.RaiseGMessage(origin);
+                //if (origin.StartsWith("G0CC"))
+                //    XI.InnerGMessage(origin, 141);
+                //else if (origin.StartsWith("G"))
+                //    XI.RaiseGMessage(origin);
+                if (origin.StartsWith("G"))
+                {
+                    string cardname = g0cc[4];
+                    int inType = int.Parse(Util.Substring(fuse, hdx + 1, kdx));
+                    Base.Card.Tux tux = XI.LibTuple.TL.EncodeTuxCode(cardname);
+                    int prior = tux.Priorities[inType];
+                    XI.InnerGMessage(origin, prior);
+                }
             }
         }
         public string JNH0901Input(Player player, int type, string fuse, string prev)

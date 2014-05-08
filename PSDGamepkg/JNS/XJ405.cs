@@ -2407,7 +2407,7 @@ namespace PSD.PSDGamepkg.JNS
                                 foreach (Player py in vs)
                                 {
                                     if (py.Uid != player.Uid)
-                                        if (tux.ConsumeValidHolder(player, py, tConsType, tType, fuse))
+                                        if (tux.ConsumeValidHolder(player, py, tConsType, tType, linkFuse))
                                             return true;
                                 }
                             }
@@ -2470,7 +2470,7 @@ namespace PSD.PSDGamepkg.JNS
                                     foreach (Player py in vs)
                                     {
                                         if (py.Uid != player.Uid)
-                                            if (tux.ConsumeValidHolder(player, py, tConsType, tType, fuse))
+                                            if (tux.ConsumeValidHolder(player, py, tConsType, tType, linkFuse))
                                                 usefulPlayer.Add(py.Uid);
                                     }
                                 }
@@ -2524,7 +2524,7 @@ namespace PSD.PSDGamepkg.JNS
                                 if (tux != null && tux.Code == rName)
                                 {
                                     Player py = XI.Board.Garden[who];
-                                    if (tux.ConsumeValidHolder(player, py, tConsType, tType, fuse))
+                                    if (tux.ConsumeValidHolder(player, py, tConsType, tType, linkFuse))
                                         usefulTux.Add(ut);
                                 }
                             }
@@ -2576,7 +2576,7 @@ namespace PSD.PSDGamepkg.JNS
                             if (te != null && te.Code == rName)
                             {
                                 Player py = XI.Board.Garden[who];
-                                return te.ConsumeInputHolder(player, py, tConsType, tType, fuse, rest);
+                                return te.ConsumeInputHolder(player, py, tConsType, tType, linkFuse, rest);
                             }
                         }
                     }

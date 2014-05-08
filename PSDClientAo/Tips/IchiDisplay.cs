@@ -170,17 +170,20 @@ namespace PSD.ClientAo.Tips
                     FontSize = SSIZE
                 });
             }
-            if (!string.IsNullOrEmpty(tux.Special))
+            foreach (var pair in tux.Special)
             {
                 pr.Inlines.Add(new LineBreak());
                 pr.Inlines.Add(new LineBreak());
-                pr.Inlines.Add(new Run("特效")
+                if (!string.IsNullOrEmpty(pair.Key))
                 {
-                    Foreground = new SolidColorBrush(Colors.LawnGreen),
-                    FontSize = SSIZE
-                });
-                pr.Inlines.Add(new LineBreak());
-                pr.Inlines.Add(new Run(tux.Special)
+                    pr.Inlines.Add(new Run(pair.Key)
+                    {
+                        Foreground = new SolidColorBrush(Colors.LawnGreen),
+                        FontSize = SSIZE
+                    });
+                    pr.Inlines.Add(new LineBreak());
+                }
+                pr.Inlines.Add(new Run(pair.Value)
                 {
                     Foreground = new SolidColorBrush(Colors.White),
                     FontSize = SSIZE

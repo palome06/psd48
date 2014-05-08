@@ -463,10 +463,14 @@ namespace PSD.PSDGamepkg.JNS
             ushort pop = XI.Board.RestNPCPiles.Dequeue();
             NPC npc = XI.LibTuple.NL.Decode(NMBLib.OriginalNPC(pop));
             XI.RaiseGMessage("G0YM,3," + pop + ",0");
-
+            XI.Board.Monster1 = pop;
             UEchoCode r5ed = XI.HandleWithNPCEffect(py, npc, false);
-            //XI.Board.RestNPCDises.Add(pop);
-            XI.RaiseGMessage("G0ON,0,M,1," + pop);
+            
+            if (XI.Board.Monster1 != 0) // In case the NPC has been taken away
+            {
+                XI.Board.Monster1 = 0;
+                XI.RaiseGMessage("G0ON,0,M,1," + pop);
+            }
             XI.RaiseGMessage("G0YM,3,0,0");
         }
         public void SJT08()
@@ -524,7 +528,8 @@ namespace PSD.PSDGamepkg.JNS
 
         public void SJ002()
         {
-            XI.RaiseGMessage(Artiad.Harm.ToMessage(new Artiad.Harm(1, 0, FiveElement.SATURN, 24, 0)));
+            XI.RaiseGMessage(Artiad.Harm.ToMessage(new Artiad.Harm(5, 0, FiveElement.SATURN, 12, 0)));
+            XI.RaiseGMessage(Artiad.Harm.ToMessage(new Artiad.Harm(1, 0, FiveElement.SATURN, 12, 0)));
         }
 
         public void SJ003()
