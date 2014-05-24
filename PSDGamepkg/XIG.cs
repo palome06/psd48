@@ -1023,8 +1023,11 @@ namespace PSD.PSDGamepkg
                         ushort who = ushort.Parse(args[1]);
                         List<ushort> cards = Util.TakeRange(args, 2, args.Length).Select(p => ushort.Parse(p)).ToList();
                         WI.BCast("E0QZ," + who + "," + string.Join(",", cards));
+                        List<ushort> inTux = Board.Garden[who].Tux.Intersect(cards).ToList();
+                        List<ushort> allOrdered = inTux.ToList(); allOrdered.AddRange(cards.Except(inTux).ToList());
                         RaiseGMessage("G0OT," + who + "," + cards.Count + "," + string.Join(",", cards));
-                        RaiseGMessage("G1DI," + who + ",1," + cards.Count + "," + string.Join(",", cards));
+                        RaiseGMessage("G1DI," + who + ",1," + cards.Count + "," +
+                            inTux.Count + "," + string.Join(",", allOrdered));
                     }
                     break;
                 case "G0DH":
@@ -1095,15 +1098,15 @@ namespace PSD.PSDGamepkg
                             if (dis.Count > 0)
                                 loses.Add(pair.Key, dis);
                         }
-                        int onCount = loses.Sum(p => p.Value.Count());
-                        int inCount = gains.Sum(p => p.Value.Count());
+                        int onCount = loses.Sum(p => p.Value.Count);
+                        int inCount = gains.Sum(p => p.Value.Count);
                         string g1di = "";
                         if (inCount > 0)
                         {
                             string g1it = string.Join(",", gains.Select(p =>
-                                p.Key + "," + p.Value.Count() + "," + string.Join(",", p.Value)));
+                                p.Key + "," + p.Value.Count + "," + string.Join(",", p.Value)));
                             g1di += "," + string.Join(",", gains.Select(p =>
-                                p.Key + ",0," + p.Value.Count() + "," + string.Join(",", p.Value)));
+                                p.Key + ",0," + p.Value.Count + "," + p.Value.Count + "," + string.Join(",", p.Value)));
                             RaiseGMessage("G0IT," + g1it);
                             RaiseGMessage("G2IN,0," + inCount);
                             foreach (var pair in gains)
@@ -1116,13 +1119,19 @@ namespace PSD.PSDGamepkg
                         }
                         if (onCount > 0)
                         {
-                            string g1ot = string.Join(",", loses.Select(p =>
-                                p.Key + "," + p.Value.Count + "," + string.Join(",", p.Value)));
-                            g1di += "," + string.Join(",", loses.Select(p =>
-                                p.Key + ",1," + p.Value.Count + "," + string.Join(",", p.Value)));
+                            string g1ot = "";
+                            foreach (var pair in loses)
+                            {
+                                g1ot += "," + pair.Key + "," + pair.Value.Count + "," + string.Join(",", pair.Value);
+                                List<ushort> inTux = Board.Garden[pair.Key].Tux.Intersect(pair.Value).ToList();
+                                List<ushort> allOrdered = inTux.ToList();
+                                allOrdered.AddRange(pair.Value.Except(inTux).ToList());
+                                g1di += "," + pair.Key + ",1," + pair.Value.Count + "," + inTux.Count +
+                                    "," + string.Join(",", pair.Value);
+                            }
                             foreach (var pair in loses)
                                 WI.BCast("E0QZ," + pair.Key + "," + string.Join(",", pair.Value));
-                            RaiseGMessage("G0OT," + g1ot);
+                            RaiseGMessage("G0OT" + g1ot);
                         }
                         if (g1di != "")
                             RaiseGMessage("G1DI" + g1di);
@@ -1364,10 +1373,10 @@ namespace PSD.PSDGamepkg
                             int n = int.Parse(args[idx + 2]);
                             if (!drIn)
                             {
-                                string[] cards = Util.TakeRange(args, idx + 3, idx + 3 + n);
+                                string[] cards = Util.TakeRange(args, idx + 4, idx + 4 + n);
                                 g0on += "," + who + ",C," + n + "," + string.Join(",", cards);
                             }
-                            idx += (3 + n);
+                            idx += (4 + n);
                         }
                         if (g0on.Length > 0)
                             RaiseGMessage("G0ON" + g0on);
@@ -2108,7 +2117,7 @@ namespace PSD.PSDGamepkg
                         if (nmb.IsMonster())
                         {
                             Monster mon = (Monster)nmb;
-                            mon.STR += (ushort)n;
+                            mon.STR = mon.mSTR + n;
                             WI.BCast("E0IB," + x + "," + n + "," + mon.STR);
                             if (Board.InFight)
                                 RaiseGMessage("G09P,1");
@@ -2118,7 +2127,7 @@ namespace PSD.PSDGamepkg
                         else if (nmb.IsNPC())
                         {
                             NPC npc = (NPC)nmb;
-                            npc.STR += (ushort)n;
+                            npc.STR += n;
                             WI.BCast("E0IB," + x + "," + n + "," + npc.STR);
                         }
                         break;
@@ -2131,9 +2140,7 @@ namespace PSD.PSDGamepkg
                         if (nmb.IsMonster())
                         {
                             Monster mon = (Monster)nmb;
-                            if (mon.STR < n)
-                                n = mon.STR;
-                            mon.STR -= (ushort)n;
+                            mon.STR = mon.mSTR - n;
                             WI.BCast("E0OB," + x + "," + n + "," + mon.STR);
                             if (Board.InFight)
                                 RaiseGMessage("G09P,1");
@@ -2143,7 +2150,7 @@ namespace PSD.PSDGamepkg
                         else if (nmb.IsNPC())
                         {
                             NPC npc = (NPC)nmb;
-                            npc.STR -= (ushort)n;
+                            npc.STR -= n;
                             WI.BCast("E0OB," + x + "," + n + "," + npc.STR);
                         }
                         break;
@@ -2171,8 +2178,6 @@ namespace PSD.PSDGamepkg
                         if (nmb.IsMonster())
                         {
                             Monster mon = (Monster)nmb;
-                            if (mon.AGL < n)
-                                n = mon.AGL;
                             mon.AGL -= (ushort)n;
                             WI.BCast("E0OW," + x + "," + n + "," + mon.AGL);
                             if (Board.InFight)

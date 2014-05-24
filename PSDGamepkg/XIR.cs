@@ -84,7 +84,7 @@ namespace PSD.PSDGamepkg
             //Board.MonPiles.PushBack(1015);
             //Board.MonPiles.PushBack(28);
             //Board.MonPiles.PushBack(1013);
-            //Board.MonPiles.PushBack(1003);
+            //Board.MonPiles.PushBack(1002);
             //Board.MonPiles.PushBack(4);
             //Board.MonPiles.PushBack(1001);
             //Board.MonPiles.PushBack(15);
@@ -125,7 +125,8 @@ namespace PSD.PSDGamepkg
             //RaiseGMessage("G0IJ,6,0,1");
             //RaiseGMessage("G0HQ,2,1,0,10,47,53,6");
             //RaiseGMessage("G0HQ,2,3,0,20,26");
-            //RaiseGMessage("G0HQ,2,1,0,48,49");
+            RaiseGMessage("G0HQ,2,1,0,0,48,49");
+            Board.RestNPCPiles.PushBack(1018);
             //RaiseGMessage("G0HQ,2,3,0,25");
             //RaiseGMessage("G0HQ,2,1,0,47,50,49,5,63,8,69");
             //RaiseGMessage("G0HQ,2,1,0,10,11,12");
@@ -158,7 +159,7 @@ namespace PSD.PSDGamepkg
             //RaiseGMessage("G0HQ,2,2,0,0,96,59");
             //RaiseGMessage("G0HQ,2,1,0,0,96,18");
             //RaiseGMessage("G0HQ,2,5,0,0,65,66");
-            RaiseGMessage("G0HQ,2,1,0,0,71,37,95");
+            //RaiseGMessage("G0HQ,2,1,0,0,71,37,95");
             //RaiseGMessage("G0HQ,2,2,0,0,90,34,89,88,95");
             //RaiseGMessage("G0HQ,2,1,0,0,95,88,10");
             //RaiseGMessage("G0HQ,2,1,0,10,11,12,47,48,5");
@@ -227,6 +228,8 @@ namespace PSD.PSDGamepkg
             //RaiseGMessage("G0OH,1,0,4,12,2,0,4,12");
             foreach (Player player in Board.Garden.Values)
                 RaiseGMessage("G0HQ,2," + player.Uid + ",1,3");
+            //RaiseGMessage("G0HQ,2,4,1,1");
+            //RaiseGMessage("G0HQ,2,6,1,2");
             //RaiseGMessage("G0HQ,2,2,1,3");
             //RaiseGMessage("G0HQ,2,3,1,3");
             //RaiseGMessage("G0HQ,2,4,1,3");
@@ -872,6 +875,8 @@ namespace PSD.PSDGamepkg
                 actualAction |= (echo == UEchoCode.END_ACTION);
                 if (actualAction && ((sina & 4) != 0))
                     break;
+                if (echo == UEchoCode.END_TERMIN) // skill updated
+                    pocket = ParseFromSKTriples(sk02[zero], zero, (sina & 4) != 0);
                 //actualAction |= UKEvenMessage(involved, purse, pris, sina);
                 //if (actualAction && ((sina & 4) != 0))
                 //    break;
@@ -961,6 +966,8 @@ namespace PSD.PSDGamepkg
                         insstage = 0;
                         break;
                     }
+                    if (echo == UEchoCode.END_TERMIN) // skill updated
+                        pocket = ParseFromSKTriples(sk02[zero], zero, false);
                 } while (!IsAllClear(involved, false));
                 if (!actualAction)
                 {

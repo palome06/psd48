@@ -350,10 +350,14 @@ namespace PSD.Base
                     result.Add(ut);
             return result;
         }
+        public int GetBaseEquipCount()
+        {
+            return (Weapon != 0 ? 1 : 0) + (Armor != 0 ? 1 : 0) +
+                 (Trove != 0 ? 1 : 0) + (ExEquip != 0 ? 1 : 0);
+        }
         public int GetEquipCount()
         {
-            return (Weapon != 0 ? 1 : 0) + (Armor != 0 ? 1 : 0) + (Trove != 0 ? 1 : 0)
-                + (ExEquip != 0 ? 1 : 0) + ExCards.Count + Fakeq.Count;
+            return GetBaseEquipCount() + ExCards.Count + Fakeq.Count;
         }
         public bool IsValidPlayer()
         {

@@ -550,14 +550,7 @@ namespace PSD.ClientAo.VW
                 ad.yfMigi.IncrText("===> " + hint);
                 ad.yfMigi.svText.ScrollToEnd();
             }));
-            int count = cinReqCount;
-            for (int i = 0; i < count; ++i)
-                cvQueues.Enqueue(CinSentinel);
-            while (cinReqCount > 0)
-                Thread.Sleep(50);
-            while (cvQueues.Count > 0 && cvQueues.Peek() == CinSentinel)
-                cvQueues.Dequeue();
-
+            // SetSentialToPendingTunnel();
             ++cinReqCount;
             cinGate = true;
             string msg = null;
@@ -581,9 +574,20 @@ namespace PSD.ClientAo.VW
         {
             return FCin(me, string.Format(hintFormat, args));
         }
-
+        private void SetSentialToPendingTunnel()
+        {
+            int count = cinReqCount;
+            for (int i = 0; i < count; ++i)
+                cvQueues.Enqueue(CinSentinel);
+            while (cinReqCount > 0)
+                Thread.Sleep(50);
+            while (cvQueues.Count > 0 && cvQueues.Peek() == CinSentinel)
+                cvQueues.Dequeue();
+        }
+        // Reset All Input UI, not handled with kernel I/O work flow
         private void ResetAllInputs()
         {
+            SetSentialToPendingTunnel();
             HideTip();
             ad.yfBag.Me.ResumeTux();
             ad.yfPlayerR2.AoPlayer.ResumeExCards();

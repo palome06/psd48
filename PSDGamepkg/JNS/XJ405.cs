@@ -1472,10 +1472,11 @@ namespace PSD.PSDGamepkg.JNS
         public void JN40302Action(Player player, int type, string fuse, string argst)
         {
             VI.Cout(0, "星璇预定发动「兄弟」.");
-            string stage1 = "G0HQ,0," + player.Uid + "," + string.Join(",", XI.Board.Garden.Values.Where(
+            string getGroup = string.Join(",", XI.Board.Garden.Values.Where(
                 p => p.Uid != player.Uid && p.IsAlive && p.Team == player.Team && p.Tux.Count > 0).Select(
                 p => p.Uid + ",2," + p.Tux.Count));
-            XI.RaiseGMessage(stage1);
+            if (!string.IsNullOrEmpty(getGroup))
+                XI.RaiseGMessage("G0HQ,0," + player.Uid + "," + getGroup);
             do
             {
                 string targ = "/T1" + Util.SSelect(XI.Board, p => p.IsTared &&
@@ -2201,21 +2202,16 @@ namespace PSD.PSDGamepkg.JNS
                     return false;
                 while (idx < blocks.Length)
                 {
+                    ushort n = ushort.Parse(blocks[idx + 2]);
                     if (blocks[idx + 1] == "0")
                     {
                         ushort who = ushort.Parse(blocks[idx]);
-                        ushort n = ushort.Parse(blocks[idx + 2]);
                         Player py = XI.Board.Garden[who];
                         if (who == player.Uid && py.Team == oy.Team &&
                                 who != owner && n > 0 && !oy.RAMPeoples.Contains(player.Uid))
                             return true;
-                        idx += (n + 3);
                     }
-                    else
-                    {
-                        ushort n = ushort.Parse(blocks[idx + 2]);
-                        idx += (n + 3);
-                    }
+                    idx += (n + 4);
                 }
             }
             else if (type == 1)
@@ -2245,15 +2241,16 @@ namespace PSD.PSDGamepkg.JNS
                             ushort who = ushort.Parse(blocks[jdx]);
                             ushort n = ushort.Parse(blocks[jdx + 2]);
                             if (who != player.Uid)
-                                nfuse += "," + string.Join(",", Util.TakeRange(blocks, jdx, jdx + 3 + n));
+                                nfuse += "," + string.Join(",", Util.TakeRange(blocks, jdx, jdx + 4 + n));
                             else
                             {
-                                var rests = Util.TakeRange(blocks, jdx + 3, jdx + 3 + n).Where(p => p != card.ToString());
-                                int rstCnt = rests.Count();
-                                if (rstCnt > 0)
-                                    nfuse += "," + blocks[jdx] + "," + blocks[jdx + 1] + "," + rstCnt + "," + string.Join(",", rests);
+                                List<ushort> rests = Util.TakeRange(blocks, jdx + 4, jdx + 4 + n)
+                                    .Select(p => ushort.Parse(p)).Where(p => p != card).ToList();
+                                if (rests.Count > 0)
+                                    nfuse += "," + blocks[jdx] + "," + blocks[jdx + 1] + "," + rests.Count +
+                                        "," + rests.Count + "," + string.Join(",", rests);
                             }
-                            jdx += (n + 3);
+                            jdx += (n + 4);
                         }
                         if (nfuse.Length > 0)
                             XI.InnerGMessage(blocks[0] + nfuse, 120);
@@ -2311,10 +2308,10 @@ namespace PSD.PSDGamepkg.JNS
                             ushort who = ushort.Parse(blocks[idx]);
                             if (who == player.Uid && n > 0)
                             {
-                                jdx = idx + 3; kdx = idx + 3 + n; break;
+                                jdx = idx + 4; kdx = idx + 4 + n; break;
                             }
                         }
-                        idx += (n + 3);
+                        idx += (n + 4);
                     }
                     if (jdx >= 0 && kdx > jdx)
                         return "/Q1(p" + string.Join("p", Util.TakeRange(blocks, jdx, kdx)) + ")";
@@ -3356,21 +3353,22 @@ namespace PSD.PSDGamepkg.JNS
                     {
                         if (me == player.Uid && n > 0)
                         {
-                            List<ushort> cards = Util.TakeRange(args, i + 3, i + 3 + n)
+                            List<ushort> cards = Util.TakeRange(args, i + 4, i + 4 + n)
                                 .Select(p => ushort.Parse(p)).ToList();
                             string cardstr = XI.AsyncInput(player.Uid,
                                 "#弃置的,Q1(p" + string.Join("p", cards) + ")", "JNS0801", "0");
                             ushort card = ushort.Parse(cardstr);
                             XI.RaiseGMessage("G0QZ," + player.Uid + "," + card);
                             cards.Remove(card);
-                            if (cards.Count > 0)
-                                g1di += "," + me + "," + lose + "," + cards.Count + "," + string.Join(",", cards);
+                            int cn = cards.Count;
+                            if (cn > 0)
+                                g1di += "," + me + "," + lose + "," + cn + "," + cn + "," + string.Join(",", cards);
                         }
                         else
-                            g1di += "," + string.Join(",", Util.TakeRange(args, i, i + 3 + n));
+                            g1di += "," + string.Join(",", Util.TakeRange(args, i, i + 4 + n));
                     } else
-                        g1di += "," + string.Join(",", Util.TakeRange(args, i, i + 3 + n));
-                    i += (3 + n);
+                        g1di += "," + string.Join(",", Util.TakeRange(args, i, i + 4 + n));
+                    i += (4 + n);
                 }
                 if (g1di.Length > 0)
                     XI.InnerGMessage("G1DI" + g1di, 171);
@@ -3419,7 +3417,7 @@ namespace PSD.PSDGamepkg.JNS
                         if (me == player.Uid && n > 0)
                             return true;
                     }
-                    i += (3 + n);
+                    i += (4 + n);
                 }
                 return false;
             }

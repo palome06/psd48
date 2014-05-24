@@ -22,7 +22,12 @@ namespace PSD.Base.Card
         // group, e.g. 1 for standard, 0 for test, 2 for SP, etc.
         public int Group { private set; get; }
 
-        public int STR { set; get; }
+        public int mSTR;
+        public int STR
+        {
+            set { mSTR = value; }
+            get { return mSTR >= 0 ? mSTR : 0; }
+        }
         public ushort STRb { private set; get; }
         public int AGL { set; get; }
         public ushort AGLb { private set; get; }
@@ -373,14 +378,16 @@ namespace PSD.Base.Card
         public MonsterLib()
         {
             Firsts = new List<Monster>();
+            dicts = new Dictionary<ushort, Monster>();
             sql = new Utils.ReadonlySQL("psd.db3");
             List<string> list = new string[] {
-                "CODE", "NAME", "VALID", "FIVE", "STR", "AGL", "LEVEL", "OCCURS",
+                "ID", "CODE", "NAME", "VALID", "FIVE", "STR", "AGL", "LEVEL", "OCCURS",
                 "PRIORS", "DEBUTTEXT", "PETTEXT", "WINTEXT", "LOSETEXT", "TERMINI", "SPI"
             }.ToList();
             System.Data.DataRowCollection datas = sql.Query(list, "Monster");
             foreach (System.Data.DataRow data in datas)
             {
+                int mid = (int)((long)data["ID"]);
                 string code = (string)data["CODE"];
                 string name = (string)data["NAME"];
                 int group = (int)((short)data["VALID"]);
@@ -464,19 +471,17 @@ namespace PSD.Base.Card
                 string petText = data["PETTEXT"] as string;
                 string winText = data["WINTEXT"] as string;
                 string loseText = data["LOSETEXT"] as string;
-                Firsts.Add(new Monster(name, code, group, element, str, agl,
+                Monster monster = new Monster(name, code, group, element, str, agl,
                     level, eaoccurs, eaprops, ealocks, eaonces, eaterminies, spis)
                     {
                         DebutText = debutText ?? "",
                         PetText = petText ?? "",
                         WinText = winText ?? "",
                         LoseText = loseText ?? ""
-                    });
+                    };
+                Firsts.Add(monster);
+                dicts.Add((ushort)mid, monster);
             }
-            ushort cardx = 1;
-            dicts = new Dictionary<ushort, Monster>();
-            foreach (Monster monster in Firsts)
-                dicts.Add(cardx++, monster);
         }
 
         public int Size { get { return dicts.Count; } }

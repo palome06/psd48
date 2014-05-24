@@ -77,6 +77,8 @@ namespace PSD.ClientAo.Login
         private void ButtonOKClick(object sender, RoutedEventArgs e)
         {
             string addr = addrTextBox.Text;
+            if ("本机" == addr)
+                addr = "127.0.0.1";
             string nick = userTextBox.Text;
             int ava = 0;
             if (IsRoomGained)
@@ -167,7 +169,7 @@ namespace PSD.ClientAo.Login
         private void ButtonResetClick(object sender, RoutedEventArgs e) { ResetOptions(); }
         private void ResetOptions()
         {
-            addrTextBox.Text = "127.0.0.1";
+            addrTextBox.Text = "本机";
             userTextBox.Text = GetRandomHeroName();
             //portTextBox.Text = PORT_DEF.ToString();
             //(teamRadioPanel.Children[0] as RadioButton).IsChecked = true;

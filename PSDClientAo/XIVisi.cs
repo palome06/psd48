@@ -2632,11 +2632,11 @@ namespace PSD.ClientAo
         {
             bool cinCalled = false;
             ushort[] invs = inv.Split(',').Select(p => ushort.Parse(p)).ToArray();
+            foreach (ushort ut in invs)
+                ad.ShowProgressBar(ut);
             if (string.IsNullOrEmpty(mai) || mai.StartsWith("0,"))
             {
                 //VI.Cout(Uid, "等待下列玩家行动:{0}...", zd.Player(invs));
-                foreach (ushort ut in invs)
-                    ad.ShowProgressBar(ut);
                 int sina = int.Parse(mai.Substring("0,".Length));
                 if ((sina & 1) != 0 && invs.Contains(Uid))
                 {
@@ -2660,8 +2660,6 @@ namespace PSD.ClientAo
                 }
             }
             //VI.Cout(Uid, "下列玩家与你均可行动:{0}.", zd.Player(invs));
-            foreach (ushort ut in invs)
-                ad.ShowProgressBar(ut);
             if (!isReplay)
             {
                 flashHelper.AFlashApplicationWindow(ad);
@@ -2748,6 +2746,7 @@ namespace PSD.ClientAo
             if (!isReplay)
             {
                 flashHelper.AFlashApplicationWindow(ad);
+                ad.ShowProgressBar(Uid);
                 cinCalled = StartCinEtc();
                 string input = FormattedInputWithCancelFlag(mai);
                 VI.CloseCinTunnel(Uid);
@@ -2770,6 +2769,7 @@ namespace PSD.ClientAo
                     VI.Cout(Uid, "{0}{1}了{2}.", zd.Player(owner), action, sktxcz);
                 else
                     VI.Cout(Uid, "您{0}了{1}.", action, sktxcz);
+                ad.HideProgressBar(owner);
             }
             return false;
         }
@@ -2782,6 +2782,7 @@ namespace PSD.ClientAo
             if (!isReplay)
             {
                 flashHelper.AFlashApplicationWindow(ad);
+                ad.ShowProgressBar(Uid);
                 cinCalled = StartCinEtc();
                 string input = FormattedInputWithCancelFlag(mai);
                 VI.CloseCinTunnel(Uid);

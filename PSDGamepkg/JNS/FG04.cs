@@ -1455,8 +1455,7 @@ namespace PSD.PSDGamepkg.JNS
                         int n = int.Parse(parts[i + 2]);
 
                         if (discard == 1 && XI.Board.Garden[ut].Tux.Count > 0)
-                        {
-                            for (int j = i + 3; j < i + 3 + n; ++j)
+                            for (int j = i + 4; j < i + 4 + n; ++j)
                             {
                                 ushort cd = ushort.Parse(parts[j]);
                                 Base.Card.Tux tux = XI.LibTuple.TL.DecodeTux(cd);
@@ -1466,8 +1465,7 @@ namespace PSD.PSDGamepkg.JNS
                                     break;
                                 }
                             }
-                        }
-                        i += (3 + n);
+                        i += (4 + n);
                     }
                     if (g0dh.Length > 0)
                         XI.RaiseGMessage("G0DH" + g0dh);
@@ -1504,16 +1502,14 @@ namespace PSD.PSDGamepkg.JNS
                         int n = int.Parse(parts[i + 2]);
 
                         if (discard == 1 && XI.Board.Garden[ut].Tux.Count > 0)
-                        {
-                            for (int j = i + 3; j < i + 3 + n; ++j)
+                            for (int j = i + 4; j < i + 4 + n; ++j)
                             {
                                 ushort cd = ushort.Parse(parts[j]);
                                 Base.Card.Tux tux = XI.LibTuple.TL.DecodeTux(cd);
                                 if (tux.Type != Tux.TuxType.ZP)
                                     return true;
                             }
-                        }
-                        i += (3 + n);
+                        i += (4 + n);
                     }
                 }
                 else if (type == 1) // G0CC,A,0,A,KN,x1,x2;TF
