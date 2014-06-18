@@ -241,8 +241,14 @@ namespace PSD.ClientAo
         }
         private static bool IsCodeEqual(string bsName, Base.Bless bs)
         {
-            string skName = bsName.Substring(0, bsName.IndexOf('('));
-            return bs != null && skName == bs.Code;
+            int idx = bsName.IndexOf('(');
+            if (idx >= 0)
+            {
+                string skName = bsName.Substring(0, idx);
+                return bs != null && skName == bs.Code;
+            }
+            else
+                return false;
         }
 
         //public void SetSkillText(int index, string code, string text)
@@ -314,7 +320,30 @@ namespace PSD.ClientAo
             Skill3 = null; Skill4 = null;
             nextSKill = 0;
         }
-
+        public void LoseSkill(string code)
+        {
+            Base.Skill[] skills = new Base.Skill[] { Skill1, Skill2, Skill3, Skill4, null };
+            Base.Skill[] hsk = new Base.Skill[4];
+            int idx = 0; bool found = false;
+            while (idx < skills.Length - 1) {
+                if (!found) {
+                    if (skills[idx] != null && skills[idx].Code == code)
+                        found = true;
+                    else
+                        hsk[idx] = skills[idx];
+                }
+                if (found) {
+                    hsk[idx] = skills[idx + 1];
+                    if (hsk[idx] == null)
+                        break;
+                }
+                ++idx;
+            }
+            Skill1 = hsk[0]; Skill2 = hsk[1]; Skill3 = hsk[2]; Skill4 = hsk[3];
+            idx = 0;
+            while (idx < 4) { if (hsk[idx] == null) break; ++idx; }
+            nextSKill = idx;
+        }
         public void ResetBKSKill(string code)
         {
             if (ExtSkill1.Code == code)

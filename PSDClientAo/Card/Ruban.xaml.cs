@@ -1,4 +1,5 @@
-﻿using System;
+﻿using PSD.Base.Card;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -316,7 +317,7 @@ namespace PSD.ClientAo.Card
             else if (str.StartsWith("C"))
             {
                 ushort ut = ushort.Parse(str.Substring(1));
-                Base.Card.Tux tux = tuple.TL.DecodeTux(ut);
+                Tux tux = tuple.TL.DecodeTux(ut);
                 if (tux != null)
                 {
                     Image image = uc.TryFindResource("tuxCard" + tux.Code) as Image;
@@ -332,7 +333,7 @@ namespace PSD.ClientAo.Card
             else if (str.StartsWith("M"))
             {
                 ushort ut = ushort.Parse(str.Substring(1));
-                Base.Card.NMB nmb = Base.Card.NMBLib.Decode(ut, tuple.ML, tuple.NL);
+                NMB nmb = NMBLib.Decode(ut, tuple.ML, tuple.NL);
                 if (nmb != null)
                 {
                     Image image = uc.TryFindResource("monCard" + nmb.Code) as Image;
@@ -340,20 +341,20 @@ namespace PSD.ClientAo.Card
                         rb = new Ruban(image, ut);
                     else
                         rb = new Ruban(uc.TryFindResource("monCard000") as Image, ut);
+                    if (nmb.IsMonster())
+                        rb.ToolTip = Tips.IchiDisplay.GetMonTip(tuple, NMBLib.OriginalMonster(ut));
+                    else if (nmb.IsNPC())
+                        rb.ToolTip = Tips.IchiDisplay.GetNPCTip(tuple, NMBLib.OriginalNPC(ut));
                 }
                 else
                     rb = new Ruban(uc.TryFindResource("monCard000") as Image, ut);
-                if (nmb.IsMonster())
-                    rb.ToolTip = Tips.IchiDisplay.GetMonTip(tuple, Base.Card.NMBLib.OriginalMonster(ut));
-                else if (nmb.IsNPC())
-                    rb.ToolTip = Tips.IchiDisplay.GetNPCTip(tuple, Base.Card.NMBLib.OriginalNPC(ut));
             }
             else if (str.StartsWith("H0"))
                 rb = new Ruban(uc.TryFindResource("hroCard000") as Image, 0);
             else if (str.StartsWith("H"))
             {
                 ushort ut = ushort.Parse(str.Substring("H".Length));
-                Base.Card.Hero hro = tuple.HL.InstanceHero(ut);
+                Hero hro = tuple.HL.InstanceHero(ut);
                 if (hro != null)
                 {
                     Image image = uc.TryFindResource("hroCard" + hro.Ofcode) as Image;
@@ -374,6 +375,17 @@ namespace PSD.ClientAo.Card
                 else
                     rb = new Ruban(uc.TryFindResource("diceImg000") as Image, ut);
                 rb.ToolTip = null;
+            }
+            else if (str.StartsWith("G"))
+            {
+                ushort dbSerial = ushort.Parse(str.Substring("G".Length));
+                Tux tux = tuple.TL.EncodeTuxDbSerial(dbSerial);
+                Image image = uc.TryFindResource("tuxCard" + tux.Code) as Image;
+                if (image != null)
+                    rb = new Ruban(image, dbSerial);
+                else
+                    rb = new Ruban(uc.TryFindResource("tuxCard000") as Image, dbSerial);
+                rb.ToolTip = Tips.IchiDisplay.GetTuxDbSerialTip(tuple, dbSerial);
             }
             else if (str.StartsWith("I"))
             {

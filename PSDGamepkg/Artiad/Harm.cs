@@ -139,6 +139,59 @@ namespace PSD.PSDGamepkg.Artiad
         }
     }
 
+    public class Toxi
+    {
+        public ushort Who { set; get; }
+
+        public FiveElement Element { set; get; }
+
+        public int N { set; get; }
+        // Nowadays, set 0 = unknown source, 1~6 = player, 1001~ = monster/NPC(2000+)
+        public int Source { set; get; }
+
+        public Toxi(ushort who, int source, FiveElement elem, int n)
+        {
+            Who = who; Element = elem;
+            N = n; Source = source;
+        }
+
+        public static FiveElement[] GetPropedElement()
+        {
+            return new FiveElement[] { FiveElement.AQUA, FiveElement.AGNI,
+                FiveElement.THUNDER, FiveElement.AERO, FiveElement.SATURN };
+        }
+
+        public static string ToMessage(Toxi toxi)
+        {
+            return "G0PH," + toxi.Who + "," + toxi.Source +
+                "," + IntHelper.Elem2Int(toxi.Element) + "," + toxi.N;
+        }
+        public static string ToMessage(IEnumerable<Toxi> toxis)
+        {
+            string op = string.Join(",", toxis.Select(p => p.Who + "," +
+                    p.Source + "," + IntHelper.Elem2Int(p.Element) + "," + p.N));
+            if (!string.IsNullOrEmpty(op))
+                return "G0PH," + op;
+            else
+                return "";
+        }
+
+        public static List<Toxi> Parse(string line)
+        {
+            List<Toxi> list = new List<Toxi>();
+            string[] blocks = line.Split(',');
+            for (int i = 1; i < blocks.Length; i += 4)
+            {
+                ushort who = ushort.Parse(blocks[i]);
+                int src = int.Parse(blocks[i + 1]);
+                FiveElement elem = IntHelper.Int2Elem(int.Parse(blocks[i + 2]));
+                int n = int.Parse(blocks[i + 3]);
+                list.Add(new Toxi(who, src, elem, n));
+            }
+            return list;
+        }
+    }
+
     public class Cure
     {
         public ushort Who { set; get; }

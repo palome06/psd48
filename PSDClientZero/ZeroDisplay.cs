@@ -73,6 +73,22 @@ namespace PSD.ClientZero
         {
             return cardName + ":" + tuple.TL.Firsts.Find(p => p.Code == cardName).Name;
         }
+        internal string Tux(IEnumerable<string> cardNames)
+        {
+            if (!cardNames.Any())
+                return "{}";
+            return "{" + string.Join(",", cardNames.Select(p => Tux(p))) + "}";
+        }
+        internal string TuxDbSerial(ushort dbSerial)
+        {
+            return dbSerial + ":" + tuple.TL.Firsts.Find(p => p.DBSerial == dbSerial).Name;
+        }
+        internal string TuxDbSerial(IEnumerable<ushort> dbSerials)
+        {
+            if (!dbSerials.Any())
+                return "{}";
+            return "{" + string.Join(",", dbSerials.Select(p => TuxDbSerial(p))) + "}";
+        }
         internal string TuxAs(IDictionary<ushort, string> cards)
         {
             return "{" + string.Join(",", cards.Select(p => Tux(p.Key) +
@@ -157,6 +173,21 @@ namespace PSD.ClientZero
             if (!codes.Any())
                 return "{}";
             return "{" + string.Join(",", codes.Select(p => ExspIWithCode(p))) + "}";
+        }
+        internal object Guard(ushort code)
+        {
+            Base.Card.Exsp exsp = tuple.ESL.Encode("L" + code);
+            return (exsp != null) ? (code + ":" + exsp.Name) : "0:喵";
+        }
+        internal string GuardWithCode(int code)
+        {
+            return code + ":" + ExspI(code);
+        }
+        internal string GuardWithCode(IEnumerable<int> codes)
+        {
+            if (!codes.Any())
+                return "{}";
+            return "{" + string.Join(",", codes.Select(p => GuardWithCode(p))) + "}";
         }
         internal string Hero(int hero)
         {
@@ -273,6 +304,10 @@ namespace PSD.ClientZero
                 }
             }
             return "盖牌";
+        }
+        internal string GuardAlias(params int[] heros)
+        {
+            return HeroPeopleAlias(heros);
         }
         internal string Prop(ushort prop)
         {

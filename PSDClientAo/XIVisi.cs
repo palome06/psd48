@@ -947,6 +947,58 @@ namespace PSD.ClientAo
                     inputValid &= (ipValue >= r1 && ipValue <= r2);
                     prevComment = ""; cancel = "";
                 }
+                else if (arg[0] == 'G')
+                {
+                    int idx = arg.IndexOf('~');
+                    int jdx = arg.IndexOf('(');
+                    int kdx = arg.IndexOf(')');
+                    string input;
+                    if (idx >= 1)
+                    {
+                        int r1 = int.Parse(Substring(arg, 1, idx));
+                        int r2 = int.Parse(Substring(arg, idx + 1, jdx));
+                        string inst;
+                        if (jdx >= 0)
+                        {
+                            string[] argv = Substring(arg, jdx + "(p".Length, kdx).Split('p');
+                            ushort[] uss = argv.Select(p => ushort.Parse(p)).ToArray();
+                            if (argv.Length < r1)
+                            {
+                                r1 = r2 = argv.Length;
+                                inst = string.Format("请选择{0}种卡牌为{1}目标.", argv.Length, prevComment);
+                            }
+                            else
+                                inst = string.Format("请选择{0}至{1}种卡牌为{2}目标.", r1, r2, prevComment);
+                            input = VI.CinG(Uid, inst, r1, r2, uss, cancellable, keep);
+                            inputValid &= input.Split(',').Intersect(argv).Any();
+                        }
+                        else
+                        {
+                            inst = string.Format("请选择{0}至{1}种卡牌为{2}目标.", r1, r2, prevComment);
+                            input = VI.CinG(Uid, inst, r1, r2, null, cancellable, keep);
+                        }
+                        inputValid &= !(CountItemFromComma(input) < r1 || CountItemFromComma(input) > r2);
+                    }
+                    else
+                    {
+                        int r = int.Parse(Substring(arg, 1, jdx));
+                        if (jdx >= 0)
+                        {
+                            string[] argv = Substring(arg, jdx + "(p".Length, kdx).Split('p');
+                            ushort[] uss = argv.Select(p => ushort.Parse(p)).ToArray();
+                            if (argv.Length < r)
+                                r = argv.Length;
+                            string inst = string.Format("请选择{0}张卡牌为{1}目标.", r, prevComment);
+                            input = VI.CinG(Uid, inst, r, r, uss, cancellable, keep);
+                            inputValid &= input.Split(',').Intersect(argv).Any();
+                        }
+                        else
+                            input = VI.Cin(Uid, "请选择{0}张卡牌为{1}目标{2}.", r, prevComment, cancel);
+                        inputValid &= CountItemFromComma(input) == r;
+                    }
+                    prevComment = ""; cancel = "";
+                    roundInput = input;
+                }
                 else if (arg[0] == 'J')
                 {
                     // format T1~2(p1p3p5),T1(p1p3),#Text
@@ -1651,9 +1703,6 @@ namespace PSD.ClientAo
                             else if (where == 6)
                                 A0P[me].Trove = card;
                             VI.Cout(Uid, "{0}装备了{1}到{2}.", zd.Player(me), zd.Tux(card), words[where - 1]);
-                            //--Z0D[me].TuxCount;
-                            //if (me == uid)
-                            //    Z0M.Tux.Remove(card);
                             A0O.FlyingGet("C" + card, me, me);
                         }
                         else if (type == 1)
@@ -1678,7 +1727,7 @@ namespace PSD.ClientAo
                                 A0P[me].Trove = card;
                             if (from != 0)
                             {
-                                VI.Cout(Uid, "{0}为{1}装备了{2}到{3}.",
+                                VI.Cout(Uid, "{0}的装备{2}进入{1}的{3}.",
                                     zd.Player(from), zd.Player(me), zd.Tux(card), words[where - 1]);
                                 A0O.FlyingGet("C" + card, from, me);
                             }
@@ -2417,6 +2466,50 @@ namespace PSD.ClientAo
                             A0O.FlyingGet("M" + mon, 0, 0, true);
                         }
                     }
+                    else if (args[1] == "6")
+                    {
+                        int position = int.Parse(args[2]);
+                        if (args[3] == "0")
+                        {
+                            VI.Cout(Uid, "一张NPC牌被插入放置于牌堆顶第{0}张.", (position + 1));
+                            A0O.FlyingGet("M0", 0, 0, true);
+                        }
+                        else {
+                            List<ushort> mons = Util.TakeRange(args, 3, args.Length)
+                                .Select(p => ushort.Parse(p)).ToList();
+                            VI.Cout(Uid, "NPC牌【{0}】被插入放置于牌堆顶第{1}张.", mons, (position + 1));
+                            foreach (ushort mon in mons)
+                                A0O.FlyingGet("M" + mon, 0, 0, true);
+                        }
+                    }
+                    break;
+                case "E0IS":
+                    {
+                        ushort ut = ushort.Parse(args[1]);
+                        for (int i = 2; i < args.Length; ++i) {
+                            string skillStr = args[i];
+                            Base.Skill sk = Tuple.SL.EncodeSkill(skillStr);
+                            if (sk.IsBK)
+                                A0C.SetNewBKSkill(sk, ut);
+                            else if (ut == Uid)
+                                A0C.SetNewSkill(sk);
+                            VI.Cout(Uid, "{0}获得了技能「{1}」.", zd.Player(ut), zd.SkillName(args[i]));
+                        }
+                    }
+                    break;
+                case "E0OS":
+                    {
+                        ushort ut = ushort.Parse(args[1]);
+                        for (int i = 2; i < args.Length; ++i) {
+                            string skillStr = args[i];
+                            Base.Skill sk = Tuple.SL.EncodeSkill(skillStr);
+                            if (sk.IsBK)
+                                A0C.ResetBKSKill(sk.Code);
+                            else if (ut == Uid)
+                                A0C.LoseSkill(sk.Code);
+                            VI.Cout(Uid, "{0}失去了技能「{1}」.", zd.Player(ut), zd.SkillName(args[i]));
+                        }
+                    }
                     break;
                 case "E0LH":
                     for (int i = 1; i < args.Length; i += 3)
@@ -2561,6 +2654,45 @@ namespace PSD.ClientAo
                         ushort from = ushort.Parse(args[2]);
                         string[] cards = Util.TakeRange(args, 3, args.Length);
                         A0O.FlyingGet(cards.ToList(), from, to);
+                    }
+                    break;
+                case "E0MA":
+                    {
+                        ushort who = ushort.Parse(args[1]);
+                        ushort guad = ushort.Parse(args[2]);
+                        A0P[who].Guardian = guad;
+                        if (guad != 0)
+                            VI.Cout(Uid, "{0}选择{1}.", zd.Player(who), zd.Guard(guad));
+                        else
+                            VI.Cout(Uid, "{0}撤销{1}.", zd.Player(who),
+                                zd.GuardAlias(A0P[who].SelectHero, 0)); // TODO: set as A0P[who].Coss
+                    }
+                    break;
+                case "E0PH":
+                    {
+                        string result = "";
+                        for (int i = 1; i < args.Length; i += 4)
+                        {
+                            ushort from = ushort.Parse(args[i]);
+                            ushort prop = ushort.Parse(args[i + 1]);
+                            ushort n = ushort.Parse(args[i + 2]);
+                            ushort now = ushort.Parse(args[i + 3]);
+                            result += string.Format("\n{0}HP流失-{1}({2})，当前HP={3}.",
+                                zd.Player(from), n, zd.Prop(prop), now);
+                            A0P[from].HP = now;
+                        }
+                        if (result != "")
+                            VI.Cout(Uid, result.Substring(1));
+                        break;
+                    }
+                case "E0ZJ":
+                    {
+                        ushort ut = ushort.Parse(args[1]);
+                        ushort slot = ushort.Parse(args[2]);
+                        ushort eq = ushort.Parse(args[3]);
+                        if (slot == 1) { A0P[ut].Weapon = eq; A0P[ut].ExEquip = 0; }
+                        else if (slot == 2) { A0P[ut].Armor = eq; A0P[ut].ExEquip = 0; }
+                        else if (slot == 3) { A0P[ut].Trove = eq; A0P[ut].ExEquip = 0; }
                     }
                     break;
             }

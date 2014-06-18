@@ -14,6 +14,8 @@ namespace PSD.Base.Card
         // avatar = serial, (e.g.) 50204
         //public int Avatar { private set; get; }
         public string Code { private set; get; }
+        // Integer in data base to numbering code
+        public ushort DBSerial { protected set; get; }
 
         //public int Count { private set; get; }
         // package contains all the tux involved in (e.g.) { 1, 4 }
@@ -100,19 +102,19 @@ namespace PSD.Base.Card
         protected static LocustActionDelegate DefLocust = (p, t, f, a, cd, lr, l) => { };
 
         // public Delegate Type of Handling events
-        internal Tux(string name, string code, TuxType type, string description, IDictionary<string, string> special)
+        internal Tux(string name, string code, TuxType type, string description,
+            IDictionary<string, string> special)
         {
             this.Name = name; this.Code = code;
             //this.Count = count;
             this.Type = type;
             this.Description = description; this.Special = special;
-            //this.IsSelfType = isSelfType;
         }
 
         public virtual bool IsTuxEqiup() { return false; }
 
         internal virtual void Parse(string countStr, string occurStr, string parasitismStr,
-            string priorStr, string isEqStr, string tarStr, string terminiStr)
+            string priorStr, string isEqStr, string tarStr, string terminiStr, long dbSerial)
         {
             if (countStr != "")
             {
@@ -175,6 +177,7 @@ namespace PSD.Base.Card
                 for (int i = 0; i < sz; ++i)
                     IsTermini[i] = false;
             }
+            DBSerial = (ushort)dbSerial;
         }
 
         public virtual string OccurString()
@@ -267,12 +270,13 @@ namespace PSD.Base.Card
             Firsts = new List<Tux>();
             sql = new Utils.ReadonlySQL("psd.db3");
             List<string> list = new string[] {
-                "CODE", "NAME", "COUNT", "OCCURS", "PRIORS", "PARASITISM",
+                "ID", "CODE", "NAME", "COUNT", "OCCURS", "PRIORS", "PARASITISM",
                 "DESCRIPTION", "SPECIAL", "ISEQ", "TARGET", "GROWUP", "TERMHIND"
             }.ToList();
             System.Data.DataRowCollection datas = sql.Query(list, "Tux");
             foreach (System.Data.DataRow data in datas)
             {
+                long lid = (long)data["ID"];
                 string code = (string)data["CODE"];
                 string name = (string)data["NAME"];
                 //ushort count = (ushort)((short)data["COUNT"]);
@@ -306,20 +310,23 @@ namespace PSD.Base.Card
                     string growup = (string)data["GROWUP"];
                     isEqs = "1";
                     var tux = new Luggage(name, code, type, description, special, growup);
-                    tux.Parse(countStr, occur, parasitismStr, priority, isEqs, targets, terministr);
+                    tux.Parse(countStr, occur, parasitismStr,
+                        priority, isEqs, targets, terministr, (ushort)lid);
                     Firsts.Add(tux);
                 }
                 else if (type == Tux.TuxType.WQ || type == Tux.TuxType.FJ || type == Tux.TuxType.XB)
                 {
                     string growup = (string)data["GROWUP"];
                     var tux = new TuxEqiup(name, code, type, description, special, growup);
-                    tux.Parse(countStr, occur, parasitismStr, priority, isEqs, targets, terministr);
+                    tux.Parse(countStr, occur, parasitismStr,
+                        priority, isEqs, targets, terministr, (ushort)lid);
                     Firsts.Add(tux);
                 }
                 else
                 {
                     var tux = new Tux(name, code, type, description, special);
-                    tux.Parse(countStr, occur, parasitismStr, priority, isEqs, targets, terministr);
+                    tux.Parse(countStr, occur, parasitismStr,
+                        priority, isEqs, targets, terministr, (ushort)lid);
                     Firsts.Add(tux);
                 }
             }
@@ -354,6 +361,12 @@ namespace PSD.Base.Card
                     return tux;
             }
             return null;
+        }
+        public Tux EncodeTuxDbSerial(ushort dbSerial)
+        {
+            List<Tux> tuxes = Firsts.Where(
+                p => p.DBSerial == dbSerial).ToList();
+            return tuxes.Count > 0 ? tuxes.First() : null;
         }
         public List<Tux> ListAllTuxs(int groups)
         {
@@ -513,7 +526,7 @@ namespace PSD.Base.Card
         public virtual bool IsLuggage() { return false; }
 
         internal override void Parse(string countStr, string occurStr, string parasitismStr,
-            string priorStr, string isEqStr, string tarStr, string tmhdstr)
+            string priorStr, string isEqStr, string tarStr, string tmhdstr, long dbSerial)
         {
             if (countStr != "")
             {
@@ -632,6 +645,7 @@ namespace PSD.Base.Card
                     }
                 }
             }
+            this.DBSerial = (ushort)dbSerial;
         }
 
         public override string OccurString()
@@ -682,12 +696,15 @@ namespace PSD.Base.Card
         public List<string> Capacities { private set; get; }
 
         public override bool IsLuggage() { return true; }
+        // Indicate whether in processing of pulling goods, avoid recycle when erase luggage itself.
+        public bool Pull { set; get; }
 
         public Luggage(string name, string code, TuxType type,
                 string description, IDictionary<string, string> special, string growup) :
             base(name, code, type, description, special, growup)
         {
             Capacities = new List<string>();
+            Pull = false;
         }
     }
 }

@@ -387,6 +387,23 @@ namespace PSD.ClientAo.VW
                 result = "6+";
             return result;
         }
+        internal string CinG(ushort uid, string prevComment, int r1, int r2,
+            IEnumerable<ushort> dbSerials, bool cancellable, bool keep)
+        {
+            PreCin(uid);
+            ShowTip(prevComment);
+            AD.yfDeal.Deal.Show(dbSerials.Select(p => "G" + p),
+                null, r1, r2, cancellable, keep);
+            string result = Cin(uid);
+            if (result != CinSentinel)
+                HideTip();
+            return result;
+        }
+        internal void OCinG()
+        {
+            AD.yfDeal.Deal.FinishTable();
+            HideTip();
+        }
 
         internal void Watch(ushort uid, IEnumerable<string> enumerable, string tvTag)
         {

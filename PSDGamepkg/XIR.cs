@@ -68,7 +68,7 @@ namespace PSD.PSDGamepkg
             ////Board.MonPiles.PushBack(21);
             ////Board.MonPiles.PushBack(1022);
             ////Board.MonPiles.PushBack(1030);
-            ////Board.EvePiles.PushBack(8);
+            //Board.EvePiles.PushBack(8);
             ////Board.EvePiles.PushBack(1);
             //Board.EvePiles.PushBack(22);
             //Board.EvePiles.PushBack(6);
@@ -125,9 +125,13 @@ namespace PSD.PSDGamepkg
             //RaiseGMessage("G0IJ,6,0,1");
             //RaiseGMessage("G0HQ,2,1,0,10,47,53,6");
             //RaiseGMessage("G0HQ,2,3,0,20,26");
-            RaiseGMessage("G0HQ,2,1,0,0,48,49");
-            Board.RestNPCPiles.PushBack(1018);
-            //RaiseGMessage("G0HQ,2,3,0,25");
+            //RaiseGMessage("G0HQ,2,1,0,0,49,11,10");
+            //Board.RestNPCPiles.PushBack(1018);
+            //RaiseGMessage("G0HQ,2,3,0,0,40");
+            //RaiseGMessage("G0HQ,2,1,0,0,47,76");
+            //RaiseGMessage("G0HQ,2,2,0,0,49");
+            RaiseGMessage("G0HQ,2,1,0,0,71");
+            RaiseGMessage("G0HQ,2,6,0,0,88");
             //RaiseGMessage("G0HQ,2,1,0,47,50,49,5,63,8,69");
             //RaiseGMessage("G0HQ,2,1,0,10,11,12");
             //RaiseGMessage("G0HQ,2,1,0,86");
@@ -784,9 +788,17 @@ namespace PSD.PSDGamepkg
                                 RaiseGMessage("G0AX," + player.Uid);
                             RunQuadStage(rstage, 0);
                             if (Board.PendingTux.Count > 0)
-                                RaiseGMessage("G0ON,10,C," + Board.PendingTux.Count + "," +
-                                    string.Join(",", Board.PendingTux.Select(
-                                    p => p.Substring(p.LastIndexOf(',') + 1))));
+                            {
+                                IDictionary<ushort, List<ushort>> imt = new Dictionary<ushort, List<ushort>>();
+                                foreach (string pendItem in Board.PendingTux) {
+                                    ushort pendWho = ushort.Parse(pendItem.Substring(0, pendItem.IndexOf(',')));
+                                    ushort pendTux = ushort.Parse(pendItem.Substring(pendItem.LastIndexOf(',') + 1));
+                                    Util.AddToMultiMap(imt, pendWho, pendTux);
+                                }
+                                if (imt.Count > 0)
+                                    RaiseGMessage("G0ON," + string.Join(",", imt.Select(p => p.Key + ",C," +
+                                        p.Value.Count + "," + string.Join(",", p.Value))));
+                            }
                             if (!Board.Rounder.IsAlive && Board.Garden.Values.Any(p => p.IsAlive && p.HP == 0))
                                 RaiseGMessage("G0ZH,1");
                             List<ushort> ordered = Board.OrderedPlayer();

@@ -18,6 +18,11 @@ namespace PSD.ClientAo
         }
 
         #region Utils
+        internal string SkillName(string code)
+        {
+            var skill = tuple.SL.EncodeSkill(code);
+            return skill.Name;
+        }
         internal string SKTXCZ(string ops) { return SKTXCZ(ops, false, "0"); }
         internal string SKTXCZ(string ops, bool hind, string inType)
         {
@@ -67,6 +72,22 @@ namespace PSD.ClientAo
         internal string Tux(string cardName)
         {
             return cardName + ":" + tuple.TL.Firsts.Find(p => p.Code == cardName).Name;
+        }
+        internal string Tux(IEnumerable<string> cardNames)
+        {
+            if (!cardNames.Any())
+                return "{}";
+            return "{" + string.Join(",", cardNames.Select(p => Tux(p))) + "}";
+        }
+        internal string TuxDbSerial(ushort dbSerial)
+        {
+            return dbSerial + ":" + tuple.TL.Firsts.Find(p => p.DBSerial == dbSerial).Name;
+        }
+        internal string TuxDbSerial(IEnumerable<ushort> dbSerials)
+        {
+            if (!dbSerials.Any())
+                return "{}";
+            return "{" + string.Join(",", dbSerials.Select(p => TuxDbSerial(p))) + "}";
         }
         internal string PurePlayer(ushort player)
         {
@@ -149,6 +170,21 @@ namespace PSD.ClientAo
                 return "{}";
             return "{" + string.Join(",", codes.Select(p => ExspIWithCode(p))) + "}";
         }
+        internal object Guard(ushort code)
+        {
+            Base.Card.Exsp exsp = tuple.ESL.Encode("L" + code);
+            return (exsp != null) ? (code + ":" + exsp.Name) : "0:喵";
+        }
+        internal string GuardWithCode(int code)
+        {
+            return code + ":" + ExspI(code);
+        }
+        internal string GuardWithCode(IEnumerable<int> codes)
+        {
+            if (!codes.Any())
+                return "{}";
+            return "{" + string.Join(",", codes.Select(p => GuardWithCode(p))) + "}";
+        }
         internal string Hero(int hero)
         {
             return hero == 0 ? "姚仙" : tuple.HL.InstanceHero(hero).Name;
@@ -180,29 +216,58 @@ namespace PSD.ClientAo
             sb.Remove(sb.Length - 1, 1);
             return "{" + sb.ToString() + "}";
         }
-        internal string HeroTokenAlias(int hero)
+        internal string HeroTokenAlias(params int[] heroes)
         {
-            Base.Card.Hero hro = tuple.HL.InstanceHero(hero);
-            if (hro != null)
-                return hro.TokenAlias ?? "标记";
-            else
-                return "标记";
+            foreach (int hero in heroes)
+            {
+                if (hero != 0)
+                {
+                    Base.Card.Hero hro = tuple.HL.InstanceHero(hero);
+                    if (hro != null && hro.TokenAlias != null)
+                        return hro.TokenAlias;
+                }
+            }
+            return "标记";
         }
-        internal string HeroPeopleAlias(int hero)
+        internal string HeroPeopleAlias(params int[] heroes)
         {
-            Base.Card.Hero hro = tuple.HL.InstanceHero(hero);
-            if (hro != null)
-                return hro.PeopleAlias ?? "人物牌";
-            else
-                return "人物牌";
+            foreach (int hero in heroes)
+            {
+                if (hero != 0)
+                {
+                    Base.Card.Hero hro = tuple.HL.InstanceHero(hero);
+                    if (hro != null && hro.PeopleAlias != null)
+                        return hro.PeopleAlias;
+                }
+            }
+            return "人物牌";
         }
-        internal string HeroPlayerTarAlias(int hero)
+        internal string HeroPlayerTarAlias(params int[] heroes)
         {
-            Base.Card.Hero hro = tuple.HL.InstanceHero(hero);
-            if (hro != null)
-                return hro.PlayerTarAlias ?? "目标角色";
-            else
-                return "目标角色";
+            foreach (int hero in heroes)
+            {
+                if (hero != 0)
+                {
+                    Base.Card.Hero hro = tuple.HL.InstanceHero(hero);
+                    if (hro != null && hro.PlayerTarAlias != null)
+                        return hro.PlayerTarAlias;
+                }
+            }
+            return "目标角色";
+        }
+
+        internal string HeroExCardAlias(params int[] heroes)
+        {
+            foreach (int hero in heroes)
+            {
+                if (hero != 0)
+                {
+                    Base.Card.Hero hro = tuple.HL.InstanceHero(hero);
+                    if (hro != null && hro.ExCardsAlias != null)
+                        return hro.ExCardsAlias;
+                }
+            }
+            return "特殊装备";
         }
         internal string HeroAwakeAlias(params int[] heros)
         {
@@ -236,13 +301,9 @@ namespace PSD.ClientAo
             }
             return "盖牌";
         }
-        internal string HeroExCardAlias(int hero)
+        internal string GuardAlias(params int[] heros)
         {
-            Base.Card.Hero hro = tuple.HL.InstanceHero(hero);
-            if (hro != null)
-                return hro.ExCardsAlias ?? "特殊装备";
-            else
-                return "特殊装备";
+            return HeroPeopleAlias(heros);
         }
         internal string Prop(ushort prop)
         {

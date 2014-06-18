@@ -263,15 +263,15 @@ namespace PSD.Base
                 h09g.Append("," + py.Fakeq.Count);
                 if (py.Fakeq.Count > 0)
                     h09g.Append("," + string.Join(",", py.Fakeq.Select(p => p.Key + "," + p.Value)));
-                h09g.Append("," + py.ROMToken);
-                h09g.Append("," + py.ROMCards.Count);
-                if (py.ROMCards.Count > 0)
-                    h09g.Append("," + string.Join(",", py.ROMCards));
-                h09g.Append("," + py.ROMPlayerTar.Count);
-                if (py.ROMPlayerTar.Count > 0)
-                    h09g.Append("," + string.Join(",", py.ROMPlayerTar));
-                h09g.Append("," + (py.ROMAwake ? "1" : "0"));
-                h09g.Append("," + py.ROMFolder.Count);
+                h09g.Append("," + py.TokenCount);
+                h09g.Append("," + py.TokenExcl.Count);
+                if (py.TokenExcl.Count > 0)
+                    h09g.Append("," + string.Join(",", py.TokenExcl));
+                h09g.Append("," + py.TokenTars.Count);
+                if (py.TokenTars.Count > 0)
+                    h09g.Append("," + string.Join(",", py.TokenTars));
+                h09g.Append("," + (py.TokenAwake ? "1" : "0"));
+                h09g.Append("," + py.TokenFold.Count);
                 h09g.Append("," + py.Escue.Count);
                 if (py.Escue.Count > 0)
                     h09g.Append("," + string.Join(",", py.Escue));
@@ -295,9 +295,9 @@ namespace PSD.Base
             h09f.Add(py.Tux.Count.ToString());
             if (py.Tux.Count > 0)
                 h09f.Add(string.Join(",", py.Tux));
-            h09f.Add(py.ROMFolder.Count.ToString());
-            if (py.ROMFolder.Count > 0)
-                h09f.Add(string.Join(",", py.ROMFolder));
+            h09f.Add(py.TokenFold.Count.ToString());
+            if (py.TokenFold.Count > 0)
+                h09f.Add(string.Join(",", py.TokenFold));
             return string.Join(",", h09f);
         }
         #endregion Serialize the Game Situation

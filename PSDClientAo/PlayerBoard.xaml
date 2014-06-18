@@ -183,6 +183,8 @@
             <!--<Ellipse Canvas.Left="-15" Canvas.Top="-15" Width="130" Height="130" Fill="Aqua"/>-->
             <Ellipse x:Name="portrait" Canvas.Left="0" Canvas.Top="0" Width="100" Height="100"
                      Fill="{StaticResource heroHead000Brush}"/>
+            <Image x:Name="guardSlice" Canvas.Left="18" Canvas.Top="10" Visibility="Collapsed"
+                   Width="10" Height="80" Source="{StaticResource loadGuard000}"/>
             <Rectangle x:Name="nameBarBrush" Canvas.Top="90" Canvas.Left="-8" Height="30" Width="113"
                        Fill="{StaticResource nameBar000Brush}"/>
 

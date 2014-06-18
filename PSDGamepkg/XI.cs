@@ -74,7 +74,10 @@ namespace PSD.PSDGamepkg
             //17022, 19006, 10605, 10501, 15003, 10505
             //19009, 17022, 19001, 19011, 10107, 10302
             //19009, 10105, 19013, 17010, 19017, 19010
-            10602, 17022, 19002, 10104, 19009, 17015
+            //10602, 17022, 19002, 10104, 19009, 19006
+            //17007, 17020, 19002, 10104, 17011, 19006
+            //10102, 10201, 17007, 10104, 17011, 19006
+            17021, 10504, 19002, 10104, 17011, 19006
         };
 
         #region Memeber Declaration & Constructor
@@ -537,7 +540,7 @@ namespace PSD.PSDGamepkg
                  "IY", "OY", "DS", "CC", "CD", "CE", "XZ", "ZB", "ZC", "ZS", "ZL", "IA", "OA", "IX",
                  "OX", "AX", "IB", "OB", "IW", "OW", "WB", "9P", "IP", "OP", "CZ", "HC", "HD", "HH",
                  "HI", "HL", "IC", "OC", "HT", "QR", "HZ", "TT", "JM", "WN", "IJ", "OJ", "IE", "OE",
-                 "IS", "OS", "LH", "IV", "OV", "PB", "YM", "HR", "AF", "ON", "SN"
+                 "IS", "OS", "LH", "IV", "OV", "PB", "YM", "HR", "AF", "ON", "SN", "MA", "PH", "ZJ"
             };
             string[] g1 = new string[] { "DI", "IU", "OU", "ZK", "IZ", "OZ", "SG", "HK", "WJ", "JG",
                  "XR", "EV", "CK" };
@@ -663,13 +666,13 @@ namespace PSD.PSDGamepkg
             {
                 //skt.CardCode = 0;
                 Bless skill = (Bless)sk01[ske.Name];
-                if ((!ske.IsOnce || ske.Tick == 0) && skill.BKValid(garden[ske.Tg], ske.InType, ske.Fuse, ske.Owner))
+                string lf = (skill.IsLinked(ske.InType) ? ske.LinkFrom + ":" : "") + ske.Fuse;
+                if ((!ske.IsOnce || ske.Tick == 0) && skill.BKValid(garden[ske.Tg], ske.InType, lf, ske.Owner))
                 {
                     if (ske.Lock == false || (ske.Lock == null && !garden[ske.Tg].IsSKOpt))
                     {
                         string msg = ske.Name + "(" + ske.Owner + ")";
                         // Only report the first param
-                        string lf = (skill.IsLinked(ske.InType) ? ske.LinkFrom + ":" : "") + ske.Fuse;
                         string req = skill.Input(garden[ske.Tg], ske.InType, lf, ske.Owner.ToString());
                         if (req != "")
                             msg += "," + req;

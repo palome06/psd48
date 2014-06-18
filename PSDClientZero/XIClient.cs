@@ -856,6 +856,55 @@ namespace PSD.ClientZero
                     }
                     prevComment = ""; cancel = "";
                 }
+                else if (arg[0] == 'G')
+                {
+                    int idx = arg.IndexOf('~');
+                    int jdx = arg.IndexOf('(');
+                    int kdx = arg.IndexOf(')');
+                    string input;
+                    if (idx >= 1)
+                    {
+                        int r1 = int.Parse(Substring(arg, 1, idx));
+                        int r2 = int.Parse(Substring(arg, idx + 1, jdx));
+                        if (jdx >= 0)
+                        {
+                            string[] argv = Substring(arg, jdx + "(p".Length, kdx).Split('p');
+                            ushort[] uss = argv.Select(p => ushort.Parse(p)).ToArray();
+                            if (argv.Length < r1)
+                            {
+                                r1 = r2 = argv.Length;
+                                input = VI.Cin(Uid, "请选择{0}种卡牌为{1}目标，可选{2}{3}.",
+                                    argv.Length, prevComment, zd.TuxDbSerial(uss), cancel);
+                            }
+                            else
+                                input = VI.Cin(Uid, "请选择{0}至{1}种卡牌为{2}目标，可选{3}{4}."
+                                    , r1, r2, prevComment, zd.TuxDbSerial(uss), cancel);
+                            inputValid &= input.Split(',').Intersect(argv).Any();
+                        }
+                        else
+                            input = VI.Cin(Uid, "请选择{0}至{1}种卡牌为{2}目标{3}.", r1, r2, prevComment, cancel);
+                        inputValid &= !(CountItemFromComma(input) < r1 || CountItemFromComma(input) > r2);
+                    }
+                    else
+                    {
+                        int r = int.Parse(Substring(arg, 1, jdx));
+                        if (jdx >= 0)
+                        {
+                            string[] argv = Substring(arg, jdx + "(p".Length, kdx).Split('p');
+                            ushort[] uss = argv.Select(p => ushort.Parse(p)).ToArray();
+                            if (argv.Length < r)
+                                r = argv.Length;
+                            input = VI.Cin(Uid, "请选择{0}种卡牌为{1}目标，可选{2}{3}.",
+                                r, prevComment, zd.TuxDbSerial(uss), cancel);
+                            inputValid &= input.Split(',').Intersect(argv).Any();
+                        }
+                        else
+                            input = VI.Cin(Uid, "请选择{0}种卡牌为{1}目标{2}.", r, prevComment, cancel);
+                        inputValid &= CountItemFromComma(input) == r;
+                    }
+                    prevComment = ""; cancel = "";
+                    roundInput = input;
+                }
                 else if (arg[0] == 'J')
                 {
                     // format T1~2(p1p3p5),T1(p1p3),#Text
@@ -1493,7 +1542,7 @@ namespace PSD.ClientZero
                             else if (where == 6)
                                 Z0D[me].Trove = card;
                             if (from != 0)
-                                VI.Cout(Uid, "{0}为{1}装备了卡牌{2}到{3}.",
+                                VI.Cout(Uid, "{0}的装备{2}进入{1}的{3}.",
                                     zd.Player(from), zd.Player(me), zd.Tux(card), words[where - 1]);
                             else
                                 VI.Cout(Uid, "{0}装备了卡牌{1}到{2}.",
@@ -2158,6 +2207,17 @@ namespace PSD.ClientZero
                         if (mon != 0)
                             VI.Cout(Uid, "翻出怪物牌为【{0}】.", zd.Monster(mon));
                     }
+                    else if (args[1] == "6")
+                    {
+                        int position = int.Parse(args[2]);
+                        if (args[3] == "0")
+                            VI.Cout(Uid, "一张NPC牌被插入放置于牌堆顶第{0}张.", (position + 1));
+                        else {
+                            List<ushort> mons = Util.TakeRange(args, 3, args.Length)
+                                .Select(p => ushort.Parse(p)).ToList();
+                            VI.Cout(Uid, "NPC牌【{0}】被插入放置于牌堆顶第{1}张.", mons, (position + 1));
+                        }
+                    }
                     break;
                 case "E0IS":
                     {
@@ -2293,6 +2353,45 @@ namespace PSD.ClientZero
                             VI.Cout(Uid, "{0}被从{1}的{2}中取出.",
                                 zd.MixedCards(cards), zd.Player(who), zd.Tux(lugUt));
                         }
+                    }
+                    break;
+                case "E0MA":
+                    {
+                        ushort who = ushort.Parse(args[1]);
+                        ushort guad = ushort.Parse(args[2]);
+                        Z0D[who].Guardian = guad;
+                        if (guad != 0)
+                            VI.Cout(Uid, "{0}选择{1}.", zd.Player(who), zd.Guard(guad));
+                        else
+                            VI.Cout(Uid, "{0}撤销{1}.", zd.Player(who),
+                                zd.GuardAlias(Z0D[who].SelectHero, Z0D[who].Coss));
+                    }
+                    break;
+                case "E0PH":
+                    {
+                        string result = "";
+                        for (int i = 1; i < args.Length; i += 4)
+                        {
+                            ushort from = ushort.Parse(args[i]);
+                            ushort prop = ushort.Parse(args[i + 1]);
+                            ushort n = ushort.Parse(args[i + 2]);
+                            ushort now = ushort.Parse(args[i + 3]);
+                            result += string.Format("\n{0}HP流失-{1}({2})，当前HP={3}.",
+                                zd.Player(from), n, zd.Prop(prop), now);
+                            Z0D[from].HP = now;
+                        }
+                        if (result != "")
+                            VI.Cout(Uid, result.Substring(1));
+                    }
+                    break;
+                case "E0ZJ":
+                    {
+                        ushort ut = ushort.Parse(args[1]);
+                        ushort slot = ushort.Parse(args[2]);
+                        ushort eq = ushort.Parse(args[3]);
+                        if (slot == 1) { Z0D[ut].Weapon = eq; Z0D[ut].ExEquip = 0; }
+                        else if (slot == 2) { Z0D[ut].Armor = eq; Z0D[ut].ExEquip = 0; }
+                        else if (slot == 3) { Z0D[ut].Trove = eq; Z0D[ut].ExEquip = 0; }
                     }
                     break;
             }

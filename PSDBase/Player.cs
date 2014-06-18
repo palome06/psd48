@@ -23,8 +23,8 @@ namespace PSD.Base
         public int Team { get; set; }
         // whether is real or lumberjack and etc
         public bool IsReal { private set; get; }
-
-        public Skill[] Skills { set; get; }
+        // Set of skills the player has obtained
+        public ISet<string> Skills { private set; get; }
 
         public int mSTR, mDEX;
         private int mSTRa, mDEXa, mSTRb, mDEXb;
@@ -76,7 +76,7 @@ namespace PSD.Base
         public ushort Weapon { set; get; }
         public ushort Trove { set; get; }
 
-        // Another extra Equip, also view as Equip
+        // Another extend Equip, also view as Equip
         public ushort ExEquip { set; get; }
         // extra Equip Slot, not the same as the ExEquip
         public List<ushort> ExCards { private set; get; }
@@ -111,6 +111,8 @@ namespace PSD.Base
         public bool ZPDisabled { set; get; }
         // Whether player can use tux from hand directly or not
         public bool DrTuxDisabled { set; get; }
+        // Extend Equip Mask, 0 = disabled, 1 = weapon, 2 = armor, 4 = trove
+        public int ExMask { set; get; }
 
         private void SetEquipDisabled(string tag, bool value, int maskCode)
         {
@@ -151,37 +153,26 @@ namespace PSD.Base
 
         #region Memory
         // TODO: formalize and classify memories
-        // public bool TokenActivate { set; get; } // 0 (e.g. XJ401.2)
-        // public ushort TokenCount { set; get; } // 1 (e.g. XJ608.1)
-        // public List<ushort> TokenTars { set; get; } // 2 (e.g. XJ405,2)
-        // public List<string> TokenExcl { set; get; } // 3 (e.g. XJ606,1)
-        // public List<ushort> TokenFold { set; get; } // 4 (e.g. HL011.2)
+        public bool TokenAwake { set; get; } // 0 (e.g. XJ401.2)
+        public ushort TokenCount { set; get; } // 1 (e.g. XJ608.1)
+        public List<ushort> TokenTars { set; get; } // 2 (e.g. XJ405,2)
+        public List<string> TokenExcl { set; get; } // 3 (e.g. XJ606,1)
+        public List<ushort> TokenFold { set; get; } // 4 (e.g. HL011.2)
 
-        // public ushort ROMUshort { set; get; }
-        // public ushort RAMUshort { set; get; }
-        // public int ROMInt { set; get; }
-        // public int RAMInt { set; get; }
-        // public List<ushort> RAMLists { set; get; }
-        // public string RAMString { set; get; }
-        // public IDictionary<string, object> ROM { private set; get; }
-        // public IDictionary<string, object> RAM { private set; get; }
+        public ushort SingleTokenTar { get { return TokenTars.Count > 0 ? TokenTars[0] : (ushort)0; } }
 
-        //// Cos players Stack, e.g. SP101-SP102-XJ404
-        // public Stack<int> Coss { private set; get; }
-
-        public ushort ROMUshort { set; get; } // 0
-        public List<string> ROMCards { private set; get; } // 1
-        public int ROMToken { set; get; } // 2
-        public List<ushort> ROMPlayerTar { private set; get; } // 3
-        public bool ROMAwake { set; get; } // 4
-        public List<ushort> ROMFolder { private set; get; } // 5
-
+        public IDictionary<string, object> ROM { private set; get; }
+        public IDictionary<string, object> RAM { private set; get; }
+        public ushort ROMUshort { set; get; }
+        public int ROMInt { set; get; }
         public ushort RAMUshort { set; get; }
         public int RAMInt { set; get; }
-        public List<ushort> RAMPeoples { private set; get; }
-        public string RAMString { set; get; }
+        public List<ushort> RAMUtList { private set; get; }
 
-        public Stack<int> Coss { private set; get; } // Cos players Stack, e.g. SP101-SP102-XJ404
+        // Cos players Stack, e.g. SP101-SP102-XJ404
+        public Stack<int> Coss { private set; get; }
+        // Guardian, e.g. TR007/TR020
+        public ushort Guardian { set; get; }
         #endregion Memory
 
         #region PlayerOptions
@@ -198,23 +189,26 @@ namespace PSD.Base
             this.Name = name; this.Avatar = avatar; this.Uid = uid;
 
             this.Tux = new List<ushort>();
-            this.Armor = 0; this.Weapon = 0; this.Trove = 0; this.ExEquip = 0;
+            this.Armor = 0; this.Weapon = 0; this.Trove = 0;
+            this.ExEquip = 0; this.ExMask = 0;
 
             this.Pets = new ushort[] { 0, 0, 0, 0, 0 };
             this.ExCards = new List<ushort>();
             Escue = new List<ushort>();
             Fakeq = new Dictionary<ushort, string>();
 
-            this.ROMUshort = 0;
-            ROMToken = 0;
-            ROMCards = new List<string>();
-            ROMPlayerTar = new List<ushort>();
-            ROMAwake = false;
-            ROMFolder = new List<ushort>();
+            TokenAwake = false;
+            TokenCount = 0;
+            TokenExcl = new List<string>();
+            TokenTars = new List<ushort>();
+            TokenFold = new List<ushort>();
 
-            RAMUshort = 0; RAMInt = 0;
-            RAMPeoples = new List<ushort>();
+            ROM = new Dictionary<string, object>();
+            RAM = new Dictionary<string, object>();
+            RAMUtList = new List<ushort>();
+
             Coss = new Stack<int>();
+            Guardian = 0;
 
             Immobilized = false;
             cardDisabled = new Dictionary<string, int>();
@@ -228,6 +222,7 @@ namespace PSD.Base
             IsSKOpt = true;
 
             IsReal = isReal;
+            Skills = new HashSet<string>();
         }
         public int GetPetCount() { return Pets.Count(p => p != 0); }
         public int OppTeam { get { return 3 - Team; } }
@@ -243,22 +238,27 @@ namespace PSD.Base
 
         public void ResetRAM()
         {
+            RAM.Clear();
             RAMUshort = 0;
             RAMInt = 0;
-            RAMPeoples.Clear();
-            RAMString = "";
+            RAMUtList.Clear();
             ZPDisabled = false;
             DrTuxDisabled = false;
         }
 
+        public void ResetTokens()
+        {
+            TokenAwake = false;
+            TokenCount = 0;
+            TokenExcl.Clear();
+            TokenTars.Clear();
+            TokenFold.Clear();
+        }
+
         public void ResetROM(Board board)
         {
-            ROMUshort = 0;
-            ROMToken = 0;
-            ROMPlayerTar.Clear();
-            ROMAwake = false;
-            ROMFolder.Clear();
-            foreach (string cd in ROMCards)
+            ResetTokens();
+            foreach (string cd in TokenExcl)
             {
                 if (cd.StartsWith("H"))
                 {
@@ -266,7 +266,9 @@ namespace PSD.Base
                     board.BannedHero.Remove(hero);
                 }
             }
-            ROMCards.Clear();
+            ROM.Clear();
+            ROMUshort = 0;
+            ROMInt = 0;
             ResetRAM();
         }
 
@@ -277,6 +279,7 @@ namespace PSD.Base
             STR = STRa = STRb = hero.STR;
             DEX = DEXa = DEXb = hero.DEX;
             STRi = 0; DEXi = 0;
+            Skills.Clear();
             if (reset)
             {
                 IsAlive = true;

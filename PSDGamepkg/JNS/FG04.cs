@@ -356,27 +356,28 @@ namespace PSD.PSDGamepkg.JNS
         {
             if (consumeType == 0)
             {
-                string[] blocks = fuse.Split(',');
-                string g0dh = "";
-                for (int i = 1; i < blocks.Length; i += 3)
-                {
-                    ushort ut = ushort.Parse(blocks[i]);
-                    int gtype = int.Parse(blocks[i + 1]);
-                    int n = int.Parse(blocks[i + 2]);
-                    if (ut == player.Uid && gtype == 0 && n > 0)
-                        g0dh += "," + ut + ",0," + (n + 1);
-                    else
-                        g0dh += "," + ut + "," + gtype + "," + n;
+                string[] g0ht = fuse.Split(',');
+                for (int i = 1; i < g0ht.Length; i += 2) {
+                    ushort ut = ushort.Parse(g0ht[i]);
+                    int n = int.Parse(g0ht[i + 1]);
+                    if (ut == player.Uid && n > 0)
+                        g0ht[i + 1] = (n + 1).ToString();
                 }
-                if (g0dh.Length > 0)
-                    XI.InnerGMessage("G0DH" + g0dh, 51);
+                XI.InnerGMessage(string.Join(",", g0ht), 51);
             }
-            //XI.RaiseGMessage("G0DH," + player.Uid + ",0,1");
         }
         public bool GL02ConsumeValid(Player player, int consumeType, int type, string fuse)
         {
             if (consumeType == 0)
-                return XI.Board.RoundIN == ("R" + player.Uid + "BC");
+            {
+                string[] g0ht = fuse.Split(',');
+                for (int i = 1; i < g0ht.Length; i += 2) {
+                    ushort ut = ushort.Parse(g0ht[i]);
+                    int n = int.Parse(g0ht[i + 1]);
+                    if (ut == player.Uid && n > 0)
+                        return true;
+                }
+            }
             return false;
         }
 
@@ -738,13 +739,9 @@ namespace PSD.PSDGamepkg.JNS
         #region Package 4#
         public void GST1Debut()
         {
-            if (XI.Board.Supporter.Uid != 0)
-            {
-                if (XI.Board.Supporter.DEX >= 4)
-                    XI.RaiseGMessage("G0OX," + XI.Board.Supporter.Uid + ",1,4");
-                else
-                    XI.RaiseGMessage("G0OX," + XI.Board.Supporter.Uid + ",1," + XI.Board.Supporter.DEX);
-            }
+            ushort ut = XI.Board.Supporter.Uid;
+            if (ut > 0 && ut < 1000)
+                XI.RaiseGMessage("G0OX," + ut + ",1,4");
         }
         public void GST1IncrAction(Player player)
         {
@@ -2113,7 +2110,7 @@ namespace PSD.PSDGamepkg.JNS
                             if (ut == player.Uid)
                             {
                                 ushort delta = ushort.Parse(g0af[i]);
-                                if (delta > 4 && player.RAMInt > 0)
+                                if (delta > 4 && player.RAMInt > 0) // TODO: W.T.F
                                     return true;
                                 else if (delta <= 4 && player.RAMInt == 0)
                                     return true;

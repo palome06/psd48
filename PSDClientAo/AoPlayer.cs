@@ -185,8 +185,7 @@ namespace PSD.ClientAo
                         pb.portrait.ToolTip = Tips.IchiDisplay.GetHeroTip(Tuple, value);
                     }));
 
-                    // Update Skills
-
+                    // Update Skills when change hero directly, reserved now.
                     Base.Card.Hero oldHero = Tuple.HL.InstanceHero(mHero);
                     if (oldHero != null)
                     {
@@ -219,7 +218,6 @@ namespace PSD.ClientAo
                 }));
             mHero = value;
         }
-
         #endregion Player Property
 
         #region Cards Property
@@ -711,6 +709,40 @@ namespace PSD.ClientAo
         {
             return mMyFolder.Select(p => "C" + p.ToString()).ToList();
         }
+
+        private int mGuardian;
+        public int Guardian
+        {
+            set { if (mGuardian != value) { OnGuardChanged(value); } }
+            get { return mGuardian; }
+        }
+        [STAThread]
+        private void OnGuardChanged(int value)
+        {
+            if (value != 0)
+            {
+                Base.Card.Exsp exsp = Tuple.ESL.Encode("L" + value);
+                if (exsp != null)
+                {
+                    pb.Dispatcher.BeginInvoke((Action)(() =>
+                    {
+                        ImageSource img = pb.TryFindResource("loadGuard" + value) as ImageSource;
+                        if (img == null)
+                            img = pb.TryFindResource("loadGuard000") as ImageSource;
+                        pb.guardSlice.Visibility = System.Windows.Visibility.Visible;
+                        pb.guardSlice.Source = img;
+                        pb.guardSlice.ToolTip = Tips.IchiDisplay.GetExspTip(Tuple, "L" + value);
+                    }));
+                }
+            }
+            else
+                pb.Dispatcher.BeginInvoke((Action)(() =>
+                {
+                    pb.guardSlice.Visibility = System.Windows.Visibility.Collapsed;
+                }));
+            mGuardian = value;
+        }
+
         #endregion Cards Property
 
         #region 3-points and Status Property

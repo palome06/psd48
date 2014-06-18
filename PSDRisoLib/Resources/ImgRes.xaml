@@ -141,7 +141,7 @@
     <Image x:Key="heroHead17004" Source="Heros/17004.png"/>
     <Image x:Key="heroHead17005" Source="Heros/17005.png"/>
     <Image x:Key="heroHead17006" Source="Heros/17006.png"/>
-
+	<Image x:Key="heroHead17007" Source="Heros/17007.png"/>
     <Image x:Key="heroHead17008" Source="Heros/17008.png"/>
     <Image x:Key="heroHead17009" Source="Heros/17009.png"/>
     <Image x:Key="heroHead17010" Source="Heros/17010.png"/>
@@ -153,7 +153,9 @@
     <Image x:Key="heroHead17016" Source="Heros/17016.png"/>
     <Image x:Key="heroHead17017" Source="Heros/17017.png"/>
     <Image x:Key="heroHead17018" Source="Heros/17018.png"/>
-
+    <Image x:Key="heroHead17019" Source="Heros/17019.png"/>
+	<Image x:Key="heroHead17020" Source="Heros/17020.png"/>
+	<Image x:Key="heroHead17021" Source="Heros/17021.png"/>
     <Image x:Key="heroHead17022" Source="Heros/17022.png"/>
     <Image x:Key="heroHead17024" Source="Heros/17024.png"/>
 	<Image x:Key="heroHead17027" Source="Heros/17027.png"/>
@@ -229,7 +231,8 @@
     <ImageBrush x:Key="nameBarTR016" ImageSource="NameBar/NameTR016.png"/>
     <ImageBrush x:Key="nameBarTR017" ImageSource="NameBar/NameTR017.png"/>
     <ImageBrush x:Key="nameBarTR018" ImageSource="NameBar/NameTR018.png"/>
-
+	<ImageBrush x:Key="nameBarTR020" ImageSource="NameBar/NameTR020.png"/>
+	<ImageBrush x:Key="nameBarTR021" ImageSource="NameBar/NameTR021.png"/>
     <ImageBrush x:Key="nameBarTR022" ImageSource="NameBar/NameTR022.png"/>
     <ImageBrush x:Key="nameBarTR024" ImageSource="NameBar/NameTR024.png"/>
 	<ImageBrush x:Key="nameBarTR027" ImageSource="NameBar/NameTR027.png"/>
@@ -316,6 +319,15 @@
     <Image x:Key="exspCard3" Source="Card/ExSp/EP003.png"/>
     <Image x:Key="exspCard4" Source="Card/ExSp/EP004.png"/>
     <Image x:Key="exspCard5" Source="Card/ExSp/EP005.png"/>
+	<Image x:Key="exspCard6" Source="Card/ExSp/EP006.png"/>
+    <Image x:Key="exspCard7" Source="Card/ExSp/EP007.png"/>
+    <Image x:Key="exspCard8" Source="Card/ExSp/EP008.png"/>
+    <Image x:Key="exspCard9" Source="Card/ExSp/EP009.png"/>
+    <Image x:Key="exspCard10" Source="Card/ExSp/EP010.png"/>
+    <Image x:Key="exspCard11" Source="Card/ExSp/EP011.png"/>
+    <Image x:Key="exspCard12" Source="Card/ExSp/EP012.png"/>
+    <Image x:Key="exspCard13" Source="Card/ExSp/EP013.png"/>
+    <Image x:Key="exspCard14" Source="Card/ExSp/EP014.png"/>
 
     <BitmapImage x:Key="eveCard000src" UriSource="Card/Eve00.png"/>
     <Image x:Key="eveCard000" Source="Card/Eve00.png"/>
@@ -548,7 +560,7 @@
     <Image x:Key="hroCardTR004" Source="Card/Heros/TR004.png"/>
     <Image x:Key="hroCardTR005" Source="Card/Heros/TR005.png"/>
     <Image x:Key="hroCardTR006" Source="Card/Heros/TR006.png"/>
-
+	<Image x:Key="hroCardTR007" Source="Card/Heros/TR007.png"/>
     <Image x:Key="hroCardTR008" Source="Card/Heros/TR008.png"/>
     <Image x:Key="hroCardTR009" Source="Card/Heros/TR009.png"/>
     <Image x:Key="hroCardTR010" Source="Card/Heros/TR010.png"/>
@@ -560,7 +572,9 @@
     <Image x:Key="hroCardTR016" Source="Card/Heros/TR016.png"/>
     <Image x:Key="hroCardTR017" Source="Card/Heros/TR017.png"/>
     <Image x:Key="hroCardTR018" Source="Card/Heros/TR018.png"/>
-
+    <Image x:Key="hroCardTR019" Source="Card/Heros/TR019.png"/>
+	<Image x:Key="hroCardTR020" Source="Card/Heros/TR020.png"/>
+	<Image x:Key="hroCardTR021" Source="Card/Heros/TR021.png"/>
     <Image x:Key="hroCardTR022" Source="Card/Heros/TR022.png"/>
     <Image x:Key="hroCardTR024" Source="Card/Heros/TR024.png"/>
 	<Image x:Key="hroCardTR027" Source="Card/Heros/TR027.png"/>
@@ -613,4 +627,15 @@
     <BitmapImage x:Key="cananLosepaint" UriSource="Logo/CananLose.png"/>
     <BitmapImage x:Key="cananCountdown48paint" UriSource="Logo/CananCountdown48.png"/>
     <BitmapImage x:Key="cananCountdown12paint" UriSource="Logo/CananCountdown12.png"/>
+
+    <BitmapImage x:Key="loadGuard000" UriSource="Card/Guardian/L0.png"/>
+    <BitmapImage x:Key="loadGuard1" UriSource="Card/Guardian/L1.png"/>
+    <BitmapImage x:Key="loadGuard2" UriSource="Card/Guardian/L2.png"/>
+    <BitmapImage x:Key="loadGuard3" UriSource="Card/Guardian/L3.png"/>
+    <BitmapImage x:Key="loadGuard4" UriSource="Card/Guardian/L4.png"/>
+    <BitmapImage x:Key="loadGuard5" UriSource="Card/Guardian/L5.png"/>
+    <BitmapImage x:Key="loadGuard6" UriSource="Card/Guardian/L6.png"/>
+    <BitmapImage x:Key="loadGuard7" UriSource="Card/Guardian/L7.png"/>
+    <BitmapImage x:Key="loadGuard8" UriSource="Card/Guardian/L8.png"/>
+    <BitmapImage x:Key="loadGuard9" UriSource="Card/Guardian/L9.png"/>
 </ResourceDictionary>

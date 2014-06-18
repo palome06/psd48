@@ -119,13 +119,19 @@ namespace PSD.ClientAo.Tips
             tt.Content = mainGrid;
             return tt;
         }
-
+        
         public static ToolTip GetTuxTip(LibGroup Tuple, ushort tuxCode)
         {
-            Tux tux = Tuple.TL.DecodeTux(tuxCode);
+            return GetTuxTip(Tuple.TL.DecodeTux(tuxCode));
+        }
+        public static ToolTip GetTuxDbSerialTip(LibGroup Tuple, ushort dbSerial)
+        {
+            return GetTuxTip(Tuple.TL.EncodeTuxDbSerial(dbSerial));
+        }
+        private static ToolTip GetTuxTip(Tux tux)
+        {
             if (tux == null)
                 return null;
-
             Grid mainGrid = new Grid();
             Grid gd1 = new Grid()
             {

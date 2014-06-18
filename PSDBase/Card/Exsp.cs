@@ -45,7 +45,7 @@ namespace PSD.Base.Card
             {
                 //short type = (ushort)((short)data["TYPE"]);
                 string name = (string)data["NAME"];
-                string code = (string)data["CODE"];
+                string codeGroup = (string)data["CODE"];
                 string skillstr = (string)data["SKILL"];
                 List<string> skill = string.IsNullOrEmpty(skillstr) ?
                         new List<string>() : skillstr.Split(',').ToList();
@@ -55,7 +55,9 @@ namespace PSD.Base.Card
                         new string[] { } : descstr.Split('|');
                 for (int i = 1; i < descSpt.Length; i += 2)
                     id.Add(descSpt[i], descSpt[i + 1]);
-                firsts.Add(new Exsp(name, code, skill, id, this));
+                string[] codes = codeGroup.Split(',');
+                foreach (string code in codes)
+                    firsts.Add(new Exsp(name, code, skill, id, this));
             }
             dicts = new Dictionary<string, Exsp>();
             foreach (Exsp exsp in firsts)

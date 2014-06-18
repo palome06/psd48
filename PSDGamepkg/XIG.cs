@@ -318,9 +318,9 @@ namespace PSD.PSDGamepkg
                                 excds.AddRange(player.ExCards);
                                 if (excds.Count > 0)
                                     g0qzs.Add("G0QZ," + player.Uid + "," + string.Join(",", excds));
+                                if (player.Skills.Count > 0)
+                                    RaiseGMessage("G0OS," + player.Uid + ",0," + string.Join(",", player.Skills));
                             }
-                            if (hero.Skills.Count > 0)
-                                RaiseGMessage("G0OS," + player.Uid + ",0," + string.Join(",", hero.Skills));
                         }
                         if (g1zl != "")
                             RaiseGMessage("G1OZ" + g1zl);
@@ -343,46 +343,7 @@ namespace PSD.PSDGamepkg
                             //if (changeType == 2)
                             //    player.HP = 0;
                             if (changeType == 0 || changeType == 2)
-                            {
-                                if (player.ROMToken != 0)
-                                    RaiseGMessage("G0OJ," + player.Uid + ",0," + player.ROMToken);
-                                if (player.ROMCards.Count > 0)
-                                {
-                                    RaiseGMessage("G2TZ,0," + player.Uid + "," + string.Join(",", player.ROMCards));
-                                    RaiseGMessage("G0OJ," + player.Uid + ",1," + player.ROMCards.Count
-                                        + "," + string.Join(",", player.ROMCards));
-                                    IDictionary<char, List<ushort>> allKinds = new Dictionary<char, List<ushort>>();
-                                    foreach (string cd in player.ROMCards)
-                                    {
-                                        if (cd[0] != 'H')
-                                            Util.AddToMultiMap(allKinds, cd[0], ushort.Parse(cd.Substring(1)));
-                                    }
-                                    if (allKinds.Count > 0)
-                                         RaiseGMessage("G0ON," + string.Join(",", allKinds.Select(p => player.Uid +
-                                             "," + p.Key + "," + p.Value.Count + "," + string.Join(",", p.Value))));
-                                }
-                                if (player.ROMPlayerTar.Count > 0)
-                                    RaiseGMessage("G0OJ," + player.Uid + ",2," + player.ROMPlayerTar.Count
-                                        + "," + string.Join(",", player.ROMPlayerTar));
-                                if (player.ROMAwake)
-                                    RaiseGMessage("G0OJ," + player.Uid + ",3");
-                                if (player.ROMFolder.Count > 0)
-                                {
-                                    RaiseGMessage("G2TZ,0," + player.Uid + "," + string.Join(
-                                        ",", player.ROMFolder.Select(p => "C" + p)));
-                                    RaiseGMessage("G0OJ," + player.Uid + ",4," + player.ROMFolder.Count
-                                        + "," + string.Join(",", player.ROMFolder));
-                                    RaiseGMessage("G0ON," + player.Uid + ",C," + player.ROMFolder.Count + ","
-                                        + string.Join(",", player.ROMFolder));
-                                }
-                                player.ResetROM(Board);
-                                // Remove others' tar token on the player
-                                foreach (Player py in Board.Garden.Values)
-                                {
-                                    if (py.IsAlive && py != player && py.ROMPlayerTar.Contains(player.Uid))
-                                        RaiseGMessage("G0OJ," + py.Uid + ",2,1," + player.Uid);
-                                }
-                            }
+                                Artiad.ContentRule.ErasePlayerToken(player, Board, RaiseGMessage);
                             player.SelectHero = 0;
                         }
                     }
@@ -1316,8 +1277,11 @@ namespace PSD.PSDGamepkg
                         }
                         RaiseGMessage("G2AK," + player.Uid + ","
                             + player.HP + "," + player.HPb + "," + player.STR + "," + player.DEX);
-                        if (hero.Skills.Count > 0)
-                            RaiseGMessage("G0IS," + player.Uid + ",0," + string.Join(",", hero.Skills));
+                        if (changeType == 0 || changeType == 2)
+                        {
+                            if (hero.Skills.Count > 0)
+                                RaiseGMessage("G0IS," + player.Uid + ",0," + string.Join(",", hero.Skills));
+                        }
                         WI.BCast("E0IY," + cmdrst);
                         string zs = "";
                         if (player.Weapon != 0)
@@ -1544,117 +1508,314 @@ namespace PSD.PSDGamepkg
                             {
                                 TuxEqiup te = tux as TuxEqiup;
                                 RaiseGMessage("G0OT," + me + ",1," + card);
-                                if (tux.Type == Tux.TuxType.WQ && player.Weapon != card)
+                                if (tux.Type == Tux.TuxType.WQ)
                                 {
-                                    if (player.Weapon != 0)
-                                        RaiseGMessage("G0QZ," + me + "," + player.Weapon);
-                                    player.Weapon = card;
+                                    if (player.Weapon == 0 && player.ExEquip == 0)
+                                    {
+                                        player.Weapon = card;
+                                        WI.BCast("E0ZB," + me + ",0,1," + card);
+                                    }
+                                    else if ((player.ExMask & 0x1) == 0)
+                                    {
+                                        if (player.Weapon != card && player.Weapon != 0)
+                                            RaiseGMessage("G0QZ," + me + "," + player.Weapon);
+                                        player.Weapon = card;
+                                        WI.BCast("E0ZB," + me + ",0,1," + card);
+                                    }
+                                    else
+                                    {
+                                        string mai = "#替换的,C1(p" + player.Weapon
+                                             + "p" + player.ExEquip + ")";
+                                        ushort sel = ushort.Parse(AsyncInput(me, mai, cmd, "0"));
+                                        if (player.ExEquip == sel) {
+                                            if (player.ExEquip != 0)
+                                                RaiseGMessage("G0QZ," + me + "," + player.ExEquip);
+                                            player.ExEquip = card;
+                                            WI.BCast("E0ZB," + me + ",0,5," + card);
+                                        } else { // player.Weapon == sel
+                                            if (player.Weapon != 0)
+                                                RaiseGMessage("G0QZ," + me + "," + player.Weapon);
+                                            player.Weapon = card;
+                                            WI.BCast("E0ZB," + me + ",0,1," + card);
+                                        }
+                                    }
                                     RaiseGMessage("G1IZ," + me + "," + card);
-                                    WI.BCast("E0ZB," + me + ",0,1," + card);
                                     if (!player.WeaponDisabled)
                                         te.InsAction(player);
                                 }
-                                if (tux.Type == Tux.TuxType.FJ && player.Armor != card)
+                                else if (tux.Type == Tux.TuxType.FJ)
                                 {
-                                    if (player.Armor != 0)
-                                        RaiseGMessage("G0QZ," + me + "," + player.Armor);
-                                    player.Armor = card;
+                                    if (player.Armor == 0 && player.ExEquip == 0) {
+                                        player.Armor = card;
+                                        WI.BCast("E0ZB," + me + ",0,2," + card);
+                                    }
+                                    else if ((player.ExMask & 0x2) == 0)
+                                    {
+                                        if (player.Armor != card && player.Armor != 0)
+                                            RaiseGMessage("G0QZ," + me + "," + player.Armor);
+                                        player.Armor = card;
+                                        WI.BCast("E0ZB," + me + ",0,2," + card);
+                                    }
+                                    else
+                                    {
+                                        string mai = "#替换的,C1(p" + player.Armor
+                                             + "p" + player.ExEquip + ")";
+                                        ushort sel = ushort.Parse(AsyncInput(me, mai, cmd, "0"));
+                                        if (player.ExEquip == sel) {
+                                            if (player.ExEquip != 0)
+                                                RaiseGMessage("G0QZ," + me + "," + player.ExEquip);
+                                            player.ExEquip = card;
+                                            WI.BCast("E0ZB," + me + ",0,5," + card);
+                                        } else { // player.Armor == sel
+                                            if (player.Armor != 0)
+                                                RaiseGMessage("G0QZ," + me + "," + player.Armor);
+                                            player.Armor = card;
+                                            WI.BCast("E0ZB," + me + ",0,2," + card);
+                                        }
+                                    }
                                     RaiseGMessage("G1IZ," + me + "," + card);
-                                    WI.BCast("E0ZB," + me + ",0,2," + card);
                                     if (!player.ArmorDisabled)
                                         te.InsAction(player);
                                 }
-                                if (tux.Type == Tux.TuxType.XB && player.Trove != card)
+                                if (tux.Type == Tux.TuxType.XB)
                                 {
-                                    if (player.Trove != 0)
-                                        RaiseGMessage("G0QZ," + me + "," + player.Trove);
-                                    player.Trove = card;
+                                    if (player.Trove == 0 && player.ExEquip == 0)
+                                    {
+                                        player.Trove = card;
+                                        WI.BCast("E0ZB," + me + ",0,6," + card);
+                                    }
+                                    else if ((player.ExMask & 0x4) == 0)
+                                    {
+                                        if (player.Trove != card && player.Trove != 0)
+                                            RaiseGMessage("G0QZ," + me + "," + player.Trove);
+                                        player.Trove = card;
+                                        WI.BCast("E0ZB," + me + ",0,6," + card);
+                                    } else
+                                    {
+                                        string mai = "#替换的,C1(p" + player.Trove
+                                             + "p" + player.ExEquip + ")";
+                                        ushort sel = ushort.Parse(AsyncInput(me, mai, cmd, "0"));
+                                        if (player.ExEquip == sel) {
+                                            if (player.ExEquip != 0)
+                                                RaiseGMessage("G0QZ," + me + "," + player.ExEquip);
+                                            player.ExEquip = card;
+                                            WI.BCast("E0ZB," + me + ",0,5," + card);
+                                        } else { // player.Trove == sel
+                                            if (player.Trove != 0)
+                                                RaiseGMessage("G0QZ," + me + "," + player.Trove);
+                                            player.Trove = card;
+                                            WI.BCast("E0ZB," + me + ",0,6," + card);
+                                        }
+                                    }
                                     RaiseGMessage("G1IZ," + me + "," + card);
-                                    WI.BCast("E0ZB," + me + ",0,6," + card);
                                     if (!player.LuggageDisabled)
                                         te.InsAction(player);
                                 }
                             }
                         }
                     }
-                    else if (args[2] == "1")
+                    else if (args[2] == "1") // G0ZB,to,1,master,0:normal;1:force-fill,from,[tux]*
                     {
                         ushort me = ushort.Parse(args[1]);
-                        ushort from = ushort.Parse(args[3]);
-                        for (int i = 4; i < args.Length; ++i)
+                        ushort master = ushort.Parse(args[3]);
+                        bool fillForce = args[4] == "1";
+                        ushort from = ushort.Parse(args[5]);
+                        for (int i = 6; i < args.Length; ++i)
                         {
                             ushort card = ushort.Parse(args[i]);
-                            //Player player = Board.Garden[from];
-                            Player pm = Board.Garden[me];
-                            Player pf = (from == 0) ? null : Board.Garden[from];
                             Tux tux = LibTuple.TL.DecodeTux(card);
-                            if ((from == 0 || pf.ListOutAllCards().Contains(card)) && tux.IsTuxEqiup())
+
+                            bool cardCheck = (from == 0 || Board.Garden[from].ListOutAllCards().Contains(card));
+                            if (from == 0 && !tux.IsTuxEqiup())
                             {
-                                TuxEqiup te = tux as TuxEqiup;
-                                if (from != 0)
+                                Board.Garden[me].Fakeq[card] = tux.Code;
+                                WI.BCast("E0ZB," + me + ",1," + from + ",4," + card + "," + tux.Code);
+                            }
+                            else if (from != 0 && !tux.IsTuxEqiup())
+                            {
+                                if (cardCheck)
+                                {
+                                    Board.Garden[me].Fakeq[card] = Board.Garden[from].Fakeq[card];
                                     RaiseGMessage("G0OT," + from + ",1," + card);
-                                if (tux.Type == Tux.TuxType.WQ && pm.Weapon != card)
-                                {
-                                    if (pm.Weapon != 0)
-                                        RaiseGMessage("G0QZ," + me + "," + pm.Weapon);
-                                    pm.Weapon = card;
-                                    RaiseGMessage("G1IZ," + me + "," + card);
-                                    WI.BCast("E0ZB," + me + ",1," + from + ",1," + card);
-                                    if (!Board.Garden[me].WeaponDisabled)
-                                        te.InsAction(Board.Garden[me]);
-                                }
-                                if (tux.Type == Tux.TuxType.FJ && pm.Armor != card)
-                                {
-                                    if (pm.Armor != 0)
-                                        RaiseGMessage("G0QZ," + me + "," + pm.Armor);
-                                    pm.Armor = card;
-                                    RaiseGMessage("G1IZ," + me + "," + card);
-                                    WI.BCast("E0ZB," + me + ",1," + from + ",2," + card);
-                                    if (!Board.Garden[me].ArmorDisabled)
-                                        te.InsAction(Board.Garden[me]);
-                                }
-                                if (tux.Type == Tux.TuxType.XB && pm.Trove != card)
-                                {
-                                    if (pm.Trove != 0)
-                                        RaiseGMessage("G0QZ," + me + "," + pm.Trove);
-                                    pm.Trove = card;
-                                    RaiseGMessage("G1IZ," + me + "," + card);
-                                    WI.BCast("E0ZB," + me + ",1," + from + ",6," + card);
-                                    if (!Board.Garden[me].LuggageDisabled)
-                                        te.InsAction(Board.Garden[me]);
+                                    WI.BCast("E0ZB," + me + ",1," + from + ",4," + card + "," + tux.Code);
                                 }
                             }
-                            else if (from == 0 || pf.ListOutAllEquips().Contains(card))
+                            else if (cardCheck)
                             {
                                 if (from != 0)
-                                {
-                                    pm.Fakeq[card] = pf.Fakeq[card];
                                     RaiseGMessage("G0OT," + from + ",1," + card);
-                                    WI.BCast("E0ZB," + me + ",1," + from + ",4," + card + "," + pm.Fakeq[card]);
-                                }
-                                else
+                                TuxEqiup te = tux as TuxEqiup;
+                                Player player = Board.Garden[me];
+                                if (tux.Type == Tux.TuxType.WQ)
                                 {
-                                    pm.Fakeq[card] = tux.Code;
-                                    WI.BCast("E0ZB," + me + ",1," + from + ",4," + card + "," + tux.Code);
+                                    if (fillForce)
+                                    {
+                                        if (player.Weapon == 0)
+                                        {
+                                            player.Weapon = card;
+                                            WI.BCast("E0ZB," + me + ",1," + from + ",1," + card);
+                                        }
+                                        else if ((player.ExMask & 0x1) != 0 && player.ExEquip == 0)
+                                        {
+                                            player.ExEquip = card;
+                                            WI.BCast("E0ZB," + me + ",1," + from + ",5," + card);
+                                        }
+                                    }
+                                    else if (player.Weapon == 0 && player.ExEquip == 0)
+                                    {
+                                        player.Weapon = card;
+                                        WI.BCast("E0ZB," + me + ",1," + from + ",1," + card);
+                                    }
+                                    else if ((player.ExMask & 0x1) == 0)
+                                    {
+                                        if (player.Weapon != card && player.Weapon != 0)
+                                            RaiseGMessage("G0QZ," + me + "," + player.Weapon);
+                                        player.Weapon = card;
+                                        WI.BCast("E0ZB," + me + ",1," + from + ",1," + card);
+                                    }
+                                    else
+                                    {
+                                        string mai = "#替换的,C1(p" + player.Weapon
+                                             + "p" + player.ExEquip + ")";
+                                        ushort sel = ushort.Parse(AsyncInput(master, mai, cmd, "0"));
+                                        if (player.ExEquip == sel)
+                                        {
+                                            if (player.ExEquip != 0)
+                                                RaiseGMessage("G0QZ," + me + "," + player.ExEquip);
+                                            player.ExEquip = card;
+                                            WI.BCast("E0ZB," + me + ",1," + from + ",5," + card);
+                                        }
+                                        else
+                                        { // player.Weapon == sel
+                                            if (player.Weapon != 0)
+                                                RaiseGMessage("G0QZ," + me + "," + player.Weapon);
+                                            player.Weapon = card;
+                                            WI.BCast("E0ZB," + me + ",1," + from + ",1," + card);
+                                        }
+                                    }
+                                    RaiseGMessage("G1IZ," + me + "," + card);
+                                    if (!player.WeaponDisabled)
+                                        te.InsAction(player);
+                                }
+                                else if (tux.Type == Tux.TuxType.FJ)
+                                {
+                                    if (fillForce)
+                                    {
+                                        if (player.Armor == 0)
+                                        {
+                                            player.Armor = card;
+                                            WI.BCast("E0ZB," + me + ",1," + from + ",2," + card);
+                                        }
+                                        else if ((player.ExMask & 0x2) != 0 && player.ExEquip == 0)
+                                        {
+                                            player.ExEquip = card;
+                                            WI.BCast("E0ZB," + me + ",1," + from + ",5," + card);
+                                        }
+                                    }
+                                    else if (player.Armor == 0 && player.ExEquip == 0)
+                                    {
+                                        player.Armor = card;
+                                        WI.BCast("E0ZB," + me + ",1," + from + ",2," + card);
+                                    }
+                                    else if ((player.ExMask & 0x2) == 0)
+                                    {
+                                        if (player.Armor != card && player.Armor != 0)
+                                            RaiseGMessage("G0QZ," + me + "," + player.Armor);
+                                        player.Armor = card;
+                                        WI.BCast("E0ZB," + me + ",1," + from + ",2," + card);
+                                    }
+                                    else
+                                    {
+                                        string mai = "#替换的,C1(p" + player.Armor
+                                             + "p" + player.ExEquip + ")";
+                                        ushort sel = ushort.Parse(AsyncInput(master, mai, cmd, "0"));
+                                        if (player.ExEquip == sel)
+                                        {
+                                            if (player.ExEquip != 0)
+                                                RaiseGMessage("G0QZ," + me + "," + player.ExEquip);
+                                            player.ExEquip = card;
+                                            WI.BCast("E0ZB," + me + ",1," + from + ",5," + card);
+                                        }
+                                        else
+                                        { // player.Armor == sel
+                                            if (player.Armor != 0)
+                                                RaiseGMessage("G0QZ," + me + "," + player.Armor);
+                                            player.Armor = card;
+                                            WI.BCast("E0ZB," + me + ",1," + from + ",2," + card);
+                                        }
+                                    }
+                                    RaiseGMessage("G1IZ," + me + "," + card);
+                                    if (!player.ArmorDisabled)
+                                        te.InsAction(player);
+                                }
+                                else if (tux.Type == Tux.TuxType.XB)
+                                {
+                                    if (fillForce)
+                                    {
+                                        if (player.Trove == 0)
+                                        {
+                                            player.Trove = card;
+                                            WI.BCast("E0ZB," + me + ",1," + from + ",6," + card);
+                                        }
+                                        else if ((player.ExMask & 0x1) != 0 && player.ExEquip == 0)
+                                        {
+                                            player.ExEquip = card;
+                                            WI.BCast("E0ZB," + me + ",1," + from + ",5," + card);
+                                        }
+                                    }
+                                    else if (player.Trove == 0 && player.ExEquip == 0)
+                                    {
+                                        player.Trove = card;
+                                        WI.BCast("E0ZB," + me + ",1," + from + ",6," + card);
+                                    }
+                                    else if ((player.ExMask & 0x4) == 0)
+                                    {
+                                        if (player.Trove != card && player.Trove != 0)
+                                            RaiseGMessage("G0QZ," + me + "," + player.Trove);
+                                        player.Trove = card;
+                                        WI.BCast("E0ZB," + me + ",1," + from + ",6," + card);
+                                    }
+                                    else
+                                    {
+                                        string mai = "#替换的,C1(p" + player.Trove
+                                             + "p" + player.ExEquip + ")";
+                                        ushort sel = ushort.Parse(AsyncInput(master, mai, cmd, "0"));
+                                        if (player.ExEquip == sel)
+                                        {
+                                            if (player.ExEquip != 0)
+                                                RaiseGMessage("G0QZ," + me + "," + player.ExEquip);
+                                            player.ExEquip = card;
+                                            WI.BCast("E0ZB," + me + ",1," + from + ",5," + card);
+                                        }
+                                        else
+                                        { // player.Trove == sel
+                                            if (player.Trove != 0)
+                                                RaiseGMessage("G0QZ," + me + "," + player.Trove);
+                                            player.Trove = card;
+                                            WI.BCast("E0ZB," + me + ",1," + from + ",6," + card);
+                                        }
+                                    }
+                                    RaiseGMessage("G1IZ," + me + "," + card);
+                                    if (!player.LuggageDisabled)
+                                        te.InsAction(player);
                                 }
                             }
                         }
                     }
                     else if (args[2] == "2")
                     {
-                        // G0ZB,A,2,x
+                        // G0ZB,A,2,from,x
                         ushort me = ushort.Parse(args[1]);
-                        for (int i = 3; i < args.Length; ++i)
+                        ushort from = ushort.Parse(args[3]);
+                        for (int i = 4; i < args.Length; ++i)
                         {
                             ushort card = ushort.Parse(args[i]);
                             Player player = Board.Garden[me];
                             Tux tux = LibTuple.TL.DecodeTux(card);
-                            if (player.Tux.Contains(card))
-                            {
+                            if (from != 0 && Board.Garden[from].Tux.Contains(card))
                                 RaiseGMessage("G0OT," + me + ",1," + card);
-                                player.ExCards.Add(card);
-                                WI.BCast("E0ZB," + me + ",0,3," + card);
-                            }
+                            player.ExCards.Add(card);
+                            WI.BCast("E0ZB," + me + ",0,3," + card);
                         }
                     }
                     else if (args[2] == "3")
@@ -1675,35 +1836,6 @@ namespace PSD.PSDGamepkg
                                     player.Fakeq[card] = cardAs;
                                     WI.BCast("E0ZB," + me + ",0,4," + card + "," + cardAs);
                                     Board.PendingTux.Remove(tuxInfo); break;
-                                }
-                            }
-                        }
-                    }
-                    else if (args[2] == "4")
-                    {
-                        // G0ZB,A,4,x
-                        ushort me = ushort.Parse(args[1]);
-                        for (int i = 3; i < args.Length; ++i)
-                        {
-                            ushort card = ushort.Parse(args[i]);
-                            Player player = Board.Garden[me];
-                            TuxEqiup tux = LibTuple.TL.DecodeTux(card) as TuxEqiup;
-                            if (player.Tux.Contains(card))
-                            {
-                                RaiseGMessage("G0OT," + me + ",1," + card);
-                                if (player.ExEquip != card)
-                                {
-                                    if (player.ExEquip != 0)
-                                        RaiseGMessage("G0QZ," + me + "," + player.ExEquip);
-                                    player.ExEquip = card;
-                                    RaiseGMessage("G1IZ," + me + "," + card);
-                                    WI.BCast("E0ZB," + me + ",0,5," + card);
-                                    if (tux.Type == Tux.TuxType.WQ && !player.WeaponDisabled)
-                                        tux.InsAction(player);
-                                    else if (tux.Type == Tux.TuxType.FJ && !player.ArmorDisabled)
-                                        tux.InsAction(player);
-                                    else if (tux.Type == Tux.TuxType.XB && !player.LuggageDisabled)
-                                        tux.InsAction(player);
                                 }
                             }
                         }
@@ -2472,7 +2604,10 @@ namespace PSD.PSDGamepkg
                     }
                 case "G0HI":
                     {
+                        // to mark as to be discard
                         IDictionary<ushort, List<ushort>> imc = new Dictionary<ushort, List<ushort>>();
+                        // to discard immediately
+                        IDictionary<ushort, List<ushort>> jmc = new Dictionary<ushort, List<ushort>>();
                         List<ushort> dices = new List<ushort>();
                         for (int i = 1; i < args.Length; i += 2)
                         {
@@ -2481,20 +2616,19 @@ namespace PSD.PSDGamepkg
                             if (Board.InFight)
                             {
                                 RaiseGMessage("G1HK,0," + who + "," + pet);
-                                if (!imc.ContainsKey(who))
-                                    imc[who] = new List<ushort>();
-                                imc[who].Add(pet);
+                                Util.AddToMultiMap(imc, who, pet);
                             }
                             else
                             {
                                 RaiseGMessage("G0HL," + who + "," + pet);
-                                dices.Add(pet);
+                                Util.AddToMultiMap(jmc, who, pet);
                             }
                         }
                         foreach (var pair in imc)
                             RaiseGMessage("G2HU," + pair.Key + "," + string.Join(",", pair.Value));
-                        if (dices.Count > 0) // Actually from different players, set 10
-                            RaiseGMessage("G0ON,10,M," + dices.Count + "," + string.Join(",", dices));
+                        if (jmc.Count > 0)
+                            RaiseGMessage("G0ON," + string.Join(",", jmc.Select(p => p.Key + ",M," +
+                                 p.Value.Count + "," + string.Join(",", p.Value))));
                         WI.BCast("E0HI," + cmdrst);
                     }
                     break;
@@ -2663,31 +2797,31 @@ namespace PSD.PSDGamepkg
                         if (type == 0)
                         {
                             ushort n = ushort.Parse(args[3]);
-                            py.ROMToken += n;
-                            WI.BCast("E0IJ," + who + ",0," + n + "," + py.ROMToken);
+                            py.TokenCount += n;
+                            WI.BCast("E0IJ," + who + ",0," + n + "," + py.TokenCount);
                         }
                         else if (type == 1)
                         {
                             int n = int.Parse(args[3]);
                             List<string> heros = Util.TakeRange(args, 4, 4 + n).ToList();
-                            py.ROMCards.AddRange(heros);
+                            py.TokenExcl.AddRange(heros);
                             WI.BCast("E0IJ," + who + ",1," + n + "," + string.Join(",", heros) +
-                                "," + py.ROMCards.Count + "," + string.Join(",", py.ROMCards));
+                                "," + py.TokenExcl.Count + "," + string.Join(",", py.TokenExcl));
                         }
                         else if (type == 2)
                         {
                             int n = int.Parse(args[3]);
                             List<ushort> tars = Util.TakeRange(args, 4, 4 + n)
                                 .Select(p => ushort.Parse(p)).ToList();
-                            py.ROMPlayerTar.AddRange(tars);
+                            py.TokenTars.AddRange(tars);
                             WI.BCast("E0IJ," + who + ",2," + n + "," + string.Join(",", tars) +
-                                "," + py.ROMPlayerTar.Count + "," + string.Join(",", py.ROMPlayerTar));
+                                "," + py.TokenTars.Count + "," + string.Join(",", py.TokenTars));
                         }
                         else if (type == 3)
                         {
-                            if (!py.ROMAwake)
+                            if (!py.TokenAwake)
                             {
-                                py.ROMAwake = true;
+                                py.TokenAwake = true;
                                 WI.BCast("E0IJ," + who + ",3");
                             }
                         } 
@@ -2696,11 +2830,11 @@ namespace PSD.PSDGamepkg
                             int n = int.Parse(args[3]);
                             List<ushort> folders = Util.TakeRange(args, 4, 4 + n)
                                 .Select(p => ushort.Parse(p)).ToList();
-                            py.ROMFolder.AddRange(folders);
+                            py.TokenFold.AddRange(folders);
                             WI.Send("E0IJ," + who + ",4,0," + n + "," + string.Join(",", folders) +
-                                "," + py.ROMFolder.Count + "," + string.Join(",", py.ROMFolder), 0, who);
-                            WI.Send("E0IJ," + who + ",4,1," + n + "," + py.ROMFolder.Count, ExceptStaff(who));
-                            WI.Live("E0IJ," + who + ",4,1," + n + "," + py.ROMFolder.Count);
+                                "," + py.TokenFold.Count + "," + string.Join(",", py.TokenFold), 0, who);
+                            WI.Send("E0IJ," + who + ",4,1," + n + "," + py.TokenFold.Count, ExceptStaff(who));
+                            WI.Live("E0IJ," + who + ",4,1," + n + "," + py.TokenFold.Count);
                         }
                     }
                     break;
@@ -2712,17 +2846,17 @@ namespace PSD.PSDGamepkg
                         if (type == 0)
                         {
                             ushort n = ushort.Parse(args[3]);
-                            py.ROMToken -= n;
-                            WI.BCast("E0OJ," + who + ",0," + n + "," + py.ROMToken);
+                            py.TokenCount -= n;
+                            WI.BCast("E0OJ," + who + ",0," + n + "," + py.TokenCount);
                         }
                         else if (type == 1)
                         {
                             int n = int.Parse(args[3]);
                             List<string> heros = Util.TakeRange(args, 4, 4 + n).ToList();
-                            py.ROMCards.RemoveAll(p => heros.Contains(p));
-                            if (py.ROMCards.Count > 0)
+                            py.TokenExcl.RemoveAll(p => heros.Contains(p));
+                            if (py.TokenExcl.Count > 0)
                                 WI.BCast("E0OJ," + who + ",1," + n + "," + string.Join(",", heros) +
-                                    "," + py.ROMCards.Count + "," + string.Join(",", py.ROMCards));
+                                    "," + py.TokenExcl.Count + "," + string.Join(",", py.TokenExcl));
                             else
                                 WI.BCast("E0OJ," + who + ",1," + n + "," + string.Join(",", heros) + ",0");
                         }
@@ -2731,18 +2865,18 @@ namespace PSD.PSDGamepkg
                             int n = int.Parse(args[3]);
                             List<ushort> tars = Util.TakeRange(args, 4, 4 + n)
                                 .Select(p => ushort.Parse(p)).ToList();
-                            py.ROMPlayerTar.RemoveAll(p => tars.Contains(p));
-                            if (py.ROMPlayerTar.Count > 0)
+                            py.TokenTars.RemoveAll(p => tars.Contains(p));
+                            if (py.TokenTars.Count > 0)
                                 WI.BCast("E0OJ," + who + ",2," + n + "," + string.Join(",", tars) +
-                                    "," + py.ROMPlayerTar.Count + "," + string.Join(",", py.ROMPlayerTar));
+                                    "," + py.TokenTars.Count + "," + string.Join(",", py.TokenTars));
                             else
                                 WI.BCast("E0OJ," + who + ",2," + n + "," + string.Join(",", tars) + ",0");
                         }
                         else if (type == 3)
                         {
-                            if (py.ROMAwake)
+                            if (py.TokenAwake)
                             {
-                                py.ROMAwake = false;
+                                py.TokenAwake = false;
                                 WI.BCast("E0OJ," + who + ",3");
                             }
                         }
@@ -2751,15 +2885,15 @@ namespace PSD.PSDGamepkg
                             int n = int.Parse(args[3]);
                             List<ushort> folders = Util.TakeRange(args, 4, 4 + n)
                                 .Select(p => ushort.Parse(p)).ToList();
-                            py.ROMFolder.RemoveAll(p => folders.Contains(p));
-                            if (py.ROMFolder.Count > 0)
+                            py.TokenFold.RemoveAll(p => folders.Contains(p));
+                            if (py.TokenFold.Count > 0)
                                 WI.Send("E0OJ," + who + ",4,0," + n + "," + string.Join(",", folders) +
-                                    "," + py.ROMFolder.Count + "," + string.Join(",", py.ROMFolder), 0, who);
+                                    "," + py.TokenFold.Count + "," + string.Join(",", py.TokenFold), 0, who);
                             else
                                 WI.Send("E0OJ," + who + ",4,0," + n + ","
                                     + string.Join(",", folders) + ",0", 0, who);
-                            WI.Send("E0OJ," + who + ",4,1," + n + "," + py.ROMFolder.Count, ExceptStaff(who));
-                            WI.Live("E0OJ," + who + ",4,1," + n + "," + py.ROMFolder.Count);
+                            WI.Send("E0OJ," + who + ",4,1," + n + "," + py.TokenFold.Count, ExceptStaff(who));
+                            WI.Live("E0OJ," + who + ",4,1," + n + "," + py.TokenFold.Count);
                         }
                     }
                     break;
@@ -2817,8 +2951,13 @@ namespace PSD.PSDGamepkg
                             Skill skill;
                             if (sk01.TryGetValue(args[i], out skill))
                             {
-                                AddSingleSkill(who, skill, sk02, sk03);
-                                e0is += "," + args[i];
+                                Player py = Board.Garden[who];
+                                if (!py.Skills.Contains(skill.Code))
+                                {
+                                    py.Skills.Add(skill.Code);
+                                    AddSingleSkill(who, skill, sk02, sk03);
+                                    e0is += "," + args[i];
+                                }
                             }
                         }
                         if (e0is != "" && !hind)
@@ -2835,8 +2974,12 @@ namespace PSD.PSDGamepkg
                             Skill skill;
                             if (sk01.TryGetValue(args[i], out skill))
                             {
-                                RemoveSingleSkill(who, skill, sk02, sk03);
-                                e0os += "," + args[i];
+                                Player py = Board.Garden[who];
+                                if (py.Skills.Remove(skill.Code))
+                                {
+                                    RemoveSingleSkill(who, skill, sk02, sk03);
+                                    e0os += "," + args[i];
+                                }
                             }
                         }
                         if (e0os != "" && !hind)
@@ -2901,38 +3044,7 @@ namespace PSD.PSDGamepkg
                         excds.AddRange(player.ExCards);
                         if (excds.Count > 0)
                             RaiseGMessage("G0QZ," + player.Uid + "," + string.Join(",", excds));
-                        if (player.ROMToken != 0)
-                            RaiseGMessage("G0OJ," + player.Uid + ",0," + player.ROMToken);
-                        if (player.ROMCards.Count > 0)
-                        {
-                            RaiseGMessage("G2TZ,0," + player.Uid + "," + string.Join(",", player.ROMCards));
-                            RaiseGMessage("G0OJ," + player.Uid + ",1," + player.ROMCards.Count
-                                + "," + string.Join(",", player.ROMCards));
-                            IDictionary<char, List<ushort>> allKinds = new Dictionary<char, List<ushort>>();
-                            foreach (string cd in player.ROMCards)
-                            {
-                                if (cd[0] != 'H')
-                                    Util.AddToMultiMap(allKinds, cd[0], ushort.Parse(cd.Substring(1)));
-                            }
-                            if (allKinds.Count > 0)
-                                RaiseGMessage("G0ON," + string.Join(",", allKinds.Select(p => player.Uid +
-                                    "," + p.Key + "," + p.Value.Count + "," + string.Join(",", p.Value))));
-                        }
-                        if (player.ROMPlayerTar.Count > 0)
-                            RaiseGMessage("G0OJ," + player.Uid + ",2," + player.ROMPlayerTar.Count
-                                + "," + string.Join(",", player.ROMPlayerTar));
-                        if (player.ROMAwake)
-                            RaiseGMessage("G0OJ," + player.Uid + ",3");
-                        if (player.ROMFolder.Count > 0)
-                        {
-                            RaiseGMessage("G2TZ,0," + player.Uid + "," + string.Join(
-                                ",", player.ROMFolder.Select(p => "C" + p)));
-                            RaiseGMessage("G0OJ," + player.Uid + ",4," + player.ROMFolder.Count
-                                + "," + string.Join(",", player.ROMFolder));
-                            RaiseGMessage("G0ON," + player.Uid + ",C," + player.ROMFolder.Count + ","
-                                + string.Join(",", player.ROMFolder));
-                        }
-                        player.ResetROM(Board);
+                        Artiad.ContentRule.ErasePlayerToken(player, Board, RaiseGMessage);
 
                         Hero hro = LibTuple.HL.InstanceHero(hero);
                         if (hro != null)
@@ -3242,6 +3354,108 @@ namespace PSD.PSDGamepkg
                                 //if (rms.Count > 0)
                                 //    RaiseGMessage("G2TZ," + who + ",1," + string.Join(",", rms));
                             }
+                        }
+                    }
+                    break;
+                case "G0MA":
+                    {
+                        ushort who = ushort.Parse(args[1]);
+                        ushort guad = ushort.Parse(args[2]);
+                        Board.Garden[who].Guardian = guad;
+                        WI.BCast("E0MA," + cmdrst);
+                    }
+                    break;
+                case "G0PH":
+                    {
+                        string result = "";
+                        List<Artiad.Toxi> toxis = Artiad.Toxi.Parse(cmd);
+                        foreach (Artiad.Toxi toxi in toxis)
+                        {
+                            Player py = Board.Garden[toxi.Who];
+                            if (toxi.N > 0)
+                            {
+                                if (py.HP - toxi.N <= 0)
+                                    toxi.N = py.HP;
+                                py.HP -= toxi.N;
+                                if (toxi.N > 0)
+                                    result += "," + toxi.Who + "," + Artiad.IntHelper.Elem2Int(
+                                        toxi.Element) + "," + toxi.N + "," + py.HP;
+                            }
+                        }
+                        if (!result.Equals(""))
+                            WI.BCast("E0PH" + result);
+                        List<ushort> zeros = Board.Garden.Values.Where(p => p.IsAlive && p.HP == 0)
+                            .Select(p => p.Uid).ToList();
+                        if (zeros.Count > 0)
+                        {
+                            WI.BCast("E0ZH," + string.Join(",", zeros));
+                            RaiseGMessage("G0ZH,0");
+                        }
+                    }
+                    break;
+                case "G0ZJ":
+                    {
+                        ushort ut = ushort.Parse(cmdrst);
+                        Player py = Board.Garden[ut];
+                        if ((py.ExMask & 0x1) != 0 && py.ExEquip != 0)
+                        {
+                            if (py.Weapon == 0)
+                            {
+                                py.Weapon = py.ExEquip; py.ExEquip = 0;
+                                WI.BCast("E0ZJ," + ut + ",1," + py.ExEquip);
+                            } else {
+                                ushort choose = ushort.Parse(AsyncInput(ut, "#保留的,C1(p"
+                                    + py.Weapon + "p" + py.ExEquip + ")", "G0ZJ", "0"));
+                                if (choose == py.Weapon)
+                                    RaiseGMessage("G0QZ," + ut + "," + py.ExEquip);
+                                else
+                                {
+                                    RaiseGMessage("G0QZ," + ut + "," + py.Weapon);
+                                    py.Weapon = py.ExEquip; py.ExEquip = 0;
+                                    WI.BCast("E0ZJ," + ut + ",1," + py.ExEquip);
+                                }
+                            }
+                            py.ExMask &= (~0x1);
+                        }
+                        else if ((py.ExMask & 0x2) != 0 && py.ExEquip != 0)
+                        {
+                            if (py.Armor == 0)
+                            {
+                                py.Armor = py.ExEquip; py.ExEquip = 0;
+                                WI.BCast("E0ZJ," + ut + ",2," + py.ExEquip);
+                            } else {
+                                ushort choose = ushort.Parse(AsyncInput(ut, "#保留的,C1(p"
+                                    + py.Armor + "p" + py.ExEquip + ")", "G0ZJ", "0"));
+                                if (choose == py.Armor)
+                                    RaiseGMessage("G0QZ," + ut + "," + py.ExEquip);
+                                else
+                                {
+                                    RaiseGMessage("G0QZ," + ut + "," + py.Armor);
+                                    py.Armor = py.ExEquip; py.ExEquip = 0;
+                                    WI.BCast("E0ZJ," + ut + ",2," + py.ExEquip);
+                                }
+                            }
+                            py.ExMask &= (~0x2);
+                        }
+                        else if ((py.ExMask & 0x4) != 0 && py.ExEquip != 0)
+                        {
+                            if (py.Trove == 0)
+                            {
+                                py.Trove = py.ExEquip; py.ExEquip = 0;
+                                WI.BCast("E0ZJ," + ut + ",3," + py.ExEquip);
+                            } else {
+                                ushort choose = ushort.Parse(AsyncInput(ut, "#保留的,C1(p"
+                                    + py.Trove + "p" + py.ExEquip + ")", "G0ZJ", "0"));
+                                if (choose == py.Trove)
+                                    RaiseGMessage("G0QZ," + ut + "," + py.ExEquip);
+                                else
+                                {
+                                    RaiseGMessage("G0QZ," + ut + "," + py.Trove);
+                                    py.Trove = py.ExEquip; py.ExEquip = 0;
+                                    WI.BCast("E0ZJ," + ut + ",3," + py.ExEquip);
+                                }
+                            }
+                            py.ExMask &= (~0x4);
                         }
                     }
                     break;

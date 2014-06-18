@@ -198,6 +198,7 @@ namespace PSD.ClientZero
 
         public IDictionary<ushort, List<string>> Treasures { private set; get; }
         public int Coss { set; get; }
+        public ushort Guardian { set; get; }
 
         public int Token { set; get; }
         public List<string> SpecialCards { private set; get; }
@@ -225,6 +226,8 @@ namespace PSD.ClientZero
             PlayerTars = new List<ushort>();
             AwakeSignal = false;
             FolderCount = 0;
+
+            Guardian = 0; Coss = 0;
         }
 
         public void ParseFromHeroLib()
@@ -260,9 +263,9 @@ namespace PSD.ClientZero
         public string ToStringSingleMask()
         {
             StringBuilder sb = new StringBuilder();
-            Aps(sb, "{0}P: {1}({2}) {3}{4}{5}{6}", Uid, xic.zd.Hero(SelectHero), Name,
+            Aps(sb, "{0}P: {1}({2}) {3}{4}{5}{6} {7}", Uid, xic.zd.Hero(SelectHero), Name,
                 IsAlive ? "" : "已阵亡 ", IsLoved ? "已倾慕 " : "", Immobilized ? "定 " : "",
-                PetDisabled ? "禁宠 " : "");
+                PetDisabled ? "禁宠 " : "", Guardian != 0 ? xic.zd.GuardAlias(SelectHero, Coss) : "");
             Aps(sb, "手牌数:{0} HP:{1}/{2} STR:{3}/{4} DEX:{5}/{6}",
                 TuxCount, HP, HPa, STR, STRa, DEX, DEXa);
             string equipBase = "装备: {0} {1}" + ((xic.PkgGroups >= 16) ? " {2}  " : "  ") +

@@ -93,48 +93,7 @@ namespace PSD.PSDGamepkg.JNS
             NPC npc = XI.LibTuple.NL.Decode(XI.LibTuple.NL.Encode(npcCode));
             bool anyFriends = XI.Board.Garden.Values.Where(p => p.IsAlive
                 && p.Team == player.Team && p.Tux.Count > 0).Any();
-            if (anyFriends)
-            {
-                Hero hero = XI.LibTuple.HL.InstanceHero(npc.Hero);
-                if (hero == null)
-                    return false;
-                Hero hrc = XI.LibTuple.HL.InstanceHero(hero.Archetype);
-                foreach (Player py in XI.Board.Garden.Values)
-                {
-                    if (py.SelectHero == 0)
-                        continue;
-                    if (py.SelectHero == npc.Hero && py.IsAlive)
-                        return false;
-                    foreach (int isoId in hero.Isomorphic)
-                    {
-                        if (isoId == py.SelectHero && py.IsAlive) // hero=10202,isoId=10203,py.Sel=10203
-                            return false;
-                    }
-                    Hero hpy = XI.LibTuple.HL.InstanceHero(py.SelectHero);
-                    if (hrc != null && hpy.Avatar == hrc.Avatar)
-                        return false;
-                    else if (hpy.Archetype == hero.Avatar)
-                        return false;
-                }
-                foreach (int ib in XI.Board.BannedHero)
-                {
-                    if (ib == npc.Hero)
-                        return false;
-                    foreach (int isoId in hero.Isomorphic)
-                    {
-                        if (isoId == ib)
-                            return false;
-                    }
-                    Hero hpy = XI.LibTuple.HL.InstanceHero(ib);
-                    if (hrc != null && hpy.Avatar == hrc.Avatar)
-                        return false;
-                    else if (hpy.Archetype == hero.Avatar)
-                        return false;
-                }
-                return true;
-            }
-            else
-                return false;
+            return anyFriends && Artiad.ContentRule.IsNPCJoinable(npc, XI.LibTuple.HL, XI.Board);
         }
         public void NJ02Action(Player player, string fuse, string args) {
             ushort who = ushort.Parse(args);
