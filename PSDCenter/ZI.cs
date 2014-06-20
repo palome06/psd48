@@ -406,7 +406,7 @@ namespace PSD.PSDCenter
                 }
 
                 if (teamCode == RuleCode.DEF_CODE)
-                    teamCode = RuleCode.HOPE_NO;
+                    teamCode = RuleCode.HOPE_IP;
                 else if ((teamCode & RuleCode.HOPE_YES) == RuleCode.HOPE_YES)
                     teamCode = RuleCode.HOPE_YES;
                 if (selCode == RuleCode.DEF_CODE)

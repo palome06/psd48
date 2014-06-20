@@ -273,10 +273,10 @@ namespace PSD.PSDGamepkg
                     }
                     else if (priority == 400) // leave
                     {
-                        List<ushort> players = Util.TakeRange(args, 1, args.Length)
-                            .Select(p => ushort.Parse(p)).ToList();
+                        List<Player> players = Util.TakeRange(args, 1, args.Length)
+                            .Select(p => Board.Garden[ushort.Parse(p)]).Where(p => !p.IsAlive).ToList();
                         if (players.Count > 0)
-                            RaiseGMessage("G0OY," + string.Join(",", players.Select(p => "2," + p)));
+                            RaiseGMessage("G0OY," + string.Join(",", players.Select(p => "2," + p.Uid)));
                     }
                     break;
                 case "G0OY":
@@ -338,8 +338,9 @@ namespace PSD.PSDGamepkg
                             ushort who = ushort.Parse(args[i + 1]);
                             Player player = Board.Garden[who];
 
-                            player.STR = player.STRa = player.STRb = 0;
-                            player.DEX = player.DEXa = player.DEXb = 0;
+                            player.STRb = 0;
+                            player.DEXb = 0;
+                            player.SDaSet = player.SDcSet = false;
                             //if (changeType == 2)
                             //    player.HP = 0;
                             if (changeType == 0 || changeType == 2)
@@ -670,6 +671,8 @@ namespace PSD.PSDGamepkg
                     }
                     else if (type == 3)
                         WI.BCast("E0FU,3");
+                    else if (type == 4)
+                        WI.BCast("E0FU,5," + string.Join(",", Util.TakeRange(args, 2, args.Length)));
                 }
                 else if (args[0].StartsWith("G2QU"))
                 {
@@ -1265,10 +1268,10 @@ namespace PSD.PSDGamepkg
                         if (changeType == 0 || changeType == 2)
                         {
                             player.ResetROM(Board);
-                            player.InitFromHero(hero, true);
+                            player.InitFromHero(hero, true, Board.InFightThrough, Board.InFight);
                         }
                         else
-                            player.InitFromHero(hero, false);
+                            player.InitFromHero(hero, false, Board.InFightThrough, Board.InFight);
                         if (changeType == 2)
                         {
                             player.HP = int.Parse(args[4]);
@@ -1635,9 +1638,10 @@ namespace PSD.PSDGamepkg
                             {
                                 if (cardCheck)
                                 {
-                                    Board.Garden[me].Fakeq[card] = Board.Garden[from].Fakeq[card];
+                                    string ccode = Board.Garden[from].Fakeq[card];
+                                    Board.Garden[me].Fakeq[card] = ccode;
                                     RaiseGMessage("G0OT," + from + ",1," + card);
-                                    WI.BCast("E0ZB," + me + ",1," + from + ",4," + card + "," + tux.Code);
+                                    WI.BCast("E0ZB," + me + ",1," + from + ",4," + card + "," + ccode);
                                 }
                             }
                             else if (cardCheck)
@@ -1864,9 +1868,8 @@ namespace PSD.PSDGamepkg
                             }
                             else
                             {
-                                RaiseGMessage("G0OT," + me + ",1," + card);
                                 RaiseGMessage("G2ZU,0," + me + "," + card);
-                                RaiseGMessage("G0ON," + me + ",C,1," + card);
+                                RaiseGMessage("G0QZ," + me + "," + card);
                             }
                         }
                         else if (consumeType == 0 || consumeType == 1)
@@ -1906,9 +1909,8 @@ namespace PSD.PSDGamepkg
                                         }
                                         else
                                         {
-                                            RaiseGMessage("G0OT," + me + ",1," + card);
                                             RaiseGMessage("G2ZU,0," + me + "," + card);
-                                            RaiseGMessage("G0ON," + me + ",C,1," + card);
+                                            RaiseGMessage("G0QZ," + me + "," + card);
                                         }
                                     }
                                     WI.BCast("E0ZC," + me + "," + consumeType + "," + equipType +
@@ -1955,9 +1957,8 @@ namespace PSD.PSDGamepkg
                                         }
                                         else
                                         {
-                                            RaiseGMessage("G0OT," + me + ",1," + card);
                                             RaiseGMessage("G2ZU,0," + me + "," + card);
-                                            RaiseGMessage("G0ON," + me + ",C,1," + card);
+                                            RaiseGMessage("G0QZ," + me + "," + card);
                                         }
                                     }
                                     WI.BCast("E0ZC," + me + "," + consumeType + "," + equipType +
@@ -1986,9 +1987,8 @@ namespace PSD.PSDGamepkg
                             Player py = Board.Garden[who];
                             if (py.ListOutAllCards().Contains(ep))
                             {
-                                RaiseGMessage("G0OT," + who + ",1," + ep);
                                 RaiseGMessage("G2ZU,0," + who + "," + ep);
-                                RaiseGMessage("G0ON," + who + ",C,1," + ep);
+                                RaiseGMessage("G0QZ," + who + "," + ep);
                             }
                         }
                         Board.CsEqiups.Clear();
@@ -2072,7 +2072,6 @@ namespace PSD.PSDGamepkg
                     {
                         ushort me = ushort.Parse(args[1]);
                         int type = int.Parse(args[2]);
-                        int n = (type < 3) ? int.Parse(args[3]) : 0;
                         Player player = null;
                         if (me < 1000)
                             player = Board.Garden[me];
@@ -2080,28 +2079,26 @@ namespace PSD.PSDGamepkg
                             player = Board.Hinder;
                         else if (Board.Supporter.Uid == me)
                             player = Board.Supporter;
-                        if (type == 0)
+
+                        if (type == 0 || type == 1)
                         {
-                            player.STR = player.mSTR + n;
-                            player.STRa += n;
-                            player.STRb += n;
-                            WI.BCast("E0IA," + me + ",0," + n + "," + player.STRa + "," + player.STR);
+                            int n = int.Parse(args[3]);
+                            if (type == 0)
+                                player.STRb = player.mSTRb + n;
+                            if (Board.InFightThrough && !Board.InFight) {
+                                player.STRa = player.mSTRa + n;
+                                WI.BCast("E0IA," + me + "," + type + "," + n + "," + player.STRa);
+                            }
+                            else if (Board.InFight) {
+                                player.STRc = player.STRc + n;
+                                WI.BCast("E0IA," + me + "," + type + "," + n + "," + player.STRa + "," + player.STRc);
+                            } else
+                                WI.BCast("E0IA," + me + "," + type + "," + n + "," + player.STRb);
                         }
-                        else if (type == 1)
-                        {
-                            player.STR += n;
-                            player.STRa += n;
-                            WI.BCast("E0IA," + me + ",1," + n + "," + player.STRa + "," + player.STR);
-                        }
-                        else if (type == 2)
-                        {
-                            player.STR += n;
-                            WI.BCast("E0IA," + me + ",2," + n + "," + player.STRa + "," + player.STR);
-                        }
-                        else if (type == 3)
+                        else if (type == 2) // Suppress case
                         {
                             player.STRi = 1;
-                            WI.BCast("E0IA," + me + ",3");
+                            WI.BCast("E0IA," + me + ",2");
                         }
                         if (Board.InFight)
                             RaiseGMessage("G09P,1");
@@ -2111,7 +2108,6 @@ namespace PSD.PSDGamepkg
                     {
                         ushort me = ushort.Parse(args[1]);
                         int type = int.Parse(args[2]);
-                        int n = (type < 3) ? int.Parse(args[3]) : 0;
                         Player player = null;
                         if (me < 1000)
                             player = Board.Garden[me];
@@ -2119,28 +2115,26 @@ namespace PSD.PSDGamepkg
                             player = Board.Hinder;
                         else if (Board.Supporter.Uid == me)
                             player = Board.Supporter;
-                        if (type == 0)
+
+                        if (type == 0 || type == 1)
                         {
-                            player.STR = player.mSTR - n;
-                            player.STRa -= n;
-                            player.STRb -= n;
-                            WI.BCast("E0OA," + me + ",0," + n + "," + player.STRa + "," + player.STR);
-                        }
-                        else if (type == 1)
-                        {
-                            player.STR -= n;
-                            player.STRa -= n;
-                            WI.BCast("E0OA," + me + ",1," + n + "," + player.STRa + "," + player.STR);
+                            int n = int.Parse(args[3]);
+                            if (type == 0)
+                                player.STRb = player.mSTRb - n;
+                            if (Board.InFightThrough && !Board.InFight) {
+                                player.STRa = player.mSTRa - n;
+                                WI.BCast("E0OA," + me + "," + type + "," + n + "," + player.STRa);
+                            }
+                            else if (Board.InFight) {
+                                player.STRc = player.STRc - n;
+                                WI.BCast("E0OA," + me + "," + type + "," + n + "," + player.STRa + "," + player.STRc);
+                            } else
+                                WI.BCast("E0OA," + me + "," + type + "," + n + "," + player.STRb);
                         }
                         else if (type == 2)
                         {
-                            player.STR -= n;
-                            WI.BCast("E0OA," + me + ",2," + n + "," + player.STRa + "," + player.STR);
-                        }
-                        else if (type == 3)
-                        {
                             player.STRi = -1;
-                            WI.BCast("E0OA," + me + ",3");
+                            WI.BCast("E0OA," + me + ",2");
                         }
                         if (Board.InFight)
                             RaiseGMessage("G09P,1");
@@ -2150,7 +2144,6 @@ namespace PSD.PSDGamepkg
                     {
                         ushort me = ushort.Parse(args[1]);
                         int type = int.Parse(args[2]);
-                        int n = (type < 3) ? int.Parse(args[3]) : 0;
                         Player player = null;
                         if (me < 1000)
                             player = Board.Garden[me];
@@ -2158,31 +2151,27 @@ namespace PSD.PSDGamepkg
                             player = Board.Hinder;
                         else if (Board.Supporter.Uid == me)
                             player = Board.Supporter;
-                        if (player != null)
+                        if (player.Uid != 0)
                         {
-                            if (type == 0)
+                            if (type == 0 || type == 1)
                             {
-                                player.DEX = player.mDEX + n;
-                                player.DEXa += n;
-                                player.DEXb += n;
-                                WI.BCast("E0IX," + me + ",0," + n + "," + player.DEXa + "," + player.DEX);
-                            }
-                            else if (type == 1)
-                            {
-                                player.DEX += n;
-                                player.DEXa += n;
-                                WI.BCast("E0IX," + me + ",1," + n + "," + player.DEXa + "," + player.DEX);
+                                int n = int.Parse(args[3]);
+                                if (type == 0)
+                                    player.DEXb = player.mDEXb + n;
+                                if (Board.InFightThrough && !Board.InFight) {
+                                    player.DEXa = player.mDEXa + n;
+                                    WI.BCast("E0IX," + me + "," + type + "," + n + "," + player.DEXa);
+                                }
+                                else if (Board.InFight) {
+                                    player.DEXc = player.DEXc + n;
+                                    WI.BCast("E0IX," + me + "," + type + "," + n + "," + player.DEXa + "," + player.DEXc);
+                                } else
+                                    WI.BCast("E0IX," + me + "," + type + "," + n + "," + player.DEXb);
                             }
                             else if (type == 2)
                             {
-                                player.DEX += n;
-                                WI.BCast("E0IX," + me + ",2," + n + "," + player.DEXa + "," + player.DEX);
-
-                            }
-                            else if (type == 3)
-                            {
                                 player.DEXi = 1;
-                                WI.BCast("E0IX," + me + ",3");
+                                WI.BCast("E0IX," + me + ",2");
                             } if (Board.InFight)
                                 RaiseGMessage("G09P,0");
                         }
@@ -2192,7 +2181,6 @@ namespace PSD.PSDGamepkg
                     {
                         ushort me = ushort.Parse(args[1]);
                         int type = int.Parse(args[2]);
-                        int n = (type < 3) ? int.Parse(args[3]) : 0;
                         Player player = null;
                         if (me < 1000)
                             player = Board.Garden[me];
@@ -2200,29 +2188,31 @@ namespace PSD.PSDGamepkg
                             player = Board.Hinder;
                         else if (Board.Supporter.Uid == me)
                             player = Board.Supporter;
-                        if (type == 0)
+                        if (player.Uid != 0)
                         {
-                            player.DEX = player.mDEX - n;
-                            player.DEXa -= n;
-                            player.DEXb -= n;
-                            WI.BCast("E0OX," + me + ",0," + n + "," + player.DEXa + "," + player.DEX);
+                            if (type == 0 || type == 1)
+                            {
+                                int n = int.Parse(args[3]);
+                                if (type == 0)
+                                    player.DEXb = player.mDEXb - n;
+                                if (Board.InFightThrough && !Board.InFight) {
+                                    player.DEXa = player.mDEXa - n;
+                                    WI.BCast("E0OX," + me + "," + type + "," + n + "," + player.DEXa);
+                                }
+                                else if (Board.InFight) {
+                                    player.DEXc = player.DEXc - n;
+                                    WI.BCast("E0OX," + me + "," + type + "," + n + "," + player.DEXa + "," + player.DEXc);
+                                } else
+                                    WI.BCast("E0OX," + me + "," + type + "," + n + "," + player.DEXb);
+                            }
+                            else if (type == 2)
+                            {
+                                player.DEXi = 1;
+                                WI.BCast("E0OX," + me + ",2");
+                            } if (Board.InFight)
+                                RaiseGMessage("G09P,0");
                         }
-                        else if (type == 1)
-                        {
-                            player.DEX -= n;
-                            player.DEXa -= n;
-                            WI.BCast("E0OX," + me + ",1," + n + "," + player.DEXa + "," + player.DEX);
-                        }
-                        else if (type == 2)
-                        {
-                            player.DEX -= n;
-                            WI.BCast("E0OX," + me + ",1," + n + "," + player.DEXa + "," + player.DEX);
-                        }
-                        else if (type == 3)
-                        {
-                            player.DEXi = -1;
-                            WI.BCast("E0OX," + me + ",3");
-                        } if (Board.InFight)
+                        if (Board.InFight)
                             RaiseGMessage("G09P,0");
                         break;
                     }
@@ -2230,13 +2220,12 @@ namespace PSD.PSDGamepkg
                     {
                         ushort me = ushort.Parse(args[1]);
                         Player player = Board.Garden[me];
-                        if (player.DEX != player.DEXb || player.DEXa != player.DEXb
-                            || player.STR != player.STRb || player.STRa != player.STRb)
+                        if (player.DEXc != player.DEXb || player.DEXa != player.DEXb
+                            || player.STRc != player.STRb || player.STRa != player.STRb)
                         {
-                            player.DEX = player.DEXa = player.DEXb;
-                            player.STR = player.STRa = player.STRb;
                             WI.BCast("E0AX," + me + "," + player.STRb + "," + player.DEXb);
                         }
+                        player.SDaSet = player.SDcSet = false;
                         player.DEXi = 0; player.STRi = 0;
                         player.RestZP = 1;
                         break;

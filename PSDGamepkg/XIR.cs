@@ -72,8 +72,8 @@ namespace PSD.PSDGamepkg
             ////Board.EvePiles.PushBack(1);
             //Board.EvePiles.PushBack(22);
             //Board.EvePiles.PushBack(6);
-            //Board.EvePiles.PushBack(30);
-            //Board.RestNPCPiles.PushBack(1004);
+            Board.EvePiles.PushBack(30);
+            Board.RestNPCPiles.PushBack(1011);
             //Board.EvePiles.PushBack(23);
             //while (Board.MonPiles.Count > 0)
             //    Board.MonPiles.Dequeue();
@@ -130,8 +130,8 @@ namespace PSD.PSDGamepkg
             //RaiseGMessage("G0HQ,2,3,0,0,40");
             //RaiseGMessage("G0HQ,2,1,0,0,47,76");
             //RaiseGMessage("G0HQ,2,2,0,0,49");
-            RaiseGMessage("G0HQ,2,1,0,0,71");
-            RaiseGMessage("G0HQ,2,6,0,0,88");
+            RaiseGMessage("G0HQ,2,1,0,0,36,37");
+            //RaiseGMessage("G0HQ,2,6,0,0,88");
             //RaiseGMessage("G0HQ,2,1,0,47,50,49,5,63,8,69");
             //RaiseGMessage("G0HQ,2,1,0,10,11,12");
             //RaiseGMessage("G0HQ,2,1,0,86");
@@ -261,10 +261,10 @@ namespace PSD.PSDGamepkg
             foreach (Player player in garden.Values)
             {
                 Base.Card.Hero hero = LibTuple.HL.InstanceHero(player.SelectHero);
-                player.InitFromHero(hero);
+                player.InitFromHero(hero, true, false, false);
             }
-                //hipc.Add(player.Uid, player.SelectHero);
-                //xiclients[player.Uid].Heros = hipc;
+            //hipc.Add(player.Uid, player.SelectHero);
+            //xiclients[player.Uid].Heros = hipc;
             foreach (Player player in garden.Values)
             {
                 Base.Card.Hero hero = LibTuple.HL.InstanceHero(player.SelectHero);
@@ -440,14 +440,19 @@ namespace PSD.PSDGamepkg
                                     WI.Live(rstage + "3," + advUt);
                                 });
                             ushort sprUid = 0;
-                            if (decision.StartsWith("T")) {
+                            if (decision.StartsWith("T"))
+                            {
                                 ushort who = ushort.Parse(decision.Substring("T".Length));
                                 sprUid = (who != Board.Rounder.Uid) ? who : (ushort)0;
                                 isFight = true;
-                            } else if (decision.StartsWith("P")) {
+                            }
+                            else if (decision.StartsWith("P"))
+                            {
                                 ushort cdCode = ushort.Parse(decision.Substring("PT".Length));
                                 isFight = true; sprUid = (ushort)(cdCode + 1000);
-                            } else if (decision.StartsWith("/")) {
+                            }
+                            else if (decision.StartsWith("/"))
+                            {
                                 isFight = false; sprUid = 0;
                             }
 
@@ -461,7 +466,9 @@ namespace PSD.PSDGamepkg
                                 WI.BCast(rstage + "7,0," + mons);
                                 RaiseGMessage("G0ON,0,M,1," + mons);
                                 rstage = "R" + rounder + "ZF";
-                            } else {
+                            }
+                            else
+                            {
                                 RaiseGMessage("G0AF," + sprUid + ",1");
                                 // Hinder side
                                 isFight = false; // decide to show fight or just pass
@@ -481,13 +488,17 @@ namespace PSD.PSDGamepkg
                                         WI.Live(rstage + "3," + advUt);
                                     });
                                 ushort hndUid = 0;
-                                if (decision.StartsWith("T")) {
+                                if (decision.StartsWith("T"))
+                                {
                                     ushort who = ushort.Parse(decision.Substring("T".Length));
                                     hndUid = who;
-                                } else if (decision.StartsWith("P")) {
+                                }
+                                else if (decision.StartsWith("P"))
+                                {
                                     ushort cdCode = ushort.Parse(decision.Substring("PT".Length));
                                     hndUid = (ushort)(cdCode + 1000);
-                                } else if (decision.StartsWith("/"))
+                                }
+                                else if (decision.StartsWith("/"))
                                     hndUid = 0;
                                 RaiseGMessage("G0AF," + hndUid + ",2");
                                 WI.BCast(rstage + "7,2," + Board.Hinder.Uid);
@@ -570,6 +581,7 @@ namespace PSD.PSDGamepkg
                         }
                     case "Z7":
                         Board.InFightThrough = true;
+                        AwakeABCValue(false);
                         RunQuadStage(rstage, 0);
                         rstage = "R" + rounder + "Z1"; break;
                     case "Z1":
@@ -594,6 +606,7 @@ namespace PSD.PSDGamepkg
                         rstage = "R" + rounder + "ZC"; break;
                     case "ZC":
                         Board.InFight = true;
+                        AwakeABCValue(true);
                         RunQuadStage(rstage, 0);
                         RaiseGMessage("G09P,0");
                         rstage = "R" + rounder + "ZI"; break;
@@ -790,7 +803,8 @@ namespace PSD.PSDGamepkg
                             if (Board.PendingTux.Count > 0)
                             {
                                 IDictionary<ushort, List<ushort>> imt = new Dictionary<ushort, List<ushort>>();
-                                foreach (string pendItem in Board.PendingTux) {
+                                foreach (string pendItem in Board.PendingTux)
+                                {
                                     ushort pendWho = ushort.Parse(pendItem.Substring(0, pendItem.IndexOf(',')));
                                     ushort pendTux = ushort.Parse(pendItem.Substring(pendItem.LastIndexOf(',') + 1));
                                     Util.AddToMultiMap(imt, pendWho, pendTux);
@@ -1115,6 +1129,24 @@ namespace PSD.PSDGamepkg
             else
                 r5ed = UEchoCode.NO_OPTIONS; // cannot take any action, seem as skip
             return r5ed;
+        }
+        private void AwakeABCValue(bool containsC)
+        {
+            foreach (Player py in Board.Garden.Values)
+            {
+                if (!containsC)
+                {
+                    py.SDaSet = true;
+                    py.STRa = py.STRb;
+                    py.DEXa = py.DEXb;
+                }
+                if (containsC)
+                {
+                    py.SDcSet = true;
+                    py.STRc = py.STRa;
+                    py.DEXc = py.DEXa;
+                }
+            }
         }
     }
 }

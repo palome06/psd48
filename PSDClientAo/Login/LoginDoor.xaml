@@ -161,9 +161,9 @@
                                     </WrapPanel>
                                     <WrapPanel>
                                         <RadioButton Content="任意选队" Width="120" GroupName="TeamOptGroup"
-                                                 Checked="HallTeamYesDecided" IsChecked="True"/>
+                                                 Checked="HallTeamYesDecided"/>
                                         <RadioButton Content="IP优先匹配" Width="120" GroupName="TeamOptGroup"
-                                                 Checked="HallTeamIPDecided"/>
+                                                 Checked="HallTeamIPDecided" IsChecked="True"/>
                                     </WrapPanel>
                                 </StackPanel>
                             </Grid>

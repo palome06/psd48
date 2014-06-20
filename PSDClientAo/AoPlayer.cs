@@ -667,16 +667,19 @@ namespace PSD.ClientAo
         public void InsMyFolder(ushort ut) { InsMyFolder(new ushort[] { ut }.ToList()); }
         public void InsMyFolder(List<ushort> uts)
         {
-            mMyFolder.AddRange(uts);
-            pb.Dispatcher.BeginInvoke((Action)(() =>
+            if (uts.Count > 0)
             {
-                pb.folderBar.Visibility = System.Windows.Visibility.Visible;
-                Base.Card.Hero hro = Tuple.HL.InstanceHero(mHero);
-                string alias = (hro != null) ? (hro.FolderAlias ?? "盖牌") : "盖牌";
-                pb.folderBText.Text = alias + " (" + mMyFolder.Count + ")";
-                if (pb.AD != null && pb.AD.IsTVDictContains(Rank + "MFD"))
-                    pb.AD.yhTV.Show(GetMyFolderMatList(), Rank + "MFD");
-            }));
+                mMyFolder.AddRange(uts);
+                pb.Dispatcher.BeginInvoke((Action)(() =>
+                {
+                    pb.folderBar.Visibility = System.Windows.Visibility.Visible;
+                    Base.Card.Hero hro = Tuple.HL.InstanceHero(mHero);
+                    string alias = (hro != null) ? (hro.FolderAlias ?? "盖牌") : "盖牌";
+                    pb.folderBText.Text = alias + " (" + mMyFolder.Count + ")";
+                    if (pb.AD != null && pb.AD.IsTVDictContains(Rank + "MFD"))
+                        pb.AD.yhTV.Show(GetMyFolderMatList(), Rank + "MFD");
+                }));
+            }
         }
         public void DelMyFolder(ushort ut) { DelMyFolder(new ushort[] { ut }.ToList()); }
         public void DelMyFolder(List<ushort> uts)

@@ -25,44 +25,28 @@ namespace PSD.Base
         public bool IsReal { private set; get; }
         // Set of skills the player has obtained
         public ISet<string> Skills { private set; get; }
-
-        public int mSTR, mDEX;
-        private int mSTRa, mDEXa, mSTRb, mDEXb;
+        // 'M' for male and 'F' for female
         public char Gender { set; get; }
 
         public int HP { set; get; }
-        public int STR
-        {
-            set { mSTR = value; }
-            get { return mSTR >= 0 ? mSTR : 0; }
-        }
-        public int DEX
-        {
-            set { mDEX = value; }
-            get { return mDEX >= 0 ? mDEX : 0; }
-        }
-        public int STRa
-        {
-            set { mSTRa = (value >= 0 ? value : 0); }
-            get { return mSTRa; }
-        }
-        public int DEXa
-        {
-            set { mDEXa = (value >= 0 ? value : 0); }
-            get { return mDEXa; }
-        }
-
         public int HPb { set; get; }
-        public int STRb
-        {
-            set { mSTRb = (value >= 0 ? value : 0); }
-            get { return mSTRb; }
-        }
-        public int DEXb
-        {
-            set { mDEXb = (value >= 0 ? value : 0); }
-            get { return mDEXb; }
-        }
+
+        // whether the STRa/DEXa/STRc/DEXc is set, return STR/DEX according to them.
+        public bool SDaSet { set; get; }
+        public bool SDcSet { set; get; }
+        public int mSTRa, mSTRb, mDEXa, mDEXb;
+        private int mSTRc, mDEXc;
+
+        public int STRa { set { mSTRa = value; } get { return mSTRa >= 0 ? mSTRa : 0; }}
+        public int STRb { set { mSTRb = value; } get { return mSTRb >= 0 ? mSTRb : 0; }}
+        public int STRc { set { mSTRc = (value >= 0 ? value : 0); } get { return mSTRc; } }
+
+        public int DEXa { set { mDEXa = value; } get { return mDEXa >= 0 ? mDEXa : 0; }}
+        public int DEXb { set { mDEXb = value; } get { return mDEXb >= 0 ? mDEXb : 0; }}
+        public int DEXc { set { mDEXc = (value >= 0 ? value : 0); } get { return mDEXc; } }
+
+        public int STR { get { return SDcSet ? STRc : (SDaSet ? STRa : STRb ); } }
+        public int DEX { get { return SDcSet ? DEXc : (SDaSet ? DEXa : DEXb ); } }
 
         public int STRi { set; get; } // -1, -inf; 0, normal; 1, inf
         public int DEXi { set; get; } // -1, -inf; 0, normal; 1, inf
@@ -272,12 +256,12 @@ namespace PSD.Base
             ResetRAM();
         }
 
-        public void InitFromHero(Base.Card.Hero hero) { InitFromHero(hero, true); }
-        public void InitFromHero(Base.Card.Hero hero, bool reset)
+        public void InitFromHero(Base.Card.Hero hero, bool reset, bool sdaset, bool sdcset)
         {
             Gender = hero.Gender;
-            STR = STRa = STRb = hero.STR;
-            DEX = DEXa = DEXb = hero.DEX;
+            STRb = hero.STR;
+            DEXb = hero.DEX;
+            SDaSet = sdaset; SDcSet = sdcset;
             STRi = 0; DEXi = 0;
             Skills.Clear();
             if (reset)

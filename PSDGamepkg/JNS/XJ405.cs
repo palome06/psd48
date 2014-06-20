@@ -605,17 +605,15 @@ namespace PSD.PSDGamepkg.JNS
             {
                 List<ushort> v1 = XI.Board.Garden.Values.Where(p => p.IsTared && p.Gender == 'F' &&
                     !player.RAMUtList.Contains(p.Uid)).Select(p => p.Uid).ToList();
-                if (v1.Any())
-                    return "/T1(p" + string.Join("p", v1) + ")";
-                else
-                    return "/";
+                return "/T1(p" + string.Join("p", v1) + ")";
             }
             else
                 return "";
         }
         public bool JN20601Valid(Player player, int type, string fuse)
         {
-            return player.HP >= 2;
+            return player.HP >= 2 && XI.Board.Garden.Values.Any(p =>
+                p.IsTared && p.Gender == 'F' && !player.RAMUtList.Contains(p.Uid));
         }
         public void JN20602Action(Player player, int type, string fuse, string args)
         {
@@ -704,7 +702,7 @@ namespace PSD.PSDGamepkg.JNS
             ushort card = ushort.Parse(argst);
             VI.Cout(0, "唐雪见发动「连击」.");
             XI.RaiseGMessage("G0QZ," + player.Uid + "," + card);
-            XI.RaiseGMessage("G0IA," + player.Uid + ",2,2");
+            XI.RaiseGMessage("G0IA," + player.Uid + ",1,2");
         }
         public string JN30202Input(Player player, int type, string fuse, string prev)
         {
@@ -810,7 +808,7 @@ namespace PSD.PSDGamepkg.JNS
             if (card != 0)
             {
                 XI.RaiseGMessage("G0ZC," + player.Uid + ",2," + card + ";" + fuse);
-                XI.RaiseGMessage("G0IA," + player.Uid + ",2,3");
+                XI.RaiseGMessage("G0IA," + player.Uid + ",1,3");
             }
         }
         public string JN30303Input(Player player, int type, string fuse, string prev)
@@ -1372,11 +1370,11 @@ namespace PSD.PSDGamepkg.JNS
         {
             if (type == 0)
             {
-                // G0ZB,A,2/3/4,x
+                // G0ZB,A,2/3/4,from,x
                 string[] blocks = fuse.Split(',');
                 if (blocks[1] == player.Uid.ToString() && blocks[2] == "2")
                 {
-                    int n = blocks.Length - 3;
+                    int n = blocks.Length - 4;
                     XI.RaiseGMessage("G0IA," + player.Uid + ",0," + n);
                 }
             }
@@ -1403,7 +1401,7 @@ namespace PSD.PSDGamepkg.JNS
                 // G0ZB,A,2/3/4,x
                 string[] blocks = fuse.Split(',');
                 if (blocks[1] == player.Uid.ToString() && blocks[2] == "2")
-                    return blocks.Length > 3;
+                    return blocks.Length > 4;
                 else
                     return false;
             }
@@ -1433,44 +1431,27 @@ namespace PSD.PSDGamepkg.JNS
         #region XJ401 - YunTianhe
         public bool JN50101Valid(Player player, int type, string fuse)
         {
-            if (type == 0)
+            if (type == 0 || type == 1)
             {
                 return XI.Board.IsAttendWar(player) && XI.Board.Battler != null &&
                     player.DEX - XI.Board.Battler.AGL >= 4 && (player.RAMUshort == 0);
             }
-            else if (type == 1)
-            {
-                if (XI.Board.IsAttendWar(player) && XI.Board.Battler != null && XI.Board.InFight)
-                {
-                    if (player.DEX - XI.Board.Battler.AGL >= 4 && (player.RAMUshort == 0))
-                        return true;
-                }
-            }
             else if (type == 2)
             {
-                if (XI.Board.IsAttendWar(player) && XI.Board.Battler != null && XI.Board.InFight)
-                {
-                    if (player.DEX - XI.Board.Battler.AGL < 4 && (player.RAMUshort == 1))
-                        return true;
-                }
+                return XI.Board.IsAttendWar(player) && XI.Board.Battler != null &&
+                    player.DEX - XI.Board.Battler.AGL < 4 && (player.RAMUshort == 1);
             }
-            return false;
+            else return false;
         }
         public void JN50101Action(Player player, int type, string fuse, string argst)
         {
-            if (type == 0)
+            if (type == 0 || type == 1)
             {
                 VI.Cout(0, "云天河发动「天河剑」.");
                 XI.RaiseGMessage("G0IA," + player.Uid + ",1,2");
                 player.RAMUshort = 1;
             }
             else if (type == 1)
-            {
-                VI.Cout(0, "云天河触发「天河剑」.");
-                XI.RaiseGMessage("G0IA," + player.Uid + ",1,2");
-                player.RAMUshort = 1;
-            }
-            else if (type == 2)
             {
                 VI.Cout(0, "云天河触发「天河剑」.");
                 XI.RaiseGMessage("G0OA," + player.Uid + ",1,2");
@@ -2480,7 +2461,7 @@ namespace PSD.PSDGamepkg.JNS
         public void JN60302Action(Player player, int type, string fuse, string args)
         {
             player.RAMUshort = 1;
-            XI.RaiseGMessage("G0IX," + XI.Board.Supporter.Uid + ",3");
+            XI.RaiseGMessage("G0IX," + XI.Board.Supporter.Uid + ",2");
         }
         #endregion XJ503 - LongYou
         #region XJ504 - XiaoMan
@@ -2718,7 +2699,7 @@ namespace PSD.PSDGamepkg.JNS
                 //    XI.Board.RPool = 10000;
                 //else if (player.Team == XI.Board.Rounder.OppTeam)
                 //    XI.Board.OPool = 10000;
-                XI.RaiseGMessage("G0IA," + player.Uid + ",3");
+                XI.RaiseGMessage("G0IA," + player.Uid + ",2");
                 player.RAMUshort = 1;
                 XI.RaiseGMessage("G0JM,R" + XI.Board.Rounder.Uid + "ZN");
             }

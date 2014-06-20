@@ -118,6 +118,19 @@ namespace PSD.ClientAo.VW
         #region Version
         private void HandleWithVersion(ref string line, int Version)
         {
+            if (Version <= 115)
+            {
+                if (line.StartsWith("E0IA") || line.StartsWith("E0IX") ||
+                    line.StartsWith("E0OA") || line.StartsWith("E0OX"))
+                {
+                    string[] args = line.Split(',');
+                    if (args[2] == "3")
+                        args[2] = "2";
+                    else if (args[2] == "2")
+                        args[2] = "1";
+                    line = string.Join(",", args);
+                }
+            }
             if (Version <= 114)
             {
                 if (line.StartsWith("E0ON"))

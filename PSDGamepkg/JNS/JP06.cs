@@ -853,7 +853,7 @@ namespace PSD.PSDGamepkg.JNS
         public void ZP02Action(Player player, int type, string fuse, string argst)
         {
             if (player.STRa > 0)
-                XI.RaiseGMessage("G0IA," + player.Uid + ",2," + player.STRa);
+                XI.RaiseGMessage("G0IA," + player.Uid + ",1," + player.STRa);
         }
         // Jincanwang
         public bool ZP03Bribe(Player player, int type, string fuse)
@@ -866,7 +866,7 @@ namespace PSD.PSDGamepkg.JNS
         }
         public void ZP03Action(Player player, int type, string fuse, string argst)
         {
-            XI.RaiseGMessage("G0IA," + player.Uid + ",2,3");
+            XI.RaiseGMessage("G0IA," + player.Uid + ",1,3");
         }
         // Tianxuanwuyin
         public bool ZP04Bribe(Player player, int type, string fuse)
@@ -1230,7 +1230,7 @@ namespace PSD.PSDGamepkg.JNS
             if (consumeType == 1)
             {
                 VI.Cout(0, "{0}爆发「羲和」,令其强制命中.", XI.DisplayPlayer(player.Uid));
-                XI.RaiseGMessage("G0IX," + player.Uid + ",3");
+                XI.RaiseGMessage("G0IX," + player.Uid + ",2");
             }
         }
         public bool WQT2ConsumeValid(Player player, int consumeType, int type, string fuse)
@@ -1244,7 +1244,7 @@ namespace PSD.PSDGamepkg.JNS
             if (consumeType == 1)
             {
                 VI.Cout(0, "{0}爆发「望舒」,令其战力加倍.", XI.DisplayPlayer(player.Uid));
-                XI.RaiseGMessage("G0IA," + player.Uid + ",2," + player.STR);
+                XI.RaiseGMessage("G0IA," + player.Uid + ",1," + player.STRa);
             }
         }
         public bool FJT1ConsumeValid(Player player, int consumeType, int type, string fuse)
@@ -1475,9 +1475,9 @@ namespace PSD.PSDGamepkg.JNS
         {
             string input = XI.AsyncInput(player.Uid, "#请选择执行项##命中+3##战力+2,Y2", "ZPT2", "0");
             if (input == "1")
-                XI.RaiseGMessage("G0IX," + player.Uid + ",2,3");
+                XI.RaiseGMessage("G0IX," + player.Uid + ",1,3");
             else
-                XI.RaiseGMessage("G0IA," + player.Uid + ",2,2");
+                XI.RaiseGMessage("G0IA," + player.Uid + ",1,2");
         }
         public bool ZPT2Bribe(Player player, int type, string fuse)
         {
@@ -1494,17 +1494,17 @@ namespace PSD.PSDGamepkg.JNS
             if (input == "1")
             {
                 string target = XI.AsyncInput(player.Uid, "T1" + AAllTareds(player), "ZPT3", "1");
-                XI.RaiseGMessage("G0IX," + target + ",2,1");
+                XI.RaiseGMessage("G0IX," + target + ",1,1");
             }
             else if (input == "2")
             {
                 if (player.DEXa > 0)
-                    XI.RaiseGMessage("G0IA," + player.Uid + ",2," + player.DEXa);
+                    XI.RaiseGMessage("G0IA," + player.Uid + ",1," + player.DEXa);
             }
             else if (input == "3")
             {
                 if (player.STRa > 0)
-                    XI.RaiseGMessage("G0IX," + player.Uid + ",2," + player.STRa);
+                    XI.RaiseGMessage("G0IX," + player.Uid + ",1," + player.STRa);
             }
         }
         public bool ZPT3Bribe(Player player, int type, string fuse)
@@ -2031,7 +2031,7 @@ namespace PSD.PSDGamepkg.JNS
                     else if (tux != null)
                     {
                         XI.RaiseGMessage("G0SN," + player.Uid + "," + lugCode + ",1,C" + ut);
-                        XI.RaiseGMessage("G0ZB," + player.Uid + ",1,0," + ut);
+                        XI.RaiseGMessage("G0ZB," + player.Uid + ",1," + player.Uid + ",0,0," + ut);
                     }
                 }
             }

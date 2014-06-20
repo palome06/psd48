@@ -77,7 +77,8 @@ namespace PSD.PSDGamepkg
             //10602, 17022, 19002, 10104, 19009, 19006
             //17007, 17020, 19002, 10104, 17011, 19006
             //10102, 10201, 17007, 10104, 17011, 19006
-            17021, 10504, 19002, 10104, 17011, 19006
+            //17021, 10504, 19002, 10104, 17011, 19006
+            19007, 17022, 10302, 17011, 19002, 19006
         };
 
         #region Memeber Declaration & Constructor
@@ -833,7 +834,7 @@ namespace PSD.PSDGamepkg
                     if (mon1 != 0 && Board.InFightThrough)
                     {
                         Base.Card.Monster mon = LibTuple.ML.Decode(mon1);
-                        if (mon != null && mt.ConsumeValid(player, consumeType, ske.InType, ske.Fuse))
+                        if (mon != null && mon == mt && mt.ConsumeValid(player, consumeType, ske.InType, ske.Fuse))
                         {
                             if (ske.Lock == false)
                             {

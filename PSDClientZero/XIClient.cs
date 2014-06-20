@@ -1384,6 +1384,13 @@ namespace PSD.ClientZero
                     }
                     else if (args[1].Equals("3"))
                         VI.Cout(Uid, "观看完毕.");
+                    else if (args[1].Equals("5"))
+                    {
+                        ushort who = ushort.Parse(args[2]);
+                        ushort[] invs = Util.TakeRange(args, 3, args.Length)
+                            .Select(p => ushort.Parse(p)).ToArray();
+                        VI.Cout(Uid, "{0}声明了{1}.", who, zd.TuxDbSerial(invs));
+                    }
                     break;
                 case "E0QU":
                     if (args[1].Equals("0"))
@@ -1631,26 +1638,21 @@ namespace PSD.ClientZero
                     {
                         ushort who = ushort.Parse(args[1]);
                         int type = int.Parse(args[2]);
-                        if (type == 0 || type == 1 || type == 2)
+                        if (type == 0 || type == 1)
                         {
                             int n = int.Parse(args[3]);
                             int bs = int.Parse(args[4]);
-                            int tp = int.Parse(args[5]);
+                            int tp = args.Length > 5 ? int.Parse(args[5]) : bs;
                             if (who < 1000)
                             {
-                                if (type == 0)
-                                    VI.Cout(Uid, "{0}基础战力+{1},当前战力为{2}/{3}.", zd.Player(who), n, tp, bs);
-                                else if (type == 1)
-                                    VI.Cout(Uid, "{0}本场战力+{1},当前战力为{2}/{3}.", zd.Player(who), n, tp, bs);
-                                else if (type == 2)
-                                    VI.Cout(Uid, "{0}临时战力+{1},当前战力为{2}/{3}.", zd.Player(who), n, tp, bs);
+                                VI.Cout(Uid, "{0}战力+{1},当前为{2}/{3}.", zd.Player(who), n, tp, bs);
                                 Z0D[who].STR = tp;
                                 Z0D[who].STRa = bs;
                             }
                             else
                                 VI.Cout(Uid, "{0}战力+{1},当前战力为{2}.", zd.Monster((ushort)(who - 1000)), n, tp);
                         }
-                        else if (type == 3)
+                        else if (type == 2)
                             VI.Cout(Uid, "{0}强制战斗胜利.", who == 1 ? "红方" : "蓝方");
                         break;
                     }
@@ -1658,27 +1660,22 @@ namespace PSD.ClientZero
                     {
                         ushort who = ushort.Parse(args[1]);
                         int type = int.Parse(args[2]);
-                        if (type == 0 || type == 1 || type == 2)
+                        if (type == 0 || type == 1)
                         {
                             int n = int.Parse(args[3]);
                             int bs = int.Parse(args[4]);
-                            int tp = int.Parse(args[5]);
+                            int tp = args.Length > 5 ? int.Parse(args[5]) : bs;
                             if (who < 1000)
                             {
-                                if (type == 0)
-                                    VI.Cout(Uid, "{0}基础战力-{1},当前战力为{2}/{3}.", zd.Player(who), n, tp, bs);
-                                else if (type == 1)
-                                    VI.Cout(Uid, "{0}本场战力-{1},当前战力为{2}/{3}.", zd.Player(who), n, tp, bs);
-                                else if (type == 2)
-                                    VI.Cout(Uid, "{0}临时战力-{1},当前战力为{2}/{3}.", zd.Player(who), n, tp, bs);
+                                VI.Cout(Uid, "{0}战力-{1},当前为{2}/{3}.", zd.Player(who), n, tp, bs);
                                 Z0D[who].STR = tp;
                                 Z0D[who].STRa = bs;
                             }
                             else
                                 VI.Cout(Uid, "{0}战力-{1},当前战力为{2}.", zd.Monster((ushort)(who - 1000)), n, tp);
                         }
-                        else if (type == 3)
-                            VI.Cout(Uid, "{0}强制战斗失败　.", who == 1 ? "红方" : "蓝方");
+                        else if (type == 2)
+                            VI.Cout(Uid, "{0}强制战斗失败.", who == 1 ? "红方" : "蓝方");
                         break;
                     }
                 case "E0IX":
@@ -1689,22 +1686,17 @@ namespace PSD.ClientZero
                         {
                             int n = int.Parse(args[3]);
                             int bs = int.Parse(args[4]);
-                            int tp = int.Parse(args[5]);
+                            int tp = args.Length > 5 ? int.Parse(args[5]) : bs;
                             if (who < 1000)
                             {
-                                if (type == 0)
-                                    VI.Cout(Uid, "{0}基础命中+{1},当前命中为{2}/{3}.", zd.Player(who), n, tp, bs);
-                                else if (type == 1)
-                                    VI.Cout(Uid, "{0}本场命中+{1},当前命中为{2}/{3}.", zd.Player(who), n, tp, bs);
-                                else if (type == 2)
-                                    VI.Cout(Uid, "{0}临时命中+{1},当前命中为{2}/{3}.", zd.Player(who), n, tp, bs);
+                                VI.Cout(Uid, "{0}命中+{1},当前命中为{2}/{3}.", zd.Player(who), n, tp, bs);
                                 Z0D[who].DEX = tp;
                                 Z0D[who].DEXa = bs;
                             }
                             else
                                 VI.Cout(Uid, "{0}命中+{1},当前命中为{2}.", zd.Monster((ushort)(who - 1000)), n, tp);
                         }
-                        else if (type == 3)
+                        else if (type == 2)
                             VI.Cout(Uid, "{0}强制命中.", zd.Player(who));
                         break;
                     }
@@ -1716,22 +1708,17 @@ namespace PSD.ClientZero
                         {
                             int n = int.Parse(args[3]);
                             int bs = int.Parse(args[4]);
-                            int tp = int.Parse(args[5]);
+                            int tp = args.Length > 5 ? int.Parse(args[5]) : bs;
                             if (who < 1000)
                             {
-                                if (type == 0)
-                                    VI.Cout(Uid, "{0}基础命中-{1},当前命中为{2}/{3}.", zd.Player(who), n, tp, bs);
-                                else if (type == 1)
-                                    VI.Cout(Uid, "{0}本场命中-{1},当前命中为{2}/{3}.", zd.Player(who), n, tp, bs);
-                                else if (type == 2)
-                                    VI.Cout(Uid, "{0}临时命中-{1},当前命中为{2}/{3}.", zd.Player(who), n, tp, bs);
+                                VI.Cout(Uid, "{0}命中-{1},当前命中为{2}/{3}.", zd.Player(who), n, tp, bs);
                                 Z0D[who].DEX = tp;
                                 Z0D[who].DEXa = bs;
                             }
                             else
                                 VI.Cout(Uid, "{0}命中-{1},当前命中为{2}.", zd.Monster((ushort)(who - 1000)), n, tp);
                         }
-                        else if (type == 3)
+                        else if (type == 2)
                             VI.Cout(Uid, "{0}强制被闪避.", zd.Player(who));
                         break;
                     }

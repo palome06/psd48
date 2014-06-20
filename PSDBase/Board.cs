@@ -225,9 +225,7 @@ namespace PSD.Base
             return new Player(nmb.Name, 0, (ushort)(orgCode + 1000), false)
             {
                 STRb = nmb.STR,
-                STRa = nmb.STR,
-                STR = nmb.STR,
-                DEX = nmb.AGL,
+                DEXb = nmb.STR,
                 IsAlive = false
             };
         }
