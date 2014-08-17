@@ -458,7 +458,7 @@ namespace PSD.PSDGamepkg
                 string sTop = "U5," + from + ";;" + skName;
                 string sType = ";;" + ske.InType;
                 WI.BCast(sTop + sType);
-                ev.Pers();
+                ev.Pers(Board.Garden[from]);
                 u5ed = ske.IsTermini ? UEchoCode.END_TERMIN : UEchoCode.END_ACTION;
                 ++ske.Tick;
             }

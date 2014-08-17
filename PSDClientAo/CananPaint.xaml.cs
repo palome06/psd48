@@ -74,9 +74,9 @@ namespace PSD.ClientAo
                         case CananSignal.LOSE_CONNECTION:
                             mainImg.Source = TryFindResource("cananLosepaint") as ImageSource; break;
                         case CananSignal.LOSE_COUNTDOWN_48:
-                            mainImg.Source = TryFindResource("cananLoseCountdown48paint") as ImageSource; break;
+                            mainImg.Source = TryFindResource("cananCountdown48paint") as ImageSource; break;
                         case CananSignal.LOSE_COUNTDOWN_12:
-                            mainImg.Source = TryFindResource("cananLoseCountdown12paint") as ImageSource; break;
+                            mainImg.Source = TryFindResource("cananCountdown12paint") as ImageSource; break;
                     }
                     this.Visibility = Visibility.Visible;
                 }));

@@ -64,7 +64,7 @@ namespace PSD.Base.Card
             Lock = new bool[] { };
         }
 
-        public delegate void ActionDelegate();
+        public delegate void ActionDelegate(Player player);
         private ActionDelegate mAction;
         public ActionDelegate Action
         {
@@ -100,7 +100,7 @@ namespace PSD.Base.Card
         //    }
         //}
 
-        private static ActionDelegate DefAction = new ActionDelegate(delegate() { });
+        private static ActionDelegate DefAction = new ActionDelegate(delegate(Player player) { });
         private static ValidDelegate DefValid = new ValidDelegate(delegate() { return true; });
 
         //private static string DefaultInput(Board board) { return ""; }

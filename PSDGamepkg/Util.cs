@@ -148,6 +148,10 @@ namespace PSD.PSDGamepkg
                 arr[i] = value;
             return arr;
         }
+        public static bool TryNotEmpty(IDictionary<string, object> map, string key)
+        {
+            return map.ContainsKey(key) && (string)map[key] != "";
+        }
         public static int GetFiveElementId(Base.Card.FiveElement five)
         {
             switch (five)

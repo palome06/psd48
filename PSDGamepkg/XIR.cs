@@ -39,8 +39,8 @@ namespace PSD.PSDGamepkg
             //RaiseGMessage("G0HQ,2,1,0,47,48");//7,1,13
             //RaiseGMessage("G0HQ,2,2,0,15,32");//54
             //RaiseGMessage("G0HQ,2,4,0,51,26");//33
-            //RaiseGMessage("G0HQ,2,1,0,53,51");
-            //RaiseGMessage("G0HQ,2,2,0,46");
+            RaiseGMessage("G0HQ,2,1,0,0,81");
+            //RaiseGMessage("G0HQ,2,5,0,0,77");
             //RaiseGMessage("G0IJ,5,0,4");
             //RaiseGMessage("G0IX,5,0,2");
             //garden[2].Weapon = 51;
@@ -65,15 +65,15 @@ namespace PSD.PSDGamepkg
             ////Board.MonPiles.PushBack(24);
             ////Board.MonPiles.PushBack(23);
             ////Board.MonPiles.PushBack(22);
-            ////Board.MonPiles.PushBack(21);
-            ////Board.MonPiles.PushBack(1022);
+            //Board.MonPiles.PushBack(1);
+            //Board.MonPiles.PushBack(1022);
             ////Board.MonPiles.PushBack(1030);
-            //Board.EvePiles.PushBack(8);
+            //Board.EvePiles.PushBack(29);
             ////Board.EvePiles.PushBack(1);
             //Board.EvePiles.PushBack(22);
             //Board.EvePiles.PushBack(6);
-            Board.EvePiles.PushBack(30);
-            Board.RestNPCPiles.PushBack(1011);
+            //Board.EvePiles.PushBack(30);
+            Board.RestNPCPiles.PushBack(1047);
             //Board.EvePiles.PushBack(23);
             //while (Board.MonPiles.Count > 0)
             //    Board.MonPiles.Dequeue();
@@ -130,7 +130,7 @@ namespace PSD.PSDGamepkg
             //RaiseGMessage("G0HQ,2,3,0,0,40");
             //RaiseGMessage("G0HQ,2,1,0,0,47,76");
             //RaiseGMessage("G0HQ,2,2,0,0,49");
-            RaiseGMessage("G0HQ,2,1,0,0,36,37");
+            //RaiseGMessage("G0HQ,2,1,0,0,36,37");
             //RaiseGMessage("G0HQ,2,6,0,0,88");
             //RaiseGMessage("G0HQ,2,1,0,47,50,49,5,63,8,69");
             //RaiseGMessage("G0HQ,2,1,0,10,11,12");
@@ -144,18 +144,6 @@ namespace PSD.PSDGamepkg
             //RaiseGMessage("G0IJ,3,0,1");
             //RaiseGMessage("G0IJ,3,0,1");
             //RaiseGMessage("G0IX,5,0,1");
-            //RaiseGMessage("G0HQ,2,2,0,66,57");
-            //RaiseGMessage("G0HQ,2,3,0,72,40,34");
-            //RaiseGMessage("G0HQ,2,1,0,10,11,12,69,75");
-            //RaiseGMessage("G0HQ,2,2,0,25,65");
-            //RaiseGMessage("G0HQ,2,3,0,26");
-            //RaiseGMessage("G0HQ,2,5,0,54");
-            //RaiseGMessage("G0HQ,2,2,0,34");
-            //RaiseGMessage("G0HQ,2,1,0,47,49,55");
-            //RaiseGMessage("G0HQ,2,1,0,77,78,60,10,11,12");
-            //RaiseGMessage("G0HQ,2,6,0,47,48");
-            //RaiseGMessage("G0HQ,2,3,0,47,52");
-            //RaiseGMessage("G0HQ,2,3,0,41");
             //RaiseGMessage("G0HQ,2,1,0,0,93,94,9,18,96,5,2,71,72,49,60,11");
             ////RaiseGMessage("G0HQ,2,1,0,0,1,18");
             ////RaiseGMessage("G0HQ,2,4,0,0,33,35");
@@ -220,7 +208,7 @@ namespace PSD.PSDGamepkg
             //RaiseGMessage("G0HD,1,2,0,36");
             //RaiseGMessage("G0HD,1,6,0,16");
             //RaiseGMessage("G0HD,1,2,0,37");
-            //RaiseGMessage("G0HD,1,2,0,31");
+            RaiseGMessage("G0HD,1,2,0,31");
             //RaiseGMessage("G0HD,1,1,0,30");
             //RaiseGMessage("G0HD,1,4,0,6");
             //RaiseGMessage("G0HD,1,6,0,9");
@@ -537,7 +525,8 @@ namespace PSD.PSDGamepkg
                     case "NP":
                         {
                             WI.BCast(rstage + "1,0");
-                            NPC npc = LibTuple.NL.Decode(NMBLib.OriginalNPC(Board.Monster1));
+                            ushort npcut = Board.Monster1;
+                            NPC npc = LibTuple.NL.Decode(NMBLib.OriginalNPC(npcut));
                             UEchoCode r5ed = HandleWithNPCEffect(Board.Rounder, npc, true);
                             if (r5ed == UEchoCode.NO_OPTIONS) // cannot take any action, check whether finished
                             {
@@ -569,6 +558,7 @@ namespace PSD.PSDGamepkg
                             }
                             else // take action
                             {
+                                RaiseGMessage("G1YP," + Board.Rounder.Uid + "," + npcut);
                                 WI.BCast(rstage + "1,1");
                                 if (Board.Monster1 != 0) // In case Monster1 has been taken
                                 {
@@ -860,6 +850,8 @@ namespace PSD.PSDGamepkg
                 Fill(pris, "");
                 List<string> locks = new List<string>();
                 List<SKE> purse = new List<SKE>();
+
+                AddZhuSkillBackward(pocket, zero, (sina & 4) != 0);
                 foreach (SKE ske in pocket)
                 {
                     if ((sina & 1) != 0 && ske.Type == SKTType.TX && garden[ske.Tg].IsAlive)
@@ -867,6 +859,7 @@ namespace PSD.PSDGamepkg
                     bool ias = SKE2Message(ske, zero, involved, pris, locks);
                     if (ias)
                         purse.Add(ske);
+                    // if somebody added now, then re-scan it's related with $zero
                 }
 
                 // round mode, priority not needed.
@@ -911,6 +904,7 @@ namespace PSD.PSDGamepkg
             WI.RecvInfEnd();
             return actualAction;
         }
+        
         // Run in Separate Ways
         // return whether actual action has been taken
         private bool RunSeperateStage(string zero, int sina, Func<Board, bool> judge)
@@ -944,6 +938,7 @@ namespace PSD.PSDGamepkg
                     Fill(pris, "");
                     List<string> locks = new List<string>();
                     List<SKE> purse = new List<SKE>();
+                    AddZhuSkillBackward(pocket, zero, (sina & 4) != 0);
                     foreach (SKE ske in pocket)
                     {
                         if (garden[ske.Tg].Team == side)

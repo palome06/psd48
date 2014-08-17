@@ -748,7 +748,7 @@ namespace PSD.PSDGamepkg.JNS
         {
             if (type == 0)
             {
-                if (((string)player.RAM["JPName"]) != "" && player.RAMUshort == 0)
+                if (Util.TryNotEmpty(player.RAM, "JPName") && player.RAMUshort == 0)
                 {
                     Base.Card.Tux tux = XI.LibTuple.TL.EncodeTuxCode((string)player.RAM["JPName"]);
                     if (tux != null && tux.Valid(player, 0, fuse))
@@ -1092,9 +1092,7 @@ namespace PSD.PSDGamepkg.JNS
             ushort card = ushort.Parse(args);
             XI.RaiseGMessage("G0QZ," + player.Uid + "," + card);
             XI.RaiseGMessage("G0XZ," + player.Uid + ",2,1,3,1");
-            ushort[] pops = XI.Board.MonPiles.Dequeue(2);
-            XI.RaiseGMessage("G2IN,1,2");
-            XI.RaiseGMessage("G0ON,0,M,2," + string.Join(",", pops));
+            
         }
         public string JN40101Input(Player player, int type, string fuse, string prev)
         {
@@ -1151,8 +1149,7 @@ namespace PSD.PSDGamepkg.JNS
         #region X3W02 - WenHui
         public bool JN40201Valid(Player player, int type, string fuse)
         {
-            if (XI.Board.Rounder.Uid == player.Uid)
-            {
+            if (type == 0 || (type == 1 && XI.Board.Rounder.Uid == player.Uid)) {
                 if (player.RAMUshort == 0 && XI.Board.SupportSucc)
                     return true;
                 else if (player.RAMUshort == 1 && !XI.Board.SupportSucc)
@@ -1925,12 +1922,12 @@ namespace PSD.PSDGamepkg.JNS
         {
             if (type == 0)
             {
-                // G0DI,A,0,n,B,1,m
-                string[] blocks = fuse.Split(',');
-                int idx = 1;
                 Player oy = XI.Board.Garden[owner];
                 if (!oy.IsAlive)
                     return false;
+                // G1DI,A,Ty=0,n,m,x
+                string[] blocks = fuse.Split(',');
+                int idx = 1;
                 while (idx < blocks.Length)
                 {
                     ushort n = ushort.Parse(blocks[idx + 2]);
@@ -1946,7 +1943,10 @@ namespace PSD.PSDGamepkg.JNS
                 }
             }
             else if (type == 1)
-                return true;
+            {
+                Player oy = XI.Board.Garden[owner];
+                return oy.RAMUtList.Contains(player.Uid);
+            }
             return false;
         }
         public void JN60102Action(Player player, int type, string fuse, string args)
@@ -2006,17 +2006,17 @@ namespace PSD.PSDGamepkg.JNS
                         //    XI.InnerGMessage(blocks[0] + nfuse, 120);
                     }
                     else
-                        XI.InnerGMessage(fuse, 151);
+                        XI.InnerGMessage(fuse, 121);
                 }
                 else
-                    XI.InnerGMessage(fuse, 151);
+                    XI.InnerGMessage(fuse, 121);
             }
             else if (type == 1)
             {
                 ushort to = ushort.Parse(args);
                 Player oy = XI.Board.Garden[to];
                 oy.RAMUtList.Clear();
-                XI.InnerGMessage(fuse, 152);
+                XI.InnerGMessage(fuse, 122);
             }
         }
         public string JN60102Input(Player player, int type, string fuse, string prev)

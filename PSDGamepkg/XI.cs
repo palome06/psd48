@@ -78,7 +78,8 @@ namespace PSD.PSDGamepkg
             //17007, 17020, 19002, 10104, 17011, 19006
             //10102, 10201, 17007, 10104, 17011, 19006
             //17021, 10504, 19002, 10104, 17011, 19006
-            19007, 17022, 10302, 17011, 19002, 19006
+            //17003, 17022, 10601, 19011, 10604, 19013
+            10203, 15008, 10302, 10603, 10604, 17011
         };
 
         #region Memeber Declaration & Constructor
@@ -544,7 +545,7 @@ namespace PSD.PSDGamepkg
                  "IS", "OS", "LH", "IV", "OV", "PB", "YM", "HR", "AF", "ON", "SN", "MA", "PH", "ZJ"
             };
             string[] g1 = new string[] { "DI", "IU", "OU", "ZK", "IZ", "OZ", "SG", "HK", "WJ", "JG",
-                 "XR", "EV", "CK" };
+                 "XR", "EV", "CK", "YP" };
             string[] g2 = new string[] { "IN", "RN", "CN", "QC", "FU", "QU", "CL", "ZU", "HU", "WK",
                  "AK", "IL", "OL", "SW", "AS", "KI" };
             foreach (string g0event in g0)
@@ -573,6 +574,50 @@ namespace PSD.PSDGamepkg
                     value.Sort(SkTriple.Cmp);
             }
             //return dict;
+        }
+
+        private List<SKE> ParseSingleFromSKTriples(List<SkTriple> list,
+            string zero, bool ucr, ushort puid, Skill skill)
+        {
+            List<SKE> result = new List<SKE>();
+            ucr &= (Board.UseCardRound != 0);
+            if (ucr && Board.Garden[puid].Team != Board.UseCardRound)
+                return result;
+
+            foreach (SkTriple skt in list)
+            {
+                if (skt.Name == skill.Code)
+                {
+                    if (skt.Type == SKTType.BK && puid != skt.Owner)
+                        result.Add(new SKE(skt) { Tg = puid });
+                    else if (skt.Type == SKTType.SK && puid == skt.Owner)
+                        result.Add(new SKE(skt) { Tg = puid });
+                }
+            }
+            return result;
+        }
+        // add newcomers skill back to pocket to register it in runquad
+        private void AddZhuSkillBackward(List<SKE> pocket, string zero, bool cond)
+        {
+            foreach (Player player in Board.Garden.Values)
+            {
+                if (player.IsZhu)
+                {
+                    Base.Card.Hero selHero = LibTuple.HL.InstanceHero(player.SelectHero);
+                    foreach (string skillStr in selHero.Skills)
+                    {
+                        Skill skill = LibTuple.SL.EncodeSkill(skillStr);
+                        if (!pocket.Any(p => p.Name == skill.Code))
+                        {
+                            pocket.AddRange(ParseSingleFromSKTriples(
+                                sk02[zero], zero, cond, player.Uid, skill));
+                        }
+                    }
+                }
+                player.IsZhu = false;
+            }
+            int c = 0;
+            c = c + 2;
         }
 
         // Parse from SKTriple list to SKT list

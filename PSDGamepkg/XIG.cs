@@ -49,9 +49,10 @@ namespace PSD.PSDGamepkg
                 isAnySet = false;
                 isTermini = false;
                 Fill(involved, false);
-
                 List<string> locks = new List<string>();
                 List<SKE> purse = new List<SKE>();
+                //AddZhuSkillBackward(pocket, zero, false);
+
                 foreach (SKE ske in pocket)
                 {
                     if (!isAnySet && ske.Priorty < priorty)
@@ -590,8 +591,9 @@ namespace PSD.PSDGamepkg
                     }
                     else if (priority == 200)
                     {
+                        ushort trigger = ushort.Parse(args[1]);
                         Base.Card.Evenement eve = LibTuple.EL.DecodeEvenement(Board.Eve);
-                        eve.Action();
+                        eve.Action(Board.Garden[trigger]);
                     }
                     break;
                 default:
@@ -1493,6 +1495,16 @@ namespace PSD.PSDGamepkg
                                 }
                                 else
                                     WI.BCast("E0XZ," + me + ",4,0");
+
+                                if (pick < count)
+                                {
+                                    int discard = count - pick;
+                                    ushort[] pops = piles.Dequeue(discard);
+                                    char[] diceNames = new char[] { '0', 'C', 'M', 'E' };
+                                    RaiseGMessage("G2IN," + (dicesType - 1) + "," + discard);
+                                    RaiseGMessage("G0ON,0," + diceNames[dicesType] + "," + discard
+                                        + "," + string.Join(",", pops));
+                                }
                             }
                         }
                         break;
@@ -2945,6 +2957,7 @@ namespace PSD.PSDGamepkg
                                 {
                                     py.Skills.Add(skill.Code);
                                     AddSingleSkill(who, skill, sk02, sk03);
+                                    py.IsZhu = true;
                                     e0is += "," + args[i];
                                 }
                             }

@@ -1773,7 +1773,7 @@ namespace PSD.PSDGamepkg.JNS
             string[] g0xzs = fuse.Split(',');
             if (g0xzs[1] != player.Uid.ToString() && g0xzs[2] == "2")
             {
-                int amount = int.Parse(g0xzs[4]);
+                int amount = g0xzs.Length > 5 ? int.Parse(g0xzs[5]) : int.Parse(g0xzs[4]);
                 XI.RaiseGMessage("G0XZ," + player.Uid + ",2,0," + amount);
             }
         }
@@ -2611,13 +2611,25 @@ namespace PSD.PSDGamepkg.JNS
         #region TR018 - Qinji
         public void JNT1801Action(Player player, int type, string fuse, string argst)
         {
-            if (type == 1)
+            if (type == 0)
+            {
                 XI.RaiseGMessage("G0QZ," + player.Uid + "," + argst);
-            XI.RaiseGMessage("G0IP," + player.Team + ",1");
+                XI.RaiseGMessage("G0IP," + player.Team + ",1");
+            }
+            else if (type == 1)
+            {
+                string add = XI.AsyncInput(player.Uid, "#「弦歌问情」触发，是否令我方战力+1##是##否,Y2",
+                    "JNT1801", "0");
+                if (add != "2")
+                    XI.RaiseGMessage("G0IP," + player.Team + ",1");
+            }
         }
         public bool JNT1801Valid(Player player, int type, string fuse)
         {
             if (type == 0)
+                return player.Tux.Any(p =>
+                    XI.LibTuple.TL.DecodeTux(p).Type == Base.Card.Tux.TuxType.ZP);
+            else if (type == 1)
             {
                 // G0CC,A,0,B,KN,x1,x2;TF
                 string[] g0cc = fuse.Split(',');
@@ -2629,13 +2641,11 @@ namespace PSD.PSDGamepkg.JNS
                         return true;
                 }
             }
-            else if (type == 1)
-                return player.Tux.Count > 0;
             return false;
         }
         public string JNT1801Input(Player player, int type, string fuse, string prev)
         {
-            if (type == 1 && prev == "")
+            if (type == 0 && prev == "")
             {
                 List<ushort> cands = player.Tux.Where(p => XI.LibTuple.TL.DecodeTux(p) != null &&
                     XI.LibTuple.TL.DecodeTux(p).Type == Base.Card.Tux.TuxType.ZP).ToList();
@@ -2828,13 +2838,36 @@ namespace PSD.PSDGamepkg.JNS
             }
         }
         public bool JNT1903Valid(Player player, int type, string fuse) {
-            return XI.Board.IsAttendWar(player) && player.Tux.Count > 0;
+            if (type == 0)
+                return player.Team == XI.Board.Rounder.Team && XI.Board.IsBattleWin
+                     && XI.Board.PoolDelta > 0 && player.Tux.Count >= 2;
+            else if (type == 1)
+                return player.TokenCount > 0;
+            else
+                return false;
         }
-        public void JNT1903Action(Player player, int type, string fuse, string argst)
-        {
-            int n = player.Tux.Count;
-            XI.RaiseGMessage("G0QZ," + player.Uid + "," + string.Join(",", player.Tux));
-            XI.RaiseGMessage("G0DH," + player.Uid + ",0," + n);
+        public void JNT1903Action(Player player, int type, string fuse, string argst) {
+            if (type == 0)
+            {
+                XI.RaiseGMessage("G0QZ," + player.Uid + "," + argst);
+                if (player.TokenCount < 7)
+                {
+                    int delta = System.Math.Min(XI.Board.PoolDelta, 7 - player.TokenCount);
+                    XI.RaiseGMessage("G0IJ," + player.Uid + ",0," + delta);
+                }
+            }
+            else if (type == 1)
+            {
+                int z = player.TokenCount;
+                XI.RaiseGMessage("G0OJ," + player.Uid + ",0," + z);
+                XI.RaiseGMessage("G0IP," + player.Team + "," + z);
+            }
+        }
+        public string JNT1903Input(Player player, int type, string fuse, string prev) {
+            if (type == 0 && prev == "")
+                return "#弃置的,/Q2(p" + string.Join("p", player.Tux) + ")";
+            else
+                return "";
         }
         #endregion TR019 - JingTian
         #region TR020 - LeiYuan'ge
@@ -3393,10 +3426,10 @@ namespace PSD.PSDGamepkg.JNS
         public void JNH0102Action(Player player, int type, string fuse, string argst)
         {
             int cnt = player.ROMUshort;
+            XI.RaiseGMessage("G0DS," + player.Uid + ",0,1");
             XI.RaiseGMessage("G0OJ," + player.Uid + ",0," + cnt);
             player.ROMUshort = 0;
             XI.RaiseGMessage("G0IP," + player.Team + "," + (cnt + 2));
-            XI.RaiseGMessage("G0DS," + player.Uid + ",0,1");
         }
         public bool JNH0102Valid(Player player, int type, string fuse)
         {
@@ -3470,57 +3503,10 @@ namespace PSD.PSDGamepkg.JNS
                 }
                 else if (NMBLib.IsNPC(mon2ut))
                 {
-                    NPC npc = XI.LibTuple.NL.Decode(NMBLib.OriginalNPC(mon2ut));
-                    //bool doubled = false;
-                    //Hero nho = XI.LibTuple.HL.InstanceHero(npc.Hero);
-                    //foreach (Player py in XI.Board.Garden.Values.Where(
-                    //    p => p.IsAlive && p.Team == XI.Board.Rounder.Team))
-                    //{
-                    //    Hero pero = XI.LibTuple.HL.InstanceHero(py.SelectHero);
-                    //    if (pero != null)
-                    //    {
-                    //        if (pero.Spouses.Contains(npc.Hero.ToString()))
-                    //        {
-                    //            doubled = true; break;
-                    //        }
-                    //        else if (nho != null && pero.Spouses.Contains(nho.Archetype.ToString()))
-                    //        {
-                    //            doubled = true; break;
-                    //        }
-                    //        Hero par = XI.LibTuple.HL.InstanceHero(pero.Archetype);
-                    //        if (par != null && par.Spouses.Contains(npc.Hero.ToString()))
-                    //        {
-                    //            doubled = true; break;
-                    //        }
-                    //    }
-                    //}
-                    //if (doubled)
-                    //    XI.WI.BCast("E0HZ,3," + who + "," + mon2ut);
-                    //else
-                    //    XI.WI.BCast("E0HZ,2," + who + "," + mon2ut);
-                    //XI.RaiseGMessage("G0YM,1," + mon2ut + ",0");
-                    //int nSTR = doubled ? (2 * npc.STR) : npc.STR;
                     XI.WI.BCast("E0HZ,2," + who + "," + mon2ut);
-                    int nSTR = npc.STR;
-                    if (nSTR >= mon1.STR)
-                    {
-                        mon1.Curtain();
-                        if (XI.Board.Mon1From != 0)
-                            XI.RaiseGMessage("G0HL," + XI.Board.Mon1From + "," + XI.Board.Monster1);
-                        XI.RaiseGMessage("G0WB," + XI.Board.Monster1);
-                        XI.RaiseGMessage("G0ON," + XI.Board.Mon1From + ",M,1," + XI.Board.Monster1);
-                        XI.RaiseGMessage("G0YM,0,0,0");
-                        XI.Board.Mon1From = 0;
-                        XI.Board.Monster1 = 0;
-
-                        XI.HandleWithNPCEffect(player, npc, false);
-                        XI.RaiseGMessage("G0ON,0,M,1," + XI.Board.Monster2);
-                        XI.RaiseGMessage("G0YM,1,0,0");
-                        XI.Board.Monster2 = 0;
-
-                        XI.RaiseGMessage("G0IA," + player.Uid + ",2");
-                        XI.RaiseGMessage("G0JM,R" + XI.Board.Rounder.Uid + "ZN");
-                    }
+                    XI.RaiseGMessage("G0ON,0,M,1," + XI.Board.Monster2);
+                    XI.RaiseGMessage("G0YM,1,0,0");
+                    XI.Board.Monster2 = 0;
                 }
                 XI.InnerGMessage(fuse, 201);
             }
@@ -3539,7 +3525,11 @@ namespace PSD.PSDGamepkg.JNS
         	if (player.HP < 7)
         	{
         		List<Artiad.Harm> harms = Artiad.Harm.Parse(fuse);
-        		return harms.Any(p => p.Element != FiveElement.SOL && p.Element != FiveElement.LOVE);
+        		bool anyHarm = player.HP < 3 && harms.Any(p => p.Element != FiveElement.SOL
+                    && p.Element != FiveElement.LOVE);
+                bool hasIncr = harms.Any(p => p.Element != FiveElement.SOL
+                    && p.Element != FiveElement.LOVE && p.N >= 2);
+                return anyHarm || hasIncr;
         	} else return false;
         }
         public void JNH0201Action(Player player, int type, string fuse, string argst)
@@ -4511,11 +4501,16 @@ namespace PSD.PSDGamepkg.JNS
             List<ushort> cands = player.Tux.Where(p => XI.LibTuple.TL.DecodeTux(p) != null &&
                     XI.LibTuple.TL.DecodeTux(p).Type != Base.Card.Tux.TuxType.TP).ToList();
             if (cands.Count >= 2) {
-                string[] crs = new string[] { "TP02", "TP03", "TPT1" };
+                string[] kekkai = new string[] { "TP01,0", "TPT3,0", "TPT3,1", "ZP01,0", "TPT1,0" };
                 // G0CC,A,0,B,KN,x1,x2;TF
-                string[] g0cc = fuse.Split(',');
+                int idx = fuse.IndexOf(';');
+                string[] g0cc = fuse.Substring(0, idx).Split(',');
+                string tuxType = Util.Substring(fuse, idx + 1, fuse.IndexOf(',', idx + 1));
                 string kn = g0cc[4];
-                if (g0cc[1] != player.Uid.ToString() && crs.Contains(kn))
+                Tux ktux = XI.LibTuple.TL.EncodeTuxCode(kn);
+                ushort who = ushort.Parse(g0cc[1]);
+                if (who != player.Uid && ktux != null && ktux.Type == Tux.TuxType.TP
+                        && !kekkai.Contains(kn + "," + tuxType))
                     return true;
             }
             return false;
@@ -4569,8 +4564,8 @@ namespace PSD.PSDGamepkg.JNS
         {
             if (type == 0)
             {
-                if (player.RAM.ContainsKey("ZPName") && (string)player.RAM["ZPName"] != ""
-                    && player.RAMUshort == 0 && player.Tux.Count > 0)
+                if (Util.TryNotEmpty(player.RAM, "ZPName") &&
+                    player.RAMUshort == 0 && player.Tux.Count > 0)
                 {
                     Base.Card.Tux tux = XI.LibTuple.TL.EncodeTuxCode((string)player.RAM["ZPName"]);
                     if (tux != null && tux.Valid(player, 0, fuse))
@@ -4589,7 +4584,7 @@ namespace PSD.PSDGamepkg.JNS
                         return true;
                 }
             } else if (type == 2)
-                return (string)player.RAM["ZPName"] != "" || player.RAMUshort != 0;
+                return Util.TryNotEmpty(player.RAM, "ZPName") || player.RAMUshort != 0;
             return false;
         }
         public void JNH0902Action(Player player, int type, string fuse, string argst)
@@ -4693,7 +4688,9 @@ namespace PSD.PSDGamepkg.JNS
             else if (type == 3)
             {
                 XI.RaiseGMessage("G0OY,1," + player.Uid);
+                XI.RaiseGMessage("G0OS," + player.Uid + ",0,JNH0901,JNH0902,JNH0903");
                 XI.RaiseGMessage("G0IY,1," + player.Uid + ",19015");
+                XI.RaiseGMessage("G0IS," + player.Uid + ",0,JNH1501,JNH1502");
             }
         }
         #endregion HL009 - Lingjian
@@ -4980,7 +4977,20 @@ namespace PSD.PSDGamepkg.JNS
         }
         public bool JNH1302Valid(Player player, int type, string fuse)
         {
-            return fuse == "G0AF,0,0" && XI.Board.Rounder.Team == player.OppTeam;
+            if (type == 0)
+                return fuse == "G0AF,0,0" && XI.Board.Rounder.Team == player.OppTeam;
+            else if (type == 1)
+            {
+                string[] g1yp = fuse.Split(',');
+                for (int i = 1; i < g1yp.Length; i += 2)
+                {
+                    Player py = XI.Board.Garden[ushort.Parse(g1yp[i])];
+                    if (py.Team == player.OppTeam)
+                        return true;
+                }
+                return false;
+            }
+            else return false;
         }
         public void JNH1302Action(Player player, int type, string fuse, string argst)
         {
@@ -5315,8 +5325,13 @@ namespace PSD.PSDGamepkg.JNS
             {
                 IDictionary<int, int> dicts = XI.CalculatePetsScore();
                 int diff1 = XI.Board.PoolDelta;
-                int diff2 = dicts[player.OppTeam] - dicts[player.Team];
-                return diff1 >= 2 && diff2 >= 5;
+
+                ushort[] props = new ushort[] { 0, 1, 2, 3, 4 };
+                int opr = props.Count(q => XI.Board.Garden.Values.Where(p => p.IsAlive &&
+                    p.Team == player.OppTeam).Any(r => r.Pets[q] != 0));
+                int rpr = props.Count(q => XI.Board.Garden.Values.Where(p => p.IsAlive &&
+                    p.Team == player.Team).Any(r => r.Pets[q] != 0));
+                return diff1 >= 2 && opr > rpr;
             }
             else
                 return false;
@@ -5325,8 +5340,12 @@ namespace PSD.PSDGamepkg.JNS
         {
             IDictionary<int, int> dicts = XI.CalculatePetsScore();
             int diff1 = XI.Board.PoolDelta;
-            int diff2 = dicts[player.OppTeam] - dicts[player.Team];
-            int diff = System.Math.Min(diff1 / 2, diff2 / 5);
+            ushort[] props = new ushort[] { 0, 1, 2, 3, 4 };
+            int opr = props.Count(q => XI.Board.Garden.Values.Where(p => p.IsAlive &&
+                p.Team == player.OppTeam).Any(r => r.Pets[q] != 0));
+            int rpr = props.Count(q => XI.Board.Garden.Values.Where(p => p.IsAlive &&
+                p.Team == player.Team).Any(r => r.Pets[q] != 0));
+            int diff = System.Math.Min(diff1 / 2, opr - rpr);
             string rSel = XI.AsyncInput(player.Uid, "#补" + diff + "张牌,T1" +
                 ATeammatesTared(player), "JNH1802", "0");
             ushort rTar = ushort.Parse(rSel);

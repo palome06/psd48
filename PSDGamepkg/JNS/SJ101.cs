@@ -28,12 +28,12 @@ namespace PSD.PSDGamepkg.JNS
                 ev01.Add(cardCode, eve);
                 var method = ec.GetType().GetMethod(cardCode);
                 if (method != null)
-                    eve.Action += delegate() { method.Invoke(ec, new object[] { }); };
+                    eve.Action += delegate(Player player) { method.Invoke(ec, new object[] { player }); };
 
                 var methodPers = ec.GetType().GetMethod(cardCode + "Pers");
                 if (methodPers != null)
-                    eve.Pers += new Evenement.ActionDelegate(delegate()
-                    { methodPers.Invoke(ec, new object[] { }); });
+                    eve.Pers += new Evenement.ActionDelegate(delegate(Player player)
+                    { methodPers.Invoke(ec, new object[] { player }); });
                 var methodPersValid = ec.GetType().GetMethod(cardCode + "PersValid");
                 if (methodPersValid != null)
                     eve.PersValid += new Evenement.ValidDelegate(delegate()
@@ -42,14 +42,12 @@ namespace PSD.PSDGamepkg.JNS
             return ev01;
         }
         #region Eve Of Pal1
-        public void SJ101()
+        public void SJ101(Player rd)
         {
-            Player rd = XI.Board.Rounder;
             if (rd.Gender == 'M')
             {
                 XI.RaiseGMessage("G0DH," + rd.Uid + ",0,1");
                 XI.RaiseGMessage(Artiad.Harm.ToMessage(new Artiad.Harm(rd.Uid, 0, FiveElement.THUNDER, 1, 0)));
-                XI.VI.Cout(0, "SJ101,0");
             }
             else if (rd.Gender == 'F')
             {
@@ -70,25 +68,24 @@ namespace PSD.PSDGamepkg.JNS
                 }
             }
         }
-        public void SJ102()
+        public void SJ102(Player rd)
         {
             string msg = Util.SParal(XI.Board, p => p.IsAlive && p.GetPetCount() == 0,
                 p => p.Uid + ",0,1", ",");
             if (msg != null)
                 XI.RaiseGMessage("G0DH," + msg);
         }
-        public void SJ103()
+        public void SJ103(Player rd)
         {
-            Player rd = XI.Board.Rounder;
             string range1 = Util.SSelect(XI.Board, p => p.Team == rd.Team && p.IsAlive);
             string range2 = Util.SSelect(XI.Board, p => p.Team == rd.OppTeam && p.IsAlive);
             string input = XI.AsyncInput(rd.Uid, "#获得2张手牌的,T1" + range1 + ",T1" + range2, "SJ103", "0");
             string[] ips = input.Split(',');
             XI.RaiseGMessage("G0DH," + ips[0] + ",0,2," + ips[1] + ",0,2");
         }
-        public void SJ104()
+        public void SJ104(Player rd)
         {
-            Player rd = XI.Board.Rounder, nx = XI.Board.Opponent;
+            Player nx = XI.Board.GetOpponenet(rd);
             List<ushort> pops = XI.DequeueOfPile(XI.Board.TuxPiles, 4).ToList();
             XI.RaiseGMessage("G2IN,0,4");
             XI.RaiseGMessage("G1IU," + string.Join(",", pops));
@@ -128,7 +125,7 @@ namespace PSD.PSDGamepkg.JNS
         }
         #endregion Eve Of Pal1
         #region Eve Of Pal2
-        public void SJ201()
+        public void SJ201(Player rd)
         {
             string msg = Util.SParal(XI.Board, p => p.IsAlive && p.HP <= 3,
                 p => p.Uid + ",0,1", ",");
@@ -136,9 +133,9 @@ namespace PSD.PSDGamepkg.JNS
                 XI.RaiseGMessage("G0DH," + msg);
         }
 
-        public void SJ202()
+        public void SJ202(Player rd)
         {
-            string range = Util.SSelect(XI.Board, p => p.IsAlive && p.HP >= 2 && p.Team == XI.Board.Rounder.Team);
+            string range = Util.SSelect(XI.Board, p => p.IsAlive && p.HP >= 2 && p.Team == rd.Team);
             if (range != null)
             {
                 string input = XI.AsyncInput(XI.Board.Rounder.Uid,"#HP将为1的,T1" + range, "SJ202", "0");
@@ -146,7 +143,8 @@ namespace PSD.PSDGamepkg.JNS
                 Player targetPy = XI.Board.Garden[target];
                 int dHp = targetPy.HP - 1;
                 int maskDuel = Artiad.IntHelper.SetMask(0, GiftMask.INCOUNTABLE, true);
-                XI.RaiseGMessage(Artiad.Harm.ToMessage(new Artiad.Harm(target, 0, FiveElement.SOL, dHp, maskDuel)));
+                XI.RaiseGMessage(Artiad.Harm.ToMessage(
+                    new Artiad.Harm(target, 0, FiveElement.SOL, dHp, maskDuel)));
             }
             string msg = Util.SParal(XI.Board, p => p.IsAlive && p.Team.Equals(XI.Board.Rounder.Team),
                 p => p.Uid + ",0,1", ",");
@@ -156,7 +154,7 @@ namespace PSD.PSDGamepkg.JNS
         #endregion Eve Of Pal2
         #region Eve Of Pal3
 
-        public void SJ301()
+        public void SJ301(Player rd)
         {
             string msgP = Util.SParal(XI.Board, p => p.IsAlive && p.Tux.Count < 3,
                 p => p.Uid + ",0," + (3 - p.Tux.Count), ",");
@@ -174,22 +172,22 @@ namespace PSD.PSDGamepkg.JNS
             if (msg != "")
                 XI.RaiseGMessage("G0DH," + msg);
         }
-        public void SJ302()
+        public void SJ302(Player rd)
         {
             int minHp = XI.Board.Garden.Values.Where(p => p.IsAlive).Min(p => p.HP);
             XI.RaiseGMessage(Artiad.Cure.ToMessage(XI.Board.Garden.Values.Where(p => p.IsAlive &&
                 p.HP == minHp).Select(p => new Artiad.Cure(p.Uid, 0, FiveElement.A, 2))));
         }
-        public void SJ303()
+        public void SJ303(Player rd)
         {
-            int countOfPet = XI.Board.Rounder.GetPetCount();
+            int countOfPet = rd.GetPetCount();
             if (countOfPet > 0)
-                XI.RaiseGMessage("G0DH," + XI.Board.Rounder.Uid + ",1," + countOfPet);
-            XI.RaiseGMessage("G0DH," + XI.Board.Rounder.Uid + ",0,1");
+                XI.RaiseGMessage("G0DH," + rd.Uid + ",1," + countOfPet);
+            XI.RaiseGMessage("G0DH," + rd.Uid + ",0,1");
         }
         #endregion Eve Of Pal3
         #region Eve Of Pal3A
-        public void S3W01()
+        public void S3W01(Player rd)
         {
             int maxSTR = XI.Board.Garden.Values.Where(p => p.IsAlive).Max(p => p.STR);
             string msgP = Util.SParal(XI.Board, p => p.IsAlive && p.STR == maxSTR,
@@ -202,29 +200,29 @@ namespace PSD.PSDGamepkg.JNS
             XI.RaiseGMessage("G0DH," + msgP + "," + msgN);
         }
 
-        public void S3W02()
+        public void S3W02(Player rd)
         {
             int countOfPet = XI.Board.Garden.Values.Where(
-                p => p.Team == XI.Board.Rounder.OppTeam).Sum(p => p.GetPetCount());
+                p => p.Team == rd.OppTeam).Sum(p => p.GetPetCount());
             if (countOfPet > 0)
             {
-                string range = Util.SSelect(XI.Board, p => p.IsAlive && p.Team == XI.Board.Rounder.Team);
-                string input = XI.AsyncInput(XI.Board.Rounder.Uid, "#回复HP的,T1" + range, "S3W02", "0");
+                string range = Util.SSelect(XI.Board, p => p.IsAlive && p.Team == rd.Team);
+                string input = XI.AsyncInput(rd.Uid, "#回复HP的,T1" + range, "S3W02", "0");
                 ushort target = ushort.Parse(input);
-                XI.RaiseGMessage(Artiad.Cure.ToMessage(new Artiad.Cure(target, 0, FiveElement.A, countOfPet)));
+                XI.RaiseGMessage(Artiad.Cure.ToMessage(
+                    new Artiad.Cure(target, 0, FiveElement.A, countOfPet)));
             }
         }
         #endregion Eve Of Pal3A
         #region Eve Of Pal4
-        public void SJ401()
+        public void SJ401(Player rd)
         {
-            Player rd = XI.Board.Rounder;
             if (rd.Tux.Count > 0)
                 XI.RaiseGMessage("G0DH," + rd.Uid + ",2," + rd.Tux.Count);
             XI.RaiseGMessage("G0DH," + rd.Uid + ",0,2");
         }
 
-        public void SJ402()
+        public void SJ402(Player rd)
         {
             //string result = Util.SParal(XI.Board, p => p.IsAlive && p.GetPetCount() > 0,
             //    p => p.Uid + ",8," + p.GetPetCount(), ",");
@@ -237,7 +235,7 @@ namespace PSD.PSDGamepkg.JNS
         }
         #endregion Eve Of Pal4
         #region Eve Of Pal5
-        public void SJ501()
+        public void SJ501(Player rd)
         {
             int maxTux = XI.Board.Garden.Values.Where(p => p.IsAlive).Max(p => p.Tux.Count);
             var v = XI.Board.Garden.Values.Where(p => p.IsAlive && p.Tux.Count == maxTux);
@@ -247,9 +245,8 @@ namespace PSD.PSDGamepkg.JNS
         #endregion Eve Of Pal5
 
         #region Package 5#
-        public void SJT01()
+        public void SJT01(Player rd)
         {
-            Player rd = XI.Board.Rounder;
             ushort uhd = (ushort)(((rd.Uid + 1) / 2 * 4) - 1 - rd.Uid);
             Player hd = XI.Board.Garden[uhd];
             if (hd != null && hd.IsAlive)
@@ -263,7 +260,7 @@ namespace PSD.PSDGamepkg.JNS
                     XI.RaiseGMessage("G0HQ,0," + rd.Uid + "," + hd.Uid + ",1," + htxn + "," + htx);
             }
         }
-        public void SJT02()
+        public void SJT02(Player rd)
         {
             List<Artiad.Harm> harms = new List<Artiad.Harm>();
             foreach (Player py in XI.Board.Garden.Values.Where(p => p.IsAlive))
@@ -276,9 +273,9 @@ namespace PSD.PSDGamepkg.JNS
             if (harms.Count > 0)
                 XI.RaiseGMessage(Artiad.Harm.ToMessage(harms));
         }
-        public void SJT03()
+        public void SJT03(Player rd)
         {
-            Player rd = XI.Board.Rounder, od = XI.Board.Opponent;
+            Player od = XI.Board.GetOpponenet(rd);
             int rn = XI.Board.Garden.Values.Where(p => p.IsAlive && p.Team == rd.OppTeam)
                 .Sum(p => p.GetPetCount()) + 1;
             int on = XI.Board.Garden.Values.Where(p => p.IsAlive && p.Team == rd.Team)
@@ -352,24 +349,25 @@ namespace PSD.PSDGamepkg.JNS
                 XI.RaiseGMessage("G2FU,3");
             } while (pops.Count > 0);
         }
-        public void SJT04()
+        public void SJT04(Player rd)
         {
-            int sumMe = XI.Board.Garden.Values.Where(p => p.IsAlive && p.Team == XI.Board.Rounder.Team)
+            Player op = XI.Board.GetOpponenet(rd);
+            int sumMe = XI.Board.Garden.Values.Where(p => p.IsAlive && p.Team == rd.Team)
                     .Sum(p => p.Pets.Where(q => q != 0 && XI.LibTuple.ML.Decode(q) != null)
                     .Sum(q => XI.LibTuple.ML.Decode(q).STR));
-            int sumOe = XI.Board.Garden.Values.Where(p => p.IsAlive && p.Team == XI.Board.Rounder.OppTeam)
+            int sumOe = XI.Board.Garden.Values.Where(p => p.IsAlive && p.Team == rd.OppTeam)
                 .Sum(p => p.Pets.Where(q => q != 0 && XI.LibTuple.ML.Decode(q) != null)
                 .Sum(q => XI.LibTuple.ML.Decode(q).STR));
 
             Player py;
             if (sumMe < sumOe)
-                py = XI.Board.Rounder;
+                py = rd;
             else if (sumMe > sumOe)
-                py = XI.Board.Opponent;
-            else if (XI.Board.Rounder.Team == 1)
-                py = XI.Board.Rounder;
+                py = op;
+            else if (rd.Team == 1)
+                py = rd;
             else
-                py = XI.Board.Opponent;
+                py = op;
             List<ushort> uts = XI.Board.TuxDises.Where(p =>
                 XI.LibTuple.TL.DecodeTux(p).Type == Tux.TuxType.WQ ||
                 XI.LibTuple.TL.DecodeTux(p).Type == Tux.TuxType.FJ).ToList();
@@ -423,48 +421,50 @@ namespace PSD.PSDGamepkg.JNS
         //    else
         //        XI.RaiseGMessage("G0IP,2,3");
         //}
-        public void SJT05()
+        public void SJT05(Player rd)
         {
             string result = Util.SParal(XI.Board, p => p.IsAlive &&
                 p.Tux.Count > 0, p => p.Uid + ",1,1", ",");
             if (!string.IsNullOrEmpty(result))
                 XI.RaiseGMessage("G0DH," + result);
 
-            int sumTR = XI.Board.Garden.Values.Where(p => p.IsAlive && p.Team == XI.Board.Rounder.Team)
+            int sumTR = XI.Board.Garden.Values.Where(p => p.IsAlive && p.Team == rd.Team)
                     .Sum(p => p.Pets.Where(q => q != 0 && XI.LibTuple.ML.Decode(q) != null)
                     .Sum(q => XI.LibTuple.ML.Decode(q).STR));
-            int sumTO = XI.Board.Garden.Values.Where(p => p.IsAlive && p.Team == XI.Board.Rounder.OppTeam)
+            int sumTO = XI.Board.Garden.Values.Where(p => p.IsAlive && p.Team == rd.OppTeam)
                 .Sum(p => p.Pets.Where(q => q != 0 && XI.LibTuple.ML.Decode(q) != null)
                 .Sum(q => XI.LibTuple.ML.Decode(q).STR));
 
             if (sumTR > sumTO)
                 result = Util.SParal(XI.Board, p => p.IsAlive &&
-                    p.Team == XI.Board.Rounder.OppTeam, p => p.Uid + ",0,1", ",");
+                    p.Team == rd.OppTeam, p => p.Uid + ",0,1", ",");
             else if (sumTR < sumTO)
                 result = Util.SParal(XI.Board, p => p.IsAlive &&
-                    p.Team == XI.Board.Rounder.Team, p => p.Uid + ",0,1", ",");
+                    p.Team == rd.Team, p => p.Uid + ",0,1", ",");
             else
-                result = XI.Board.Rounder.Uid + ",0,1";
+                result = rd.Uid + ",0,1";
             XI.RaiseGMessage("G0DH," + result);
         }
-        public void SJT06()
+        public void SJT06(Player rd)
         {
             List<Player> invs = XI.Board.Garden.Values.Where(p => p.GetPetCount() == 0).ToList();
             if (invs.Any())
                 XI.RaiseGMessage("G1XR,1,0,2," + string.Join(",", invs.Select(p => p.Uid)));
         }
-        public void SJT07()
+        public void SJT07(Player rd)
         {
             var gv = XI.Board.Garden.Values;
-            int lr = gv.Count(p => p.IsAlive && p.Team == XI.Board.Rounder.Team);
-            int or = gv.Count(p => p.IsAlive && p.Team == XI.Board.Rounder.OppTeam);
-            Player py = (lr <= or) ? XI.Board.Rounder : XI.Board.Opponent;
+            int lr = gv.Count(p => p.IsAlive && p.Team == rd.Team);
+            int or = gv.Count(p => p.IsAlive && p.Team == rd.OppTeam);
+            Player py = (lr <= or) ? rd : XI.Board.GetOpponenet(rd);
 
             ushort pop = XI.Board.RestNPCPiles.Dequeue();
             NPC npc = XI.LibTuple.NL.Decode(NMBLib.OriginalNPC(pop));
             XI.RaiseGMessage("G0YM,3," + pop + ",0");
             XI.Board.Monster1 = pop;
             UEchoCode r5ed = XI.HandleWithNPCEffect(py, npc, false);
+            if (r5ed != UEchoCode.END_ACTION && r5ed != UEchoCode.NO_OPTIONS)
+                XI.RaiseGMessage("G1YP," + XI.Board.Rounder.Uid + "," + pop);
             
             if (XI.Board.Monster1 != 0) // In case the NPC has been taken away
             {
@@ -473,7 +473,7 @@ namespace PSD.PSDGamepkg.JNS
             }
             XI.RaiseGMessage("G0YM,3,0,0");
         }
-        public void SJT08()
+        public void SJT08(Player rd)
         {
             string g0dh = "";
             List<Player> ovs = XI.Board.Garden.Values.Where(
@@ -487,7 +487,7 @@ namespace PSD.PSDGamepkg.JNS
             if (g0dh.Length > 0)
                 XI.RaiseGMessage("G0DH" + g0dh);
         }
-        public void SJT09()
+        public void SJT09(Player rd)
         {
             List<Artiad.Cure> cures = XI.Board.Garden.Values
                 .Where(p => p.IsAlive && p.Tux.Count < 3).Select(p =>
@@ -500,14 +500,13 @@ namespace PSD.PSDGamepkg.JNS
             if (harms.Count > 0)
                 XI.RaiseGMessage(Artiad.Harm.ToMessage(harms));
         }
-        public void SJT10()
+        public void SJT10(Player rd)
         {
             if (XI.Board.RestNPCPiles.Count > 0)
             {
                 ushort pop = XI.Board.RestNPCPiles.Dequeue();
                 NPC npc = XI.LibTuple.NL.Decode(NMBLib.OriginalNPC(pop));
                 XI.RaiseGMessage("G0YM,3," + pop + ",0");
-                Player rd = XI.Board.Rounder;
                 int sr = npc.STR < 5 ? npc.STR : 5;
                 if (rd.Tux.Count > sr)
                     XI.RaiseGMessage("G0DH," + rd.Uid + ",1," + (rd.Tux.Count - sr));
@@ -520,19 +519,19 @@ namespace PSD.PSDGamepkg.JNS
         }
         #endregion Package 5#
 
-        public void SJ001()
+        public void SJ001(Player rd)
         {
             XI.RaiseGMessage(Artiad.Harm.ToMessage(XI.Board.Garden.Values.Where(p => p.IsAlive)
                 .Select(p => new Artiad.Harm(p.Uid, 0, FiveElement.AQUA, 12, 0))));
         }
 
-        public void SJ002()
+        public void SJ002(Player rd)
         {
             XI.RaiseGMessage(Artiad.Harm.ToMessage(new Artiad.Harm(5, 0, FiveElement.SATURN, 12, 0)));
             XI.RaiseGMessage(Artiad.Harm.ToMessage(new Artiad.Harm(1, 0, FiveElement.SATURN, 12, 0)));
         }
 
-        public void SJ003()
+        public void SJ003(Player rd)
         {
             XI.RaiseGMessage("G0HD,1,2,0,15");
             XI.RaiseGMessage("G0HD,1,4,0,6");

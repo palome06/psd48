@@ -439,7 +439,9 @@ namespace PSD.PSDGamepkg.JNS
         public bool TP01Valid(Player player, int type, string fuse)
         {
             string[] blocks = fuse.Split(',');
-            return blocks[2] != "1";
+            bool cardValid = blocks[2] != "1";
+            bool teammate = XI.Board.Garden[ushort.Parse(blocks[1])].Team == player.Team;
+            return cardValid && (!player.IsTPOpt || !teammate);
         }
         // Ling Hu Xian Dan
         public bool TP02Bribe(Player player, int type, string fuse)
@@ -1461,6 +1463,8 @@ namespace PSD.PSDGamepkg.JNS
             XI.RaiseGMessage("G0YM,3," + pop + ",0");
             XI.Board.Monster1 = pop;
             UEchoCode r5ed = XI.HandleWithNPCEffect(XI.Board.Garden[to], npc, false);
+            if (r5ed != UEchoCode.END_ACTION && r5ed != UEchoCode.NO_OPTIONS)
+                XI.RaiseGMessage("G1YP," + player.Uid + "," + pop);
             
             if (XI.Board.Monster1 != 0) // In case the NPC has been taken away
             {

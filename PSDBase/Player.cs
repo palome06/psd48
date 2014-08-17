@@ -132,6 +132,10 @@ namespace PSD.Base
         public void SetArmorDisabled(string tag, bool value) { SetEquipDisabled(tag, value, 2); }
         public bool LuggageDisabled { get { return (GetEquipDisabled() & 4) != 0; } }
         public void SetLuggageDisabled(string tag, bool value) { SetEquipDisabled(tag, value, 4); }
+        // whether the player is rounder and dead to cause continuous procedure
+        public bool IsRan { set; get; }
+        // whether the player is added and needed push back to pocket
+        public bool IsZhu { set; get; }
 
         #endregion Status
 
@@ -207,6 +211,8 @@ namespace PSD.Base
 
             IsReal = isReal;
             Skills = new HashSet<string>();
+            IsRan = false;
+            IsZhu = false;
         }
         public int GetPetCount() { return Pets.Count(p => p != 0); }
         public int OppTeam { get { return 3 - Team; } }

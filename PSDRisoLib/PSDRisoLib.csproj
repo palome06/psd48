@@ -98,6 +98,16 @@
     <Resource Include="Resources\Token\TRH19.png" />
     <Resource Include="Resources\Token\TRS05.png" />
     <Resource Include="Resources\Token\TRT08.png" />
+	<Resource Include="Resources\Token\TRH02.png" />
+    <Resource Include="Resources\Token\TAH0301.png" />
+    <Resource Include="Resources\Token\TAH0601.png" />
+    <Resource Include="Resources\Token\TKT1901.png" />
+    <Resource Include="Resources\Token\TKT1902.png" />
+    <Resource Include="Resources\Token\TKT1903.png" />
+    <Resource Include="Resources\Token\TKT1904.png" />
+    <Resource Include="Resources\Token\TKT1905.png" />
+    <Resource Include="Resources\Token\TKT1906.png" />
+    <Resource Include="Resources\Token\TKT1907.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Card\Eve\S3W01.png" />
@@ -749,11 +759,6 @@
     <Resource Include="Resources\Heros\17022.png" />
     <Resource Include="Resources\Heros\17024.png" />
     <Resource Include="Resources\Heros\17027.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Token\TRH02.png" />
-    <Resource Include="Resources\Token\TAH0301.png" />
-    <Resource Include="Resources\Token\TAH0601.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\PetsSnap\JPT2.png" />
