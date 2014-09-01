@@ -93,6 +93,8 @@ namespace PSD.Base
         public Utils.Rueue<string> PendingTux { private set; get; }
         // Player that won't lose pets in battle
         public List<ushort> PetProtecedPlayer { private set; get; }
+        // List of monsters that is disabled
+        public ISet<ushort> NotActionPets { private set; get; }
 
         public IDictionary<string, string> JumpTable { private set; get; }
 
@@ -215,6 +217,7 @@ namespace PSD.Base
             PendingTux = new Utils.Rueue<string>();
             ProtectedTux = new List<ushort>();
             PetProtecedPlayer = new List<ushort>();
+            NotActionPets = new HashSet<ushort>();
             UseCardRound = 0; ClockWised = true;
             JumpTable = new Dictionary<string, string>();
             FinalAkaScore = 0; FinalAoScore = 0;
@@ -254,6 +257,7 @@ namespace PSD.Base
                     h09g.Append("," + lug.Capacities.Count + "," + string.Join(",", lug.Capacities));
                 else
                     h09g.Append(",0");
+                h09g.Append("," + py.Guardian + "," + (py.Coss.Count > 0 ? py.Coss.Peek() : 0));
                 h09g.Append("," + string.Join(",", py.Pets));
                 h09g.Append("," + py.ExCards.Count);
                 if (py.ExCards.Count > 0)

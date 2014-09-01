@@ -2236,7 +2236,7 @@ namespace PSD.ClientZero
                     {
                         ushort ut = ushort.Parse(args[1]);
                         int hro = int.Parse(args[2]);
-                        VI.Cout(Uid, "{0}获得了{1}化身.", zd.Player(ut), zd.Hero(hro));
+                        VI.Cout(Uid, "{0}迎来了客人{1}.", zd.Player(ut), zd.Hero(hro));
                         Z0D[ut].Coss = hro;
                     }
                     break;
@@ -2244,8 +2244,9 @@ namespace PSD.ClientZero
                     {
                         ushort ut = ushort.Parse(args[1]);
                         int hro = int.Parse(args[2]);
-                        VI.Cout(Uid, "{0}失去了{1}化身.", zd.Player(ut), zd.Hero(hro));
-                        Z0D[ut].Coss = 0;
+                        int next = int.Parse(args[3]);
+                        VI.Cout(Uid, "{0}送走了客人{1}.", zd.Player(ut), zd.Hero(hro));
+                        Z0D[ut].Coss = next;
                     }
                     break;
                 case "E0PB":
@@ -2398,7 +2399,7 @@ namespace PSD.ClientZero
                 listOfThreads.Add(Thread.CurrentThread);
             }
             // Reset Cin Count
-            VI.ResetCinTunnel(Uid);
+            VI.TerminCinTunnel(Uid);
             WI.Send(readLine, Uid, 0);
             string[] args = readLine.Split(',');
             switch (args[0])
@@ -3525,6 +3526,10 @@ namespace PSD.ClientZero
                             List<string> lugs = Util.TakeRange(blocks, nextIdx,
                                 nextIdx + lugsz).ToList();
                             nextIdx += lugsz;
+                            ushort guard = ushort.Parse(blocks[nextIdx]);
+                            nextIdx += 1;
+                            ushort coss = ushort.Parse(blocks[nextIdx]);
+                            nextIdx += 1;
                             ushort[] pets = Util.TakeRange(blocks, nextIdx,
                                 nextIdx + 5).Select(p => ushort.Parse(p)).ToArray();
                             nextIdx += 5;
@@ -3573,6 +3578,7 @@ namespace PSD.ClientZero
                                 zp.Weapon = wp; zp.Armor = am; zp.Trove = tr; zp.ExEquip = exq;
                                 if (lugs.Count > 0)
                                     zp.Treasures[tr].AddRange(lugs);
+                                zp.Guardian = guard; zp.Coss = coss;
                                 zp.Pets = pets;
                                 zp.ExCards = excards;
                                 for (int i = 0; i < fakeqpairs.Count; i += 2)

@@ -374,14 +374,9 @@ namespace PSD.ClientAo
 
         private bool StartCinEtc()
         {
-            //List<string> newList = new List<string>();
-            //if (unhandledMsg.Count > 0)
-            //    unhandledMsg.Dequeue();
-            //newList.AddRange(unhandledMsg);
-            //if (unhandledMsg.Count > 0)
-            //    unhandledMsg.Dequeue();
             SingleThreadMessageStart();
             VI.OpenCinTunnel(Uid);
+            flashHelper.AFlashApplicationWindow(ad);
             return true;
         }
 
@@ -2393,8 +2388,9 @@ namespace PSD.ClientAo
                     break;
                 case "E0IE":
                 case "E0OE":
+                    if (args[1] == "0")
                     {
-                        for (int i = 1; i < args.Length; ++i)
+                        for (int i = 2; i < args.Length; ++i)
                         {
                             ushort who = ushort.Parse(args[i]);
                             if (args[0] == "E0IE")
@@ -2496,7 +2492,7 @@ namespace PSD.ClientAo
                             string skillStr = args[i];
                             Base.Skill sk = Tuple.SL.EncodeSkill(skillStr);
                             if (sk.IsBK)
-                                A0C.ResetBKSKill(sk.Code);
+                                A0C.LoseBKSkill(sk.Code);
                             else if (ut == Uid)
                                 A0C.LoseSkill(sk.Code);
                             VI.Cout(Uid, "{0}失去了技能「{1}」.", zd.Player(ut), zd.SkillName(args[i]));
@@ -2514,6 +2510,23 @@ namespace PSD.ClientAo
                         A0P[ut].HPa = to;
                         if (A0P[ut].HP > A0P[ut].HPa)
                             A0P[ut].HP = A0P[ut].HPa;
+                    }
+                    break;
+                case "E0IV":
+                    {
+                        ushort ut = ushort.Parse(args[1]);
+                        int hro = int.Parse(args[2]);
+                        VI.Cout(Uid, "{0}迎来了客人{1}.", zd.Player(ut), zd.Hero(hro));
+                        A0P[ut].Coss = hro;
+                    }
+                    break;
+                case "E0OV":
+                    {
+                        ushort ut = ushort.Parse(args[1]);
+                        int hro = int.Parse(args[2]);
+                        int next = int.Parse(args[3]);
+                        VI.Cout(Uid, "{0}送走了客人{1}.", zd.Player(ut), zd.Hero(hro));
+                        A0P[ut].Coss = next;
                     }
                     break;
                 case "E0PB":
@@ -2693,6 +2706,7 @@ namespace PSD.ClientAo
         #region F
         private void HandleF0Message(string readLine)
         {
+            VI.TerminCinTunnel(Uid);
             lock (listOfThreads)
             {
                 foreach (Thread td in listOfThreads)
@@ -2704,7 +2718,6 @@ namespace PSD.ClientAo
                 listOfThreads.Add(Thread.CurrentThread);
             }
             // Reset Cin Count
-            VI.ResetCinTunnel(Uid);
             WI.Send(readLine, Uid, 0);
             string[] args = readLine.Split(',');
             switch (args[0])
@@ -2756,32 +2769,32 @@ namespace PSD.ClientAo
         {
             bool cinCalled = false;
             ushort[] invs = inv.Split(',').Select(p => ushort.Parse(p)).ToArray();
-            foreach (ushort ut in invs)
-                ad.ShowProgressBar(ut);
             if (string.IsNullOrEmpty(mai) || mai.StartsWith("0,"))
             {
                 //VI.Cout(Uid, "等待下列玩家行动:{0}...", zd.Player(invs));
-                int sina = int.Parse(mai.Substring("0,".Length));
+                int sina = string.IsNullOrEmpty(mai) ? 0 : int.Parse(mai.Substring("0,".Length));
                 if ((sina & 1) != 0 && invs.Contains(Uid))
                 {
                     if (!isReplay)
                     {
+                        // manually cancel the call
                         cinCalled = StartCinEtc();
-                        //string input = VI.Cin(uid, "您无法行动，输入任意键声明行动结束.");
-                        flashHelper.AFlashApplicationWindow(ad);
+                        ShowProgresses(invs);
                         string input = VI.CinCMD0(Uid);
-                        if (input != VI.CinSentinel)
-                            WI.Send("U2,0," + sina, Uid, 0);
+                        if (input == VI.CinSentinel)
+                            return false;
                         VI.CloseCinTunnel(Uid);
+                        WI.Send("U2,0," + sina, Uid, 0);
                     }
-                    return cinCalled;
                 }
                 else
                 {
+                    // automatically not call at all
+                    ShowProgresses(invs);
+                    VI.CloseCinTunnel(Uid);
                     WI.Send("U2,0," + sina, Uid, 0);
-                    VI.CloseObsoletedTunnel(Uid);
-                    return false;
                 }
+                return cinCalled;
             }
             //VI.Cout(Uid, "下列玩家与你均可行动:{0}.", zd.Player(invs));
             if (!isReplay)
@@ -2822,17 +2835,13 @@ namespace PSD.ClientAo
                             skTable.Add(name, rest);
                         }
                     }
-                    //VI.Cout(uid, opt.Substring(0, opt.Length - 1));
-                    //VI.Cout(uid, string.Join("&", optlst)); // TODO: display again to check problem.
-                    //if (optlst.Contains("TX43") || optlst.Contains("TX44") ||
-                    //      optlst.Contains("TX45") || optlst.Contains("TX46"))
-                    //    System.Windows.MessageBox.Show("Jingzi Called!");
-                    //string inputBase = VI.Cin(uid, "请做出您的选择，0为放弃行动:");
+                    //VI.Cout(uid, string.Join("&", optlst));
+                    ShowProgresses(invs);
                     string inputBase = VI.CinCMD(Uid, optlst, true);
-                    VI.CloseCinTunnel(Uid);
                     if (inputBase == VI.CinSentinel)
-                        decided = true;
-                    else if (inputBase == "0")
+                        return false;
+                    VI.CloseCinTunnel(Uid);
+                    if (inputBase == "0")
                     {
                         decided = true;
                         VI.Cout(Uid, "您决定放弃行动.");
@@ -2840,14 +2849,18 @@ namespace PSD.ClientAo
                     }
                     else if (skTable.ContainsKey(inputBase))
                     {
-                        if (skTable[inputBase] == "^")
+                        if (skTable[inputBase] == "^") // Lock case
                         {
                             decided = true;
                             WI.Send("U2," + inputBase, Uid, 0);
                         }
                         else
                         {
+                            cinCalled |= StartCinEtc();
                             string input = FormattedInputWithCancelFlag(skTable[inputBase]);
+                            VI.CloseCinTunnel(Uid);
+                            if (input == VI.CinSentinel)
+                                return false;
                             if (!input.StartsWith("/"))
                             {
                                 decided = true;
@@ -2869,10 +2882,11 @@ namespace PSD.ClientAo
             VI.Cout(Uid, "已尝试{0}{1}，请继续：", action, zd.SKTXCZ(prev));
             if (!isReplay)
             {
-                flashHelper.AFlashApplicationWindow(ad);
-                ad.ShowProgressBar(Uid);
                 cinCalled = StartCinEtc();
+                ad.ShowProgressBar(Uid);
                 string input = FormattedInputWithCancelFlag(mai);
+                if (input == VI.CinSentinel)
+                    return false;
                 VI.CloseCinTunnel(Uid);
                 if (!input.StartsWith("/") && input != "")
                     WI.Send("U4," + prev + "," + input, Uid, 0);
@@ -2883,7 +2897,7 @@ namespace PSD.ClientAo
         }
         private bool HandleU5Message(string involved, string mai, string inType)
         {
-            VI.CloseObsoletedTunnel(Uid);
+            VI.CloseCinTunnel(Uid);
             ushort owner = ushort.Parse(involved);
             string action = zd.AnalysisAction(mai, inType);
             string sktxcz = zd.SKTXCZ(mai, true, inType);
@@ -2906,9 +2920,11 @@ namespace PSD.ClientAo
             if (!isReplay)
             {
                 flashHelper.AFlashApplicationWindow(ad);
-                ad.ShowProgressBar(Uid);
                 cinCalled = StartCinEtc();
+                ad.ShowProgressBar(Uid);
                 string input = FormattedInputWithCancelFlag(mai);
+                if (input == VI.CinSentinel)
+                    return false;
                 VI.CloseCinTunnel(Uid);
                 WI.SendDirect("U8," + prev + "," + input, Uid);
             }
@@ -2918,8 +2934,8 @@ namespace PSD.ClientAo
         {
             ushort owner = ushort.Parse(inv);
             VI.Cout(Uid, "等待{0}响应中:{1}...", zd.Player(owner), zd.SKTXCZ(prev));
+            VI.CloseCinTunnel(Uid);
             ad.ShowProgressBar(owner);
-            VI.CloseObsoletedTunnel(Uid);
             return false;
         }
         private bool HandleUAMessage(string inv, string mai, string inType)
@@ -2934,39 +2950,36 @@ namespace PSD.ClientAo
         #region V
         public bool HandleV0Message(string cmdrst)
         {
-            StartCinEtc();
             if (!isReplay)
             {
+                StartCinEtc();
                 string[] blocks = cmdrst.Split(',');
                 int invCount = int.Parse(blocks[0]);
                 for (int i = 0; i < invCount; ++i)
                     ad.ShowProgressBar(ushort.Parse(blocks[i + 1]));
                 string input = FormattedInputWithCancelFlag(string.Join(
                     ",", Util.TakeRange(blocks, 1 + invCount, blocks.Length)));
+                if (input == VI.CinSentinel)
+                    return false; 
                 VI.CloseCinTunnel(Uid);
                 WI.Send("V1," + input, Uid, 0);
-            }
-            return true;
+                return true;
+            } else
+                return false;
         }
         public bool HandleV2Message(string cmdrst)
         {
-            StartCinEtc();
             if (!isReplay)
             {
+                StartCinEtc();
                 int idx = cmdrst.IndexOf(',');
                 ushort major = ushort.Parse(cmdrst.Substring(0, idx));
                 string input = FormattedInputWithCancelFlag(cmdrst.Substring(idx + 1));
-                if (input != VI.CinSentinel)
-                {
-                    VI.CloseCinTunnel(Uid);
-                    WI.Send("V4," + input, Uid, 0);
-                    return true;
-                }
-                else
-                {
-                    VI.CloseCinTunnel(Uid);
+                if (input == VI.CinSentinel)
                     return false;
-                }
+                VI.CloseCinTunnel(Uid);
+                WI.Send("V4," + input, Uid, 0);
+                return true;
             }
             else return false;
         }
@@ -2976,8 +2989,8 @@ namespace PSD.ClientAo
             List<ushort> invs = Util.TakeRange(splits, 0, splits.Length)
                 .Select(p => ushort.Parse(p)).ToList();
             VI.Cout(Uid, "等待{0}响应.", zd.Player(invs));
-            foreach (ushort ut in invs)
-                ad.ShowProgressBar(ut);
+            VI.CloseCinTunnel(Uid);
+            ShowProgresses(invs);
             return false;
         }
         public bool HandleV5Message(string cmdrst)
@@ -4063,6 +4076,10 @@ namespace PSD.ClientAo
                             List<string> lugs = Util.TakeRange(blocks, nextIdx,
                                 nextIdx + lugsz).ToList();
                             nextIdx += lugsz;
+                            ushort guard = ushort.Parse(blocks[nextIdx]);
+                            nextIdx += 1;
+                            ushort coss = ushort.Parse(blocks[nextIdx]);
+                            nextIdx += 1;
                             ushort[] pets = Util.TakeRange(blocks, nextIdx,
                                 nextIdx + 5).Select(p => ushort.Parse(p)).ToArray();
                             nextIdx += 5;
@@ -4112,6 +4129,7 @@ namespace PSD.ClientAo
                                 ap.Weapon = wp; ap.Armor = am; ap.Trove = tr; ap.ExEquip = exq;
                                 if (lugs.Count > 0)
                                     ap.InsIntoLuggage(ap.Trove, lugs);
+                                ap.Guardian = guard; ap.Coss = coss;
                                 for (int i = 0; i < pets.Length; ++i)
                                     ap.SetPet(i, pets[i]);
                                 foreach (ushort ut in excards)
@@ -4548,6 +4566,12 @@ namespace PSD.ClientAo
         private static bool IsUtTeammate(ushort ut, ushort uu)
         {
             return ut % 2 == uu % 2 && ut > 0 && ut < 1000 && uu > 0 && uu < 1000;
+        }
+
+        private void ShowProgresses(IEnumerable<ushort> invs)
+        {
+            foreach (ushort inv in invs)
+                ad.ShowProgressBar(inv);
         }
 
         #endregion Utils

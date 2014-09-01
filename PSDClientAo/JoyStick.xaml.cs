@@ -117,6 +117,16 @@ namespace PSD.ClientAo
             if (input != null)
                 input(CEE.ExtSkill1.Code + "(" + CEE.ExtHolder1 + ")");
         }
+        private void ExtSkill2ButtonClick(object sender, RoutedEventArgs e)
+        {
+            if (input != null)
+                input(CEE.ExtSkill2.Code + "(" + CEE.ExtHolder2 + ")");
+        }
+        private void ExtSkill3ButtonClick(object sender, RoutedEventArgs e)
+        {
+            if (input != null)
+                input(CEE.ExtSkill3.Code + "(" + CEE.ExtHolder3 + ")");
+        }
 
         private void SkOptChecked(object sender, RoutedEventArgs e)
         {

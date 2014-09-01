@@ -742,7 +742,7 @@ namespace PSD.PSDGamepkg.JNS
             XI.RaiseGMessage("G0OY,1," + player.Uid);
             XI.RaiseGMessage("G0OS," + player.Uid + ",0,JN30301,JN30302,JN30303");
             XI.RaiseGMessage("G0IY,1," + player.Uid + ",10304");
-            XI.RaiseGMessage("G0IS," + player.Uid + ",0,JN30401,JN30402,JN30403");
+            XI.RaiseGMessage("G0IS," + player.Uid + ",2,JN30401,JN30402,JN30403");
         }
         public bool JN30302Valid(Player player, int type, string fuse)
         {
@@ -835,7 +835,7 @@ namespace PSD.PSDGamepkg.JNS
             XI.RaiseGMessage("G0OY,1," + player.Uid);
             XI.RaiseGMessage("G0OS," + player.Uid + ",0,JN30401,JN30402,JN30403");
             XI.RaiseGMessage("G0IY,1," + player.Uid + ",10303");
-            XI.RaiseGMessage("G0IS," + player.Uid + ",0,JN30301,JN30302,JN30303");
+            XI.RaiseGMessage("G0IS," + player.Uid + ",2,JN30301,JN30302,JN30303");
         }
         public bool JN30402Valid(Player player, int type, string fuse)
         {
@@ -1161,13 +1161,13 @@ namespace PSD.PSDGamepkg.JNS
         {
             if (player.RAMUshort == 0)
             {
-                XI.RaiseGMessage("G0IA," + player.Uid + ",1,3");
                 player.RAMUshort = 1;
+                XI.RaiseGMessage("G0IA," + player.Uid + ",1,3");
             }
             else if (player.RAMUshort == 1)
             {
-                XI.RaiseGMessage("G0OA," + player.Uid + ",0,3");
                 player.RAMUshort = 0;
+                XI.RaiseGMessage("G0OA," + player.Uid + ",1,3");
             }
         }
         public bool JN40202Valid(Player player, int type, string fuse)
@@ -1623,36 +1623,16 @@ namespace PSD.PSDGamepkg.JNS
                     XI.RaiseGMessage(title + "," + pair.Key + ",0," + pair.Value);
                 //XI.InnerGMessage(fuse, 81);
             }
-            else if (type == 2)
+            else if (type == 2 || type == 3)
             {
+                string title = (type == 2) ? "G0IA" : "G0OA";
                 foreach (Player py in XI.Board.Garden.Values)
                     if (py.IsAlive && py.Team == player.Team && !py.PetDisabled)
                     {
-                        int count = py.Pets.Where(p => p != 0).Count();
+                        int count = py.GetActionPetCount(XI.Board);
                         if (count > 0)
-                            XI.RaiseGMessage("G0IA," + py.Uid + ",0," + count);
+                            XI.RaiseGMessage(title + py.Uid + ",0," + count);
                     }
-            }
-            else if (type == 3)
-            {
-                foreach (Player py in XI.Board.Garden.Values)
-                    if (py.IsAlive && py.Team == player.Team && !py.PetDisabled)
-                    {
-                        int count = py.Pets.Where(p => p != 0).Count();
-                        if (count > 0)
-                            XI.RaiseGMessage("G0OA," + py.Uid + ",0," + count);
-                    }
-            }
-            else if (type == 4)
-            {
-                foreach (Player py in XI.Board.Garden.Values)
-                    if (py.IsAlive && py.Team == player.Team && !py.PetDisabled)
-                    {
-                        int count = py.Pets.Where(p => p != 0).Count();
-                        if (count > 0)
-                            XI.RaiseGMessage("G0OA," + py.Uid + ",0," + count);
-                    }
-                //XI.InnerGMessage(fuse, 91);
             }
         }
         public bool JN50301Valid(Player player, int type, string fuse)
@@ -1670,17 +1650,8 @@ namespace PSD.PSDGamepkg.JNS
                 return false;
             }
             else if (type == 2 || type == 3)
-                return IsMathISOS("JN50301", player, fuse);
-            else if (type == 4)
-            { // G0ZW,[A]
-                for (int i = 1; i < blocks.Length; ++i)
-                {
-                    ushort who = ushort.Parse(blocks[i]);
-                    if (who == player.Uid)
-                        return true;
-                }
-                return false;
-            }
+                return IsMathISOS("JN50301", player, fuse) && XI.Board.Garden.Values.
+                    Any(p => p.IsAlive && p.Team == player.Team && p.GetActionPetCount(XI.Board) > 0);
             else return false;
         }
         public void JN50302Action(Player player, int type, string fuse, string argst)
@@ -1923,7 +1894,7 @@ namespace PSD.PSDGamepkg.JNS
             if (type == 0)
             {
                 Player oy = XI.Board.Garden[owner];
-                if (!oy.IsAlive)
+                if (!oy.IsAlive || owner == player.Uid)
                     return false;
                 // G1DI,A,Ty=0,n,m,x
                 string[] blocks = fuse.Split(',');
@@ -2580,14 +2551,14 @@ namespace PSD.PSDGamepkg.JNS
         #region XJ505 - JiangShili
         public bool JN60501Valid(Player player, int type, string fuse)
         {
+            bool self = (XI.Board.Rounder.Uid == player.Uid);
             if (type == 0)
-                return XI.Board.IsAttendWar(player) && XI.Board.Rounder.Uid != player.Uid;
+                return XI.Board.IsAttendWar(player) && !self && player.HP != player.HPb;
             else if (type == 1)
             {
                 bool b1 = XI.Board.RoundIN[0] == 'R' && XI.Board.RoundIN.Substring(2, 2) == "ZD";
                 bool b2 = XI.Board.IsAttendWar(player);
-                bool b3 = XI.Board.Rounder.Uid != player.Uid;
-                if (b1 && b2 && b3)
+                if (b1 && b2 && !self)
                 {
                     List<Artiad.Cure> cures = Artiad.Cure.Parse(fuse);
                     foreach (Artiad.Cure cure in cures)
@@ -2601,8 +2572,7 @@ namespace PSD.PSDGamepkg.JNS
             {
                 bool b1 = XI.Board.RoundIN[0] == 'R' && XI.Board.RoundIN.Substring(2, 2) == "ZD";
                 bool b2 = XI.Board.IsAttendWar(player);
-                bool b3 = XI.Board.Rounder.Uid != player.Uid;
-                if (b1 && b2 && b3)
+                if (b1 && b2 && !self)
                 {
                     List<Artiad.Harm> harms = Artiad.Harm.Parse(fuse);
                     foreach (Artiad.Harm harm in harms)

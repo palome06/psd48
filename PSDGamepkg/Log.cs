@@ -16,7 +16,7 @@ namespace PSD.PSDGamepkg
         public void Start()
         {
             DateTime dt = System.DateTime.Now;
-                        bool exists = Directory.Exists("./log");
+            bool exists = Directory.Exists("./log");
             if (!exists)
                 Directory.CreateDirectory("./log");
             fileName = string.Format("./log/psd{0:D4}{1:D2}{2:D2}-{3:D2}{4:D2}{5:D2}.log",

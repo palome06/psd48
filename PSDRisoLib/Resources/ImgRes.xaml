@@ -86,6 +86,7 @@
     <Image x:Key="wersnapTPT3" Source="PetsSnap/TPT3.png" ToolTip="TR净衣咒"/>
 
     <ImageBrush x:Key="heroHead000Brush" ImageSource="Heros/00000.png"/>
+    <ImageBrush x:Key="heroHead001Brush" ImageSource="Heros/17007.png"/>
     <Image x:Key="heroHead000" Source="Heros/00000.png"/>
     <Image x:Key="heroHead10101" Source="Heros/10101.png"/>
     <Image x:Key="heroHead10102" Source="Heros/10102.png"/>
@@ -141,7 +142,7 @@
     <Image x:Key="heroHead17004" Source="Heros/17004.png"/>
     <Image x:Key="heroHead17005" Source="Heros/17005.png"/>
     <Image x:Key="heroHead17006" Source="Heros/17006.png"/>
-	<Image x:Key="heroHead17007" Source="Heros/17007.png"/>
+    <Image x:Key="heroHead17007" Source="Heros/17007.png"/>
     <Image x:Key="heroHead17008" Source="Heros/17008.png"/>
     <Image x:Key="heroHead17009" Source="Heros/17009.png"/>
     <Image x:Key="heroHead17010" Source="Heros/17010.png"/>
@@ -154,11 +155,11 @@
     <Image x:Key="heroHead17017" Source="Heros/17017.png"/>
     <Image x:Key="heroHead17018" Source="Heros/17018.png"/>
     <Image x:Key="heroHead17019" Source="Heros/17019.png"/>
-	<Image x:Key="heroHead17020" Source="Heros/17020.png"/>
-	<Image x:Key="heroHead17021" Source="Heros/17021.png"/>
+    <Image x:Key="heroHead17020" Source="Heros/17020.png"/>
+    <Image x:Key="heroHead17021" Source="Heros/17021.png"/>
     <Image x:Key="heroHead17022" Source="Heros/17022.png"/>
     <Image x:Key="heroHead17024" Source="Heros/17024.png"/>
-	<Image x:Key="heroHead17027" Source="Heros/17027.png"/>
+    <Image x:Key="heroHead17027" Source="Heros/17027.png"/>
 
     <Image x:Key="heroHead19001" Source="Heros/19001.png"/>
     <Image x:Key="heroHead19002" Source="Heros/19002.png"/>
@@ -171,7 +172,9 @@
     <Image x:Key="heroHead19011" Source="Heros/19011.png"/>
     <Image x:Key="heroHead19012" Source="Heros/19012.png"/>
     <Image x:Key="heroHead19013" Source="Heros/19013.png"/>
+    <Image x:Key="heroHead19014" Source="Heros/19014.png"/>
     <Image x:Key="heroHead19015" Source="Heros/19015.png"/>
+    <Image x:Key="heroHead19016" Source="Heros/19016.png"/>
     <Image x:Key="heroHead19017" Source="Heros/19017.png"/>
     <Image x:Key="heroHead19018" Source="Heros/19018.png"/>
     <Image x:Key="heroHead19019" Source="Heros/19019.png"/>
@@ -231,11 +234,11 @@
     <ImageBrush x:Key="nameBarTR016" ImageSource="NameBar/NameTR016.png"/>
     <ImageBrush x:Key="nameBarTR017" ImageSource="NameBar/NameTR017.png"/>
     <ImageBrush x:Key="nameBarTR018" ImageSource="NameBar/NameTR018.png"/>
-	<ImageBrush x:Key="nameBarTR020" ImageSource="NameBar/NameTR020.png"/>
-	<ImageBrush x:Key="nameBarTR021" ImageSource="NameBar/NameTR021.png"/>
+    <ImageBrush x:Key="nameBarTR020" ImageSource="NameBar/NameTR020.png"/>
+    <ImageBrush x:Key="nameBarTR021" ImageSource="NameBar/NameTR021.png"/>
     <ImageBrush x:Key="nameBarTR022" ImageSource="NameBar/NameTR022.png"/>
     <ImageBrush x:Key="nameBarTR024" ImageSource="NameBar/NameTR024.png"/>
-	<ImageBrush x:Key="nameBarTR027" ImageSource="NameBar/NameTR027.png"/>
+    <ImageBrush x:Key="nameBarTR027" ImageSource="NameBar/NameTR027.png"/>
 
     <ImageBrush x:Key="nameBarHL001" ImageSource="NameBar/NameHL001.png"/>
     <ImageBrush x:Key="nameBarHL002" ImageSource="NameBar/NameHL002.png"/>
@@ -248,7 +251,9 @@
     <ImageBrush x:Key="nameBarHL011" ImageSource="NameBar/NameHL011.png"/>
     <ImageBrush x:Key="nameBarHL012" ImageSource="NameBar/NameHL012.png"/>
     <ImageBrush x:Key="nameBarHL013" ImageSource="NameBar/NameHL013.png"/>
+    <ImageBrush x:Key="nameBarHL014" ImageSource="NameBar/NameHL014.png"/>
     <ImageBrush x:Key="nameBarHL015" ImageSource="NameBar/NameHL015.png"/>
+    <ImageBrush x:Key="nameBarHL016" ImageSource="NameBar/NameHL016.png"/>
     <ImageBrush x:Key="nameBarHL017" ImageSource="NameBar/NameHL017.png"/>
     <ImageBrush x:Key="nameBarHL018" ImageSource="NameBar/NameHL018.png"/>
     <ImageBrush x:Key="nameBarHL019" ImageSource="NameBar/NameHL019.png"/>
@@ -307,6 +312,7 @@
     <BitmapImage x:Key="snapTRHL002" UriSource="Token/TRH02.png"/>
     <BitmapImage x:Key="snapTAHL003" UriSource="Token/TAH0301.png"/>
     <BitmapImage x:Key="snapTAHL006" UriSource="Token/TAH0601.png"/>
+    <BitmapImage x:Key="snapTAHL014" UriSource="Token/TAH1401.png"/>
     <BitmapImage x:Key="snapTKHL019_1" UriSource="Token/TKH1901.png"/>
     <BitmapImage x:Key="snapTKHL019_2" UriSource="Token/TKH1902.png"/>
     <BitmapImage x:Key="snapTKHL019_3" UriSource="Token/TKH1903.png"/>
@@ -318,15 +324,13 @@
     <BitmapImage x:Key="snapTKTR019_3" UriSource="Token/TKT1903.png"/>
     <BitmapImage x:Key="snapTKTR019_4" UriSource="Token/TKT1904.png"/>
     <BitmapImage x:Key="snapTKTR019_5" UriSource="Token/TKT1905.png"/>
-    <BitmapImage x:Key="snapTKTR019_6" UriSource="Token/TKT1906.png"/>
-	<BitmapImage x:Key="snapTKTR019_7" UriSource="Token/TKT1907.png"/>
 
     <Image x:Key="exspCard1" Source="Card/ExSp/EP001.png"/>
     <Image x:Key="exspCard2" Source="Card/ExSp/EP002.png"/>
     <Image x:Key="exspCard3" Source="Card/ExSp/EP003.png"/>
     <Image x:Key="exspCard4" Source="Card/ExSp/EP004.png"/>
     <Image x:Key="exspCard5" Source="Card/ExSp/EP005.png"/>
-	<Image x:Key="exspCard6" Source="Card/ExSp/EP006.png"/>
+    <Image x:Key="exspCard6" Source="Card/ExSp/EP006.png"/>
     <Image x:Key="exspCard7" Source="Card/ExSp/EP007.png"/>
     <Image x:Key="exspCard8" Source="Card/ExSp/EP008.png"/>
     <Image x:Key="exspCard9" Source="Card/ExSp/EP009.png"/>
@@ -335,6 +339,14 @@
     <Image x:Key="exspCard12" Source="Card/ExSp/EP012.png"/>
     <Image x:Key="exspCard13" Source="Card/ExSp/EP013.png"/>
     <Image x:Key="exspCard14" Source="Card/ExSp/EP014.png"/>
+    <Image x:Key="exspCard15" Source="Card/ExSp/EP015.png"/>
+    <Image x:Key="exspCard16" Source="Card/ExSp/EP016.png"/>
+    <Image x:Key="exspCard17" Source="Card/ExSp/EP017.png"/>
+    <Image x:Key="exspCard18" Source="Card/ExSp/EP018.png"/>
+    <Image x:Key="exspCard19" Source="Card/ExSp/EP019.png"/>
+    <Image x:Key="exspCard20" Source="Card/ExSp/EP020.png"/>
+    <Image x:Key="exspCard21" Source="Card/ExSp/EP021.png"/>
+    <Image x:Key="exspCard22" Source="Card/ExSp/EP022.png"/>
 
     <BitmapImage x:Key="eveCard000src" UriSource="Card/Eve00.png"/>
     <Image x:Key="eveCard000" Source="Card/Eve00.png"/>
@@ -387,31 +399,31 @@
     <Image x:Key="monCardGT03" Source="Card/NMB/GT03.png"/>
     <Image x:Key="monCardGT04" Source="Card/NMB/GT04.png"/>    
     <Image x:Key="monCardNC101" Source="Card/NMB/NC101.png"/>
-	<Image x:Key="monCardNC102" Source="Card/NMB/NC102.png"/>
-	<Image x:Key="monCardNC103" Source="Card/NMB/NC103.png"/>
-	<Image x:Key="monCardNC104" Source="Card/NMB/NC104.png"/>
-	<Image x:Key="monCardNC105" Source="Card/NMB/NC105.png"/>
-	<Image x:Key="monCardNC106" Source="Card/NMB/NC106.png"/>
-	<Image x:Key="monCardNC107" Source="Card/NMB/NC107.png"/>
-	<Image x:Key="monCardNC201" Source="Card/NMB/NC201.png"/>
-	<Image x:Key="monCardNC202" Source="Card/NMB/NC202.png"/>
-	<Image x:Key="monCardNC203" Source="Card/NMB/NC203.png"/>
-	<Image x:Key="monCardNC206" Source="Card/NMB/NC206.png"/>
-	<Image x:Key="monCardNC207" Source="Card/NMB/NC207.png"/>
-	<Image x:Key="monCardNC302" Source="Card/NMB/NC302.png"/>
-	<Image x:Key="monCardNC305" Source="Card/NMB/NC305.png"/>
-	<Image x:Key="monCardNC306" Source="Card/NMB/NC306.png"/>
-	<Image x:Key="monCardN3W01" Source="Card/NMB/N3W01.png"/>
-	<Image x:Key="monCardN3W02" Source="Card/NMB/N3W02.png"/>
-	<Image x:Key="monCardN3W03" Source="Card/NMB/N3W03.png"/>
-	<Image x:Key="monCardN3W04" Source="Card/NMB/N3W04.png"/>
-	<Image x:Key="monCardNC401" Source="Card/NMB/NC401.png"/>
-	<Image x:Key="monCardNC402" Source="Card/NMB/NC402.png"/>
-	<Image x:Key="monCardNC403" Source="Card/NMB/NC403.png"/>
-	<Image x:Key="monCardNC404" Source="Card/NMB/NC404.png"/>
-	<Image x:Key="monCardNC405" Source="Card/NMB/NC405.png"/>
-	<Image x:Key="monCardNC503" Source="Card/NMB/NC503.png"/>
-	<Image x:Key="monCardNC504" Source="Card/NMB/NC504.png"/>
+    <Image x:Key="monCardNC102" Source="Card/NMB/NC102.png"/>
+    <Image x:Key="monCardNC103" Source="Card/NMB/NC103.png"/>
+    <Image x:Key="monCardNC104" Source="Card/NMB/NC104.png"/>
+    <Image x:Key="monCardNC105" Source="Card/NMB/NC105.png"/>
+    <Image x:Key="monCardNC106" Source="Card/NMB/NC106.png"/>
+    <Image x:Key="monCardNC107" Source="Card/NMB/NC107.png"/>
+    <Image x:Key="monCardNC201" Source="Card/NMB/NC201.png"/>
+    <Image x:Key="monCardNC202" Source="Card/NMB/NC202.png"/>
+    <Image x:Key="monCardNC203" Source="Card/NMB/NC203.png"/>
+    <Image x:Key="monCardNC206" Source="Card/NMB/NC206.png"/>
+    <Image x:Key="monCardNC207" Source="Card/NMB/NC207.png"/>
+    <Image x:Key="monCardNC302" Source="Card/NMB/NC302.png"/>
+    <Image x:Key="monCardNC305" Source="Card/NMB/NC305.png"/>
+    <Image x:Key="monCardNC306" Source="Card/NMB/NC306.png"/>
+    <Image x:Key="monCardN3W01" Source="Card/NMB/N3W01.png"/>
+    <Image x:Key="monCardN3W02" Source="Card/NMB/N3W02.png"/>
+    <Image x:Key="monCardN3W03" Source="Card/NMB/N3W03.png"/>
+    <Image x:Key="monCardN3W04" Source="Card/NMB/N3W04.png"/>
+    <Image x:Key="monCardNC401" Source="Card/NMB/NC401.png"/>
+    <Image x:Key="monCardNC402" Source="Card/NMB/NC402.png"/>
+    <Image x:Key="monCardNC403" Source="Card/NMB/NC403.png"/>
+    <Image x:Key="monCardNC404" Source="Card/NMB/NC404.png"/>
+    <Image x:Key="monCardNC405" Source="Card/NMB/NC405.png"/>
+    <Image x:Key="monCardNC503" Source="Card/NMB/NC503.png"/>
+    <Image x:Key="monCardNC504" Source="Card/NMB/NC504.png"/>
 
     <Image x:Key="monCardGST1" Source="Card/NMB/GST1.png"/>
     <Image x:Key="monCardGST2" Source="Card/NMB/GST2.png"/>
@@ -567,7 +579,7 @@
     <Image x:Key="hroCardTR004" Source="Card/Heros/TR004.png"/>
     <Image x:Key="hroCardTR005" Source="Card/Heros/TR005.png"/>
     <Image x:Key="hroCardTR006" Source="Card/Heros/TR006.png"/>
-	<Image x:Key="hroCardTR007" Source="Card/Heros/TR007.png"/>
+    <Image x:Key="hroCardTR007" Source="Card/Heros/TR007.png"/>
     <Image x:Key="hroCardTR008" Source="Card/Heros/TR008.png"/>
     <Image x:Key="hroCardTR009" Source="Card/Heros/TR009.png"/>
     <Image x:Key="hroCardTR010" Source="Card/Heros/TR010.png"/>
@@ -580,11 +592,11 @@
     <Image x:Key="hroCardTR017" Source="Card/Heros/TR017.png"/>
     <Image x:Key="hroCardTR018" Source="Card/Heros/TR018.png"/>
     <Image x:Key="hroCardTR019" Source="Card/Heros/TR019.png"/>
-	<Image x:Key="hroCardTR020" Source="Card/Heros/TR020.png"/>
-	<Image x:Key="hroCardTR021" Source="Card/Heros/TR021.png"/>
+    <Image x:Key="hroCardTR020" Source="Card/Heros/TR020.png"/>
+    <Image x:Key="hroCardTR021" Source="Card/Heros/TR021.png"/>
     <Image x:Key="hroCardTR022" Source="Card/Heros/TR022.png"/>
     <Image x:Key="hroCardTR024" Source="Card/Heros/TR024.png"/>
-	<Image x:Key="hroCardTR027" Source="Card/Heros/TR027.png"/>
+    <Image x:Key="hroCardTR027" Source="Card/Heros/TR027.png"/>
 
     <Image x:Key="hroCardHL001" Source="Card/Heros/HL001.png"/>
     <Image x:Key="hroCardHL002" Source="Card/Heros/HL002.png"/>
@@ -597,7 +609,9 @@
     <Image x:Key="hroCardHL011" Source="Card/Heros/HL011.png"/>
     <Image x:Key="hroCardHL012" Source="Card/Heros/HL012.png"/>
     <Image x:Key="hroCardHL013" Source="Card/Heros/HL013.png"/>
+    <Image x:Key="hroCardHL014" Source="Card/Heros/HL014.png"/>
     <Image x:Key="hroCardHL015" Source="Card/Heros/HL015.png"/>
+    <Image x:Key="hroCardHL016" Source="Card/Heros/HL016.png"/>
     <Image x:Key="hroCardHL017" Source="Card/Heros/HL017.png"/>
     <Image x:Key="hroCardHL018" Source="Card/Heros/HL018.png"/>
     <Image x:Key="hroCardHL019" Source="Card/Heros/HL019.png"/>
@@ -635,14 +649,22 @@
     <BitmapImage x:Key="cananCountdown48paint" UriSource="Logo/CananCountdown48.png"/>
     <BitmapImage x:Key="cananCountdown12paint" UriSource="Logo/CananCountdown12.png"/>
 
-    <BitmapImage x:Key="loadGuard000" UriSource="Card/Guardian/L0.png"/>
-    <BitmapImage x:Key="loadGuard1" UriSource="Card/Guardian/L1.png"/>
-    <BitmapImage x:Key="loadGuard2" UriSource="Card/Guardian/L2.png"/>
-    <BitmapImage x:Key="loadGuard3" UriSource="Card/Guardian/L3.png"/>
-    <BitmapImage x:Key="loadGuard4" UriSource="Card/Guardian/L4.png"/>
-    <BitmapImage x:Key="loadGuard5" UriSource="Card/Guardian/L5.png"/>
-    <BitmapImage x:Key="loadGuard6" UriSource="Card/Guardian/L6.png"/>
-    <BitmapImage x:Key="loadGuard7" UriSource="Card/Guardian/L7.png"/>
-    <BitmapImage x:Key="loadGuard8" UriSource="Card/Guardian/L8.png"/>
-    <BitmapImage x:Key="loadGuard9" UriSource="Card/Guardian/L9.png"/>
+    <ImageBrush x:Key="loadGuard000Brush" ImageSource="Guard/L0.png"/>
+    <ImageBrush x:Key="loadGuard1" ImageSource="Guard/L1.png"/>
+    <ImageBrush x:Key="loadGuard2" ImageSource="Guard/L2.png"/>
+    <ImageBrush x:Key="loadGuard3" ImageSource="Guard/L3.png"/>
+    <ImageBrush x:Key="loadGuard4" ImageSource="Guard/L4.png"/>
+    <ImageBrush x:Key="loadGuard5" ImageSource="Guard/L5.png"/>
+    <ImageBrush x:Key="loadGuard6" ImageSource="Guard/L6.png"/>
+    <ImageBrush x:Key="loadGuard7" ImageSource="Guard/L7.png"/>
+    <ImageBrush x:Key="loadGuard8" ImageSource="Guard/L8.png"/>
+    <ImageBrush x:Key="loadGuard9" ImageSource="Guard/L9.png"/>
+    <ImageBrush x:Key="loadGuard10" ImageSource="Guard/L10.png"/>
+    <ImageBrush x:Key="loadGuard11" ImageSource="Guard/L11.png"/>
+    <ImageBrush x:Key="loadGuard12" ImageSource="Guard/L12.png"/>
+    <ImageBrush x:Key="loadGuard13" ImageSource="Guard/L13.png"/>
+    <ImageBrush x:Key="loadGuard14" ImageSource="Guard/L14.png"/>
+    <ImageBrush x:Key="loadGuard15" ImageSource="Guard/L15.png"/>
+    <ImageBrush x:Key="loadGuard16" ImageSource="Guard/L16.png"/>
+    <ImageBrush x:Key="loadGuard17" ImageSource="Guard/L17.png"/>
 </ResourceDictionary>

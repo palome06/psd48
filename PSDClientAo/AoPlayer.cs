@@ -193,7 +193,7 @@ namespace PSD.ClientAo
                         {
                             Base.Skill sk = Tuple.SL.EncodeSkill(skstr);
                             if (sk.IsBK)
-                                pb.AD.yfJoy.CEE.ResetBKSKill(sk.Code);
+                                pb.AD.yfJoy.CEE.LoseBKSkill(sk.Code);
                         }
                         if (Rank == pb.AD.SelfUid)
                             pb.AD.yfJoy.CEE.ResetSkill();
@@ -652,7 +652,15 @@ namespace PSD.ClientAo
                         {
                             pb.folderRect.Visibility = System.Windows.Visibility.Visible;
                             Base.Card.Hero hro = Tuple.HL.InstanceHero(mHero);
-                            string alias = (hro != null) ? (hro.FolderAlias ?? "盖牌") : "盖牌";
+                            string alias = "盖牌";
+                            if (hro != null)
+                            {
+                                if (hro.FolderAlias != null)
+                                    alias = hro.FolderAlias;
+                                Base.Card.Hero guest = Tuple.HL.InstanceHero(Coss);
+                                if (guest != null && guest.FolderAlias != null)
+                                    alias = guest.FolderAlias;
+                            }
                             pb.folderRText.Text = alias + " (" + mFolderCount + ")";
                         }
                         else
@@ -674,7 +682,15 @@ namespace PSD.ClientAo
                 {
                     pb.folderBar.Visibility = System.Windows.Visibility.Visible;
                     Base.Card.Hero hro = Tuple.HL.InstanceHero(mHero);
-                    string alias = (hro != null) ? (hro.FolderAlias ?? "盖牌") : "盖牌";
+                    string alias = "盖牌";
+                    if (hro != null)
+                    {
+                        if (hro.FolderAlias != null)
+                            alias = hro.FolderAlias;
+                        Base.Card.Hero guest = Tuple.HL.InstanceHero(Coss);
+                        if (guest != null && guest.FolderAlias != null)
+                            alias = guest.FolderAlias;
+                    }
                     pb.folderBText.Text = alias + " (" + mMyFolder.Count + ")";
                     if (pb.AD != null && pb.AD.IsTVDictContains(Rank + "MFD"))
                         pb.AD.yhTV.Show(GetMyFolderMatList(), Rank + "MFD");
@@ -690,7 +706,15 @@ namespace PSD.ClientAo
                 if (mMyFolder.Count > 0)
                 {
                     Base.Card.Hero hro = Tuple.HL.InstanceHero(mHero);
-                    string alias = (hro != null) ? (hro.FolderAlias ?? "盖牌") : "盖牌";
+                    string alias = "盖牌";
+                    if (hro != null)
+                    {
+                        if (hro.FolderAlias != null)
+                            alias = hro.FolderAlias;
+                        Base.Card.Hero guest = Tuple.HL.InstanceHero(Coss);
+                        if (guest != null && guest.FolderAlias != null)
+                            alias = guest.FolderAlias;
+                    }
                     pb.folderBText.Text = alias + " (" + mMyFolder.Count + ")";
                     if (pb.AD != null && pb.AD.IsTVDictContains(Rank + "MFD"))
                         pb.AD.yhTV.Show(GetMyFolderMatList(), Rank + "MFD");
@@ -729,21 +753,54 @@ namespace PSD.ClientAo
                 {
                     pb.Dispatcher.BeginInvoke((Action)(() =>
                     {
-                        ImageSource img = pb.TryFindResource("loadGuard" + value) as ImageSource;
+                        ImageBrush img = pb.TryFindResource("loadGuard" + value) as ImageBrush;
                         if (img == null)
-                            img = pb.TryFindResource("loadGuard000") as ImageSource;
-                        pb.guardSlice.Visibility = System.Windows.Visibility.Visible;
-                        pb.guardSlice.Source = img;
-                        pb.guardSlice.ToolTip = Tips.IchiDisplay.GetExspTip(Tuple, "L" + value);
+                            img = pb.TryFindResource("loadGuard000Brush") as ImageBrush;
+                        pb.guardTing.Visibility = System.Windows.Visibility.Visible;
+                        pb.guardTing.Fill = img;
+                        pb.guardTing.ToolTip = Tips.IchiDisplay.GetExspTip(Tuple, "L" + value);
                     }));
                 }
             }
             else
                 pb.Dispatcher.BeginInvoke((Action)(() =>
                 {
-                    pb.guardSlice.Visibility = System.Windows.Visibility.Collapsed;
+                    pb.guardTing.Visibility = System.Windows.Visibility.Collapsed;
                 }));
             mGuardian = value;
+        }
+
+        private int mCoss;
+        public int Coss
+        {
+            set { if (mCoss != value) { OnCossChanged(value); } }
+            get { return mCoss; }
+        }
+        [STAThread]
+        private void OnCossChanged(int value)
+        {
+            if (value != 0)
+            {
+                Base.Card.Hero hero = Tuple.HL.InstanceHero(value);
+                if (hero != null)
+                {
+                    pb.Dispatcher.BeginInvoke((Action)(() =>
+                    {
+                        Image img = pb.TryFindResource("heroHead" + hero.Avatar) as Image;
+                        if (img == null)
+                            img = pb.TryFindResource("heroHead000") as Image;
+                        pb.cossTing.Visibility = System.Windows.Visibility.Visible;
+                        pb.cossTing.Fill = new ImageBrush(img.Source);
+                        pb.cossTing.ToolTip = Tips.IchiDisplay.GetHeroTip(Tuple, value);
+                    }));
+                }
+            }
+            else
+                pb.Dispatcher.BeginInvoke((Action)(() =>
+                {
+                    pb.cossTing.Visibility = System.Windows.Visibility.Collapsed;
+                }));
+            mCoss = value;
         }
 
         #endregion Cards Property
@@ -932,6 +989,12 @@ namespace PSD.ClientAo
                         {
                             pb.tkTake.Visibility = System.Windows.Visibility.Visible;
                             Base.Card.Hero hero = Tuple.HL.InstanceHero(SelectHero);
+                            if (Coss != 0)
+                            {
+                                Base.Card.Hero cossHero = Tuple.HL.InstanceHero(Coss);
+                                if (cossHero != null)
+                                    hero = cossHero;
+                            }
                             if (hero != null)
                             {
                                 string rename = "snapTK" + hero.Ofcode + "_" + mToken;
@@ -962,9 +1025,17 @@ namespace PSD.ClientAo
                         {
                             pb.awTake.Visibility = System.Windows.Visibility.Visible;
                             Base.Card.Hero hero = Tuple.HL.InstanceHero(SelectHero);
+                            if (Coss != 0)
+                            {
+                                Base.Card.Hero cossHero = Tuple.HL.InstanceHero(Coss);
+                                if (cossHero != null)
+                                    hero = cossHero;
+                            }
                             if (hero != null)
                             {
                                 string rename = "snapTA" + hero.Ofcode;
+                                if (Coss != 0)
+                                    rename = "snapTK" + Tuple.HL.InstanceHero(Coss).Ofcode;
                                 pb.awTake.ToolTip = Tips.IchiDisplay.GetExspTip(Tuple, "TA" + hero.Ofcode);
                                 if (pb.awTake.ToolTip == null)
                                     pb.awTake.ToolTip = hero.AwakeAlias;
@@ -990,7 +1061,15 @@ namespace PSD.ClientAo
                 {
                     pb.expeopleBar.Visibility = System.Windows.Visibility.Visible;
                     Base.Card.Hero hro = Tuple.HL.InstanceHero(mHero);
-                    string alias = (hro != null) ? (hro.PeopleAlias ?? "特殊牌") : "特殊牌";
+                    string alias = "特殊牌";
+                    if (hro != null)
+                    {
+                        if (hro.PeopleAlias != null)
+                            alias = hro.PeopleAlias;
+                        Base.Card.Hero guest = Tuple.HL.InstanceHero(Coss);
+                        if (guest != null && guest.PeopleAlias != null)
+                            alias = guest.PeopleAlias;
+                    }
                     pb.expeopleText.Text = alias + " (" + mExSpCards.Count + ")";
                     if (pb.AD != null && pb.AD.IsTVDictContains(Rank + "EP"))
                         pb.AD.yhTV.Show(mExSpCards, Rank + "EP");
@@ -1006,7 +1085,15 @@ namespace PSD.ClientAo
                 if (mExSpCards.Count > 0)
                 {
                     Base.Card.Hero hro = Tuple.HL.InstanceHero(mHero);
-                    string alias = (hro != null) ? (hro.PeopleAlias ?? "特殊牌") : "特殊牌";
+                    string alias = "特殊牌";
+                    if (hro != null)
+                    {
+                        if (hro.PeopleAlias != null)
+                            alias = hro.PeopleAlias;
+                        Base.Card.Hero guest = Tuple.HL.InstanceHero(Coss);
+                        if (guest != null && guest.PeopleAlias != null)
+                            alias = guest.PeopleAlias;
+                    }
                     pb.expeopleText.Text = alias + " (" + mExSpCards.Count + ")";
                     if (pb.AD != null && pb.AD.IsTVDictContains(Rank + "EP"))
                         pb.AD.yhTV.Show(mExSpCards, Rank + "EP");
@@ -1031,6 +1118,12 @@ namespace PSD.ClientAo
         public void InsPlayerTar(List<ushort> uts)
         {
             Base.Card.Hero hero = Tuple.HL.InstanceHero(SelectHero);
+            if (Coss != 0)
+            {
+                Base.Card.Hero cossHero = Tuple.HL.InstanceHero(Coss);
+                if (cossHero != null)
+                    hero = cossHero;
+            }
             foreach (ushort ut in uts)
             {
                 if (!mPlayerTars.Contains(ut) && hero != null)
@@ -1056,6 +1149,12 @@ namespace PSD.ClientAo
         public void DelPlayerTar(List<ushort> uts)
         {
             Base.Card.Hero hero = Tuple.HL.InstanceHero(SelectHero);
+            if (Coss != 0)
+            {
+                Base.Card.Hero cossHero = Tuple.HL.InstanceHero(Coss);
+                if (cossHero != null)
+                    hero = cossHero;
+            }
             foreach (ushort ut in uts)
             {
                 if (mPlayerTars.Contains(ut) && hero != null)
@@ -1139,13 +1238,29 @@ namespace PSD.ClientAo
                 if (mExCards.Count > 0)
                 {
                     Base.Card.Hero hro = Tuple.HL.InstanceHero(mHero);
-                    string alias = (hro != null) ? (hro.ExCardsAlias ?? "特殊装备") : "特殊装备";
+                    string alias = "特殊装备";
+                    if (hro != null)
+                    {
+                        if (hro.ExCardsAlias != null)
+                            alias = hro.ExCardsAlias;
+                        Base.Card.Hero guest = Tuple.HL.InstanceHero(Coss);
+                        if (guest != null && guest.ExCardsAlias != null)
+                            alias = guest.ExCardsAlias;
+                    }
                     pb.excardText.Text = alias + " (" + mExCards.Count + ")";
                 }
                 if (mExSpCards.Count > 0)
                 {
                     Base.Card.Hero hro = Tuple.HL.InstanceHero(mHero);
-                    string alias = (hro != null) ? (hro.PeopleAlias ?? "特殊牌") : "特殊牌";
+                    string alias = "特殊牌";
+                    if (hro != null)
+                    {
+                        if (hro.PeopleAlias != null)
+                            alias = hro.PeopleAlias;
+                        Base.Card.Hero guest = Tuple.HL.InstanceHero(Coss);
+                        if (guest != null && guest.PeopleAlias != null)
+                            alias = guest.PeopleAlias;
+                    }
                     pb.expeopleText.Text = alias + " (" + mExSpCards.Count + ")";
                 }
             }));

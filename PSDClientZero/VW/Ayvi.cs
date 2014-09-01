@@ -37,9 +37,10 @@ namespace PSD.ClientZero.VW
         }
 
         public void Init() { cinListenThread.Start(); }
-        private bool InGame { set; get; }
-        // Set whether in game mode, whether operations can be accepted
-        public void SetInGame(bool value) { InGame = value; }
+        // Set whether the game is started or still in preparation
+        // thus whether operations can be accepted or not
+        public void SetInGame(bool value) { mInGame = value; }
+        private bool mInGame;
 
         private void CinListenStarts()
         {
@@ -54,7 +55,7 @@ namespace PSD.ClientZero.VW
                 }
                 else
                 {
-                    if (InGame)
+                    if (mInGame)
                     {
                         line = line.Trim().ToUpper();
                         if (line.StartsWith("@#"))

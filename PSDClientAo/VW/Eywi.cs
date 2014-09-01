@@ -118,6 +118,57 @@ namespace PSD.ClientAo.VW
         #region Version
         private void HandleWithVersion(ref string line, int Version)
         {
+            if (Version <= 121)
+            {
+                if (line.StartsWith("E0IE") || line.StartsWith("E0OE"))
+                    line = line.Substring(0, "E0IE".Length) + ",0," + line.Substring("E0IE,".Length);
+                else if (line.StartsWith("H09G"))
+                {
+                    string[] blocks = line.Split(',');
+                    for (int idx = 1; idx < blocks.Length; )
+                    {
+                        int lugsz = int.Parse(blocks[idx + 14]);
+                        int nextIdx = idx + 15;
+                        nextIdx += lugsz;
+                        blocks[nextIdx] = "0,0," + blocks[nextIdx];
+                        nextIdx += 5;
+                        int excdsz = int.Parse(blocks[nextIdx]);
+                        nextIdx += 1;
+                        List<ushort> excards = Util.TakeRange(blocks, nextIdx,
+                            nextIdx + excdsz).Select(p => ushort.Parse(p)).ToList();
+                        nextIdx += excdsz;
+                        int fakeqsz = int.Parse(blocks[nextIdx]);
+                        nextIdx += 1;
+                        List<string> fakeqpairs = Util.TakeRange(blocks, nextIdx,
+                            nextIdx + fakeqsz * 2).ToList();
+                        nextIdx += fakeqsz * 2;
+                        int token = int.Parse(blocks[nextIdx]);
+                        nextIdx += 1;
+                        int peoplesz = int.Parse(blocks[nextIdx]);
+                        nextIdx += 1;
+                        List<string> peoples = Util.TakeRange(blocks, nextIdx,
+                            nextIdx + peoplesz).ToList();
+                        nextIdx += peoplesz;
+                        int tarsz = int.Parse(blocks[nextIdx]);
+                        nextIdx += 1;
+                        List<ushort> tars = Util.TakeRange(blocks, nextIdx,
+                            nextIdx + tarsz).Select(p => ushort.Parse(p)).ToList();
+                        nextIdx += tarsz;
+                        bool awake = blocks[nextIdx] == "1";
+                        nextIdx += 1;
+                        int foldsz = int.Parse(blocks[nextIdx]);
+                        nextIdx += 1;
+                        int escuesz = int.Parse(blocks[nextIdx]);
+                        nextIdx += 1;
+                        List<ushort> escues = Util.TakeRange(blocks, nextIdx,
+                            nextIdx + escuesz).Select(p => ushort.Parse(p)).ToList();
+                        nextIdx += escuesz;
+
+                        idx = nextIdx;
+                    }
+                    line = string.Join(",", blocks);
+                }
+            }
             if (Version <= 115)
             {
                 if (line.StartsWith("E0IA") || line.StartsWith("E0IX") ||
@@ -221,7 +272,9 @@ namespace PSD.ClientAo.VW
                         int escuesz = int.Parse(blocks[nextIdx]);
                         nextIdx += 1;
                         nextIdx += escuesz;
+                        idx = nextIdx;
                     }
+                    line = string.Join(",", blocks);
                 }
                 else if (line.StartsWith("H09F"))
                     line += ",0";

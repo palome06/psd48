@@ -10,7 +10,8 @@ namespace PSD.Base.VW
     {
         // Initial listening receive
         void Init();
-        // Set whether in game mode, whether operations can be accepted
+        // Set whether the game is started or still in preparation
+        // thus whether operations can be accepted or not
         void SetInGame(bool value);
         // display $msg on $me screen
         void Cout(ushort me, string msgFormat, params object[] args);
@@ -25,8 +26,6 @@ namespace PSD.Base.VW
         void CloseCinTunnel(ushort me);
         // Terminate Cin Tunnel, give pending Cin CinSentinel as result
         void TerminCinTunnel(ushort me);
-        // Reset Cin Tunnel, clean all pending input request
-        void ResetCinTunnel(ushort me);
         // sentinel value that pending close Cin would return
         string CinSentinel { get; }
 

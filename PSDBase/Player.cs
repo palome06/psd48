@@ -52,6 +52,8 @@ namespace PSD.Base
         public int DEXi { set; get; } // -1, -inf; 0, normal; 1, inf
         public int TuxLimit { set; get; }
 
+        public IDictionary<string, int> cz01PriceDict { private set; get; }
+
         #endregion Property
 
         #region Cards
@@ -213,8 +215,14 @@ namespace PSD.Base
             Skills = new HashSet<string>();
             IsRan = false;
             IsZhu = false;
+
+            cz01PriceDict = new Dictionary<string, int>();
         }
         public int GetPetCount() { return Pets.Count(p => p != 0); }
+        public int GetActionPetCount(Board board)
+        {
+            return PetDisabled ? 0 : Pets.Count(p => p != 0 && !board.NotActionPets.Contains(p));
+        }
         public int OppTeam { get { return 3 - Team; } }
 
         public void ResetStatus()
@@ -279,6 +287,11 @@ namespace PSD.Base
                 HP = HPb = hero.HP;
                 Loved = false;
                 TuxLimit = 3;
+
+                cz01PriceDict.Clear();
+                cz01PriceDict.Add("JP03", 1);
+                cz01PriceDict.Add("WQ04", 2);
+                cz01PriceDict.Add("{E}WQ04", 2);
             }
         }
         public bool RemoveCard(ushort card, List<ushort> discards)

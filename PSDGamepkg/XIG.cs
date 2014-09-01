@@ -303,7 +303,7 @@ namespace PSD.PSDGamepkg
                             if (!player.PetDisabled)
                             {
                                 foreach (ushort ut in player.Pets)
-                                    if (ut != 0)
+                                    if (ut != 0 && !Board.NotActionPets.Contains(ut))
                                     {
                                         if (changeType == 1)
                                             g0oc += ",1," + player.Uid + "," + ut;
@@ -321,6 +321,10 @@ namespace PSD.PSDGamepkg
                                     g0qzs.Add("G0QZ," + player.Uid + "," + string.Join(",", excds));
                                 if (player.Skills.Count > 0)
                                     RaiseGMessage("G0OS," + player.Uid + ",0," + string.Join(",", player.Skills));
+                                if (player.Guardian != 0)
+                                    RaiseGMessage("G0MA," + player.Uid + ",0");
+                                while (player.Coss.Count > 0)
+                                    RaiseGMessage("G0OV," + player.Uid + ",0");
                             }
                         }
                         if (g1zl != "")
@@ -1282,6 +1286,10 @@ namespace PSD.PSDGamepkg
                         }
                         RaiseGMessage("G2AK," + player.Uid + ","
                             + player.HP + "," + player.HPb + "," + player.STR + "," + player.DEX);
+                        // remove all cosses containing the player
+                        foreach (Player py in Board.Garden.Values)
+                            if (py.IsAlive && py.Coss.Peek() == heroNum)
+                                RaiseGMessage("G0OV," + player.Uid + "," + heroNum);
                         if (changeType == 0 || changeType == 2)
                         {
                             if (hero.Skills.Count > 0)
@@ -1302,7 +1310,7 @@ namespace PSD.PSDGamepkg
                         if (!player.PetDisabled)
                         {
                             foreach (ushort ut in player.Pets)
-                                if (ut != 0)
+                                if (ut != 0 && !Board.NotActionPets.Contains(ut))
                                 {
                                     if (changeType == 1)
                                         RaiseGMessage("G0IC,1," + player.Uid + "," + ut);
@@ -2232,14 +2240,17 @@ namespace PSD.PSDGamepkg
                     {
                         ushort me = ushort.Parse(args[1]);
                         Player player = Board.Garden[me];
-                        if (player.DEXc != player.DEXb || player.DEXa != player.DEXb
-                            || player.STRc != player.STRb || player.STRa != player.STRb)
+                        if (player.IsAlive)
                         {
-                            WI.BCast("E0AX," + me + "," + player.STRb + "," + player.DEXb);
-                        }
-                        player.SDaSet = player.SDcSet = false;
-                        player.DEXi = 0; player.STRi = 0;
-                        player.RestZP = 1;
+                            if (player.DEXc != player.DEXb || player.DEXa != player.DEXb
+                                || player.STRc != player.STRb || player.STRa != player.STRb)
+                            {
+                                WI.BCast("E0AX," + me + "," + player.STRb + "," + player.DEXb);
+                            }
+                            player.SDaSet = player.SDcSet = false;
+                            player.DEXi = 0; player.STRi = 0;
+                            player.RestZP = 1;
+                        } // JN50302 to override the G0AX events
                         break;
                     }
                 case "G0IB":
@@ -2544,7 +2555,7 @@ namespace PSD.PSDGamepkg
                         Player player = Board.Garden[who];
                         player.Pets[pe] = which;
                         RaiseGMessage("G0WB," + which);
-                        if (!player.PetDisabled)
+                        if (!player.PetDisabled && !Board.NotActionPets.Contains(which))
                             RaiseGMessage("G0IC,0," + who + "," + which);
                         WI.BCast("E0HD," + who + "," + from + "," + which);
                         RaiseGMessage("G2WK," + string.Join(",",
@@ -2666,7 +2677,7 @@ namespace PSD.PSDGamepkg
                         Player player = Board.Garden[who];
                         if (player.Pets[pe] == which)
                         {
-                            if (!player.PetDisabled)
+                            if (!player.PetDisabled && !Board.NotActionPets.Contains(which))
                                 RaiseGMessage("G0OC,0," + who + "," + which);
                             WI.BCast("E0HL," + who + "," + which);
                             Board.Garden[who].Pets[pe] = 0;
@@ -2901,51 +2912,103 @@ namespace PSD.PSDGamepkg
                 case "G0IE":
                     {
                         string ioc = "", e0ie = "";
-                        for (int i = 1; i < args.Length; ++i)
+                        if (args[1] == "0")
                         {
-                            ushort who = ushort.Parse(args[i]);
-                            Player player = Board.Garden[who];
-                            if (player.PetDisabled)
+                            for (int i = 2; i < args.Length; ++i)
                             {
-                                foreach (ushort pt in player.Pets)
-                                    if (pt != 0)
-                                        ioc += ",1," + who + "," + pt;
-                                player.PetDisabled = false;
-                                e0ie += "," + who;
+                                ushort who = ushort.Parse(args[i]);
+                                Player player = Board.Garden[who];
+                                if (player.PetDisabled)
+                                {
+                                    foreach (ushort pt in player.Pets)
+                                        if (pt != 0 && !Board.NotActionPets.Contains(pt))
+                                            ioc += ",1," + who + "," + pt;
+                                    player.PetDisabled = false;
+                                    e0ie += "," + who;
+                                }
                             }
+                            if (ioc != "")
+                                RaiseGMessage("G0IC" + ioc);
+                            if (e0ie != "")
+                                WI.BCast("E0IE,0" + e0ie);
                         }
-                        if (ioc != "")
-                            RaiseGMessage("G0IC" + ioc);
-                        if (e0ie != "")
-                            WI.BCast("E0IE" + e0ie);
+                        else if (args[1] == "1")
+                        {
+                            for (int i = 2; i < args.Length; ++i)
+                            {
+                                ushort pt = ushort.Parse(args[i]);
+                                if (Board.NotActionPets.Contains(pt))
+                                {
+                                    Board.NotActionPets.Remove(pt);
+                                    int elem = Util.GetFiveElementId(LibTuple.ML.Decode(pt).Element);
+                                    foreach (Player py in Board.Garden.Values)
+                                    {
+                                        if (py.Pets[elem] == pt && !py.PetDisabled)
+                                            ioc += ",1," + py.Uid + "," + pt;
+                                    }
+                                    e0ie += "," + pt;
+                                }
+                            }
+                            if (ioc != "")
+                                RaiseGMessage("G0IC" + ioc);
+                            if (e0ie != "")
+                                WI.BCast("E0IE,1" + e0ie);
+                        }
                     }
                     break;
                 case "G0OE":
                     {
                         string ioc = "", e0oe = "";
-                        for (int i = 1; i < args.Length; ++i)
+                        if (args[1] == "0")
                         {
-                            ushort who = ushort.Parse(args[i]);
-                            Player player = Board.Garden[who];
-                            if (!player.PetDisabled)
+                            for (int i = 2; i < args.Length; ++i)
                             {
-                                foreach (ushort pt in player.Pets)
-                                    if (pt != 0)
-                                        ioc += ",1," + who + "," + pt;
-                                player.PetDisabled = true;
-                                e0oe += "," + who;
+                                ushort who = ushort.Parse(args[i]);
+                                Player player = Board.Garden[who];
+                                if (!player.PetDisabled)
+                                {
+                                    foreach (ushort pt in player.Pets)
+                                        if (pt != 0 && !Board.NotActionPets.Contains(pt))
+                                            ioc += ",1," + who + "," + pt;
+                                    player.PetDisabled = true;
+                                    e0oe += "," + who;
+                                }
                             }
+                            if (ioc != "")
+                                RaiseGMessage("G0OC" + ioc);
+                            if (e0oe != "")
+                                WI.BCast("E0OE,0" + e0oe);
                         }
-                        if (ioc != "")
-                            RaiseGMessage("G0OC" + ioc);
-                        if (e0oe != "")
-                            WI.BCast("E0OE" + e0oe);
+                        else if (args[1] == "1")
+                        {
+                            for (int i = 2; i < args.Length; ++i)
+                            {
+                                ushort pt = ushort.Parse(args[i]);
+                                if (!Board.NotActionPets.Contains(pt))
+                                {
+                                    Board.NotActionPets.Add(pt);
+                                    int elem = Util.GetFiveElementId(LibTuple.ML.Decode(pt).Element);
+                                    foreach (Player py in Board.Garden.Values)
+                                    {
+                                        if (py.Pets[elem] == pt && !py.PetDisabled)
+                                            ioc += ",1," + py.Uid + "," + pt;
+                                    }
+                                    e0oe += "," + pt;
+                                }
+                            }
+                            if (ioc != "")
+                                RaiseGMessage("G0OC" + ioc);
+                            if (e0oe != "")
+                                WI.BCast("E0IE,1" + e0oe);
+                        }
                     }
                     break;
                 case "G0IS":
                     {
                         ushort who = ushort.Parse(args[1]);
-                        bool hind = (args[2] == "0");
+                        ushort op = ushort.Parse(args[2]);
+                        bool hind = (op & 1) == 0;
+                        bool roolBack = (op & 2) == 0;
                         string e0is = "";
                         for (int i = 3; i < args.Length; ++i)
                         {
@@ -2957,7 +3020,8 @@ namespace PSD.PSDGamepkg
                                 {
                                     py.Skills.Add(skill.Code);
                                     AddSingleSkill(who, skill, sk02, sk03);
-                                    py.IsZhu = true;
+                                    if (roolBack)
+                                        py.IsZhu = true;
                                     e0is += "," + args[i];
                                 }
                             }
@@ -3021,6 +3085,7 @@ namespace PSD.PSDGamepkg
                         Hero hro = LibTuple.HL.InstanceHero(hero);
                         if (hro != null)
                         {
+                            RaiseGMessage("G2TZ," + ut + ",0,H" + hero);
                             List<string> skills = new List<string>();
                             foreach (string skstr in hro.Skills)
                             {
@@ -3038,7 +3103,8 @@ namespace PSD.PSDGamepkg
                         ushort ut = ushort.Parse(args[1]);
                         Player player = Board.Garden[ut];
                         int hero = player.Coss.Pop();
-                        WI.BCast("E0OV," + ut + "," + hero);
+                        int next = player.Coss.Count > 0 ? player.Coss.Peek() : 0;
+                        WI.BCast("E0OV," + ut + "," + hero + "," + next);
 
                         List<ushort> excds = new List<ushort>();
                         if (player.ExEquip != 0)
@@ -3051,6 +3117,7 @@ namespace PSD.PSDGamepkg
                         Hero hro = LibTuple.HL.InstanceHero(hero);
                         if (hro != null)
                         {
+                            RaiseGMessage("G2TZ,0," + ut + ",H" + hero);
                             List<string> skills = new List<string>();
                             foreach (string skstr in hro.Skills)
                             {

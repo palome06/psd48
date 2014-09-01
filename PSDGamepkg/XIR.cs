@@ -39,7 +39,9 @@ namespace PSD.PSDGamepkg
             //RaiseGMessage("G0HQ,2,1,0,47,48");//7,1,13
             //RaiseGMessage("G0HQ,2,2,0,15,32");//54
             //RaiseGMessage("G0HQ,2,4,0,51,26");//33
-            RaiseGMessage("G0HQ,2,1,0,0,81");
+            //RaiseGMessage("G0HQ,2,1,0,0,17");
+
+            //RaiseGMessage("G0HQ,2,1,0,0,81");
             //RaiseGMessage("G0HQ,2,5,0,0,77");
             //RaiseGMessage("G0IJ,5,0,4");
             //RaiseGMessage("G0IX,5,0,2");
@@ -73,7 +75,7 @@ namespace PSD.PSDGamepkg
             //Board.EvePiles.PushBack(22);
             //Board.EvePiles.PushBack(6);
             //Board.EvePiles.PushBack(30);
-            Board.RestNPCPiles.PushBack(1047);
+            //Board.RestNPCPiles.PushBack(1047);
             //Board.EvePiles.PushBack(23);
             //while (Board.MonPiles.Count > 0)
             //    Board.MonPiles.Dequeue();
@@ -105,6 +107,8 @@ namespace PSD.PSDGamepkg
             //foreach (ushort mon in mons)
             //    Board.MonPiles.PushBack(mons);
 
+            //for (int i = 0; i < 28; ++i)
+            //    Board.MonPiles.Dequeue();
             //Board.MonPiles.PushBack(1006);
             //Board.MonPiles.PushBack(37);
             //Board.MonPiles.PushBack(8);
@@ -208,8 +212,10 @@ namespace PSD.PSDGamepkg
             //RaiseGMessage("G0HD,1,2,0,36");
             //RaiseGMessage("G0HD,1,6,0,16");
             //RaiseGMessage("G0HD,1,2,0,37");
-            RaiseGMessage("G0HD,1,2,0,31");
-            //RaiseGMessage("G0HD,1,1,0,30");
+            //RaiseGMessage("G0HD,1,2,0,31");
+            RaiseGMessage("G0HD,1,3,0,8");
+            RaiseGMessage("G0HD,1,3,0,12");
+            RaiseGMessage("G0HD,1,5,0,22");
             //RaiseGMessage("G0HD,1,4,0,6");
             //RaiseGMessage("G0HD,1,6,0,9");
             //RaiseGMessage("G0HD,1,5,0,15");

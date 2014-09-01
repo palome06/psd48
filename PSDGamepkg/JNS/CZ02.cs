@@ -56,33 +56,19 @@ namespace PSD.PSDGamepkg.JNS
             Tux tux = XI.LibTuple.TL.DecodeTux(card);
             if (player.Tux.Contains(card))
             {
-                int price = 0;
-                if (tux.Code.Equals("JP03"))
-                    price = 1;
-                else if (tux.Code.Equals("WQ04"))
-                    price = 2;
+                int price = player.cz01PriceDict[tux.Code];
+                XI.RaiseGMessage("G2ZU,0," + player.Uid + "," + card);
+                XI.RaiseGMessage("G0QZ," + player.Uid + "," + card);
                 if (price > 0)
-                {
-                    //XI.RaiseGMessage("G0OT," + player.Uid + ",1," + card);
-                    XI.RaiseGMessage("G2ZU,0," + player.Uid + "," + card);
-                    //XI.RaiseGMessage("G0ON," + player.Uid + ",C,1," + card);
-                    XI.RaiseGMessage("G0QZ," + player.Uid + "," + card);
                     XI.RaiseGMessage("G0DH," + player.Uid + ",0," + price);
-                }
             }
             else if (player.Weapon == card || player.ExEquip == card)
             {
-                int price = 0;
-                if (tux.Code.Equals("WQ04"))
-                    price = 2;
+                int price = player.cz01PriceDict["{E}" + tux.Code];
+                XI.RaiseGMessage("G2ZU,0," + player.Uid + "," + card);
+                XI.RaiseGMessage("G0QZ," + player.Uid + "," + card);
                 if (price > 0)
-                {
-                    //XI.RaiseGMessage("G0OT," + player.Uid + ",1," + card);
-                    XI.RaiseGMessage("G2ZU,0," + player.Uid + "," + card);
-                    //XI.RaiseGMessage("G0ON," + player.Uid + ",C,1," + card);
-                    XI.RaiseGMessage("G0QZ," + player.Uid + "," + card);
                     XI.RaiseGMessage("G0DH," + player.Uid + ",0," + price);
-                }
             }
         }
         public string CZ01Input(Player player, string fuse, string prev)
@@ -90,13 +76,20 @@ namespace PSD.PSDGamepkg.JNS
             if (prev != "")
                 return "";
             else {
-                var lt = player.Tux.Where(p => XI.LibTuple.TL.DecodeTux(p).Code.Equals("JP03")
-                    || XI.LibTuple.TL.DecodeTux(p).Code.Equals("WQ04")).ToList();
-                if (player.Weapon != 0 && XI.LibTuple.TL.DecodeTux(player.Weapon).Code.Equals("WQ04"))
-                    lt.Add(player.Weapon);
-                if (player.ExEquip != 0 && XI.LibTuple.TL.DecodeTux(player.ExEquip).Code.Equals("WQ04"))
-                    lt.Add(player.ExEquip);
-                return "/Q1(p" + string.Join("p", lt) + ")";
+                var tl = XI.LibTuple.TL;
+                List<ushort> goods = new List<ushort>();
+                foreach (var pair in player.cz01PriceDict)
+                {
+                    goods.AddRange(player.Tux.Where(p => tl.DecodeTux(p).Code.Equals(pair.Key)));
+                    if (!player.WeaponDisabled)
+                    {
+                        if (player.Weapon != 0 && ("{E}" + tl.DecodeTux(player.Weapon).Code).Equals(pair.Key))
+                            goods.Add(player.Weapon);
+                        if (player.ExEquip != 0 && ("{E}" + tl.DecodeTux(player.ExEquip).Code).Equals(pair.Key))
+                            goods.Add(player.ExEquip);
+                    }
+                }
+                return "/Q1(p" + string.Join("p", goods) + ")";
             }
         }
         public bool CZ01Valid(Player player, string fuse)
@@ -104,13 +97,21 @@ namespace PSD.PSDGamepkg.JNS
             ushort who = (ushort)(fuse[fuse.IndexOf('R') + 1] - '0');
             if (player.Uid == who)
             {
-                bool c1 = player.Tux.Where(p => XI.LibTuple.TL.DecodeTux(p).Code.Equals("JP03")
-                        || XI.LibTuple.TL.DecodeTux(p).Code.Equals("WQ04")).Any();
-                bool c2 = player.Weapon != 0 && XI.LibTuple.TL.DecodeTux(player.Weapon).Code.Equals("WQ04");
-                bool c3 = player.ExEquip != 0 && XI.LibTuple.TL.DecodeTux(player.ExEquip).Code.Equals("WQ04");
-                return c1 || c2 || c3;
+                var tl = XI.LibTuple.TL;
+                foreach (var pair in player.cz01PriceDict)
+                {
+                    if (player.Tux.Any(p => tl.DecodeTux(p).Code.Equals(pair.Key)))
+                        return true;
+                    if (!player.WeaponDisabled)
+                    {
+                        if (player.Weapon != 0 && ("{E}" + tl.DecodeTux(player.Weapon).Code).Equals(pair.Key))
+                            return true;
+                        if (player.ExEquip != 0 && ("{E}" + tl.DecodeTux(player.ExEquip).Code).Equals(pair.Key))
+                            return true;
+                    }
+                }
             }
-            else return false;
+            return false;
         }
 
         public void CZ02Action(Player player, string fuse, string args)

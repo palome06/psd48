@@ -64,6 +64,30 @@
                 <TextBlock x:Name="skillText4" FontSize="12"
                            Text="{Binding Path=Skill4, Converter={StaticResource sknmConv}}"/>
             </Button>
+            <Button Canvas.Left="166" Width="72" Height="26" Canvas.Top="25" Background="LightSeaGreen"
+                    IsEnabled="{Binding Path=Skill5Valid}"
+                    ToolTip="{Binding Path=Skill5, Converter={StaticResource sktpConv}}"
+                    Visibility="{Binding Path=Skill5, Converter={StaticResource skivConv}}"
+                    Click="Skill4ButtonClick">
+                <TextBlock x:Name="skillText5" FontSize="12"
+                           Text="{Binding Path=Skill5, Converter={StaticResource sknmConv}}"/>
+            </Button>
+            <Button Canvas.Left="166" Width="72" Height="26" Canvas.Top="57" Background="LightSeaGreen"
+                    IsEnabled="{Binding Path=Skill6Valid}"
+                    ToolTip="{Binding Path=Skill5, Converter={StaticResource sktpConv}}"
+                    Visibility="{Binding Path=Skill6, Converter={StaticResource skivConv}}"
+                    Click="Skill4ButtonClick">
+                <TextBlock x:Name="skillText6" FontSize="12"
+                           Text="{Binding Path=Skill6, Converter={StaticResource sknmConv}}"/>
+            </Button>
+            <Button Canvas.Left="166" Width="72" Height="26" Canvas.Top="88" Background="LightSeaGreen"
+                    IsEnabled="{Binding Path=Skill7Valid}"
+                    ToolTip="{Binding Path=Skill7, Converter={StaticResource sktpConv}}"
+                    Visibility="{Binding Path=Skill7, Converter={StaticResource skivConv}}"
+                    Click="Skill4ButtonClick">
+                <TextBlock x:Name="skillText7" FontSize="12"
+                           Text="{Binding Path=Skill7, Converter={StaticResource sknmConv}}"/>
+            </Button>
             <Button Canvas.Left="168" Width="61" Height="20" Canvas.Top="-20" Background="DodgerBlue"
                     IsEnabled="{Binding Path=ExtSkill1Valid}"
                      ToolTip="{Binding Path=ExtSkill1, Converter={StaticResource sktpConv}}"
@@ -71,6 +95,22 @@
                     Click="ExtSkill1ButtonClick">
                 <TextBlock x:Name="skillExtText1" FontSize="10"
                            Text="{Binding Path=ExtSkill1, Converter={StaticResource sknmConv}}"/>
+            </Button>
+            <Button Canvas.Left="104" Width="61" Height="20" Canvas.Top="-20" Background="DodgerBlue"
+                    IsEnabled="{Binding Path=ExtSkill2Valid}"
+                     ToolTip="{Binding Path=ExtSkill2, Converter={StaticResource sktpConv}}"
+                    Visibility="{Binding Path=ExtSkill2, Converter={StaticResource skivConv}}"
+                    Click="ExtSkill2ButtonClick">
+                <TextBlock x:Name="skillExtText2" FontSize="10"
+                           Text="{Binding Path=ExtSkill2, Converter={StaticResource sknmConv}}"/>
+            </Button>
+            <Button Canvas.Left="40" Width="61" Height="20" Canvas.Top="-20" Background="DodgerBlue"
+                    IsEnabled="{Binding Path=ExtSkill3Valid}"
+                     ToolTip="{Binding Path=ExtSkill3, Converter={StaticResource sktpConv}}"
+                    Visibility="{Binding Path=ExtSkill3, Converter={StaticResource skivConv}}"
+                    Click="ExtSkill3ButtonClick">
+                <TextBlock x:Name="skillExtText3" FontSize="10"
+                           Text="{Binding Path=ExtSkill3, Converter={StaticResource sknmConv}}"/>
             </Button>
             <StackPanel Orientation="Vertical" Canvas.Right="0" Canvas.Bottom="0">
                 <CheckBox FontFamily="Simsun" Checked="SkOptChecked"

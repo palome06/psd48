@@ -78,12 +78,10 @@ namespace PSD.PSDGamepkg.Artiad
                 raiseG("G0OJ," + player.Uid + ",3");
             if (player.TokenFold.Count > 0)
             {
-                raiseG("G2TZ,0," + player.Uid + "," + string.Join(
-                    ",", player.TokenFold.Select(p => "C" + p)));
-                raiseG("G0OJ," + player.Uid + ",4," + player.TokenFold.Count
-                    + "," + string.Join(",", player.TokenFold));
-                raiseG("G0ON," + player.Uid + ",C," + player.TokenFold.Count + ","
-                    + string.Join(",", player.TokenFold));
+                List<ushort> folds = player.TokenFold.ToList();
+                raiseG("G2TZ,0," + player.Uid + "," + string.Join(",", folds.Select(p => "C" + p)));
+                raiseG("G0OJ," + player.Uid + ",4," + folds.Count + "," + string.Join(",", folds));
+                raiseG("G0ON," + player.Uid + ",C," + folds.Count + "," + string.Join(",", folds));
             }
             player.ResetROM(board);
             // Remove others' tar token on the player

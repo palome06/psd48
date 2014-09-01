@@ -79,7 +79,9 @@ namespace PSD.PSDGamepkg
             //10102, 10201, 17007, 10104, 17011, 19006
             //17021, 10504, 19002, 10104, 17011, 19006
             //17003, 17022, 10601, 19011, 10604, 19013
-            10203, 15008, 10302, 10603, 10604, 17011
+            //10203, 15008, 10302, 10603, 10604, 17011
+            //19016, 17007, 17020, 19011, 19008, 10601
+            19014, 17005, 17020, 19011, 19008, 19016
         };
 
         #region Memeber Declaration & Constructor
@@ -588,7 +590,7 @@ namespace PSD.PSDGamepkg
             {
                 if (skt.Name == skill.Code)
                 {
-                    if (skt.Type == SKTType.BK && puid != skt.Owner)
+                    if (skt.Type == SKTType.BK)
                         result.Add(new SKE(skt) { Tg = puid });
                     else if (skt.Type == SKTType.SK && puid == skt.Owner)
                         result.Add(new SKE(skt) { Tg = puid });
@@ -616,8 +618,6 @@ namespace PSD.PSDGamepkg
                 }
                 player.IsZhu = false;
             }
-            int c = 0;
-            c = c + 2;
         }
 
         // Parse from SKTriple list to SKT list
@@ -633,7 +633,7 @@ namespace PSD.PSDGamepkg
                 switch (skt.Type)
                 {
                     case SKTType.BK:
-                        result.AddRange(pys.Where(p => p != skt.Owner).Select(p => new SKE(skt) { Tg = p }));
+                        result.AddRange(pys.Select(p => new SKE(skt) { Tg = p }));
                         break;
                     case SKTType.TX:
                     case SKTType.EQ:
@@ -849,7 +849,7 @@ namespace PSD.PSDGamepkg
                     {
                         foreach (ushort petCode in player.Pets)
                         {
-                            if (petCode == 0) continue;
+                            if (petCode == 0 || Board.NotActionPets.Contains(petCode)) continue;
                             if (petCode == Board.Monster1 && consumeType == 1) continue;
                             Base.Card.Monster pet = LibTuple.ML.Decode(petCode);
                             if (pet.Code.Equals(mt.Code) && mt.ConsumeValid(player, consumeType, ske.InType, ske.Fuse))
