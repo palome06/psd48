@@ -2690,8 +2690,13 @@ namespace PSD.PSDGamepkg.JNS
             }
             else if (type == 1)
                 return player.TokenExcl.Count > 0;
-            else if (type == 2)
-                return XI.Board.InFight && IsMathISOS("JN60601", player, fuse);
+            else if (type == 2) {
+                string[] g0oj = fuse.Split(',');
+                if (g0oj[1] == player.Uid.ToString() && g0oj[2] == "1")
+                    return ushort.Parse(g0oj[3]) > 0;
+                else
+                    return false;
+            }
             else
                 return false;
         }
@@ -2714,9 +2719,14 @@ namespace PSD.PSDGamepkg.JNS
                 XI.RaiseGMessage("G0IP," + player.Team + "," + player.TokenExcl.Count);
             else if (type == 2)
             {
+                string[] g0oj = fuse.Split(',');
+                int n = int.Parse(g0oj[3]);
+                List<int> souls = Util.TakeRange(g0oj, 4, 4 + n).Select(
+                    p => int.Parse(p.Substring("H".Length))).ToList();
+                XI.Board.BannedHero.RemoveAll(p => souls.Contains(p));
+                XI.Board.HeroDises.AddRange(souls);
                 if (XI.Board.InFight)
-                    XI.RaiseGMessage("G0OP," + player.Team + "," + player.TokenExcl.Count);
-                //XI.InnerGMessage(fuse, 81);
+                    XI.RaiseGMessage("G0OP," + player.Team + "," + n);
             }
         }
         public bool JN60602Valid(Player player, int type, string fuse)
@@ -2740,7 +2750,6 @@ namespace PSD.PSDGamepkg.JNS
                 XI.RaiseGMessage("G0OJ," + player.Uid + ",1," + souls.Count + "," + hs);
                 XI.RaiseGMessage("G2TZ,0," + player.Uid + "," + hs);
             }
-            XI.Board.BannedHero.RemoveAll(p => souls.Contains(p));
             XI.RaiseGMessage("G0OY,0," + player.Uid);
             XI.RaiseGMessage("G0IY,0," + player.Uid + ",10607");
             XI.InnerGMessage(fuse, 341);
@@ -2902,6 +2911,15 @@ namespace PSD.PSDGamepkg.JNS
                         return true;
             }
             return false;
+        }
+        public bool JNS0102Valid(Player player, int type, string fuse)
+        {
+            if (type == 0)
+                return true;
+            else if (type == 1)
+                return IsMathISOS("JNS0102", player, fuse);
+            else
+                return false;
         }
         public void JNS0102Action(Player player, int type, string fuse, string argst)
         {

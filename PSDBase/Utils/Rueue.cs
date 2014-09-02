@@ -80,7 +80,7 @@ namespace PSD.Base.Utils
             }
             return result;
         }
-        // TODO:DEBUG: Remove from piles should not be permitted...
+        // find and remove given heros from piles
         public void Remove(T value)
         {
             lilt.Remove(value);

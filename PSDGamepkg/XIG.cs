@@ -350,6 +350,8 @@ namespace PSD.PSDGamepkg
                             //    player.HP = 0;
                             if (changeType == 0 || changeType == 2)
                                 Artiad.ContentRule.ErasePlayerToken(player, Board, RaiseGMessage);
+                            if (!Board.BannedHero.Contains(player.SelectHero))
+                                Board.HeroDises.Remove(player.SelectHero);
                             player.SelectHero = 0;
                         }
                     }
@@ -1288,8 +1290,12 @@ namespace PSD.PSDGamepkg
                             + player.HP + "," + player.HPb + "," + player.STR + "," + player.DEX);
                         // remove all cosses containing the player
                         foreach (Player py in Board.Garden.Values)
+                        {
                             if (py.IsAlive && py.Coss.Peek() == heroNum)
                                 RaiseGMessage("G0OV," + player.Uid + "," + heroNum);
+                        }
+                        Board.HeroPiles.Remove(heroNum);
+                        Board.HeroDises.Remove(heroNum);
                         if (changeType == 0 || changeType == 2)
                         {
                             if (hero.Skills.Count > 0)
@@ -3085,7 +3091,6 @@ namespace PSD.PSDGamepkg
                         Hero hro = LibTuple.HL.InstanceHero(hero);
                         if (hro != null)
                         {
-                            RaiseGMessage("G2TZ," + ut + ",0,H" + hero);
                             List<string> skills = new List<string>();
                             foreach (string skstr in hro.Skills)
                             {
@@ -3117,7 +3122,6 @@ namespace PSD.PSDGamepkg
                         Hero hro = LibTuple.HL.InstanceHero(hero);
                         if (hro != null)
                         {
-                            RaiseGMessage("G2TZ,0," + ut + ",H" + hero);
                             List<string> skills = new List<string>();
                             foreach (string skstr in hro.Skills)
                             {

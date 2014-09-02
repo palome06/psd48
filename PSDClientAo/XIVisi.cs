@@ -2337,9 +2337,7 @@ namespace PSD.ClientAo
                         ushort npc = ushort.Parse(args[idx + 1]);
                         A0P[who].InsEscue(npc);
                         VI.Cout(Uid, "{0}获得助战NPC{1}.", zd.Player(who), zd.Monster(npc));
-                        List<string> cedcards = new List<string>();
-                        cedcards.Add("M" + npc);
-                        A0O.FlyingGet(cedcards, 0, who);
+                        A0O.FlyingGet("M" + npc, 0, who);
                     }
                     break;
                 case "E0OL":
@@ -2349,9 +2347,7 @@ namespace PSD.ClientAo
                         ushort npc = ushort.Parse(args[idx + 1]);
                         A0P[who].DelEscue(npc);
                         VI.Cout(Uid, "{0}失去助战NPC{1}.", zd.Player(who), zd.Monster(npc));
-                        List<string> cedcards = new List<string>();
-                        cedcards.Add("M" + npc);
-                        A0O.FlyingGet(cedcards, who, 0);
+                        A0O.FlyingGet("M" + npc, who, 0);
                     }
                     break;
                 case "E0SW":
@@ -2517,6 +2513,7 @@ namespace PSD.ClientAo
                         ushort ut = ushort.Parse(args[1]);
                         int hro = int.Parse(args[2]);
                         VI.Cout(Uid, "{0}迎来了客人{1}.", zd.Player(ut), zd.Hero(hro));
+                        A0O.FlyingGet("H" + hro, 0, ut);
                         A0P[ut].Coss = hro;
                     }
                     break;
@@ -2526,6 +2523,7 @@ namespace PSD.ClientAo
                         int hro = int.Parse(args[2]);
                         int next = int.Parse(args[3]);
                         VI.Cout(Uid, "{0}送走了客人{1}.", zd.Player(ut), zd.Hero(hro));
+                        A0O.FlyingGet("H" + hro, ut, 0);
                         A0P[ut].Coss = next;
                     }
                     break;
