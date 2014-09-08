@@ -41,7 +41,7 @@ namespace PSD.PSDGamepkg
             //RaiseGMessage("G0HQ,2,4,0,51,26");//33
             //RaiseGMessage("G0HQ,2,1,0,0,17");
 
-            //RaiseGMessage("G0HQ,2,1,0,0,81");
+            RaiseGMessage("G0HQ,2,1,0,0,10");
             //RaiseGMessage("G0HQ,2,5,0,0,77");
             //RaiseGMessage("G0IJ,5,0,4");
             //RaiseGMessage("G0IX,5,0,2");
@@ -213,9 +213,9 @@ namespace PSD.PSDGamepkg
             //RaiseGMessage("G0HD,1,6,0,16");
             //RaiseGMessage("G0HD,1,2,0,37");
             //RaiseGMessage("G0HD,1,2,0,31");
-            RaiseGMessage("G0HD,1,3,0,8");
-            RaiseGMessage("G0HD,1,3,0,12");
-            RaiseGMessage("G0HD,1,5,0,22");
+            //RaiseGMessage("G0HD,1,3,0,8");
+            //RaiseGMessage("G0HD,1,3,0,12");
+            //RaiseGMessage("G0HD,1,5,0,22");
             //RaiseGMessage("G0HD,1,4,0,6");
             //RaiseGMessage("G0HD,1,6,0,9");
             //RaiseGMessage("G0HD,1,5,0,15");

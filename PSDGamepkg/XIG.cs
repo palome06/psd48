@@ -1291,7 +1291,7 @@ namespace PSD.PSDGamepkg
                         // remove all cosses containing the player
                         foreach (Player py in Board.Garden.Values)
                         {
-                            if (py.IsAlive && py.Coss.Peek() == heroNum)
+                            if (py.IsAlive && py.Coss.Count > 0 && py.Coss.Peek() == heroNum)
                                 RaiseGMessage("G0OV," + player.Uid + "," + heroNum);
                         }
                         Board.HeroPiles.Remove(heroNum);

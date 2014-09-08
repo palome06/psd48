@@ -463,7 +463,7 @@ namespace PSD.PSDGamepkg.JNS
             XI.RaiseGMessage("G0YM,3," + pop + ",0");
             XI.Board.Monster1 = pop;
             UEchoCode r5ed = XI.HandleWithNPCEffect(py, npc, false);
-            if (r5ed != UEchoCode.END_ACTION && r5ed != UEchoCode.NO_OPTIONS)
+            if (r5ed == UEchoCode.END_ACTION)
                 XI.RaiseGMessage("G1YP," + XI.Board.Rounder.Uid + "," + pop);
             
             if (XI.Board.Monster1 != 0) // In case the NPC has been taken away

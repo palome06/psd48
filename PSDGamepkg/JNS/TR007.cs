@@ -1877,7 +1877,7 @@ namespace PSD.PSDGamepkg.JNS
                             harm.Element != FiveElement.LOVE && harm.Source != harm.Who && harm.N > 0)
                         uts.Add(py.Uid);
                 }
-                return "#代为承受伤害,/T1(p" + string.Join("p", uts);
+                return "#代为承受伤害,/T1(p" + string.Join("p", uts) + ")";
             }
             else
                 return "";
@@ -4228,7 +4228,7 @@ namespace PSD.PSDGamepkg.JNS
         public bool JNH0702Valid(Player player, int type, string fuse)
         {
             if (XI.Board.Garden.Values.Where(p => p.IsTared && p.Team == player.Team &&
-                !p.Immobilized).Select(p => p.Uid).Except(player.RAMUtList).Any())
+                !p.Immobilized).Select(p => p.Uid).Any() && player.RAMUshort == 0)
             {
                 string[] g1ev = fuse.Split(',');
                 Player trigger = XI.Board.Garden[ushort.Parse(g1ev[1])];
@@ -4240,7 +4240,7 @@ namespace PSD.PSDGamepkg.JNS
         {
             ushort ut = ushort.Parse(argst);
             XI.RaiseGMessage("G0DS," + ut+ ",0,1");
-            player.RAMUtList.Add(ut);
+            player.RAMUshort = 1;
 
             XI.RaiseGMessage("G0ON,10,E,1," + XI.Board.Eve);
             XI.RaiseGMessage("G0YM,2,0,0");
@@ -4254,7 +4254,7 @@ namespace PSD.PSDGamepkg.JNS
             if (prev == "")
                 return "#横置,/T1(p" + string.Join("p", XI.Board.Garden.Values
                     .Where(p => p.IsTared && p.Team == player.Team && !p.Immobilized)
-                    .Select(p => p.Uid).Except(player.RAMUtList)) + ")";
+                    .Select(p => p.Uid)) + ")";
             else
                 return "";
         }
@@ -4887,16 +4887,14 @@ namespace PSD.PSDGamepkg.JNS
         public bool JNH1301Valid(Player player, int type, string fuse)
         {
             if (type == 0)
-                return XI.Board.IsAttendWar(player) && (XI.Board.RestMonPiles.Count + XI.Board.RestMonDises.Count > 0);
-            else if (type == 1 || type == 2)
+                return XI.Board.IsAttendWar(player) && (
+                    XI.Board.RestMonPiles.Count + XI.Board.RestMonDises.Count > 0);
+            else if (type == 1)
+                return player.TokenExcl.Count >= 3;
+            else if (type == 2 || type == 3)
             {
                 string[] blocks = fuse.Split(',');
-                if (blocks[1] == player.Uid.ToString() && blocks[2] == "1" && blocks[3] != "0")
-                {
-                    int agl = player.TokenExcl.Select(p => XI.LibTuple.ML.Decode(
-                        ushort.Parse(p.Substring("M".Length)))).Sum(p => p.AGL) / 2;
-                    return agl != player.ROMUshort;
-                }
+                return (blocks[1] == player.Uid.ToString() && blocks[2] == "1" && blocks[3] != "0");
             }
             return false;
         }
@@ -4904,15 +4902,6 @@ namespace PSD.PSDGamepkg.JNS
         {
             if (type == 0)
             {
-                if (player.TokenExcl.Count >= 3)
-                {
-                    List<string> animals = player.TokenExcl.ToList();
-                    string sanimals = string.Join(",", animals);
-                    XI.RaiseGMessage("G0OJ," + player.Uid + ",1," + animals.Count + "," + sanimals);
-                    XI.RaiseGMessage("G0ON," + player.Uid + ",M," + animals.Count +
-                         "," + string.Join(",", animals.Select(p => p.Substring("M".Length))));
-                    XI.RaiseGMessage("G2TZ,0," + player.Uid + "," + sanimals);
-                }
                 ushort pop = XI.Board.RestMonPiles.Dequeue();
                 Monster mon = XI.LibTuple.ML.Decode(pop);
                 XI.RaiseGMessage("G0YM,5," + pop + ",0");
@@ -4922,7 +4911,16 @@ namespace PSD.PSDGamepkg.JNS
                 XI.RaiseGMessage("G2TZ," + player.Uid + ",0,M" + pop);
                 XI.RaiseGMessage("G0IJ," + player.Uid + ",1,1,M" + pop);
             }
-            else if (type == 1 || type == 2)
+            else if (type == 1)
+            {
+                List<string> animals = player.TokenExcl.ToList();
+                string sanimals = string.Join(",", animals);
+                XI.RaiseGMessage("G0OJ," + player.Uid + ",1," + animals.Count + "," + sanimals);
+                XI.RaiseGMessage("G0ON," + player.Uid + ",M," + animals.Count +
+                     "," + string.Join(",", animals.Select(p => p.Substring("M".Length))));
+                XI.RaiseGMessage("G2TZ,0," + player.Uid + "," + sanimals);
+            }
+            else if (type == 2 || type == 3)
             {
                 int agl = player.TokenExcl.Select(p => XI.LibTuple.ML.Decode(
                     ushort.Parse(p.Substring("M".Length)))).Sum(p => p.AGL) / 2;
@@ -4932,6 +4930,10 @@ namespace PSD.PSDGamepkg.JNS
                 else if (delta < 0)
                     XI.RaiseGMessage("G0IX," + player.Uid + ",0," + (-delta));
                 player.ROMUshort = (ushort)agl;
+
+                string[] blocks = fuse.Split(',');
+                int n = int.Parse(blocks[3]);
+                XI.RaiseGMessage((type == 2 ? "G0IA," : "G0OA,") + player.Uid + ",0," + n);
             }
         }
         public bool JNH1302Valid(Player player, int type, string fuse)

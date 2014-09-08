@@ -15,6 +15,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PSDRisoLib", "PSDRisoLib\PS
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PSDCenter", "PSDCenter\PSDCenter.csproj", "{A833540E-4B2B-4571-9B03-44CCF9E1E8A6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PSDDorm", "PSDDorm\PSDDorm.csproj", "{77E2581B-5D42-403E-810D-2AA46C2F9067}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -93,6 +95,16 @@ Global
 		{A833540E-4B2B-4571-9B03-44CCF9E1E8A6}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{A833540E-4B2B-4571-9B03-44CCF9E1E8A6}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{A833540E-4B2B-4571-9B03-44CCF9E1E8A6}.Release|x86.ActiveCfg = Release|Any CPU
+		{77E2581B-5D42-403E-810D-2AA46C2F9067}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{77E2581B-5D42-403E-810D-2AA46C2F9067}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{77E2581B-5D42-403E-810D-2AA46C2F9067}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{77E2581B-5D42-403E-810D-2AA46C2F9067}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{77E2581B-5D42-403E-810D-2AA46C2F9067}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{77E2581B-5D42-403E-810D-2AA46C2F9067}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{77E2581B-5D42-403E-810D-2AA46C2F9067}.Release|Any CPU.Build.0 = Release|Any CPU
+		{77E2581B-5D42-403E-810D-2AA46C2F9067}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{77E2581B-5D42-403E-810D-2AA46C2F9067}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{77E2581B-5D42-403E-810D-2AA46C2F9067}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

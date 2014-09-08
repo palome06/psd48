@@ -1463,7 +1463,7 @@ namespace PSD.PSDGamepkg.JNS
             XI.RaiseGMessage("G0YM,3," + pop + ",0");
             XI.Board.Monster1 = pop;
             UEchoCode r5ed = XI.HandleWithNPCEffect(XI.Board.Garden[to], npc, false);
-            if (r5ed != UEchoCode.END_ACTION && r5ed != UEchoCode.NO_OPTIONS)
+            if (r5ed == UEchoCode.END_ACTION)
                 XI.RaiseGMessage("G1YP," + player.Uid + "," + pop);
             
             if (XI.Board.Monster1 != 0) // In case the NPC has been taken away
@@ -2164,7 +2164,7 @@ namespace PSD.PSDGamepkg.JNS
                     {
                         ushort ut = ushort.Parse(revInput);
                         XI.RaiseGMessage("G0SN," + player.Uid + "," + lugCode + ",1," + ut);
-                        XI.RaiseGMessage("G0HQ,3," + player.Uid + "," + player.Uid + ",1,C" + ut);
+                        XI.RaiseGMessage("G0HQ,3," + player.Uid + "," + player.Uid + ",1," + ut);
                     }
                 }
                 if (lug.Capacities.Count > 0)

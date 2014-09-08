@@ -284,7 +284,7 @@ namespace PSD.ClientAo.Tips
             {
                 case FiveElement.AQUA: color = Colors.DeepSkyBlue; fiveText = "水"; break;
                 case FiveElement.AGNI: color = Colors.Red;fiveText = "火";  break;
-                case FiveElement.THUNDER: color = Colors.SlateBlue;fiveText = "雷";  break;
+                case FiveElement.THUNDER: color = Colors.Thistle; fiveText = "雷"; break;
                 case FiveElement.AERO: color = Colors.SpringGreen;fiveText = "风";  break;
                 case FiveElement.SATURN: color = Colors.Yellow;fiveText = "土";  break;
                 default: color = Colors.White;fiveText = "无属性"; break;

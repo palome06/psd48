@@ -1072,8 +1072,6 @@ namespace PSD.PSDGamepkg.JNS
                             g0zl += "," + py.Uid + "," + ut;
                         if (tux.Type == Tux.TuxType.FJ && !py.ArmorDisabled)
                             g0zl += "," + py.Uid + "," + ut;
-                        if (tux.Type == Tux.TuxType.XB && !py.LuggageDisabled)
-                            g0zl += "," + py.Uid + "," + ut;
                     }
                     py.SetEquipDisabled("GLT2", true);
                     //foreach (ushort ut in cards)
@@ -1106,8 +1104,6 @@ namespace PSD.PSDGamepkg.JNS
                             cards.Add(ut);
                         if (tux.Type == Tux.TuxType.FJ && py.ArmorDisabled)
                             cards.Add(ut);
-                        if (tux.Type == Tux.TuxType.XB && !py.LuggageDisabled)
-                            cards.Add(ut);
                     }
                     py.SetEquipDisabled("GLT2", false);
                     foreach (ushort ut in cards)
@@ -1116,8 +1112,6 @@ namespace PSD.PSDGamepkg.JNS
                         if (tux.Type == Tux.TuxType.WQ && !py.WeaponDisabled)
                             g0zs += "," + py.Uid + "," + ut;
                         if (tux.Type == Tux.TuxType.FJ && !py.ArmorDisabled)
-                            g0zs += "," + py.Uid + "," + ut;
-                        if (tux.Type == Tux.TuxType.XB && !py.LuggageDisabled)
                             g0zs += "," + py.Uid + "," + ut;
                     }
                 }
@@ -1766,7 +1760,7 @@ namespace PSD.PSDGamepkg.JNS
                 if (mon != null)
                     mon.RAMUshort = (ushort)player.Team;
                 string[] g1ev = fuse.Split(',');
-                XI.InnerGMessage("G1EV," + g1ev[1] + "," + g1ev[2], 151);
+                XI.InnerGMessage("G1EV," + g1ev[1] + "," + g1ev[2], 201);
             }
         }
         public bool GLT4ConsumeValid(Player player, int consumeType, int type, string fuse)
