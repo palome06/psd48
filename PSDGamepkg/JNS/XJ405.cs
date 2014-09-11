@@ -106,8 +106,15 @@ namespace PSD.PSDGamepkg.JNS
         }
         public bool JN10202Valid(Player player, int type, string fuse)
         {
-            return player.IsAlive && XI.Board.Garden.Values.Where(p => p.IsAlive &&
-                p.Team == player.OppTeam).Select(p => p.GetPetCount()).Sum() >= 3;
+            if (player.IsAlive && XI.Board.Garden.Values.Where(p => p.IsAlive &&
+                p.Team == player.OppTeam).Select(p => p.GetPetCount()).Sum() >= 3)
+            {
+                if (type == 0)
+                    return true;
+                else if (type == 1)
+                    return IsMathISOS("JN10202", player, fuse);
+            }
+            return false;
         }
         public void JN10202Action(Player player, int type, string fuse, string argst)
         {

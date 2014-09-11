@@ -563,10 +563,12 @@ namespace PSD.PSDGamepkg
                 while (dicts.Count > 0)
                 {
                     Base.VW.Msgs msg = WI.RecvInfRecvPending();
-                    MatchedPopFromLastUV(msg.From, msg.Msg);
-                    result.Add(msg.From, msg.Msg.Substring("V1,".Length));
-                    dicts.Remove(msg.From);
-                    RaiseGMessage("G2AS," + msg.From);
+                    if (MatchedPopFromLastUV(msg.From, msg.Msg))
+                    {
+                        result.Add(msg.From, msg.Msg.Substring("V1,".Length));
+                        dicts.Remove(msg.From);
+                        RaiseGMessage("G2AS," + msg.From);
+                    }
                 }
                 WI.RecvInfEnd();
             }
@@ -598,12 +600,16 @@ namespace PSD.PSDGamepkg
                     break;
                 if (msg.From == major)
                 {
-                    MatchedPopFromLastUV(msg.From, msg.Msg);
-                    string decision = msg.Msg.Substring("V4,".Length);
-                    MatchedPopFromLastUV(ExceptStaff(major), "V5,0");
-                    WI.Send("V5,0", ExceptStaff(major));
-                    WI.Live("V5,0");
-                    return msg.Msg.Substring("V4,".Length);
+                    if (MatchedPopFromLastUV(msg.From, msg.Msg))
+                    {
+                        string decision = msg.Msg.Substring("V4,".Length);
+                        if (MatchedPopFromLastUV(ExceptStaff(major), "V5,0"))
+                        {
+                            WI.Send("V5,0", ExceptStaff(major));
+                            WI.Live("V5,0");
+                        }
+                        return decision;
+                    }
                 }
                 else if (citizens.ContainsKey(msg.From))
                 {

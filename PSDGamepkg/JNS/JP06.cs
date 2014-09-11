@@ -2163,7 +2163,7 @@ namespace PSD.PSDGamepkg.JNS
                     if (revInput != VI.CinSentinel && !revInput.StartsWith("/"))
                     {
                         ushort ut = ushort.Parse(revInput);
-                        XI.RaiseGMessage("G0SN," + player.Uid + "," + lugCode + ",1," + ut);
+                        XI.RaiseGMessage("G0SN," + player.Uid + "," + lugCode + ",1,C" + ut);
                         XI.RaiseGMessage("G0HQ,3," + player.Uid + "," + player.Uid + ",1," + ut);
                     }
                 }
