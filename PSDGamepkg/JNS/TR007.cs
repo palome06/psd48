@@ -4795,9 +4795,23 @@ namespace PSD.PSDGamepkg.JNS
         public bool JNH1102Valid(Player player, int type, string fuse)
         {
             if (type == 0)
-                return player.Tux.Count > 0;
-            else if (type == 1 || type == 2 || type == 3)
-                return player.TokenFold.Count > 0;
+                return player.Tux.Count > 0 && XI.Board.IsAttendWar(player);
+            else if (type == 1)
+            {
+                if (player.TokenFold.Count > 0 && player.RAMUshort == 1)
+                {
+                    int idx = fuse.IndexOf(';');
+                    string[] g0cc = fuse.Substring(0, idx).Split(',');
+                    string tuxType = Util.Substring(fuse, idx + 1, fuse.IndexOf(',', idx + 1));
+                    ushort who = ushort.Parse(g0cc[1]);
+                    Player py = XI.Board.Garden[who];
+                    if (py != null && py.Team == player.OppTeam)
+                        return true;
+                }
+                return false;
+            }
+            else if (type == 2 || type == 3)
+                return player.TokenFold.Count > 0 || player.RAMUshort != 0;
             else
                 return false;
         }
@@ -4809,17 +4823,33 @@ namespace PSD.PSDGamepkg.JNS
                 int n = player.Tux.Count;
                 XI.RaiseGMessage("G0OT," + player.Uid + "," + n + "," + string.Join(",", ijs));
                 XI.RaiseGMessage("G0IJ," + player.Uid + ",4," + n + "," + string.Join(",", ijs));
+                player.RAMUshort = 1;
             }
             else if (type == 1)
             {
-                XI.RaiseGMessage("G0IA," + player.Uid + ",1," + player.TokenFold.Count);
-                XI.RaiseGMessage("G0OX," + player.Uid + ",1," + player.TokenFold.Count);
+                player.RAMUshort = 0;
+                int hdx = fuse.IndexOf(';');
+                string[] g0cc = Util.Substring(fuse, 0, hdx).Split(',');
+                int kdx = fuse.IndexOf(',', hdx);
+                string origin = Util.Substring(fuse, kdx + 1, -1);
+                if (origin.StartsWith("G"))
+                {
+                    string cardname = g0cc[4];
+                    int inType = int.Parse(Util.Substring(fuse, hdx + 1, kdx));
+                    Base.Card.Tux tux = XI.LibTuple.TL.EncodeTuxCode(cardname);
+                    int prior = tux.Priorities[inType];
+                    XI.InnerGMessage(origin, prior);
+                }
             }
             else if (type == 2 || type == 3)
             {
-                List<ushort> ijs = player.TokenFold.ToList();
-                XI.RaiseGMessage("G0OJ," + player.Uid + ",4," + ijs.Count + "," + string.Join(",", ijs));
-                XI.RaiseGMessage("G0IT," + player.Uid + "," + ijs.Count + "," + string.Join(",", ijs));
+                if (player.TokenFold.Count > 0)
+                {
+                    List<ushort> ijs = player.TokenFold.ToList();
+                    XI.RaiseGMessage("G0OJ," + player.Uid + ",4," + ijs.Count + "," + string.Join(",", ijs));
+                    XI.RaiseGMessage("G0IT," + player.Uid + "," + ijs.Count + "," + string.Join(",", ijs));
+                }
+                player.RAMUshort = 0;
             }
         }
         #endregion HL011 - ShuiGang
@@ -4991,7 +5021,20 @@ namespace PSD.PSDGamepkg.JNS
                 foreach (Tux tux in XI.LibTuple.TL.Firsts.Where(p => p.Type == Tux.TuxType.ZP))
                     player.cz01PriceDict.Remove(tux.Code);
             }
-            else if (type == 2) { }
+            else if (type == 2) {
+                int hdx = fuse.IndexOf(';');
+                string[] g0cc = Util.Substring(fuse, 0, hdx).Split(',');
+                int kdx = fuse.IndexOf(',', hdx);
+                string origin = Util.Substring(fuse, kdx + 1, -1);
+                if (origin.StartsWith("G"))
+                {
+                    string cardname = g0cc[4];
+                    int inType = int.Parse(Util.Substring(fuse, hdx + 1, kdx));
+                    Base.Card.Tux tux = XI.LibTuple.TL.EncodeTuxCode(cardname);
+                    int prior = tux.Priorities[inType];
+                    XI.InnerGMessage(origin, prior);
+                }
+            }
         }
         public bool JNH1402Valid(Player player, int type, string fuse)
         {

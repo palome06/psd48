@@ -41,7 +41,7 @@ namespace PSD.PSDGamepkg
             //RaiseGMessage("G0HQ,2,4,0,51,26");//33
             //RaiseGMessage("G0HQ,2,1,0,0,17");
 
-            RaiseGMessage("G0HQ,2,1,0,0,10");
+            RaiseGMessage("G0HQ,2,2,0,0,88,44");
             //RaiseGMessage("G0HQ,2,5,0,0,77");
             //RaiseGMessage("G0IJ,5,0,4");
             //RaiseGMessage("G0IX,5,0,2");
@@ -777,13 +777,13 @@ namespace PSD.PSDGamepkg
                     case "TM":
                         WI.BCast(rstage + ",0");
                         Board.InFight = false; Board.InFightThrough = false;
-                        Board.Battler = null; Board.Supporter = null; Board.Hinder = null;
                         RunQuadStage(rstage, 0);
                         rstage = "R" + rounder + "ED"; break;
                     case "ED":
                         {
                             WI.BCast(rstage + ",0");
                             Board.InFight = false; Board.InFightThrough = false;
+                            Board.Battler = null; Board.Supporter = null; Board.Hinder = null;
                             if (Board.MonPiles.Count <= 0)
                                 RaiseGMessage("G1WJ,0");
                             RecycleMonster(false, false);

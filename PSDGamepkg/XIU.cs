@@ -627,23 +627,6 @@ namespace PSD.PSDGamepkg
         		citizenDict[ut] = citizenMsg;
     		return MajorAsyncInput(major, majorMsg, citizenDict, handleCitizenAdvices);
         }
-        // public bool MultiSyncReply(IDictionary<ushort, string> dicts)
-        // {
-        //     try
-        //     {
-        //         foreach (var pair in dicts)
-        //             WI.Send("V2," + pair.Value, 0, pair.Key);
-        //         WI.RecvInfStart();
-        //         while (dicts.Count > 0)
-        //         {
-        //             Base.VW.Msgs msg = WI.RecvInfRecvPending();
-        //             dicts.Remove(msg.From);
-        //         }
-        //         WI.RecvInfEnd();
-        //     }
-        //     catch (Exception) { return false; }
-        //     return true;
-        // }
         private void HandleYMessage(string msg, ushort who)
         {
             if (msg.StartsWith("Y1,"))

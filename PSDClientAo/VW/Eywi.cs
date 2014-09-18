@@ -206,19 +206,19 @@ namespace PSD.ClientAo.VW
                     string[] args = line.Split(',');
                     if (args[2] == "0")
                         args[2] = args[1];
-                    args[2] = ",0," + args[2];
+                    args[2] = "0," + args[2];
                     line = string.Join(",", args);
                 }
                 else if (line.StartsWith("E0CD"))
                 {
                     string[] args = line.Split(',');
-                    args[1] = args[1] + ",0,";
+                    args[1] = args[1] + ",0";
                     line = string.Join(",", args);
                 }
                 else if (line.StartsWith("E0CE"))
                 {
                     string[] args = line.Split(',');
-                    args[1] = args[1] + ",0,";
+                    args[1] = args[1] + ",0";
                     line = string.Join(",", args);
                 }
                 else if (line.StartsWith("E0ZB"))

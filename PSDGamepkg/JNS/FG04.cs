@@ -357,7 +357,8 @@ namespace PSD.PSDGamepkg.JNS
             if (consumeType == 0)
             {
                 string[] g0ht = fuse.Split(',');
-                for (int i = 1; i < g0ht.Length; i += 2) {
+                for (int i = 1; i < g0ht.Length; i += 2)
+                {
                     ushort ut = ushort.Parse(g0ht[i]);
                     int n = int.Parse(g0ht[i + 1]);
                     if (ut == player.Uid && n > 0)
@@ -371,7 +372,8 @@ namespace PSD.PSDGamepkg.JNS
             if (consumeType == 0)
             {
                 string[] g0ht = fuse.Split(',');
-                for (int i = 1; i < g0ht.Length; i += 2) {
+                for (int i = 1; i < g0ht.Length; i += 2)
+                {
                     ushort ut = ushort.Parse(g0ht[i]);
                     int n = int.Parse(g0ht[i + 1]);
                     if (ut == player.Uid && n > 0)
@@ -657,16 +659,19 @@ namespace PSD.PSDGamepkg.JNS
             if (XI.Board.Hinder.IsValidPlayer())
                 Harm("GT01", XI.Board.Hinder, 3);
         }
-        public void GT02Debut() {
+        public void GT02Debut()
+        {
             List<Player> pys = XI.Board.Garden.Values.Where(p => p.IsAlive &&
                 !XI.Board.IsAttendWar(p) && p.Tux.Count > 0).ToList();
             if (pys.Any())
                 Harm("GT02", pys, pys.Select(p => p.Tux.Count).ToList());
         }
-        public void GT02IncrAction(Player player) {
+        public void GT02IncrAction(Player player)
+        {
             XI.RaiseGMessage("G0IX," + player.Uid + ",0,1");
         }
-        public void GT02DecrAction(Player player) {
+        public void GT02DecrAction(Player player)
+        {
             XI.RaiseGMessage("G0OX," + player.Uid + ",0,1");
         }
 
@@ -1533,28 +1538,24 @@ namespace PSD.PSDGamepkg.JNS
             Player r = XI.Board.Rounder, h = XI.Board.Hinder;
             if (h.IsValidPlayer())
                 Harm("GST4", h, 3);
-            if (r.Tux.Count > 0)
+            string ques = XI.AsyncInput(r.Uid, "#您是否弃掉所有手牌解除定身？##是##否,Y2", "GST4WinEff", "0");
+            if (ques == "1")
             {
-                string ques = XI.AsyncInput(r.Uid, "#您是否弃掉所有手牌解除定身？##是##否,Y2", "GST4WinEff", "0");
-                if (ques == "1")
-                {
+                if (r.Tux.Count > 0)
                     XI.RaiseGMessage("G0DH," + r.Uid + ",2," + r.Tux.Count);
-                    XI.RaiseGMessage("G0DS," + r.Uid + ",1");
-                }
+                XI.RaiseGMessage("G0DS," + r.Uid + ",1");
             }
         }
         public void GST4LoseEff()
         {
             Player r = XI.Board.Rounder, h = XI.Board.Hinder;
             Harm("GST4", r, 3);
-            if (h.Tux.Count > 0)
+            string ques = XI.AsyncInput(h.Uid, "#您是否弃掉所有手牌解除定身？##是##否,Y2", "GST4LoseEff", "0");
+            if (ques == "1")
             {
-                string ques = XI.AsyncInput(h.Uid, "#您是否弃掉所有手牌解除定身？##是##否,Y2", "GST4LoseEff", "0");
-                if (ques == "1")
-                {
+                if (h.Tux.Count > 0)
                     XI.RaiseGMessage("G0DH," + h.Uid + ",2," + h.Tux.Count);
-                    XI.RaiseGMessage("G0DS," + h.Uid + ",1");
-                }
+                XI.RaiseGMessage("G0DS," + h.Uid + ",1");
             }
         }
         public void GST4ConsumeAction(Player player, int consumeType, int type, string fuse, string argst)
@@ -2003,7 +2004,7 @@ namespace PSD.PSDGamepkg.JNS
                 invs.Add(XI.Board.Hinder);
             invs = XI.Board.Garden.Values.Where(p => p.IsAlive).Except(invs).ToList();
             if (invs.Count > 0)
-            Harm("GTT3", invs, 2);
+                Harm("GTT3", invs, 2);
         }
         public void GTT4Debut()
         {

@@ -2156,7 +2156,7 @@ namespace PSD.PSDGamepkg.JNS
             ushort lugCode = XI.LibTuple.TL.UniqueEquipSerial("XBT4");
             if (lug != null && lug.Capacities.Count > 0)
             {
-                if (lug.Capacities.Count > 0 && player.IsAlive)
+                if (player.IsAlive)
                 {
                     string revInput = XI.AsyncInput(player.Uid, "#保留,/C1(p" +
                         string.Join("p", lug.Capacities.Select(p => p.Substring("C".Length))), "XBT4DelAction", "0");
@@ -2167,14 +2167,11 @@ namespace PSD.PSDGamepkg.JNS
                         XI.RaiseGMessage("G0HQ,3," + player.Uid + "," + player.Uid + ",1," + ut);
                     }
                 }
-                if (lug.Capacities.Count > 0)
-                {
-                    List<string> cap = lug.Capacities.ToList();
-                    XI.RaiseGMessage("G0SN," + player.Uid + "," + lugCode + ",1," + string.Join(",", cap));
-                    XI.RaiseGMessage("G0ON," + player.Uid + ",C," + lug.Capacities.Count + ","
-                        + string.Join(",", cap.Select(p => p.Substring("C".Length))));
-                    XI.RaiseGMessage("G2TZ,0," + player.Uid + "," + string.Join(",", cap));
-                }
+                List<string> cap = lug.Capacities.ToList();
+                XI.RaiseGMessage("G0SN," + player.Uid + "," + lugCode + ",1," + string.Join(",", cap));
+                XI.RaiseGMessage("G0ON," + player.Uid + ",C," + cap.Count + ","
+                    + string.Join(",", cap.Select(p => p.Substring("C".Length))));
+                XI.RaiseGMessage("G2TZ,0," + player.Uid + "," + string.Join(",", cap));
             }
         }
         public bool XBT4ConsumeValid(Player player, int consumeType, int type, string fuse)

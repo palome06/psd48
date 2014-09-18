@@ -1997,8 +1997,8 @@ namespace PSD.ClientZero
                             }
                             else
                             {
-                                int count1 = int.Parse(args[3]);
-                                int count2 = int.Parse(args[4]);
+                                int count1 = int.Parse(args[4]);
+                                int count2 = int.Parse(args[5]);
                                 VI.Cout(Uid, "{0}的{1}数增加{2}，现在为{3}.", zd.Player(who),
                                     zd.HeroFolderAlias(Z0D[who].SelectHero), count1, count2);
                                 Z0D[who].FolderCount += count1;
