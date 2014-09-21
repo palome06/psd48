@@ -94,11 +94,14 @@
     <Resource Include="Resources\Token\TKH1904.png" />
     <Resource Include="Resources\Token\TKH1905.png" />
     <Resource Include="Resources\Token\TR405.png" />
+    <Resource Include="Resources\Token\TRH05.png" />
     <Resource Include="Resources\Token\TRH19.png" />
     <Resource Include="Resources\Token\TRS05.png" />
     <Resource Include="Resources\Token\TRT08.png" />
     <Resource Include="Resources\Token\TRH02.png" />
     <Resource Include="Resources\Token\TAH0301.png" />
+    <Resource Include="Resources\Token\TAH0401.png" />
+    <Resource Include="Resources\Token\TAH0501.png" />
     <Resource Include="Resources\Token\TAH0601.png" />
     <Resource Include="Resources\Token\TAH1401.png" />
     <Resource Include="Resources\Token\TKT1901.png" />
@@ -638,9 +641,24 @@
   <ItemGroup>
     <Resource Include="Resources\NameBar\Name000.png" />
     <Resource Include="Resources\NameBar\NameHL001.png" />
+    <Resource Include="Resources\NameBar\NameHL002.png" />
     <Resource Include="Resources\NameBar\NameHL003.png" />
+    <Resource Include="Resources\NameBar\NameHL004.png" />
+    <Resource Include="Resources\NameBar\NameHL005.png" />
+    <Resource Include="Resources\NameBar\NameHL006.png" />
+    <Resource Include="Resources\NameBar\NameHL007.png" />
     <Resource Include="Resources\NameBar\NameHL008.png" />
+    <Resource Include="Resources\NameBar\NameHL009.png" />
+    <Resource Include="Resources\NameBar\NameHL010.png" />
+    <Resource Include="Resources\NameBar\NameHL011.png" />
     <Resource Include="Resources\NameBar\NameHL012.png" />
+    <Resource Include="Resources\NameBar\NameHL013.png" />
+    <Resource Include="Resources\NameBar\NameHL014.png" />
+    <Resource Include="Resources\NameBar\NameHL015.png" />
+    <Resource Include="Resources\NameBar\NameHL016.png" />
+    <Resource Include="Resources\NameBar\NameHL017.png" />
+    <Resource Include="Resources\NameBar\NameHL018.png" />
+    <Resource Include="Resources\NameBar\NameHL019.png" />
     <Resource Include="Resources\NameBar\NameSP301.png" />
     <Resource Include="Resources\NameBar\NameTR001.png" />
     <Resource Include="Resources\NameBar\NameTR002.png" />
@@ -691,13 +709,6 @@
     <Resource Include="Resources\NameBar\NameXJ506.png" />
     <Resource Include="Resources\NameBar\NameXJ507.png" />
     <Resource Include="Resources\NameBar\NameXJ508.png" />
-    <Resource Include="Resources\NameBar\NameHL002.png" />
-    <Resource Include="Resources\NameBar\NameHL006.png" />
-    <Resource Include="Resources\NameBar\NameHL014.png" />
-    <Resource Include="Resources\NameBar\NameHL016.png" />
-    <Resource Include="Resources\NameBar\NameHL017.png" />
-    <Resource Include="Resources\NameBar\NameHL018.png" />
-    <Resource Include="Resources\NameBar\NameHL019.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Logo\CananCountdown12.png" />
@@ -740,6 +751,8 @@
     <Resource Include="Resources\Heros\19001.png" />
     <Resource Include="Resources\Heros\19002.png" />
     <Resource Include="Resources\Heros\19003.png" />
+    <Resource Include="Resources\Heros\19004.png" />
+    <Resource Include="Resources\Heros\19005.png" />
     <Resource Include="Resources\Heros\19006.png" />
     <Resource Include="Resources\Heros\19007.png" />
     <Resource Include="Resources\Heros\19008.png" />
@@ -756,17 +769,11 @@
     <Resource Include="Resources\Heros\19019.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Resources\NameBar\NameHL007.png" />
-    <Resource Include="Resources\NameBar\NameHL009.png" />
-    <Resource Include="Resources\NameBar\NameHL010.png" />
-    <Resource Include="Resources\NameBar\NameHL011.png" />
-    <Resource Include="Resources\NameBar\NameHL013.png" />
-    <Resource Include="Resources\NameBar\NameHL015.png" />
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="Resources\Card\Heros\HL001.png" />
     <Resource Include="Resources\Card\Heros\HL002.png" />
     <Resource Include="Resources\Card\Heros\HL003.png" />
+    <Resource Include="Resources\Card\Heros\HL004.png" />
+    <Resource Include="Resources\Card\Heros\HL005.png" />
     <Resource Include="Resources\Card\Heros\HL006.png" />
     <Resource Include="Resources\Card\Heros\HL007.png" />
     <Resource Include="Resources\Card\Heros\HL008.png" />

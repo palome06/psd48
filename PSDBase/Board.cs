@@ -45,6 +45,8 @@ namespace PSD.Base
         public bool InFight { set; get; }
         // Whether in a fight/battle, consequence included
         public bool InFightThrough { set; get; }
+        // Whether the debut action of monster is valid
+        public bool IsMonsterDebut { set; get; }
         // Bonus Pool Value of Rounder Side
         public int RPool { get; set; }
         // Bonus Pool Value of Opponent Side
@@ -221,6 +223,7 @@ namespace PSD.Base
             UseCardRound = 0; ClockWised = true;
             JumpTable = new Dictionary<string, string>();
             FinalAkaScore = 0; FinalAoScore = 0;
+            IsMonsterDebut = false;
         }
         // Create a lumberjack of monster/NPC, act as normal humans
         public static Player Lumberjack(Card.NMB nmb, ushort orgCode)

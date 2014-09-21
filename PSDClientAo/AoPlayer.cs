@@ -989,7 +989,7 @@ namespace PSD.ClientAo
                         {
                             pb.tkTake.Visibility = System.Windows.Visibility.Visible;
                             Base.Card.Hero hero = Tuple.HL.InstanceHero(SelectHero);
-                            if (Coss != 0)
+                            if (string.IsNullOrEmpty(hero.TokenAlias) && Coss != 0)
                             {
                                 Base.Card.Hero cossHero = Tuple.HL.InstanceHero(Coss);
                                 if (cossHero != null)
@@ -1025,7 +1025,7 @@ namespace PSD.ClientAo
                         {
                             pb.awTake.Visibility = System.Windows.Visibility.Visible;
                             Base.Card.Hero hero = Tuple.HL.InstanceHero(SelectHero);
-                            if (Coss != 0)
+                            if (string.IsNullOrEmpty(hero.AwakeAlias) && Coss != 0)
                             {
                                 Base.Card.Hero cossHero = Tuple.HL.InstanceHero(Coss);
                                 if (cossHero != null)
@@ -1034,8 +1034,6 @@ namespace PSD.ClientAo
                             if (hero != null)
                             {
                                 string rename = "snapTA" + hero.Ofcode;
-                                if (Coss != 0)
-                                    rename = "snapTK" + Tuple.HL.InstanceHero(Coss).Ofcode;
                                 pb.awTake.ToolTip = Tips.IchiDisplay.GetExspTip(Tuple, "TA" + hero.Ofcode);
                                 if (pb.awTake.ToolTip == null)
                                     pb.awTake.ToolTip = hero.AwakeAlias;
@@ -1118,7 +1116,7 @@ namespace PSD.ClientAo
         public void InsPlayerTar(List<ushort> uts)
         {
             Base.Card.Hero hero = Tuple.HL.InstanceHero(SelectHero);
-            if (Coss != 0)
+            if (string.IsNullOrEmpty(hero.PlayerTarAlias) && Coss != 0)
             {
                 Base.Card.Hero cossHero = Tuple.HL.InstanceHero(Coss);
                 if (cossHero != null)
@@ -1138,7 +1136,7 @@ namespace PSD.ClientAo
                                 Image img = new Image() { Source = imgsrc, Height = 18, Width = 18 };
                                 img.ToolTip = Tips.IchiDisplay.GetExspTip(Tuple, "TR" + hero.Ofcode);
                                 if (img.ToolTip == null)
-                                    img.ToolTip = hero.TokenAlias;
+                                    img.ToolTip = hero.PlayerTarAlias;
                                 spNewTarget.Children.Add(img);
                             }
                         }
@@ -1149,7 +1147,7 @@ namespace PSD.ClientAo
         public void DelPlayerTar(List<ushort> uts)
         {
             Base.Card.Hero hero = Tuple.HL.InstanceHero(SelectHero);
-            if (Coss != 0)
+            if (string.IsNullOrEmpty(hero.PlayerTarAlias) && Coss != 0)
             {
                 Base.Card.Hero cossHero = Tuple.HL.InstanceHero(Coss);
                 if (cossHero != null)

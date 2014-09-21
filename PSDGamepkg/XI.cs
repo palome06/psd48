@@ -83,7 +83,8 @@ namespace PSD.PSDGamepkg
             //19016, 17007, 17020, 19011, 19008, 10601
             //19014, 17005, 17020, 19011, 19008, 19016
             //10303, 10105, 10102, 10601, 17018, 19013
-            19011, 19003, 10102, 10502, 17018, 19013
+            //19011, 19003, 10601, 10502, 17018, 19013
+            19004, 10302, 19001, 10206, 10504, 19011
         };
 
         #region Memeber Declaration & Constructor
@@ -603,11 +604,11 @@ namespace PSD.PSDGamepkg
         // add newcomers skill back to pocket to register it in runquad
         private void AddZhuSkillBackward(List<SKE> pocket, string zero, bool cond)
         {
-            foreach (Player player in Board.Garden.Values)
+            foreach (Player player in Board.Garden.Values.Where(p => p.IsZhu))
             {
-                if (player.IsZhu)
+                Base.Card.Hero selHero = LibTuple.HL.InstanceHero(player.SelectHero);
+                if (selHero != null)
                 {
-                    Base.Card.Hero selHero = LibTuple.HL.InstanceHero(player.SelectHero);
                     foreach (string skillStr in selHero.Skills)
                     {
                         Skill skill = LibTuple.SL.EncodeSkill(skillStr);
@@ -878,7 +879,7 @@ namespace PSD.PSDGamepkg
                 {
                     Player player = Board.Rounder;
                     ushort mon1 = Board.Monster1;
-                    if (mon1 != 0 && Board.InFightThrough)
+                    if (mon1 != 0 && Board.InFightThrough && Board.IsMonsterDebut)
                     {
                         Base.Card.Monster mon = LibTuple.ML.Decode(mon1);
                         if (mon != null && mon == mt && mt.ConsumeValid(player, consumeType, ske.InType, ske.Fuse))

@@ -36,6 +36,7 @@ namespace PSD.Base.Card
         public string ExCardsAlias { set; get; }
         public string AwakeAlias { set; get; }
         public string FolderAlias { set; get; }
+        public string GuestAlias { set; get; }
 
         public Hero(string name, int avatar, int group, char gender, ushort hp, ushort str, ushort dex,
             List<string> spouses, List<int> isomorphic, int archetype, List<string> skills, string bio)
@@ -155,7 +156,7 @@ namespace PSD.Base.Card
                     List<string> skill = string.IsNullOrEmpty(skills) ?
                         new List<string>() : skills.Split(',').ToList();
                     string[] aliass = (data["ALIAS"] as string ?? "").Split(',');
-                    string[] alias = new string[6];
+                    string[] alias = new string[7];
                     for (int i = 0; i < aliass.Length; i += 2)
                     {
                         switch (aliass[i])
@@ -166,6 +167,7 @@ namespace PSD.Base.Card
                             case "E": alias[3] = aliass[i + 1]; break;
                             case "A": alias[4] = aliass[i + 1]; break;
                             case "F": alias[5] = aliass[i + 1]; break;
+                            case "V": alias[6] = aliass[i + 1]; break;
                         }
                     }
                     string bio = data["BIO"] as string ?? "";
@@ -177,7 +179,8 @@ namespace PSD.Base.Card
                         PlayerTarAlias = alias[2],
                         ExCardsAlias = alias[3],
                         AwakeAlias = alias[4],
-                        FolderAlias = alias[5]
+                        FolderAlias = alias[5],
+                        GuestAlias = alias[6]
                     };
                     dicts.Add(code, hero);
                 }

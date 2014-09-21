@@ -91,5 +91,39 @@ namespace PSD.PSDGamepkg.Artiad
                     raiseG("G0OJ," + py.Uid + ",2,1," + player.Uid);
             }
         }
+
+        public static void IncrGuestPlayer(Player player, Hero guest, XI xi)
+        {
+            List<string> skills = new List<string>();
+            foreach (string skstr in guest.Skills)
+            {
+                Skill skill = xi.LibTuple.SL.EncodeSkill(skstr);
+                if (!skill.IsChange)
+                    skills.Add(skill.Code);
+            }
+            if (skills.Count > 0)
+                xi.RaiseGMessage("G0IS," + player.Uid + ",1," + string.Join(",", skills));
+        }
+
+        public static void DecrGuestPlayer(Player player, Hero guest, XI xi)
+        {
+            List<ushort> excds = new List<ushort>();
+            if (player.ExEquip != 0)
+                excds.Add(player.ExEquip);
+            excds.AddRange(player.ExCards);
+            if (excds.Count > 0)
+                xi.RaiseGMessage("G0QZ," + player.Uid + "," + string.Join(",", excds));
+            ErasePlayerToken(player, xi.Board, xi.RaiseGMessage);
+
+            List<string> skills = new List<string>();
+            foreach (string skstr in guest.Skills)
+            {
+                Skill skill = xi.LibTuple.SL.EncodeSkill(skstr);
+                if (!skill.IsChange)
+                    skills.Add(skill.Code);
+            }
+            if (skills.Count > 0)
+                xi.RaiseGMessage("G0OS," + player.Uid + ",1," + string.Join(",", skills));
+        }
     }
 }

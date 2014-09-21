@@ -2168,10 +2168,13 @@ namespace PSD.PSDGamepkg.JNS
                     }
                 }
                 List<string> cap = lug.Capacities.ToList();
-                XI.RaiseGMessage("G0SN," + player.Uid + "," + lugCode + ",1," + string.Join(",", cap));
-                XI.RaiseGMessage("G0ON," + player.Uid + ",C," + cap.Count + ","
-                    + string.Join(",", cap.Select(p => p.Substring("C".Length))));
-                XI.RaiseGMessage("G2TZ,0," + player.Uid + "," + string.Join(",", cap));
+                if (cap.Count > 0)
+                {
+                    XI.RaiseGMessage("G0SN," + player.Uid + "," + lugCode + ",1," + string.Join(",", cap));
+                    XI.RaiseGMessage("G0ON," + player.Uid + ",C," + cap.Count + ","
+                        + string.Join(",", cap.Select(p => p.Substring("C".Length))));
+                    XI.RaiseGMessage("G2TZ,0," + player.Uid + "," + string.Join(",", cap));
+                }
             }
         }
         public bool XBT4ConsumeValid(Player player, int consumeType, int type, string fuse)

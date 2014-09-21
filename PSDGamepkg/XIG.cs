@@ -35,8 +35,12 @@ namespace PSD.PSDGamepkg
             //    past = new HashSet<string>();
             string zero = Util.Substring(cmd, 0, cmd.IndexOf(','));
             List<SkTriple> _pocket;
-            if (!sk02.TryGetValue(zero, out _pocket)) { return; }
-            else if (_pocket.Count == 0) { return; }
+            if (!sk02.TryGetValue(zero, out _pocket) || _pocket.Count == 0)
+            {
+                foreach (Player py in Board.Garden.Values)
+                    py.IsZhu = false;
+                return;
+            }
             List<SKE> pocket = ParseFromSKTriples(_pocket, cmd, false);
 
             bool[] involved = new bool[Board.Garden.Count + 1];
@@ -1296,12 +1300,12 @@ namespace PSD.PSDGamepkg
                         }
                         Board.HeroPiles.Remove(heroNum);
                         Board.HeroDises.Remove(heroNum);
+                        WI.BCast("E0IY," + cmdrst);
                         if (changeType == 0 || changeType == 2)
                         {
                             if (hero.Skills.Count > 0)
                                 RaiseGMessage("G0IS," + player.Uid + ",0," + string.Join(",", hero.Skills));
                         }
-                        WI.BCast("E0IY," + cmdrst);
                         string zs = "";
                         if (player.Weapon != 0)
                             zs += "," + player.Uid + "," + player.Weapon;
@@ -3088,50 +3092,15 @@ namespace PSD.PSDGamepkg
                         Player py = Board.Garden[ut];
                         py.Coss.Push(hero);
                         WI.BCast("E0IV," + ut + "," + hero);
-                        Hero hro = LibTuple.HL.InstanceHero(hero);
-                        if (hro != null)
-                        {
-                            List<string> skills = new List<string>();
-                            foreach (string skstr in hro.Skills)
-                            {
-                                Skill skill = LibTuple.SL.EncodeSkill(skstr);
-                                if (!skill.IsChange)
-                                    skills.Add(skill.Code);
-                            }
-                            if (skills.Count > 0)
-                                RaiseGMessage("G0IS," + ut + ",1," + string.Join(",", skills));
-                        }
                     }
                     break;
                 case "G0OV":
                     {
                         ushort ut = ushort.Parse(args[1]);
-                        Player player = Board.Garden[ut];
-                        int hero = player.Coss.Pop();
-                        int next = player.Coss.Count > 0 ? player.Coss.Peek() : 0;
+                        Player py = Board.Garden[ut];
+                        int hero = py.Coss.Pop();
+                        int next = py.Coss.Count > 0 ? py.Coss.Peek() : 0;
                         WI.BCast("E0OV," + ut + "," + hero + "," + next);
-
-                        List<ushort> excds = new List<ushort>();
-                        if (player.ExEquip != 0)
-                            excds.Add(player.ExEquip);
-                        excds.AddRange(player.ExCards);
-                        if (excds.Count > 0)
-                            RaiseGMessage("G0QZ," + player.Uid + "," + string.Join(",", excds));
-                        Artiad.ContentRule.ErasePlayerToken(player, Board, RaiseGMessage);
-
-                        Hero hro = LibTuple.HL.InstanceHero(hero);
-                        if (hro != null)
-                        {
-                            List<string> skills = new List<string>();
-                            foreach (string skstr in hro.Skills)
-                            {
-                                Skill skill = LibTuple.SL.EncodeSkill(skstr);
-                                if (!skill.IsChange)
-                                    skills.Add(skill.Code);
-                            }
-                            if (skills.Count > 0)
-                                RaiseGMessage("G0OS," + ut + ",1," + string.Join(",", skills));
-                        }
                     }
                     break;
                 case "G0PB":

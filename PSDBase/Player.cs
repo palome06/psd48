@@ -40,10 +40,13 @@ namespace PSD.Base
         public int STRa { set { mSTRa = value; } get { return mSTRa >= 0 ? mSTRa : 0; }}
         public int STRb { set { mSTRb = value; } get { return mSTRb >= 0 ? mSTRb : 0; }}
         public int STRc { set { mSTRc = (value >= 0 ? value : 0); } get { return mSTRc; } }
+        // STR value got from the hero card, might decrease because of skill
+        public int STRh { set; get; }
 
         public int DEXa { set { mDEXa = value; } get { return mDEXa >= 0 ? mDEXa : 0; }}
         public int DEXb { set { mDEXb = value; } get { return mDEXb >= 0 ? mDEXb : 0; }}
         public int DEXc { set { mDEXc = (value >= 0 ? value : 0); } get { return mDEXc; } }
+        public int DEXh { set; get; }
 
         public int STR { get { return SDcSet ? STRc : (SDaSet ? STRa : STRb ); } }
         public int DEX { get { return SDcSet ? DEXc : (SDaSet ? DEXa : DEXb ); } }
@@ -273,8 +276,8 @@ namespace PSD.Base
         public void InitFromHero(Base.Card.Hero hero, bool reset, bool sdaset, bool sdcset)
         {
             Gender = hero.Gender;
-            STRb = hero.STR;
-            DEXb = hero.DEX;
+            STRh = STRb = hero.STR;
+            DEXh = DEXb = hero.DEX;
             SDaSet = sdaset; SDcSet = sdcset;
             STRi = 0; DEXi = 0;
             Skills.Clear();

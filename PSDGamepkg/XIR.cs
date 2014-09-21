@@ -41,7 +41,7 @@ namespace PSD.PSDGamepkg
             //RaiseGMessage("G0HQ,2,4,0,51,26");//33
             //RaiseGMessage("G0HQ,2,1,0,0,17");
 
-            RaiseGMessage("G0HQ,2,2,0,0,88,44");
+            //RaiseGMessage("G0HQ,2,2,0,0,88,44");
             //RaiseGMessage("G0HQ,2,5,0,0,77");
             //RaiseGMessage("G0IJ,5,0,4");
             //RaiseGMessage("G0IX,5,0,2");
@@ -49,7 +49,7 @@ namespace PSD.PSDGamepkg
             //garden[1].Pets[3] = 16;
             //garden[1].Pets[4] = 20;
             //garden[2].Pets[0] = 4;
-            //Board.MonPiles.PushBack(7);
+            //Board.MonPiles.PushBack(13);
             //Board.MonPiles.PushBack(1012);
             //Board.MonPiles.PushBack(1);
             //RaiseGMessage("G0HC,0,1,19");
@@ -73,7 +73,8 @@ namespace PSD.PSDGamepkg
             //Board.EvePiles.PushBack(29);
             ////Board.EvePiles.PushBack(1);
             //Board.EvePiles.PushBack(22);
-            //Board.EvePiles.PushBack(6);
+            Board.EvePiles.PushBack(8);
+            Board.EvePiles.PushBack(8);
             //Board.EvePiles.PushBack(30);
             //Board.RestNPCPiles.PushBack(1047);
             //Board.EvePiles.PushBack(23);
@@ -595,6 +596,7 @@ namespace PSD.PSDGamepkg
                         RunQuadStage(rstage, 0);
                         WI.BCast(rstage + ",1");
                         //Board.Battler.Debut();
+                        Board.IsMonsterDebut = true;
                         LibTuple.ML.Decode(Board.Monster1).Debut();
                         rstage = "R" + rounder + "PD"; break;
                     case "PD":
@@ -842,7 +844,11 @@ namespace PSD.PSDGamepkg
         {
             var garden = Board.Garden;
             if (!sk02.ContainsKey(zero))
+            {
+                foreach (Player py in Board.Garden.Values)
+                    py.IsZhu = false;
                 return false;
+            }
             List<SKE> pocket = ParseFromSKTriples(sk02[zero], zero, (sina & 4) != 0);
 
             bool[] involved = new bool[garden.Count + 1];
@@ -917,7 +923,11 @@ namespace PSD.PSDGamepkg
         {
             var garden = Board.Garden;
             if (!sk02.ContainsKey(zero))
+            {
+                foreach (Player py in Board.Garden.Values)
+                    py.IsZhu = false;
                 return false;
+            }
             List<SKE> pocket = ParseFromSKTriples(sk02[zero], zero, false);
 
             bool[] involved = new bool[garden.Count + 1];
@@ -1041,7 +1051,7 @@ namespace PSD.PSDGamepkg
             if (Board.Monster1 != 0)
             {
                 Monster mon1 = LibTuple.ML.Decode(NMBLib.OriginalMonster(Board.Monster1));
-                if (mon1 != null)
+                if (mon1 != null && Board.IsMonsterDebut)
                     mon1.Curtain();
                 if (!zero1)
                 {
@@ -1070,6 +1080,7 @@ namespace PSD.PSDGamepkg
                 }
                 Board.Monster2 = 0;
             }
+            Board.IsMonsterDebut = false;
         }
         // Handle With NPC
         public UEchoCode HandleWithNPCEffect(Player player, NPC npc, bool watchValid)

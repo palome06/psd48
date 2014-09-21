@@ -1473,11 +1473,8 @@ namespace PSD.PSDGamepkg.JNS
             else if (type == 1)
             {
                 VI.Cout(0, "云天河基础命中数值变为0.");
-                Base.Card.Hero hero = XI.LibTuple.HL.InstanceHero(player.SelectHero);
-                if (hero != null)
-                    XI.RaiseGMessage("G0OX," + player.Uid + ",0," + hero.DEX);
-                else
-                    XI.RaiseGMessage("G0OX," + player.Uid + ",0,6");
+                if (player.DEXh > 0)
+                    XI.RaiseGMessage("G0OX," + player.Uid + ",0," + player.DEXh);
                 player.ROMUshort = 2;
             }
         }
@@ -1931,6 +1928,7 @@ namespace PSD.PSDGamepkg.JNS
         {
             if (type == 0)
             {
+                bool isSet = false; 
                 int idx = args.IndexOf(',');
                 if (idx >= 0)
                 {
@@ -1962,31 +1960,13 @@ namespace PSD.PSDGamepkg.JNS
                             jdx += (n + 4);
                         }
                         if (nfuse.Length > 0)
+                        {
+                            isSet = true;
                             XI.InnerGMessage(blocks[0] + nfuse, 120);
-                        //while (jdx < blocks.Length)
-                        //{
-                        //    ushort who = ushort.Parse(blocks[jdx]);
-                        //    ushort n = ushort.Parse(blocks[jdx + 2]);
-                        //    if (who != player.Uid)
-                        //        nfuse += "," + string.Join(",", Util.TakeRange(blocks, jdx, jdx + 3 + n));
-                        //    else
-                        //    {
-                        //        var rests = Util.TakeRange(blocks, jdx + 3, jdx + 3 + n).Where(p => p != card.ToString());
-                        //        int rstCnt = rests.Count();
-                        //        if (rstCnt > 0)
-                        //            mfuse += "," + blocks[jdx] + "," + blocks[jdx + 1] + "," + rstCnt + "," + string.Join(",", rests);
-                        //    }
-                        //    jdx += (n + 3);
-                        //}
-                        //if (mfuse.Length > 0)
-                        //    XI.InnerGMessage(blocks[0] + mfuse, 121);
-                        //if (nfuse.Length > 0)
-                        //    XI.InnerGMessage(blocks[0] + nfuse, 120);
+                        }
                     }
-                    else
-                        XI.InnerGMessage(fuse, 121);
                 }
-                else
+                if (!isSet)
                     XI.InnerGMessage(fuse, 121);
             }
             else if (type == 1)
@@ -2934,11 +2914,17 @@ namespace PSD.PSDGamepkg.JNS
             {
                 int peek = player.Coss.Peek();
                 XI.RaiseGMessage("G0OV," + player.Uid + "," + peek);
+                Hero peekHero = XI.LibTuple.HL.InstanceHero(peek);
+                if (peekHero != null)
+                    Artiad.ContentRule.DecrGuestPlayer(player, peekHero, XI);
                 XI.Board.HeroDises.Add(peek);
             }
             string order = XI.AsyncInput(player.Uid, "//", "JNS0102", "0");
             int next = XI.Board.HeroPiles.Dequeue();
             XI.RaiseGMessage("G0IV," + player.Uid + "," + next);
+            Hero nextHero = XI.LibTuple.HL.InstanceHero(next);
+            if (nextHero != null)
+                Artiad.ContentRule.IncrGuestPlayer(player, nextHero, XI);
         }
         public void JNS0103Action(Player player, int type, string fuse, string argst)
         {

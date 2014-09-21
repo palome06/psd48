@@ -2512,7 +2512,11 @@ namespace PSD.ClientAo
                     {
                         ushort ut = ushort.Parse(args[1]);
                         int hro = int.Parse(args[2]);
-                        VI.Cout(Uid, "{0}迎来了客人{1}.", zd.Player(ut), zd.Hero(hro));
+                        string guestName = "副角色牌";
+                        Base.Card.Hero hero = Tuple.HL.InstanceHero(A0P[ut].SelectHero);
+                        if (hero != null && !string.IsNullOrEmpty(hero.GuestAlias))
+                            guestName = hero.GuestAlias;
+                        VI.Cout(Uid, "{0}迎来了{1}{2}.", zd.Player(ut), guestName, zd.Hero(hro));
                         A0O.FlyingGet("H" + hro, 0, ut);
                         A0P[ut].Coss = hro;
                     }
@@ -2522,7 +2526,11 @@ namespace PSD.ClientAo
                         ushort ut = ushort.Parse(args[1]);
                         int hro = int.Parse(args[2]);
                         int next = int.Parse(args[3]);
-                        VI.Cout(Uid, "{0}送走了客人{1}.", zd.Player(ut), zd.Hero(hro));
+                        string guestName = "副角色牌";
+                        Base.Card.Hero hero = Tuple.HL.InstanceHero(A0P[ut].SelectHero);
+                        if (hero != null && !string.IsNullOrEmpty(hero.GuestAlias))
+                            guestName = hero.GuestAlias;
+                        VI.Cout(Uid, "{0}送走了{1}{2}.", zd.Player(ut), guestName, zd.Hero(hro));
                         A0O.FlyingGet("H" + hro, ut, 0);
                         A0P[ut].Coss = next;
                     }
