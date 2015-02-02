@@ -2291,42 +2291,54 @@ namespace PSD.ClientZero
                     else if (args[1] == "1")
                         VI.Cout(Uid, "当前行动顺序变成逆方向。");
                     break;
-                case "E0AF":
-                    if (args[1] == "0")
+                case "E0FI":
+                    if (args[1] == "O")
                         VI.Cout(Uid, "不触发战斗.");
+                    else if (args[1] == "U")
+                    {
+                        Z0F.Hinder = 0; Z0F.Supporter = 0;
+                        // A0F.Horn = 0;
+                    }
                     else
                     {
-                        string msg = "";
-                        for (int i = 1; i < args.Length; i += 2)
+                        List<ushort> leavers = new List<ushort>();
+                        List<ushort> joiners = new List<ushort>();
+                        List<string> msgs = new List<string>();
+                        for (int i = 1; i < args.Length; i += 3)
                         {
-                            ushort s = ushort.Parse(args[i + 1]);
+                            char position = args[i][0];
+                            ushort old = ushort.Parse(args[i + 1]);
+                            ushort s = ushort.Parse(args[i + 2]);
                             string name = (s == 0 ? "无人" :
                                 (s < 1000 ? zd.Player(s) : zd.Monster((ushort)(s - 1000))));
-                            if (args[i] == "1")
-                            {
-                                msg += string.Format("{0}进行支援.", name);
-                                Z0F.Supporter = s;
+                            if (old != 0)
+                                leavers.Add(old);
+                            if (s != 0) {
+                                joiners.Add(s);
+                                if (position == 'T') {
+                                    msgs.Add(string.Format("{0}触发战斗", name));
+                                    //A0F.Trigger = s;
+                                } else if (position == 'S') {
+                                    msgs.Add(string.Format("{0}支援", name));
+                                    Z0F.Supporter = s;
+                                } else if (position == 'H') {
+                                    msgs.Add(string.Format("{0}妨碍", name));
+                                    Z0F.Hinder = s;
+                                } else if (position == 'W') {
+                                    msgs.Add(string.Format("{0}代为触发战斗", name));
+                                    //A0F.Horn = s;
+                                }
                             }
-                            else if (args[i] == "2")
-                            {
-                                msg += string.Format("{0}进行妨碍.", name);
-                                Z0F.Hinder = s;
-                            }
-                            else if (args[i] == "5")
-                            {
-                                msg += string.Format("{0}不再支援.", name);
-                                if (Z0F.Supporter == s)
-                                    Z0F.Supporter = 0;
-                            }
-                            else if (args[i] == "6")
-                            {
-                                msg += string.Format("{0}不再妨碍.", name);
-                                if (Z0F.Hinder == s)
-                                    Z0F.Hinder = 0;
-                            }
-                            if (msg.Length > 0)
-                                VI.Cout(Uid, msg);
                         }
+                        leavers.RemoveAll(p => joiners.Contains(p));
+                        if (leavers.Count > 0)
+                        {
+                            msgs.AddRange(leavers.Select(p => string.Format("{0}退出战斗", 
+                                (p == 0 ? "无人" : (p < 1000 ? zd.Player(p) :
+                                zd.Monster((ushort)(p - 1000)))))));
+                        }
+                        if (msgs.Count > 0)
+                            VI.Cout(Uid, string.Join(",", msgs) + ".");
                     }
                     break;
                 case "E0SN":

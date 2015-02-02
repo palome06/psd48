@@ -27,6 +27,12 @@ namespace PSD.Base
             set { mSupporter = value ?? ghost; }
             get { return mSupporter ?? ghost; }
         }
+        // Somebody that ordered to trigger a battle
+        public Player Horn
+        {
+            set { mHorn = value ?? ghost; }
+            get { return mHorn ?? ghost; }
+        }
         public string RoundIN { set; get; }
 
         public bool SupportSucc { set; get; }
@@ -237,6 +243,7 @@ namespace PSD.Base
         }
 
         private Player mRounder, mHinder, mSupporter;
+        private Player mHorn;
         private readonly Player ghost = new Player("鬼", 0, 0, false);
 
         #region Serialize the Game Situation

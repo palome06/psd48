@@ -563,7 +563,7 @@ namespace PSD.PSDGamepkg
                 while (dicts.Count > 0)
                 {
                     Base.VW.Msgs msg = WI.RecvInfRecvPending();
-                    if (MatchedPopFromLastUV(msg.From, msg.Msg))
+                    if (MatchedPopFromLastUV(msg.From, msg.Msg) && msg.Msg.StartsWith("V1"))
                     {
                         result.Add(msg.From, msg.Msg.Substring("V1,".Length));
                         dicts.Remove(msg.From);

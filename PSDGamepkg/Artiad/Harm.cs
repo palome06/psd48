@@ -100,13 +100,18 @@ namespace PSD.PSDGamepkg.Artiad
             Who = who; Element = elem;
             N = n; Source = source; Mask = mask;
         }
+        // Whether avoidable: Yin Prop, Love Prop or Termined Harm
+        public bool IsAvoidable()
+        {
+            return Element != FiveElement.YIN && Element != FiveElement.LOVE
+                && !Artiad.IntHelper.IsMaskSet(Mask, GiftMask.TERMIN);
+        }
 
         public static FiveElement[] GetPropedElement()
         {
             return new FiveElement[] { FiveElement.AQUA, FiveElement.AGNI,
                 FiveElement.THUNDER, FiveElement.AERO, FiveElement.SATURN };
         }
-
         public static string ToMessage(Harm harm)
         {
             return "G0OH," + harm.Who + "," + harm.Source + "," + IntHelper.Elem2Int(harm.Element)

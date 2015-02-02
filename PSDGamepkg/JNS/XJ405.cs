@@ -1637,6 +1637,17 @@ namespace PSD.PSDGamepkg.JNS
                         if (count > 0)
                             XI.RaiseGMessage(title + py.Uid + ",0," + count);
                     }
+            } else if (type == 4)
+            {
+                string[] g0iy = fuse.Split(',');
+                ushort who = ushort.Parse(g0iy[2]);
+                Player py = XI.Board.Garden[who];
+                if (py.Team == player.Team && !py.PetDisabled)
+                {
+                    int count = py.GetActionPetCount(XI.Board);
+                    if (count > 0)
+                        XI.RaiseGMessage("G0IA," + py.Uid + "," + who + "," + count);
+                }
             }
         }
         public bool JN50301Valid(Player player, int type, string fuse)
@@ -1656,6 +1667,12 @@ namespace PSD.PSDGamepkg.JNS
             else if (type == 2 || type == 3)
                 return IsMathISOS("JN50301", player, fuse) && XI.Board.Garden.Values.
                     Any(p => p.IsAlive && p.Team == player.Team && p.GetActionPetCount(XI.Board) > 0);
+            else if (type == 4) {
+                string[] g0iy = fuse.Split(',');
+                ushort who = ushort.Parse(g0iy[2]);
+                Player py = XI.Board.Garden[who];
+                return py.Team == player.Team && !py.PetDisabled && py.GetActionPetCount(XI.Board) > 0;
+            }
             else return false;
         }
         public void JN50302Action(Player player, int type, string fuse, string argst)
@@ -2571,22 +2588,29 @@ namespace PSD.PSDGamepkg.JNS
             }
             else if (type == 3 || type == 4)
                 return IsMathISOS("JN60501", player, fuse) && player.HP < player.HPb;
-            else if (type == 5)
+            else if (type == 5 && XI.Board.InFight && player.HP < player.HPb)
             {
-                string[] g0af = fuse.Split(',');
-                if (g0af[1] != "0" && XI.Board.InFight && player.HP < player.HPb)
-                    for (int i = 1; i < g0af.Length; i += 2)
+                string[] g0fi = fuse.Split(',');
+                if (g0fi[1] == "O" || g0fi[1] == "U")
+                    return false;
+                int result = 0;
+                for (int i = 1; i < g0fi.Length; i += 3)
+                {
+                    char ch = g0fi[i][0];
+                    ushort old = ushort.Parse(g0fi[i + 1]);
+                    ushort to = ushort.Parse(g0fi[i + 2]);
+                    if (ch == 'S' || ch == 'H')
                     {
-                        ushort ut = ushort.Parse(g0af[i + 1]);
-                        if (ut == player.Uid) {
-                            ushort delta = ushort.Parse(g0af[i]);
-                            if (delta > 4 && player.RAMInt > 0)
-                                return true;
-                            else if (delta <= 4 && player.RAMInt == 0)
-                                return true;
-                        }
+                        if (old == player.Uid)
+                            --result;
+                        if (to == player.Uid)
+                            ++result;
+                    } else if (ch == 'T' || ch == 'W')
+                    {
+                        result = 0; break;
                     }
-                return false;
+                }
+                return result != 0;
             }
             return false;
         }
@@ -2625,17 +2649,36 @@ namespace PSD.PSDGamepkg.JNS
             }
             else if (type == 5)
             {
-                if (XI.Board.IsAttendWar(player))
+                string[] g0fi = fuse.Split(',');
+                if (g0fi[1] == "O" || g0fi[1] == "U")
+                    return;
+                int result = 0;
+                for (int i = 1; i < g0fi.Length; i += 3)
+                {
+                    char ch = g0fi[i][0];
+                    ushort old = ushort.Parse(g0fi[i + 1]);
+                    ushort to = ushort.Parse(g0fi[i + 2]);
+                    if (ch == 'S' || ch == 'H')
+                    {
+                        if (old == player.Uid)
+                            --result;
+                        if (to == player.Uid)
+                            ++result;
+                    } else if (ch == 'T' || ch == 'W')
+                    {
+                        result = 0; break;
+                    }
+                }
+                if (result < 0 && player.RAMInt > 0)
+                {
+                    XI.RaiseGMessage("G0OP," + player.Team + "," + player.RAMInt);
+                    player.RAMInt = 0;
+                }
+                else if (result > 0)
                 {
                     player.RAMInt = player.HPb - player.HP;
                     if (player.RAMInt > 0)
                         XI.RaiseGMessage("G0IP," + player.Team + "," + player.RAMInt);
-                }
-                else
-                {
-                    if (player.RAMInt > 0)
-                        XI.RaiseGMessage("G0OP," + player.Team + "," + player.RAMInt);
-                    player.RAMInt = 0;
                 }
             }
         }

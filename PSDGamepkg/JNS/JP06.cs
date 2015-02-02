@@ -541,8 +541,7 @@ namespace PSD.PSDGamepkg.JNS
             List<Artiad.Harm> harms = Artiad.Harm.Parse(fuse);
             foreach (Artiad.Harm harm in harms)
             {
-                if (harm.Who == player.Uid && harm.Element != FiveElement.YIN &&
-                    harm.Element != FiveElement.LOVE && !Artiad.IntHelper.IsMaskSet(harm.Mask, GiftMask.STABLE))
+                if (harm.Who == player.Uid && harm.IsAvoidable())
                     return true;
             }
             return false;
@@ -553,8 +552,7 @@ namespace PSD.PSDGamepkg.JNS
             List<Artiad.Harm> rvs = new List<Artiad.Harm>();
             foreach (Artiad.Harm harm in harms)
             {
-                if (harm.Who == player.Uid && harm.Element != FiveElement.YIN &&
-                    harm.Element != FiveElement.LOVE && !Artiad.IntHelper.IsMaskSet(harm.Mask, GiftMask.TERMIN))
+                if (harm.Who == player.Uid && harm.IsAvoidable())
                 {
                     VI.Cout(0, "{0}使用「隐蛊」免疫本次伤害.", XI.DisplayPlayer(player.Uid));
                     rvs.Add(harm);
@@ -573,8 +571,7 @@ namespace PSD.PSDGamepkg.JNS
             List<Artiad.Harm> rvs = new List<Artiad.Harm>();
             foreach (Artiad.Harm harm in harms)
             {
-                if (harm.Who == player.Uid && harm.Element != FiveElement.YIN &&
-                    harm.Element != FiveElement.LOVE && !Artiad.IntHelper.IsMaskSet(harm.Mask, GiftMask.TERMIN))
+                if (harm.Who == player.Uid && harm.IsAvoidable())
                 {
                     VI.Cout(0, "{0}使用「隐蛊」免疫本次伤害.", XI.DisplayPlayer(player.Uid));
                     rvs.Add(harm);

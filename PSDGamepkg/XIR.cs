@@ -73,9 +73,9 @@ namespace PSD.PSDGamepkg
             //Board.EvePiles.PushBack(29);
             ////Board.EvePiles.PushBack(1);
             //Board.EvePiles.PushBack(22);
-            Board.EvePiles.PushBack(8);
-            Board.EvePiles.PushBack(8);
-            //Board.EvePiles.PushBack(30);
+            //Board.EvePiles.PushBack(8);
+            //Board.EvePiles.PushBack(8);
+            Board.EvePiles.PushBack(30);
             //Board.RestNPCPiles.PushBack(1047);
             //Board.EvePiles.PushBack(23);
             //while (Board.MonPiles.Count > 0)
@@ -112,7 +112,10 @@ namespace PSD.PSDGamepkg
             //    Board.MonPiles.Dequeue();
             //Board.MonPiles.PushBack(1006);
             //Board.MonPiles.PushBack(37);
-            //Board.MonPiles.PushBack(8);
+            Board.MonPiles.PushBack(33);
+            Board.MonPiles.PushBack(4);
+            Board.MonPiles.PushBack(10);
+            Board.MonPiles.PushBack(8);
             //Board.MonPiles.PushBack(1045);
             //Board.MonPiles.PushBack(5);
             //Board.MonPiles.PushBack(1040);
@@ -138,12 +141,12 @@ namespace PSD.PSDGamepkg
             //RaiseGMessage("G0HQ,2,1,0,0,36,37");
             //RaiseGMessage("G0HQ,2,6,0,0,88");
             //RaiseGMessage("G0HQ,2,1,0,47,50,49,5,63,8,69");
-            //RaiseGMessage("G0HQ,2,1,0,10,11,12");
-            //RaiseGMessage("G0HQ,2,1,0,86");
-            //RaiseGMessage("G0HQ,2,3,0,87");
-            //RaiseGMessage("G0HQ,2,3,0,19,73");
-            //RaiseGMessage("G0HQ,2,4,0,47,48,52");
-            //RaiseGMessage("G0HQ,2,5,0,26");
+            //RaiseGMessage("G0HQ,2,2,0,0,10,11,12");
+            //RaiseGMessage("G0HQ,2,1,0,0,48,49,95");
+            //RaiseGMessage("G0HQ,2,3,0,0,92");
+            //RaiseGMessage("G0HQ,2,4,0,0,90");
+            //RaiseGMessage("G0HQ,2,4,0,0,47,48,52");
+            //RaiseGMessage("G0HQ,2,6,0,0,26");
             //RaiseGMessage("G0HQ,2,2,0,48");
             //RaiseGMessage("G0HQ,2,1,0,61,64,73,74,75,76,65,17,69,71,10,70");
             //RaiseGMessage("G0IJ,3,0,1");
@@ -157,9 +160,11 @@ namespace PSD.PSDGamepkg
             //RaiseGMessage("G0HQ,2,1,0,0,96,18");
             //RaiseGMessage("G0HQ,2,5,0,0,65,66");
             //RaiseGMessage("G0HQ,2,1,0,0,71,37,95");
+            //RaiseGMessage("G0HQ,2,1,0,0,1,57");
+            //RaiseGMessage("G0HQ,2,2,0,0,96");
             //RaiseGMessage("G0HQ,2,2,0,0,90,34,89,88,95");
             //RaiseGMessage("G0HQ,2,1,0,0,95,88,10");
-            //RaiseGMessage("G0HQ,2,1,0,10,11,12,47,48,5");
+            //RaiseGMessage("G0HQ,2,1,0,10,11,12");
             //RaiseGMessage("G0HQ,2,1,0,10,38,39");
             //RaiseGMessage("G0HQ,2,1,0,1,47,48,49,51,52");
             //RaiseGMessage("G0HQ,2,1,0,71,72,10,79,8");
@@ -210,7 +215,7 @@ namespace PSD.PSDGamepkg
             //RaiseGMessage("G0HD,1,5,0,17");
             //RaiseGMessage("G0HD,1,1,0,16");
             //RaiseGMessage("G0HD,1,1,0,30");
-            //RaiseGMessage("G0HD,1,2,0,36");
+            //RaiseGMessage("G0HD,1,5,0,36");
             //RaiseGMessage("G0HD,1,6,0,16");
             //RaiseGMessage("G0HD,1,2,0,37");
             //RaiseGMessage("G0HD,1,2,0,31");
@@ -453,7 +458,7 @@ namespace PSD.PSDGamepkg
 
                             if (!isFight)
                             {
-                                RaiseGMessage("G0AF,0,0");
+                                RaiseGMessage("G17F,O");
                                 // Ensure XI.Board.Mon1From == 0
                                 ushort mons = DequeueOfPile(Board.MonPiles);
                                 RaiseGMessage("G2IN,1,1");
@@ -464,7 +469,7 @@ namespace PSD.PSDGamepkg
                             }
                             else
                             {
-                                RaiseGMessage("G0AF," + sprUid + ",1");
+                                RaiseGMessage("G17F,S," + sprUid);
                                 // Hinder side
                                 isFight = false; // decide to show fight or just pass
                                 string hnsm = "#妨碍者(决定)", hnsn = "#妨碍者(建议)";
@@ -495,7 +500,7 @@ namespace PSD.PSDGamepkg
                                 }
                                 else if (decision.StartsWith("/"))
                                     hndUid = 0;
-                                RaiseGMessage("G0AF," + hndUid + ",2");
+                                RaiseGMessage("G17F,H," + hndUid);
                                 WI.BCast(rstage + "7,2," + Board.Hinder.Uid);
                                 rstage = "R" + rounder + "ZU";
                             }
@@ -753,8 +758,7 @@ namespace PSD.PSDGamepkg
                         Board.SupportSucc = false; Board.HinderSucc = false;
                         rstage = "R" + rounder + "ZZ"; break;
                     case "ZZ":
-                        RaiseGMessage("G2KI," + string.Join(",", Board.Garden.Values.Where(
-                            p => p.Uid != rounder).Select(p => p.Uid + ",0")) + "," + rounder + ",1");
+                        RaiseGMessage("G17F,U," + rounder);
                         RunQuadStage(rstage, 0);
                         rstage = "R" + rounder + "BB"; break;
                     case "BB":

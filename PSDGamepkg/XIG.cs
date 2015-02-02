@@ -355,7 +355,7 @@ namespace PSD.PSDGamepkg
                             if (changeType == 0 || changeType == 2)
                                 Artiad.ContentRule.ErasePlayerToken(player, Board, RaiseGMessage);
                             if (!Board.BannedHero.Contains(player.SelectHero))
-                                Board.HeroDises.Remove(player.SelectHero);
+                                Board.HeroDises.Add(player.SelectHero);
                             player.SelectHero = 0;
                         }
                     }
@@ -812,6 +812,7 @@ namespace PSD.PSDGamepkg
                                         TuxEqiup te = tx as TuxEqiup;
                                         te.DelAction(py);
                                     }
+                                    RaiseGMessage("G1OZ," + who + "," + py.ExEquip);
                                     py.ExEquip = 0; bright.Add(card);
                                 }
                                 if (py.Fakeq.ContainsKey(card))
@@ -3302,50 +3303,79 @@ namespace PSD.PSDGamepkg
                         }
                     }
                     break;
-                case "G0AF":
-                    if (args[2] == "0") // Not show fight
-                        WI.BCast("E0AF,0,0");
-                    else if (args[1] == "0")
-                        WI.BCast("E0AF," + args[2] + ",0");
-                    else
-                    {
-                        IDictionary<ushort, int> selecto = new Dictionary<ushort, int>();
-                        for (int i = 1; i < args.Length; i += 2)
-                        {
-                            ushort who = ushort.Parse(args[i]);
-                            int delta = int.Parse(args[i + 1]);
-                            selecto[who] = delta;
+                case "G17F":
+                    if (args[1] == "O") {
+                        RaiseGMessage("G0FI,O");
+                    } else {
+                        ushort[] lists = new ushort[] { Board.Rounder.Uid, Board.Rounder.Uid,
+                             Board.Supporter.Uid, Board.Supporter.Uid,
+                             Board.Hinder.Uid, Board.Hinder.Uid, 0, 0 }; // TODO: Horn
+                        for (int i = 1; i < args.Length; i += 2) {
+                            char position = args[i][0];
+                            ushort who = ushort.Parse(args[i + 1]);
+
+                            if (who == Board.Rounder.Uid)
+                                lists[1] = 0;
+                            else if (who == Board.Supporter.Uid)
+                                lists[3] = 0;
+                            else if (who == Board.Hinder.Uid)
+                                lists[5] = 0;
+                            else if (who == Board.Horn.Uid)
+                                lists[7] = 0;
+
+                            if (position == 'T' && lists[1] != who)
+                                lists[1] = who;
+                            else if (position == 'S' && lists[3] != who)
+                                lists[3] = who;
+                            else if (position == 'H' && lists[5] != who)
+                                lists[5] = who;
+                            else if (position == 'W' && lists[7] != who)
+                                lists[7] = who;
                         }
-                        foreach (var pair in selecto)
-                        {
-                            if (pair.Value == 5 && Board.Supporter.Uid == pair.Key)
-                                Board.Supporter = null;
-                            else if (pair.Value == 6 && Board.Hinder.Uid == pair.Value)
-                                Board.Hinder = null;
+                        string g0fi = "";
+                        if (lists[0] != lists[1])
+                            g0fi += ",T," + lists[0] + "," + lists[1];
+                        if (lists[2] != lists[3])
+                            g0fi += ",S," + lists[2] + "," + lists[3];
+                        if (lists[4] != lists[5])
+                            g0fi += ",H," + lists[4] + "," + lists[5];
+                        if (lists[6] != lists[7])
+                            g0fi += ",W," + lists[6] + "," + lists[7];
+                        if (!string.IsNullOrEmpty(g0fi))
+                            RaiseGMessage("G0FI" + g0fi);
+                    }
+                    break;
+                case "G0FI":
+                    {
+                        RaiseGMessage("E0FI," + cmdrst);
+                        if (args[1] == "O" || args[1] == "U")
+                            break;
+                        for (int i = 1; i < args.Length; i += 3) {
+                            char position = args[i][0];
+                            ushort old = ushort.Parse(args[i + 1]);
+                            ushort to = ushort.Parse(args[i + 2]);
+                            Player py;
+                            if (to == 0)
+                                py = null;
+                            else if (to > 0 && to < 1000)
+                                py = Board.Garden[to];
                             else
                             {
-                                Player py;
-                                if (pair.Key > 0 && pair.Key < 1000)
-                                    py = Board.Garden[pair.Key];
+                                ushort mut = (ushort)(to - 1000);
+                                Base.Card.NMB nmb = Base.Card.NMBLib.Decode(
+                                    mut, LibTuple.ML, LibTuple.NL);
+                                if (nmb != null)
+                                    py = Board.Lumberjack(nmb, mut);
                                 else
-                                {
-                                    ushort mut = (ushort)(pair.Key - 1000);
-                                    Base.Card.NMB nmb = Base.Card.NMBLib.Decode(mut, LibTuple.ML, LibTuple.NL);
-                                    if (nmb != null)
-                                        py = Board.Lumberjack(nmb, mut);
-                                    else
-                                        py = null;
-                                }
-                                if (pair.Value == 1)
-                                    Board.Supporter = py;
-                                else if (pair.Value == 2)
-                                    Board.Hinder = py;
+                                    py = null;
                             }
+                            if (position == 'S')
+                                Board.Supporter = py;
+                            else if (position == 'H')
+                                Board.Hinder = py;
+                            else if (position == 'T') { }
+                            else if (position == 'W') { }
                         }
-                        string e0af = string.Join(",", selecto.Select(
-                            p => (p.Value > 4 ? 0 : p.Value) + "," + p.Key));
-                        if (e0af.Length > 0)
-                            WI.BCast("E0AF," + e0af);
                     }
                     break;
                 case "G0ON":

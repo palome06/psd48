@@ -1667,7 +1667,8 @@ namespace PSD.PSDGamepkg.JNS
                     List<Artiad.Harm> rvs = new List<Artiad.Harm>();
                     foreach (Artiad.Harm harm in harms)
                     {
-                        if (harm.Who == player.Uid && Util.GetFiveElementId(harm.Element) == mon.RAMUshort)
+                        int elemCode = Util.GetFiveElementId(harm.Element) + 1;
+                        if (harm.Who == player.Uid && elemCode == mon.RAMUshort)
                             rvs.Add(harm);
                     }
                     harms.RemoveAll(p => rvs.Contains(p));
@@ -1686,7 +1687,8 @@ namespace PSD.PSDGamepkg.JNS
                 {
                     foreach (Artiad.Harm harm in harms)
                     {
-                        if (harm.Who == player.Uid && Util.GetFiveElementId(harm.Element) == mon.RAMUshort)
+                        int elemCode = Util.GetFiveElementId(harm.Element) + 1;
+                        if (harm.Who == player.Uid && elemCode == mon.RAMUshort)
                             return true;
                     }
                 }
@@ -2094,24 +2096,23 @@ namespace PSD.PSDGamepkg.JNS
                 if (type == 0) // Z1
                     return XI.Board.IsAttendWar(player) && XI.Board.Garden.Values.Any(
                         p => p.IsAlive && p.Team == player.Team && p.GetPetCount() > 0);
-                else if (type == 1) // AF
+                else if (type == 1 && XI.Board.InFight && player.GetPetCount() > 0) // FI
                 {
-                    bool waken = player.GetPetCount() > 0;
-                    string[] g0af = fuse.Split(',');
-                    if (g0af[1] != "0" && XI.Board.InFight && waken)
-                        for (int i = 1; i < g0af.Length; i += 2)
-                        {
-                            ushort ut = ushort.Parse(g0af[i + 1]);
-                            if (ut == player.Uid)
-                            {
-                                ushort delta = ushort.Parse(g0af[i]);
-                                if (delta > 4 && player.RAMInt > 0) // TODO: W.T.F
-                                    return true;
-                                else if (delta <= 4 && player.RAMInt == 0)
-                                    return true;
-                            }
-                        }
-                    return false;
+                    string[] g0fi = fuse.Split(',');
+                    if (g0fi[1] == "O" || g0fi[1] == "U")
+                        return false;
+                    int result = 0;
+                    for (int i = 1; i < g0fi.Length; i += 3)
+                    {
+                        char ch = g0fi[i][0];
+                        ushort old = ushort.Parse(g0fi[i + 1]);
+                        ushort to = ushort.Parse(g0fi[i + 2]);
+                        if (old == player.Uid)
+                            --result;
+                        if (to == player.Uid)
+                            ++result;
+                    }
+                    return result != 0;
                 }
                 else if (type == 2 || type == 3) // IC/OC
                 {
