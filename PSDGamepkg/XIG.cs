@@ -1413,32 +1413,50 @@ namespace PSD.PSDGamepkg
                     }
                 case "G0CE": // use card and take action
                     {
-                        // G0CE,A,0,JP04,3,1
+                        // G0CE,1,A,0,0,JP04,(3,1);TF
+                        // G0CE,2,A,B,0,JP04;TF
                         int hdx = cmd.IndexOf(';');
                         int idx = cmd.IndexOf(',', hdx);
                         int sktInType = int.Parse(Util.Substring(cmd, hdx + 1, idx));
                         string sktFuse = Util.Substring(cmd, idx + 1, -1);
-                        string[] argv = cmd.Substring(0, hdx).Split(',');
+                        string[] parts = cmd.Substring(0, hdx).Split(',');
 
-                        ushort ust = ushort.Parse(argv[1]);
-                        ushort uaction = ushort.Parse(argv[2]);
-                        ushort notEq = ushort.Parse(argv[3]);
-                        if (notEq == 0)
+                        ushort invCount = ushort.Parse(parts[1]);
+                        if (invCount == 1) {
+                            ushort ust = ushort.Parse(parts[2]);
+                            ushort taction = ushort.Parse(parts[3]);
+                            ushort notEq = ushort.Parse(parts[4]);
+                            if (notEq == 0)
+                            {
+                                Base.Card.Tux tux = tx01[parts[5]];
+                                string argvt = Util.Substring(cmd, parts[0].Length + parts[1].Length +
+                                    parts[2].Length + parts[3].Length + parts[4].Length + parts[5].Length + 6, hdx);
+                                if (argvt.Length > 0)
+                                    argvt = "," + argvt;
+                                WI.BCast("E0CE," + ust + "," + taction + "," + parts[5] +
+                                    (argvt.Length > 0 ? ("," + argvt) : ""));
+                                if (taction != 2)
+                                    tux.Action(Board.Garden[ust], sktInType, sktFuse, argvt);
+                            }
+                            else
+                            {
+                                ushort ut = ushort.Parse(parts[6]);
+                                if (taction != 2)
+                                    RaiseGMessage("G0ZB," + Board.Garden[ust].Uid + ",3," + ut + "," + parts[5]);
+                            }
+                        } else if (invCount == 2) // Copy happens, handle it in both sides
                         {
-                            Base.Card.Tux tux = tx01[argv[4]];
-                            string argvt = Util.Substring(cmd, argv[0].Length + argv[1].Length +
-                                argv[2].Length + argv[3].Length + argv[4].Length + 5, hdx);
-                            if (argvt.Length > 0)
-                                argvt = "," + argvt;
-                            WI.BCast("E0CE," + ust + "," + uaction + "," + argv[4] + argvt);
-                            if (uaction != 2)
-                                tux.Action(Board.Garden[ust], sktInType, sktFuse, argvt);
-                        }
-                        else
-                        {
-                            ushort ut = ushort.Parse(argv[5]);
-                            if (uaction != 2)
-                                RaiseGMessage("G0ZB," + Board.Garden[ust].Uid + ",3," + ut + "," + argv[4]);
+                            ushort u1 = ushort.Parse(parts[2]), u2 = ushort.Parse(parts[3]);
+                            ushort taction = ushort.Parse(parts[4]);
+                            ushort notEq = ushort.Parse(parts[5]);
+                            Base.Card.Tux tux = tx01[parts[6]];
+
+                            Base.Card.Tux tux = tx01[parts[6]];
+                            int fuseIdx = sktFuse.IndexOf(',');
+                            string locusFuse = Util.SubString(sktFuse, 0, fuseIdx);
+                            string locusCdFuse = Util.Substring(sktFuse, fuseIdx + 1, -1);
+                            tux.Locust(Board.Garden[u2], sktInType, locusFuse,
+                                "", locusCdFuse, Board.Garden[u1], tux);
                         }
                         break;
                     }

@@ -493,7 +493,7 @@ namespace PSD.PSDGamepkg.JNS
             {
                 string[] argv = cdFuse.Split(',');
                 ushort host = ushort.Parse(argv[1]);
-                XI.RaiseGMessage("G0CE," + host + ",2,0," + argv[3] + ";" + type + "," + fuse);
+                XI.RaiseGMessage("G0CE,1," + host + ",2,0," + argv[3] + ";" + type + "," + fuse);
                 List<ushort> invs = XI.Board.Garden.Values.Where(p => p.IsTared && p.HP == 0).Select(p => p.Uid).ToList();
                 string ic = invs.Count > 0 ? "T1(p" + string.Join("p", invs) + ")" : "/";
                 ushort tg = ushort.Parse(XI.AsyncInput(player.Uid, ic, "「灵葫仙丹」", "1"));
@@ -566,7 +566,7 @@ namespace PSD.PSDGamepkg.JNS
         {
             string[] argv = cdFuse.Split(',');
             ushort host = ushort.Parse(argv[1]);
-            XI.RaiseGMessage("G0CE," + host + ",2,0," + argv[3] + ";" + type + "," + fuse);
+            XI.RaiseGMessage("G0CE,1," + host + ",2,0," + argv[3] + ";" + type + "," + fuse);
             List<Artiad.Harm> harms = Artiad.Harm.Parse(fuse);
             List<Artiad.Harm> rvs = new List<Artiad.Harm>();
             foreach (Artiad.Harm harm in harms)
@@ -767,9 +767,6 @@ namespace PSD.PSDGamepkg.JNS
                         return true;
                 }
                 return false;
-                //// G0CE,A,0,KN,y,z;TF
-                //string[] args = fuse.Split(',');
-                //return args[2] == "0" && args[3] == "JP05";
             }
             else return false;
         }
@@ -1121,7 +1118,7 @@ namespace PSD.PSDGamepkg.JNS
             {
                 string[] argv = cdFuse.Split(',');
                 ushort host = ushort.Parse(argv[1]);
-                XI.RaiseGMessage("G0CE," + host + ",2,0," + argv[3] + ";" + type + "," + fuse);
+                XI.RaiseGMessage("G0CE,1," + host + ",2,0," + argv[3] + ";" + type + "," + fuse);
                 List<Artiad.Harm> harms = Artiad.Harm.Parse(fuse);
                 ISet<ushort> invs = new HashSet<ushort>();
                 foreach (Artiad.Harm harm in harms)
@@ -1552,7 +1549,7 @@ namespace PSD.PSDGamepkg.JNS
                 {
                     XI.AsyncInput(player.Uid, "/", "TPT3", "0"); return;
                 }
-                string tar = XI.AsyncInput(player.Uid, "#「净衣咒」使用,T1" + ATaredTeammates(player), "TPT3", "0");
+                string tar = XI.AsyncInput(player.Uid, "#【净衣咒】使用,T1" + ATaredTeammates(player), "TPT3", "0");
                 Player locuster = XI.Board.Garden[ushort.Parse(tar)];
                 int idx = fuse.IndexOf(';');
                 string[] blocks = fuse.Substring(0, idx).Split(',');
@@ -2423,10 +2420,10 @@ namespace PSD.PSDGamepkg.JNS
             // G0CD,A,T,JP02,17,36;1,G0OH,...
             string[] argv = cdFuse.Split(',');
             if ((locus.IsEq[type] & 1) == 0)
-                XI.RaiseGMessage("G0CE," + argv[1] + "," + argv[2] + ",0," + argv[3] +
+                XI.RaiseGMessage("G0CE,1," + argv[1] + "," + argv[2] + ",0," + argv[3] +
                     ";" + type + "," + fuse);
             else
-                XI.RaiseGMessage("G0CE," + argv[1] + "," + argv[2] + ",1," + argv[3] +
+                XI.RaiseGMessage("G0CE,1," + argv[1] + "," + argv[2] + ",1," + argv[3] +
                     "," + argv[4] + ";" + type + "," + fuse);
             ushort owner = locuster.Uid;
             string last = null;

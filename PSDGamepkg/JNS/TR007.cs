@@ -4131,9 +4131,9 @@ namespace PSD.PSDGamepkg.JNS
             else if (type == 1 && player.TokenAwake)
             { // G0CE
                 int idx = fuse.IndexOf(';');
-                string[] g0cc = fuse.Substring(0, idx).Split(',');
+                string[] g0ce = fuse.Substring(0, idx).Split(',');
                 string tuxType = Util.Substring(fuse, idx + 1, fuse.IndexOf(',', idx + 1));
-                ushort who = ushort.Parse(g0cc[1]);
+                ushort who = ushort.Parse(g0ce[2]);
                 Player py = XI.Board.Garden[who];
                 if (py != null && py.Team == player.Team)
                     return true;
@@ -5392,13 +5392,19 @@ namespace PSD.PSDGamepkg.JNS
                 {
                     int idx = fuse.IndexOf(';');
                     string[] g0ce = fuse.Substring(0, idx).Split(',');
-                    string tuxType = Util.Substring(fuse, idx + 1, fuse.IndexOf(',', idx + 1));
-                    ushort who = ushort.Parse(g0ce[1]);
-                    Player py = XI.Board.Garden[who];
-                    if (py != null && py.Team == player.OppTeam)
-                        return true;
-                }
-                return false;
+                    // string tuxType = Util.Substring(fuse, idx + 1, fuse.IndexOf(',', idx + 1));
+                    ushort invCount = ushort.Parse(g0ce[1]);
+                    if (invCount == 1) {
+                        Player py = XI.Board.Garden[ushort.Parse(g0ce[2])];
+                        return py != null && py.Team == player.OppTeam;
+                    } else if (invCount == 2) {
+                        Player py1 = XI.Board.Garden[ushort.Parse(g0ce[2])];
+                        Player py2 = XI.Board.Garden[ushort.Parse(g0ce[3])];
+                        return (py1 != null && py1.Team == player.OppTeam) ||
+                            (py2 != null && py2.Team == player.OppTeam);
+                    } else
+                        return false;
+                } else return false;
             }
             else if (type == 2 || type == 3)
                 return player.TokenFold.Count > 0 || player.RAMUshort != 0;
@@ -5420,15 +5426,47 @@ namespace PSD.PSDGamepkg.JNS
                 player.RAMUshort = 0;
                 int hdx = fuse.IndexOf(';');
                 string[] g0ce = Util.Substring(fuse, 0, hdx).Split(',');
-                int kdx = fuse.IndexOf(',', hdx);
-                string origin = Util.Substring(fuse, kdx + 1, -1);
-                if (origin.StartsWith("G") && g0ce[2] != "2") // Avoid Double Computation on Copy
+                ushort invCount = ushort.Parse(g0ce[1]);
+                if (invCount == 1)
                 {
-                    string cardname = g0ce[4];
-                    int inType = int.Parse(Util.Substring(fuse, hdx + 1, kdx));
-                    Base.Card.Tux tux = XI.LibTuple.TL.EncodeTuxCode(cardname);
-                    int prior = tux.Priorities[inType];
-                    XI.InnerGMessage(origin, prior);
+                    int kdx = fuse.IndexOf(',', hdx);
+                    string origin = Util.Substring(fuse, kdx + 1, -1);
+                    if (origin.StartsWith("G") && g0ce[3] != "2") // Avoid Double Computation on Copy
+                    {
+                        string cardname = g0ce[5];
+                        int inType = int.Parse(Util.Substring(fuse, hdx + 1, kdx));
+                        Base.Card.Tux tux = XI.LibTuple.TL.EncodeTuxCode(cardname);
+                        int prior = tux.Priorities[inType];
+                        XI.InnerGMessage(origin, prior);
+                    }
+                }
+                else if (invCount == 2)
+                {
+                    Player py1 = XI.Board.Garden[ushort.Parse(g0ce[2])];
+                    Player py2 = XI.Board.Garden[ushort.Parse(g0ce[3])];
+                    int remain = 3;
+                    if (py1 != null && py1.Team == player.OppTeam)
+                        remain -= 1;
+                    if (py2 != null && py2.Team == player.OppTeam)
+                        remain -= 2;
+                    if (remain == 1) {
+                        XI.InnerGMessage("G0CE,1," + py1.Uid + ",0," + g0ce[4] + "," + g0ce[5] +
+                            ";" + Util.Substring(fuse, hdx + 1, -1), 90);
+                    } else if (remain == 2) {
+                        XI.InnerGMessage("G0CE,1," + py2.Uid + ",0," + g0ce[4] + "," + g0ce[5] +
+                            ";" + Util.Substring(fuse, hdx + 1, -1), 90);
+                    } else if (remain == 0) {
+                        int kdx = fuse.IndexOf(',', hdx);
+                        string origin = Util.Substring(fuse, kdx + 1, -1);
+                        if (origin.StartsWith("G")) // Avoid Double Computation on Copy
+                        {
+                            string cardname = g0ce[5];
+                            int inType = int.Parse(Util.Substring(fuse, hdx + 1, kdx));
+                            Base.Card.Tux tux = XI.LibTuple.TL.EncodeTuxCode(cardname);
+                            int prior = tux.Priorities[inType];
+                            XI.InnerGMessage(origin, prior);
+                        }
+                    }
                 }
                 Harm(player, player, 1);
             }
@@ -5591,6 +5629,7 @@ namespace PSD.PSDGamepkg.JNS
                 return IsMathISOS("JNH1401", player, fuse);
             else if (type == 2)
             {
+                // :[ Mainly to solve now
                 // G0CE,A,T,0,KN,y,z;TF
                 string[] g0ce = Util.Substring(fuse, 0, fuse.IndexOf(';')).Split(',');
                 ushort who = ushort.Parse(g0ce[1]);
