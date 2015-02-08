@@ -298,6 +298,8 @@ namespace PSD.Base
             h09p.Append("," + (Rounder != null ? Rounder.Uid : 0));
             h09p.Append("," + Supporter.Uid + "," + Hinder.Uid);
             h09p.Append("," + (Monster1 + "," + Monster2 + "," + Eve));
+            h09p.Append("," + Rounder.Team + "," + CalculateRPool() + "," +
+                Rounder.OppTeam + "," + CalculateOPool());
             return h09p.ToString();
         }
         public string GeneratePrivateMessage(ushort ut)

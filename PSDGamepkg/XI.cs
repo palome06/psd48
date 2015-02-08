@@ -85,7 +85,8 @@ namespace PSD.PSDGamepkg
             //10303, 10105, 10102, 10601, 17018, 19013
             //19011, 19003, 10601, 10502, 17018, 19013
             //10102, 17028, 17025, 10206, 10504, 19011
-            17008, 17028, 17004, 17025, 10608, 19011
+            17008, 17028, 17005, 17025, 10608, 19011
+            //10303, 10404, 10602, 17017, 10403, 10504
         };
 
         #region Memeber Declaration & Constructor
@@ -550,8 +551,8 @@ namespace PSD.PSDGamepkg
                  "HI", "HL", "IC", "OC", "HT", "QR", "HZ", "TT", "JM", "WN", "IJ", "OJ", "IE", "OE",
                  "IS", "OS", "LH", "IV", "OV", "PB", "YM", "HR", "FI", "ON", "SN", "MA", "PH", "ZJ"
             };
-            string[] g1 = new string[] { "DI", "IU", "OU", "ZK", "IZ", "OZ", "SG", "HK", "WJ", "JG",
-                 "XR", "EV", "CK", "7F", "YP" };
+            string[] g1 = new string[] { "DI", "IU", "OU", "CW", "ZK", "IZ", "OZ", "SG", "HK", "WJ",
+                 "JG", "XR", "EV", "CK", "7F", "YP" };
             string[] g2 = new string[] { "IN", "RN", "CN", "QC", "FU", "QU", "CL", "ZU", "HU", "WK",
                  "AK", "IL", "OL", "SW", "AS" };
             foreach (string g0event in g0)
@@ -1205,19 +1206,20 @@ namespace PSD.PSDGamepkg
                                 List<string> invis = occurTable[skill.Parasitism[j]];
                                 foreach (string invi in invis)
                                 {
-                                    if (dict.ContainsKey(invi))
+                                    string head = Util.Substring(invi, 0, invi.IndexOf(','));
+                                    if (dict.ContainsKey(head))
                                     {
-                                        List<SkTriple> skts = dict[invi];
+                                        List<SkTriple> skts = dict[head];
                                         List<SkTriple> sktrvs = new List<SkTriple>();
                                         foreach (SkTriple skt in skts)
                                         {
-                                            if (skt.Name == skill.Name && skt.InType == i)
+                                            if (skt.Name == skill.Code && skt.InType == i)
                                                 sktrvs.Add(skt);
                                         }
                                         foreach (SkTriple skt in sktrvs)
                                             skts.Remove(skt);
                                         if (skts.Count <= 0)
-                                            dict.Remove(invi);
+                                            dict.Remove(head);
                                     }
                                 }
                             }

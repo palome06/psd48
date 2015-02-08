@@ -3217,12 +3217,10 @@ namespace PSD.PSDGamepkg.JNS
             }
             else if (type == 1)
             {
-                // G0CE,1,A,T,0,KN,y,z;TF
+                // G0CE,A,T,0,KN,y,z;TF
                 string[] blocks = fuse.Substring(0, fuse.IndexOf(';')).Split(',');
-                if (blocks[1] == "1") {
-                    Player py = XI.Board.Garden[ushort.Parse(blocks[2])];
-                    return py.Team == player.OppTeam && blocks[4] == "0" && (blocks[5] == "JP01" || blocks[5] == "JP06");
-                } else return false;
+                Player py = XI.Board.Garden[ushort.Parse(blocks[1])];
+                return py.Team == player.OppTeam && blocks[3] == "0" && (blocks[5] == "JP01" || blocks[5] == "JP06");
             }
             else return false;
         }

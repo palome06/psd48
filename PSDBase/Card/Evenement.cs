@@ -138,6 +138,12 @@ namespace PSD.Base.Card
             else
                 return null;
         }
+
+        public void ForceChange(string field, object value)
+        {
+            if (field == "Count" && value is ushort)
+                Count = (ushort)value;
+        }
     }
 
     public class EvenementLib
@@ -158,15 +164,10 @@ namespace PSD.Base.Card
                 if (eve != null)
                     firsts.Add(eve);
             }
-            ushort cardx = 1;
             dicts = new Dictionary<ushort, Evenement>();
-            foreach (Evenement eve in firsts)
-            {
-                for (int i = 0; i < eve.Count; ++i)
-                    dicts.Add(cardx++, eve);
-            }
+            Refresh();
         }
-
+        
         public EvenementLib()
         {
             firsts = new List<Evenement>();
@@ -212,13 +213,8 @@ namespace PSD.Base.Card
                     });
                 }
             }
-            ushort cardx = 1;
             dicts = new Dictionary<ushort, Evenement>();
-            foreach (Evenement eve in firsts)
-            {
-                for (int i = 0; i < eve.Count; ++i)
-                    dicts.Add(cardx++, eve);
-            }
+            Refresh();
         }
 
         //public IEnumerable<Evenement> Firsts { get { return firsts; } }
@@ -255,6 +251,15 @@ namespace PSD.Base.Card
                 return firsts;
             else
                 return firsts.Where(p => ((groups & (1 << (p.Group - 1))) != 0)).ToList();
+        }
+        public void Refresh()
+        {
+            dicts.Clear(); ushort cardx = 1;
+            foreach (Evenement eve in firsts)
+            {
+                for (int i = 0; i < eve.Count; ++i)
+                    dicts.Add(cardx++, eve);
+            }
         }
     }
 }

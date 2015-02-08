@@ -2839,22 +2839,22 @@ namespace PSD.ClientZero
                             ushort mons = ushort.Parse(args[1]);
                             VI.Cout(Uid, "{0}决定不打怪，放弃怪物{1}.", zd.Player(rounder), zd.Monster(mons));
                         }
-                        else if (args[0] == "1")
-                        {
-                            ushort s = ushort.Parse(args[1]);
-                            string ss = (s == 0) ? "不支援" : "{1}进行支援";
-                            VI.Cout(Uid, "{0}决定打怪，" + ss + ".", zd.Player(rounder),
-                                s < 1000 ? zd.Player(s) : zd.Monster((ushort)(s - 1000)));
-                            Z0F.Supporter = s;
-                        }
-                        else if (args[0] == "2")
-                        {
-                            ushort h = ushort.Parse(args[1]);
-                            string sh = (h == 0) ? "不妨碍" : "{0}进行妨碍";
-                            VI.Cout(Uid, sh + ".", zd.Player(rounder),
-                                h < 1000 ? zd.Player(h) : zd.Monster((ushort)(h - 1000)));
-                            Z0F.Hinder = h;
-                        }
+                        //else if (args[0] == "1")
+                        //{
+                        //    ushort s = ushort.Parse(args[1]);
+                        //    string ss = (s == 0) ? "不支援" : "{1}进行支援";
+                        //    VI.Cout(Uid, "{0}决定打怪，" + ss + ".", zd.Player(rounder),
+                        //        s < 1000 ? zd.Player(s) : zd.Monster((ushort)(s - 1000)));
+                        //    Z0F.Supporter = s;
+                        //}
+                        //else if (args[0] == "2")
+                        //{
+                        //    ushort h = ushort.Parse(args[1]);
+                        //    string sh = (h == 0) ? "不妨碍" : "{0}进行妨碍";
+                        //    VI.Cout(Uid, sh + ".", zd.Player(rounder),
+                        //        h < 1000 ? zd.Player(h) : zd.Monster((ushort)(h - 1000)));
+                        //    Z0F.Hinder = h;
+                        //}
                     }
                     VI.TerminCinTunnel(Uid);
                     break;
@@ -3648,7 +3648,20 @@ namespace PSD.ClientZero
                         ushort eve1 = ushort.Parse(blocks[12]);
                         Z0F.Monster1 = mon1; Z0F.Monster2 = mon2; Z0F.Eve1 = eve1;
 
-                        for (int i = 13; i < blocks.Length; i += 2)
+                        for (int i = 13; i < Math.Min(blocks.Length, 17); i += 2)
+                        {
+                            if (blocks[i] == "1")
+                            {
+                                if (rounder % 2 == 0) Z0F.RPool = int.Parse(blocks[i + 1]);
+                                else Z0F.OPool = int.Parse(blocks[i + 1]);
+                            }
+                            else if (blocks[i] == "2")
+                            {
+                                if (rounder % 2 == 0) Z0F.OPool = int.Parse(blocks[i + 1]);
+                                else Z0F.RPool = int.Parse(blocks[i + 1]);
+                            }
+                        }
+                        for (int i = 17; i < blocks.Length; i += 2)
                             Z0P.Score[int.Parse(blocks[i])] = int.Parse(blocks[i + 1]);
                     }
                     break;

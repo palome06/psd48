@@ -511,7 +511,20 @@ namespace PSD.ClientAo
 
         private List<string> mInLuggage;
         public List<string> InLuggage { get { return mInLuggage; } }
-        public void InsIntoLuggage(ushort ut, string code) { InsIntoLuggage(ut, new List<string> { code }); }
+        public void InitToLuggage(List<string> codes)
+        {
+            if (codes.Count > 0)
+            {
+                pb.Dispatcher.BeginInvoke((Action)(() =>
+                {
+                    mInLuggage.AddRange(codes);
+                    Base.Card.Hero hro = Tuple.HL.InstanceHero(mHero);
+                    pb.troveBox.cardPad.Content = "(" + mInLuggage.Count + ")";
+                    if (pb.AD != null && pb.AD.IsTVDictContains(Rank + "ILG"))
+                        pb.AD.yhTV.Show(mInLuggage, Rank + "ILG");
+                }));
+            }
+        }
         public void InsIntoLuggage(ushort ut, List<string> codes)
         {
             mInLuggage.AddRange(codes);
@@ -526,7 +539,6 @@ namespace PSD.ClientAo
                 }));
             }
         }
-        public void DelIntoLuggage(ushort ut, string code) { DelIntoLuggage(ut, new List<string> { code }); }
         public void DelIntoLuggage(ushort ut, List<string> codes)
         {
             mInLuggage.RemoveAll(p => codes.Contains(p));
@@ -1116,7 +1128,7 @@ namespace PSD.ClientAo
         public void InsPlayerTar(List<ushort> uts)
         {
             Base.Card.Hero hero = Tuple.HL.InstanceHero(SelectHero);
-            if (string.IsNullOrEmpty(hero.PlayerTarAlias) && Coss != 0)
+            if (hero != null && string.IsNullOrEmpty(hero.PlayerTarAlias) && Coss != 0)
             {
                 Base.Card.Hero cossHero = Tuple.HL.InstanceHero(Coss);
                 if (cossHero != null)

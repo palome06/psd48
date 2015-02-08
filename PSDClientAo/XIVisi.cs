@@ -3241,25 +3241,25 @@ namespace PSD.ClientAo
                             //cedcards.Add("M" + mons);
                             //A0O.FlyingGet(cedcards, 0, 0);
                         }
-                        else if (args[0] == "1")
-                        {
-                            ushort s = ushort.Parse(args[1]);
-                            string ss = (s == 0) ? "不支援" : "{1}进行支援";
-                            VI.Cout(Uid, "{0}决定打怪，" + ss + ".", zd.Player(rounder),
-                                s < 1000 ? zd.Player(s) : zd.Monster((ushort)(s - 1000)));
-                            A0F.Supporter = s;
-                            if (s != 0 && s < 1000)
-                                A0P[s].SetAsSpSucc();
-                        }
-                        else if (args[0] == "2")
-                        {
-                            ushort h = ushort.Parse(args[1]);
-                            string sh = (h == 0) ? "不妨碍" : "{0}进行妨碍";
-                            VI.Cout(Uid, sh + ".", h < 1000 ? zd.Player(h) : zd.Monster((ushort)(h - 1000)));
-                            A0F.Hinder = h;
-                            if (h != 0 && h < 1000)
-                                A0P[h].SetAsSpSucc();
-                        }
+                        //else if (args[0] == "1")
+                        //{
+                        //    ushort s = ushort.Parse(args[1]);
+                        //    string ss = (s == 0) ? "不支援" : "{1}进行支援";
+                        //    VI.Cout(Uid, "{0}决定打怪，" + ss + ".", zd.Player(rounder),
+                        //        s < 1000 ? zd.Player(s) : zd.Monster((ushort)(s - 1000)));
+                        //    A0F.Supporter = s;
+                        //    if (s != 0 && s < 1000)
+                        //        A0P[s].SetAsSpSucc();
+                        //}
+                        //else if (args[0] == "2")
+                        //{
+                        //    ushort h = ushort.Parse(args[1]);
+                        //    string sh = (h == 0) ? "不妨碍" : "{0}进行妨碍";
+                        //    VI.Cout(Uid, sh + ".", h < 1000 ? zd.Player(h) : zd.Monster((ushort)(h - 1000)));
+                        //    A0F.Hinder = h;
+                        //    if (h != 0 && h < 1000)
+                        //        A0P[h].SetAsSpSucc();
+                        //}
                     }
                     //VI.TerminCinTunnel(Uid);
                     break;
@@ -4134,8 +4134,7 @@ namespace PSD.ClientAo
                                 ap.DEX = dex; ap.DEXa = dexa;
                                 ap.TuxCount = tuxCount;
                                 ap.Weapon = wp; ap.Armor = am; ap.Trove = tr; ap.ExEquip = exq;
-                                if (lugs.Count > 0)
-                                    ap.InsIntoLuggage(ap.Trove, lugs);
+                                ap.InitToLuggage(lugs);
                                 ap.Guardian = guard; ap.Coss = coss;
                                 for (int i = 0; i < pets.Length; ++i)
                                     ap.SetPet(i, pets[i]);
@@ -4202,7 +4201,14 @@ namespace PSD.ClientAo
                         ushort eve1 = ushort.Parse(blocks[12]);
                         A0F.Monster1 = mon1; A0F.Monster2 = mon2; A0F.Eve1 = eve1;
 
-                        for (int i = 13; i < blocks.Length; i += 2)
+                        for (int i = 13; i < Math.Min(blocks.Length, 17); i += 2)
+                        {
+                            if (blocks[i] == "1")
+                                A0F.PoolAka = int.Parse(blocks[i + 1]);
+                            else if (blocks[i] == "2")
+                                A0F.PoolAo = int.Parse(blocks[i + 1]);
+                        }
+                        for (int i = 17; i < blocks.Length; i += 2)
                         {
                             if (blocks[i] == "1")
                                 A0F.ScoreAka = int.Parse(blocks[i + 1]);

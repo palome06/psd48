@@ -1063,6 +1063,7 @@ namespace PSD.PSDGamepkg.JNS
 
         public void GLT2Debut()
         {
+            // Possible Case: G07F causes the new valid/invalid
             var b = XI.Board;
             string g0zl = "";
             foreach (Player py in new Player[] { b.Rounder, b.Hinder, b.Supporter })
@@ -1078,7 +1079,8 @@ namespace PSD.PSDGamepkg.JNS
                         if (tux.Type == Tux.TuxType.FJ && !py.ArmorDisabled)
                             g0zl += "," + py.Uid + "," + ut;
                     }
-                    py.SetEquipDisabled("GLT2", true);
+                    py.SetArmorDisabled("GLT2", true);
+                    py.SetWeaponDisabled("GLT2", true);
                     //foreach (ushort ut in cards)
                     //{
                     //    Tux tux = XI.LibTuple.TL.DecodeTux(ut);
@@ -1110,7 +1112,8 @@ namespace PSD.PSDGamepkg.JNS
                         if (tux.Type == Tux.TuxType.FJ && py.ArmorDisabled)
                             cards.Add(ut);
                     }
-                    py.SetEquipDisabled("GLT2", false);
+                    py.SetArmorDisabled("GLT2", false);
+                    py.SetWeaponDisabled("GLT2", false);
                     foreach (ushort ut in cards)
                     {
                         Tux tux = XI.LibTuple.TL.DecodeTux(ut);
@@ -1401,6 +1404,7 @@ namespace PSD.PSDGamepkg.JNS
                             if (py.Pets.Contains(ut))
                             {
                                 XI.RaiseGMessage("G0HL," + py.Uid + "," + ut);
+                                XI.RaiseGMessage("G0ON," + py.Uid + ",M,1," + ut);
                                 break;
                             }
                         }

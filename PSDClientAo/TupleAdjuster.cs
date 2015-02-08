@@ -10,6 +10,23 @@ namespace PSD.ClientAo
     {
         public void ConvertTuple(LibGroup tuple, int version)
         {
+            if (version <= 131)
+            {
+                Base.Card.Evenement eve = tuple.EL.GetEveFromName("SJ104");
+                if (eve != null)
+                    eve.ForceChange("Count", 1);
+                tuple.EL.Refresh();
+                Base.Skill skill = tuple.SL.EncodeSkill("JNH1102");
+                if (skill != null)
+                {
+                    skill.ForceChange("Occurs", RemoveOnArray(skill.Occurs, 2));
+                    skill.ForceChange("Priorities", RemoveOnArray(skill.Priorities, 2));
+                    skill.ForceChange("IsOnce", RemoveOnArray(skill.IsOnce, 2));
+                    skill.ForceChange("IsTermini", RemoveOnArray(skill.IsTermini, 2));
+                    skill.ForceChange("Lock", RemoveOnArray(skill.Lock, 2));
+                    skill.ForceChange("IsHind", RemoveOnArray(skill.IsHind, 2));
+                }
+            }
             if (version <= 114)
             {
                 Base.Skill skill = tuple.SL.EncodeSkill("JN50402");

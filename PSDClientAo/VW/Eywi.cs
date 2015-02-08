@@ -118,6 +118,55 @@ namespace PSD.ClientAo.VW
         #region Version
         private void HandleWithVersion(ref string line, int Version)
         {
+            if (Version <= 131)
+            {
+                if (line[0] == 'R' && Util.Substring(line, 2, 5) == "ZW7")
+                {
+                    string[] args = line.Substring("R#ZW7,".Length).Split(',');
+                    if (args[0] == "1")
+                        line = "E0FI,S,0," + args[1];
+                    else if (args[0] == "2")
+                        line = "E0FI,H,0," + args[1];
+                }
+                else if (line.StartsWith("E0AF"))
+                {
+                    string[] args = line.Split(',');
+                    string e0fi = "";
+                    for (int i = 1; i < args.Length; i += 2)
+                    {
+                        ushort type = ushort.Parse(args[i]);
+                        if (type == 1) { e0fi += ",S,0," + args[i + 1]; }
+                        else if (type == 2) { e0fi += ",H,0," + args[i + 1]; }
+                        else if (type == 5) { e0fi += ",S," + args[i + 1] + "0"; }
+                        else if (type == 6) { e0fi += ",H," + args[i + 1] + "0"; }
+                    }
+                    if (!string.IsNullOrEmpty(e0fi))
+                        line = "E0FI" + e0fi;
+                }
+                else if (line.StartsWith("E0KI"))
+                {
+                    string[] args = line.Split(',');
+                    IDictionary<int, int> values = new Dictionary<int, int>();
+                    for (int i = 1; i < args.Length; i += 2)
+                        values.Add(int.Parse(args[i]), int.Parse(args[i + 1]));
+                    if (values.Count == 6)
+                    {
+                        foreach (var pair in values)
+                        {
+                            if (pair.Value == 1)
+                            {
+                                line = "E0FI,U," + pair.Key;
+                                break;
+                            }
+                        }
+                    }
+                    else if (values.Any(p => p.Value == 4))
+                    {
+                        var pair = values.First(p => p.Value == 4);
+                        line = "E0FI,W,0," + pair.Key;
+                    }
+                }
+            }
             if (Version <= 121)
             {
                 if (line.StartsWith("E0IE") || line.StartsWith("E0OE"))

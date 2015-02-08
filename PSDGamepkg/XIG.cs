@@ -13,6 +13,14 @@ namespace PSD.PSDGamepkg
     public partial class XI
     {
         #region G-Loop
+        // public void RaiseGObject(UnitObject uo)
+        // {
+        //     Log.Logger(uo.ToMessage());
+        //     if (uo.IsSentDirect)
+        //         SimpleGObject100(uo);
+        //     else
+        //         InnerGObject(uo, int.MinValue);
+        // }
         // Raise Command from skill declaration, without Priory Control
         public void RaiseGMessage(string cmd)
         {
@@ -1390,7 +1398,7 @@ namespace PSD.PSDGamepkg
 
                         string[] argv = cmd.Substring(0, hdx).Split(',');
                         ushort ust = ushort.Parse(argv[1]);
-                        Base.Card.Tux tux = tx01[argv[3]];
+                        Base.Card.Tux tux = LibTuple.TL.EncodeTuxCode(argv[3]);
                         WI.BCast("E0CD," + argv[1] + "," + argv[2] + "," + argv[3]);
                         //if (!tux.IsEq[sktInType])
                             //string input = "";
@@ -1404,62 +1412,63 @@ namespace PSD.PSDGamepkg
                             //if (input.Length > 0)
                             //    argv[3] += "," + input;
                         if ((tux.IsEq[sktInType] & 1) == 0)
-                            RaiseGMessage("G0CE," + argv[1] + "," + argv[2] + ",0," + argv[3] +
+                            RaiseGMessage("G0CE," + ust + "," + argv[2] + ",0," + argv[3] +
                                 ";" + sktInType + "," + sktFuse);
                         else
-                            RaiseGMessage("G0CE," + argv[1] + "," + argv[2] + ",1," + argv[3] +
+                            RaiseGMessage("G0CE," + ust + "," + argv[2] + ",1," + argv[3] +
                                 "," + argv[4] + ";" + sktInType + "," + sktFuse);
                         break;
                     }
                 case "G0CE": // use card and take action
                     {
-                        // G0CE,1,A,0,0,JP04,(3,1);TF
-                        // G0CE,2,A,B,0,JP04;TF
+                        // G0CE,A,T,0/1(eq),JP04,(3,1);TF
                         int hdx = cmd.IndexOf(';');
                         int idx = cmd.IndexOf(',', hdx);
                         int sktInType = int.Parse(Util.Substring(cmd, hdx + 1, idx));
                         string sktFuse = Util.Substring(cmd, idx + 1, -1);
                         string[] parts = cmd.Substring(0, hdx).Split(',');
 
-                        ushort invCount = ushort.Parse(parts[1]);
-                        if (invCount == 1) {
-                            ushort ust = ushort.Parse(parts[2]);
-                            ushort taction = ushort.Parse(parts[3]);
-                            ushort notEq = ushort.Parse(parts[4]);
-                            if (notEq == 0)
-                            {
-                                Base.Card.Tux tux = tx01[parts[5]];
-                                string argvt = Util.Substring(cmd, parts[0].Length + parts[1].Length +
-                                    parts[2].Length + parts[3].Length + parts[4].Length + parts[5].Length + 6, hdx);
-                                if (argvt.Length > 0)
-                                    argvt = "," + argvt;
-                                WI.BCast("E0CE," + ust + "," + taction + "," + parts[5] +
-                                    (argvt.Length > 0 ? ("," + argvt) : ""));
-                                if (taction != 2)
-                                    tux.Action(Board.Garden[ust], sktInType, sktFuse, argvt);
-                            }
-                            else
-                            {
-                                ushort ut = ushort.Parse(parts[6]);
-                                if (taction != 2)
-                                    RaiseGMessage("G0ZB," + Board.Garden[ust].Uid + ",3," + ut + "," + parts[5]);
-                            }
-                        } else if (invCount == 2) // Copy happens, handle it in both sides
+                        ushort ust = ushort.Parse(parts[1]);
+                        ushort taction = ushort.Parse(parts[2]);
+                        ushort notEq = ushort.Parse(parts[3]);
+                        if (notEq == 0)
                         {
-                            ushort u1 = ushort.Parse(parts[2]), u2 = ushort.Parse(parts[3]);
-                            ushort taction = ushort.Parse(parts[4]);
-                            ushort notEq = ushort.Parse(parts[5]);
-                            Base.Card.Tux tux = tx01[parts[6]];
-
-                            Base.Card.Tux tux = tx01[parts[6]];
-                            int fuseIdx = sktFuse.IndexOf(',');
-                            string locusFuse = Util.SubString(sktFuse, 0, fuseIdx);
-                            string locusCdFuse = Util.Substring(sktFuse, fuseIdx + 1, -1);
-                            tux.Locust(Board.Garden[u2], sktInType, locusFuse,
-                                "", locusCdFuse, Board.Garden[u1], tux);
+                            Base.Card.Tux tux = tx01[parts[4]];
+                            string argvt = Util.Substring(cmd, parts[0].Length + parts[1].Length +
+                                parts[2].Length + parts[3].Length + parts[4].Length + 5, hdx);
+                            if (argvt.Length > 0)
+                                argvt = "," + argvt;
+                            WI.BCast("E0CE," + ust + "," + taction + "," + parts[4] +
+                                (argvt.Length > 0 ? ("," + argvt) : ""));
+                            if (taction != 2)
+                                tux.Action(Board.Garden[ust], sktInType, sktFuse, argvt);
                         }
-                        break;
+                        else
+                        {
+                            ushort ut = ushort.Parse(parts[5]);
+                            if (taction != 2)
+                                RaiseGMessage("G0ZB," + Board.Garden[ust].Uid + ",3," + ut + "," + parts[4]);
+                        }
                     }
+                    break;
+                case "G1CW": // two targets that a tux will take action
+                    {
+                        // G1CW,A[1st:Org],B[2nd:Target],C[2nd:Provider],JP04;cdFuse;TF
+                        int fdx = cmd.IndexOf(';');
+                        int hdx = cmd.IndexOf(';', fdx + 1);
+                        int idx = cmd.IndexOf(',', hdx);
+                        int sktInType = int.Parse(Util.Substring(cmd, hdx + 1, idx));
+                        string sktFuse = Util.Substring(cmd, idx + 1, -1);
+                        string cdFuse = cmd.Substring(fdx + 1, hdx);
+
+                        string[] g1cw = cmd.Substring(0, fdx).Split(',');
+                        ushort first = ushort.Parse(g1cw[1]);
+                        ushort second = ushort.Parse(g1cw[2]);
+                        ushort provider = ushort.Parse(g1cw[3]);
+                        Tux tux = LibTuple.TL.EncodeTuxCode(g1cw[4]);
+                        tux.Locust(Board.Garden[provider], sktInType, sktFuse, cdFuse, Board.Garden[second], tux);
+                    }
+                    break;
                 case "G0XZ":
                     {
                         ushort me = ushort.Parse(args[1]);
@@ -3365,7 +3374,7 @@ namespace PSD.PSDGamepkg
                     break;
                 case "G0FI":
                     {
-                        RaiseGMessage("E0FI," + cmdrst);
+                        WI.BCast("E0FI," + cmdrst);
                         if (args[1] == "O" || args[1] == "U")
                             break;
                         for (int i = 1; i < args.Length; i += 3) {
