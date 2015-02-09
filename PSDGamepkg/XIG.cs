@@ -2342,7 +2342,7 @@ namespace PSD.PSDGamepkg
                         ushort x = ushort.Parse(args[1]);
                         int n = ushort.Parse(args[2]);
                         NMB nmb = NMBLib.Decode(x, LibTuple.ML, LibTuple.NL);
-                        if (nmb.IsMonster())
+                        if (nmb.IsMonster() && n > 0)
                         {
                             Monster mon = (Monster)nmb;
                             mon.AGL += (ushort)n;
@@ -2357,7 +2357,7 @@ namespace PSD.PSDGamepkg
                         ushort x = ushort.Parse(args[1]);
                         int n = ushort.Parse(args[2]);
                         NMB nmb = NMBLib.Decode(x, LibTuple.ML, LibTuple.NL);
-                        if (nmb.IsMonster())
+                        if (nmb.IsMonster() && n > 0)
                         {
                             Monster mon = (Monster)nmb;
                             mon.AGL -= (ushort)n;

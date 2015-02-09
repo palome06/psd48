@@ -2610,7 +2610,7 @@ namespace PSD.PSDGamepkg.JNS
                         result = 0; break;
                     }
                 }
-                return result != 0;
+                return result > 0 || (result < 0 && player.RAMInt != 0);
             }
             return false;
         }

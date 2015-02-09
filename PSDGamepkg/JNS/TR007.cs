@@ -3111,13 +3111,13 @@ namespace PSD.PSDGamepkg.JNS
                 return XI.Board.InFight && XI.Board.IsAttendWar(player) && player.RAMUshort == 0;
             else if (type == 3) // in battle and attender change
             {
-                string[] e0af = fuse.Split(',');
-                if (e0af[1] != "0" && player.RAMUshort == 1 && XI.Board.InFight)
+                if (player.RAMUshort == 1 && XI.Board.InFight)
                 {
-                    for (int i = 1; i < e0af.Length; ++i)
+                    string[] e0fi = fuse.Split(',');
+                    for (int i = 1; i < e0fi.Length; i += 3)
                     {
-                        bool e1 = e0af[i] == "1" || e0af[i] == "2";
-                        if (e1 && e0af[i + 1] == player.Uid.ToString())
+                        char c = e0fi[i][0];
+                        if ((c == 'S' || c == 'H' || c == 'W') && e0fi[i + 1] == player.Uid.ToString())
                             return true;
                     }
                 }
@@ -3428,32 +3428,32 @@ namespace PSD.PSDGamepkg.JNS
         {
             XI.RaiseGMessage("G0DH," + player.Uid + ",0,1");
         }
-        #endregion
+        #endregion TR025 - Liaori
         #region TR027 - Qianye
         public bool JNT2701Valid(Player player, int type, string fuse)
         {
-            // Z1,AF,IX,OX,IW,OW
-            if (type == 0)
+            if (type == 0) // Z1
                 return XI.Board.IsAttendWar(player) && XI.Board.Battler != null;
-            else if (type == 1)
+            else if (type == 1 && XI.Board.InFight) // FI
             {
-                string[] g0af = fuse.Split(',');
-                if (g0af[1] != "0" && XI.Board.InFight && XI.Board.Battler != null)
-                    for (int i = 1; i < g0af.Length; i += 2)
+                string[] g0fi = fuse.Split(',');
+                int zero = 0;
+                for (int i = 1; i < g0fi.Length; i += 3)
+                {
+                    char ch = g0fi[i][0];
+                    ushort od = ushort.Parse(g0fi[i + 1]);
+                    ushort nw = ushort.Parse(g0fi[i + 2]);
+                    if (g0fi[i] == "S" || g0fi[i] == "H")
                     {
-                        ushort ut = ushort.Parse(g0af[i + 1]);
-                        if (ut == player.Uid)
-                        {
-                            int now = player.DEX - XI.Board.Battler.AGL;
-                            if (now < 0)
-                                now = 0;
-                            ushort delta = ushort.Parse(g0af[i]);
-                            return now != player.RAMUshort;
-                        }
+                        if (od == player.Uid)
+                            --zero;
+                        if (nw == player.Uid)
+                            ++zero;
                     }
-                return false;
+                }
+                return zero != 0 && (player.DEX > XI.Board.Battler.AGL);
             }
-            else if (type >= 2 && type <= 5)
+            else if (type >= 2 && type <= 5) // I/OX,I/OW
             {
                 if (XI.Board.IsAttendWar(player) && XI.Board.Battler != null)
                 {
