@@ -14,7 +14,7 @@ namespace PSD.ClientAo
             {
                 Base.Card.Evenement eve = tuple.EL.GetEveFromName("SJ104");
                 if (eve != null)
-                    eve.ForceChange("Count", 1);
+                    eve.ForceChange("Count", (ushort)1);
                 tuple.EL.Refresh();
                 Base.Skill skill = tuple.SL.EncodeSkill("JNH1102");
                 if (skill != null)

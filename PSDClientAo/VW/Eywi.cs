@@ -336,7 +336,7 @@ namespace PSD.ClientAo.VW
             if (Version <= 110)
             {
                 if (line.StartsWith("H0SM"))
-                    line += ",5";
+                    line += ",4";
                 else if (line[0] == 'R' && line.Substring(2, 3) == "ZW5")
                 {
                     string[] blocks = line.Split(',');

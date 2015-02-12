@@ -37,7 +37,7 @@ namespace PSD.PSDGamepkg
             string sel = GetValue(args, 2, "选人模式(31:三选一/RM:随机/" +
                 "BP:禁选/RD:轮选/ZY:昭鹰/CP:协同/SS:北软/CJ:召唤/TC:明暗)").Trim().ToUpper();
             int selCode = RuleCode.CastMode(sel);
-            int pkgCode = RuleCode.PKG_ALL;
+            int levelCode = RuleCode.LEVEL_ALL;
             if (netMode == "SF")
             {
                 //IsGameCompete = false;
@@ -85,17 +85,22 @@ namespace PSD.PSDGamepkg
                     VI.Cout(0, "player " + player.Uid + "# belongs to Team " + player.Team + ".");
 
                 isFinished = false;
-                pkgCode = RuleCode.PKG_ALL;
+                levelCode = RuleCode.LEVEL_ALL;
             }
             else if (netMode == "NT")
             {
                 string teamModeStr = GetValue(args, 3, "请选择是否支持选队(YJ:选队/NJ:不允许选队)");
                 bool teamMode = (teamModeStr == "YJ") ? true : false;
-                string pkg = GetValue(args, 4, "采用包，求和(1:标包/2:凤鸣玉誓/4:SP" +
-                    "/8:TR三世轮回/16:TR云来奇缘/32:宿命篇/64:逍遥幻境)");
-                
-                if (!int.TryParse(pkg, out pkgCode) || pkgCode <= 0 || pkgCode > RuleCode.PKG_ALL)
-                    pkgCode = RuleCode.PKG_STD;
+                string level = GetValue(args, 4, "房间等级，(1:新手场/2:标准场/3:高手场/4:至尊场/5:界限突破场，后附+为特训");
+                bool isTrain = level.Contains("+");
+                if (isTrain)
+                    level = level.Substring(0, level.Length - 1);
+                if (!int.TryParse(level, out levelCode) || levelCode < 0 || levelCode > RuleCode.LEVEL_IPV)
+                    levelCode = RuleCode.LEVEL_RCM;
+                else if (levelCode == 0)
+                    levelCode = RuleCode.DEF_CODE;
+                else
+                    levelCode = (levelCode << 1) | (isTrain ? RuleCode.LEVEL_TRAIN_MASK : 0);
                 //string gameModeStr = GetValue(args, 5, "请选择游戏模式(JY:休闲模式/CT:竞技模式)");
                 //IsGameCompete = (gameModeStr == "CT") ? true : false; // true -> CT
                 string portStr = GetValue(args, 5, "请输入房间编号(0为默认值)");
@@ -150,8 +155,8 @@ namespace PSD.PSDGamepkg
             Board.RoundIN = "H0PR";
             if (WI is VW.Aywi)
                 HoldRoomTunnel();
-            SelectHero(selCode, pkgCode);
-            Run(pkgCode, selCode == Base.Rules.RuleCode.MODE_00);
+            SelectHero(selCode, levelCode);
+            Run(levelCode, selCode == Base.Rules.RuleCode.MODE_00);
         }
         // invs: players' uid
         private void StartRoom(int room, int[] opts, ushort[] invs)
@@ -208,7 +213,7 @@ namespace PSD.PSDGamepkg
         
 		private void HandleHoldOfWatcher(ushort wuid) {
 			VW.Aywi aywi = WI as VW.Aywi;
-            WI.Send("H0SM," + SelCode + "," + PCS.Groups, 0, wuid);
+            WI.Send("H0SM," + SelCode + "," + PCS.Level, 0, wuid);
             if (Board.RoundIN != "H0PR")
             {
                 string h09n = "H09N," + string.Join(",",
@@ -226,7 +231,7 @@ namespace PSD.PSDGamepkg
                     p => p.Uid + "," + p.AUid + "," + p.Name)), 0, wuid);
                 if (Casting != null)
                 {
-                    WI.BCast("H0SM," + SelCode + "," + PCS.Groups);
+                    WI.BCast("H0SM," + SelCode + "," + PCS.Level);
                     if (Casting is Base.Rules.CastingPick)
                     {
                         WI.Send("H0RT,0", 0, wuid);
@@ -263,7 +268,7 @@ namespace PSD.PSDGamepkg
             VW.Aywi aywi = WI as VW.Aywi;
             VI.Cout(0, "{0}#玩家恢复连接。", wuid);
             // If detected all recovered, BCase H0RK,0
-            WI.Send("H0SM," + SelCode + "," + PCS.Groups, 0, wuid);
+            WI.Send("H0SM," + SelCode + "," + PCS.Level, 0, wuid);
             if (Board.RoundIN != "H0PR")
             {
                 string h09n = "H09N," + string.Join(",",

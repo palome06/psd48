@@ -511,7 +511,7 @@ namespace PSD.ClientAo.OI
                     };
                 }
             }
-            if (Rank == 1 || Rank == 2)
+            if (operatable)
                 okButton.Visibility = Visibility.Visible;
             else
                 okButton.Visibility = Visibility.Hidden;

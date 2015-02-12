@@ -17,7 +17,7 @@ namespace PSD.PSDCenter
 
         public int OptTeam { set; get; }
         public int OptSel { set; get; }
-        public int OptPkg { set; get; }
+        public int OptLevel { set; get; }
 
         private bool mReady;
         public bool Ready {
@@ -30,18 +30,18 @@ namespace PSD.PSDCenter
             get { return mReady; }
         }
 
-        public Room(int number, int optTeam, int optSel, int optPkg)
+        public Room(int number, int optTeam, int optSel, int optLevel)
         {
             Number = number;
             players = new List<ushort>();
             watchers = new List<ushort>();
-            OptTeam = optTeam; OptSel = optSel; OptPkg = optPkg;
+            OptTeam = optTeam; OptSel = optSel; OptLevel = optLevel;
             Ready = false; Ps = null;
         }
 
         public string ConvToString()
         {
-            return Number + " " + OptTeam + "," + OptSel + "," + OptPkg;
+            return Number + " " + OptTeam + "," + OptSel + "," + OptLevel;
         }
 
         //public static Room CreateRoom(int number, int optTeam, int optSel, int optPkg)

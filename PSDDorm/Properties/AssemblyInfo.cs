@@ -7,12 +7,12 @@ using System.Windows;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("PSDDorm v0.4.9")]
+[assembly: AssemblyTitle("PSDDorm v0.4.10")]
 [assembly: AssemblyDescription("Generator of Report of PSDGame")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("PSDDorm")]
-[assembly: AssemblyCopyright("Copyright © Ventdealic 1996- 2014")]
+[assembly: AssemblyCopyright("Copyright © 2007-2015 Ventdealic")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -51,5 +51,5 @@ using System.Windows;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("0.4.9.1")]
-[assembly: AssemblyFileVersion("0.4.9.1")]
+[assembly: AssemblyVersion("0.4.10.2")]
+[assembly: AssemblyFileVersion("0.4.10.2")]

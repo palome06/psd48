@@ -48,5 +48,32 @@ namespace PSD.Base.Card
                 randomSortTable[randomSeed.NextDouble()] = someType;
             return randomSortTable.OrderBy(KVP => KVP.Key).Take(maxCount).Select(KVP => KVP.Value);
         }
+
+        public static IEnumerable<Type> PickSomeInGivenProbability<Type>(
+            IEnumerable<Type> someTypes, double propbability)
+        {
+            List<Type> result = new List<Type>();
+            foreach (Type type in someTypes) {
+                double decide = randomSeed.NextDouble();
+                if (decide < propbability)
+                    result.Add(type);
+            }
+            return result;
+        }
+
+        public static int[] Level2Pkg(int level)
+        {
+            int[] pkgs = null;
+            int pkgCode = level >> 1;
+            if (pkgCode == 1)
+                pkgs = new int[] { 1 };
+            else if (pkgCode == 2)
+                pkgs = new int[] { 1, 2 };
+            else if (pkgCode == 3)
+                pkgs = new int[] { 1, 2, 4, 5 };
+            else if (pkgCode == 4)
+                pkgs = new int[] { 1, 2, 3, 4, 5, 6, 7 };
+            return pkgs;
+        }
     }
 }

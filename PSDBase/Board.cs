@@ -298,8 +298,11 @@ namespace PSD.Base
             h09p.Append("," + (Rounder != null ? Rounder.Uid : 0));
             h09p.Append("," + Supporter.Uid + "," + Hinder.Uid);
             h09p.Append("," + (Monster1 + "," + Monster2 + "," + Eve));
-            h09p.Append("," + Rounder.Team + "," + CalculateRPool() + "," +
-                Rounder.OppTeam + "," + CalculateOPool());
+            if (InFight)
+                h09p.Append("," + Rounder.Team + "," + CalculateRPool() + "," +
+                    Rounder.OppTeam + "," + CalculateOPool());
+            else
+                h09p.Append("," + Rounder.Team + ",0," + Rounder.OppTeam + ",0");
             return h09p.ToString();
         }
         public string GeneratePrivateMessage(ushort ut)

@@ -135,6 +135,8 @@ namespace PSD.PSDGamepkg
             //RaiseGMessage("G0HQ,2,3,0,20,26");
             //RaiseGMessage("G0HQ,2,1,0,0,49,11,10");
             //Board.RestNPCPiles.PushBack(1018);
+            RaiseGMessage("G0HQ,2,1,0,0,10");
+            RaiseGMessage("G0HQ,2,2,0,0,90");
             //RaiseGMessage("G0HQ,2,3,0,0,40");
             //RaiseGMessage("G0HQ,2,1,0,0,47,76");
             //RaiseGMessage("G0HQ,2,2,0,0,49");
@@ -144,7 +146,7 @@ namespace PSD.PSDGamepkg
             //RaiseGMessage("G0HQ,2,2,0,0,10,11,12");
             //RaiseGMessage("G0HQ,2,1,0,0,48,49,95");
             //RaiseGMessage("G0HQ,2,3,0,0,92");
-            //RaiseGMessage("G0HQ,2,4,0,0,90");
+            //RaiseGMessage("G0HQ,2,5,0,0,90");
             //RaiseGMessage("G0HQ,2,4,0,0,47,48,52");
             //RaiseGMessage("G0HQ,2,6,0,0,26");
             //RaiseGMessage("G0HQ,2,2,0,48");
@@ -168,7 +170,7 @@ namespace PSD.PSDGamepkg
             //RaiseGMessage("G0HQ,2,2,0,0,96");
             //RaiseGMessage("G0HQ,2,2,0,0,90,34,89,88,95");
             //RaiseGMessage("G0HQ,2,1,0,0,95,88,10");
-            RaiseGMessage("G0HQ,2,1,0,0,10,11,12");
+            //RaiseGMessage("G0HQ,2,1,0,0,10,11,12");
             //RaiseGMessage("G0HQ,2,1,0,10,38,39");
             //RaiseGMessage("G0HQ,2,1,0,1,47,48,49,51,52");
             //RaiseGMessage("G0HQ,2,1,0,71,72,10,79,8");
@@ -176,7 +178,7 @@ namespace PSD.PSDGamepkg
             //RaiseGMessage("G0HQ,2,3,0,49");
             //RaiseGMessage("G0HQ,2,4,0,50,32,1,2");
             //RaiseGMessage("G0HQ,2,5,0,51");
-            RaiseGMessage("G0HQ,2,6,0,0,52");
+            //RaiseGMessage("G0HQ,2,6,0,0,52");
             //RaiseGMessage("G0HQ,2,1,0,51,37,10,53,11,40,16,18,25");
             //RaiseGMessage("G0HQ,2,2,0,48,49,13,14,34");
             //RaiseGMessage("G0HQ,2,3,0,1,52");
@@ -246,19 +248,19 @@ namespace PSD.PSDGamepkg
         }
         #endregion DebugCondition
 
-        public void Run(int pkgCode, bool inDebug)
+        public void Run(int levelCode, bool inDebug)
         {
             var garden = Board.Garden;
             LastUVs = new Dictionary<ushort, string>();
-            ConstructPiles(pkgCode);
+            ConstructPiles(levelCode);
             WI.BCast(string.Format("H0DP,{0},{1},{2}",
                 Board.TuxPiles.Count, Board.MonPiles.Count, Board.EvePiles.Count));
-            tx01 = new JNS.TuxCottage(this, VI).RegisterDelegates(LibTuple.TL, pkgCode);
+            tx01 = new JNS.TuxCottage(this, VI).RegisterDelegates(LibTuple.TL, levelCode);
             sk01 = new JNS.SkillCottage(this, VI).RegisterDelegates(LibTuple.SL);
             cz01 = new JNS.OperationCottage(this, VI).RegisterDelegates(LibTuple.ZL);
             nj01 = new JNS.NPCCottage(this, VI).RegisterDelegates(LibTuple.NJL);
             ev01 = new JNS.EveCottage(this, VI).RegisterDelegates(LibTuple.EL);
-            MappingSksp(out sk02, out sk03, pkgCode);
+            MappingSksp(out sk02, out sk03, levelCode);
             mt01 = new JNS.MonsterCottage(this, VI).RegisterDelegates(LibTuple.ML);
 
             IDictionary<ushort, int> hipc = new Dictionary<ushort, int>();

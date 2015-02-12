@@ -19,7 +19,7 @@ namespace PSD.ClientZero
 
         private string name;
         private int avatar;
-        private int teamCode, selCode, pkgCode;
+        private int teamCode, selCode, levelCode;
 
         private ushort uid;
         private int room;
@@ -36,11 +36,11 @@ namespace PSD.ClientZero
 
         #region Hall
         public ZI(string name, int avatar, string server, int port,
-            int teamCode, int selCode, int pkgCode, bool record, bool msglog)
+            int teamCode, int selCode, int levelCode, bool record, bool msglog)
         {
             this.name = name; this.avatar = avatar;
             this.server = server; this.port = port;
-            this.teamCode = teamCode; this.selCode = selCode; this.pkgCode = pkgCode;
+            this.teamCode = teamCode; this.selCode = selCode; this.levelCode = levelCode;
             this.record = record; this.msglog = msglog;
             roomMates = new List<IchiPlayer>();
         }
@@ -54,7 +54,7 @@ namespace PSD.ClientZero
             TcpClient client = new TcpClient(server, port);
             NetworkStream tcpStream = client.GetStream();
             SentByteLine(tcpStream, "C0CO," + name + "," + avatar + ","
-                + teamCode + "," + selCode + "," + pkgCode);
+                + teamCode + "," + selCode + "," + levelCode);
 
             Thread msgThread = new Thread(delegate()
             {
@@ -355,16 +355,22 @@ namespace PSD.ClientZero
                     string sel = GetValue(args, 7,
                         "选将模式(31:三选一/RM:随机/BP:禁选/RD:轮选/ZY:昭鹰/CP:协同/IN:客栈/SS:北软/CJ:召唤/TC:六明六暗)");
                     int selCode = RuleCode.CastMode(sel.Trim().ToUpper());
-                    string pkg = GetValue(args, 8, "采用包，求和(1:标包/2:凤鸣玉誓/4:SP/" +
-                        "8:TR三世轮回/16:TR云来奇缘/32:HL宿命篇)");
-                    int pkgCode;
-                    if (!int.TryParse(pkg, out pkgCode) || pkgCode < 0 || pkgCode >= 64)
-                        pkgCode = 0;
+                    int levelCode;
+                    string level = GetValue(args, 8, "房间等级，(1:新手场/2:标准场/3:高手场/4:至尊场/5:界限突破场，后附+为特训");
+                    bool isTrain = level.Contains("+");
+                    if (isTrain)
+                        level = level.Substring(0, level.Length - 1);
+                    if (!int.TryParse(level, out levelCode) || levelCode < 0 || levelCode > RuleCode.LEVEL_IPV)
+                        levelCode = RuleCode.LEVEL_RCM;
+                    else if (levelCode == 0)
+                        levelCode = RuleCode.DEF_CODE;
+                    else
+                        levelCode = (levelCode << 1) | (isTrain ? RuleCode.LEVEL_TRAIN_MASK : 0);
                     //string server = "127.0.0.1";
                     //string name = "Yuan";
                     int port = Base.NetworkCode.HALL_PORT;
                     int avatar = new Random().Next(120);
-                    ZI xin = new ZI(name, avatar, server, port, teamCode, selCode, pkgCode, record, msglog);
+                    ZI xin = new ZI(name, avatar, server, port, teamCode, selCode, levelCode, record, msglog);
                     xin.StartHall();
                 }
                 else

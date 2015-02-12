@@ -268,7 +268,7 @@ namespace PSD.ClientZero
                 PetDisabled ? "禁宠 " : "", Guardian != 0 ? xic.zd.GuardAlias(SelectHero, Coss) : "");
             Aps(sb, "手牌数:{0} HP:{1}/{2} STR:{3}/{4} DEX:{5}/{6}",
                 TuxCount, HP, HPa, STR, STRa, DEX, DEXa);
-            string equipBase = "装备: {0} {1}" + ((xic.PkgGroups >= 16) ? " {2}  " : "  ") +
+            string equipBase = "装备: {0} {1}" + (((xic.LevelCode >> 1) >= 3) ? " {2}  " : "  ") +
                  ((ExCards.Count > 0 || ExEquip != 0) ? "{3}: {4}" : "");
             Aps(sb, equipBase, xic.zd.Tux(Weapon), xic.zd.Tux(Armor), xic.zd.Tux(Trove),
                 xic.zd.HeroExCardAlias(SelectHero, Coss),

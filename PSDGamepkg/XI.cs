@@ -14,12 +14,15 @@ namespace PSD.PSDGamepkg
     {
         private LibGroup libTuple;
         public int Groups { private set; get; }
+        public bool IsTrain { private set; get; }
+        public int Level { get { return (Groups << 1) | (IsTrain ? 1 : 0); } }
 
-        public PilesConstruct(LibGroup libTuple, int groups)
+        public PilesConstruct(LibGroup libTuple, int levelCode)
         {
             //this.xi = xi; 
             this.libTuple = libTuple;
-            Groups = groups;
+            IsTrain = (levelCode % 2 != 0);
+            Groups = (levelCode >> 1);
         }
 
         //public Base.Card.Hero[,] AllocateHerosRM(int szCand, int szPlayer)
@@ -28,15 +31,36 @@ namespace PSD.PSDGamepkg
         //}
         public Base.Card.Hero[] AllocateHerosRM(int sz)
         {
-            return libTuple.HL.RMPickList(sz, Groups).ToArray();
+            var test = libTuple.HL.ListHeroesInTest(Level);
+            var sels = ListAllSeleableHeros();
+            double probablity = (IsTrain ? 0.48 : Math.Max(0.04, test.Count * 1.0 / (test.Count + sels.Length)));
+
+            List<Base.Card.Hero> list = Base.Card.Card.PickSomeInGivenProbability(
+                libTuple.HL.ListHeroesInTest(Level), probablity).ToList();
+            if (list.Count >= sz)
+                return Base.Card.Card.PickSomeInRandomOrder(list, sz).ToArray();
+            else
+            {
+                list.AddRange(Base.Card.Card.PickSomeInRandomOrder(ListAllSeleableHeros(), sz - list.Count));
+                list.Shuffle();
+                return list.ToArray();
+            }
+        }
+        public List<Base.Card.Hero> ListAllSeleableAndTestedHeros()
+        {
+            List<Base.Card.Hero> list = libTuple.HL.ListAllSeleable(Level).ToList();
+            list.AddRange(libTuple.HL.ListHeroesInTest(Level));
+            return list;
         }
         public Base.Card.Hero[] ListAllSeleableHeros()
         {
-            return libTuple.HL.ListAllSeleable(Groups).ToArray();
+            return libTuple.HL.ListAllSeleable(Level).ToArray();
         }
-        public Base.Card.Hero[] ListAllHeros()
+        public List<Base.Card.Hero> ListAllHeros()
         {
-            return libTuple.HL.ListAllHeros(Groups).ToArray();
+            List<Base.Card.Hero> list = libTuple.HL.ListAllHeros(Level).ToList();
+            list.AddRange(libTuple.HL.ListHeroesInTest(Level));
+            return list;
         }
     }
 
@@ -87,7 +111,8 @@ namespace PSD.PSDGamepkg
             //10102, 17028, 17025, 10206, 10504, 19011
             //17027, 17028, 17005, 17025, 10608, 19011
             //10303, 10404, 10602, 17017, 10403, 10504
-            10302, 17012, 17005, 17022, 10605, 17028
+            //10302, 17012, 17005, 17022, 10605, 17028
+            10106, 10608, 19001, 17022, 19011, 17028
         };
 
         #region Memeber Declaration & Constructor
@@ -154,22 +179,22 @@ namespace PSD.PSDGamepkg
                 piles.Enqueue(id);
             dises.Clear();
         }
-        private void ConstructPiles(int pkgCode)
+        private void ConstructPiles(int levelCode)
         {
             //List<ushort> tuxLst = Base.Card.Card.GeneratePiles(null,
             //    new ushort[] { 1, (ushort)LibTuple.TL.Size });
-            List<ushort> tuxLst = LibTuple.TL.ListAllTuxCodes(pkgCode);
+            List<ushort> tuxLst = LibTuple.TL.ListAllTuxCodes(levelCode);
             Util.Shuffle(tuxLst);
             Board.TuxPiles = new Base.Utils.Rueue<ushort>(tuxLst);
             List<ushort> eveLst = Base.Card.Card.GeneratePiles(null,
-                new ushort[] { 1, (ushort)LibTuple.EL.ListAllSeleable(pkgCode).Count });
+                new ushort[] { 1, (ushort)LibTuple.EL.ListAllSeleable(levelCode).Count });
             Util.Shuffle(eveLst);
             Board.EvePiles = new Base.Utils.Rueue<ushort>(eveLst);
             //List<ushort> monLst = Base.Card.Card.GeneratePiles(null, new ushort[] {
             //    Base.Card.NMBLib.CodeOfMonster(1), (ushort)(Base.Card.NMBLib.CodeOfMonster(0) + LibTuple.ML.Size) });
-            List<ushort> monLst = LibTuple.ML.ListAllSeleable(pkgCode)
+            List<ushort> monLst = LibTuple.ML.ListAllSeleable(levelCode)
                 .Select(p => Base.Card.NMBLib.CodeOfMonster(p)).ToList();
-            List<ushort> npcLst = LibTuple.NL.ListAllSeleable(pkgCode)
+            List<ushort> npcLst = LibTuple.NL.ListAllSeleable(levelCode)
                 .Select(p => Base.Card.NMBLib.CodeOfNPC(p)).ToList();
             //npcLst.Shuffle();
             //monLst.AddRange(npcLst.Take(10));
@@ -190,7 +215,7 @@ namespace PSD.PSDGamepkg
             Board.EveDises = new List<ushort>();
             Board.MonDises = new List<ushort>();
 
-            List<int> heros = LibTuple.HL.ListAllHeros(pkgCode).Select(p => p.Avatar).ToList();
+            List<int> heros = PCS.ListAllHeros().Select(p => p.Avatar).ToList();
             foreach (Player py in Board.Garden.Values)
                 heros.Remove(py.SelectHero);
             heros.Shuffle();
@@ -292,13 +317,13 @@ namespace PSD.PSDGamepkg
         // $dict is the main sk02 dictionary mapping from Occur to SKTriple
         // $links is the dictionary mapping from one SKTriple to all its parasitisms
         private void MappingSksp(out IDictionary<string, List<SkTriple>> dict,
-            out IDictionary<string, List<string>> links, int pkgCode)
+            out IDictionary<string, List<string>> links, int levelCode)
         {
             dict = new Dictionary<string, List<SkTriple>>();
             links = new Dictionary<string, List<string>>();
             //IDictionary<string, List<SkTriple>> par = new Dictionary<string, List<SkTriple>>();
             List<SkTriple> parasitism = new List<SkTriple>();
-            foreach (Base.Card.Tux tux in LibTuple.TL.ListAllTuxs(pkgCode))
+            foreach (Base.Card.Tux tux in LibTuple.TL.ListAllTuxs(levelCode))
             {
                 //string[] blocks = tux.Occur.Split(';');
                 //string[] occurs = blocks[0].Split(',');
@@ -412,7 +437,7 @@ namespace PSD.PSDGamepkg
                 else
                     Util.AddToMultiMap(dict, cz.Occur, skt);
             }
-            foreach (Base.Card.Monster mt in LibTuple.ML.ListAllMonster(pkgCode))
+            foreach (Base.Card.Monster mt in LibTuple.ML.ListAllMonster(levelCode))
             {
                 for (int i = 0; i < mt.EAOccurs.Length; ++i)
                     if (mt.EAOccurs[i] != null)
@@ -449,7 +474,7 @@ namespace PSD.PSDGamepkg
                         }
                     }
             }
-            foreach (Base.Card.Evenement eve in LibTuple.EL.ListAllEves(pkgCode))
+            foreach (Base.Card.Evenement eve in LibTuple.EL.ListAllEves(levelCode))
             {
                 for (int i = 0; i < eve.Occurs.Length; ++i)
                 {
@@ -1364,9 +1389,9 @@ namespace PSD.PSDGamepkg
         #endregion Util Methods
 
         #region Hero Selection
-        public void SelectHero(int selCode, int pkgCode)
+        public void SelectHero(int selCode, int levelCode)
         {
-            PCS = new PilesConstruct(LibTuple, pkgCode);
+            PCS = new PilesConstruct(LibTuple, levelCode);
             //int prpr = -1; // Params Specification Closed now. (e.g. 31->41, prpr = 4)
             //if (!int.TryParse(Util.Substring(mode, 2, -1), out prpr))
             //    prpr = -1;
@@ -1374,7 +1399,7 @@ namespace PSD.PSDGamepkg
             var garden = Board.Garden;
             List<ushort> staff = garden.Keys.ToList(); staff.Sort();
             SelCode = selCode;
-            WI.BCast("H0SM," + selCode + "," + pkgCode);
+            WI.BCast("H0SM," + selCode + "," + levelCode);
             if (selCode == RuleCode.MODE_00)
             {
                 //garden[1].SelectHero = 17004;
@@ -1392,13 +1417,11 @@ namespace PSD.PSDGamepkg
                 for (ushort i = 1; i <= 6; ++i)
                     garden[i].SelectHero = mode00heroes[i - 1];
             }
-            else if (selCode == RuleCode.MODE_31)
+            else if (selCode == RuleCode.MODE_31 && PCS.ListAllSeleableAndTestedHeros().Count >= 18)
             {
                 if (prpr < 0)
                     prpr = 3;
-                if (PCS.ListAllSeleableHeros().Length >= 48)
-                    ++prpr;
-                if (PCS.ListAllSeleableHeros().Length >= 72)
+                if (PCS.ListAllSeleableAndTestedHeros().Count >= 72)
                     ++prpr;
                 CastingPick cp = new CastingPick(); Casting = cp;
                 Base.Card.Hero[] heros = PCS.AllocateHerosRM((prpr + 1) * garden.Count);
@@ -1449,7 +1472,7 @@ namespace PSD.PSDGamepkg
                 }
                 WI.RecvInfEnd();
             }
-            else if (selCode == RuleCode.MODE_NM)
+            else if ((selCode == RuleCode.MODE_31 && PCS.ListAllSeleableAndTestedHeros().Count < 18) || selCode == RuleCode.MODE_NM)
             {
                 if (prpr < 0)
                     prpr = 3;
@@ -1491,7 +1514,7 @@ namespace PSD.PSDGamepkg
             }
             else if (selCode == RuleCode.MODE_CJ) // No Casting in Mode of CJ
             {
-                List<Base.Card.Hero> heros = PCS.ListAllSeleableHeros().ToList();
+                List<Base.Card.Hero> heros = PCS.ListAllSeleableAndTestedHeros();
                 List<int> hts = heros.Select(p => p.Avatar).ToList();
                 WI.BCast("H0RT,0");
                 foreach (ushort ut in staff)
@@ -1712,7 +1735,7 @@ namespace PSD.PSDGamepkg
                      "," + half + "," + string.Join(",", cc.XuanAo) + "," +
                     string.Join(",", staff.Select(p => p + ",0")), staff.Where(p => p % 2 == 0).ToArray());
 
-                List<ushort> decided = new ushort[] { 1, 2 }.ToList();
+                List<ushort> decided = new ushort[] { 3, 4 }.ToList();
                 WI.RecvInfStart();
                 while (decided.Count > 0)
                 {
@@ -1892,7 +1915,7 @@ namespace PSD.PSDGamepkg
                 CastingPublic cp = new CastingPublic(heros.Select(p => p.Avatar).ToList());
                 Casting = cp;
                 WI.BCast("H0PT," + cp.ToMessage());
-                ushort[] captain = new ushort[] { 2, 1, 1, 2 };
+                ushort[] captain = new ushort[] { 4, 3, 3, 4 };
                 for (int i = 0; i < 2; ++i)
                 {
                     ushort ut = captain[i];
@@ -1961,7 +1984,7 @@ namespace PSD.PSDGamepkg
                     WI.Send("H0CI," + cc.ToMessage(pair.Value.Team == 1, false), 0, pair.Key);
                 WI.Live("H0CI," + cc.ToMessage(true, true));
 
-                List<ushort> decided = new ushort[] { 1, 2 }.ToList();
+                List<ushort> decided = new ushort[] { 3, 4 }.ToList();
                 WI.RecvInfStart();
                 while (decided.Count > 0)
                 {
@@ -2013,7 +2036,7 @@ namespace PSD.PSDGamepkg
                 cp.Xuan.Shuffle();
                 Casting = cp;
                 WI.BCast("H0PT," + cp.ToMessage());
-                ushort[] captain = new ushort[] { 2, 1, 1, 2 };
+                ushort[] captain = new ushort[] { 4, 3, 3, 4 };
                 int cidx = 0;
                 do
                 {
@@ -2061,7 +2084,7 @@ namespace PSD.PSDGamepkg
                     WI.Send("H0CI," + cc.ToMessage(pair.Value.Team == 1, false), 0, pair.Key);
                 WI.Live("H0CI," + cc.ToMessage(true, true));
 
-                List<ushort> decided = new ushort[] { 1, 2 }.ToList();
+                List<ushort> decided = new ushort[] { 3, 4 }.ToList();
                 WI.RecvInfStart();
                 while (decided.Count > 0)
                 {

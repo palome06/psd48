@@ -104,7 +104,9 @@ namespace PSD.ClientAo.Login
                     bool resume = IsHallReconnect;
                     bool msglog = true;
                     int mode = IsHallSelModeEnabled ? SelMode : Base.Rules.RuleCode.DEF_CODE;
-                    int pkg = GetPkgCode();
+                    //int pkg = GetPkgCode();
+                    int level = IsHallLevelEnabled == false ? 0 :
+                         ((PkgMode << 1) | (LvTestCheckBox.IsChecked == true ? 1 : 0));
                     int team = IsHallTeamEnabled ? HallTeamMode : Base.Rules.RuleCode.DEF_CODE;
                     if (resume)
                     {
@@ -117,7 +119,7 @@ namespace PSD.ClientAo.Login
                     }
                     else if (!watch)
                     {
-                        AoDisplay a0d = new AoDisplay(addr, nick, ava, record, msglog, mode, pkg, team);
+                        AoDisplay a0d = new AoDisplay(addr, nick, ava, record, msglog, mode, level, team);
                         a0d.Show();
                         this.Close();
                     }
@@ -177,11 +179,13 @@ namespace PSD.ClientAo.Login
             HallPkgCB.IsChecked = null;
             HallTeamCB.IsChecked = null;
             DirTeamCB.IsChecked = null;
+            HallLevelCB.IsChecked = null;
 
             HallSelModeCB.IsChecked = true;
             HallPkgCB.IsChecked = false;
             HallTeamCB.IsChecked = false;
             DirTeamCB.IsChecked = false;
+            HallLevelCB.IsChecked = true;
         }
 
         private void WindowClosed(object sender, EventArgs e)
@@ -199,10 +203,11 @@ namespace PSD.ClientAo.Login
         {
             string[] names = new string[] {"凤天凌","瑚月","姬亭","迦兰多","蓉霜","白王",
                 "魂", "左殇", "银翎", "蝶", "瓷儿", "玄鱼", "冷荼", "雷当", "沐小葵", "长鸿",
-                "闻人羽","乐无异","夏夷则","阿阮",
+                "闻人羽","乐无异","夏夷则","阿阮","沈夜",
                 "夏侯仪","冰璃","封铃笙","慕容璇玑","古德伦",
                 "楚歌","海棠","甄瑶","韩靖","沈嫣","杜晏","夏侯翎",
-                "南宫飞云","燕若雪","柴嵩","赵无双","唐影","秋依水"
+                "南宫飞云","燕若雪","柴嵩","赵无双","唐影","秋依水",
+                "越今朝","越祈","闲卿","洛昭言","扁络桓","葛清霏","绮里小媛","嬴旭危"
             };
             int idx = random.Next(names.Length);
             return names[idx];
@@ -217,6 +222,7 @@ namespace PSD.ClientAo.Login
         private bool IsHallRecord { set; get; }
         private bool IsHallSelModeEnabled { set; get; }
         private bool IsHallPkgEnabled { set; get; }
+        private bool IsHallLevelEnabled { set; get; }
         private bool IsHallTeamEnabled { set; get; }
         private bool IsHallMsgLogEnabled { set; get; }
 
@@ -274,6 +280,16 @@ namespace PSD.ClientAo.Login
             HallPkgPanel.IsEnabled = false;
             IsHallPkgEnabled = false;
         }
+        private void HallLevelEnabled(object sender, RoutedEventArgs e)
+        {
+            HallLevelPanel.IsEnabled = true;
+            IsHallLevelEnabled = true;
+        }
+        private void HallLevelDisabled(object sender, RoutedEventArgs e)
+        {
+            HallLevelPanel.IsEnabled = false;
+            IsHallLevelEnabled = false;
+        }
         private void HallTeamEnabled(object sender, RoutedEventArgs e)
         {
             HallTeamPanel.IsEnabled = true;
@@ -307,6 +323,13 @@ namespace PSD.ClientAo.Login
         private void SelCJDecided(object sender, RoutedEventArgs e) { SelMode = Base.Rules.RuleCode.MODE_CJ; }
         private void SelTCDecided(object sender, RoutedEventArgs e) { SelMode = Base.Rules.RuleCode.MODE_TC; }
         private void Sel00Decided(object sender, RoutedEventArgs e) { SelMode = Base.Rules.RuleCode.MODE_00; }
+
+        private int PkgMode { set; get; }
+        private void Lv0Decided(object sender, RoutedEventArgs e) { PkgMode = 1; }
+        private void Lv1Decided(object sender, RoutedEventArgs e) { PkgMode = 2; }
+        private void Lv2Decided(object sender, RoutedEventArgs e) { PkgMode = 3; }
+        private void Lv3Decided(object sender, RoutedEventArgs e) { PkgMode = 4; }
+        private void Lv4Decided(object sender, RoutedEventArgs e) { PkgMode = 5; }
 
         private int GetPkgCode()
         {
@@ -443,9 +466,15 @@ namespace PSD.ClientAo.Login
         {
             TextBox tb = sender as TextBox;
             if (tb.Text == "AKB48Show!")
+            {
                 Sel00Radio.IsEnabled = true;
+                Lv4Radio.IsEnabled = true;
+            }
             else
+            {
                 Sel00Radio.IsEnabled = false;
+                Lv4Radio.IsEnabled = false;
+            }
         }
     }
 }

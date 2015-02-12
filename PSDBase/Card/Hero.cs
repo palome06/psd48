@@ -12,6 +12,10 @@ namespace PSD.Base.Card
         public int Avatar { private set; get; }
         // group, e.g. 1 for standard, 0 for test, 2 for SP, etc.
         public int Group { private set; get; }
+        // available day of tested hero
+        public DayOfWeek[] AvailableDay { set; get; }
+        // available test level, e.g. HL012 in Group 6 is tested in RCM Room 3
+        public int AvailableTestPkg { set; get; }
 
         // HP, EP, CP; STR, DEF, ATS, ADF, SPD, DEX, AGL, MOV, RNG
         public ushort HP { private set; get; }
@@ -47,6 +51,28 @@ namespace PSD.Base.Card
             this.Spouses = spouses; this.Skills = skills;
             this.Isomorphic = isomorphic; this.Archetype = archetype;
             this.Bio = bio;
+        }
+        internal void SetAvailableParam(string groupString)
+        {
+            List<DayOfWeek> list = new List<DayOfWeek>();
+            int apkg = 0;
+            string[] parts = groupString.Split(',');
+            foreach (string part in parts)
+            {
+                switch (part)
+                {
+                    case "L1": list.Add(DayOfWeek.Monday); break;
+                    case "L2": list.Add(DayOfWeek.Tuesday); break;
+                    case "L3": list.Add(DayOfWeek.Wednesday); break;
+                    case "L4": list.Add(DayOfWeek.Thursday); break;
+                    case "L5": list.Add(DayOfWeek.Friday); break;
+                    case "L6": list.Add(DayOfWeek.Saturday); break;
+                    case "L7": list.Add(DayOfWeek.Sunday); break;
+                    default: if (part.StartsWith("R")) apkg = int.Parse(part.Substring("R".Length)); break;
+                }
+            }
+            AvailableDay = list.ToArray();
+            AvailableTestPkg = apkg;
         }
 
         internal static Hero Parse(string line)
@@ -130,7 +156,8 @@ namespace PSD.Base.Card
             System.Data.DataRowCollection datas = sql.Query(list, "Hero");
             foreach (System.Data.DataRow data in datas)
             {
-                int group = (int)((long)data["VALID"]);
+                string gs = (string)data["VALID"];
+                int group = int.Parse(gs.Contains(",") ? gs.Substring(0, gs.IndexOf(',')) : gs);
                 if (group != 0)
                 {
                     int code = (int)((long)data["ID"]);
@@ -182,6 +209,7 @@ namespace PSD.Base.Card
                         FolderAlias = alias[5],
                         GuestAlias = alias[6]
                     };
+                    hero.SetAvailableParam(gs);
                     dicts.Add(code, hero);
                 }
             }
@@ -189,31 +217,6 @@ namespace PSD.Base.Card
 
         public int Size { get { return dicts.Count; } }
 
-        public Hero[,] RMPickList(int cand, int people, int groups)
-        {
-            int possi = dicts.Count / people;
-            if (possi < cand)
-                cand = possi;
-            int total = cand * people;
-            // TODO: Remove others from HeroLib
-            List<Hero> possibles = ListAllSeleable(groups).ToList();
-            IEnumerable<Hero> selects = Card.PickSomeInRandomOrder(possibles, total);
-            int idx = 0, jdx = 0;
-            Hero[,] heros = new Hero[people, cand];
-            foreach (Hero hero in selects)
-            {
-                heros[idx, jdx] = hero;
-                ++jdx;
-                if (jdx >= cand) { ++idx; jdx = 0; }
-            }
-            return heros;
-        }
-        public Hero[] RMPickList(int sz, int groups)
-        {
-            IEnumerable<Hero> selects = Card.PickSomeInRandomOrder(
-                ListAllSeleable(groups).ToList(), sz);
-            return selects.ToArray();
-        }
         public List<Hero> ListAllSeleable(int groups)
         {
             List<Hero> first = ListAllHeros(groups).Where(p => p.Ofcode != "XJ103" &&
@@ -225,10 +228,11 @@ namespace PSD.Base.Card
         }
         public List<Hero> ListAllHeros(int groups)
         {
-            if (groups == 0)
-                return dicts.Values.ToList();
+            int[] pkgs = Card.Level2Pkg(groups);
+            if (pkgs != null)
+                return dicts.Values.Where(p => pkgs.Contains(p.Group)).ToList();
             else
-                return dicts.Values.Where(p => ((groups & (1 << (p.Group - 1))) != 0)).ToList();
+                return dicts.Values.ToList();
         }
         //public Hero[,] SRPickList(int cand, int people)
         //{
@@ -250,6 +254,11 @@ namespace PSD.Base.Card
         //    //heros[0, 0] = dicts[10505];
         //    return heros;
         //}
+        public List<Hero> ListHeroesInTest(int level)
+        {
+            return dicts.Values.Where(p => p.AvailableTestPkg == (level >> 1)
+                && p.AvailableDay.Contains(DateTime.Now.DayOfWeek)).ToList();
+        }
 
         public Hero InstanceHero(int code) {
             Hero hero = null;

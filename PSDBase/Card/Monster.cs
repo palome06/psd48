@@ -504,19 +504,20 @@ namespace PSD.Base.Card
 
         public List<ushort> ListAllSeleable(int groups)
         {
-            if (groups == 0)
+            int[] pkgs = Card.Level2Pkg(groups);
+            if (pkgs == null)
                 return dicts.Where(p => p.Value.Group > 0).Select(p => p.Key).ToList();
             else
-                return dicts.Where(p => p.Value.Group > 0 && 
-                    ((groups & (1 << (p.Value.Group - 1))) != 0)).Select(p => p.Key).ToList();
+                return dicts.Where(p => pkgs.Contains(p.Value.Group)).Select(p => p.Key).ToList();
         }
 
         public List<Monster> ListAllMonster(int groups)
         {
-            if (groups == 0)
+            int[] pkgs = Card.Level2Pkg(groups);
+            if (pkgs == null)
                 return dicts.Values.ToList();
             else
-                return dicts.Values.Where(p => ((groups & (1 << (Math.Abs(p.Group) - 1))) != 0)).ToList();
+                return dicts.Values.Where(p => pkgs.Contains(p.Group)).ToList();
         }
     }
 }

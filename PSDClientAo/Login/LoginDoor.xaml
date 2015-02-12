@@ -83,33 +83,33 @@
                                           Checked="HallSelModeEnabled" Unchecked="HallSelModeDisabled">
                                     指定选将模式：</CheckBox>
                                 <WrapPanel x:Name="HallSelModePanel" Grid.Column="1" Grid.Row="0">
-                                    <RadioButton Content="三选一" Width="120" GroupName="SelOptGroup"
-                                                 Checked="Sel31Decided" IsChecked="True"
-                                                 ToolTip="每人随机发给三个人物从中选择一名作为上场人物，如不满意可用一名随机新角色随机替换一名待选人物。"/>
-                                    <RadioButton Content="北软禁选" Width="120" GroupName="SelOptGroup"
-                                                 Checked="SelSSDecided"
+                                    <RadioButton Content="标准竞技" Width="120" GroupName="SelOptGroup"
+                                                 Checked="SelSSDecided" IsChecked="True"
                                                  ToolTip="总共亮出16名角色，由双方队长依次禁选一名角色，然后按照一名-两名-两名的顺序依次选取人物。最后队长将我方已选人物中选出三名作为我方上场人物。"/>
-                                    <RadioButton Content="昭鹰" Width="120" GroupName="SelOptGroup"
+                                    <RadioButton Content="欢乐三选一" Width="120" GroupName="SelOptGroup"
+                                                 Checked="Sel31Decided"
+                                                 ToolTip="每人随机发给三个人物从中选择一名作为上场人物，如不满意可用一名随机新角色随机替换一名待选人物。"/>
+                                    <RadioButton Content="对位轮选" Width="120" GroupName="SelOptGroup"
                                                  Checked="SelZYDecided"
                                                  ToolTip="双方第一名玩家执行三选一，然后同时亮出；由第二名玩家执行四选一，同理第三名玩家执行五选一。"/>
+                                    <RadioButton Content="队长(CM)" Width="120" GroupName="SelOptGroup" IsEnabled="False"
+                                                 Checked="SelBPDecided"
+                                                 ToolTip="总共亮出18名角色，然后由双方每名玩家依次禁选一名，然后选择自己的上场人物。"/>                          
+                                    <RadioButton Content="协同(CP)" Width="120" GroupName="SelOptGroup"
+                                                 Checked="SelCPDecided"
+                                                 ToolTip="每方各分配8名角色，然后队友间通过商议分别选出自己的上场人物。"/>
                                     <RadioButton Content="六明六暗" Width="120" GroupName="SelOptGroup"
                                                  Checked="SelTCDecided"
                                                  ToolTip="总共抽出12名角色，6名明置6名暗置，然后由双方队长依次按照一名-两名-两名的顺序依次选取人物。最后队长将我方已选人物中选出三名作为我方上场人物。"/>
                                     <RadioButton Content="随机" Width="120" GroupName="SelOptGroup"
                                                  Checked="SelRMDecided"
                                                  ToolTip="所有玩家随机决定上场角色。"/>
-                                    <RadioButton Content="标准禁选" Width="120" GroupName="SelOptGroup"
-                                                 Checked="SelBPDecided"
-                                                 ToolTip="总共亮出18名角色，然后由双方每名玩家依次禁选一名，然后选择自己的上场人物。"/>
-                                    <RadioButton Content="轮选" Width="120" GroupName="SelOptGroup"
-                                                 Checked="SelRDDecided"
-                                                 ToolTip="总共亮出12名角色，然后由双方每名玩家依次选择自己的上场人物。"/>                                    
-                                    <RadioButton Content="协同" Width="120" GroupName="SelOptGroup"
-                                                 Checked="SelCPDecided"
-                                                 ToolTip="每方各分配8名角色，然后队友间通过商议分别选出自己的上场人物。"/>
                                     <RadioButton Content="客栈" Width="120" GroupName="SelOptGroup"
-                                                 Checked="SelINDecided" IsEnabled="False"
+                                                 Checked="SelINDecided" Visibility="Collapsed"
                                                  ToolTip="客栈中初始有6名角色，然后由每名玩家依次将一名角色踢出客栈，然后选择自己的上场人物。每当有角色离开客栈，补充相应的任务。"/>
+                                    <RadioButton Content="轮选" Width="120" GroupName="SelOptGroup"
+                                                 Checked="SelRDDecided" Visibility="Collapsed"
+                                                 ToolTip="总共亮出12名角色，然后由双方每名玩家依次选择自己的上场人物。"/>
                                     <RadioButton Content="召唤" Width="120" GroupName="SelOptGroup"
                                                  Checked="SelCJDecided"
                                                  ToolTip="每名玩家选择自己最希望玩到的角色。如果有多人选择了同一角色，则随机满足一人召唤，其余获得随机角色。"/>
@@ -122,13 +122,35 @@
                                 </WrapPanel>
 
                                 <Grid Grid.Column="0" Grid.Row="2">
+                                    <CheckBox x:Name="HallLevelCB" VerticalAlignment="Top"
+                                              Checked="HallLevelEnabled" Unchecked="HallLevelDisabled">
+                                        指定房间：</CheckBox>
+                                </Grid>
+                                <StackPanel x:Name="HallLevelPanel" Orientation="Vertical" Grid.Column="1" Grid.Row="2">
+                                    <WrapPanel>
+                                        <RadioButton Content="新手场" Width="120" GroupName="LvGroup" Checked="Lv0Decided"
+                                                     ToolTip="使用标准版游戏，去除苏媚，唐雪见，南宫煌，王蓬絮与小蛮等操作或询问复杂的角色。"/>
+                                        <RadioButton Content="标准场" Width="120" GroupName="LvGroup" Checked="Lv1Decided"
+                                                     ToolTip="使用标准版与资料篇一《凤鸣玉誓》的官方正式出版的版本游戏。"/>
+                                        <RadioButton Content="高手场" Width="120" GroupName="LvGroup" Checked="Lv2Decided" IsChecked="True"
+                                                     ToolTip="使用标准版、资料篇一《凤鸣玉誓》、同人资料篇二《三世轮回》，同人资料篇三《云来奇缘》成熟的版本游戏。（神秘时限体验角色试用中！）"/>
+                                        <RadioButton Content="至尊场" Width="120" GroupName="LvGroup" Checked="Lv3Decided"
+                                                     ToolTip="使用标准版、资料篇一～三、测试中的资料篇四《逍遥幻境》、番外资料篇《宿命篇》、SP版本游戏。享受至尊全扩的尊贵。"/>
+                                        <RadioButton Content="□限突破场" x:Name="Lv4Radio"  Width="120" GroupName="LvGroup" Checked="Lv4Decided" IsEnabled="False"
+                                                     ToolTip="对标准版与资料篇一《凤鸣玉誓》进行尝试调整，以及加入少许官方先行角色的测试包。"/>
+                                    </WrapPanel>
+                                    <Grid Background="LightGray">
+                                        <CheckBox x:Name="LvTestCheckBox" ToolTip="测试中角色出现概率大大增加哦。">特训模式</CheckBox>
+                                    </Grid>
+                                </StackPanel>
+                                <Grid Grid.Column="0" Grid.Row="2" Visibility="Collapsed">
                                     <CheckBox x:Name="HallPkgCB" VerticalAlignment="Top"
                                               Checked="HallPkgEnabled" Unchecked="HallPkgDisabled">
                                         指定游戏包：</CheckBox>
                                     <Button x:Name="HallPkgAllSel" VerticalAlignment="Bottom" Click="HallPkgAllSelClick"
                                             Width="100" Height="26" Background="LightGray">全部选择</Button>
                                 </Grid>
-                                <WrapPanel x:Name="HallPkgPanel" Grid.Column="1" Grid.Row="2">
+                                <WrapPanel x:Name="HallPkgPanel" Grid.Column="1" Grid.Row="2" Visibility="Collapsed">
                                     <CheckBox x:Name="Pkg1CheckBox" Content="标准包" Width="120"
                                               IsChecked="True" IsEnabled="False"/>
                                     <CheckBox x:Name="Pkg2CheckBox" Content="凤鸣玉誓" Width="120"
@@ -150,20 +172,18 @@
                                     选队倾向：</CheckBox>
                                 <StackPanel x:Name="HallTeamPanel" Grid.Column="1" Grid.Row="4" Orientation="Vertical">
                                     <WrapPanel>
-                                        <RadioButton Content="禁止选队" Width="120" GroupName="TeamOptGroup"
+                                        <RadioButton Content="无选队" Width="120" GroupName="TeamOptGroup"
                                                  Checked="HallTeamNoDecided"/>
+                                        <RadioButton Content="IP优先匹配" Width="120" GroupName="TeamOptGroup"
+                                                 Checked="HallTeamIPDecided" IsChecked="True"/>
+                                        <RadioButton Content="随机匹配" Width="120" GroupName="TeamOptGroup"
+                                                 Checked="HallTeamYesDecided"/>
                                     </WrapPanel>
-                                    <WrapPanel>
+                                    <WrapPanel Visibility="Collapsed">
                                         <RadioButton Content="蜀山派" Width="120" GroupName="TeamOptGroup"
                                                  Checked="HallTeamAkaDecided"/>
                                         <RadioButton Content="琼华派" Width="120" GroupName="TeamOptGroup"
                                                  Checked="HallTeamAoDecided"/>
-                                    </WrapPanel>
-                                    <WrapPanel>
-                                        <RadioButton Content="任意选队" Width="120" GroupName="TeamOptGroup"
-                                                 Checked="HallTeamYesDecided"/>
-                                        <RadioButton Content="IP优先匹配" Width="120" GroupName="TeamOptGroup"
-                                                 Checked="HallTeamIPDecided" IsChecked="True"/>
                                     </WrapPanel>
                                 </StackPanel>
                             </Grid>

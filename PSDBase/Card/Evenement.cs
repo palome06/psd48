@@ -239,18 +239,20 @@ namespace PSD.Base.Card
 
         public List<ushort> ListAllSeleable(int groups)
         {
-            if (groups == 0)
+            int[] pkgs = Card.Level2Pkg(groups);
+            if (pkgs == null)
                 return dicts.Keys.ToList();
             else
-                return dicts.Where(p => ((groups & (1 << (p.Value.Group - 1))) != 0)).Select(p => p.Key).ToList();
+                return dicts.Where(p => pkgs.Contains(p.Value.Group)).Select(p => p.Key).ToList();
         }
 
         public List<Evenement> ListAllEves(int groups)
         {
-            if (groups == 0)
+            int[] pkgs = Card.Level2Pkg(groups);
+            if (pkgs == null)
                 return firsts;
             else
-                return firsts.Where(p => ((groups & (1 << (p.Group - 1))) != 0)).ToList();
+                return firsts.Where(p => pkgs.Contains(p.Group)).ToList();
         }
         public void Refresh()
         {

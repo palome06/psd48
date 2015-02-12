@@ -1356,8 +1356,8 @@ namespace PSD.PSDGamepkg.JNS
                     bool b3 = false;
                     bool b4 = XI.Board.IsRounderBattleWin();
                     bool b5 = XI.Board.Rounder.Team == player.Team;
-                    return mon1 != null && mon2 != null && mon1.IsTuxInvolved(b1, b2, b3,
-                        b4, b5) && mon2.IsTuxInvolved(b1, b2, b3, b4, b5);
+                    return (mon1 != null && mon1.IsTuxInvolved(b1, b2, b3, b4, b5)) ||
+                        (mon2 != null && mon2.IsTuxInvolved(b1, b2, b3, b4, b5));
                 }
                 else if (type == 6)
                 {
@@ -3008,9 +3008,9 @@ namespace PSD.PSDGamepkg.JNS
 
             XI.RaiseGMessage("G1CK," + player.Uid + ",JNS0302,0");
             if (player.RAMUshort == 2)
-                Harm(player, XI.Board.Garden[uts[1]], 1); 
-            else
-                Harm(player, XI.Board.Garden[uts[2]], 1);
+                Harm(player, XI.Board.Garden[uts[1]], 2); 
+            else if (player.RAMUshort == 1)
+                Harm(player, XI.Board.Garden[uts[2]], 2);
         }
         public bool JNS0301Valid(Player player, int type, string fuse)
         {

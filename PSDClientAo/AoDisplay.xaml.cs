@@ -39,7 +39,7 @@ namespace PSD.ClientAo
         public AoMix Mix { private set; get; }
         // Hall mode - Gamer mode
         public AoDisplay(string sv, string nick, int ava,
-            bool record, bool msglog, int mode, int pkg, int team)
+            bool record, bool msglog, int mode, int level, int team)
         {
             InitializeComponent();
             var ass = System.Reflection.Assembly.GetExecutingAssembly().GetName();
@@ -49,7 +49,7 @@ namespace PSD.ClientAo
             visiThread = new Thread(delegate()
             {
                 int port = Base.NetworkCode.HALL_PORT;
-                mzi = new ZI(nick, ava, sv, port, team, mode, pkg, record, msglog, this);
+                mzi = new ZI(nick, ava, sv, port, team, mode, level, record, msglog, this);
                 mzi.StartHall();
             });
             visiThread.Start();

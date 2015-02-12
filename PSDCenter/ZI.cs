@@ -51,7 +51,7 @@ namespace PSD.PSDCenter
                 ushort avatar = ushort.Parse(blocks[2]);
                 int teamCode = int.Parse(blocks[3]);
                 int selCode = int.Parse(blocks[4]);
-                int pkgCode = int.Parse(blocks[5]);
+                int levelCode = int.Parse(blocks[5]);
 
                 ushort uid = RequestUid();
                 Neayer ny = new Neayer(user, avatar, uid)
@@ -67,7 +67,7 @@ namespace PSD.PSDCenter
                 //Thread lThread = new Thread(delegate() { ListenToTalkSocket(socket); });
                 //lThread.Start();
 
-                Room reqRoom = RequestRoom(teamCode, selCode, pkgCode);
+                Room reqRoom = RequestRoom(teamCode, selCode, levelCode);
                 try
                 {
                     lock (reqRoom.players)
@@ -386,7 +386,7 @@ namespace PSD.PSDCenter
         private ushort RequestRoom() { return rmCount++; }
         private ushort RequestQSUid() { return qsCount++; }
 
-        private Room RequestRoom(int teamCode, int selCode, int pkgCode)
+        private Room RequestRoom(int teamCode, int selCode, int levelCode)
         {
             lock (rooms)
             {
@@ -399,7 +399,7 @@ namespace PSD.PSDCenter
                             ((rm.OptTeam == RuleCode.HOPE_YES) &&
                             ((teamCode & RuleCode.HOPE_YES) == RuleCode.HOPE_YES));
                         bool b2 = (selCode == RuleCode.DEF_CODE) || (rm.OptSel == selCode);
-                        bool b3 = (pkgCode == RuleCode.DEF_CODE) || (rm.OptPkg == pkgCode);
+                        bool b3 = (levelCode == RuleCode.DEF_CODE) || (rm.OptLevel == levelCode);
                         if (b1 && b2 && b3)
                             return rm;
                     }
@@ -411,11 +411,11 @@ namespace PSD.PSDCenter
                     teamCode = RuleCode.HOPE_YES;
                 if (selCode == RuleCode.DEF_CODE)
                     selCode = RuleCode.MODE_31;
-                if (pkgCode == RuleCode.DEF_CODE)
-                    pkgCode = RuleCode.PKG_STD;
-                Room room = new Room(RequestRoom(), teamCode, selCode, pkgCode);
+                if (levelCode == RuleCode.DEF_CODE)
+                    levelCode = RuleCode.LEVEL_RCM;
+                Room room = new Room(RequestRoom(), teamCode, selCode, levelCode);
                 Console.WriteLine("Room {0}# is created. [{1}][{2}][{3}]",
-                    room.Number, room.OptTeam, room.OptSel, room.OptPkg);
+                    room.Number, room.OptTeam, room.OptSel, room.OptLevel);
                 rooms[room.Number] = room; return room;
             }
         }

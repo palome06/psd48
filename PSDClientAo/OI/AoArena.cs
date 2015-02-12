@@ -120,7 +120,7 @@ namespace PSD.ClientAo.OI
                                 ar.CstCongress(xme, xop, me, right, left, false, true);
                             else
                             {
-                                if (Rank == 2)
+                                if (cc.IsCaptain(Rank))
                                     ar.CstCongress(xme, xop, me, right, left, true, true);
                                 else
                                     ar.CstCongress(xme, xop, me, right, left, true, false);
@@ -157,7 +157,7 @@ namespace PSD.ClientAo.OI
                                 ar.CstCongress(xme, xop, me, right, left, false, true);
                             else
                             {
-                                if (Rank == 1)
+                                if (cc.IsCaptain(Rank))
                                     ar.CstCongress(xme, xop, me, right, left, true, true);
                                 else
                                     ar.CstCongress(xme, xop, me, right, left, true, false);

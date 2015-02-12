@@ -20,7 +20,7 @@ namespace PSD.ClientAo
 
         private string name;
         private int avatar;
-        private int teamCode, selCode, pkgCode;
+        private int teamCode, selCode, levelCode;
 
         private ushort uid;
         private int room;
@@ -41,11 +41,11 @@ namespace PSD.ClientAo
 
         #region Hall
         public ZI(string name, int avatar, string server, int port,
-            int teamCode, int selCode, int pkgCode, bool record, bool msglog, AoDisplay ad)
+            int teamCode, int selCode, int levelCode, bool record, bool msglog, AoDisplay ad)
         {
             this.name = name; this.avatar = avatar;
             this.server = server; this.port = port;
-            this.teamCode = teamCode; this.selCode = selCode; this.pkgCode = pkgCode;
+            this.teamCode = teamCode; this.selCode = selCode; this.levelCode = levelCode;
             this.record = record; this.msglog = msglog;
             roomMates = new List<IchiPlayer>();
             AD = ad; XV = null;
@@ -60,7 +60,7 @@ namespace PSD.ClientAo
             TcpClient client = new TcpClient(server, port);
             NetworkStream tcpStream = client.GetStream();
             SentByteLine(tcpStream, "C0CO," + name + "," + avatar + ","
-                + teamCode + "," + selCode + "," + pkgCode);
+                + teamCode + "," + selCode + "," + levelCode);
             Thread msgThread = new Thread(delegate()
             {
                 try

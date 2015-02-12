@@ -43,18 +43,20 @@ namespace PSD.ClientAo
 
         private int hopeTeam;
         public int SelMode { private set; get; }
-        private int mPkgGroups;
-        public int PkgGroups
+        private int mLevelCode;
+        public int LevelCode
         {
             private set
             {
-                if (mPkgGroups < 16 && value >= 16)
+                int mPkgCode = mLevelCode >> 1;
+                int mValue = value >> 1;
+                if (mPkgCode < 3 && mValue >= 3)
                     ad.SetPlayerXBSlot(true);
-                else if (mPkgGroups >= 16 && value < 16)
+                else if (mPkgCode >= 3 && mValue < 3)
                     ad.SetPlayerXBSlot(false);
-                mPkgGroups = value;
+                mLevelCode = value;
             }
-            get { return mPkgGroups; }
+            get { return mLevelCode; }
         }
         private readonly bool isReplay;
         //private Base.Rules.Casting casting; // exists in yfArena.AoArena
@@ -3428,7 +3430,7 @@ namespace PSD.ClientAo
                     {
                         string[] blocks = cmdrst.Split(',');
                         SelMode = int.Parse(blocks[0]);
-                        PkgGroups = int.Parse(blocks[1]);
+                        LevelCode = int.Parse(blocks[1]);
                     }
                     break;
                 case "H0SW":
@@ -3828,17 +3830,17 @@ namespace PSD.ClientAo
                         ad.yfArena.AoArena.Show();
                         //cc.ToHint(Uid, VI, zd.HeroWithCode, zd.Hero);
                         cinCalled = StartCinEtc();
-                        while ((Uid % 2 == 0 && !cc.DecidedAo) || (Uid % 2 == 1 && !cc.DecidedAka))
+                        bool isAka = (Uid % 2 == 1);
+                        while ((!isAka && !cc.DecidedAo) || (isAka && !cc.DecidedAka))
                         {
-                            List<int> xuanR = (Uid % 2 == 0) ? cc.XuanAo : cc.XuanAka;
+                            List<int> xuanR = isAka ? cc.XuanAka : cc.XuanAo;
                             if (VI is VW.Cyvi)
                             {
                                 string op = (VI as VW.Cyvi).Cin48(Uid, "请选择您的角色。");
                                 op = op.Trim().ToUpper();
                                 int selAva;
-                                bool captain = (Uid == 1 || Uid == 2);
                                 bool has = cc.Ding[Uid] != 0;
-                                if (op == "X" && captain)
+                                if (op == "X" && cc.IsCaptain(Uid))
                                     WI.Send("H0CD,0", Uid, 0);
                                 else if (op == "0" && has)
                                     WI.Send("H0CB," + cc.Ding[Uid], Uid, 0);
@@ -3864,12 +3866,13 @@ namespace PSD.ClientAo
                         for (int i = xsz1 + xsz2 + 2; i < args.Length; i += 2)
                             cc.Init(ushort.Parse(args[i]), int.Parse(args[i + 1]));
                         ad.yfArena.AoArena.Show();
-                        if (Uid == 1 || Uid == 2) // Captain Only
+                        if (cc.IsCaptain(Uid)) // Captain Only
                         {
                             cinCalled = StartCinEtc();
-                            while ((Uid == 1 && !cc.DecidedAka) || (Uid == 2 && !cc.DecidedAo))
+                            bool isAka = (Uid % 2 == 1);
+                            while ((isAka && !cc.DecidedAka) || (!isAka && !cc.DecidedAo))
                             {
-                                List<int> xuanR = (Uid % 2 == 0) ? cc.XuanAo : cc.XuanAka;
+                                List<int> xuanR = isAka ? cc.XuanAka : cc.XuanAo;
                                 if (VI is VW.Cyvi)
                                 {
                                     string op = (VI as VW.Cyvi).Cin48(Uid, "请为我方玩家分配角色.");

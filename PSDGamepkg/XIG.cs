@@ -1459,7 +1459,7 @@ namespace PSD.PSDGamepkg
                         int idx = cmd.IndexOf(',', hdx);
                         int sktInType = int.Parse(Util.Substring(cmd, hdx + 1, idx));
                         string sktFuse = Util.Substring(cmd, idx + 1, -1);
-                        string cdFuse = cmd.Substring(fdx + 1, hdx);
+                        string cdFuse = Util.Substring(cmd, fdx + 1, hdx);
 
                         string[] g1cw = cmd.Substring(0, fdx).Split(',');
                         ushort first = ushort.Parse(g1cw[1]);

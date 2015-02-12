@@ -369,14 +369,16 @@ namespace PSD.Base.Card
         }
         public List<Tux> ListAllTuxs(int groups)
         {
-            if (groups == 0)
+            int[] pkgs = Card.Level2Pkg(groups);
+            if (pkgs == null)
                 return Firsts.ToList();
             else
-                return Firsts.Where(p => p.Package.Any(q => (groups & (1 << (q - 1))) != 0)).ToList();
+                return Firsts.Where(p => p.Package.Any(q => pkgs.Contains(q))).ToList();
         }
         public List<ushort> ListAllTuxCodes(int groups)
         {
-            if (groups == 0)
+            int[] pkgs = Card.Level2Pkg(groups);
+            if (pkgs == null)
                 return dicts.Keys.ToList();
             List<Tux> txs = ListAllTuxs(groups);
             List<ushort> us = new List<ushort>();
@@ -384,7 +386,7 @@ namespace PSD.Base.Card
             {
                 for (int i = 0; i < tux.Package.Length; ++i)
                 {
-                    if ((groups & (1 << (tux.Package[i] - 1))) != 0)
+                    if (pkgs.Contains(tux.Package[i]))
                     {
                         for (ushort j = tux.Range[i * 2]; j <= tux.Range[i * 2 + 1]; ++j)
                             us.Add(j);

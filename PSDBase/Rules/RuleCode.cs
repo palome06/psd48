@@ -76,22 +76,29 @@ namespace PSD.Base.Rules
         #endregion Mode Selection
 
         #region Package Selection
-        public const int XJ_STANDARD = 0x1; // [1] Standard
-        public const int XJ_EXT1 = 0x2; // [2] Fengmingyushi
-        public const int XJ_SP = 0x4; // [3] SP
-        public const int XJ_TR2 = 0x8; // [4] Sanshilunhui
-        public const int XJ_TR3 = 0x10; // [5] Yunlaiqiyuan
-        public const int XJ_HL = 0x20; // [6] Holiday Serial
-        public const int XJ_TR4 = 0x40; // [7] Xiaoyaohuanjing
+        //public const int XJ_STANDARD = 0x1; // [1] Standard
+        //public const int XJ_EXT1 = 0x2; // [2] Fengmingyushi
+        //public const int XJ_SP = 0x4; // [3] SP
+        //public const int XJ_TR2 = 0x8; // [4] Sanshilunhui
+        //public const int XJ_TR3 = 0x10; // [5] Yunlaiqiyuan
+        //public const int XJ_HL = 0x20; // [6] Holiday Serial
+        //public const int XJ_TR4 = 0x40; // [7] Xiaoyaohuanjing
 
-        public static int PKG_ALL
-        {
-            get { return XJ_STANDARD | XJ_EXT1 | XJ_SP | XJ_TR2 | XJ_TR3 | XJ_HL | XJ_TR4; }
-        }
-        public static int PKG_STD
-        {
-            get { return XJ_STANDARD | XJ_EXT1 | XJ_TR2 | XJ_TR3; }
-        }
+        //public static int PKG_ALL
+        //{
+        //    get { return XJ_STANDARD | XJ_EXT1 | XJ_SP | XJ_TR2 | XJ_TR3 | XJ_HL | XJ_TR4; }
+        //}
+        //public static int PKG_STD
+        //{
+        //    get { return XJ_STANDARD | XJ_EXT1 | XJ_TR2 | XJ_TR3; }
+        //}
+        public const int LEVEL_NEW = 0x1 << 1;
+        public const int LEVEL_STD = 0x2 << 1;
+        public const int LEVEL_RCM = 0x3 << 1;
+        public const int LEVEL_ALL = 0x4 << 1;
+        public const int LEVEL_IPV = 0x5 << 1;
+
+        public const int LEVEL_TRAIN_MASK = 0x1;
         #endregion Package Selection
     }
 }

@@ -403,7 +403,7 @@ namespace PSD.Base.Rules
         public bool IsDecide(ushort ut)
         {
             bool aka = (ut % 2 == 1);
-            return !Ding.Where(p => (p.Key % 2 == ut % 2)).Any(p => p.Value == 0);
+            return !Ding.Any(p => (p.Key % 2 == ut % 2) && p.Value == 0);
         }
         public string ToMessage(bool akaTeam, bool watch = false)
         {
@@ -458,9 +458,11 @@ namespace PSD.Base.Rules
 
         public void ToInputRequire(ushort ut, Base.VW.IVI vi)
         {
-            bool captain = (ut == 1 || ut == 2);
-            bool has = Ding[ut] != 0;
-            vi.Cout(ut, "===> 选择您的角色{0}{1}.", has ? "，0为退回" : "", captain ? "，X为选将确定" : "");
+            vi.Cout(ut, "===> 选择您的角色{0}{1}.", Ding[ut] != 0 ? "，0为退回" : "",
+                 IsCaptain(ut) ? "，X为选将确定" : "");
         }
+
+        public bool IsCaptain(ushort ut) { return ut == 3 || ut == 4; }
+        public ushort[] GetCaptainLoop() { return new ushort[] { 4, 3, 3, 4 }; }
     }
 }

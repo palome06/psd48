@@ -7,12 +7,12 @@ using System.Windows;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("PSDClientAo v0.4.9")]
+[assembly: AssemblyTitle("PSDClientAo v0.4.10")]
 [assembly: AssemblyDescription("PSDClientAo")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("iptcg")]
 [assembly: AssemblyProduct("PSDClientAo")]
-[assembly: AssemblyCopyright("Copyright © 2007-2014 Ventdealic")]
+[assembly: AssemblyCopyright("Copyright © 2007-2015 Ventdealic")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -51,5 +51,5 @@ using System.Windows;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("0.4.10.132")]
-[assembly: AssemblyFileVersion("0.4.10.132")]
+[assembly: AssemblyVersion("0.4.10.133")]
+[assembly: AssemblyFileVersion("0.4.10.133")]

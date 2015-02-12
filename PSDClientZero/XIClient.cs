@@ -46,7 +46,7 @@ namespace PSD.ClientZero
 
         private int hopeTeam;
         public int SelMode { private set; get; }
-        public int PkgGroups { private set; get; }
+        public int LevelCode { private set; get; }
         private Base.Rules.Casting casting;
         //private List<int> selCandidates;
         // Displays Members
@@ -2995,7 +2995,7 @@ namespace PSD.ClientZero
                     {
                         string[] blocks = cmdrst.Split(',');
                         SelMode = int.Parse(blocks[0]);
-                        PkgGroups = int.Parse(blocks[1]);
+                        LevelCode = int.Parse(blocks[1]);
                     }
                     break;
                 case "H0SW":
@@ -3326,9 +3326,8 @@ namespace PSD.ClientZero
                                 string op = (VI as ClientZero.VW.Ayvi).Cin48(Uid);
                                 op = op.Trim().ToUpper();
                                 int selAva;
-                                bool captain = (Uid == 1 || Uid == 2);
                                 bool has = cc.Ding[Uid] != 0;
-                                if (op == "X" && captain)
+                                if (op == "X" && cc.IsCaptain(Uid))
                                     WI.Send("H0CD,0", Uid, 0);
                                 else if (op == "0" && has)
                                     WI.Send("H0CB," + cc.Ding[Uid], Uid, 0);
@@ -3355,11 +3354,12 @@ namespace PSD.ClientZero
                             cc.Init(ushort.Parse(args[i]), int.Parse(args[i + 1]));
 
                         cc.ToHint(Uid, VI, zd.HeroWithCode, zd.Hero);
-                        if (Uid == 1 || Uid == 2) // Captain Only
+                        if (cc.IsCaptain(Uid)) // Captain Only
                         {
                             VI.Cout(Uid, "===> 选择目标玩家与角色，以逗号分隔；0为退回，X为选将确定.");
                             cinCalled = StartCinEtc();
-                            while ((Uid == 1 && !cc.DecidedAka) || (Uid == 2 && !cc.DecidedAo))
+                            bool isAka = (Uid % 2 == 1);
+                            while ((isAka && !cc.DecidedAka) || (!isAka && !cc.DecidedAo))
                             {
                                 List<int> xuanR = (Uid % 2 == 0) ? cc.XuanAo : cc.XuanAka;
                                 if (VI is ClientZero.VW.Ayvi)
@@ -3407,7 +3407,7 @@ namespace PSD.ClientZero
                         Base.Rules.CastingCongress cc = casting as Base.Rules.CastingCongress;
                         cc.Set(puid, heroCode);
                         cc.ToHint(Uid, VI, zd.HeroWithCode, zd.Hero);
-                        if (!cc.CaptainMode || (Uid == 1 || Uid == 2))
+                        if (!cc.CaptainMode || cc.IsCaptain(Uid))
                             cc.ToInputRequire(Uid, VI);
                     }
                     break;
@@ -3420,7 +3420,7 @@ namespace PSD.ClientZero
                         Base.Rules.CastingCongress cc = casting as Base.Rules.CastingCongress;
                         cc.Set(0, heroCode);
                         cc.ToHint(Uid, VI, zd.HeroWithCode, zd.Hero);
-                        if (!cc.CaptainMode || (Uid == 1 || Uid == 2))
+                        if (!cc.CaptainMode || cc.IsCaptain(Uid))
                             cc.ToInputRequire(Uid, VI);
                     }
                     break;
