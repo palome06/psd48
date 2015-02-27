@@ -5474,7 +5474,6 @@ namespace PSD.PSDGamepkg.JNS
                         "," + tux.Code + "," + locustee + ";" + sktInType + "," + sktFuse, 101);
                 }
                 XI.InnerGMessage(cdFuse, 106);
-                Harm(player, player, 1);
             }
             else if (type == 3 || type == 4)
             {

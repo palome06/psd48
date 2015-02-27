@@ -1334,7 +1334,7 @@ namespace PSD.PSDGamepkg.JNS
             }
             else
             {
-                if (type == 0 || type == 2 || type == 3)
+                if (type == 0 || type == 2)
                     return true;
                 if (type == 1)
                 {// Ask for CC
@@ -1342,6 +1342,8 @@ namespace PSD.PSDGamepkg.JNS
                     return mon != null && mon.IsTuxInvolved(XI.Board.Rounder.Uid == player.Uid,
                         XI.Board.IsAttendWar(player), true, false, XI.Board.Rounder.Team == player.Team);
                 }
+                else if (type == 3) // G0QR
+                    return fuse.Substring("G0QR,".Length) == player.Uid.ToString();
                 else if (type == 4)
                 {
                     Base.Card.Evenement eve = XI.LibTuple.EL.DecodeEvenement(XI.Board.Eve);
@@ -2490,7 +2492,7 @@ namespace PSD.PSDGamepkg.JNS
             }
             else
             {
-                if (type == 0 || type == 2 || type == 3)
+                if (type == 0 || type == 2)
                     return true;
                 if (type == 1)
                 {// Ask for CC
@@ -2503,6 +2505,8 @@ namespace PSD.PSDGamepkg.JNS
                     return mon != null && (mon.IsTuxInvolved(b1, b2, b3, b4, b5) ||
                         mon.IsHarmInvolved(b1, b2, b3, b4, b5));
                 }
+                else if (type == 3) // G0QR
+                    return fuse.Substring("G0QR,".Length) == player.Uid.ToString();
                 else if (type == 4)
                 {
                     Base.Card.Evenement eve = XI.LibTuple.EL.DecodeEvenement(XI.Board.Eve);
@@ -3220,7 +3224,7 @@ namespace PSD.PSDGamepkg.JNS
                 // G0CE,A,T,0,KN,y,z;TF
                 string[] blocks = fuse.Substring(0, fuse.IndexOf(';')).Split(',');
                 Player py = XI.Board.Garden[ushort.Parse(blocks[1])];
-                return py.Team == player.OppTeam && blocks[3] == "0" && (blocks[5] == "JP01" || blocks[5] == "JP06");
+                return py.Team == player.OppTeam && blocks[3] == "0" && (blocks[4] == "JP01" || blocks[4] == "JP06");
             }
             else return false;
         }

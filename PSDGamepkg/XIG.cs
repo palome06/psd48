@@ -3167,7 +3167,7 @@ namespace PSD.PSDGamepkg
                     }
                     break;
                 case "G0YM":
-                    WI.BCast("E0YM" + cmd.Substring("E0YM".Length));
+                    WI.BCast("E0YM," + cmdrst);
                     break;
                 case "G1XR":
                     if (args[1] == "0" || args[1] == "2")

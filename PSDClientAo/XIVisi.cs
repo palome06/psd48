@@ -2458,6 +2458,7 @@ namespace PSD.ClientAo
                         if (args[3] == "0")
                         {
                             VI.Cout(Uid, "一张NPC牌被插入放置于牌堆顶第{0}张.", (position + 1));
+                            ++A0F.MonCount;
                             A0O.FlyingGet("M0", 0, 0, true);
                         }
                         else {
@@ -2466,6 +2467,7 @@ namespace PSD.ClientAo
                             VI.Cout(Uid, "NPC牌【{0}】被插入放置于牌堆顶第{1}张.", mons, (position + 1));
                             foreach (ushort mon in mons)
                                 A0O.FlyingGet("M" + mon, 0, 0, true);
+                            A0F.MonCount += mons.Count;
                         }
                     }
                     break;
