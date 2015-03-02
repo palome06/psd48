@@ -62,7 +62,7 @@
     <Image x:Key="petsnapGFT4" Source="PetsSnap/GFT4.png" ToolTip="TR岚翼"/>
     <Image x:Key="petsnapGTT3" Source="PetsSnap/GTT3.png" ToolTip="TR槐妖"/>
     <Image x:Key="petsnapGTT4" Source="PetsSnap/GTT4.png" ToolTip="TR峰龟"/>
-    <Image x:Key="petsnapGSH2" Source="PetsSnap/GSH2.png" ToolTip="水菱晶"/>
+    <Image x:Key="petsnapGSH3" Source="PetsSnap/GSH3.png" ToolTip="水菱晶"/>
 
     <Image x:Key="npcsnapNC101" Source="PetsSnap/NC101.png" ToolTip="NPC李逍遥"/>
     <Image x:Key="npcsnapNC102" Source="PetsSnap/NC102.png" ToolTip="NPC赵灵儿"/>
@@ -483,7 +483,7 @@
     <Image x:Key="monCardNCT17" Source="Card/NMB/NCT17.png"/>
     <Image x:Key="monCardNCT18" Source="Card/NMB/NCT18.png"/>
 
-    <Image x:Key="monCardGSH2" Source="Card/NMB/GSH2.png"/>
+    <Image x:Key="monCardGSH3" Source="Card/NMB/GSH3.png"/>
 
     <Image x:Key="tuxCard000" Source="Card/Tux00.png"/>
     <Image x:Key="tuxCardJP01" Source="Card/Tux/JP01.png"/>

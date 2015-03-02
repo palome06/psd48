@@ -135,8 +135,8 @@ namespace PSD.PSDGamepkg
             //RaiseGMessage("G0HQ,2,3,0,20,26");
             //RaiseGMessage("G0HQ,2,1,0,0,49,11,10");
             //Board.RestNPCPiles.PushBack(1018);
-            RaiseGMessage("G0HQ,2,1,0,0,10");
-            RaiseGMessage("G0HQ,2,2,0,0,90");
+            //RaiseGMessage("G0HQ,2,1,0,0,10");
+            //RaiseGMessage("G0HQ,2,2,0,0,90");
             //RaiseGMessage("G0HQ,2,3,0,0,40");
             //RaiseGMessage("G0HQ,2,1,0,0,47,76");
             //RaiseGMessage("G0HQ,2,2,0,0,49");
@@ -236,8 +236,8 @@ namespace PSD.PSDGamepkg
             //RaiseGMessage("G0OH,1,0,0,5,2,0,0,4,3,0,0,5,4,0,0,5,5,0,0,5,6,0,0,5");
             //RaiseGMessage("G0OH,2,0,0,2,3,0,0,3,4,0,0,5,6,0,0,2");
             //RaiseGMessage("G0OH,1,0,4,12,2,0,4,12");
-            //foreach (Player player in Board.Garden.Values)
-            //    RaiseGMessage("G0HQ,2," + player.Uid + ",1,3");
+            foreach (Player player in Board.Garden.Values)
+                RaiseGMessage("G0HQ,2," + player.Uid + ",1,3");
             //RaiseGMessage("G0HQ,2,4,1,1");
             //RaiseGMessage("G0HQ,2,6,1,2");
             //RaiseGMessage("G0HQ,2,2,1,3");
@@ -409,6 +409,7 @@ namespace PSD.PSDGamepkg
                     case "Z0":
                         Board.Monster1 = 0; Board.Monster2 = 0;
                         Board.RPool = 0; Board.OPool = 0;
+                        Board.RPoolGain.Clear(); Board.OPoolGain.Clear();
                         Board.Battler = null;
                         RaiseGMessage("G1SG,0");
                         RunQuadStage(rstage, 0);
@@ -748,6 +749,7 @@ namespace PSD.PSDGamepkg
                     case "Z3":
                         Board.InFight = false; Board.InFightThrough = false;
                         Board.RPool = 0; Board.OPool = 0;
+                        Board.RPoolGain.Clear(); Board.OPoolGain.Clear();
                         RecycleMonster(false, false);
                         WI.BCast(rstage + ",0");
                         RunQuadStage(rstage, 0);

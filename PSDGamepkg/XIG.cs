@@ -2411,6 +2411,35 @@ namespace PSD.PSDGamepkg
                         WI.BCast("E09P,1," + Board.Rounder.Team + "," + Board.CalculateRPool()
                                 + "," + Board.Rounder.OppTeam + "," + Board.CalculateOPool());
                     break;
+                case "G1WP":
+                    for (int i = 1; i < args.Length; i += 4)
+                    {
+                        ushort side = ushort.Parse(args[i]);
+                        ushort host = ushort.Parse(args[i + 1]);
+                        string reason = args[i + 2];
+                        int newVal = int.Parse(args[i + 3]);
+                        if (side == Board.Rounder.Team)
+                        {
+                            string key = host + "," + reason;
+                            int delta = newVal - (Board.RPoolGain.ContainsKey(key) ? Board.RPoolGain[key] : 0);
+                            if (delta > 0)
+                                RaiseGMessage("G0IP," + side + "," + delta);
+                            else if (delta < 0)
+                                RaiseGMessage("G0OP," + side + "," + (-delta));
+                            Board.RPoolGain[key] = newVal;
+                        }
+                        else if (side == Board.Rounder.OppTeam)
+                        {
+                            string key = host + "," + reason;
+                            int delta = newVal - (Board.OPoolGain.ContainsKey(key) ? Board.OPoolGain[key] : 0);
+                            if (delta > 0)
+                                RaiseGMessage("G0IP," + side + "," + delta);
+                            else if (delta < 0)
+                                RaiseGMessage("G0OP," + side + "," + (-delta));
+                            Board.OPoolGain[key] = newVal;
+                        }
+                    }
+                    break;
                 case "G0IP":
                     {
                         ushort side = ushort.Parse(args[1]);

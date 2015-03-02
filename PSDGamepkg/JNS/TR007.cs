@@ -5261,11 +5261,11 @@ namespace PSD.PSDGamepkg.JNS
             else if (type == 2 || type == 3)
                 return IsMathISOS("JNH1001", player, fuse) && XI.Board.Garden.Values
                     .Any(p => p.IsAlive && p.Team == player.Team && p.GetActionPetCount(XI.Board) > 0);
-            else if (type == 4)
+            else if (type == 4) // G0HT,A,n
             {
-                Player r = XI.Board.Rounder;
-                return r.Team == player.Team && r.GetPetCount() > 0 && r.Tux.Count == 0
-                     && XI.Board.RoundIN == "R" + r.Uid + "BC";
+                string[] g0ht = fuse.Split(',');
+                Player py = XI.Board.Garden[ushort.Parse(g0ht[1])];
+                return py.Team == player.Team && py.GetPetCount() > 0;
             }
             else
                 return false;
@@ -5312,46 +5312,59 @@ namespace PSD.PSDGamepkg.JNS
             }
             else if (type == 4)
             {
-                string[] blocks = fuse.Split(',');
-                string g0dh = "";
-                for (int i = 1; i < blocks.Length; i += 3)
+                string[] g0ht = fuse.Split(',');
+                Player py = XI.Board.Garden[ushort.Parse(g0ht[1])];
+                bool yesAction = false;
+                if (py.Tux.Count > 0)
                 {
-                    ushort ut = ushort.Parse(blocks[i]);
-                    int gtype = int.Parse(blocks[i + 1]);
-                    int n = int.Parse(blocks[i + 2]);
-                    if (ut == XI.Board.Rounder.Uid && gtype == 0 && n > 0)
+                    string ques = XI.AsyncInput(py.Uid, "#您是否弃置所有手牌？##是##否,Y2", "JNH1001", "0");
+                    if (ques == "1")
                     {
-                        int petCount = XI.Board.Garden[ut].GetPetCount();
-                        g0dh += "," + ut + ",0," + (n + petCount);
+                        XI.RaiseGMessage("G0QZ," + py.Uid + "," + string.Join(",", py.Tux));
+                        yesAction = true;
                     }
                     else
-                        g0dh += "," + ut + "," + gtype + "," + n;
+                        yesAction = false;
                 }
-                if (g0dh.Length > 0)
-                    XI.InnerGMessage("G0DH" + g0dh, 46);
+                else yesAction = true;
+                if (yesAction)
+                {
+                    int n = int.Parse(g0ht[2]);
+                    XI.InnerGMessage("G0HT," + py.Uid + "," + (n + py.GetPetCount()), 51);
+                }
+                else
+                    XI.InnerGMessage(fuse, 51);
             }
         }
         public bool JNH1002Valid(Player player, int type, string fuse)
         {
-            return player.IsAlive && player.HP == 0 && XI.Board.Garden.Values.Any(
-                p => p.Uid != player.Uid && p.IsTared);
+            List<Artiad.Harm> harms = Artiad.Harm.Parse(fuse);
+            foreach (Artiad.Harm harm in harms)
+            {
+                Player py = XI.Board.Garden[harm.Who];
+                if (py.Team == player.Team && harm.N >= py.HP && harm.Element != FiveElement.LOVE)
+                    return true;
+            }
+            return false;
         }
         public void JNH1002Action(Player player, int type, string fuse, string argst)
         {
             ushort tar = ushort.Parse(argst);
-            ushort mon = XI.LibTuple.ML.Encode("GSH2");
+            ushort mon = XI.LibTuple.ML.Encode("GSH3");
             if (mon != 0)
             {
                 XI.RaiseGMessage("G0HC,1," + tar + ",0,1," + mon);
                 XI.RaiseGMessage("G0ZW," + player.Uid);
             }
-            if (XI.Board.Garden.Values.Any(p => p.IsAlive && p.HP == 0))
-                XI.InnerGMessage("G0ZH,0", -50);
         }
         public string JNH1002Input(Player player, int type, string fuse, string prev)
         {
             if (prev == "")
-                return "/T1" + AAllTareds(player);
+            {
+                List<ushort> tars = XI.Board.Garden.Values.Where(p => p.IsTared &&
+                    p.Uid != player.Uid && p.Team == player.Team).Select(p => p.Uid).ToList();
+                return tars.Count > 0 ? ("#获得宠物「水菱晶」,/T1(p" + string.Join("p", tars) + ")") : "/";
+            }
             else
                 return "";
         }
@@ -5431,7 +5444,6 @@ namespace PSD.PSDGamepkg.JNS
                     int prior = tux.Priorities[inType];
                     XI.InnerGMessage(origin, prior);
                 }
-                Harm(player, player, 1);
             } else if (type == 2) {
                 player.RAMUshort = 0;
                 int fdx = fuse.IndexOf(';');

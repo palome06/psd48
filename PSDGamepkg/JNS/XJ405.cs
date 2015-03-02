@@ -156,18 +156,10 @@ namespace PSD.PSDGamepkg.JNS
         }
         public void JN10303Action(Player player, int type, string fuse, string argst)
         {
-            if (type == 0)
-                XI.RaiseGMessage("G0IP," + player.Team + ",2");
-            else if (type == 1)
-            {
-                XI.RaiseGMessage("G0IP," + player.Team + ",2");
-                //XI.InnerGMessage(fuse, 121);
-            }
+            if (type == 0 || type == 1)
+                XI.RaiseGMessage("G1WP," + player.Team + "," + player.Uid + ",JN10303,2");
             else if (type == 2)
-            {
-                XI.RaiseGMessage("G0OP," + player.Team + ",2");
-                //XI.InnerGMessage(fuse, 81);
-            }
+                XI.RaiseGMessage("G1WP," + player.Team + "," + player.Uid + ",JN10303,0");
         }
         #endregion XJ103 - Mengshe
         #region XJ104 - LinYueru
@@ -2561,7 +2553,7 @@ namespace PSD.PSDGamepkg.JNS
         {
             bool self = (XI.Board.Rounder.Uid == player.Uid);
             if (type == 0)
-                return XI.Board.IsAttendWar(player) && !self && player.HP != player.HPb;
+                return XI.Board.IsAttendWar(player) && !self && player.HP < player.HPb;
             else if (type == 1)
             {
                 bool b1 = XI.Board.RoundIN[0] == 'R' && XI.Board.RoundIN.Substring(2, 2) == "ZD";
@@ -2591,7 +2583,10 @@ namespace PSD.PSDGamepkg.JNS
                 }
             }
             else if (type == 3 || type == 4)
-                return IsMathISOS("JN60501", player, fuse) && player.HP < player.HPb;
+            {
+                return IsMathISOS("JN60501", player, fuse) &&
+                     XI.Board.IsAttendWar(player) && !self && player.HP < player.HPb;
+            }
             else if (type == 5 && XI.Board.InFight && player.HP < player.HPb)
             {
                 string[] g0fi = fuse.Split(',');
@@ -2614,43 +2609,19 @@ namespace PSD.PSDGamepkg.JNS
                         result = 0; break;
                     }
                 }
-                return result > 0 || (result < 0 && player.RAMInt != 0);
+                return result != 0;
             }
             return false;
         }
         public void JN60501Action(Player player, int type, string fuse, string argst)
         {
-            if (type == 0)
+            if (type == 0 || type == 1 || type == 2 || type == 4)
             {
-                player.RAMInt = player.HPb - player.HP;
-                if (player.RAMInt > 0)
-                    XI.RaiseGMessage("G0IP," + player.Team + "," + player.RAMInt);
-            }
-            else if (type == 1 || type == 2)
-            {
-                int curValue = player.HPb - player.HP;
-                int delta = curValue - player.RAMInt;
-                player.RAMInt = player.HPb - player.HP;
-                if (delta > 0)
-                    XI.RaiseGMessage("G0IP," + player.Team + "," + delta);
-                else if (delta < 0)
-                    XI.RaiseGMessage("G0OP," + player.Team + "," + (-delta));
-                //XI.InnerGMessage(fuse, 121);
+                int point = player.HPb - player.HP;
+                XI.RaiseGMessage("G1WP," + player.Team + "," + player.Uid + ",JN60501," + point);
             }
             else if (type == 3)
-            {
-                player.RAMInt = player.HPb - player.HP;
-                if (player.RAMInt > 0)
-                    XI.RaiseGMessage("G0OP," + player.Team + "," + player.RAMInt);
-                //XI.InnerGMessage(fuse, 81);
-            }
-            else if (type == 4)
-            {
-                if (player.RAMInt > 0)
-                    XI.RaiseGMessage("G0IP," + player.Team + "," + player.RAMInt);
-                player.RAMInt = 0;
-                //XI.InnerGMessage(fuse, 121);
-            }
+                XI.RaiseGMessage("G1WP," + player.Team + "," + player.Uid + ",JN60501,0");
             else if (type == 5)
             {
                 string[] g0fi = fuse.Split(',');
@@ -2673,16 +2644,12 @@ namespace PSD.PSDGamepkg.JNS
                         result = 0; break;
                     }
                 }
-                if (result < 0 && player.RAMInt > 0)
-                {
-                    XI.RaiseGMessage("G0OP," + player.Team + "," + player.RAMInt);
-                    player.RAMInt = 0;
-                }
+                if (result < 0)
+                    XI.RaiseGMessage("G1WP," + player.Team + "," + player.Uid + ",JN60501,0");
                 else if (result > 0)
                 {
-                    player.RAMInt = player.HPb - player.HP;
-                    if (player.RAMInt > 0)
-                        XI.RaiseGMessage("G0IP," + player.Team + "," + player.RAMInt);
+                    int point = player.HPb - player.HP;
+                    XI.RaiseGMessage("G1WP," + player.Team + "," + player.Uid + ",JN60501," + point);
                 }
             }
         }
@@ -2699,10 +2666,6 @@ namespace PSD.PSDGamepkg.JNS
         {
             if (type == 0)
             {
-                //if (player.Team == XI.Board.Rounder.Team)
-                //    XI.Board.RPool = 10000;
-                //else if (player.Team == XI.Board.Rounder.OppTeam)
-                //    XI.Board.OPool = 10000;
                 XI.RaiseGMessage("G0IA," + player.Uid + ",2");
                 player.RAMUshort = 1;
                 XI.RaiseGMessage("G0JM,R" + XI.Board.Rounder.Uid + "ZN");
@@ -2880,7 +2843,8 @@ namespace PSD.PSDGamepkg.JNS
         }
         public void JN60802Action(Player player, int type, string fuse, string argst)
         {
-            ushort who = ushort.Parse(argst);
+            string[] parts = argst.Split(',');
+            ushort who = ushort.Parse(parts[0]); int point = int.Parse(parts[1]);
             List<Artiad.Harm> harms = Artiad.Harm.Parse(fuse);
             List<Artiad.Harm> rvs = new List<Artiad.Harm>();
             foreach (Artiad.Harm harm in harms)
@@ -2888,9 +2852,9 @@ namespace PSD.PSDGamepkg.JNS
                 if (harm.Who == who && harm.Element != FiveElement.SOL &&
                         harm.Element != FiveElement.LOVE)
                 {
-                    if (--harm.N <= 0)
+                    if ((harm.N - point) <= 0)
                         rvs.Add(harm);
-                    XI.RaiseGMessage("G0OJ," + player.Uid + ",0,1");
+                    XI.RaiseGMessage("G0OJ," + player.Uid + ",0," + point);
                 }
             }
             harms.RemoveAll(p => rvs.Contains(p));
@@ -2909,7 +2873,18 @@ namespace PSD.PSDGamepkg.JNS
                             harm.Element != FiveElement.LOVE && harm.N > 0)
                         cands.Add(harm.Who);
                 }
-                return "/T1(p" + string.Join("p", cands) + ")";
+                return "#「雷屏」作用,/T1(p" + string.Join("p", cands) + ")";
+            }
+            else if (prev.IndexOf(',') < 0)
+            {
+                ushort tar = ushort.Parse(prev);
+                int point = 0;
+                List<Artiad.Harm> harms = Artiad.Harm.Parse(fuse);
+                foreach (Artiad.Harm harm in harms)
+                {
+                    if (harm.Who == tar) { point = harm.N; break; }
+                }
+                return point == 0 ? "" : ("#屏蔽伤害,/D1" + ((point == 1) ? "" : ("~" + point)));
             }
             else
                 return "";

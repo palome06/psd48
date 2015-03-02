@@ -57,6 +57,9 @@ namespace PSD.Base
         public int RPool { get; set; }
         // Bonus Pool Value of Opponent Side
         public int OPool { get; set; }
+        // map of gain to pool, <host,reason:value>
+        public IDictionary<string, int> RPoolGain { get; private set; }
+        public IDictionary<string, int> OPoolGain { get; private set; }
         // Whether current battle is won
         public bool IsBattleWin { get; set; }
         // Final difference of pool in Battle
@@ -172,6 +175,7 @@ namespace PSD.Base
                 (player.Uid == Supporter.Uid && SupportSucc);
         }
 
+
         public int CalculateRPool()
         {
             return Rounder.STR + RPool + (SupportSucc ? Supporter.STR : 0);
@@ -229,6 +233,8 @@ namespace PSD.Base
             UseCardRound = 0; ClockWised = true;
             JumpTable = new Dictionary<string, string>();
             FinalAkaScore = 0; FinalAoScore = 0;
+            RPoolGain = new Dictionary<string, int>();
+            OPoolGain = new Dictionary<string, int>();
             IsMonsterDebut = false;
         }
         // Create a lumberjack of monster/NPC, act as normal humans

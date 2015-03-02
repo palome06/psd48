@@ -2060,67 +2060,78 @@ namespace PSD.PSDGamepkg.JNS
         #endregion Package 5#
 
         #region Package HL
-        public void GSH2IncrAction(Player player)
+        public void GSH3IncrAction(Player player)
         {
             XI.Board.PetProtecedPlayer.Add(player.Uid);
         }
-        public void GSH2DecrAction(Player player)
+        public void GSH3DecrAction(Player player)
         {
             XI.Board.PetProtecedPlayer.Remove(player.Uid);
         }
-        public void GSH2ConsumeAction(Player player, int consumeType, int type, string fuse, string argst)
+        public void GSH3ConsumeAction(Player player, int consumeType, int type, string fuse, string argst)
         {
             if (consumeType == 0)
             {
-                bool[] sets = new bool[] { false, false, false, false, false };
-                foreach (Player py in XI.Board.Garden.Values)
-                    if (py.IsAlive && py.Team == player.Team && py.GetPetCount() > 0)
-                        for (int i = 0; i < 5; ++i)
-                            sets[i] |= (py.Pets[i] != 0);
-                int adjust = sets.Count(p => p);
+                List<Player> invs = XI.Board.Garden.Values.Where(p => p.IsAlive &&
+                     p.Uid != player.Uid && XI.Board.IsAttendWar(p) && p.GetPetCount() > 0).ToList();
+                ISet<int> props = new HashSet<int>();
+                foreach (Player py in invs) {
+                    for (int i = 0; i < 5; ++i) {
+                        if (py.Pets[i] != 0) props.Add(i);
+                    }
+                }
                 if (type == 0)
-                    XI.RaiseGMessage("G0IP," + player.Team + "," + adjust);
-                else if (type == 1)
-                {
+                    XI.RaiseGMessage("G1WP," + player.Team + "," + player.Uid + ",GSH3," + props.Count);
+                else if (type == 1) { // FI
                     if (XI.Board.IsAttendWar(player))
-                        XI.RaiseGMessage("G0IP," + player.Team + "," + adjust);
+                        XI.RaiseGMessage("G1WP," + player.Team + "," + player.Uid + ",GSH3," + props.Count);
                     else
-                        XI.RaiseGMessage("G0OP," + player.Team + "," + adjust);
+                        XI.RaiseGMessage("G1WP," + player.Team + "," + player.Uid + ",GSH3,0");
                 }
                 else if (type == 2)
-                    XI.RaiseGMessage("G0IP," + player.Team + "," + adjust);
+                    XI.RaiseGMessage("G1WP," + player.Team + "," + player.Uid + ",GSH3," + props.Count);
                 else if (type == 3)
-                    XI.RaiseGMessage("G0OP," + player.Team + "," + adjust);
+                    XI.RaiseGMessage("G1WP," + player.Team + "," + player.Uid + ",GSH3,0");
             }
         }
-        public bool GSH2ConsumeValid(Player player, int consumeType, int type, string fuse)
+        public bool GSH3ConsumeValid(Player player, int consumeType, int type, string fuse)
         {
             if (consumeType == 0)
             {
+                bool yesIncr = XI.Board.Garden.Values.Any(p => 
+                    p.Uid != player.Uid && XI.Board.IsAttendWar(p) && p.GetPetCount() > 0);
                 if (type == 0) // Z1
-                    return XI.Board.IsAttendWar(player) && XI.Board.Garden.Values.Any(
-                        p => p.IsAlive && p.Team == player.Team && p.GetPetCount() > 0);
-                else if (type == 1 && XI.Board.InFight && player.GetPetCount() > 0) // FI
+                    return XI.Board.IsAttendWar(player) && yesIncr;
+                else if (type == 1 && XI.Board.InFight) // FI
                 {
                     string[] g0fi = fuse.Split(',');
                     if (g0fi[1] == "O" || g0fi[1] == "U")
                         return false;
-                    int result = 0;
+                    int playerIn = 0;
+                    bool leaver = false;
                     for (int i = 1; i < g0fi.Length; i += 3)
                     {
                         char ch = g0fi[i][0];
                         ushort old = ushort.Parse(g0fi[i + 1]);
                         ushort to = ushort.Parse(g0fi[i + 2]);
                         if (old == player.Uid)
-                            --result;
+                            --playerIn;
+                        else {
+                            Player po = XI.Board.Garden[old];
+                            if (po != null && po.GetPetCount() > 0) { leaver = true; break; }
+                        }
                         if (to == player.Uid)
-                            ++result;
+                            ++playerIn;
+                        else {
+                            Player pt = XI.Board.Garden[to];
+                            if (pt != null && pt.GetPetCount() > 0) { leaver = true; break; }
+                        }
                     }
-                    return result != 0;
+                    return leaver || playerIn != 0;
                 }
                 else if (type == 2 || type == 3) // IC/OC
                 {
-                    if (XI.Board.InFight && XI.Board.IsAttendWar(player) && player.GetPetCount() > 0)
+                    if (XI.Board.InFight && XI.Board.IsAttendWar(player) && yesIncr)
                     {
                         string[] iocs = fuse.Split(',');
                         for (int idx = 1; idx < iocs.Length; idx += 3)
@@ -2128,7 +2139,7 @@ namespace PSD.PSDGamepkg.JNS
                             ushort who = ushort.Parse(iocs[idx + 1]);
                             ushort petUt = ushort.Parse(iocs[idx + 2]);
                             Monster pet = XI.LibTuple.ML.Decode(petUt);
-                            if (who == player.Uid && pet != null && pet.Code == "GSH2")
+                            if (who == player.Uid && pet != null && pet.Code == "GSH3")
                                 return true;
                         }
                     }
