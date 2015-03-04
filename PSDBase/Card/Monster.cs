@@ -21,6 +21,8 @@ namespace PSD.Base.Card
         public string Code { private set; get; }
         // group, e.g. 1 for standard, 0 for test, 2 for SP, etc.
         public int Group { private set; get; }
+        // whether put into piles or not
+        public bool IsEx { private set; get; }
 
         public int mSTR;
         public int STR
@@ -228,7 +230,9 @@ namespace PSD.Base.Card
             ushort agl, ClLevel level, string[][] eaoccurs, int[][] eaprops,
             bool[][] ealocks, bool[][] eaonces, bool[][] eaterminis, string spis)
         {
-            this.Name = name; this.Code = code; this.Group = group;
+            this.Name = name; this.Code = code;
+            this.Group = Math.Abs(group);
+            this.IsEx = (this.Group < 0);
             this.Element = element; this.Level = level;
             this.STRb = strb; this.STR = this.STRb;
             this.AGLb = agl; this.AGL = this.AGLb;

@@ -34,6 +34,7 @@ namespace PSD.Base.Rules
         public const int MODE_SS = 0xA; // Official Pick/Ban Mode
         public const int MODE_NM = 0xB; // Normal 41 without change card
         public const int MODE_TC = 0xC; // 6 known and 6 unknown SS mode
+        public const int MODE_CM = 0xD; // AS Captain Mode
 
         public static int CastMode(string name)
         {
@@ -51,6 +52,7 @@ namespace PSD.Base.Rules
                 case "SS": return MODE_SS;
                 case "NM": return MODE_NM;
                 case "TC": return MODE_TC;
+                case "CM": return MODE_CM;
                 default: return DEF_CODE;
             }
         }
@@ -70,6 +72,7 @@ namespace PSD.Base.Rules
                 case MODE_SS: return "SS";
                 case MODE_NM: return "NM";
                 case MODE_TC: return "TC";
+                case MODE_CM: return "CM";
                 default: return "RM";
             }
         }

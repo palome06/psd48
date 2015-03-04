@@ -3362,6 +3362,8 @@ namespace PSD.PSDGamepkg
                 case "G17F":
                     if (args[1] == "O") {
                         RaiseGMessage("G0FI,O");
+                    } else if (args[1] == 'U') { // Just start the fight
+                        Board.InFight = true;
                     } else {
                         ushort[] lists = new ushort[] { Board.Rounder.Uid, Board.Rounder.Uid,
                              Board.Supporter.Uid, Board.Supporter.Uid,

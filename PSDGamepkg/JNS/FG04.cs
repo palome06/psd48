@@ -2131,7 +2131,7 @@ namespace PSD.PSDGamepkg.JNS
                 }
                 else if (type == 2 || type == 3) // IC/OC
                 {
-                    if (XI.Board.InFight && XI.Board.IsAttendWar(player) && yesIncr)
+                    if (XI.Board.InFightThrough && XI.Board.IsAttendWar(player) && yesIncr)
                     {
                         string[] iocs = fuse.Split(',');
                         for (int idx = 1; idx < iocs.Length; idx += 3)
