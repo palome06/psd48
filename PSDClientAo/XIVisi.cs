@@ -1552,9 +1552,10 @@ namespace PSD.ClientAo
                     else if (args[1].Equals("2"))
                     {
                         ushort who = ushort.Parse(args[2]);
-                        List<ushort> invs = Util.TakeRange(args, 3, args.Length)
+                        string cardType = args[3];
+                        List<ushort> invs = Util.TakeRange(args, 4, args.Length)
                             .Select(p => ushort.Parse(p)).ToList();
-                        A0O.FlyingGet(invs.Select(p => "C" + p).ToList(), who, who, true);
+                        A0O.FlyingGet(invs.Select(p => cardType + p).ToList(), who, who, true);
                     }
                     else if (args[1].Equals("3"))
                         VI.OWatch(Uid, "E0FU");
@@ -1568,24 +1569,16 @@ namespace PSD.ClientAo
                             VI.Watch(Uid, ravs.Select(p => cardType + p), "E0FU");
                         }
                     }
-                    else if (args[1].Equals("5"))
-                    {
-                        ushort who = ushort.Parse(args[2]);
-                        ushort[] invs = Util.TakeRange(args, 3, args.Length)
-                            .Select(p => ushort.Parse(p)).ToArray();
-                        A0O.FlyingGet(invs.Select(p => "G" + p).ToList(), who, who, true);
-                    }
                     break;
                 case "E0QU":
                     if (args[1].Equals("0"))
                     {
-                        var ravs = Util.TakeRange(args, 2, args.Length).Select(p => ushort.Parse(p));
-                        VI.Cout(Uid, "{0}被移离观看区.", zd.Tux(ravs));
+                        string cardType = args[2];
+                        var ravs = Util.TakeRange(args, 3, args.Length).Select(p => cardType + p);
+                        VI.Cout(Uid, "{0}被移离观看区.", zd.MixedCards(ravs));
                     }
                     else if (args[1].Equals("1"))
                         VI.Cout(Uid, "{0}张牌被移离观看区.", args[2]);
-                    else if (args[1].Equals("2"))
-                        VI.Cout(Uid, "观看区被清空.");
                     break;
                 case "E0CC": // prepare to use card
                     {

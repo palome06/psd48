@@ -450,9 +450,32 @@ namespace PSD.ClientAo.VW
                     if (args[1] == "0" || args[1] == "1" || args[1] == "4")
                         args[1] += ",C";
                     line = string.Join(",", args);
-                }
                 else if (line.StartsWith("H09F"))
                     line += ",0";
+            }
+            if (Version <= 146)
+            {
+                if (line.StartsWith("E0FU"))
+                {
+                    string[] e0fu = line.Split(',');
+                    if (e0fu[1] == "2")
+                        e0fu[2] += ",C";
+                    else if (e0fu[1] == "5")
+                    {
+                        e0fu[1] = "2"; e0fu[2] += ",G";
+                    }
+                    line = string.Join(",", e0fu);
+                }
+                else if (line.StartsWith("E0QU"))
+                {
+                    string[] e0qu = line.Split(',');
+                    if (e0qu[1] == "0" || e0qu[1] == "1") {
+                        e0qu[1] += ",C";
+                    } else if (e0qu[1] == "2") {
+                        e0qu[0] = "E0FU"; e0qu[1] = "3";
+                    }
+                    line = string.Join(",", e0qu);
+                }
             }
         }
         #endregion Version

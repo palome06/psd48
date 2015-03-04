@@ -1424,11 +1424,11 @@ namespace PSD.PSDGamepkg
             }
             return true;
         }
-        private ushort[] ExceptStaff(ushort to)
+        internal ushort[] ExceptStaff(ushort to)
         {
             return ExceptStaff(new ushort[] { to });
         }
-        private ushort[] ExceptStaff(ushort[] exc)
+        internal ushort[] ExceptStaff(ushort[] exc)
         {
             List<ushort> list = new List<ushort>(Board.Garden.Keys);
             foreach (ushort us in exc)

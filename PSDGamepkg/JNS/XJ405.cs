@@ -1,5 +1,6 @@
 ﻿using PSD.Base;
 using PSD.Base.Card;
+using PSD.PSDGamepkg.Mint;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -221,10 +222,13 @@ namespace PSD.PSDGamepkg.JNS
         }
         public void JN10402Action(Player player, int type, string fuse, string argst)
         {
-            var opps = XI.Board.Garden.Values.Where(p => p.IsAlive &&
+            List<Player> opps = XI.Board.Garden.Values.Where(p => p.IsAlive &&
                 XI.Board.IsAttendWar(p) && p.Team == player.OppTeam).ToList();
             if (opps.Any())
+            {
+                XI.RaiseGMint(new Mint.Target('T', player.Uid, opps.Select(p => p.Uid)));
                 Harm(player, opps, 1);
+            }
         }
         #endregion XJ104 - LinYueru
         #region XJ105 - A'Nu
@@ -273,10 +277,12 @@ namespace PSD.PSDGamepkg.JNS
         }
         public void JN10502Action(Player player, int type, string fuse, string argst)
         {
-            VI.Cout(0, "阿奴发动「万蛊蚀天」.");
-            XI.RaiseGMessage("G0DH," + Util.SParal(XI.Board,
-                p => p.IsAlive && p.Team == player.Team, p => p.Uid + ",0,1", ","));
-            Harm(player, XI.Board.Garden.Values.Where(p => p.IsAlive && p != player), 1);
+            var v = XI.Board.Garden.Values;
+            XI.RaiseGMessage("G0DH," + string.Join("p", v.Where(
+                p => p.IsAlive && p.Team == player.Team).Select(p => p.Uid + ",0,1")));
+            XI.RaiseGMint(new Mint.Target('T', player.Uid, v.Where(p => p.IsAlive &&
+                 p.Uid != player.Uid).Select(p => p.Uid)));
+            Harm(player, v.Where(p => p.IsAlive && p.Uid != player.Uid), 1);
         }
         #endregion XJ105 - A'Nu
         #region XJ106 - Jiujianxian
@@ -388,7 +394,6 @@ namespace PSD.PSDGamepkg.JNS
         }
         public void JN10701Action(Player player, int type, string fuse, string argst)
         {
-            VI.Cout(0, "拜月教主发动「水魔兽合体」，战力+2.");
             XI.RaiseGMessage("G0IA," + player.Uid + ",1,2");
         }
         public bool JN10702Valid(Player player, int type, string fuse)
@@ -403,6 +408,7 @@ namespace PSD.PSDGamepkg.JNS
                 XI.RaiseGMessage("G0QZ," + player.Uid + "," + argst);
                 XI.RaiseGMessage("G2YS,T," + player.Uid + ",P," + (ushort)player.Team);
                 XI.RaiseGMessage("G0IP," + player.Team + ",5");
+                XI.RaiseGMint(new Mint.Target('T', player.Uid, 'P', (ushort)player.Team));
             }
         }
         public string JN10702Input(Player player, int type, string fuse, string prev)
@@ -3304,7 +3310,7 @@ namespace PSD.PSDGamepkg.JNS
                 ushort who = ushort.Parse(argst.Substring(0, idx));
                 ushort card = ushort.Parse(argst.Substring(idx + 1));
                 XI.Board.ProtectedTux.Add(card);
-                XI.RaiseGMessage("G2FU,2," + who + "," + card);
+                XI.RaiseGMint(Mint.Stargazer.NewShow(who, 'C', card));
                 player.RAMUshort = card;
                 //XI.InnerGMessage(fuse, 91);
             }
@@ -3539,7 +3545,7 @@ namespace PSD.PSDGamepkg.JNS
             ushort card = ushort.Parse(argst.Substring(0, idx));
             ushort target = ushort.Parse(argst.Substring(idx + 1));
             XI.RaiseGMessage("G0QZ," + player.Uid + "," + card);
-            XI.RaiseGMessage("G2FU,0,0,0,C," + string.Join(",", XI.Board.Garden[target].Tux));
+            XI.RaiseGMint(Mint.Stargazer.NewWatch(0, null, 'C', XI.Board.Garden[target].Tux));
         }
         public bool JNS0601Valid(Player player, int type, string fuse)
         {

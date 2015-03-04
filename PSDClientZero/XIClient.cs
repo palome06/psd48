@@ -1372,12 +1372,9 @@ namespace PSD.ClientZero
                 case "E0FU":
                     if (args[1].Equals("0"))
                     {
-                        char cardType = args[2][0];
-                        var ravs = Util.TakeRange(args, 3, args.Length).Select(p => ushort.Parse(p));
-                        if (cardType == 'C')
-                            VI.Cout(Uid, "你观看了{0}.", zd.Tux(ravs));
-                        else if (cardType == 'M')
-                            VI.Cout(Uid, "你观看了{0}.", zd.Monster(ravs));
+                        string cardType = args[2];
+                        var ravs = Util.TakeRange(args, 3, args.Length).Select(p => cardType + p);
+                        VI.Cout(Uid, "你观看了{0}.", zd.MixedCards(ravs));
                     }
                     else if (args[1].Equals("1"))
                     {
@@ -1387,30 +1384,22 @@ namespace PSD.ClientZero
                     else if (args[1].Equals("2"))
                     {
                         ushort who = ushort.Parse(args[2]);
-                        ushort[] invs = Util.TakeRange(args, 3, args.Length)
-                            .Select(p => ushort.Parse(p)).ToArray();
-                        VI.Cout(Uid, "{0}展示了卡牌{1}.", who, zd.Tux(invs));
+                        string cardType = args[3];
+                        var ravs = Util.TakeRange(args, 4, args.Length).Select(p => cardType + p);
+                        VI.Cout(Uid, "{0}展示了{1}.", zd.Player(who), zd.MixedCards(ravs));
                     }
                     else if (args[1].Equals("3"))
                         VI.Cout(Uid, "观看完毕.");
-                    else if (args[1].Equals("5"))
-                    {
-                        ushort who = ushort.Parse(args[2]);
-                        ushort[] invs = Util.TakeRange(args, 3, args.Length)
-                            .Select(p => ushort.Parse(p)).ToArray();
-                        VI.Cout(Uid, "{0}声明了{1}.", who, zd.TuxDbSerial(invs));
-                    }
                     break;
                 case "E0QU":
                     if (args[1].Equals("0"))
                     {
-                        var ravs = Util.TakeRange(args, 2, args.Length).Select(p => ushort.Parse(p));
-                        VI.Cout(Uid, "{0}被移离观看区.", zd.Tux(ravs));
+                        string cardType = args[2];
+                        var ravs = Util.TakeRange(args, 3, args.Length).Select(p => cardType + p);
+                        VI.Cout(Uid, "{0}被移离观看区.", zd.MixedCards(ravs));
                     }
                     else if (args[1].Equals("1"))
                         VI.Cout(Uid, "{0}张牌被移离观看区.", args[2]);
-                    else if (args[1].Equals("2"))
-                        VI.Cout(Uid, "观看区被清空.");
                     break;
                 case "E0CC": // prepare to use card
                     {

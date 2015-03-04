@@ -355,22 +355,22 @@ namespace PSD.PSDGamepkg.JNS
             {
                 if (pops.Count <= 0) break;
                 string pubTux = Util.SatoWithBracket(XI.Board.PZone, "p", "(p", ")");
-                XI.RaiseGMessage("G2FU,0," + ut + ",0,C," + string.Join(",", XI.Board.PZone));
+                XI.RaiseGMint(Mint.Stargazer.NewWatch(ut, null, 'C', XI.Board.PZone));
                 string input = XI.AsyncInput(ut, "Z1" + pubTux, "NJH2", "0");
                 ushort cd;
                 if (ushort.TryParse(input, out cd) && XI.Board.PZone.Contains(cd))
                 {
                     XI.RaiseGMessage("G1OU," + cd);
-                    XI.RaiseGMessage("G2QU,0,0," + cd);
+                    XI.RaiseGMint(new Mint.Starshards(null, 'C', cd));
                     XI.RaiseGMessage("G0HQ,2," + ut + ",0,0," + cd);
                     pops.Remove(cd);
                 }
-                XI.RaiseGMessage("G2FU,3");
+                XI.RaiseGMint(Mint.Stargazer.NewClose());
             }
             if (pops.Count > 0)
             {
                 XI.RaiseGMessage("G1OU," + string.Join(",", pops));
-                XI.RaiseGMessage("G2QU,0,0," + string.Join(",", pops));
+                XI.RaiseGMint(new Mint.Starshards(null, 'C', pops));
                 XI.RaiseGMessage("G0ON,0,C," + pops.Count + "," + string.Join(",", pops));
             }
         }
