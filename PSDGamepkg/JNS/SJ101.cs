@@ -102,8 +102,7 @@ namespace PSD.PSDGamepkg.JNS
 
             do 
             {
-                //XI.RaiseGMessage("G2FU,1,1," + uds[idxs] + "," + string.Join(",", pops));
-                XI.RaiseGMessage("G2FU,0," + uds[idxs] + ",0," + string.Join(",", pops));
+                XI.RaiseGMint(Mint.Stargazer.NewStandard(uds[idxs], null, 'C', pops));
                 string pubTux = Util.SatoWithBracket(XI.Board.PZone, "p", "(p", ")");
                 input = XI.AsyncInput(uds[idxs], "+Z1" + pubTux + ",#获得卡牌的,/T1" + ranges[idxs], "SJ104", "0");
                 if (!input.StartsWith("/"))
@@ -114,13 +113,13 @@ namespace PSD.PSDGamepkg.JNS
                     {
                         ushort ut = ushort.Parse(ips[1]);
                         XI.RaiseGMessage("G1OU," + cd);
-                        XI.RaiseGMessage("G2QU,0,0," + cd);
+                        XI.RaiseGMint(Mint.Stargazer.NewTakeAway(null, 'C', new ushort[] { cd }));
                         XI.RaiseGMessage("G0HQ,2," + ut + ",0,0," + cd);
                         pops.Remove(cd);
                         idxs = (idxs + 1) % 2;
                     }
                 }
-                XI.RaiseGMessage("G2FU,3");
+                XI.RaiseGMint(Mint.Stargazer.NewClose());
             } while (pops.Count > 0);
         }
         #endregion Eve Of Pal1
@@ -286,15 +285,15 @@ namespace PSD.PSDGamepkg.JNS
                 && p.Team == rd.OppTeam).Select(p => p.Uid).ToList();
             ushort[] rpsa = XI.Board.Garden.Values.Where(p => p.Team == rd.Team).Select(p => p.Uid).ToArray();
             ushort[] opsa = XI.Board.Garden.Values.Where(p => p.Team == rd.OppTeam).Select(p => p.Uid).ToArray();
-            string rg = string.Join(",", rps), rf = "(p" + string.Join("p", rps) + ")";
-            string og = string.Join(",", ops), of = "(p" + string.Join("p", ops) + ")";
+            string rf = "(p" + string.Join("p", rps) + ")";
+            string of = "(p" + string.Join("p", ops) + ")";
 
             List<ushort> pops = XI.DequeueOfPile(XI.Board.TuxPiles, rn).ToList();
             XI.RaiseGMessage("G2IN,0," + rn);
             XI.RaiseGMessage("G1IU," + string.Join(",", pops));
             do 
             {
-                XI.RaiseGMessage("G2FU,0," + rd.Uid + "," + rps.Count + "," + rg + "," + string.Join(",", pops));
+                XI.RaiseGMint(Mint.Stargazer.NewStandard(rd.Uid, rps, 'C', pops));
                 string pubTux = Util.SatoWithBracket(XI.Board.PZone, "p", "(p", ")");
                 int pubSz = XI.Board.PZone.Count;
                 string pubDig = (pubSz > 1) ? ("+Z1~" + pubSz) : "+Z1";
@@ -308,15 +307,14 @@ namespace PSD.PSDGamepkg.JNS
                     if (getxs.Count > 0)
                     {
                         XI.RaiseGMessage("G1OU," + string.Join(",", getxs));
-                        XI.RaiseGMessage("G2QU,0," + rpsa.Length + "," +
-                             string.Join(",", rpsa) + "," + string.Join(",", getxs));
+                        XI.RaiseGMint(Mint.Stargazer.NewTakeAway(rpsa, 'C', getxs));
                         XI.RaiseGMessage("G0HQ,2," + to + ",0," + rpsa.Length + "," +
                             string.Join(",", rpsa) + "," + string.Join(",", getxs));
                         foreach (ushort getx in getxs)
                             pops.Remove(getx);
                     }
                 }
-                XI.RaiseGMessage("G2FU,3");
+                XI.RaiseGMint(Mint.Stargazer.NewClose());
             } while (pops.Count > 0);
             
             pops = XI.DequeueOfPile(XI.Board.TuxPiles, on).ToList();
@@ -324,7 +322,7 @@ namespace PSD.PSDGamepkg.JNS
             XI.RaiseGMessage("G1IU," + string.Join(",", pops));
             do
             {
-                XI.RaiseGMessage("G2FU,0," + od.Uid + "," + ops.Count + "," + og + "," + string.Join(",", pops));
+                XI.RaiseGMint(Mint.Stargazer.NewStandard(od.Uid, ops, 'C', pops));
                 string pubTux = Util.SatoWithBracket(XI.Board.PZone, "p", "(p", ")");
                 int pubSz = XI.Board.PZone.Count;
                 string pubDig = (pubSz > 1) ? ("+Z1~" + pubSz) : "+Z1";
@@ -338,15 +336,14 @@ namespace PSD.PSDGamepkg.JNS
                     if (getxs.Count > 0)
                     {
                         XI.RaiseGMessage("G1OU," + string.Join(",", getxs));
-                        XI.RaiseGMessage("G2QU,0," + opsa.Length + "," +
-                             string.Join(",", opsa) + "," + string.Join(",", getxs));
+                        XI.RaiseGMint(Mint.Stargazer.NewTakeAway(opsa, 'C', getxs));
                         XI.RaiseGMessage("G0HQ,2," + to + ",0," + opsa.Length + "," +
                             string.Join(",", opsa) + "," + string.Join(",", getxs));
                         foreach (ushort getx in getxs)
                             pops.Remove(getx);
                     }
                 }
-                XI.RaiseGMessage("G2FU,3");
+                XI.RaiseGMint(Mint.Stargazer.NewClose());
             } while (pops.Count > 0);
         }
         public void SJT04(Player rd)
@@ -378,7 +375,7 @@ namespace PSD.PSDGamepkg.JNS
                 XI.RaiseGMessage("G1IU," + string.Join(",", uts));
                 do
                 {
-                    XI.RaiseGMessage("G2FU,0," + py.Uid + ",0," + string.Join(",", uts));
+                    XI.RaiseGMint(Mint.Stargazer.NewStandard(py.Uid, null, 'C', uts));
                     string pubTux = Util.SatoWithBracket(XI.Board.PZone, "p", "(p", ")");
                     string input = XI.AsyncInput(py.Uid, "+Z1" + pubTux + ",#获得卡牌的,/T1" + ranges, "SJT04", "0");
                     if (!input.StartsWith("/"))
@@ -390,9 +387,9 @@ namespace PSD.PSDGamepkg.JNS
                             ushort ut = ushort.Parse(ips[1]);
                             XI.RaiseGMessage("G1OU," + cd);
                             uts.Remove(cd);
-                            XI.RaiseGMessage("G2QU,0,0," + cd);
+                            XI.RaiseGMint(Mint.Stargazer.NewTakeAway(null, 'C', new ushort[] { cd }));
                             // CongQIPaiDuiLiQiDiao
-                            XI.RaiseGMessage("G2FU,3");
+                            XI.RaiseGMint(Mint.Stargazer.NewClose());
                             XI.RaiseGMessage("G2CN,0,1");
                             XI.RaiseGMessage("G0HQ,2," + ut + ",0,0," + cd);
                             XI.Board.TuxDises.Remove(cd);

@@ -1,5 +1,6 @@
 ﻿using PSD.Base;
 using PSD.Base.Card;
+using PSD.PSDGamepkg.Mint;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -956,8 +957,7 @@ namespace PSD.PSDGamepkg.JNS
 
                 do
                 {
-                    //XI.RaiseGMessage("G2FU,1,1," + uds[idxs] + "," + string.Join(",", pops));
-                    XI.RaiseGMessage("G2FU,0," + uds[idxs] + ",0," + string.Join(",", pops));
+                    XI.RaiseGMint(Mint.Stargazer.NewStandard(uds[idxs], null, 'C', pops));
                     string pubTux = Util.SatoWithBracket(XI.Board.PZone, "p", "(p", ")");
                     input = XI.AsyncInput(uds[idxs], "+Z1" + pubTux + ",#获得卡牌的,/T1" + ranges[idxs], "JPT1", "0");
                     if (!input.StartsWith("/"))
@@ -968,13 +968,13 @@ namespace PSD.PSDGamepkg.JNS
                         {
                             ushort ut = ushort.Parse(ips[1]);
                             XI.RaiseGMessage("G1OU," + cd);
-                            XI.RaiseGMessage("G2QU,0,0," + cd);
+                            XI.RaiseGMint(Mint.Stargazer.NewTakeAway(null, 'C', new ushort[] { cd }));
                             XI.RaiseGMessage("G0HQ,2," + ut + ",0,0," + cd);
                             pops.Remove(cd);
                             idxs = (idxs + 1) % 2;
                         }
                     }
-                    XI.RaiseGMessage("G2FU,3");
+                    XI.RaiseGMint(Mint.Stargazer.NewClose());
                 } while (pops.Count > 0);
             }
         }

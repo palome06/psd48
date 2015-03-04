@@ -2757,7 +2757,7 @@ namespace PSD.PSDGamepkg.JNS
                 int idxs = 0;
                 do
                 {
-                    XI.RaiseGMessage("G2FU,0," + uds[idxs] + ",0," + string.Join(",", ot1));
+                    XI.RaiseGMint(Mint.Stargazer.NewStandard(uds[idxs], null, 'C', ot1));
                     string pubTux = Util.SatoWithBracket(XI.Board.PZone, "p", "(p", ")");
                     string input = XI.AsyncInput(uds[idxs], "Z1" + pubTux, "JNT1901", "0");
                     if (!input.StartsWith("/"))
@@ -2766,13 +2766,13 @@ namespace PSD.PSDGamepkg.JNS
                         if (XI.Board.PZone.Contains(cd))
                         {
                             XI.RaiseGMessage("G1OU," + cd);
-                            XI.RaiseGMessage("G2QU,0,0" + cd);
+                            XI.RaiseGMint(Mint.Stargazer.NewTakeAway(null, 'C', new ushort[] { cd }));
                             XI.RaiseGMessage("G0HQ,2," + uds[idxs] + ",0,0," + cd);
                             ot1.Remove(cd);
                             idxs = (idxs + 1) % 2;
                         }
                     }
-                    XI.RaiseGMessage("G2FU,3");
+                    XI.RaiseGMint(Mint.Stargazer.NewClose());
                 } while (ot1.Count > 0);
             }
         }
@@ -2834,7 +2834,7 @@ namespace PSD.PSDGamepkg.JNS
                 {
                     ushort dbSerial = ushort.Parse(input);
                     player.ROM["Weapon"] = dbSerial;
-                    XI.RaiseGMessage("G2FU,4," + player.Uid + "," + dbSerial);
+                    XI.RaiseGMint(Mint.Stargazer.NewShow(player.Uid, 'G', dbSerial));
                 }
             }
             else if (type == 1)
@@ -3073,7 +3073,7 @@ namespace PSD.PSDGamepkg.JNS
                 XI.RaiseGMessage("G0DH," + player.Uid + ",0,3");
             else
             {
-                XI.RaiseGMessage("G2FU,0,0,0," + string.Join(",", XI.Board.Garden[tar].Tux));
+                XI.RaiseGMint(Mint.Stargazer.NewStandard(0, null, 'C', XI.Board.Garden[tar].Tux));
                 List<ushort> tuxes = XI.Board.Garden[tar].Tux.Where(p =>
                     namae[XI.LibTuple.TL.DecodeTux(p).Type] != namae[tux.Type]).ToList();
                 if (tuxes.Count > 0)

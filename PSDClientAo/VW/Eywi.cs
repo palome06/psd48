@@ -118,118 +118,96 @@ namespace PSD.ClientAo.VW
         #region Version
         private void HandleWithVersion(ref string line, int Version)
         {
-            if (Version <= 131)
+            if (Version <= 101)
             {
-                if (line[0] == 'R' && Util.Substring(line, 2, 5) == "ZW7")
-                {
-                    string[] args = line.Substring("R#ZW7,".Length).Split(',');
-                    if (args[0] == "1")
-                        line = "E0FI,S,0," + args[1];
-                    else if (args[0] == "2")
-                        line = "E0FI,H,0," + args[1];
-                }
-                else if (line.StartsWith("E0AF"))
-                {
-                    string[] args = line.Split(',');
-                    string e0fi = "";
-                    for (int i = 1; i < args.Length; i += 2)
-                    {
-                        ushort type = ushort.Parse(args[i]);
-                        if (type == 1) { e0fi += ",S,0," + args[i + 1]; }
-                        else if (type == 2) { e0fi += ",H,0," + args[i + 1]; }
-                        else if (type == 5) { e0fi += ",S," + args[i + 1] + "0"; }
-                        else if (type == 6) { e0fi += ",H," + args[i + 1] + "0"; }
-                    }
-                    if (!string.IsNullOrEmpty(e0fi))
-                        line = "E0FI" + e0fi;
-                }
-                else if (line.StartsWith("E0KI"))
-                {
-                    string[] args = line.Split(',');
-                    IDictionary<int, int> values = new Dictionary<int, int>();
-                    for (int i = 1; i < args.Length; i += 2)
-                        values.Add(int.Parse(args[i]), int.Parse(args[i + 1]));
-                    if (values.Count == 6)
-                    {
-                        foreach (var pair in values)
-                        {
-                            if (pair.Value == 1)
-                            {
-                                line = "E0FI,U," + pair.Key;
-                                break;
-                            }
-                        }
-                    }
-                    else if (values.Any(p => p.Value == 4))
-                    {
-                        var pair = values.First(p => p.Value == 4);
-                        line = "E0FI,W,0," + pair.Key;
-                    }
-                }
-            }
-            if (Version <= 121)
-            {
-                if (line.StartsWith("E0IE") || line.StartsWith("E0OE"))
-                    line = line.Substring(0, "E0IE".Length) + ",0," + line.Substring("E0IE,".Length);
-                else if (line.StartsWith("H09G"))
+                if (line.StartsWith("H09G"))
                 {
                     string[] blocks = line.Split(',');
                     for (int idx = 1; idx < blocks.Length; )
                     {
-                        int lugsz = int.Parse(blocks[idx + 14]);
-                        int nextIdx = idx + 15;
-                        nextIdx += lugsz;
-                        blocks[nextIdx] = "0,0," + blocks[nextIdx];
-                        nextIdx += 5;
+                        int nextIdx = idx + 18;
                         int excdsz = int.Parse(blocks[nextIdx]);
                         nextIdx += 1;
-                        List<ushort> excards = Util.TakeRange(blocks, nextIdx,
-                            nextIdx + excdsz).Select(p => ushort.Parse(p)).ToList();
+                        //List<ushort> excards = Util.TakeRange(blocks, nextIdx,
+                        //    nextIdx + excdsz).Select(p => ushort.Parse(p)).ToList();
                         nextIdx += excdsz;
                         int fakeqsz = int.Parse(blocks[nextIdx]);
                         nextIdx += 1;
-                        List<string> fakeqpairs = Util.TakeRange(blocks, nextIdx,
-                            nextIdx + fakeqsz * 2).ToList();
-                        nextIdx += fakeqsz * 2;
+                        //List<ushort> fakeqs = Util.TakeRange(blocks, nextIdx,
+                        //    nextIdx + fakeqsz).Select(p => ushort.Parse(p)).ToList();
+                        nextIdx += fakeqsz;
                         int token = int.Parse(blocks[nextIdx]);
                         nextIdx += 1;
                         int peoplesz = int.Parse(blocks[nextIdx]);
                         nextIdx += 1;
-                        List<string> peoples = Util.TakeRange(blocks, nextIdx,
-                            nextIdx + peoplesz).ToList();
+                        //List<string> peoples = Util.TakeRange(blocks, nextIdx,
+                        //    nextIdx + peoplesz).ToList();
                         nextIdx += peoplesz;
-                        int tarsz = int.Parse(blocks[nextIdx]);
-                        nextIdx += 1;
-                        List<ushort> tars = Util.TakeRange(blocks, nextIdx,
-                            nextIdx + tarsz).Select(p => ushort.Parse(p)).ToList();
-                        nextIdx += tarsz;
-                        bool awake = blocks[nextIdx] == "1";
-                        nextIdx += 1;
-                        int foldsz = int.Parse(blocks[nextIdx]);
-                        nextIdx += 1;
+
+                        int @int = int.Parse(blocks[nextIdx]); // target
+                        blocks[nextIdx] = "1," + @int;
+
                         int escuesz = int.Parse(blocks[nextIdx]);
                         nextIdx += 1;
-                        List<ushort> escues = Util.TakeRange(blocks, nextIdx,
-                            nextIdx + escuesz).Select(p => ushort.Parse(p)).ToList();
+                        //List<ushort> escues = Util.TakeRange(blocks, nextIdx,
+                        //    nextIdx + escuesz).Select(p => ushort.Parse(p)).ToList();
                         nextIdx += escuesz;
 
                         idx = nextIdx;
                     }
                     line = string.Join(",", blocks);
                 }
-            }
-            if (Version <= 115)
-            {
-                if (line.StartsWith("E0IA") || line.StartsWith("E0IX") ||
-                    line.StartsWith("E0OA") || line.StartsWith("E0OX"))
+                if (line.StartsWith("E0IJ"))
                 {
-                    string[] args = line.Split(',');
-                    if (args[2] == "3")
-                        args[2] = "2";
-                    else if (args[2] == "2")
-                        args[2] = "1";
-                    line = string.Join(",", args);
+                    string[] e0ij = line.Split(',');
+                    if (e0ij[2] == "1")
+                        e0ij[2] = "1,1";
+                    else if (e0ij[2] == "2")
+                    {
+                        string x = e0ij[3];
+                        e0ij[3] = "1," + x + ",1," + x;
+                    }
+                    line = string.Join(",", e0ij);
                 }
+                else if (line.StartsWith("E0OJ"))
+                {
+                    string[] e0oj = line.Split(',');
+                    if (e0oj[2] == "1")
+                        e0oj[2] = "1,1";
+                    else if (e0oj[2] == "2")
+                        e0oj[2] = "2,0";
+                    line = string.Join(",", e0oj);
+                }
+            }
+            if (Version <= 107)
+            {
+                if (line.StartsWith("V0,"))
+                {
+                    string rest = line.Substring("V0,".Length);
+                    line = "V0,1," + Uid + "," + rest;
+                }
+            }
+            if (Version <= 110)
+            {
+                if (line.StartsWith("H0SM"))
+                    line += ",4";
+                else if (line[0] == 'R' && line.Substring(2, 3) == "ZW5")
+                {
+                    string[] blocks = line.Split(',');
+                    if (blocks.Length >= 3)
+                    {
+                        if (Char.IsDigit(blocks[2][0]))
+                            blocks[2] = "T" + blocks[2];
+                        else if (blocks[2] == "0")
+                            blocks[2] = "/0";
+                        line = string.Join(",", blocks);
+                    }
+                }
+            }
+            if (Version <= 112)
+            {
+                if (line.StartsWith("E0QC,"))
+                    line = "E0QC,1," + line.Substring("E0QC,".Length);
             }
             if (Version <= 114)
             {
@@ -328,95 +306,150 @@ namespace PSD.ClientAo.VW
                 else if (line.StartsWith("H09F"))
                     line += ",0";
             }
-            if (Version <= 112)
+            if (Version <= 115)
             {
-                if (line.StartsWith("E0QC,"))
-                    line = "E0QC,1," + line.Substring("E0QC,".Length);
-            }
-            if (Version <= 110)
-            {
-                if (line.StartsWith("H0SM"))
-                    line += ",4";
-                else if (line[0] == 'R' && line.Substring(2, 3) == "ZW5")
+                if (line.StartsWith("E0IA") || line.StartsWith("E0IX") ||
+                    line.StartsWith("E0OA") || line.StartsWith("E0OX"))
                 {
-                    string[] blocks = line.Split(',');
-                    if (blocks.Length >= 3)
-                    {
-                        if (Char.IsDigit(blocks[2][0]))
-                            blocks[2] = "T" + blocks[2];
-                        else if (blocks[2] == "0")
-                            blocks[2] = "/0";
-                        line = string.Join(",", blocks);
-                    }
+                    string[] args = line.Split(',');
+                    if (args[2] == "3")
+                        args[2] = "2";
+                    else if (args[2] == "2")
+                        args[2] = "1";
+                    line = string.Join(",", args);
                 }
             }
-            if (Version <= 101)
+            if (Version <= 121)
             {
-                if (line.StartsWith("H09G"))
+                if (line.StartsWith("E0IE") || line.StartsWith("E0OE"))
+                    line = line.Substring(0, "E0IE".Length) + ",0," + line.Substring("E0IE,".Length);
+                else if (line.StartsWith("H09G"))
                 {
                     string[] blocks = line.Split(',');
                     for (int idx = 1; idx < blocks.Length; )
                     {
-                        int nextIdx = idx + 18;
+                        int lugsz = int.Parse(blocks[idx + 14]);
+                        int nextIdx = idx + 15;
+                        nextIdx += lugsz;
+                        blocks[nextIdx] = "0,0," + blocks[nextIdx];
+                        nextIdx += 5;
                         int excdsz = int.Parse(blocks[nextIdx]);
                         nextIdx += 1;
-                        //List<ushort> excards = Util.TakeRange(blocks, nextIdx,
-                        //    nextIdx + excdsz).Select(p => ushort.Parse(p)).ToList();
+                        List<ushort> excards = Util.TakeRange(blocks, nextIdx,
+                            nextIdx + excdsz).Select(p => ushort.Parse(p)).ToList();
                         nextIdx += excdsz;
                         int fakeqsz = int.Parse(blocks[nextIdx]);
                         nextIdx += 1;
-                        //List<ushort> fakeqs = Util.TakeRange(blocks, nextIdx,
-                        //    nextIdx + fakeqsz).Select(p => ushort.Parse(p)).ToList();
-                        nextIdx += fakeqsz;
+                        List<string> fakeqpairs = Util.TakeRange(blocks, nextIdx,
+                            nextIdx + fakeqsz * 2).ToList();
+                        nextIdx += fakeqsz * 2;
                         int token = int.Parse(blocks[nextIdx]);
                         nextIdx += 1;
                         int peoplesz = int.Parse(blocks[nextIdx]);
                         nextIdx += 1;
-                        //List<string> peoples = Util.TakeRange(blocks, nextIdx,
-                        //    nextIdx + peoplesz).ToList();
+                        List<string> peoples = Util.TakeRange(blocks, nextIdx,
+                            nextIdx + peoplesz).ToList();
                         nextIdx += peoplesz;
-
-                        int @int = int.Parse(blocks[nextIdx]); // target
-                        blocks[nextIdx] = "1," + @int;
-
+                        int tarsz = int.Parse(blocks[nextIdx]);
+                        nextIdx += 1;
+                        List<ushort> tars = Util.TakeRange(blocks, nextIdx,
+                            nextIdx + tarsz).Select(p => ushort.Parse(p)).ToList();
+                        nextIdx += tarsz;
+                        bool awake = blocks[nextIdx] == "1";
+                        nextIdx += 1;
+                        int foldsz = int.Parse(blocks[nextIdx]);
+                        nextIdx += 1;
                         int escuesz = int.Parse(blocks[nextIdx]);
                         nextIdx += 1;
-                        //List<ushort> escues = Util.TakeRange(blocks, nextIdx,
-                        //    nextIdx + escuesz).Select(p => ushort.Parse(p)).ToList();
+                        List<ushort> escues = Util.TakeRange(blocks, nextIdx,
+                            nextIdx + escuesz).Select(p => ushort.Parse(p)).ToList();
                         nextIdx += escuesz;
 
                         idx = nextIdx;
                     }
                     line = string.Join(",", blocks);
                 }
-                if (line.StartsWith("E0IJ"))
+            }
+            if (Version <= 131)
+            {
+                if (line[0] == 'R' && Util.Substring(line, 2, 5) == "ZW7")
                 {
-                    string[] e0ij = line.Split(',');
-                    if (e0ij[2] == "1")
-                        e0ij[2] = "1,1";
-                    else if (e0ij[2] == "2")
-                    {
-                        string x = e0ij[3];
-                        e0ij[3] = "1," + x + ",1," + x;
-                    }
-                    line = string.Join(",", e0ij);
+                    string[] args = line.Substring("R#ZW7,".Length).Split(',');
+                    if (args[0] == "1")
+                        line = "E0FI,S,0," + args[1];
+                    else if (args[0] == "2")
+                        line = "E0FI,H,0," + args[1];
                 }
-                else if (line.StartsWith("E0OJ"))
+                else if (line.StartsWith("E0AF"))
                 {
-                    string[] e0oj = line.Split(',');
-                    if (e0oj[2] == "1")
-                        e0oj[2] = "1,1";
-                    else if (e0oj[2] == "2")
-                        e0oj[2] = "2,0";
-                    line = string.Join(",", e0oj);
+                    string[] args = line.Split(',');
+                    string e0fi = "";
+                    for (int i = 1; i < args.Length; i += 2)
+                    {
+                        ushort type = ushort.Parse(args[i]);
+                        if (type == 1) { e0fi += ",S,0," + args[i + 1]; }
+                        else if (type == 2) { e0fi += ",H,0," + args[i + 1]; }
+                        else if (type == 5) { e0fi += ",S," + args[i + 1] + "0"; }
+                        else if (type == 6) { e0fi += ",H," + args[i + 1] + "0"; }
+                    }
+                    if (!string.IsNullOrEmpty(e0fi))
+                        line = "E0FI" + e0fi;
+                }
+                else if (line.StartsWith("E0KI"))
+                {
+                    string[] args = line.Split(',');
+                    IDictionary<int, int> values = new Dictionary<int, int>();
+                    for (int i = 1; i < args.Length; i += 2)
+                        values.Add(int.Parse(args[i]), int.Parse(args[i + 1]));
+                    if (values.Count == 6)
+                    {
+                        foreach (var pair in values)
+                        {
+                            if (pair.Value == 1)
+                            {
+                                line = "E0FI,U," + pair.Key;
+                                break;
+                            }
+                        }
+                    }
+                    else if (values.Any(p => p.Value == 4))
+                    {
+                        var pair = values.First(p => p.Value == 4);
+                        line = "E0FI,W,0," + pair.Key;
+                    }
                 }
             }
-            if (Version <= 107)
+            if (Version <= 137)
             {
-                if (line.StartsWith("V0,"))
+                if (line.StartsWith("E0FU"))
                 {
-                    string rest = line.Substring("V0,".Length);
-                    line = "V0,1," + Uid + "," + rest;
+                    string[] e0fu = line.Split(',');
+                    if (e0fu[1] == "0")
+                        e0fu[1] = "0,0,C";
+                    else if (e0fu[1] == "1")
+                        e0fu[1] = "0,1,C";
+                    else if (e0fu[1] == "2") {
+                        e0fu[1] = "1"; e0fu[2] += ",C";
+                    } else if (e0fu[1] == "3")
+                        e0fu[1] = "2";
+                    else if (e0fu[1] == "4")
+                        e0fu[1] = "0,2,C";
+                    else if (e0fu[1] == "5") {
+                        e0fu[1] = "1"; e0fu[2] += ",G";
+                    }
+                    line = string.Join(",", e0fu);
+                }
+                else if (line.StartsWith("E0QU"))
+                {
+                    string[] e0qu = line.Split(',');
+                    if (e0qu[1] == "0") {
+                        e0qu[0] = "E0FU"; e0qu[1] = "3,0,C";
+                    } else if (e0qu[1] == "1") {
+                        e0qu[0] = "E0FU"; e0qu[1] = "3,1,C";
+                    } else if (e0qu[1] == "2") {
+                        e0qu[0] = "E0FU"; e0qu[1] = "2";
+                    }
+                    line = string.Join(",", e0qu);
                 }
             }
         }

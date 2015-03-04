@@ -4,14 +4,23 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using PSD.Base.Card;
 using System.IO.Pipes;
 using System.IO;
+
+using PSD.Base.Card;
+using PSD.PSDGamepkg.Mint;
 
 namespace PSD.PSDGamepkg
 {
     public partial class XI
     {
+        #region G-Loop /w Mint
+        public void RaiseGMint(Mint.Mint mint)
+        {
+            Log.Logger(mint.ToMessage());
+            mint.Handle(this);
+        }
+        #endregion G-Loop /w Mint
         #region G-Loop
         // public void RaiseGObject(UnitObject uo)
         // {
@@ -627,94 +636,94 @@ namespace PSD.PSDGamepkg
             string[] args = cmd.Split(',');
             string cmdrst = Util.Substring(cmd, cmd.IndexOf(',') + 1, -1);
             var g = Board.Garden;
-            if (args[0].StartsWith("G2"))
-            {
-                if (args[0].StartsWith("G2FU"))
-                {
-                    ushort type = ushort.Parse(args[1]);
-                    if (type == 0)
-                    {
-                        ushort op = ushort.Parse(args[2]);
-                        ushort nofp = ushort.Parse(args[3]);
-                        if (op == 0)
-                        {
-                            if (nofp != 0)
-                            {
-                                ushort[] invs = Util.TakeRange(args, 4, 4 + nofp).Select(p => ushort.Parse(p)).ToArray();
-                                WI.Send("E0FU,0," + string.Join(",", Util.TakeRange(args, 4 + nofp, args.Length)), invs);
-                                WI.Send("E0FU,1," + (args.Length - 4 - nofp), ExceptStaff(invs));
-                                WI.Live("E0FU,1," + (args.Length - 4 - nofp));
-                            }
-                            else
-                                WI.BCast("E0FU,0," + string.Join(",", Util.TakeRange(args, 4, args.Length)));
-                        }
-                        else
-                        {
-                            if (nofp != 0)
-                            {
-                                ushort[] invs = Util.TakeRange(args, 4, 4 + nofp).Select(p => ushort.Parse(p)).ToArray();
-                                WI.Send("E0FU,0," + string.Join(",", Util.TakeRange(
-                                    args, 4 + nofp, args.Length)), invs.Except(new ushort[] { op }).ToArray());
-                                WI.Send("E0FU,1," + (args.Length - 4 - nofp), ExceptStaff(invs));
-                                WI.Live("E0FU,1," + (args.Length - 4 - nofp));
-                                WI.Send("E0FU,4," + string.Join(",", Util.TakeRange(args, 4 + nofp, args.Length)), 0, op);
-                            }
-                            else
-                            {
-                                WI.Send("E0FU,0," + string.Join(",", Util.TakeRange(
-                                    args, 4 + nofp, args.Length)), ExceptStaff(op));
-                                WI.Live("E0FU,0," + string.Join(",", Util.TakeRange(args, 4, args.Length)));
-                                WI.Send("E0FU,4," + string.Join(",", Util.TakeRange(args, 4 + nofp, args.Length)), 0, op);
-                            }
-                        }
-                    }
-                    //else if (type == 1)
-                    //{
-                    //    ushort nofp = ushort.Parse(args[2]);
-                    //    ushort[] invs = Util.TakeRange(args, 3, 3 + nofp).Select(p => ushort.Parse(p)).ToArray();
-                    //    //ushort nocp = ushort.Parse(args[3 + nofp]);
-                    //    //ushort[] jnvs = Util.TakeRange(args, 4 + nofp, 4 + nofp + nocp)
-                    //    //    .Select(p => ushort.Parse(p)).ToArray();
-                    //    //WI.Send("E0FU,0," + string.Join(",", Util.TakeRange(args, 4 + nofp + nocp, args.Length)), invs);
-                    //    //WI.Send("E0FU,1," + (args.Length - 4 - nofp - nocp), jnvs);
-                    //    //WI.Live("E0FU,1," + (args.Length - 4 - nofp - nocp));
-                    //    WI.Send("E0FU,0," + string.Join(",",
-                    //        Util.TakeRange(args, 3 + nofp, args.Length)), ExceptStaff(invs));
-                    //    WI.Live("E0FU,0," + string.Join(",", Util.TakeRange(args, 3 + nofp, args.Length)));
-                    //}
-                    else if (type == 2)
-                    {
-                        ushort who = ushort.Parse(args[2]);
-                        ushort[] invs = Util.TakeRange(args, 3, args.Length)
-                            .Select(p => ushort.Parse(p)).ToArray();
-                        WI.BCast("E0FU,2," + who + "," + string.Join(",", invs));
-                    }
-                    else if (type == 3)
-                        WI.BCast("E0FU,3");
-                    else if (type == 4)
-                        WI.BCast("E0FU,5," + string.Join(",", Util.TakeRange(args, 2, args.Length)));
-                }
-                else if (args[0].StartsWith("G2QU"))
-                {
-                    if (args[1] == "0")
-                    {
-                        ushort nofp = ushort.Parse(args[2]);
-                        if (nofp != 0)
-                        {
-                            ushort[] invs = Util.TakeRange(args, 3, 3 + nofp).Select(p => ushort.Parse(p)).ToArray();
-                            WI.Send("E0QU,0," + string.Join(",", Util.TakeRange(args, 3 + nofp, args.Length)), invs);
-                            WI.Send("E0QU,1," + (args.Length - 3 - nofp), ExceptStaff(invs));
-                            WI.Live("E0QU,1," + (args.Length - 3 - nofp));
-                        }
-                        else
-                            WI.BCast("E0QU,0," + string.Join(",", Util.TakeRange(args, 3, args.Length)));
-                    }
-                    else if (args[1] == "1")
-                        WI.BCast("E0QU,2");
-                }
-                else
-                    WI.BCast("E0" + cmd.Substring("G2".Length));
-            }
+            // if (args[0].StartsWith("G2"))
+            // {
+            //     if (args[0].StartsWith("G2FU"))
+            //     {
+            //         ushort type = ushort.Parse(args[1]);
+            //         if (type == 0)
+            //         {
+            //             ushort op = ushort.Parse(args[2]);
+            //             ushort nofp = ushort.Parse(args[3]);
+            //             if (op == 0)
+            //             {
+            //                 if (nofp != 0)
+            //                 {
+            //                     ushort[] invs = Util.TakeRange(args, 4, 4 + nofp).Select(p => ushort.Parse(p)).ToArray();
+            //                     WI.Send("E0FU,0," + string.Join(",", Util.TakeRange(args, 4 + nofp, args.Length)), invs);
+            //                     WI.Send("E0FU,1," + (args.Length - 4 - nofp), ExceptStaff(invs));
+            //                     WI.Live("E0FU,1," + (args.Length - 4 - nofp));
+            //                 }
+            //                 else
+            //                     WI.BCast("E0FU,0," + string.Join(",", Util.TakeRange(args, 4, args.Length)));
+            //             }
+            //             else
+            //             {
+            //                 if (nofp != 0)
+            //                 {
+            //                     ushort[] invs = Util.TakeRange(args, 4, 4 + nofp).Select(p => ushort.Parse(p)).ToArray();
+            //                     WI.Send("E0FU,0," + string.Join(",", Util.TakeRange(
+            //                         args, 4 + nofp, args.Length)), invs.Except(new ushort[] { op }).ToArray());
+            //                     WI.Send("E0FU,1," + (args.Length - 4 - nofp), ExceptStaff(invs));
+            //                     WI.Live("E0FU,1," + (args.Length - 4 - nofp));
+            //                     WI.Send("E0FU,4," + string.Join(",", Util.TakeRange(args, 4 + nofp, args.Length)), 0, op);
+            //                 }
+            //                 else
+            //                 {
+            //                     WI.Send("E0FU,0," + string.Join(",", Util.TakeRange(
+            //                         args, 4 + nofp, args.Length)), ExceptStaff(op));
+            //                     WI.Live("E0FU,0," + string.Join(",", Util.TakeRange(args, 4, args.Length)));
+            //                     WI.Send("E0FU,4," + string.Join(",", Util.TakeRange(args, 4 + nofp, args.Length)), 0, op);
+            //                 }
+            //             }
+            //         }
+            //         else if (type == 1)
+            //         {
+            //            ushort nofp = ushort.Parse(args[2]);
+            //            ushort[] invs = Util.TakeRange(args, 3, 3 + nofp).Select(p => ushort.Parse(p)).ToArray();
+            //            //ushort nocp = ushort.Parse(args[3 + nofp]);
+            //            //ushort[] jnvs = Util.TakeRange(args, 4 + nofp, 4 + nofp + nocp)
+            //            //    .Select(p => ushort.Parse(p)).ToArray();
+            //            //WI.Send("E0FU,0," + string.Join(",", Util.TakeRange(args, 4 + nofp + nocp, args.Length)), invs);
+            //            //WI.Send("E0FU,1," + (args.Length - 4 - nofp - nocp), jnvs);
+            //            //WI.Live("E0FU,1," + (args.Length - 4 - nofp - nocp));
+            //            WI.Send("E0FU,0," + string.Join(",",
+            //                Util.TakeRange(args, 3 + nofp, args.Length)), ExceptStaff(invs));
+            //            WI.Live("E0FU,0," + string.Join(",", Util.TakeRange(args, 3 + nofp, args.Length)));
+            //         }
+            //         else if (type == 2)
+            //         {
+            //             ushort who = ushort.Parse(args[2]);
+            //             ushort[] invs = Util.TakeRange(args, 3, args.Length)
+            //                 .Select(p => ushort.Parse(p)).ToArray();
+            //             WI.BCast("E0FU,2," + who + "," + string.Join(",", invs));
+            //         }
+            //         else if (type == 3)
+            //             WI.BCast("E0FU,3");
+            //         else if (type == 4)
+            //             WI.BCast("E0FU,5," + string.Join(",", Util.TakeRange(args, 2, args.Length)));
+            //     }
+            //     if (args[0].StartsWith("G2QU"))
+            //     {
+            //         if (args[1] == "0")
+            //         {
+            //             ushort nofp = ushort.Parse(args[2]);
+            //             if (nofp != 0)
+            //             {
+            //                 ushort[] invs = Util.TakeRange(args, 3, 3 + nofp).Select(p => ushort.Parse(p)).ToArray();
+            //                 WI.Send("E0QU,0," + string.Join(",", Util.TakeRange(args, 3 + nofp, args.Length)), invs);
+            //                 WI.Send("E0QU,1," + (args.Length - 3 - nofp), ExceptStaff(invs));
+            //                 WI.Live("E0QU,1," + (args.Length - 3 - nofp));
+            //             }
+            //             else
+            //                 WI.BCast("E0QU,0," + string.Join(",", Util.TakeRange(args, 3, args.Length)));
+            //         }
+            //         else if (args[1] == "1")
+            //             WI.BCast("E0QU,2");
+            //     }
+            //     else
+            //         WI.BCast("E0" + cmd.Substring("G2".Length));
+            // }
             switch (args[0])
             {
                 case "G0IT": // actual obtain Tux

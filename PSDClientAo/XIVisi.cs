@@ -1533,54 +1533,43 @@ namespace PSD.ClientAo
                 case "E0FU":
                     if (args[1].Equals("0"))
                     {
-                        //ushort from = ushort.Parse(args[2]);
-                        var ravs = Util.TakeRange(args, 2, args.Length)
-                            .Select(p => ushort.Parse(p)).ToList();
-                        //VI.Cout(uid, "你观看了{0}.", zd.Tux(ravs));
-                        VI.Watch(Uid, ravs.Select(p => "C" + p), "E0FU");
-                    }
-                    else if (args[1].Equals("1"))
-                    {
-                        ushort n = ushort.Parse(args[2]);
-                        //VI.Cout(uid, "{0}张卡牌正被观看.", n);
-                        VI.Watch(Uid, Enumerable.Repeat("C0", n), "E0FU");
-                    }
-                    else if (args[1].Equals("2"))
-                    {
-                        ushort who = ushort.Parse(args[2]);
-                        List<ushort> invs = Util.TakeRange(args, 3, args.Length)
-                            .Select(p => ushort.Parse(p)).ToList();
-                        A0O.FlyingGet(invs.Select(p => "C" + p).ToList(), who, who, true);
-                    }
-                    else if (args[1].Equals("3"))
-                        VI.OWatch(Uid, "E0FU");
-                    else if (args[1].Equals("4"))
-                    {
-                        if (WI is VW.Eywi)
+                        ushort innerType = ushort.Parse(args[2]);
+                        string cardType = args[3];
+                        if (innerType == 0)
                         {
-                            var ravs = Util.TakeRange(args, 2, args.Length)
-                                .Select(p => ushort.Parse(p)).ToList();
-                            VI.Watch(Uid, ravs.Select(p => "C" + p), "E0FU");
+                            VI.Watch(Uid, Util.TakeRange(args, 4, args.Length)
+                                .Select(p => cardType + p), "E0FU");
+                        }
+                        else if (innerType == 1)
+                            VI.Watch(Uid, Enumerable.Repeat(cardType + "0", int.Parse(args[4])), "E0FU");
+                        else if (innerType == 2 && WI is VW.Eywi)
+                        {
+                            VI.Watch(Uid, Util.TakeRange(args, 3, args.Length)
+                                .Select(p => cardType + p), "E0FU");
                         }
                     }
-                    else if (args[1].Equals("5"))
+                    else if (args[1].Equals("1"))
                     {
                         ushort who = ushort.Parse(args[2]);
-                        ushort[] invs = Util.TakeRange(args, 3, args.Length)
-                            .Select(p => ushort.Parse(p)).ToArray();
-                        A0O.FlyingGet(invs.Select(p => "G" + p).ToList(), who, who, true);
+                        string cardType = args[3];
+                        List<ushort> invs = Util.TakeRange(args, 4, args.Length)
+                            .Select(p => ushort.Parse(p)).ToList();
+                        A0O.FlyingGet(invs.Select(p => cardType + p).ToList(), who, who, true);
                     }
-                    break;
-                case "E0QU":
-                    if (args[1].Equals("0"))
-                    {
-                        var ravs = Util.TakeRange(args, 2, args.Length).Select(p => ushort.Parse(p));
-                        VI.Cout(Uid, "{0}被移离观看区.", zd.Tux(ravs));
-                    }
-                    else if (args[1].Equals("1"))
-                        VI.Cout(Uid, "{0}张牌被移离观看区.", args[2]);
                     else if (args[1].Equals("2"))
-                        VI.Cout(Uid, "观看区被清空.");
+                        VI.OWatch(Uid, "E0FU");
+                    else if (args[1].Equals("3"))
+                    {
+                        ushort innerType = ushort.Parse(args[2]);
+                        if (innerType == 0)
+                        {
+                            string cardType = args[3];
+                            VI.Cout(Uid, "{0}被移离观看区.", zd.MixedCards(Util.TakeRange(
+                                args, 4, args.Length).Select(p => cardType + ushort.Parse(p))));
+                        }
+                        else if (innerType == 1)
+                            VI.Cout(Uid, "{0}张牌被移离观看区.", args[4]);
+                    }
                     break;
                 case "E0CC": // prepare to use card
                     {

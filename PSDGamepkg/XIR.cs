@@ -74,7 +74,7 @@ namespace PSD.PSDGamepkg
             ////Board.EvePiles.PushBack(1);
             //Board.EvePiles.PushBack(22);
             //Board.EvePiles.PushBack(8);
-            //Board.EvePiles.PushBack(8);
+            Board.EvePiles.PushBack(6);
             //Board.EvePiles.PushBack(30);
             //Board.RestNPCPiles.PushBack(1047);
             //Board.EvePiles.PushBack(23);
@@ -115,7 +115,7 @@ namespace PSD.PSDGamepkg
             //Board.MonPiles.PushBack(33);
             //Board.MonPiles.PushBack(4);
             //Board.MonPiles.PushBack(10);
-            Board.MonPiles.PushBack(8);
+            //Board.MonPiles.PushBack(8);
             //Board.MonPiles.PushBack(1045);
             //Board.MonPiles.PushBack(5);
             //Board.MonPiles.PushBack(1040);

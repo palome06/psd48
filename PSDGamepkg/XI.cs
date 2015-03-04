@@ -112,7 +112,7 @@ namespace PSD.PSDGamepkg
             //17027, 17028, 17005, 17025, 10608, 19011
             //10303, 10404, 10602, 17017, 10403, 10504
             //10302, 17012, 17005, 17022, 10605, 17028
-            10106, 10608, 10605, 17022, 19011, 17028
+            15006, 17019, 10106, 10608, 10605, 19011
         };
 
         #region Memeber Declaration & Constructor
@@ -579,8 +579,8 @@ namespace PSD.PSDGamepkg
             };
             string[] g1 = new string[] { "DI", "IU", "OU", "CW", "ZK", "IZ", "OZ", "WP", "SG", "HK",
                  "WJ", "JG", "XR", "EV", "CK", "7F", "YP" };
-            string[] g2 = new string[] { "IN", "RN", "CN", "QC", "FU", "QU", "CL", "ZU", "HU", "WK",
-                 "AK", "IL", "OL", "SW", "AS" };
+            string[] g2 = new string[] { "IN", "RN", "CN", "QC", "FU", "CL", "ZU", "HU", "WK", "AK",
+                 "IL", "OL", "SW", "AS" };
             foreach (string g0event in g0)
                 Util.AddToMultiMap(dict, "G0" + g0event, new SkTriple() { Name = "~100", Priorty = 100 });
             foreach (string g1event in g1)
@@ -1303,11 +1303,11 @@ namespace PSD.PSDGamepkg
             }
             return true;
         }
-        private ushort[] ExceptStaff(ushort to)
+        internal ushort[] ExceptStaff(ushort to)
         {
             return ExceptStaff(new ushort[] { to });
         }
-        private ushort[] ExceptStaff(ushort[] exc)
+        internal ushort[] ExceptStaff(ushort[] exc)
         {
             List<ushort> list = new List<ushort>(Board.Garden.Keys);
             foreach (ushort us in exc)
