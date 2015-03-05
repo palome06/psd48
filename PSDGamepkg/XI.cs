@@ -653,7 +653,7 @@ namespace PSD.PSDGamepkg
 
         // Parse from SKTriple list to SKT list
         // $ucr: user's round, old controller for R*ZD.
-        private List<SKE> ParseFromSKTriples(List<SkTriple> list, string zero, bool ucr)
+        private List<SKE> ParseFromSKTriples(List<SkTriple> list, Mint mint, bool ucr)
         {
             List<SKE> result = new List<SKE>();
             ucr &= (Board.UseCardRound != 0);
@@ -664,7 +664,7 @@ namespace PSD.PSDGamepkg
                 switch (skt.Type)
                 {
                     case SKTType.BK:
-                        result.AddRange(pys.Select(p => new SKE(skt) { Tg = p }));
+                        result.AddRange(pys.Select(p => new SKE(skt, mint, p)));
                         break;
                     case SKTType.TX:
                     case SKTType.EQ:
@@ -673,15 +673,15 @@ namespace PSD.PSDGamepkg
                         if (skt.Occur.Contains('#'))
                         {
                             if (!ucr || Board.Rounder.Team == Board.UseCardRound)
-                                result.Add(new SKE(skt) { Tg = Board.Rounder.Uid });
+                                result.Add(new SKE(skt, mint, Board.Rounder.Uid)));
                         }
                         else if (skt.Occur.Contains('$'))
                             result.AddRange(pys.Where(p => p != Board.Rounder.Uid)
-                                .Select(p => new SKE(skt) { Tg = p }));
+                                .Select(p => new SKE(skt, mint, p)));
                         else if (skt.Occur.Contains('*'))
-                            result.AddRange(pys.Select(p => new SKE(skt) { Tg = p }));
+                            result.AddRange(pys.Select(p => new SKE(skt, mint, p)));
                         else
-                            result.AddRange(pys.Select(p => new SKE(skt) { Tg = p }));
+                            result.AddRange(pys.Select(p => new SKE(skt, mint, p)));
                         break;
                     case SKTType.PT:
                         if (skt.Consume != 2)
@@ -689,23 +689,23 @@ namespace PSD.PSDGamepkg
                             if (skt.Occur.Contains('#'))
                             {
                                 if (!ucr || Board.Rounder.Team == Board.UseCardRound)
-                                    result.Add(new SKE(skt) { Tg = Board.Rounder.Uid });
+                                    result.Add(new SKE(skt, mint, Board.Rounder.Uid));
                             }
                             else if (skt.Occur.Contains('$'))
                                 result.AddRange(pys.Where(p => p != Board.Rounder.Uid)
-                                    .Select(p => new SKE(skt) { Tg = p }));
+                                    .Select(p => new SKE(skt, mint, p)));
                             else if (skt.Occur.Contains('*'))
-                                result.AddRange(pys.Select(p => new SKE(skt) { Tg = p }));
+                                result.AddRange(pys.Select(p => new SKE(skt, mint, p)));
                             else
-                                result.AddRange(pys.Select(p => new SKE(skt) { Tg = p }));
+                                result.AddRange(pys.Select(p => new SKE(skt, mint, p)));
                         }
                         else
-                            result.Add(new SKE(skt) { Tg = Board.Rounder.Uid });
+                            result.Add(new SKE(skt, mint, Board.Rounder.Uid));
                         break;
                     case SKTType.SK:
                     default:
                         if (!ucr || skt.Owner == 0 || Board.Garden[skt.Owner].Team == Board.UseCardRound)
-                            result.Add(new SKE(skt) { Tg = skt.Owner });
+                            result.Add(new SKE(skt, mint, skt.Owner));
                         break;
                 }
             return result;

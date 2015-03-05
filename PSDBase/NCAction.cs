@@ -15,47 +15,37 @@ namespace PSD.Base
 
         public string Intro { set; get; }
 
-        public delegate void ActionDelegate(Player player, string fuse, string argst);
+        public delegate void ActionDelegate(Player player, Fuse fuse, string argst);
 
-        public delegate bool ValidDelegate(Player player, string fuse);
+        public delegate bool ValidDelegate(Player player, Fuse fuse);
 
-        public delegate string InputDelegate(Player player, string fuse, string prev);
+        public delegate string InputDelegate(Player player, Fuse fuse, string prev);
 
-        private ActionDelegate mAction;
-
+        private ActionDelegate mAction
         public ActionDelegate Action
         {
             set { mAction = value; }
-            get { return mAction ?? DefAction; }
+            get { return mAction ?? ((p, f, a) => { }); }
         }
 
         private InputDelegate mInput;
-
         public InputDelegate Input
         {
             set { mInput = value; }
-            get { return mInput ?? DefInput; }
+            get { return mInput ?? ((p, f) => { return true; }); }
         }
 
         private ValidDelegate mValid;
-
         public ValidDelegate Valid
         {
             set { mValid = value; }
-            get { return mValid ?? DefValid; }
+            get { return mValid ?? ((p, f, pr) => { return ""; }); }
         }
 
         public NCAction(string name, string code, string intro)
         {
             Name = name; Code = code; Intro = intro;
         }
-
-        private static ActionDelegate DefAction = delegate(
-            Player player, string fuse, string argst) { };
-        private static ValidDelegate DefValid = delegate(
-            Player player, string fuse) { return true; };
-        private static InputDelegate DefInput = delegate(
-            Player player, string fuse, string prev) { return ""; };
     }
 
     public class NCActionLib
@@ -65,26 +55,6 @@ namespace PSD.Base
         //private IDictionary<string, Skill> dicts;
 
         private Utils.ReadonlySQL sql;
-
-        public NCActionLib(string path)
-        {
-            Firsts = new List<NCAction>();
-            //dicts = new Dictionary<string, Skill>();
-            string[] lines = System.IO.File.ReadAllLines(path);
-            foreach (string line in lines)
-            {
-                if (line != null && line.Length > 0 && !line.StartsWith("#"))
-                {
-                    string[] content = line.Split('\t');
-                    string code = content[0];
-                    string name = content[1];
-                    string intro = content[2];
-
-                    NCAction nj = new NCAction(name, code, intro);
-                    Firsts.Add(nj);
-                }
-            }
-        }
 
         public NCActionLib()
         {

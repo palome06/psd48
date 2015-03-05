@@ -861,7 +861,7 @@ namespace PSD.PSDGamepkg
                     py.IsZhu = false;
                 return false;
             }
-            List<SKE> pocket = ParseFromSKTriples(sk02[zero], zero, (sina & 4) != 0);
+            List<SKE> pocket = ParseFromSKTriples(sk02[zero], new Mint.InRound(zero), (sina & 4) != 0);
 
             bool[] involved = new bool[garden.Count + 1];
             string[] pris = new string[garden.Count + 1];
@@ -919,7 +919,7 @@ namespace PSD.PSDGamepkg
                 if (actualAction && ((sina & 4) != 0))
                     break;
                 if (echo == UEchoCode.END_TERMIN) // skill updated
-                    pocket = ParseFromSKTriples(sk02[zero], zero, (sina & 4) != 0);
+                    pocket = ParseFromSKTriples(sk02[zero], new Mint.InRound(zero), (sina & 4) != 0);
                 //actualAction |= UKEvenMessage(involved, purse, pris, sina);
                 //if (actualAction && ((sina & 4) != 0))
                 //    break;
@@ -940,7 +940,7 @@ namespace PSD.PSDGamepkg
                     py.IsZhu = false;
                 return false;
             }
-            List<SKE> pocket = ParseFromSKTriples(sk02[zero], zero, false);
+            List<SKE> pocket = ParseFromSKTriples(sk02[zero], new Mint.InRound(zero), false);
 
             bool[] involved = new bool[garden.Count + 1];
             string[] pris = new string[garden.Count + 1];
@@ -1016,7 +1016,7 @@ namespace PSD.PSDGamepkg
                         break;
                     }
                     if (echo == UEchoCode.END_TERMIN) // skill updated
-                        pocket = ParseFromSKTriples(sk02[zero], zero, false);
+                        pocket = ParseFromSKTriples(sk02[zero], new Mint.InRound(zero), false);
                 } while (!IsAllClear(involved, false));
                 if (!actualAction)
                 {
@@ -1108,10 +1108,10 @@ namespace PSD.PSDGamepkg
             foreach (string npsk in npc.Skills)
                 if (nj01.ContainsKey(npsk))
                 {
-                    string nfuse = npc.Code + ";" + rstage;
+                    Fuse nfuse = new Fuse() { Mint = new Mint.InRound(rstage) }.SetHost(npc.Code + ",0");
                     if (nj01[npsk].Valid(player, nfuse))
                     {
-                        SKE skt = new SKE(new SkTriple()
+                        purse.Add(new SKE(new SkTriple()
                         {
                             Name = npsk,
                             Priorty = 0,
@@ -1121,8 +1121,7 @@ namespace PSD.PSDGamepkg
                             Consume = 0,
                             Lock = false,
                             IsOnce = false,
-                        }) { Tg = player.Uid, Fuse = nfuse };
-                        purse.Add(skt);
+                        }, , player.Uid));
                         string ip = nj01[npsk].Input(player, nfuse, "");
                         if (ip != "") ip = "," + ip;
                         pris[rd] += ";" + npsk + ip;

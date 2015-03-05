@@ -76,6 +76,7 @@
     <Compile Include="Utils\ReadonlySQL.cs" />
     <Compile Include="VW\IVI.cs" />
     <Compile Include="VW\IWI.cs" />
+    <Compile Include="Flow\Fuse.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

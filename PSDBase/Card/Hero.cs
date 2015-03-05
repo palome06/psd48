@@ -74,43 +74,6 @@ namespace PSD.Base.Card
             AvailableDay = list.ToArray();
             AvailableTestPkg = apkg;
         }
-
-        internal static Hero Parse(string line)
-        {
-            if (line != null && line.Length > 0 && !line.StartsWith("#"))
-            {
-                string[] content = line.Split(new char[] { '\t' });
-                int code = int.Parse(content[0]); // code, e.g. (01004)
-                string name = content[1]; // name, e.g. (Mugongxia)
-                ushort hp = ushort.Parse(content[2]);
-                ushort str = ushort.Parse(content[3]);
-                ushort dex = ushort.Parse(content[4]);
-                char gender = content[5][0];
-                string spousesStr = content[6];
-                List<string> spouses = spousesStr.Equals("^") ?
-                    new List<string>() : spousesStr.Split(',').ToList();
-                string isoStr = content[7];
-                int archetype = 0;
-                List<int> isos = new List<int>();
-                foreach (string isosr in isoStr.Split(','))
-                {
-                    if (isosr.StartsWith("@"))
-                        archetype = int.Parse(isosr.Substring("@".Length));
-                    else if (!string.IsNullOrEmpty(isosr))
-                        isos.Add(int.Parse(isosr));
-                }
-                string skillStr = content[8];
-                List<string> skills = skillStr.Equals("^") ?
-                    new List<string>() : skillStr.Split(',').ToList();
-                string bio = content[9];
-                return new Hero(name, code, 1, gender, hp, str, dex, spouses, isos, archetype, skills, bio)
-                {
-                    Ofcode = "XJ" + (code - 10000)
-                };
-            }
-            else
-                return null;
-        }
         /// <summary>
         /// Force Change Attribute of a hero, used mainly for capability for older version
         /// </summary>
@@ -132,18 +95,6 @@ namespace PSD.Base.Card
         //private List<Hero> firsts;
         private IDictionary<int, Hero> dicts;
         private Utils.ReadonlySQL sql;
-
-        public HeroLib(string path)
-        {
-            dicts = new Dictionary<int, Hero>();
-            string[] lines = System.IO.File.ReadAllLines(path);
-            foreach (string line in lines)
-            {
-                Hero hero = Hero.Parse(line);
-                if (hero != null)
-                    dicts.Add(hero.Avatar, hero);
-            }
-        }
 
         public HeroLib()
         {

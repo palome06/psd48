@@ -8,7 +8,6 @@ using System.IO.Pipes;
 using System.IO;
 
 using PSD.Base.Card;
-using PSD.PSDGamepkg.Mint;
 
 namespace PSD.PSDGamepkg
 {
@@ -18,7 +17,45 @@ namespace PSD.PSDGamepkg
         public void RaiseGMint(Mint.Mint mint)
         {
             Log.Logger(mint.ToMessage());
-            mint.Handle(this);
+            if (MintType == MintType.UI_ONLY)
+                mint.Handle(this);
+            else
+                InnerGMint(mint, int.MinValue);
+        }
+        public void InnerGMint(Mint.Mint mint, int priorty)
+        {
+            List<SkTriple> _pocket;
+            if (!sk02.TryGetValue(mint.Head, out _pocket) || _pocket.Count == 0)
+            {
+                foreach (Player py in Board.Garden.Values)
+                    py.IsZhu = false;
+                return;
+            }
+            List<SKE> pocket = ParseFromSKTriples(_pocket, mint, false);
+            bool[] involved = new bool[Board.Garden.Count + 1];
+            string[] roads = new string[Board.Garden.Count + 1];
+            bool isAnySet;
+            do
+            {
+                Fill(involved, false);
+                Fill(roads, "");
+                isAnySet = false;
+                List<SKE> purse = new List<SKE>();
+                // AddZhuSkillBackward(pocket, zero, false);
+                foreach (SKE ske in pocket)
+                {
+                    if (!isAnySet && ske.Priory < priorty)
+                        continue;
+                    // base as the first one if not set
+                    if (!isAnySet || ske.Priory == priorty)
+                    {
+                        if (ske.Name.StartsWith("~"))
+                        {
+                            mint.Handle(this, priorty); return;
+                        }
+                    }
+                }
+            }
         }
         #endregion G-Loop /w Mint
         #region G-Loop

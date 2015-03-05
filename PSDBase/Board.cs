@@ -217,6 +217,19 @@ namespace PSD.Base
             }
             return list;
         }
+        public List<ushort> OrderedInvolvePlayer()
+        {
+            if (Rounder.Uid == 0)
+                return Garden.Keys.ToList().Sort();
+            List<ushort> list = new List<ushort>();
+            list.Add(Rounder.Uid);
+            if (Supporter.IsReal && Supporter.Uid != 0)
+                list.Add(Supporter.Uid);
+            if (Hinder.IsReal && Hinder.Uid != 0)
+                list.Add(Hinder.Uid);
+            list.AddRange(OrderedPlayer().RemoveAll(p => list.Contains(p)));
+            return list;
+        }
 
         public Board()
         {
