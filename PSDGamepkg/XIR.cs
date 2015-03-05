@@ -468,7 +468,7 @@ namespace PSD.PSDGamepkg
                                 RaiseGMessage("G17F,O");
                                 // Ensure XI.Board.Mon1From == 0
                                 ushort mons = DequeueOfPile(Board.MonPiles);
-                                RaiseGMessage("G2IN,1,1");
+                                RaiseGMint(new Mint.CardOutOfPile('M', 1));
                                 Board.Battler = null;
                                 WI.BCast(rstage + "7,0," + mons);
                                 RaiseGMessage("G0ON,0,M,1," + mons);
@@ -524,7 +524,7 @@ namespace PSD.PSDGamepkg
                             if (Board.Mon1From == 0)　// Board.Monster1 hasn't been set ready.
                             {
                                 ushort mons = DequeueOfPile(Board.MonPiles);
-                                RaiseGMessage("G2IN,1,1");
+                                RaiseGMint(new Mint.CardOutOfPile('M', 1));
                                 // actually judge who wins won't happens here
                                 //if (mons == 0) { rstage = "H0TM"; break; }
                                 Board.Monster1 = mons;
@@ -559,7 +559,7 @@ namespace PSD.PSDGamepkg
                                 if (Board.MonPiles.Count > 0)
                                 {
                                     ushort mons = DequeueOfPile(Board.MonPiles);
-                                    RaiseGMessage("G2IN,1,1");
+                                    RaiseGMint(new Mint.CardOutOfPile('M', 1));
                                     Board.Monster1 = mons; Board.Mon1From = 0;
                                     Board.Battler = NMBLib.Decode(Board.Monster1,
                                         LibTuple.ML, LibTuple.NL);

@@ -87,7 +87,7 @@ namespace PSD.PSDGamepkg.JNS
         {
             Player nx = XI.Board.GetOpponenet(rd);
             List<ushort> pops = XI.DequeueOfPile(XI.Board.TuxPiles, 4).ToList();
-            XI.RaiseGMessage("G2IN,0,4");
+            XI.RaiseGMint(new Mint.CardOutOfPile('C', 4));
             XI.RaiseGMessage("G1IU," + string.Join(",", pops));
             //XI.RaiseGMessage("G2FU,0," + string.Join(",", pops));
             
@@ -289,7 +289,7 @@ namespace PSD.PSDGamepkg.JNS
             string of = "(p" + string.Join("p", ops) + ")";
 
             List<ushort> pops = XI.DequeueOfPile(XI.Board.TuxPiles, rn).ToList();
-            XI.RaiseGMessage("G2IN,0," + rn);
+            XI.RaiseGMint(new Mint.CardOutOfPile('C', rn));
             XI.RaiseGMessage("G1IU," + string.Join(",", pops));
             do 
             {
@@ -318,7 +318,7 @@ namespace PSD.PSDGamepkg.JNS
             } while (pops.Count > 0);
             
             pops = XI.DequeueOfPile(XI.Board.TuxPiles, on).ToList();
-            XI.RaiseGMessage("G2IN,0," + on);
+            XI.RaiseGMint(new Mint.CardOutOfPile('C', on));
             XI.RaiseGMessage("G1IU," + string.Join(",", pops));
             do
             {
@@ -390,7 +390,7 @@ namespace PSD.PSDGamepkg.JNS
                             XI.RaiseGMint(Mint.Stargazer.NewTakeAway(null, 'C', new ushort[] { cd }));
                             // CongQIPaiDuiLiQiDiao
                             XI.RaiseGMint(Mint.Stargazer.NewClose());
-                            XI.RaiseGMessage("G2CN,0,1");
+                            XI.RaiseGMint(new Mint.CardOutOfDise('C', 1));
                             XI.RaiseGMessage("G0HQ,2," + ut + ",0,0," + cd);
                             XI.Board.TuxDises.Remove(cd);
                             string os = XI.AsyncInput(ut, "#您是否要立即装备？##是##否,Y2", "SJT04", "0");

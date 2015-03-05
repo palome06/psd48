@@ -580,7 +580,7 @@ namespace PSD.PSDGamepkg
             string[] g1 = new string[] { "DI", "IU", "OU", "CW", "ZK", "IZ", "OZ", "WP", "SG", "HK",
                  "WJ", "JG", "XR", "EV", "CK", "7F", "YP" };
             string[] g2 = new string[] { "IN", "RN", "CN", "QC", "FU", "CL", "ZU", "HU", "WK", "AK",
-                 "IL", "OL", "SW", "AS" };
+                 "IL", "OL", "SW", "AS", "SY" };
             foreach (string g0event in g0)
                 Util.AddToMultiMap(dict, "G0" + g0event, new SkTriple() { Name = "~100", Priorty = 100 });
             foreach (string g1event in g1)

@@ -256,7 +256,7 @@ namespace PSD.PSDGamepkg.JNS
             if (yes == "2")
             {
                 ushort pop = XI.Board.MonPiles.Dequeue();
-                XI.RaiseGMessage("G2IN,1,1");
+                XI.RaiseGMint(new Mint.CardOutOfPile('M', 1));
                 XI.RaiseGMessage("G0ON,0,M,1," + pop);
             }
         }

@@ -2855,7 +2855,7 @@ namespace PSD.PSDGamepkg.JNS
                             Tux tux = XI.LibTuple.TL.DecodeTux(ut);
                             if (tux != null && tux.DBSerial == (ushort)player.ROM["Weapon"])
                             {
-                                XI.RaiseGMessage("G2CN,0,1");
+                                XI.RaiseGMint(new Mint.CardOutOfDise('C', 1));
                                 XI.RaiseGMessage("G0HQ,2," + player.Uid + ",0,0," + ut);
                                 XI.Board.TuxDises.Remove(ut);
                                 tuxes.Remove(ut); break;
@@ -3241,14 +3241,14 @@ namespace PSD.PSDGamepkg.JNS
             if (type == 0)
             {
                 ushort[] uts = XI.DequeueOfPile(XI.Board.TuxPiles, 2);
-                XI.RaiseGMessage("G2IN,0,2");
+                XI.RaiseGMint(new Mint.CardOutOfPile('C', 2));
                 XI.RaiseGMessage("G0IJ," + player.Uid + ",1,2,C" + uts[0] + ",C" + uts[1]);
                 XI.RaiseGMessage("G2TZ," + player.Uid + ",0,C" + uts[0] + ",C" + uts[1]);
             }
             else if (type == 1)
             {
                 ushort ut = XI.DequeueOfPile(XI.Board.TuxPiles);
-                XI.RaiseGMessage("G2IN,0,1");
+                XI.RaiseGMint(new Mint.CardOutOfPile('C', 1));
                 XI.RaiseGMessage("G0IJ," + player.Uid + ",1,1,C" + ut);
                 XI.RaiseGMessage("G2TZ," + player.Uid + ",0,C" + ut);
             }
@@ -3934,7 +3934,7 @@ namespace PSD.PSDGamepkg.JNS
                     if (sl != VI.CinSentinel && !sl.StartsWith("/"))
                     {
                         ushort mon = ushort.Parse(sl);
-                        XI.RaiseGMessage("G2CN,1,1");
+                        XI.RaiseGMint(new Mint.CardOutOfDise('M', 1));
                         XI.Board.MonDises.Remove(mon);
                         XI.RaiseGMessage("G0HC,1," + player.Uid + ",0,1," + mon);
                     }
@@ -4035,8 +4035,7 @@ namespace PSD.PSDGamepkg.JNS
                             XI.RaiseGMessage("G0IA," + player.Uid + ",0," + (hero.DEX - hero.STR));
                         }
                     }
-                    // Reverse Ordered Player
-                    XI.RaiseGMessage("G0HR,0,1");
+                    XI.RaiseGMint(Mint.HeavyRotation.NewRotate());
                 }
                 else if (player.ROMUshort == 1)
                 {
@@ -4056,12 +4055,11 @@ namespace PSD.PSDGamepkg.JNS
                             XI.RaiseGMessage("G0OA," + player.Uid + ",0," + (hero.DEX - hero.STR));
                         }
                     }
-                    // Reverse Ordered Player
-                    XI.RaiseGMessage("G0HR,0,1");
+                    XI.RaiseGMint(Mint.HeavyRotation.NewRotate());
                 }
             }
             else if (type == 1)
-                XI.RaiseGMessage("G0HR,0,1");
+                XI.RaiseGMint(Mint.HeavyRotation.NewReset());
         }
         public bool JNH0302Valid(Player player, int type, string fuse)
         {
@@ -4457,7 +4455,7 @@ namespace PSD.PSDGamepkg.JNS
                     if (who == player.Uid && inOut == 1 && ntx > 0)
                     {
                         ushort ut = XI.DequeueOfPile(XI.Board.TuxPiles);
-                        XI.RaiseGMessage("G2IN,0,1");
+                        XI.RaiseGMint(new Mint.CardOutOfPile('C', 1));
                         Base.Card.Tux tux = XI.LibTuple.TL.DecodeTux(ut);
                         if (tux != null)
                         {
@@ -4474,7 +4472,7 @@ namespace PSD.PSDGamepkg.JNS
             {
                 // G0HQ,0,A,B,...
                 ushort ut = XI.DequeueOfPile(XI.Board.TuxPiles);
-                XI.RaiseGMessage("G2IN,0,1");
+                XI.RaiseGMint(new Mint.CardOutOfPile('C', 1));
                 Base.Card.Tux tux = XI.LibTuple.TL.DecodeTux(ut);
                 if (tux != null)
                 {
@@ -4885,8 +4883,6 @@ namespace PSD.PSDGamepkg.JNS
             }
             if (blocks.Length >= 3)
                 XI.RaiseGMessage("G0HQ,0," + tar + "," + player.Uid + ",1,1," + blocks[2]);
-            //XI.RaiseGMessage("G2CN,0,1");
-            //XI.Board.TuxDises.Remove(ut);
             XI.RaiseGMessage("G0HQ,2," + player.Uid + ",0,0," + ut);
             rest.Remove(ut); eqs.Remove(ut);
             rest.AddRange(eqs);
