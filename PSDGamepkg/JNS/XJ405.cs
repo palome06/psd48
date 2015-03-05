@@ -2348,7 +2348,7 @@ namespace PSD.PSDGamepkg.JNS
                 if (who != player.Uid && py.IsAlive && py.Team == player.Team)
                 {
                     ushort mon = XI.Board.MonPiles.Dequeue();
-                    XI.RaiseGMessage("G2IN,1,1");
+                    XI.RaiseGMint(new Mint.CardOutOfPile('M', 1));
                     if (mon == 0)
                         break;
                     if (Base.Card.NMBLib.IsMonster(mon))

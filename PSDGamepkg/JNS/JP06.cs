@@ -947,7 +947,7 @@ namespace PSD.PSDGamepkg.JNS
 
                 Player op = XI.Board.GetOpponenet(player);
                 List<ushort> pops = XI.DequeueOfPile(XI.Board.TuxPiles, sumO + sumR).ToList();
-                XI.RaiseGMessage("G2IN,0," + (sumO + sumR));
+                XI.RaiseGMint(new Mint.CardOutOfPile('C', sumO + sumR));
                 XI.RaiseGMessage("G1IU," + string.Join(",", pops));
 
                 string range1 = Util.SSelect(XI.Board, p => p.Team == player.Team && p.IsAlive);
@@ -1880,7 +1880,7 @@ namespace PSD.PSDGamepkg.JNS
                     XI.RaiseGMessage("G0SN," + player.Uid + "," + lugCode + ",1," + ss);
                     XI.RaiseGMessage("G0ON," + player.Uid + ",C,2," + blocks[1] + "," + blocks[2]);
                     XI.RaiseGMessage("G2TZ,0," + player.Uid + "," + ss);
-                    XI.RaiseGMessage("G2CN,0,1");
+                    XI.RaiseGMint(new Mint.CardOutOfDise('C', 1));
                     XI.Board.TuxDises.Remove(blocks[0]);
                     XI.RaiseGMessage("G0HQ,2," + player.Uid + ",0,0," + blocks[0]);
                     ushort belonger = belongs[blocks[0]];

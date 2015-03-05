@@ -22,21 +22,15 @@ namespace PSD.PSDGamepkg
         }
         #endregion G-Loop /w Mint
         #region G-Loop
-        // public void RaiseGObject(UnitObject uo)
-        // {
-        //     Log.Logger(uo.ToMessage());
-        //     if (uo.IsSentDirect)
-        //         SimpleGObject100(uo);
-        //     else
-        //         InnerGObject(uo, int.MinValue);
-        // }
+        public void RaiseGMessage(string cmd) { RaiseGMessage(cmd, true); }
         // Raise Command from skill declaration, without Priory Control
-        public void RaiseGMessage(string cmd)
+        public void RaiseGMessage(string cmd, bool willLog)
         {
             if (cmd.StartsWith("G"))
             {
                 //VI.Cout(0, "☆◇○" + cmd + "○◇☆");
-                Log.Logger(cmd);
+                if (willLog)
+                    Log.Logger(cmd);
                 if (cmd.StartsWith("G2"))
                     SimpleGMessage100(cmd);
                 else
@@ -611,8 +605,7 @@ namespace PSD.PSDGamepkg
                         ushort type = ushort.Parse(args[2]);
 
                         ushort eveCard = DequeueOfPile(Board.EvePiles);
-                        RaiseGMessage("G2IN,2,1");
-                        //WI.BCast("E0EV," + eveCard);
+                        RaiseGMint(new Mint.CardOutOfPile('E', 1));
                         if (Board.Eve != 0)
                         {
                             RaiseGMessage("G0ON,10,E,1," + Board.Eve);
@@ -642,6 +635,8 @@ namespace PSD.PSDGamepkg
             string[] args = cmd.Split(',');
             string cmdrst = Util.Substring(cmd, cmd.IndexOf(',') + 1, -1);
             var g = Board.Garden;
+            if (args[0].StartsWith("G2"))
+                WI.BCast("E0" + cmd.Substring("G2".Length)); // To be erased gradually
             switch (args[0])
             {
                 case "G0IT": // actual obtain Tux
@@ -885,7 +880,7 @@ namespace PSD.PSDGamepkg
                                 ushort[] pls = Board.TuxPiles.Intersect(card).ToArray();
                                 if (pls.Length > 0)
                                 {
-                                    RaiseGMessage("G2IN,0," + pls.Count());
+                                    RaiseGMint(new Mint.CardOutOfPile('C', pls.Length));
                                     foreach (ushort pl in pls)
                                         Board.TuxPiles.Remove(pl);
                                 }
@@ -906,7 +901,7 @@ namespace PSD.PSDGamepkg
                             else if (utype == 1)
                             {
                                 int n = int.Parse(args[4]);
-                                RaiseGMessage("G2IN,0," + n);
+                                RaiseGMint(new Mint.CardOutOfPile('C', n));
                                 ushort[] tuxs = DequeueOfPile(Board.TuxPiles, n);
                                 VI.Cout(0, "{0}摸取手牌{1}.", DisplayPlayer(me), DisplayTux(tuxs));
                                 RaiseGMessage("G0IT," + me + "," + n + "," + string.Join(",", tuxs));
@@ -1020,7 +1015,7 @@ namespace PSD.PSDGamepkg
                             g1di += "," + string.Join(",", gains.Select(p =>
                                 p.Key + ",0," + p.Value.Count + "," + p.Value.Count + "," + string.Join(",", p.Value)));
                             RaiseGMessage("G0IT," + g1it);
-                            RaiseGMessage("G2IN,0," + inCount);
+                            RaiseGMint(new Mint.CardOutOfPile('C', inCount));
                             foreach (var pair in gains)
                             {
                                 int count = pair.Value.Count();
@@ -1478,7 +1473,7 @@ namespace PSD.PSDGamepkg
                                     int discard = count - pick;
                                     ushort[] pops = piles.Dequeue(discard);
                                     char[] diceNames = new char[] { '0', 'C', 'M', 'E' };
-                                    RaiseGMessage("G2IN," + (dicesType - 1) + "," + discard);
+                                    RaiseGMint(new Mint.CardOutOfPile(diceNames[dicesType], discard));
                                     RaiseGMessage("G0ON,0," + diceNames[dicesType] + "," + discard
                                         + "," + string.Join(",", pops));
                                 }
@@ -3298,34 +3293,6 @@ namespace PSD.PSDGamepkg
                         }
                         foreach (var pair in actual)
                             RaiseGMessage("G0HQ,2," + pair.Key + ",1," + pair.Value.Count);
-                    }
-                    break;
-                case "G0HR":
-                    if (args[1] == "0")
-                    {
-                        if (args[2] == "0" && !Board.ClockWised)
-                        {
-                            Board.ClockWised = true;
-                            WI.BCast("E0HR,0");
-                        }
-                        else if (args[2] == "1")
-                        {
-                            Board.ClockWised = !Board.ClockWised;
-                            WI.BCast("E0HR," + (Board.ClockWised ? 0 : 1));
-                        }
-                    }
-                    else if (args[1] == "1")
-                    {
-                        if (args[2] == "0" && !Board.ClockWised)
-                        {
-                            Board.ClockWised = true;
-                            WI.BCast("E0HR,0");
-                        }
-                        else if (args[2] == "1" && Board.ClockWised)
-                        {
-                            Board.ClockWised = false;
-                            WI.BCast("E0HR,1");
-                        }
                     }
                     break;
                 case "G17F":

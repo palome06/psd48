@@ -121,7 +121,7 @@ namespace PSD.PSDGamepkg.JNS
             if (yes.Equals("2"))
             {
                 ushort mons = XI.Board.MonPiles.Dequeue();
-                XI.RaiseGMessage("G2IN,1,1");
+                XI.RaiseGMint(new Mint.CardOutOfPile('M', 1));
                 XI.RaiseGMessage("G0HZ," + player.Uid + "," + mons);
             }
             else

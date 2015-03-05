@@ -5,29 +5,36 @@ using System.Text;
 
 namespace PSD.PSDGamepkg.Mint
 {
-    public enum MintType
-    {
-        NONE,
-        NORMAL, // G0
-        INNER, // G1, won't cause E communication directly
-        UI_ONLY // G2, trigger E communcation directly
-    };
+	public enum MintType
+	{
+		NONE,
+        GENERAL, // G0
+		INNER, // G1, won't cause E communication directly
+		UI_ONLY // G2, trigger E communcation directly
+	};
 
     public class Mint
     {
         private IDictionary<string, object> dict = new Dictionary<string, object>();
 
-        public virtual string Head { get { return null; } }
-        public virtual MintType MintType { get { return MintType.NONE; } }
+        public virtual string Head { get { return "****"; } }
+		public virtual MintType MintType { get { return MintType.NONE; } }
 
-        public void Set(string key, object value) { dict[key] = value; }
-        // public void SetUshort(string key, ushort value) { dict[key] = value; }
-        // public void SetInt(string key, int value) { dict[key] = value; }
-        // public void SetFloat(String key, float value) { dict[key] = value; }
-        // public void SetString(string key, string value) { dict[key] = value; }
-        // public void SetBool(string key, bool value) { dict[key] = value; }
-        // public void SetMint(string key, Mint value) { dict[key] = value; }
-        // public void SetArray<Type>(String key, List<Type> value) { dict[key] = value; }
+        public Mint Set(string key, object value)
+        {
+            if (value == null)
+                dict.Remove(key);
+            else
+                dict[key] = value;
+            return this;
+        }
+		// public void SetUshort(string key, ushort value) { dict[key] = value; }
+		// public void SetInt(string key, int value) { dict[key] = value; }
+		// public void SetFloat(String key, float value) { dict[key] = value; }
+		// public void SetString(string key, string value) { dict[key] = value; }
+		// public void SetBool(string key, bool value) { dict[key] = value; }
+		// public void SetMint(string key, Mint value) { dict[key] = value; }
+		// public void SetArray<Type>(String key, List<Type> value) { dict[key] = value; }
 
         public ushort GetUshort(string key) { return dict.ContainsKey(key) ? (ushort)dict[key] : (ushort)0; }
         public int? GetInt(string key) { return dict.ContainsKey(key) ? (int?) dict[key] : null; }
@@ -60,51 +67,116 @@ namespace PSD.PSDGamepkg.Mint
         {
             return dict.ContainsKey(key) ? (List<Mint>) dict[key] : null;
         }
-
-        public Mint() { }
-        public Mint(params object[] pairs)
-        {
-            for (int i = 0; i < pairs.Length; i += 2)
-            {
-                string key = pairs[i] as string;
-                object value = pairs[i + 1];
-                Set(key, value);
-            }
+		public Mint() { }
+		public Mint(params object[] pairs)
+		{
+			for (int i = 0; i < pairs.Length; i += 2)
+			{
+				string key = pairs[i] as string;
+				object value = pairs[i + 1];
+				Set(key, value);
+			}
+		}
+        public virtual string ToMessage() { return Head; }
+		public virtual void Handle(XI xi)
+		{
+			if (MintType == MintType.UI_ONLY)
+				xi.WI.BCast("E0" + ToMessage().Substring("G2".Length));
+			else
+                xi.RaiseGMessage(ToMessage(), false); // TODO: Gradually refurbish it
         }
-        public virtual string ToMessage() { return "****"; }
-        public virtual void Handle(XI xi)
+        public override string ToString()
         {
-            if (MintType == MintType.UI_ONLY)
-                xi.WI.BCast("E0" + ToMessage().Substring("G2".Length));
-            else
-                xi.RaiseGMessage(ToMessage()); // TODO: Gradually refurbish it
+            StringBuilder sb = new StringBuilder();
+            sb.Append(Head + ":{");
+            foreach (var pair in dict)
+            {
+                sb.Append(pair.Key);
+                sb.Append(":");
+                object value = pair.Value;
+                if (value is ushort || value is int || value is float)
+                    sb.Append(value.ToString());
+                else if (value is string)
+                    sb.Append("\"" + value.ToString() + "\"");
+                else if (value is Mint)
+                    sb.Append((value as Mint).ToString());
+                else if (value is System.Collections.IEnumerable)
+                {
+                    var result = ((System.Collections.IEnumerable)value).Cast<object>().ToList();
+                    sb.Append("[" + string.Join(", ", result) + "]");
+                }
+            }
+            sb.Append("}");
+            sb.Append("\n");
+            return sb.ToString();
+		}
+	}
+
+    public class CardOutOfPile : Mint
+    {
+        public override string Head { get { return "G2IN"; } }
+        public override MintType MintType { get { return MintType.UI_ONLY; }}
+        public CardOutOfPile(char pile, int count) : base()
+        {
+            Set("pile", pile.ToString()).Set("count", count);
+        }
+        public override string ToMessage()
+        {
+            string pile = GetString("pile");
+            int typeCode = (pile == "M") ? 1 : ((pile == "E") ? 2 : 0);
+            return Head + "," + typeCode + "," + GetInt("count");
+        }
+        public static CardOutOfPile Parse(string message)
+        {
+            string[] g2in = message.Split(',');
+            char[] typeChars = new char[] { 'C', 'M', 'E' };
+            return new CardOutOfPile(typeChars[int.Parse(g2in[1])], int.Parse(g2in[2]));
         }
     }
 
-    public class Target : Mint
+    public class CardOutOfDise : Mint
     {
-        public override string Head { get { return "G2SY"; } }
-        public override MintType MintType { get { return MintType.UI_ONLY; } }
+        public override string Head { get { return "G2CN"; } }
+        public override MintType MintType { get { return MintType.UI_ONLY; }}
+        public CardOutOfDise(char pile, int count) : base()
+        {
+            Set("pile", pile.ToString()).Set("count", count);
+        }
+        public override string ToMessage()
+        {
+            string pile = GetString("pile");
+            int typeCode = (pile == "M") ? 1 : ((pile == "E") ? 2 : 0);
+            return Head + "," + typeCode + "," + GetInt("count");
+        }
+        public static CardOutOfDise Parse(string message)
+        {
+            string[] g2cn = message.Split(',');
+            char[] typeChars = new char[] { 'C', 'M', 'E' };
+            return new CardOutOfDise(typeChars[int.Parse(g2cn[1])], int.Parse(g2cn[2]));
+        }
+    }
+
+	public class Target : Mint
+	{
+		public override string Head { get { return "G2SY"; } }
+		public override MintType MintType { get { return MintType.UI_ONLY; } }
 
         public Target(char fromChar, ushort fromUt, char toChar, ushort toUt)
             : base()
         {
-            Set("head", Head);
-            Set("from", new Mint("type", fromChar.ToString(), "ut", fromUt));
-            Set("to", new Mint[] { new Mint("type", toChar.ToString(), "ut", toUt) }.ToList());
+            Set("head", Head).Set("from", new Mint("type", fromChar.ToString(), "ut", fromUt))
+		.Set("to", new Mint[] { new Mint("type", toChar.ToString(), "ut", toUt) }.ToList());
         }
         public Target(char fromChar, ushort fromUt, IEnumerable<ushort> toTargetUts)
             : base()
         {
-            Set("head", Head);
-            Set("from", new Mint("type", fromChar.ToString(), "ut", fromUt));
-            Set("to", toTargetUts.Select(p => new Mint("type", "T", "ut", p)).ToList());
+            Set("head", Head).Set("from", new Mint("type", fromChar.ToString(), "ut", fromUt))
+		.Set("to", toTargetUts.Select(p => new Mint("type", "T", "ut", p)).ToList());
         }
         private Target(char fromChar, ushort fromUt, object[] tos)
             : base()
         {
-            Set("head", Head);
-            Set("from", new Mint("type", fromChar.ToString(), "ut", fromUt));
+            Set("head", Head).Set("from", new Mint("type", fromChar.ToString(), "ut", fromUt));
             List<Mint> toMints = new List<Mint>();
             for (int i = 0; i < tos.Length; i += 2)
                 toMints.Add(new Mint("type", tos[i], "ut", tos[i + 1]));
@@ -168,17 +240,6 @@ namespace PSD.PSDGamepkg.Mint
             sg.Set("show", "close");
             return sg;
         }
-        // case 4: take away
-        // public static Stargazer NewTakeAway(IEnumerable<ushort> views, char cardType, IEnumerable<ushort> cards)
-        // {
-        //     Stargazer sg = new Stargazer();
-        //     sg.Set("show", "take");
-        //     if (views != null)
-        //         sg.Set("views", views.ToList());
-        //     sg.Set("cardType", cardType.ToString());
-        //     sg.Set("cards", cards.ToList());
-        //     return sg;
-        // }
         public override string ToMessage()
         {
             string show = GetString("show");
@@ -196,13 +257,6 @@ namespace PSD.PSDGamepkg.Mint
             }
             else if (show == "close")
                 return Head + ",2";
-            // else if (show == "take")
-            // {
-            //     List<ushort> views = GetUshortArray("views");
-            //     return Head + ",3," + (views == null ?
-            //             "0" : (views.Count + "," + string.Join(",", views))) + "," +
-            //             GetString("cardType") + "," + string.Join(",", GetUshortArray("cards"));
-            // }
             else return "";
         }
         public static Stargazer Parse(string message)
@@ -230,16 +284,6 @@ namespace PSD.PSDGamepkg.Mint
             }
             else if (show == 2)
                 return Stargazer.NewClose();
-            // else if (show == 3)
-            // {
-            //     int viewCount = int.Parse(g2fu[2]);
-            //     ushort[] views = Util.TakeRange(g2fu, 3, 3 + viewCount)
-            //         .Select(p => ushort.Parse(p)).ToArray();
-            //     char cardType = g2fu[3 + viewCount][0];
-            //     ushort[] cards = Util.TakeRange(g2fu, 4, g2fu.Length)
-            //         .Select(p => ushort.Parse(p)).ToArray();
-            //     return Stargazer.NewTakeAway(views, cardType, cards);
-            // }
             else return null;
         }
         public override void Handle(XI xi)
@@ -288,15 +332,13 @@ namespace PSD.PSDGamepkg.Mint
         {
             if (views != null)
                 Set("views", views.ToList());
-            Set("cardType", cardType.ToString());
-            Set("cards", new ushort[] { card });
+            Set("cardType", cardType.ToString()).Set("cards", new ushort[] { card });
         }
         public Starshards(IEnumerable<ushort> views, char cardType, IEnumerable<ushort> cards) : base()
         {
             if (views != null)
                 Set("views", views.ToList());
-            Set("cardType", cardType.ToString());
-            Set("cards", cards.ToList());
+            Set("cardType", cardType.ToString()).Set("cards", cards.ToList());
         }
         public override string ToMessage()
         {
@@ -326,5 +368,62 @@ namespace PSD.PSDGamepkg.Mint
             xi.WI.Send("E0QU,1," + cardType + "," + cards.Count, xi.ExceptStaff(invs));
             xi.WI.Live("E0QU,1," + cardType + "," + cards.Count);
         }
+    }
+
+    public class HeavyRotation : Mint
+    {
+    	public override string Head { get { return "G0HR"; } }
+        public override MintType MintType { get { return MintType.GENERAL; }}
+
+        private HeavyRotation() : base() { }
+        public static HeavyRotation NewReset()
+        {
+            return new HeavyRotation().Set("op", "reset") as HeavyRotation;
+        }
+        public static HeavyRotation NewRotate()
+        {
+            return new HeavyRotation().Set("op", "rotate") as HeavyRotation;
+        }
+        public static HeavyRotation NewSet(bool isClockWised)
+        {
+            return new HeavyRotation().Set("op", "set").Set("cwval", isClockWised) as HeavyRotation;
+        }
+        public override string ToMessage()
+        {
+            string op = GetString("op");
+            if (op == "reset")
+    			return Head + ",0,0";
+    		else if (op == "rotate")
+    			return Head + ",0,1";
+    		else if (op == "set")
+    			return Head + ",1," + (GetBool("cwval") != false ? 1 : 0);
+    		return "";
+        }
+        public static HeavyRotation Parse(string message)
+        {
+            string[] g0hr = message.Split(',');
+            if (g0hr[1] == "0")
+            {
+                if (g0hr[2] == "0")
+                    return HeavyRotation.NewReset();
+                else if (g0hr[2] == "1")
+                    return HeavyRotation.NewRotate();
+            } else if (g0hr[1] == "1")
+                return HeavyRotation.NewSet(g0hr[2] == "0");
+            return null;
+        }
+    	public override void Handle(XI xi)
+    	{
+    		string op = GetString("op");
+    		bool oldIsCW = xi.Board.ClockWised;
+    		if (op == "reset")
+    			xi.Board.ClockWised = true;
+    		else if (op == "rotate")
+    			xi.Board.ClockWised = !xi.Board.ClockWised;
+    		else if (op == "set")
+    			xi.Board.ClockWised = (GetBool("cwval") != false);
+    		if (oldIsCW != xi.Board.ClockWised)
+    			xi.WI.BCast("E0HR," + (xi.Board.ClockWised ? 0 : 1));
+    	}
     }
 }
