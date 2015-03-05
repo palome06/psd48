@@ -102,7 +102,7 @@ namespace PSD.PSDGamepkg.Mint
 				else if (value is Mint)
 					sb.Append((value as Mint).ToString());
 				else
-					sb.Append("[" + string.Join(", ", (value as List<?>)) + "]");
+					sb.Append("[" + value.ToString() + "]");
 			}
 			sb.Append("}");
 			sb.Append("\n");
@@ -122,7 +122,7 @@ namespace PSD.PSDGamepkg.Mint
 		{
 			string pile = GetString("pile");
 			int typeCode = (pile == "M") ? 1 : ((pile == "E") ? 2 : 0);
-			return Head + "," + typeCode + "," + GetInt(count);
+			return Head + "," + typeCode + "," + GetInt("count");
 		}
 		public static CardOutOfPile Parse(string message)
 		{
@@ -145,7 +145,7 @@ namespace PSD.PSDGamepkg.Mint
 		{
 			string pile = GetString("pile");
 			int typeCode = (pile == "M") ? 1 : ((pile == "E") ? 2 : 0);
-			return Head + "," + typeCode + "," + GetInt(count);
+			return Head + "," + typeCode + "," + GetInt("count");
 		}
 		public static CardOutOfDise Parse(string message)
 		{
@@ -209,14 +209,14 @@ namespace PSD.PSDGamepkg.Mint
 		public static Stargazer NewStandard(ushort operater,
 			IEnumerable<ushort> views, char cardType, IEnumerable<ushort> cards)
 		{
-			List<ushort> viewList = (views == null ? null : views.ToString());
+			List<ushort> viewList = (views == null ? null : views.ToList());
 			return new Stargazer().Set("show", 0).Set("operator", operater).Set("views", viewList)
-				.Set("cardType", cardType.ToString()).Set("cards", cards.ToList());
+                .Set("cardType", cardType.ToString()).Set("cards", cards.ToList()) as Stargazer;
 		}
 		public static Stargazer NewShow(ushort owner, char cardType, IEnumerable<ushort> cards)
 		{
 			return new Stargazer().Set("show", 1).Set("owner", owner)
-				.Set("cardType", cardType.ToString()).Set("cards", cards.ToList());
+                .Set("cardType", cardType.ToString()).Set("cards", cards.ToList()) as Stargazer;
 		}
         public static Stargazer NewShow(ushort owner, char cardType, ushort card)
         {
@@ -224,13 +224,13 @@ namespace PSD.PSDGamepkg.Mint
         }
 		public static Stargazer NewClose()
 		{
-			return new Stargazer().Set("show", 2);
+			return new Stargazer().Set("show", 2) as Stargazer;
 		}
 		public static Stargazer NewTakeAway(IEnumerable<ushort> views, char cardType, IEnumerable<ushort> cards)
 		{
-			List<ushort> viewList = (views == null ? null : views.ToString());
-			return new Stargazer().Set("show", -1).Set("views", viewList);
-				.Set("cardType", cardType.ToString()).Set("cards", cards.ToList());
+			List<ushort> viewList = (views == null ? null : views.ToList());
+			return new Stargazer().Set("show", -1).Set("views", viewList)
+				.Set("cardType", cardType.ToString()).Set("cards", cards.ToList()) as Stargazer;
 		}
 		public override string ToMessage()
 		{
@@ -341,15 +341,15 @@ namespace PSD.PSDGamepkg.Mint
 		private HeavyRotation() : base() { }
 		public static HeavyRotation NewReset()
 		{
-			return new HeavyRotation().Set("op", "reset");
+			return new HeavyRotation().Set("op", "reset") as HeavyRotation;
 		}
 		public static HeavyRotation NewRotate()
 		{
-			return new HeavyRotation().Set("op", "rotate");
+            return new HeavyRotation().Set("op", "rotate") as HeavyRotation;
 		}
 		public static HeavyRotation NewSet(bool isClockWised)
 		{
-			return new HeavyRotation().Set("op", "set").Set("cwval", isClockWised);
+            return new HeavyRotation().Set("op", "set").Set("cwval", isClockWised) as HeavyRotation;
 		}
 		public override string ToMessage()
 		{
@@ -382,11 +382,11 @@ namespace PSD.PSDGamepkg.Mint
     		if (op == "reset")
     			xi.Board.ClockWised = true;
     		else if (op == "rotate")
-    			xi.Board.ClockWised = !Board.ClockWised;
+    			xi.Board.ClockWised = !xi.Board.ClockWised;
     		else if (op == "set")
     			xi.Board.ClockWised = (GetBool("cwval") != false);
-    		if (oldIsCW != Board.ClockWised)
-    			xi.WI.BCast("E0HR," + (Board.ClockWised ? 0 : 1));
+    		if (oldIsCW != xi.Board.ClockWised)
+    			xi.WI.BCast("E0HR," + (xi.Board.ClockWised ? 0 : 1));
     	}
     }
 }

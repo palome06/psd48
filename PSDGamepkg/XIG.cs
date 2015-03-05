@@ -8,7 +8,6 @@ using System.IO.Pipes;
 using System.IO;
 
 using PSD.Base.Card;
-using PSD.PSDGamepkg.Mint;
 
 namespace PSD.PSDGamepkg
 {
@@ -363,7 +362,7 @@ namespace PSD.PSDGamepkg
                             //if (changeType == 2)
                             //    player.HP = 0;
                             if (changeType == 0 || changeType == 2)
-                                Artiad.ContentRule.ErasePlayerToken(player, Board, RaiseGMessage);
+                                Artiad.ContentRule.ErasePlayerToken(player, Board, (s) => RaiseGMessage(s));
                             if (!Board.BannedHero.Contains(player.SelectHero))
                                 Board.HeroDises.Add(player.SelectHero);
                             player.SelectHero = 0;
@@ -873,7 +872,7 @@ namespace PSD.PSDGamepkg
                                 ushort[] pls = Board.TuxPiles.Intersect(card).ToArray();
                                 if (pls.Length > 0)
                                 {
-                                    RaiseGMint(new Mint.CardOutOfPile('C', pls.Count));
+                                    RaiseGMint(new Mint.CardOutOfPile('C', pls.Length));
                                     foreach (ushort pl in pls)
                                         Board.TuxPiles.Remove(pl);
                                 }

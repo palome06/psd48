@@ -113,7 +113,7 @@ namespace PSD.PSDGamepkg.Artiad
             excds.AddRange(player.ExCards);
             if (excds.Count > 0)
                 xi.RaiseGMessage("G0QZ," + player.Uid + "," + string.Join(",", excds));
-            ErasePlayerToken(player, xi.Board, xi.RaiseGMessage);
+            ErasePlayerToken(player, xi.Board, (s) => xi.RaiseGMessage(s));
 
             List<string> skills = new List<string>();
             foreach (string skstr in guest.Skills)

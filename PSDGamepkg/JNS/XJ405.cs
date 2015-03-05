@@ -278,7 +278,7 @@ namespace PSD.PSDGamepkg.JNS
         public void JN10502Action(Player player, int type, string fuse, string argst)
         {
             var v = XI.Board.Garden.Values;
-            XI.RaiseGMessage("G0DH," + string.Join("p", v.Where(
+            XI.RaiseGMessage("G0DH," + string.Join(",", v.Where(
                 p => p.IsAlive && p.Team == player.Team).Select(p => p.Uid + ",0,1")));
             XI.RaiseGMint(new Mint.Target('T', player.Uid, v.Where(p => p.IsAlive &&
                  p.Uid != player.Uid).Select(p => p.Uid)));
