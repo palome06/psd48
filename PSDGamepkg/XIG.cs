@@ -17,11 +17,84 @@ namespace PSD.PSDGamepkg
         public void RaiseGMint(Mint.Mint mint)
         {
             Log.Logger(mint.ToMessage());
-            mint.Handle(this);
+            if (mint.MintType == Mint.MintType.UI_ONLY)
+                mint.Handle(this);
+            else
+                InnerGMint(mint, int.MinValue);
+        }
+        public void InnerGMint(Mint.Mint mint, int priorty)
+        {
+            List<SkTriple> _pocket;
+            if (!sk02.TryGetValue(mint.Head, out _pocket) || _pocket.Count == 0)
+            {
+                foreach (Player py in Board.Garden.Values)
+                    py.IsZhu = false;
+                return;
+            }
+            List<SKE> pocket = ParseFromSKTriples(_pocket, mint, false);
+            bool[] involved = new bool[Board.Garden.Count + 1];
+            string[] roads = new string[Board.Garden.Count + 1];
+            string[] locks = new string[Board.Garden.Count + 1];
+            bool isAnySet, isSerial;
+            do
+            {
+                Fill(involved, false);
+                Fill(roads, ""); Fill(locks, "");
+                isAnySet = false; isSerial = false;
+                List<SKE> purse = new List<SKE>();
+                // AddZhuSkillBackward(pocket, zero, false);
+                foreach (SKE ske in pocket)
+                {
+                    if (!isAnySet && ske.Priorty < priorty)
+                        continue;
+                    // base as the first one if not set
+                    if (!isAnySet || ske.Priorty == priorty)
+                    {
+                        if (ske.Name.StartsWith("~"))
+                        {
+                            mint.Handle(this, priorty); return;
+                        }
+                        int iasisr = SKE2Message(ske, involved, roads, locks);
+                        if ((ias & 1) != 0) { purse.Add(ske); isAnySet = true; }
+                        if ((ias & 2) != 0) { isSerial = true; }
+                        priorty = ske.Priorty;
+                    }
+                    else break;
+                }
+                if (!isAnySet) { RaiseGMint(new Mint.MoonlightFade()); return; }
+                isAnySet = false;
+                if (!isSerial)
+                {
+                    foreach (ushort pyut in Board.OrderedInvolvePlayer())
+                    {
+                        string[] parts = locks[pyut].Split(';');
+                        for (string part in parts)
+                        {
+                            string mai = Util.Substring(part, 0, part.IndexOf(','));
+                            // string inTypeStr = Util.Substring(part, part.IndexOf(',') + 1, -1);
+                            string skName;
+                            mai = DecodeSimplifiedCommand(mai, out skName);
+                            SKE ske = SKE.Find(skName, pyut, purse);
+                            if (ske != null)
+                            {
+                                UEchoCode echo = HandleU24Message(pyut, involved, mai, ske);
+                                // if (echo == UEchoCode.END_TERMIN)
+                                //    isTermini = true;
+                                if (echo == UEchoCode.END_ACTION)
+                                    isAnySet = true;
+                            }
+                        }
+                    }
+                }
+                if (Board.Garden.Keys.Any(p => involved[p]))
+                {
+
+                }
+            } while (involved.Any(p => p));
         }
         #endregion G-Loop /w Mint
         #region G-Loop
-        // Raise Command from skill declaration, without Priory Control
+        // Raise Command from skill declaration, without Priorty Control
         public void RaiseGMessage(string cmd, bool willLog = true)
         {
             if (cmd.StartsWith("G"))
@@ -35,7 +108,7 @@ namespace PSD.PSDGamepkg
                     InnerGMessage(cmd, int.MinValue);
             }
         }
-        // Raise Command from skill declaration, with Priory appended
+        // Raise Command from skill declaration, with Priorty appended
         public void InnerGMessage(string cmd, int priorty)
         {
             if (string.IsNullOrEmpty(cmd) || !cmd.StartsWith("G"))

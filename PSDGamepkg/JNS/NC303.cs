@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using PSD.Base;
+using PSD.Base.Flow;
 
 namespace PSD.PSDGamepkg.JNS
 {
@@ -29,19 +30,19 @@ namespace PSD.PSDGamepkg.JNS
                 string njCode = nj.Code;
                 var methodAction = njc.GetType().GetMethod(njCode + "Action");
                 if (methodAction != null)
-                    nj.Action += new NCAction.ActionDelegate(delegate(Player player, string fuse, string argst)
+                    nj.Action += new NCAction.ActionDelegate(delegate(Player player, Fuse fuse, string argst)
                     {
                         methodAction.Invoke(njc, new object[] { player, fuse, argst });
                     });
                 var methodValid = njc.GetType().GetMethod(njCode + "Valid");
                 if (methodValid != null)
-                    nj.Valid += new NCAction.ValidDelegate(delegate(Player player, string fuse)
+                    nj.Valid += new NCAction.ValidDelegate(delegate(Player player, Fuse fuse)
                     {
                         return (bool)methodValid.Invoke(njc, new object[] { player, fuse });
                     });
                 var methodInput = njc.GetType().GetMethod(njCode + "Input");
                 if (methodInput != null)
-                    nj.Input += new NCAction.InputDelegate(delegate(Player player, string fuse, string prev)
+                    nj.Input += new NCAction.InputDelegate(delegate(Player player, Fuse fuse, string prev)
                     {
                         return (string)methodInput.Invoke(njc, new object[] { player, fuse, prev });
                     });

@@ -17,14 +17,8 @@ namespace PSD.Base.Card
         public string Description { private set; get; }
         // group, e.g. 1 for standard, 0 for test, 2 for SP, etc.
         public int Group { private set; get; }
-
-        public string[] Occurs { set; get; }
-        public int[] Priorties { set; get; }
-        public bool[] IsOnce { set; get; }
-        public bool[] IsTermini { set; get; }
-        public bool[] Lock { set; get; }
+        public SKBranch[] Branches { private set; get; }
         //public delegate void ActionDelegate(Player player, Board board);
-
         //public ActionDelegate Action { private set; get; }
 
         private int mSpi;
@@ -32,11 +26,11 @@ namespace PSD.Base.Card
         public bool IsTuxInvolved(bool self)
         {
             if ((mSpi & 0x2) != 0) return true;
-            return (mSpi & 0x4) != 0;
+            return (mSpi & 0x4) != 0 && self;
         }
 
-        internal Evenement(string name, string code, int count, int group,
-            string background, string description, string spis)
+        internal Evenement(string name, string code, int count, int group, string occurStr,
+            string priortyStr, string mixCodeStr, string background, string description, string spis)
         {
             this.Name = name; this.Code = code;
             this.Count = count; this.Background = background;
@@ -59,9 +53,7 @@ namespace PSD.Base.Card
                         mSpi |= 0x2;
                 }
             }
-            Occurs = new string[] { };Priorties = new int [] { };
-            IsOnce = new bool [] { }; IsTermini = new bool [] { };
-            Lock = new bool[] { };
+            Branches = SKBranch.ParseFromStrings(occurStr, priortyStr, mixCodeStr);
         }
 
         public delegate void ActionDelegate(Player player);
@@ -69,13 +61,13 @@ namespace PSD.Base.Card
         public ActionDelegate Action
         {
             set { mAction = value; }
-            get { return mAction ?? DefAction; }
+            get { return mAction ?? ((p) => { }); }
         }
         private ActionDelegate mPers;
         public ActionDelegate Pers
         {
             set { mPers = value; }
-            get { return mPers ?? DefAction; }
+            get { return mPers ?? ((p) => { }); }
         }
 
         public delegate bool ValidDelegate();
@@ -83,7 +75,7 @@ namespace PSD.Base.Card
         public ValidDelegate PersValid
         {
             set { mPersValid = value; }
-            get { return mPersValid ?? DefValid; }
+            get { return mPersValid ?? (() => { return true; }); }
         }
 
         //private InputDelegate mInput;
@@ -99,10 +91,6 @@ namespace PSD.Base.Card
         //            return DefInput;
         //    }
         //}
-
-        private static ActionDelegate DefAction = new ActionDelegate(delegate(Player player) { });
-        private static ValidDelegate DefValid = new ValidDelegate(delegate() { return true; });
-
         //private static string DefaultInput(Board board) { return ""; }
         //private static InputDelegate DefInput = new InputDelegate(DefaultInput);
 
@@ -120,25 +108,6 @@ namespace PSD.Base.Card
         //    else
         //        return null;
         //}
-
-        internal static Evenement Parse(string line)
-        {
-            if (line != null && line.Length > 0 && !line.StartsWith("#"))
-            {
-                string[] content = line.Split('\t');
-                string code = content[0]; // code, e.g. (SJ402)
-                string name = content[1]; // name, e.g. (Shufuhuanmingjie)
-                ushort count = ushort.Parse(content[2]);
-                string background = content[3];
-                string description = content[4];
-                string spis = content[5];
-                int group = int.Parse(content[5]);
-                return new Evenement(name, code, count, group, background, description, spis);
-            }
-            else
-                return null;
-        }
-
         public void ForceChange(string field, object value)
         {
             if (field == "Count" && value is ushort)
@@ -154,27 +123,13 @@ namespace PSD.Base.Card
 
         private Utils.ReadonlySQL sql;
 
-        public EvenementLib(string path)
-        {
-            firsts = new List<Evenement>();
-            string[] lines = System.IO.File.ReadAllLines(path);
-            foreach (string line in lines)
-            {
-                Evenement eve = Evenement.Parse(line);
-                if (eve != null)
-                    firsts.Add(eve);
-            }
-            dicts = new Dictionary<ushort, Evenement>();
-            Refresh();
-        }
-        
         public EvenementLib()
         {
             firsts = new List<Evenement>();
             sql = new Utils.ReadonlySQL("psd.db3");
             List<string> list = new string[] {
                 "CODE", "VALID", "NAME", "COUNT", "BACKGROUND", "EFFECT", "SPI",
-                "OCCURS", "PRIORS", "ONCES", "TERMINS"
+                "OCCURS", "PRIORS", "MIXCODES"
             }.ToList();
             System.Data.DataRowCollection datas = sql.Query(list, "Eve");
             foreach (System.Data.DataRow data in datas)
@@ -190,27 +145,10 @@ namespace PSD.Base.Card
                     string spis = (string)data["SPI"];
 
                     string occurss = (string)data["OCCURS"];
-                    string[] occurs = string.IsNullOrEmpty(occurss) ? new string[] { }
-                        : occurss.Split(',').Select(p => p.StartsWith("!") ? p.Substring(1) : p).ToArray();
-                    bool[] lks = string.IsNullOrEmpty(occurss) ? new bool[] { }
-                        : occurss.Split(',').Select(p => p.StartsWith("!")).ToArray();
                     string priorss = (string)data["PRIORS"];
-                    int[] priors = string.IsNullOrEmpty(priorss) ? new int[] { }
-                        : priorss.Split(',').Select(p => int.Parse(p)).ToArray();
-                    string oncess = (string)data["ONCES"];
-                    bool[] onces = string.IsNullOrEmpty(oncess) ? new bool[] { }
-                        : oncess.Split(',').Select(p => p != "0").ToArray();
-                    string terminss = (string)data["TERMINS"];
-                    bool[] termins = string.IsNullOrEmpty(terminss) ? new bool[] { }
-                        : terminss.Split(',').Select(p => p != "0").ToArray();
-                    firsts.Add(new Evenement(name, code, count, valid, bg, effect, spis)
-                    {
-                        Occurs = occurs,
-                        Priorties = priors,
-                        IsOnce = onces,
-                        IsTermini = termins,
-                        Lock = lks
-                    });
+                    string mixcodess = (string)data["MIXCODES"];
+                    firsts.Add(new Evenement(name, code, count, valid, occurss, priorss,
+                         mixcodess, bg, effect, spis));
                 }
             }
             dicts = new Dictionary<ushort, Evenement>();

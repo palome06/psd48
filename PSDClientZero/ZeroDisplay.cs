@@ -38,7 +38,7 @@ namespace PSD.ClientZero
                 int inTypeInt;
                 if (!int.TryParse(inType, out inTypeInt))
                     inTypeInt = 0;
-                if (skill != null && (!hind || !skill.IsHind[inTypeInt]))
+                if (skill != null && (!hind || !skill.Branches[inTypeInt].Hind))
                     result = title + ":" + skill.Name + (arg == "" ? "" : arg);
                 else
                     return "";

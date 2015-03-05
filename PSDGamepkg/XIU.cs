@@ -1,4 +1,5 @@
 ﻿using PSD.Base;
+using PSD.Base.Flow;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -32,7 +33,9 @@ namespace PSD.PSDGamepkg
         // used for parasitism, indicates where it comes from
         internal string LinkFrom { set; get; }
         // whether it will terminate the event, otherwise continue with it
-        internal bool IsTermini { get; set; }
+        internal bool IsDemiurgic { get; set; }
+        // whether only asking the owner or asking all persons at the same time
+        internal bool IsSerial { set; get; }
 
         internal static int Cmp(SkTriple skt, SkTriple sku)
         {
@@ -50,20 +53,20 @@ namespace PSD.PSDGamepkg
         internal int Consume { set; get; }
         internal bool? Lock { set; get; }
         internal bool IsOnce { get; set; }
-        internal string LinkFrom { set; get; } // Parasitism 
-        internal bool IsTermini { get; set; }
+        internal bool IsDemiurgic { get; set; }
+        internal bool IsSerial { get; set; }
 
         // card code to distinguish which card, 0 if skill
         //internal ushort CardCode { set; get; }
-        // Fuse, which R/G trigger the action
-        internal string Fuse { set; get; }
+        // Fuse, is the R/G trigger the action
+        internal Fuse Fuse { private set; get; }
         // Use Count
         internal int Tick { set; get; }
         // Actual Trigger
         //internal ushort Trigger { set; get; }
         internal ushort Tg { set; get; }
 
-        internal SKE(SkTriple skt)
+        internal SKE(SkTriple skt, Mint.Mint mint, ushort tg)
         {
             Name = skt.Name;
             Priorty = skt.Priorty;
@@ -73,18 +76,12 @@ namespace PSD.PSDGamepkg
             Consume = skt.Consume;
             Lock = skt.Lock;
             IsOnce = skt.IsOnce;
-            LinkFrom = skt.LinkFrom;
-            IsTermini = skt.IsTermini;
+            IsTermini = skt.IsDemiurgic;
+            IsSerial = skt.IsSerial;
 
-            Fuse = ""; Tick = 0; Tg = 0;
-        }
-
-        internal static List<SKE> Generate(List<SkTriple> list)
-        {
-            List<SKE> result = new List<SKE>();
-            foreach (SkTriple skt in list)
-                result.Add(new SKE(skt));
-            return result;
+            Fuse = new Fuse() { Mint = mint }.SetHost(skt.LinkFrom);
+            Tg = tg;
+            Tick = 0;
         }
 
         internal static SKE Find(string name, ushort tg, List<SKE> list)
@@ -102,6 +99,8 @@ namespace PSD.PSDGamepkg
             else
                 return Name + "," + InType;
         }
+
+        internal bool Depleted { get { return IsOnce && Tick > 0; } }
     }
 
     #endregion SKTriple Declaration
@@ -197,7 +196,7 @@ namespace PSD.PSDGamepkg
                 return code;
             }
         }
-        // return next stage: 1 - resend for invalid input, 3 - wait, 5 - OK, take action
+        // return next stage: 1 - resend when invalid input, 3 - wait, 5 - OK, take action
         private UEchoCode HandleU2Message(ushort from, bool[] involved,
             List<SKE> pocket, string mai, int[] sina)
         {
