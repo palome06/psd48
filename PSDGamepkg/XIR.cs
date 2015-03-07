@@ -1031,32 +1031,6 @@ namespace PSD.PSDGamepkg
             WI.RecvInfEnd();
             return true;
         }
-        private UEchoCode UKEvenMessage(bool[] involved,
-            List<SKE> purse, string[] pris, int sina)
-        {
-            return UKEvenMessage(involved, purse, pris, Util.RepeatToArray(sina, involved.Length));
-        }
-        // return whether actual action has been taken, otherwise all cancel.
-        private UEchoCode UKEvenMessage(bool[] involved,
-            List<SKE> purse, string[] pris, int[] sina)
-        {
-            involved[0] = false;
-            var garden = Board.Garden;
-            //bool isUK5Received = false;
-            //while (!isUK5Received && !IsAllClear(involved, false))
-            while (!IsAllClear(involved, false))
-            {
-                Base.VW.Msgs msg = WI.RecvInfRecvPending();
-                UEchoCode next = HandleUMessage(msg.Msg, purse, msg.From, involved, sina);
-                if (next == UEchoCode.END_ACTION || next == UEchoCode.END_TERMIN)
-                    //isUK5Received = true;
-                    return next;
-                else if (next == UEchoCode.RE_REQUEST)
-                    ResendU1Message(msg.From, involved, pris, false, sina);
-            }
-            return UEchoCode.END_CANCEL;
-            //return isUK5Received;
-        }
         // $zero1 means $monster1 has been taken to another places, only set to 0
         // otherwise, handle with it
         private void RecycleMonster(bool zero1, bool zero2)
@@ -1109,7 +1083,8 @@ namespace PSD.PSDGamepkg
             foreach (string npsk in npc.Skills)
                 if (nj01.ContainsKey(npsk))
                 {
-                    Fuse nfuse = new Fuse() { Mint = new Mint.InRound(rstage) }.SetHost(npc.Code + ",0");
+                    Mint.Mint mint = new Mint.InRound(rstage);
+                    Fuse nfuse = new Fuse() { Mint = mint }.SetHost(npc.Code + ",0");
                     if (nj01[npsk].Valid(player, nfuse))
                     {
                         purse.Add(new SKE(new SkTriple()
@@ -1122,7 +1097,7 @@ namespace PSD.PSDGamepkg
                             Consume = 0,
                             Lock = false,
                             IsOnce = false,
-                        }, nfuse, player.Uid));
+                        }, mint, player.Uid));
                         string ip = nj01[npsk].Input(player, nfuse, "");
                         if (ip != "") ip = "," + ip;
                         pris[rd] += ";" + npsk + ip;

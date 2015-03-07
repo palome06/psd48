@@ -23,7 +23,7 @@ namespace PSD.Base
 			set
 			{
 				Once = (value & 0x1) == 0;
-				Demiguric = (value & 0x2) == 0;
+				Demiurgic = (value & 0x2) == 0;
 				Serial = (value & 0x4) == 0;
 				Hind = (value & 0x8) == 0;
 			}

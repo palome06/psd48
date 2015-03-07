@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using PSD.Base;
 using PSD.Base.Card;
+using PSD.Base.Flow;
 
 namespace PSD.PSDGamepkg.JNS
 {
@@ -30,22 +31,22 @@ namespace PSD.PSDGamepkg.JNS
                 string czCode = cz.Code;
                 var methodAction = oc.GetType().GetMethod(czCode + "Action");
                 if (methodAction != null)
-                    cz.Action += new Operation.ActionDelegate(delegate(Player player, string fuse, string argst)
+                    cz.Action += delegate(Player player, Fuse fuse, string argst)
                     {
                         methodAction.Invoke(oc, new object[] { player, fuse, argst });
-                    });
+                    };
                 var methodValid = oc.GetType().GetMethod(czCode + "Valid");
                 if (methodValid != null)
-                    cz.Valid += new Operation.ValidDelegate(delegate(Player player, string fuse)
+                    cz.Valid += delegate(Player player, Fuse fuse)
                     {
                         return (bool)methodValid.Invoke(oc, new object[] { player, fuse });
-                    });
+                    };
                 var methodInput = oc.GetType().GetMethod(czCode + "Input");
                 if (methodInput != null)
-                    cz.Input += new Operation.InputDelegate(delegate(Player player, string fuse, string prev)
+                    cz.Input += delegate(Player player, Fuse fuse, string prev)
                     {
                         return (string)methodInput.Invoke(oc, new object[] { player, fuse, prev });
-                    });
+                    };
             }
             return cz01;
         }

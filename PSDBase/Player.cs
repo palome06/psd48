@@ -145,7 +145,6 @@ namespace PSD.Base
         #endregion Status
 
         #region Memory
-        // TODO: formalize and classify memories
         public bool TokenAwake { set; get; } // 0 (e.g. XJ401.2)
         public ushort TokenCount { set; get; } // 1 (e.g. XJ608.1)
         public List<ushort> TokenTars { set; get; } // 2 (e.g. XJ405,2)
@@ -154,7 +153,9 @@ namespace PSD.Base
 
         public ushort SingleTokenTar { get { return TokenTars.Count > 0 ? TokenTars[0] : (ushort)0; } }
 
-        public IDictionary<string, object> ROM { private set; get; }
+        // TODO: to change memory into Diva format
+        public Utils.Diva ROM { private set; get; }
+        //public IDictionary<string, object> ROM { private set; get; }
         public IDictionary<string, object> RAM { private set; get; }
         public ushort ROMUshort { set; get; }
         public int ROMInt { set; get; }
@@ -196,7 +197,7 @@ namespace PSD.Base
             TokenTars = new List<ushort>();
             TokenFold = new List<ushort>();
 
-            ROM = new Dictionary<string, object>();
+            ROM = new Utils.Diva();
             RAM = new Dictionary<string, object>();
             RAMUtList = new List<ushort>();
 

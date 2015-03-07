@@ -1,5 +1,6 @@
 ﻿using PSD.Base;
 using PSD.Base.Card;
+using PSD.Base.Flow;
 using PSD.PSDGamepkg.Mint;
 using System;
 using System.Collections.Generic;
@@ -33,32 +34,32 @@ namespace PSD.PSDGamepkg.JNS
                 var methodAction = tc.GetType().GetMethod(cardCode + "Action");
                 if (methodAction != null)
                 {
-                    tux.Action += delegate(Player player, int type, string fuse, string argst)
+                    tux.Action += delegate(Player player, int type, Fuse fuse, string argst)
                     {
                         methodAction.Invoke(tc, new object[] { player, type, fuse, argst });
                     };
                 }
                 var methodBribe = tc.GetType().GetMethod(cardCode + "Bribe");
                 if (methodBribe != null)
-                    tux.Bribe += new Tux.ValidDelegate(delegate(Player player, int type, string fuse)
+                    tux.Bribe += new Tux.ValidDelegate(delegate(Player player, int type, Fuse fuse)
                     {
                         return (bool)methodBribe.Invoke(tc, new object[] { player, type, fuse });
                     });
                 else
-                    tux.Bribe += new Tux.ValidDelegate(delegate(Player player, int type, string fuse)
+                    tux.Bribe += new Tux.ValidDelegate(delegate(Player player, int type, Fuse fuse)
                     {
                         return (bool)GeneralTuxBride(player);
                     });
                 var methodValid = tc.GetType().GetMethod(cardCode + "Valid");
                 if (methodValid != null)
-                    tux.Valid += new Tux.ValidDelegate(delegate(Player player, int type, string fuse)
+                    tux.Valid += new Tux.ValidDelegate(delegate(Player player, int type, Fuse fuse)
                     {
                         return (bool)methodValid.Invoke(tc, new object[] { player, type, fuse });
                     });
                 var methodInput = tc.GetType().GetMethod(cardCode + "Input");
                 if (methodInput != null)
                 {
-                    tux.Input += new Tux.InputDelegate(delegate(Player player, int type, string fuse, string prev)
+                    tux.Input += new Tux.InputDelegate(delegate(Player player, int type, Fuse fuse, string prev)
                     {
                         return (string)methodInput.Invoke(tc, new object[] { player, type, fuse, prev });
                     });
@@ -68,7 +69,7 @@ namespace PSD.PSDGamepkg.JNS
                     var methodInputAli = tc.GetType().GetMethod(cardCode + "InputHolder");
                     if (methodInputAli != null)
                     {
-                        tux.Input += new Tux.InputDelegate(delegate(Player player, int type, string fuse, string prev)
+                        tux.Input += new Tux.InputDelegate(delegate(Player player, int type, Fuse fuse, string prev)
                         {
                             return (string)methodInputAli.Invoke(tc, new object[] { player, player, type, fuse, prev });
                         });
@@ -78,7 +79,7 @@ namespace PSD.PSDGamepkg.JNS
                 if (metholdInputHolder != null)
                 {
                     tux.InputHolder += new Tux.InputHolderDelegate(delegate(Player provider,
-                        Player user, int type, string fuse, string prev)
+                        Player user, int type, Fuse fuse, string prev)
                     {
                         return (string)metholdInputHolder.Invoke(tc, new object[] { provider, user, type, fuse, prev });
                     });
@@ -89,7 +90,7 @@ namespace PSD.PSDGamepkg.JNS
                     if (methodInputAli != null)
                     {
                         tux.InputHolder += new Tux.InputHolderDelegate(delegate(Player provider,
-                            Player user, int type, string fuse, string prev)
+                            Player user, int type, Fuse fuse, string prev)
                         {
                             return (string)methodInputAli.Invoke(tc, new object[] { provider, type, fuse, prev });
                         });
@@ -103,7 +104,7 @@ namespace PSD.PSDGamepkg.JNS
                     if (methodConsumeAction != null)
                     {
                         tue.ConsumeAction += new TuxEqiup.CsActionDelegate(delegate(Player player,
-                            int consumeType, int type, string fuse, string argst)
+                            int consumeType, int type, Fuse fuse, string argst)
                         {
                             methodConsumeAction.Invoke(tc, new object[] { player, consumeType, type, fuse, argst });
                         });
@@ -114,7 +115,7 @@ namespace PSD.PSDGamepkg.JNS
                         if (methodConsumeActionAli != null)
                         {
                             tue.ConsumeAction += new TuxEqiup.CsActionDelegate(delegate(Player player,
-                                int consumeType, int type, string fuse, string argst)
+                                int consumeType, int type, Fuse fuse, string argst)
                             {
                                 methodConsumeActionAli.Invoke(tc, new object[] { player, player,
                                     consumeType, type, fuse, argst });
@@ -125,7 +126,7 @@ namespace PSD.PSDGamepkg.JNS
                     if (methodConsumeActionHolder != null)
                     {
                         tue.ConsumeActionHolder += new TuxEqiup.CsActionHolderDelegate(delegate(Player provider,
-                            Player user, int consumeType, int type, string fuse, string argst)
+                            Player user, int consumeType, int type, Fuse fuse, string argst)
                         {
                             methodConsumeActionHolder.Invoke(tc, new object[] { provider, user,
                                 consumeType, type, fuse, argst });
@@ -136,7 +137,7 @@ namespace PSD.PSDGamepkg.JNS
                         var methodConsumeActionAli = tc.GetType().GetMethod(cardCode + "ConsumeAction");
                         if (methodConsumeActionAli != null)
                             tue.ConsumeActionHolder += new TuxEqiup.CsActionHolderDelegate(delegate(Player provider,
-                                Player user, int consumeType, int type, string fuse, string prev)
+                                Player user, int consumeType, int type, Fuse fuse, string prev)
                             {
                                 methodConsumeActionAli.Invoke(tc, new object[] { provider, consumeType, type, fuse, prev });
                             });
@@ -165,7 +166,7 @@ namespace PSD.PSDGamepkg.JNS
                     if (methodConsumeValid != null)
                     {
                         tue.ConsumeValid += new TuxEqiup.CsValidDelegate(delegate(Player player,
-                            int consumeType, int type, string fuse)
+                            int consumeType, int type, Fuse fuse)
                         {
                             return (bool)methodConsumeValid.Invoke(tc, new object[] { player, consumeType, type, fuse });
                         });
@@ -175,7 +176,7 @@ namespace PSD.PSDGamepkg.JNS
                         var methodConsumeValidAli = tc.GetType().GetMethod(cardCode + "ConsumeValidHolder");
                         if (methodConsumeValidAli != null)
                             tue.ConsumeValid += new TuxEqiup.CsValidDelegate(delegate(Player player,
-                                int consumeType, int type, string fuse)
+                                int consumeType, int type, Fuse fuse)
                             {
                                 return (bool)methodConsumeValidAli.Invoke(tc, new object[] { player, player,
                                     consumeType, type, fuse });
@@ -185,7 +186,7 @@ namespace PSD.PSDGamepkg.JNS
                     if (methodConsumeValidHolder != null)
                     {
                         tue.ConsumeValidHolder += new TuxEqiup.CsValidHolderDelegate(delegate(Player provider,
-                            Player user, int consumeType, int type, string fuse)
+                            Player user, int consumeType, int type, Fuse fuse)
                         {
                             return (bool)methodConsumeValidHolder.Invoke(tc, new object[] { provider, user,
                                 consumeType, type, fuse });
@@ -196,7 +197,7 @@ namespace PSD.PSDGamepkg.JNS
                         var methodConsumeValidAli = tc.GetType().GetMethod(cardCode + "ConsumeValid");
                         if (methodConsumeValidAli != null)
                             tue.ConsumeValidHolder += new TuxEqiup.CsValidHolderDelegate(delegate(Player provider,
-                            Player user, int consumeType, int type, string fuse)
+                            Player user, int consumeType, int type, Fuse fuse)
                             {
                                 return (bool)methodConsumeValidAli.Invoke(tc, new object[] { provider,
                                     consumeType, type, fuse });
@@ -206,7 +207,7 @@ namespace PSD.PSDGamepkg.JNS
                     if (methodConsumeInput != null)
                     {
                         tue.ConsumeInput += new TuxEqiup.CsInputDelegate(delegate(Player player,
-                            int consumeType, int type, string fuse, string prev)
+                            int consumeType, int type, Fuse fuse, string prev)
                         {
                             return (string)methodConsumeInput.Invoke(tc, new object[] { player,
                                 consumeType, type, fuse, prev });
@@ -217,7 +218,7 @@ namespace PSD.PSDGamepkg.JNS
                         var methodConsumeInputAli = tc.GetType().GetMethod(cardCode + "ConsumeInputHolder");
                         if (methodConsumeInputAli != null)
                             tue.ConsumeInput += new TuxEqiup.CsInputDelegate(delegate(Player player,
-                                int consumeType, int type, string fuse, string prev)
+                                int consumeType, int type, Fuse fuse, string prev)
                             {
                                 return (string)methodConsumeInputAli.Invoke(tc, new object[] { player, player,
                                     consumeType, type, fuse, prev });
@@ -227,7 +228,7 @@ namespace PSD.PSDGamepkg.JNS
                     if (methodConsumeInputHolder != null)
                     {
                         tue.ConsumeInputHolder += new TuxEqiup.CsInputHolderDelegate(delegate(Player provider,
-                            Player user, int consumeType, int type, string fuse, string prev)
+                            Player user, int consumeType, int type, Fuse fuse, string prev)
                         {
                             return (string)methodConsumeInputHolder.Invoke(tc, new object[] { provider,
                                 user, consumeType, type, fuse, prev });
@@ -238,7 +239,7 @@ namespace PSD.PSDGamepkg.JNS
                         var methodConsumeInputAli = tc.GetType().GetMethod(cardCode + "ConsumeInput");
                         if (methodConsumeInputAli != null)
                             tue.ConsumeInputHolder += new TuxEqiup.CsInputHolderDelegate(delegate(Player provider,
-                                Player user, int consumeType, int type, string fuse, string prev)
+                                Player user, int consumeType, int type, Fuse fuse, string prev)
                             {
                                 return (string)methodConsumeInputAli.Invoke(tc, new object[] { provider,
                                     consumeType, type, fuse, prev });
@@ -270,14 +271,14 @@ namespace PSD.PSDGamepkg.JNS
                 }
                 var methodLocust = tc.GetType().GetMethod(cardCode + "Locust");
                 if (methodLocust != null)
-                    tux.Locust += new Tux.LocustActionDelegate(delegate(Player player, int type, string fuse,
-                        string cdFuse, Player locuster, Tux locus)
+                    tux.Locust += new Tux.LocustActionDelegate(delegate(Player player, int type, Fuse fuse,
+                        Fuse cdFuse, Player locuster, Tux locus)
                     {
                         methodLocust.Invoke(tc, new object[] { player, type, fuse, cdFuse, locuster, locus });
                     });
                 else
-                    tux.Locust += new Tux.LocustActionDelegate(delegate(Player player, int type, string fuse,
-                        string cdFuse, Player locuster, Tux locus)
+                    tux.Locust += new Tux.LocustActionDelegate(delegate(Player player, int type, Fuse fuse,
+                        Fuse cdFuse, Player locuster, Tux locus)
                     {
                         GeneralLocustAction(player, type, fuse, cdFuse, locuster, locus);
                     });

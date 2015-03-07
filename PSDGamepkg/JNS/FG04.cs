@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using PSD.Base.Card;
 using PSD.Base;
 using PSD.PSDGamepkg.Artiad;
+using PSD.Base.Flow;
 
 namespace PSD.PSDGamepkg.JNS
 {
@@ -54,7 +55,7 @@ namespace PSD.PSDGamepkg.JNS
                     });
                 var methodConsumeAction = mc.GetType().GetMethod(monCode + "ConsumeAction");
                 if (methodConsumeAction != null)
-                    mon.ConsumeAction += new Monster.CsActionDelegate(delegate(Player player, int consumeType, int type, string fuse, string argst)
+                    mon.ConsumeAction += new Monster.CsActionDelegate(delegate(Player player, int consumeType, int type, Fuse fuse, string argst)
                     {
                         methodConsumeAction.Invoke(mc, new object[] { player, consumeType, type, fuse, argst });
                     });
@@ -72,13 +73,13 @@ namespace PSD.PSDGamepkg.JNS
                     });
                 var methodConsumeValid = mc.GetType().GetMethod(monCode + "ConsumeValid");
                 if (methodConsumeValid != null)
-                    mon.ConsumeValid += new Monster.CsValidDelegate(delegate(Player player, int consumeType, int type, string fuse)
+                    mon.ConsumeValid += new Monster.CsValidDelegate(delegate(Player player, int consumeType, int type, Fuse fuse)
                     {
                         return (bool)methodConsumeValid.Invoke(mc, new object[] { player, consumeType, type, fuse });
                     });
                 var methodConsumeInput = mc.GetType().GetMethod(monCode + "ConsumeInput");
                 if (methodConsumeInput != null)
-                    mon.ConsumeInput += new Monster.CsInputDelegate(delegate(Player player, int consumeType, int type, string fuse, string prev)
+                    mon.ConsumeInput += new Monster.CsInputDelegate(delegate(Player player, int consumeType, int type, Fuse fuse, string prev)
                     {
                         return (string)methodConsumeInput.Invoke(mc, new object[] { player, consumeType, type, fuse, prev });
                     });

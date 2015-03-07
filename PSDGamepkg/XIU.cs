@@ -32,8 +32,6 @@ namespace PSD.PSDGamepkg
         internal string Occur { get; set; }
         // used for parasitism, indicates where it comes from
         internal string LinkFrom { set; get; }
-        // whether it will terminate the event, otherwise continue with it
-        internal bool IsDemiurgic { get; set; }
         // whether only asking the owner or asking all persons at the same time
         internal bool IsSerial { set; get; }
 
@@ -53,7 +51,6 @@ namespace PSD.PSDGamepkg
         internal int Consume { set; get; }
         internal bool? Lock { set; get; }
         internal bool IsOnce { get; set; }
-        internal bool IsDemiurgic { get; set; }
         internal bool IsSerial { get; set; }
 
         // card code to distinguish which card, 0 if skill
@@ -76,7 +73,6 @@ namespace PSD.PSDGamepkg
             Consume = skt.Consume;
             Lock = skt.Lock;
             IsOnce = skt.IsOnce;
-            IsTermini = skt.IsDemiurgic;
             IsSerial = skt.IsSerial;
 
             Fuse = new Fuse() { Mint = mint }.SetHost(skt.LinkFrom);
@@ -99,7 +95,6 @@ namespace PSD.PSDGamepkg
             else
                 return Name + "," + InType;
         }
-
         internal bool Depleted { get { return IsOnce && Tick > 0; } }
     }
 
@@ -169,6 +164,40 @@ namespace PSD.PSDGamepkg
                 if (pair.Value != null)
                     WI.Send(pair.Value, 0, pair.Key);
             }
+        }
+
+        private UEchoCode UKEvenMessage(bool[] involved,
+            List<SKE> purse, string[] pris, int sina)
+        {
+            return UKEvenMessage(involved, purse, pris, Util.RepeatToArray(sina, involved.Length));
+        }
+        private UEchoCode UKEvenMessage(List<SKE> purse, string singlePris, int singleSina, ushort ut)
+        {
+            int sz = Board.Garden.Count + 1;
+            bool[] invs = new bool[sz]; Fill(invs, false); invs[ut] = true;
+            string[] pris = new string[sz]; Fill(pris, ""); pris[ut] = singlePris;
+            int[] sina = new int[sz]; Fill(sina, 0); sina[ut] = singleSina;
+            return UKEvenMessage(invs, purse, pris, sina);
+        }
+        // return whether actual action has been taken, otherwise all cancel.
+        private UEchoCode UKEvenMessage(bool[] involved, List<SKE> purse, string[] pris, int[] sina)
+        {
+            involved[0] = false;
+            var garden = Board.Garden;
+            //bool isUK5Received = false;
+            //while (!isUK5Received && !IsAllClear(involved, false))
+            while (!IsAllClear(involved, false))
+            {
+                Base.VW.Msgs msg = WI.RecvInfRecvPending();
+                UEchoCode next = HandleUMessage(msg.Msg, purse, msg.From, involved, sina);
+                if (next == UEchoCode.END_ACTION || next == UEchoCode.END_TERMIN)
+                    //isUK5Received = true;
+                    return next;
+                else if (next == UEchoCode.RE_REQUEST)
+                    ResendU1Message(msg.From, involved, pris, false, sina);
+            }
+            return UEchoCode.END_CANCEL;
+            //return isUK5Received;
         }
 
         private UEchoCode HandleUMessage(string msg, List<SKE> purse,
@@ -251,7 +280,7 @@ namespace PSD.PSDGamepkg
         }
         private UEchoCode HandleU24Message(ushort from, bool[] involved, string mai, SKE ske)
         {
-            var garden = Board.Garden;
+            var gr = Board.Garden;
             UEchoCode u5ed = UEchoCode.END_CANCEL; int idx = mai.IndexOf(',');
             MatchedPopFromLastUV(from, "U24");
             var skName = ske != null ? ske.Name : null;
@@ -260,8 +289,7 @@ namespace PSD.PSDGamepkg
                 Skill skill = sk01[skName];
                 string args = (idx < 0) ? "" : mai.Substring(idx + 1);
                 // judge whether args is complete
-                string lf = (skill.IsLinked(ske.InType) ? ske.LinkFrom + ":" : "") + ske.Fuse;
-                string otherPara = skill.Input(garden[from], ske.InType, lf, args);
+                string otherPara = skill.Input(gr[from], ske.InType, ske.Fuse, args);
                 if (otherPara == "")
                 {
                     // OK, done.
@@ -275,9 +303,9 @@ namespace PSD.PSDGamepkg
                     WI.Send(mMsg, 0, from);
                     WI.Send(mEnc, ExceptStaff(from));
                     WI.Live(mEnc + sType);
-                    skill.Action(garden[from], ske.InType, lf, args);
+                    skill.Action(gr[from], ske.InType, ske.Fuse, args);
                     ++ske.Tick;
-                    u5ed = ske.IsTermini ? UEchoCode.END_TERMIN : UEchoCode.END_ACTION;
+                    u5ed = ske.Fuse.Demiurgic ? UEchoCode.END_TERMIN : UEchoCode.END_ACTION;
                 }
                 else // need further support
                 {
@@ -296,7 +324,7 @@ namespace PSD.PSDGamepkg
                 //if (!tux.IsEq[ske.InType])
                 if (!tux.IsTuxEqiup())
                 {
-                    string otherPara = tux.Input(garden[from], ske.InType, ske.Fuse, args);
+                    string otherPara = tux.Input(gr[from], ske.InType, ske.Fuse, args);
                     if (otherPara == "")
                     {
                         // OK, done.
@@ -313,7 +341,7 @@ namespace PSD.PSDGamepkg
                         RaiseGMessage("G0CC," + from + ",0," + from + "," + skName +
                             cargs + ";" + ske.InType + "," + ske.Fuse);
                         ++ske.Tick;
-                        u5ed = ske.IsTermini ? UEchoCode.END_TERMIN : UEchoCode.END_ACTION;
+                        u5ed = ske.Fuse.Demiurgic ? UEchoCode.END_TERMIN : UEchoCode.END_ACTION;
                     }
                     else // need further support
                     {
@@ -331,7 +359,7 @@ namespace PSD.PSDGamepkg
                     {
                         Base.Card.TuxEqiup tue = tux as Base.Card.TuxEqiup;
                         tue.UseAction(ccode, Board.Garden[from]);
-                        u5ed = ske.IsTermini ? UEchoCode.END_TERMIN : UEchoCode.END_ACTION;
+                        u5ed = ske.Fuse.Demiurgic ? UEchoCode.END_TERMIN : UEchoCode.END_ACTION;
                     }
                     //else
                     //{
@@ -345,8 +373,7 @@ namespace PSD.PSDGamepkg
                     // args include card code now.
                     int consumeCode = ske.Consume;
                     string prev = args.IndexOf(',') < 0 ? args : args.Substring(args.IndexOf(',') + 1);
-                    string lf = (tue.IsLinked(consumeCode, ske.InType) ? ske.LinkFrom + ":" : "") + ske.Fuse;
-                    string otherPara = tue.ConsumeInput(garden[from], consumeCode, ske.InType, lf, prev);
+                    string otherPara = tue.ConsumeInput(gr[from], consumeCode, ske.InType, ske.Fuse, prev);
                     if (otherPara == "")
                     {
                         string enc = tue.Encrypt(args);
@@ -360,8 +387,8 @@ namespace PSD.PSDGamepkg
                         WI.Send(mEnc, ExceptStaff(from));
                         WI.Live(mEnc);
                         RaiseGMessage("G0ZC," + from + "," + consumeCode +
-                               "," + args + ";" + ske.InType + "," + lf);
-                        u5ed = ske.IsTermini ? UEchoCode.END_TERMIN : UEchoCode.END_ACTION;
+                               "," + args + ";" + ske.InType + "," + ske.Fuse);
+                        u5ed = ske.Fuse.Demiurgic ? UEchoCode.END_TERMIN : UEchoCode.END_ACTION;
                     }
                     else // need further support
                     {
@@ -377,7 +404,7 @@ namespace PSD.PSDGamepkg
                 Operation cz = cz01[skName];
                 string args = (idx < 0) ? "" : mai.Substring(idx + 1);
                 // judge whether args is complete
-                string otherPara = cz.Input(garden[from], ske.Fuse, args);
+                string otherPara = cz.Input(gr[from], ske.Fuse, args);
                 if (otherPara == "")
                 {
                     // OK, done.
@@ -385,8 +412,8 @@ namespace PSD.PSDGamepkg
                     string sTop = "U5," + from + ";;" + skName;
                     string sType = ";;" + ske.InType;
                     WI.BCast(sTop + (args != "" ? "," + args : "") + sType);
-                    cz.Action(garden[from], ske.Fuse, args);
-                    u5ed = ske.IsTermini ? UEchoCode.END_TERMIN : UEchoCode.END_ACTION;
+                    cz.Action(gr[from], ske.Fuse, args);
+                    u5ed = ske.Fuse.Demiurgic ? UEchoCode.END_TERMIN : UEchoCode.END_ACTION;
                     ++ske.Tick;
                 }
                 else // need further support
@@ -402,7 +429,7 @@ namespace PSD.PSDGamepkg
                 NCAction na = nj01[skName];
                 string args = (idx < 0) ? "" : mai.Substring(idx + 1);
                 // judge whether args is complete
-                string otherPara = na.Input(garden[from], ske.Fuse, args);
+                string otherPara = na.Input(gr[from], ske.Fuse, args);
                 if (otherPara == "")
                 {
                     // OK, done.
@@ -410,8 +437,8 @@ namespace PSD.PSDGamepkg
                     string sTop = "U5," + from + ";;" + skName;
                     string sType = ";;" + ske.InType;
                     WI.BCast(sTop + (args != "" ? "," + args : "") + sType);
-                    na.Action(garden[from], ske.Fuse, args);
-                    u5ed = ske.IsTermini ? UEchoCode.END_TERMIN : UEchoCode.END_ACTION;
+                    na.Action(gr[from], ske.Fuse, args);
+                    u5ed = ske.Fuse.Demiurgic ? UEchoCode.END_TERMIN : UEchoCode.END_ACTION;
                     ++ske.Tick;
                 }
                 else // need further support
@@ -430,7 +457,7 @@ namespace PSD.PSDGamepkg
                 string args = mai.Substring(idx + 1);
                 // args include card code now.
                 int consumeCode = ske.Consume;
-                string otherPara = mt.ConsumeInput(garden[from], consumeCode, ske.InType, ske.Fuse, args);
+                string otherPara = mt.ConsumeInput(gr[from], consumeCode, ske.InType, ske.Fuse, args);
                 if (otherPara == "")
                 {
                     string sTop = "U5," + from + ";;" + skName;
@@ -438,7 +465,7 @@ namespace PSD.PSDGamepkg
                     WI.BCast(sTop + "," + args + sType);
                     RaiseGMessage("G0HH," + from + "," + consumeCode +
                            "," + args + ";" + ske.InType + "," + ske.Fuse);
-                    u5ed = ske.IsTermini ? UEchoCode.END_TERMIN : UEchoCode.END_ACTION;
+                    u5ed = ske.Fuse.Demiurgic ? UEchoCode.END_TERMIN : UEchoCode.END_ACTION;
                     ++ske.Tick;
                 }
                 else // need further support
@@ -458,7 +485,7 @@ namespace PSD.PSDGamepkg
                 string sType = ";;" + ske.InType;
                 WI.BCast(sTop + sType);
                 ev.Pers(Board.Garden[from]);
-                u5ed = ske.IsTermini ? UEchoCode.END_TERMIN : UEchoCode.END_ACTION;
+                u5ed = ske.Fuse.Demiurgic ? UEchoCode.END_TERMIN : UEchoCode.END_ACTION;
                 ++ske.Tick;
             }
             else // invalid input, repost U1
@@ -488,7 +515,14 @@ namespace PSD.PSDGamepkg
             } else
                 return "";
         }
-
+        public void SendOutU1Message(string singleMai, int singleSina, ushort ut)
+        {
+            int sz = Board.Garden.Count + 1;
+            bool[] invs = new bool[sz]; Fill(invs, false); invs[ut] = true;
+            string[] mais = new string[sz]; Fill(mais, ""); mais[ut] = singleMai;
+            int[] sina = new int[sz]; Fill(sina, 0); sina[ut] = singleSina;
+            SendOutU1Message(invs, mais, sina);
+        }
         public void SendOutU1Message(bool[] invs, string[] mais, int sina)
         {
             SendOutU1Message(invs, mais, Util.RepeatToArray(sina, invs.Length));

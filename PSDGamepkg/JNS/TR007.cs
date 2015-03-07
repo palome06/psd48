@@ -967,12 +967,10 @@ namespace PSD.PSDGamepkg.JNS
             else if (type == 1)
             {
                 ushort r = XI.Board.Rounder.Uid;
-                return player.Uid != r && player.ROM.ContainsKey("Away") &&
-                    ((List<ushort>)player.ROM["Away"]).Contains(r);
+                return player.Uid != r && player.ROM.GetUshortArray("Away").Contains(r);
             }
             else if (type == 2)
-                return IsMathISOS("JNT0706", player, fuse) && player.ROM.ContainsKey("Away") &&
-                    ((List<ushort>)player.ROM["Away"]).Count > 0;
+                return IsMathISOS("JNT0706", player, fuse) && player.ROM.GetUshortArray("Away").Count > 0;
             else
                 return false;
         }
@@ -988,21 +986,21 @@ namespace PSD.PSDGamepkg.JNS
                         XI.RaiseGMessage("G0OX," + py.Uid + ",0," + player.ROMInt);
                         list.Add(py.Uid);
                     }
-                player.ROM["Away"] = list;
+                player.ROM.Set("Away", list);
             }
             else if (type == 1)
             {
                 ushort r = XI.Board.Rounder.Uid;
-                ((List<ushort>)player.ROM["Away"]).Remove(r);
+                player.ROM.GetUshortArray("Away").Remove(r);
                 XI.RaiseGMessage("G0IX," + r + ",0," + player.ROMInt);
             }
             else if (type == 2)
             {
-                List<ushort> list = (List<ushort>)player.ROM["Away"];
+                List<ushort> list = player.ROM.GetUshortArray("Away");
                 foreach (ushort ut in list)
                     XI.RaiseGMessage("G0IX," + ut + ",0," + player.ROMInt);
                 player.ROMInt = 0;
-                player.ROM.Remove("Away");
+                player.ROM.Set("Away", null);
             }
         }
         public bool JNT0707Valid(Player player, int type, string fuse)
@@ -1018,9 +1016,9 @@ namespace PSD.PSDGamepkg.JNS
             }
             else if (type == 3) // G0OY
             {
-                if (player.ROM.ContainsKey("Ice"))
+                Base.Utils.Diva diva = player.ROM.GetDiva("Ice");
+                if (diva != null)
                 {
-                    IDictionary<ushort, bool> dict = (IDictionary<ushort, bool>)player.ROM["Ice"];
                     string[] g0oy = fuse.Split(',');
                     for (int i = 1; i < g0oy.Length; i += 2)
                     {
@@ -1029,7 +1027,7 @@ namespace PSD.PSDGamepkg.JNS
                         if (XI.Board.Garden[ut].Team == player.Team && ut != player.Uid
                             && (ytype == 0 || ytype == 2))
                         {
-                            if (dict.ContainsKey(ut))
+                            if (diva.GetBool(ut.ToString()) != null)
                                 return true;
                         }
                     }
@@ -1043,7 +1041,7 @@ namespace PSD.PSDGamepkg.JNS
         {
             if (type == 0)
             {
-                IDictionary<ushort, bool> dict = new Dictionary<ushort, bool>();
+                Base.Utils.Diva diva = new Base.Utils.Diva();
                 foreach (ushort ut in XI.Board.OrderedPlayer(player.Uid))
                 {
                     Player py = XI.Board.Garden[ut];
@@ -1053,37 +1051,34 @@ namespace PSD.PSDGamepkg.JNS
                             "##战力+1##命中+1,Y2", "JNT0707", "0");
                         if (choose == "1")
                         {
-                            dict[ut] = true;
+                            diva.Set(ut.ToString(), true);
                             XI.RaiseGMessage("G0IA," + ut + ",0,1");
                         }
                         else
                         {
-                            dict[ut] = false;
+                            diva.Set(ut.ToString(), false);
                             XI.RaiseGMessage("G0IX," + ut + ",0,1");
                         }
                     }
                 }
-                player.ROM["Ice"] = dict;
+                player.ROM.Set("Ice", diva);
             }
             else if (type == 1)
             {
-                if (player.ROM.ContainsKey("Ice"))
+                Base.Utils.Diva diva = player.ROM.GetDiva("Ice");
                 {
-                    IDictionary<ushort, bool> dict = (IDictionary<ushort, bool>)player.ROM["Ice"];
-                    foreach (var pair in dict)
+                    foreach (string key in diva.GetKeys())
                     {
-                        if (pair.Value)
-                            XI.RaiseGMessage("G0OA," + pair.Key + ",0,1");
-                        else
-                            XI.RaiseGMessage("G0OX," + pair.Key + ",0,1");
+                        bool str = diva.GetBool(key) == true;
+                        ushort ut = ushort.Parse(key);
+                        XI.RaiseGMessage((str ? "G0OA," : "G0OX,") + ut + ",0,1");
                     }
-                    player.ROM.Remove("Ice");
+                    player.ROM.Set("Ice", null);
                 }
             }
             else if (type == 2)
             {
-                IDictionary<ushort, bool> dict = player.ROM.ContainsKey("Ice") ? new Dictionary<ushort, bool>()
-                    : (IDictionary<ushort, bool>)player.ROM["Ice"];
+                Base.Utils.Diva diva = player.ROM.GetDiva("Ice") ?? new Base.Utils.Diva();
                 string[] g0iy = fuse.Split(',');
                 ushort ytype = ushort.Parse(g0iy[1]);
                 ushort ut = ushort.Parse(g0iy[2]);
@@ -1091,19 +1086,19 @@ namespace PSD.PSDGamepkg.JNS
                             "##战力+1##命中+1,Y2", "JNT0707", "0");
                 if (choose == "1")
                 {
-                    dict[ut] = true;
+                    diva.Set(ut.ToString(), true);
                     XI.RaiseGMessage("G0IA," + ut + ",0,1");
                 }
                 else
                 {
-                    dict[ut] = false;
+                    diva.Set(ut.ToString(), false);
                     XI.RaiseGMessage("G0IX," + ut + ",0,1");
                 }
-                player.ROM["Ice"] = dict;
+                player.ROM.Set("Ice", diva);
             }
             else if (type == 3)
             {
-                IDictionary<ushort, bool> dict = (IDictionary<ushort, bool>)player.ROM["Ice"];
+                Base.Utils.Diva diva = player.ROM.GetDiva("Ice") ?? new Base.Utils.Diva();
                 string[] g0oy = fuse.Split(',');
                 for (int i = 1; i < g0oy.Length; i += 2)
                 {
@@ -1112,14 +1107,11 @@ namespace PSD.PSDGamepkg.JNS
                     if (XI.Board.Garden[ut].Team == player.Team && ut != player.Uid
                         && (ytype == 0 || ytype == 2))
                     {
-                        if (dict.ContainsKey(ut))
-                        {
-                            if (dict[ut])
-                                XI.RaiseGMessage("G0OA," + ut + ",0,1");
-                            else
-                                XI.RaiseGMessage("G0OX," + ut + ",0,1");
-                            dict.Remove(ut);
-                        }
+                        if (diva.GetBool(ut.ToString()) == true)
+                            XI.RaiseGMessage("G0OA," + ut + ",0,1");
+                        else if (diva.GetBool(ut.ToString()) == false)
+                            XI.RaiseGMessage("G0OX," + ut + ",0,1");
+                        diva.Set(ut.ToString(), null);
                     }
                 }
             }
@@ -2796,7 +2788,7 @@ namespace PSD.PSDGamepkg.JNS
                 return IsMathISOS("JNT1902", player, fuse);
             else if (type == 1)
             { // G0ON
-                if (!player.ROM.ContainsKey("Weapon"))
+                if (player.ROM.GetUshort("Weapon") == 0)
                     return false;
                 string[] g0on = fuse.Split(',');
                 for (int idx = 1; idx < g0on.Length; )
@@ -2811,7 +2803,7 @@ namespace PSD.PSDGamepkg.JNS
                         foreach (ushort ut in tuxes)
                         {
                             Tux tux = XI.LibTuple.TL.DecodeTux(ut);
-                            if (tux != null && tux.DBSerial == (ushort)player.ROM["Weapon"])
+                            if (tux != null && tux.DBSerial == player.ROM.GetUshort("Weapon"))
                                 return true;
                         }
                     }
@@ -2833,7 +2825,7 @@ namespace PSD.PSDGamepkg.JNS
                 if (!input.StartsWith("/") && input != VI.CinSentinel)
                 {
                     ushort dbSerial = ushort.Parse(input);
-                    player.ROM["Weapon"] = dbSerial;
+                    player.ROM.Set("Weapon", dbSerial);
                     XI.RaiseGMint(Mint.Stargazer.NewShow(player.Uid, 'G', dbSerial));
                 }
             }
@@ -2853,7 +2845,7 @@ namespace PSD.PSDGamepkg.JNS
                         foreach (ushort ut in tuxes)
                         {
                             Tux tux = XI.LibTuple.TL.DecodeTux(ut);
-                            if (tux != null && tux.DBSerial == (ushort)player.ROM["Weapon"])
+                            if (tux != null && tux.DBSerial == player.ROM.GetUshort("Weapon"))
                             {
                                 XI.RaiseGMint(new Mint.CardOutOfDise('C', 1));
                                 XI.RaiseGMessage("G0HQ,2," + player.Uid + ",0,0," + ut);

@@ -1,4 +1,5 @@
 ﻿using PSD.Base;
+using PSD.Base.Flow;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,7 +18,7 @@ namespace PSD.Base
 
         public bool IsOnce { private set; get; }
 
-        public delegate string InputDelegate(Player player, string fuse, string prev);
+        public delegate string InputDelegate(Player player, Fuse fuse, string prev);
         private InputDelegate mInput;
         public InputDelegate Input
         {
@@ -25,7 +26,7 @@ namespace PSD.Base
             get { return mInput ?? DefInput; }
         }
 
-        public delegate void ActionDelegate(Player player, string fuse, string args);
+        public delegate void ActionDelegate(Player player, Fuse fuse, string args);
         private ActionDelegate mAction;
         public ActionDelegate Action
         {
@@ -33,7 +34,7 @@ namespace PSD.Base
             get { return mAction ?? DefAction; }
         }
 
-        public delegate bool ValidDelegate(Player player, string fuse);
+        public delegate bool ValidDelegate(Player player, Fuse fuse);
         private ValidDelegate mValid;
         public ValidDelegate Valid
         {
@@ -47,9 +48,9 @@ namespace PSD.Base
             Occur = occur; IsOnce = isOnce;
         }
 
-        private static InputDelegate DefInput = delegate(Player p, string f, string pr) { return ""; };
-        private static ActionDelegate DefAction = delegate(Player p, string f, string a) { };
-        private static ValidDelegate DefValid = delegate(Player p, string f) { return true; };
+        private static InputDelegate DefInput = (p, f, pr) => { return ""; };
+        private static ActionDelegate DefAction = (p, f, a) => { };
+        private static ValidDelegate DefValid = (p, f) => { return true; };
     }
 
     public class OperationLib

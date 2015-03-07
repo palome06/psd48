@@ -1,3 +1,4 @@
+using PSD.Base.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,69 +18,27 @@ namespace PSD.PSDGamepkg.Mint
 
     public class Mint : PSD.Base.Flow.MintBase
     {
-        private IDictionary<string, object> dict = new Dictionary<string, object>();
-
+        private Diva diva;
         public virtual string Head { get { return "****"; } }
         public virtual MintType MintType { get { return MintType.NONE; } }
 
-        public Mint Set(string key, object value)
-        {
-            if (value == null)
-                dict.Remove(key);
-            else
-                dict[key] = value;
-            return this;
-        }
-        // public void SetUshort(string key, ushort value) { dict[key] = value; }
-        // public void SetInt(string key, int value) { dict[key] = value; }
-        // public void SetFloat(String key, float value) { dict[key] = value; }
-        // public void SetString(string key, string value) { dict[key] = value; }
-        // public void SetBool(string key, bool value) { dict[key] = value; }
-        // public void SetMint(string key, Mint value) { dict[key] = value; }
-        // public void SetArray<Type>(String key, List<Type> value) { dict[key] = value; }
+        public Mint Set(string key, object value) { diva.Set(key, value); return this; }
 
-        public ushort GetUshort(string key) { return dict.ContainsKey(key) ? (ushort)dict[key] : (ushort)0; }
-        public int? GetInt(string key) { return dict.ContainsKey(key) ? (int?)dict[key] : null; }
-        //public float? GetFloat(string key) { return dict.ContainsKey(key) ? (float) dict[key] : null; }
-        public string GetString(string key) { return dict.ContainsKey(key) ? (string)dict[key] : null; }
-        public bool? GetBool(string key) { return dict.ContainsKey(key) ? (bool?)dict[key] : null; }
-        public Mint GetMint(string key) { return dict.ContainsKey(key) ? (Mint)dict[key] : null; }
+        public ushort GetUshort(string key) { return diva.GetUshort(key); }
+        public int GetInt(string key) { return diva.GetInt(key); }
+        public string GetString(string key) { return diva.GetString(key); }
+        public bool? GetBool(string key) { return diva.GetBool(key); }
+        public Diva GetDiva(string key) { return diva.GetDiva(key); }
+        public Mint GetMint(string key) { return diva.GetObject(key) as Mint; }
+        public List<ushort> GetUshortArray(String key) { return NullizeList(diva.GetUshortArray(key)); }
+        public List<int> GetIntArray(String key) { return NullizeList(diva.GetIntArray(key)); }
+        public List<string> GetStringArray(String key) { return NullizeList(diva.GetStringArray(key)); }
+        public List<bool> GetBoolArray(String key) { return NullizeList(diva.GetBoolArray(key)); }
+        public List<Diva> GetDivaArray(String key) { return NullizeList(diva.GetDivaArray(key)); }
+        private static List<T> NullizeList<T>(List<T> list) { return list.Count > 0 ? list : null; }
 
-        public List<ushort> GetUshortArray(String key)
-        {
-            return dict.ContainsKey(key) ? (List<ushort>)dict[key] : null;
-        }
-        public List<int> GetIntArray(String key)
-        {
-            return dict.ContainsKey(key) ? (List<int>)dict[key] : null;
-        }
-        // public List<float> GetFloatArray(String key)
-        // {
-        // 	return dict.ContainsKey(key) ? (List<float>) dict[key] : null;
-        // }
-        public List<string> GetStringArray(String key)
-        {
-            return dict.ContainsKey(key) ? (List<string>)dict[key] : null;
-        }
-        public List<bool> GetBoolArray(String key)
-        {
-            return dict.ContainsKey(key) ? (List<bool>)dict[key] : null;
-        }
-        public List<Mint> GetMintArray(String key)
-        {
-            return dict.ContainsKey(key) ? (List<Mint>)dict[key] : null;
-        }
-
-        public Mint() { }
-        public Mint(params object[] pairs)
-        {
-            for (int i = 0; i < pairs.Length; i += 2)
-            {
-                string key = pairs[i] as string;
-                object value = pairs[i + 1];
-                Set(key, value);
-            }
-        }
+        public Mint() { diva = new Diva(); }
+        public Mint(params object[] pairs) { diva = new Diva(pairs); }
         public override string ToMessage() { return Head; }
         public virtual void Handle(XI xi)
         {
@@ -89,28 +48,7 @@ namespace PSD.PSDGamepkg.Mint
                 xi.RaiseGMessage(ToMessage(), false); // TODO: Gradually refurbish it
         }
         public virtual void Handle(XI xi, int priority) { if (priority == 100) Handle(xi); }
-        public override string ToString()
-        {
-            StringBuilder sb = new StringBuilder();
-            sb.Append(Head + ":{");
-            foreach (var pair in dict)
-            {
-                sb.Append(pair.Key);
-                sb.Append(":");
-                object value = pair.Value;
-                if (value is ushort || value is int || value is float)
-                    sb.Append(value.ToString());
-                else if (value is string)
-                    sb.Append("\"" + value.ToString() + "\"");
-                else if (value is Mint)
-                    sb.Append((value as Mint).ToString());
-                else
-                    sb.Append("[" + value.ToString() + "]");
-            }
-            sb.Append("}");
-            sb.Append("\n");
-            return sb.ToString();
-        }
+        public override string ToString() { return Head + ":" + diva.ToString(); }
         public static Mint Parse(string message)
         {
             if (message.StartsWith("G0HR"))
@@ -138,7 +76,7 @@ namespace PSD.PSDGamepkg.Mint
         public override string Head { get { return rd; } }
         public override MintType MintType { get { return MintType.ROUND; } }
         public InRound(string rd) { this.rd = rd; }
-        public static InRound Parse(string message) { return new InRound(message); }
+        public static new InRound Parse(string message) { return new InRound(message); }
         public override void Handle(XI xi) { }
     }
     public class DefG0 : Mint
@@ -147,7 +85,7 @@ namespace PSD.PSDGamepkg.Mint
         public override string Head { get { return msg.Substring(0, 4); } }
         public override MintType MintType { get { return MintType.GENERAL; } }
         public DefG0(string message) { msg = message; }
-        public static DefG0 Parse(string message) { return new DefG0(message); }
+        public static new DefG0 Parse(string message) { return new DefG0(message); }
     }
     public class DefG1 : Mint
     {
@@ -155,7 +93,7 @@ namespace PSD.PSDGamepkg.Mint
         public override string Head { get { return msg.Substring(0, 4); } }
         public override MintType MintType { get { return MintType.INNER; } }
         public DefG1(string message) { msg = message; }
-        public static DefG1 Parse(string message) { return new DefG1(message); }
+        public static new DefG1 Parse(string message) { return new DefG1(message); }
     }
     #endregion Capability
     public class CardOutOfPile : Mint
@@ -172,7 +110,7 @@ namespace PSD.PSDGamepkg.Mint
             int typeCode = (pile == "M") ? 1 : ((pile == "E") ? 2 : 0);
             return Head + "," + typeCode + "," + GetInt("count");
         }
-        public static CardOutOfPile Parse(string message)
+        public static new CardOutOfPile Parse(string message)
         {
             string[] g2in = message.Split(',');
             char[] typeChars = new char[] { 'C', 'M', 'E' };
@@ -195,7 +133,7 @@ namespace PSD.PSDGamepkg.Mint
             int typeCode = (pile == "M") ? 1 : ((pile == "E") ? 2 : 0);
             return Head + "," + typeCode + "," + GetInt("count");
         }
-        public static CardOutOfDise Parse(string message)
+        public static new CardOutOfDise Parse(string message)
         {
             string[] g2cn = message.Split(',');
             char[] typeChars = new char[] { 'C', 'M', 'E' };
@@ -211,30 +149,30 @@ namespace PSD.PSDGamepkg.Mint
         public Target(char fromChar, ushort fromUt, char toChar, ushort toUt)
             : base()
         {
-            Set("head", Head).Set("from", new Mint("type", fromChar.ToString(), "ut", fromUt))
-                .Set("to", new Mint[] { new Mint("type", toChar.ToString(), "ut", toUt) }.ToList());
+            Set("head", Head).Set("from", new Diva("type", fromChar.ToString(), "ut", fromUt))
+                .Set("to", new Diva[] { new Diva("type", toChar.ToString(), "ut", toUt) }.ToList());
         }
         public Target(char fromChar, ushort fromUt, IEnumerable<ushort> toTargetUts)
             : base()
         {
-            Set("head", Head).Set("from", new Mint("type", fromChar.ToString(), "ut", fromUt))
-                .Set("to", toTargetUts.Select(p => new Mint("type", "T", "ut", p)).ToList());
+            Set("head", Head).Set("from", new Diva("type", fromChar.ToString(), "ut", fromUt))
+                .Set("to", toTargetUts.Select(p => new Diva("type", "T", "ut", p)).ToList());
         }
         private Target(char fromChar, ushort fromUt, object[] tos)
             : base()
         {
-            Set("head", Head).Set("from", new Mint("type", fromChar.ToString(), "ut", fromUt));
-            List<Mint> toMints = new List<Mint>();
+            Set("head", Head).Set("from", new Diva("type", fromChar.ToString(), "ut", fromUt));
+            List<Diva> toDivas = new List<Diva>();
             for (int i = 0; i < tos.Length; i += 2)
-                toMints.Add(new Mint("type", tos[i], "ut", tos[i + 1]));
-            Set("to", toMints);
+                toDivas.Add(new Diva("type", tos[i], "ut", tos[i + 1]));
+            Set("to", toDivas);
         }
         public override string ToMessage()
         {
-            return Head + "," + GetMint("from").GetString("type") + GetMint("from").GetString("ut")
-                + "," + string.Join(",", GetMintArray("to").Select(p => p.GetString("type") + p.GetString("ut")));
+            return Head + "," + GetDiva("from").GetString("type") + GetDiva("from").GetString("ut")
+                + "," + string.Join(",", GetDivaArray("to").Select(p => p.GetString("type") + p.GetString("ut")));
         }
-        public static Target Parse(string message)
+        public static new Target Parse(string message)
         {
             string[] g2sy = message.Split(',');
             char fromChar = g2sy[1][0]; ushort fromUt = ushort.Parse(g2sy[1].Substring(1));
@@ -306,7 +244,7 @@ namespace PSD.PSDGamepkg.Mint
             }
             else return "";
         }
-        public static Stargazer Parse(string message)
+        public static new Stargazer Parse(string message)
         {
             string[] g2fu = message.Split(',');
             int show = int.Parse(g2fu[1]);
@@ -387,7 +325,7 @@ namespace PSD.PSDGamepkg.Mint
     	public override MintType MintType { get { return MintType.UI_ONLY; }}
 
     	public override string ToMessage() { return Head + ",0"; }
-    	public static MoonlightFade Parse(string message) { return new MoonlightFade(); }
+        public static new MoonlightFade Parse(string message) { return new MoonlightFade(); }
     }
 
     public class HeavyRotation : Mint
@@ -419,7 +357,7 @@ namespace PSD.PSDGamepkg.Mint
                 return Head + ",1," + (GetBool("cwval") != false ? 1 : 0);
             return "";
         }
-        public static HeavyRotation Parse(string message)
+        public static new HeavyRotation Parse(string message)
         {
             string[] g0hr = message.Split(',');
             if (g0hr[1] == "0")

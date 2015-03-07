@@ -3475,22 +3475,9 @@ namespace PSD.PSDGamepkg.JNS
         }
         public bool JNS0702Valid(Player player, int type, string fuse)
         {
-            if (player.IsAlive)
-            {
-                foreach (Player py in XI.Board.Garden.Values)
-                {
-                    if (py.Team == player.OppTeam)
-                    {
-                        foreach (ushort pt in py.Pets)
-                        {
-                            Base.Card.Monster mon = XI.LibTuple.ML.Decode(pt);
-                            if (mon != null && mon.Level != Base.Card.Monster.ClLevel.BOSS)
-                                return true;
-                        }
-                    }
-                }
-            }
-            return false;
+            return player.IsAlive && XI.Board.Garden.Values.Any(p => p.Team == player.OppTeam &&
+                p.Pets.Any(q => XI.LibTuple.ML.Decode(q) != null &&
+                    XI.LibTuple.ML.Decode(q).Level != Base.Card.Monster.ClLevel.BOSS));
         }
         public string JNS0702Input(Player player, int type, string fuse, string prev)
         {

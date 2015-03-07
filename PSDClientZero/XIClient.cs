@@ -1583,7 +1583,7 @@ namespace PSD.ClientZero
 
                         bool hind = false; int acType = consumeType % 2;
                         Base.Card.TuxEqiup tuxeq = Tuple.TL.DecodeTux(card) as Base.Card.TuxEqiup;
-                        if (tuxeq != null && tuxeq.CsHind[acType][type])
+                        if (tuxeq != null && tuxeq.CS[acType][type].Hind)
                             hind = true;
                         if (!hind)
                         {

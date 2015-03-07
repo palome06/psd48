@@ -14,6 +14,7 @@ namespace PSD.PSDGamepkg
     public partial class XI
     {
         #region G-Loop /w Mint
+        // Raise Command from skill declaration, without Priorty appended
         public void RaiseGMint(Mint.Mint mint)
         {
             Log.Logger(mint.ToMessage());
@@ -22,22 +23,29 @@ namespace PSD.PSDGamepkg
             else
                 InnerGMint(mint, int.MinValue);
         }
-        public void InnerGMint(Mint.Mint mint, int priorty)
+        // Raise Command from skill declaration, with Priorty appended
+        public void InnerGMint(Mint.Mint mint, int startTime)
         {
-            List<SkTriple> _pocket;
-            if (!sk02.TryGetValue(mint.Head, out _pocket) || _pocket.Count == 0)
-            {
-                foreach (Player py in Board.Garden.Values)
-                    py.IsZhu = false;
+            for (int priority = startTime; priority < int.MaxValue; ++priority)
+                SteamLineGMint(mint, ref priority);
+        }
+        // Flow Loggic to handle with declaration
+        private void SteamLineGMint(Mint.Mint mint, ref int priority)
+        {
+            List<SkTriple> _pocket = sk02[mint.Head];
+            if (_pocket == null || _pocket.Count == 0)
                 return;
-            }
             List<SKE> pocket = ParseFromSKTriples(_pocket, mint, false);
             bool[] involved = new bool[Board.Garden.Count + 1];
             string[] roads = new string[Board.Garden.Count + 1];
             string[] locks = new string[Board.Garden.Count + 1];
             bool isAnySet, isSerial;
+            bool isDemiurgic = false;
             do
             {
+            GStartPoint:
+                if (isDemiurgic)
+                    pocket = IncrementedSKTriples2SKE2(sk02[mint.Head], mint, false, pocket);
                 Fill(involved, false);
                 Fill(roads, ""); Fill(locks, "");
                 isAnySet = false; isSerial = false;
@@ -45,50 +53,82 @@ namespace PSD.PSDGamepkg
                 // AddZhuSkillBackward(pocket, zero, false);
                 foreach (SKE ske in pocket)
                 {
-                    if (!isAnySet && ske.Priorty < priorty)
+                    if (!isAnySet && ske.Priorty < priority)
                         continue;
                     // base as the first one if not set
-                    if (!isAnySet || ske.Priorty == priorty)
+                    if (!isAnySet || ske.Priorty == priority)
                     {
                         if (ske.Name.StartsWith("~"))
                         {
-                            mint.Handle(this, priorty); return;
+                            mint.Handle(this, priority); return;
                         }
                         int iasisr = SKE2Message(ske, involved, roads, locks);
-                        if ((ias & 1) != 0) { purse.Add(ske); isAnySet = true; }
-                        if ((ias & 2) != 0) { isSerial = true; }
-                        priorty = ske.Priorty;
+                        if ((iasisr & 1) != 0) { purse.Add(ske); isAnySet = true; }
+                        if ((iasisr & 2) != 0) { isSerial = true; }
+                        priority = ske.Priorty;
                     }
                     else break;
                 }
                 if (!isAnySet) { RaiseGMint(new Mint.MoonlightFade()); return; }
                 isAnySet = false;
-                if (!isSerial)
+                // locks always occurs in serial
+                foreach (ushort pyut in Board.OrderedInvolvePlayer())
                 {
-                    foreach (ushort pyut in Board.OrderedInvolvePlayer())
+                    string[] parts = locks[pyut].Split(';');
+                    foreach (string part in parts)
                     {
-                        string[] parts = locks[pyut].Split(';');
-                        for (string part in parts)
+                        string mai = Util.Substring(part, 0, part.IndexOf(','));
+                        // string inTypeStr = Util.Substring(part, part.IndexOf(',') + 1, -1);
+                        string skName;
+                        mai = DecodeSimplifiedCommand(mai, out skName);
+                        SKE ske = SKE.Find(skName, pyut, purse);
+                        if (ske != null)
                         {
-                            string mai = Util.Substring(part, 0, part.IndexOf(','));
-                            // string inTypeStr = Util.Substring(part, part.IndexOf(',') + 1, -1);
-                            string skName;
-                            mai = DecodeSimplifiedCommand(mai, out skName);
-                            SKE ske = SKE.Find(skName, pyut, purse);
-                            if (ske != null)
-                            {
-                                UEchoCode echo = HandleU24Message(pyut, involved, mai, ske);
-                                // if (echo == UEchoCode.END_TERMIN)
-                                //    isTermini = true;
-                                if (echo == UEchoCode.END_ACTION)
-                                    isAnySet = true;
-                            }
+                            UEchoCode echo = HandleU24Message(pyut, involved, mai, ske);
+                            // if (echo == UEchoCode.END_TERMIN)
+                            //    isTermini = true;
+                            RaiseGMint(new Mint.MoonlightFade());
+                            if (echo == UEchoCode.END_ACTION)
+                                isAnySet = true;
+                            else if (echo == UEchoCode.END_TERMIN) { isDemiurgic = true; goto GStartPoint; }
                         }
                     }
                 }
                 if (Board.Garden.Keys.Any(p => involved[p]))
                 {
-
+                    if (isSerial)
+                    {
+                        ushort pyut = Board.OrderedInvolvePlayer().First(p => involved[p]);
+                        if (roads[pyut] != "")
+                            roads[pyut] = roads[pyut].Substring(1);
+                        int sinaG = Board.Garden[pyut].IsTPOpt ? 2 : 3;
+                        SendOutU1Message(roads[pyut], sinaG, pyut);
+                        UEchoCode echo = UKEvenMessage(purse, roads[pyut], sinaG, pyut);
+                        if (echo == UEchoCode.END_ACTION)
+                            isAnySet = true;
+                        else if (echo == UEchoCode.END_TERMIN) { isDemiurgic = true; goto GStartPoint; }
+                    }
+                    else
+                    {
+                        if (involved[0])
+                            Fill(involved, true);
+                        foreach (ushort ut in Board.OrderedInvolvePlayer())
+                            if (roads[ut] != "")
+                                roads[ut] = roads[ut].Substring(1);
+                        int[] sinaG = new int[Board.Garden.Count + 1];
+                        sinaG[0] = 2;
+                        for (ushort ut = 1; ut <= Board.Garden.Count; ++ut)
+                        {
+                            if (roads[ut] != "")
+                                roads[ut] = roads[ut].Substring(1);
+                            sinaG[ut] = Board.Garden[ut].IsTPOpt ? 2 : 3;
+                        }
+                        SendOutU1Message(involved, roads, sinaG);
+                        UEchoCode echo = UKEvenMessage(involved, purse, roads, sinaG);
+                        if (echo == UEchoCode.END_ACTION)
+                            isAnySet = true;
+                        else if (echo == UEchoCode.END_TERMIN) { isDemiurgic = true; goto GStartPoint; }
+                    }
                 }
             } while (involved.Any(p => p));
         }

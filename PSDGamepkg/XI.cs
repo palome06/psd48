@@ -333,7 +333,7 @@ namespace PSD.PSDGamepkg
                         SkTriple skt = new SkTriple()
                         {
                             Name = tux.Code,
-                            Priorty = tux.Branches[i].Priorty,
+                            Priorty = tux.Branches[i].Priority,
                             Owner = 0,
                             InType = i,
                             Type = SKTType.TX,
@@ -341,8 +341,7 @@ namespace PSD.PSDGamepkg
                             Lock = false,
                             IsOnce = tux.Branches[i].Once,
                             Occur = oc,
-                            IsSerial = tux.Branches[i].Serial,
-                            IsDemiurgic = tux.Branches[i].Demiurgic
+                            IsSerial = tux.Branches[i].Serial
                         };
                         if (oc.Contains('#') || oc.Contains('$') || oc.Contains('*'))
                         {
@@ -369,7 +368,7 @@ namespace PSD.PSDGamepkg
                                     SkTriple skt = new SkTriple()
                                     {
                                         Name = tux.Code,
-                                        Priorty = tue.CS[i][j].Priorty,
+                                        Priorty = tue.CS[i][j].Priority,
                                         Owner = 0,
                                         InType = j,
                                         Type = SKTType.EQ,
@@ -377,8 +376,7 @@ namespace PSD.PSDGamepkg
                                         Lock = tue.CS[i][j].Lock,
                                         IsOnce = tue.CS[i][j].Once,
                                         Occur = oc,
-                                        IsSerial = tue.CS[i][j].Serial,
-                                        IsDemiurgic = tux.CS[i][j].Demiurgic
+                                        IsSerial = tue.CS[i][j].Serial
                                     };
                                     if (oc.StartsWith("&"))
                                     {
@@ -426,8 +424,7 @@ namespace PSD.PSDGamepkg
                     Lock = false,
                     IsOnce = cz.IsOnce,
                     Occur = cz.Occur,
-                    IsSerial = false,
-                    IsDemiurgic = false
+                    IsSerial = false
                 };
                 if (cz.Occur.Contains('#') || cz.Occur.Contains('$') || cz.Occur.Contains('*'))
                 {
@@ -446,13 +443,13 @@ namespace PSD.PSDGamepkg
                     {
                         for (int j = 0; j < mt.EA[i].Length; ++j)
                         {
-                            if (mt.EA[i][j] != "")
+                            if (mt.EA[i][j] != null)
                             {
                                 string oc = mt.EA[i][j].Occur;
                                 SkTriple skt = new SkTriple()
                                 {
                                     Name = mt.Code,
-                                    Priorty = mt.EAProperties[i][j],
+                                    Priorty = mt.EA[i][j].Priority,
                                     Owner = 0,
                                     InType = j,
                                     Type = SKTType.PT,
@@ -460,8 +457,7 @@ namespace PSD.PSDGamepkg
                                     Lock = mt.EA[i][j].Lock,
                                     IsOnce = ((i == 1) || mt.EA[i][j].Once),
                                     Occur = oc,
-                                    IsSerial = mt.EA[i][j].Serial,
-                                    IsDemiurgic = mt.EA[i][j].Demiurgic
+                                    IsSerial = mt.EA[i][j].Serial
                                 };
                                 if (oc.Contains('#') || oc.Contains('$') || oc.Contains('*'))
                                 {
@@ -476,6 +472,7 @@ namespace PSD.PSDGamepkg
                             }
                         }
                     }
+                }
             }
             foreach (Base.Card.Evenement eve in LibTuple.EL.ListAllEves(levelCode))
             {
@@ -485,7 +482,7 @@ namespace PSD.PSDGamepkg
                     SkTriple skt = new SkTriple()
                     {
                         Name = eve.Code,
-                        Priorty = eve.Branches[i].Priorty,
+                        Priorty = eve.Branches[i].Priority,
                         Owner = 0,
                         InType = i,
                         Type = SKTType.EV,
@@ -494,7 +491,6 @@ namespace PSD.PSDGamepkg
                         IsOnce = eve.Branches[i].Once,
                         Occur = oc,
                         IsSerial = eve.Branches[i].Serial,
-                        IsDemiurgic = eve.Branches[i].Demiurgic
                     };
                     if (oc.Contains('#') || oc.Contains('$') || oc.Contains('*'))
                     {
@@ -568,8 +564,7 @@ namespace PSD.PSDGamepkg
                             IsOnce = para.IsOnce,
                             Occur = acOccur,
                             LinkFrom = host, // format: TP02,0&TP03,0
-                            IsSerial = para.IsSerial,
-                            IsDemiurgic = para.Demiurgic
+                            IsSerial = para.IsSerial
                         };
                         Util.AddToMultiMap(dict, oc, skt);
                     }
@@ -615,7 +610,7 @@ namespace PSD.PSDGamepkg
         }
 
         private List<SKE> ParseSingleFromSKTriples(List<SkTriple> list,
-            string zero, bool ucr, ushort puid, Skill skill)
+            Mint.Mint mint, bool ucr, ushort puid, Skill skill)
         {
             List<SKE> result = new List<SKE>();
             ucr &= (Board.UseCardRound != 0);
@@ -627,15 +622,15 @@ namespace PSD.PSDGamepkg
                 if (skt.Name == skill.Code)
                 {
                     if (skt.Type == SKTType.BK)
-                        result.Add(new SKE(skt) { Tg = puid });
+                        result.Add(new SKE(skt, mint, puid));
                     else if (skt.Type == SKTType.SK && puid == skt.Owner)
-                        result.Add(new SKE(skt) { Tg = puid });
+                        result.Add(new SKE(skt, mint, puid));
                 }
             }
             return result;
         }
         // add newcomers skill back to pocket to register it in runquad
-        private void AddZhuSkillBackward(List<SKE> pocket, string zero, bool cond)
+        private void AddZhuSkillBackward(List<SKE> pocket, Mint.Mint mint, bool cond)
         {
             foreach (Player player in Board.Garden.Values.Where(p => p.IsZhu))
             {
@@ -648,16 +643,19 @@ namespace PSD.PSDGamepkg
                         if (!pocket.Any(p => p.Name == skill.Code))
                         {
                             pocket.AddRange(ParseSingleFromSKTriples(
-                                sk02[zero], zero, cond, player.Uid, skill));
+                                sk02[mint.Head], mint, cond, player.Uid, skill));
                         }
                     }
                 }
                 player.IsZhu = false;
             }
         }
-
-        // Parse from SKTriple list to SKT list
-        // $ucr: user's round, old controller for R*ZD.
+        /// Parse from SKTriple list to SKT list
+        /// </summary>
+        /// <param name="list"></param>
+        /// <param name="mint"></param>
+        /// <param name="ucr">user's round, old controller for R*ZD</param>
+        /// <returns></returns>
         private List<SKE> ParseFromSKTriples(List<SkTriple> list, Mint.Mint mint, bool ucr)
         {
             List<SKE> result = new List<SKE>();
@@ -715,12 +713,23 @@ namespace PSD.PSDGamepkg
                 }
             return result;
         }
+        private List<SKE> IncrementedSKTriples2SKE2(List<SkTriple> pool, Mint.Mint mint, bool ucr, List<SKE> oldSKE)
+        {
+            List<SKE> newSKE = ParseFromSKTriples(pool, mint, ucr);
+            foreach (SKE ske in newSKE)
+            {
+                SKE prior = SKE.Find(ske.Name, ske.Tg, oldSKE);
+                if (prior != null)
+                    ske.Tick += prior.Tick;
+            }
+            return newSKE;
+        }
         private int SKE2Message(SKE ske, bool[] involved, string[] pris, string[] locks)
         {
-            if (ske.Depleted()) return 0;
+            if (ske.Depleted) return 0;
 
             var gr = Board.Garden;
-            bool iAnySet = false, isSerial = false;
+            bool isAnySet = false, isSerial = false;
             if (ske.Type == SKTType.SK && sk01.ContainsKey(ske.Name))
             {
                 Skill skill = sk01[ske.Name];
@@ -759,13 +768,13 @@ namespace PSD.PSDGamepkg
                 Base.Card.Tux tux = tx01[ske.Name];
                 if (tux.Valid(gr[ske.Tg], ske.InType, ske.Fuse) && tux.Bribe(gr[ske.Tg], ske.InType, ske.Fuse))
                 {
-                    if (ske.Type == SKTType.TX && player.Tux.Count > 0) // Always Trigger in non-opt mode
+                    if (ske.Type == SKTType.TX && gr[ske.Tg].Tux.Count > 0) // Always Trigger in non-opt mode
                     {
                         involved[ske.Tg] |= true;
-                        if (!player.IsTPOpt)
+                        if (!gr[ske.Tg].IsTPOpt)
                             isAnySet |= true;
                     }
-                    foreach (ushort handCode in player.Tux)
+                    foreach (ushort handCode in gr[ske.Tg].Tux)
                     {
                         Base.Card.Tux hand = LibTuple.TL.DecodeTux(handCode);
                         if (hand.Code.Equals(tux.Code))
@@ -777,17 +786,17 @@ namespace PSD.PSDGamepkg
                             }
                         }
                     }
-                    foreach (ushort handCode in new ushort[] { gr[ske.Tg].Weapon,
+                    foreach (ushort card in new ushort[] { gr[ske.Tg].Weapon,
                         gr[ske.Tg].Armor, gr[ske.Tg].Trove, gr[ske.Tg].ExEquip }.Where(p => p != 0))
                     {
-                        Base.Card.TuxEquip tue = LibTuple.TL.DecodeTux(handCode) as Base.Card.TuxEquip;
+                        Base.Card.TuxEqiup tue = LibTuple.TL.DecodeTux(card) as Base.Card.TuxEqiup;
                         if (tue != null && tue.Code.Equals(tux.Code))
                         {
-                            if (ske.Consume == 1 && Board.CsEqiups.ContainsKey(ske.Tg + "," + card))
+                            if (ske.Consume == 1 && Board.CsEqiups.Contains(ske.Tg + "," + card))
                                 continue;
-                            bool vi = (tue.Type == Base.Card.Tux.TuxType.FJ && !player.ArmorDisabled)
-                                || (tue.Type == Base.Card.Tux.TuxType.WQ && !player.WeaponDisabled)
-                                || (tue.Type == Base.Card.Tux.TuxType.XB && !player.LuggageDisabled);
+                            bool vi = (tue.Type == Base.Card.Tux.TuxType.FJ && !gr[ske.Tg].ArmorDisabled)
+                                || (tue.Type == Base.Card.Tux.TuxType.WQ && !gr[ske.Tg].WeaponDisabled)
+                                || (tue.Type == Base.Card.Tux.TuxType.XB && !gr[ske.Tg].LuggageDisabled);
                             if (vi && tue.ConsumeValid(gr[ske.Tg], ske.Consume, ske.InType, ske.Fuse))
                             {
                                 if (ske.Lock == false || (ske.Lock == null && !gr[ske.Tg].IsSKOpt))
@@ -827,12 +836,12 @@ namespace PSD.PSDGamepkg
                 Base.Card.Monster mt = mt01[ske.Name];
                 if (ske.Consume != 2 && !gr[ske.Tg].PetDisabled) // Not part of Debut
                 {
-                    foreach (ushort petCode in player.Pets)
+                    foreach (ushort petCode in gr[ske.Tg].Pets)
                     {
                         if (petCode == 0 || Board.NotActionPets.Contains(petCode)) continue;
                         if (petCode == Board.Monster1 && ske.Consume == 1) continue;
                         Base.Card.Monster pet = LibTuple.ML.Decode(petCode);
-                        if (pet.Code.Equals(mt.Code) && mt.ConsumeValid(gr[ske.Tg], consumeType, ske.InType, ske.Fuse))
+                        if (pet.Code.Equals(mt.Code) && mt.ConsumeValid(gr[ske.Tg], ske.Consume, ske.InType, ske.Fuse))
                         {
                             if (ske.Consume == 1 && Board.CsPets.Contains(ske.Tg + "," + petCode))
                                 continue;
@@ -855,15 +864,15 @@ namespace PSD.PSDGamepkg
                     if (Board.InFightThrough && Board.IsMonsterDebut)
                     {
                         Base.Card.Monster mon = LibTuple.ML.Decode(mon1);
-                        if (mon != null && mon == mt && mt.ConsumeValid(player, ske.Consume, ske.InType, ske.Fuse))
+                        if (mon != null && mon == mt && mt.ConsumeValid(rd, ske.Consume, ske.InType, ske.Fuse))
                         {
                             if (ske.Lock == false)
                             {
-                                string req = pet.ConsumeInput(rd, ske.Consume, ske.InType, ske.Fuse, "");
+                                string req = mon.ConsumeInput(rd, ske.Consume, ske.InType, ske.Fuse, "");
                                 pris[rd.Uid] += ";PT" + mon1 + (req != "" ? ("," + req) : "");
                             }
                             else
-                                locks[rd.Uid] += ";PT" + mon1 + "," + ske.InType + "!!");
+                                locks[rd.Uid] += ";PT" + mon1 + "," + ske.InType + "!!";
                             isAnySet |= true;
                             isSerial |= ske.IsSerial;
                         }
@@ -887,7 +896,7 @@ namespace PSD.PSDGamepkg
                             involved[ske.Tg] |= true;
                         }
                         else
-                            locks[ske.Tg] += ";" + ske.Name + "," + ske.InType);
+                            locks[ske.Tg] += ";" + ske.Name + "," + ske.InType;
                         isAnySet |= true;
                         isSerial |= ske.IsSerial;
                     }
@@ -958,20 +967,20 @@ namespace PSD.PSDGamepkg
             IDictionary<string, List<string>> links)
         {
             List<SkTriple> parasitism = new List<SkTriple>();
-            for (int i = 0; i < skill.Occurs.Length; ++i)
+            for (int i = 0; i < skill.Branches.Length; ++i)
             {
-                string occur = skill.Occurs[i];
+                string occur = skill.Branches[i].Occur;
                 SkTriple skt = new SkTriple()
                 {
                     Name = skill.Code,
-                    Priorty = skill.Priorities[i],
+                    Priorty = skill.Branches[i].Priority,
                     Owner = ut,
                     InType = i,
                     Type = skill.IsBK ? SKTType.BK : SKTType.SK,
-                    Lock = skill.Lock[i],
-                    IsOnce = skill.IsOnce[i],
+                    Lock = skill.Branches[i].Lock,
+                    IsOnce = skill.Branches[i].Once,
                     Occur = occur,
-                    IsTermini = skill.IsTermini[i]
+                    IsSerial = skill.Branches[i].Serial
                 };
                 if (occur.StartsWith("&"))
                 {
@@ -1079,7 +1088,7 @@ namespace PSD.PSDGamepkg
                             IsOnce = para.IsOnce,
                             Occur = acOccur,
                             LinkFrom = host, // format: TP02,0&TP03,0
-                            IsTermini = para.IsTermini
+                            IsSerial = para.IsSerial
                         };
                         Util.AddToMultiMap(dict, oc, skt);
                         dict[oc].Sort(SkTriple.Cmp);
@@ -1094,9 +1103,9 @@ namespace PSD.PSDGamepkg
         {
             bool anyPara = false;
             List<SkTriple> parasitism = new List<SkTriple>();
-            for (int i = 0; i < skill.Occurs.Length; ++i)
+            for (int i = 0; i < skill.Branches.Length; ++i)
             {
-                string occur = skill.Occurs[i];
+                string occur = skill.Branches[i].Occur;
                 if (occur.StartsWith("&"))
                     anyPara = true;
                 else
@@ -1149,9 +1158,9 @@ namespace PSD.PSDGamepkg
                             pair.Key + "," + skt.Priorty + "," + skt.Owner);
                     }
                 }
-                for (int i = 0; i < skill.Occurs.Length; ++i)
+                for (int i = 0; i < skill.Branches.Length; ++i)
                 {
-                    string occur = skill.Occurs[i];
+                    string occur = skill.Branches[i].Occur;
                     if (occur.StartsWith("&"))
                     {
                         int nexdex = occur.IndexOf('&', 1);

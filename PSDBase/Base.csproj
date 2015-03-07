@@ -73,6 +73,7 @@
     <Compile Include="Rules\RuleCode.cs" />
     <Compile Include="SKBranch.cs" />
     <Compile Include="Skill.cs" />
+    <Compile Include="Utils\Diva.cs" />
     <Compile Include="Utils\Rueue.cs" />
     <Compile Include="Utils\ReadonlySQL.cs" />
     <Compile Include="VW\IVI.cs" />

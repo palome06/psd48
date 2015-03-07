@@ -21,9 +21,11 @@ namespace PSD.Base.Flow
 		public MintBase Mint { set; get; }
 		public List<FuseHost> Host { private set; get; }
 
+        public bool Demiurgic { set; get; }
+
 		public Fuse()
 		{
-			Host = null; Mint = null;
+            Host = null; Mint = null; Demiurgic = true;
 		}
 
 		public Fuse SetHost(IEnumerable<string> hostCodes)
@@ -50,5 +52,11 @@ namespace PSD.Base.Flow
 			else
 				return string.Join("&", Host.Select(p => p.SKTHead + "," + p.InType)) + ":" + Mint.ToMessage();
 		}
+
+        public override string ToString()
+        {
+            return Mint.ToMessage();
+        }
+
 	}
 }

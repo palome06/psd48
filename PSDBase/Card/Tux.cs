@@ -26,6 +26,8 @@ namespace PSD.Base.Card
         public string Description { private set; get; }
         public IDictionary<string, string> Special { private set; get; }
 
+        public string[] Parasitism { get; protected set; }
+
         public SKBranch[] Branches { protected set; get; }
         // standard use: #-self,$-others,*=All
         public char[] Targets { protected set; get; }
@@ -131,7 +133,7 @@ namespace PSD.Base.Card
                 sz = occurs.Length;
                 Branches = new SKBranch[sz];
                 for (int i = 0; i < sz; ++i)
-                    Branches[i] = new SKBranch() { Occur = occurs[i]; }
+                    Branches[i] = new SKBranch() { Occur = occurs[i] };
             }
             else
                 sz = 0;
@@ -328,7 +330,7 @@ namespace PSD.Base.Card
         public int IncrOfSTR { set; get; }
         public int IncrOfDEX { set; get; }
 
-        public SKBranch[] Cs { private set; get; }
+        public SKBranch[][] CS { private set; get; }
 
         public delegate void CrActionDelegate(Player player);
         public delegate void CsActionDelegate(Player player,
@@ -437,13 +439,13 @@ namespace PSD.Base.Card
             string[] mixess = mixcodestr.Split(';');
             string ps = parasitismStr;
             if (cssz == 0)
-                base.Parse(countStr, occurStr, ps, priorStr, isEqStr, tarStr, mixcodeStr, dbSerial);
+                base.Parse(countStr, occurStr, ps, priorStr, isEqStr, tarStr, mixcodestr, dbSerial);
             else
             {
                 base.Parse(countStr, occurs[0], ps, priors[0], isEqStr, tarStr, mixess[0], dbSerial);
-                Cs = new SKBranch[cssz][];
+                CS = new SKBranch[cssz][];
                 for (int i = 1; i < cssz; ++i)
-                    Cs[i - 1] = SKBranch.ParseFromStrings(occurs[i], priors[i], mixess[i]);
+                    CS[i - 1] = SKBranch.ParseFromStrings(occurs[i], priors[i], mixess[i]);
             }
         }
 
