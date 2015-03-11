@@ -319,6 +319,30 @@ namespace PSD.PSDGamepkg
             //RunRound("R100", "H0TM");
         }
 
+        public void RunRound(RMint rstage, Type endStage)
+        {
+            while (rstage != null && !rstage.GetType().Equals(endStage))
+            {
+                if (Board.JumpTable.ContainsKey(rstage.GetType()))
+                {
+                    // substitude rstage with JumpTable[rstage]
+                    List<object> jumps = Board.JumpTable[rstage.GetType()];
+                    RMint next = jumps[0] as RMint;
+                    for (int i = 1; i < jumps.Count; ++i)
+                        Board.JumpTable.Remove(jumps[1] as Type);
+                    Board.JumpTable.Remove(rstage.GetType());
+                    rstage = next;
+                }
+                Board.Rounder = rstage.Rd;
+                Board.RoundIN = rstage;
+                Log.Logger(rstage.ToMessage());
+                if (rstage.RMintType == RMintType.INTELLIGENT)
+                    QuadStage(ref rstage, 0);
+                else if (rstage.RMintType == RMintType.CONSERVATIVE)
+                    QuadStage(ref rstage, 3);
+            }
+        }
+
         public void RunRound(string rstage, string endRstage)
         {
             while (rstage != null && !rstage.Equals(endRstage))
@@ -357,9 +381,9 @@ namespace PSD.PSDGamepkg
                             //    WI.BCast(rstage + "1,1");
                             //else
                             //    WI.BCast(rstage + "1,2");
-                            Board.Garden[rounder].Immobilized = false;
                             WI.BCast(rstage + "1,2");
                             RaiseGMessage("G0QR," + rounder);
+                            Board.Garden[rounder].Immobilized = false;
                             rstage = "R" + rounder + "ED";
                         }
                         break;
