@@ -681,6 +681,17 @@ namespace PSD.PSDGamepkg.JNS
             if (x != 0)
                 XI.RaiseGMessage("G0IB," + x + ",3");
         }
+        public void GT03DecrAction(Player player)
+        {
+            ushort rk = (ushort)(1000 + XI.LibTuple.ML.Encode("GT03"));
+            if (XI.Board.InFight)
+            {
+                if (XI.Board.Supporter.Uid == rk)
+                    XI.RaiseGMessage("G17F,S," + rk + ",0");
+                else if (XI.Board.Hinder.Uid == rk)
+                    XI.RaiseGMessage("G17F,H," + rk + ",0");
+            }
+        }
         public void GT03WinEff()
         {
             Harm("GT03", XI.Board.Garden.Values.Where(p => p.IsAlive && p.Team == XI.Board.Rounder.OppTeam), 1);

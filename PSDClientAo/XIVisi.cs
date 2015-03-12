@@ -3593,7 +3593,7 @@ namespace PSD.ClientAo
                         //selCandidates.Clear(); selCandidates.AddRange(cands);
                         cinCalled = StartCinEtc();
                         var ct = ad.yfArena.AoArena.Casting as Base.Rules.CastingTable;
-                        ad.yfArena.AoArena.Active(null);
+                        ad.yfArena.AoArena.Active(null, false);
                         while (true)
                         {
                             string input = VI.Cin48(Uid, "请选择一名角色.");
@@ -3634,18 +3634,23 @@ namespace PSD.ClientAo
                 case "H0TA":
                     {
                         cinCalled = StartCinEtc();
+                        string[] args = cmdrst.Split(',');
                         var ct = ad.yfArena.AoArena.Casting as Base.Rules.CastingTable;
                         while (true)
                         {
-                            ad.yfArena.AoArena.Active(null);
+                            bool canGiveup = args.Contains("0");
+                            ad.yfArena.AoArena.Active(null, canGiveup);
                             string input = VI.Cin48(Uid, "请禁选一名角色.");
                             int hero;
                             if (input == VI.CinSentinel)
                                 break;
-                            if (int.TryParse(input, out hero) && ct.Xuan.Contains(hero))
+                            if (input == "0" && canGiveup)
                             {
-                                WI.Send("H0TB," + hero, Uid, 0);
-                                break;
+                                WI.Send("H0TB,0", Uid, 0); break;
+                            }
+                            else if (int.TryParse(input, out hero) && ct.Xuan.Contains(hero))
+                            {
+                                WI.Send("H0TB," + hero, Uid, 0); break;
                             }
                         }
                         VI.CloseCinTunnel(Uid);
@@ -3657,13 +3662,18 @@ namespace PSD.ClientAo
                         ushort puid = ushort.Parse(args[0]);
                         List<int> hrs = Util.TakeRange(args, 1, args.Length)
                             .Select(p => int.Parse(p)).ToList();
-                        var ct = ad.yfArena.AoArena.Casting as Base.Rules.CastingTable;
-                        foreach (int heroCode in hrs)
+                        if (hrs.Count == 0 && hrs[0] == 0)
+                            VI.Cout(Uid, "玩家{0}#未禁选.", puid, zd.Hero(hrs));
+                        else
                         {
-                            if (ct.Ban(puid, heroCode))
-                                ad.yfArena.AoArena.BanBy(puid, heroCode);
+                            var ct = ad.yfArena.AoArena.Casting as Base.Rules.CastingTable;
+                            foreach (int heroCode in hrs)
+                            {
+                                if (ct.Ban(puid, heroCode))
+                                    ad.yfArena.AoArena.BanBy(puid, heroCode);
+                            }
+                            VI.Cout(Uid, "玩家{0}#禁选了角色{1}.", puid, zd.Hero(hrs));
                         }
-                        VI.Cout(Uid, "玩家{0}#禁选了角色{1}.", puid, zd.Hero(hrs));
                         ad.HideProgressBar(puid);
                         if (Uid == puid)
                             ad.yfArena.AoArena.Disactive(null);
@@ -3733,7 +3743,7 @@ namespace PSD.ClientAo
                             cinCalled = StartCinEtc();
                             while (true)
                             {
-                                ad.yfArena.AoArena.Active(new int[] { 1, 2 });
+                                ad.yfArena.AoArena.Active(new int[] { 1, 2 }, false);
                                 string input = VI.Cin(Uid, "请禁选一名角色.");
                                 int hero;
                                 if (input == VI.CinSentinel)
@@ -3774,7 +3784,7 @@ namespace PSD.ClientAo
                             cinCalled = StartCinEtc();
                             while (true)
                             {
-                                ad.yfArena.AoArena.Active(new int[] { 1, 2 });
+                                ad.yfArena.AoArena.Active(new int[] { 1, 2 }, false);
                                 string input = VI.Cin(Uid, "请选择一名角色.",
                                     zd.HeroWithCode(cp.Xuan));
                                 if (input == VI.CinSentinel)
@@ -4063,6 +4073,12 @@ namespace PSD.ClientAo
                         }
                         break;
                     }
+                case "H09R":
+                    if (WI is VW.Eywi)
+                    {
+                        Uid = ushort.Parse(cmdrst);
+                    }
+                    break;
                 case "H09G":
                     {
                         string[] blocks = cmdrst.Split(',');
@@ -4262,7 +4278,8 @@ namespace PSD.ClientAo
                         if (who != 0 && who != Uid)
                         {
                             VI.Cout(Uid, "玩家{0}#恢复连接。", who);
-                            A0P[who].SetAsBacker();
+                            if (A0P.ContainsKey(who))
+                                A0P[who].SetAsBacker();
                         }
                     }
                     break;

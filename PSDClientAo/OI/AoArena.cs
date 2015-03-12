@@ -168,13 +168,13 @@ namespace PSD.ClientAo.OI
             }
         }
         // Active selection, mark as active
-        internal void Active(int[] jdxs)
+        internal void Active(int[] jdxs, bool canGiveup)
         {
             if (Casting is Base.Rules.CastingTable || Casting is Base.Rules.CastingPublic)
             {
                 ar.Dispatcher.BeginInvoke((Action)(() =>
                 {
-                    ar.ActiveArena(jdxs);
+                    ar.ActiveArena(jdxs, canGiveup);
                 }));
             }
         }

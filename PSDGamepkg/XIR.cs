@@ -356,9 +356,9 @@ namespace PSD.PSDGamepkg
                             //    WI.BCast(rstage + "1,1");
                             //else
                             //    WI.BCast(rstage + "1,2");
-                            Board.Garden[rounder].Immobilized = false;
                             WI.BCast(rstage + "1,2");
                             RaiseGMessage("G0QR," + rounder);
+                            Board.Garden[rounder].Immobilized = false;
                             rstage = "R" + rounder + "ED";
                         }
                         break;

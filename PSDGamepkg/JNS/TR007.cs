@@ -3742,11 +3742,13 @@ namespace PSD.PSDGamepkg.JNS
         }
         public void JNH0103Action(Player player, int type, string fuse, string argst)
         {
-            XI.RaiseGMessage("G0DS," + player.Uid + ",1");
+            if (type == 0)
+                XI.RaiseGMessage("G0DS," + player.Uid + ",1");
+            else if (type == 1) { }
         }
         public bool JNH0103Valid(Player player, int type, string fuse)
         {
-            if (player.Immobilized)
+            if (type == 0 && player.Immobilized)
             {
                 string[] g0ds = fuse.Split(',');
                 for (int i = 1; i < g0ds.Length; )
@@ -3761,6 +3763,13 @@ namespace PSD.PSDGamepkg.JNS
                     else // A,1
                         i += 2;
                 }
+            }
+            else if (type == 1)
+            {
+                ushort who = ushort.Parse(fuse.Substring("G0QR,".Length));
+                Player py = XI.Board.Garden[who];
+                if (py != null && py.Team == player.Team && py.Immobilized)
+                    return true;
             }
             return false;
         }

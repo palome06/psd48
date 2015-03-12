@@ -38,8 +38,13 @@ namespace PSD.ClientAo
                     Skill2 = null,
                     Skill3 = null,
                     Skill4 = null,
+                    Skill5 = null,
+                    Skill6 = null,
+                    Skill7 = null,
                     ExtSkill1 = null,
-                    ExtSkill2 = null
+                    ExtSkill2 = null,
+                    ExtSkill3 = null,
+                    ExtSkill4 = null
                 };
                 this.DataContext = CEE;
             }
@@ -112,6 +117,21 @@ namespace PSD.ClientAo
             if (input != null)
                 input(CEE.Skill4.Code);
         }
+        private void Skill5ButtonClick(object sender, RoutedEventArgs e)
+        {
+            if (input != null)
+                input(CEE.Skill5.Code);
+        }
+        private void Skill6ButtonClick(object sender, RoutedEventArgs e)
+        {
+            if (input != null)
+                input(CEE.Skill6.Code);
+        }
+        private void Skill7ButtonClick(object sender, RoutedEventArgs e)
+        {
+            if (input != null)
+                input(CEE.Skill7.Code);
+        }
         private void ExtSkill1ButtonClick(object sender, RoutedEventArgs e)
         {
             if (input != null)
@@ -126,6 +146,11 @@ namespace PSD.ClientAo
         {
             if (input != null)
                 input(CEE.ExtSkill3.Code + "(" + CEE.ExtHolder3 + ")");
+        }
+        private void ExtSkill4ButtonClick(object sender, RoutedEventArgs e)
+        {
+            if (input != null)
+                input(CEE.ExtSkill4.Code + "(" + CEE.ExtHolder4 + ")");
         }
 
         private void SkOptChecked(object sender, RoutedEventArgs e)

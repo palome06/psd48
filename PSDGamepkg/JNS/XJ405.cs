@@ -2884,6 +2884,8 @@ namespace PSD.PSDGamepkg.JNS
                 {
                     if (harm.Who == tar) { point = harm.N; break; }
                 }
+                if (point > player.TokenCount)
+                    point = player.TokenCount;
                 return point == 0 ? "" : ("#屏蔽伤害,/D1" + ((point == 1) ? "" : ("~" + point)));
             }
             else
@@ -2995,7 +2997,7 @@ namespace PSD.PSDGamepkg.JNS
         {
             if (player.Tux.Count > 0)
             {
-                List<Player> pys = XI.Board.Garden.Values.Where(p => p != player && p.IsTared)
+                List<Player> pys = XI.Board.Garden.Values.Where(p => p.IsTared)
                     .Where(p => !player.RAMUtList.Contains(p.Uid)).ToList();
                 return pys.Any(p => p.Gender == 'M') && pys.Any(p => p.Gender == 'F');
             }
@@ -3004,7 +3006,7 @@ namespace PSD.PSDGamepkg.JNS
         }
         public string JNS0301Input(Player player, int type, string fuse, string prev)
         {
-            List<Player> pys = XI.Board.Garden.Values.Where(p => p != player && p.IsTared)
+            List<Player> pys = XI.Board.Garden.Values.Where(p => p.IsTared)
                 .Where(p => !player.RAMUtList.Contains(p.Uid)).ToList();
             List<ushort> uts = pys.Select(p => p.Uid).ToList();
             if (prev == "")

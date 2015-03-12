@@ -41,7 +41,7 @@ namespace PSD.PSDGamepkg
                 return Base.Card.Card.PickSomeInRandomOrder(list, sz).ToArray();
             else
             {
-                list.AddRange(Base.Card.Card.PickSomeInRandomOrder(ListAllSeleableHeros(), sz - list.Count));
+                list.AddRange(Base.Card.Card.PickSomeInRandomOrder(sels, sz - list.Count));
                 list.Shuffle();
                 return list.ToArray();
             }
@@ -1402,22 +1402,10 @@ namespace PSD.PSDGamepkg
             WI.BCast("H0SM," + selCode + "," + levelCode);
             if (selCode == RuleCode.MODE_00)
             {
-                //garden[1].SelectHero = 17004;
-                //garden[2].SelectHero = 17005;
-                //garden[3].SelectHero = 10106;
-                //garden[4].SelectHero = 15007;
-                //garden[5].SelectHero = 10606;
-                //garden[6].SelectHero = 10505;
-                //garden[1].SelectHero = 17003;
-                //garden[3].SelectHero = 17005;
-                //garden[5].SelectHero = 10305;
-                //garden[2].SelectHero = 10605;
-                //garden[4].SelectHero = 17004;
-                //garden[6].SelectHero = 10403;
                 for (ushort i = 1; i <= 6; ++i)
                     garden[i].SelectHero = mode00heroes[i - 1];
             }
-            else if (selCode == RuleCode.MODE_31 && PCS.ListAllSeleableAndTestedHeros().Count >= 18)
+            else if (selCode == RuleCode.MODE_31 && PCS.ListAllSeleableAndTestedHeros().Count >= 24)
             {
                 if (prpr < 0)
                     prpr = 3;
@@ -1472,7 +1460,7 @@ namespace PSD.PSDGamepkg
                 }
                 WI.RecvInfEnd();
             }
-            else if ((selCode == RuleCode.MODE_31 && PCS.ListAllSeleableAndTestedHeros().Count < 18) || selCode == RuleCode.MODE_NM)
+            else if ((selCode == RuleCode.MODE_31 && PCS.ListAllSeleableAndTestedHeros().Count < 24) || selCode == RuleCode.MODE_NM)
             {
                 if (prpr < 0)
                     prpr = 3;
@@ -1907,6 +1895,90 @@ namespace PSD.PSDGamepkg
             //        }
             //    }
             //}
+            else if (selCode == RuleCode.MODE_CM)
+            {
+                if (prpr <= 0) prpr = 16;
+                else if (prpr < 11) prpr = 11;
+                List<Base.Card.Hero> heros = PCS.AllocateHerosRM(prpr).ToList();
+                CastingTable ct = new CastingTable(heros.Select(p => p.Avatar).ToList());
+                Casting = ct;
+                WI.BCast("H0TT," + ct.ToMessage());
+                int startRank = randomSeed.Next(3);
+                int iRank = startRank;
+
+                ushort[] banUt = new ushort[] { (ushort)(iRank * 2 + 2),
+                    (ushort)(iRank * 2 + 1), (ushort)(iRank * 2 + 1) };
+                foreach (ushort ut in banUt)
+                {
+                    WI.Send("H0TA," + string.Join(",", ct.Xuan), 0, ut);
+                    WI.Send("H0SW,1," + ut, ExceptStaff(ut));
+                    WI.Live("H0SW,1," + ut);
+                    while (true)
+                    {
+                        string msg = WI.Recv(0, ut);
+                        if (msg != null && msg.StartsWith("H0TB"))
+                        {
+                            int selAva = int.Parse(msg.Substring("H0TB,".Length));
+                            if (ct.Ban(ut, selAva))
+                            {
+                                WI.BCast("H0TC," + ut + "," + selAva); break;
+                            }
+                        }
+                        WI.Send("H0TA," + string.Join(",", ct.Xuan), 0, ut);
+                    }
+                }
+                do
+                {
+                    banUt = new ushort[] { (ushort)(iRank * 2 + 2), (ushort)(iRank * 2 + 1) };
+                    foreach (ushort ut in banUt)
+                    {
+                        WI.Send("H0TX," + string.Join(",", ct.Xuan), 0, ut);
+                        WI.Send("H0SW,0," + ut, ExceptStaff(ut));
+                        WI.Live("H0SW,0," + ut);
+                        while (true)
+                        {
+                            string msg = WI.Recv(0, ut);
+                            if (msg != null && msg.StartsWith("H0TN"))
+                            {
+                                int selAva = int.Parse(msg.Substring("H0TN,".Length));
+                                if (ct.Pick(ut, selAva))
+                                {
+                                    WI.BCast("H0TO," + ut + "," + selAva); break;
+                                }
+                            }
+                            WI.Send("H0TX," + string.Join(",", ct.Xuan), 0, ut);
+                        }
+                        // Insert Ban
+                        if ((ut % 2 == 0 && ct.BanAo.Count < 2) || (ut % 2 == 1 && ct.BanAka.Count < 3))
+                        {
+                            WI.Send("H0TA," + string.Join(",", ct.Xuan) + ",0", 0, ut);
+                            WI.Send("H0SW,1," + ut, ExceptStaff(ut));
+                            WI.Live("H0SW,1," + ut);
+                            while (true)
+                            {
+                                string msg = WI.Recv(0, ut);
+                                if (msg != null && msg.StartsWith("H0TB"))
+                                {
+                                    int selAva = int.Parse(msg.Substring("H0TB,".Length));
+                                    if (selAva == 0) // give up ban chance
+                                    {
+                                        WI.BCast("H0TC," + ut + ",0"); break;
+                                    }
+                                    else if (ct.Ban(ut, selAva))
+                                    {
+                                        WI.BCast("H0TC," + ut + "," + selAva); break;
+                                    }
+                                }
+                                WI.Send("H0TA," + string.Join(",", ct.Xuan) + ",0", 0, ut);
+                            }
+                        }
+                    }
+                    ++iRank;
+                    if (iRank > 2) iRank = 0;
+                } while (iRank != startRank);
+                foreach (var pair in ct.Ding)
+                    garden[pair.Key].SelectHero = pair.Value;
+            }
             else if (selCode == RuleCode.MODE_SS)
             {
                 if (prpr <= 0) prpr = 16;

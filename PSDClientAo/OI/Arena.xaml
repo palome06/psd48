@@ -25,6 +25,8 @@
                 <Ellipse Width="16" Height="16" StrokeThickness="4" Stroke="Black"/>
             </Grid>
         </Button>
+        <Button x:Name="cancelBanButton" Grid.Row="0" Grid.RowSpan="2" Grid.Column="1" Height="35" Width="150"
+                VerticalAlignment="Top" FontSize="20" Click="cancelBanClick" Visibility="Collapsed">放弃禁选</Button>
         <Canvas x:Name="mainBoard" Grid.Row="1" Grid.Column="1" Width="840" Height="555"/>
     </Grid>
 </UserControl>

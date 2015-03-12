@@ -92,9 +92,12 @@
                                     <RadioButton Content="对位轮选" Width="120" GroupName="SelOptGroup"
                                                  Checked="SelZYDecided"
                                                  ToolTip="双方第一名玩家执行三选一，然后同时亮出；由第二名玩家执行四选一，同理第三名玩家执行五选一。"/>
-                                    <RadioButton Content="队长(CM)" Width="120" GroupName="SelOptGroup" IsEnabled="False"
-                                                 Checked="SelBPDecided"
-                                                 ToolTip="总共亮出18名角色，然后由双方每名玩家依次禁选一名，然后选择自己的上场人物。"/>                          
+                                    <RadioButton Content="禁选(BP)" Width="120" GroupName="SelOptGroup"
+                                                 Checked="SelBPDecided" Visibility="Collapsed"
+                                                 ToolTip="总共亮出18名角色，然后由双方每名玩家依次禁选一名，然后选择自己的上场人物。"/>
+                                    <RadioButton Content="队长(CM)" Width="120" GroupName="SelOptGroup"
+                                                 Checked="SelCMDecided"
+                                                 ToolTip="总共亮出16名角色，从蓝方随机一名角色开始选将：蓝方禁选一名，红方禁选两名。然后双方轮流选定自己的上场人物。双方各有一次在选定人物后额外禁选一人的机会。"/>
                                     <RadioButton Content="协同(CP)" Width="120" GroupName="SelOptGroup"
                                                  Checked="SelCPDecided"
                                                  ToolTip="每方各分配8名角色，然后队友间通过商议分别选出自己的上场人物。"/>

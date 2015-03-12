@@ -2267,12 +2267,10 @@ namespace PSD.PSDGamepkg
                             {
                                 player.DEXi = 1;
                                 WI.BCast("E0OX," + me + ",2");
-                            } if (Board.InFight)
+                            }
+                            if (Board.InFight)
                                 RaiseGMessage("G09P,0");
                         }
-                        if (Board.InFight)
-                            RaiseGMessage("G09P,0");
-                        break;
                     }
                 case "G0AX":
                     {
@@ -3362,7 +3360,7 @@ namespace PSD.PSDGamepkg
                 case "G17F":
                     if (args[1] == "O") {
                         RaiseGMessage("G0FI,O");
-                    } else if (args[1] == 'U') { // Just start the fight
+                    } else if (args[1] == "U") { // Just start the fight
                         Board.InFight = true;
                     } else {
                         ushort[] lists = new ushort[] { Board.Rounder.Uid, Board.Rounder.Uid,
@@ -3434,6 +3432,8 @@ namespace PSD.PSDGamepkg
                             else if (position == 'T') { }
                             else if (position == 'W') { }
                         }
+                        if (Board.InFight)
+                            RaiseGMessage("G09P,0");
                     }
                     break;
                 case "G0ON":

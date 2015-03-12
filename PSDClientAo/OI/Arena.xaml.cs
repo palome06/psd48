@@ -224,7 +224,7 @@ namespace PSD.ClientAo.OI
                 }
             }
         }
-        internal void ActiveArena(int[] jdxs)
+        internal void ActiveArena(int[] jdxs, bool canGiveup)
         {
             foreach (var elem in mainBoard.Children)
             {
@@ -233,6 +233,10 @@ namespace PSD.ClientAo.OI
                     if (jdxs == null || jdxs.Contains(ru.Jndex))
                         ru.Cat = Ruban.Category.ACTIVE;
             }
+            if (canGiveup)
+                cancelBanButton.Visibility = Visibility.Visible;
+            else
+                cancelBanButton.Visibility = Visibility.Collapsed;
         }
         internal void DisactiveArena(int[] jdxs)
         {
@@ -243,6 +247,7 @@ namespace PSD.ClientAo.OI
                     if (jdxs == null || jdxs.Contains(ru.Jndex))
                         ru.Cat = Ruban.Category.SOUND;
             }
+            cancelBanButton.Visibility = Visibility.Collapsed;
         }
         internal void BanBy(bool isAka, int heroCode)
         {
@@ -890,6 +895,11 @@ namespace PSD.ClientAo.OI
                 if (AoArena.Casting is Base.Rules.CastingCongress)
                     input("X");
             }
+        }
+        private void cancelBanClick(object sender, RoutedEventArgs e)
+        {
+            if (input != null && AoArena.Casting is Base.Rules.CastingTable)
+                input("0");
         }
 
         public event Util.InputMessageHandler input;

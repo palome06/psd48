@@ -317,6 +317,7 @@ namespace PSD.ClientAo.Login
         private void SelBPDecided(object sender, RoutedEventArgs e) { SelMode = Base.Rules.RuleCode.MODE_BP; }
         private void SelRDDecided(object sender, RoutedEventArgs e) { SelMode = Base.Rules.RuleCode.MODE_RD; }
         private void SelZYDecided(object sender, RoutedEventArgs e) { SelMode = Base.Rules.RuleCode.MODE_ZY; }
+        private void SelCMDecided(object sender, RoutedEventArgs e) { SelMode = Base.Rules.RuleCode.MODE_CM; }
         private void SelCPDecided(object sender, RoutedEventArgs e) { SelMode = Base.Rules.RuleCode.MODE_CP; }
         private void SelINDecided(object sender, RoutedEventArgs e) { SelMode = Base.Rules.RuleCode.MODE_IN; }
         private void SelSSDecided(object sender, RoutedEventArgs e) { SelMode = Base.Rules.RuleCode.MODE_SS; }

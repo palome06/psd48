@@ -3158,13 +3158,15 @@ namespace PSD.ClientZero
                 case "H0TA":
                     {
                         Base.Rules.CastingTable ct = casting as Base.Rules.CastingTable;
+                        string[] args = cmdrst.Split(',');
                         cinCalled = StartCinEtc();
                         while (true)
                         {
-                            string input = VI.Cin(Uid, "请禁选一名角色，当前可选角色：\n{0}",
-                                zd.HeroWithCode(ct.Xuan));
+                            bool canGiveup = args.Contains("0");
+                            string input = VI.Cin(Uid, "请禁选一名角色" + (canGiveup ? "(0为不禁选)" : "") +
+                                 "，当前可选角色：\n{0}", zd.HeroWithCode(ct.Xuan));
                             int hero;
-                            if (int.TryParse(input, out hero) && ct.Xuan.Contains(hero))
+                            if (int.TryParse(input, out hero) && (ct.Xuan.Contains(hero) || canGiveup && hero == 0))
                             {
                                 WI.Send("H0TB," + hero, Uid, 0);
                                 break;
@@ -3179,10 +3181,15 @@ namespace PSD.ClientZero
                         ushort puid = ushort.Parse(args[0]);
                         List<int> hrs = Util.TakeRange(args, 1, args.Length)
                             .Select(p => int.Parse(p)).ToList();
-                        VI.Cout(Uid, "玩家{0}#禁选了角色{1}.", puid, zd.Hero(hrs));
                         Base.Rules.CastingTable ct = casting as Base.Rules.CastingTable;
-                        foreach (int heroCode in hrs)
-                            ct.Ban(puid, heroCode);
+                        if (hrs.Count == 0 && hrs[0] == 0)
+                            VI.Cout(Uid, "玩家{0}#未禁选.", puid, zd.Hero(hrs));
+                        else
+                        {
+                            VI.Cout(Uid, "玩家{0}#禁选了角色{1}.", puid, zd.Hero(hrs));
+                            foreach (int heroCode in hrs)
+                                ct.Ban(puid, heroCode);
+                        }
                         if (ct.Xuan.Count > 0)
                             VI.Cout(Uid, "当前剩余角色:\n{0}.", zd.HeroWithCode(ct.Xuan));
                     }

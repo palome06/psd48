@@ -232,7 +232,7 @@ namespace PSD.Base.Card
         {
             this.Name = name; this.Code = code;
             this.Group = Math.Abs(group);
-            this.IsEx = (this.Group < 0);
+            this.IsEx = (group < 0);
             this.Element = element; this.Level = level;
             this.STRb = strb; this.STR = this.STRb;
             this.AGLb = agl; this.AGL = this.AGLb;
@@ -510,9 +510,9 @@ namespace PSD.Base.Card
         {
             int[] pkgs = Card.Level2Pkg(groups);
             if (pkgs == null)
-                return dicts.Where(p => p.Value.Group > 0).Select(p => p.Key).ToList();
+                return dicts.Where(p => !p.IsEx).Select(p => p.Key).ToList();
             else
-                return dicts.Where(p => pkgs.Contains(p.Value.Group)).Select(p => p.Key).ToList();
+                return dicts.Where(p => pkgs.Contains(p.Value.Group) && !p.IsEx).Select(p => p.Key).ToList();
         }
 
         public List<Monster> ListAllMonster(int groups)
