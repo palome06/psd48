@@ -49,7 +49,6 @@ namespace PSD.ClientAo
                 gcThread.Abort();
         }
 
-        public AoDisplay AD { set; get; }
         private Thread gcThread;
 
         public static readonly TimeSpan XURA = TimeSpan.FromSeconds(0.13);
@@ -493,13 +492,13 @@ namespace PSD.ClientAo
         public void FlashMon1(Ruban ruban, ushort from)
         {
             double x, y;
-            ParseCord(from, out x, out y);
+            ParseCord(Orch.AD.Player2Position(from), out x, out y);
             FlyingUp(ruban, x, y, 24, -118);
         }
         public void FlashMon2(Ruban ruban, ushort from)
         {
             double x, y;
-            ParseCord(from, out x, out y);
+            ParseCord(Orch.AD.Player2Position(from), out x, out y);
             FlyingUp(ruban, x, y, 73, -118);
         }
 

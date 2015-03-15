@@ -2852,7 +2852,7 @@ namespace PSD.PSDGamepkg.JNS
                 if (harm.Who == who && harm.Element != FiveElement.SOL &&
                         harm.Element != FiveElement.LOVE)
                 {
-                    if ((harm.N - point) <= 0)
+                    if ((harm.N -= point) <= 0)
                         rvs.Add(harm);
                     XI.RaiseGMessage("G0OJ," + player.Uid + ",0," + point);
                 }

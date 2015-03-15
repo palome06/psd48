@@ -2580,14 +2580,9 @@ namespace PSD.ClientAo
                         VI.Cout(Uid, "不触发战斗.");
                     else if (args[1] == "U")
                     {
-                        if (A0F.Supporter != 0 && A0F.Supporter < 1000)
-                            A0P[A0F.Supporter].SetAsClear();
-                        A0F.Supporter = 0;
-                        if (A0F.Hinder != 0 && A0F.Hinder < 1000)
-                            A0P[A0F.Hinder].SetAsClear();
-                        A0F.Hinder = 0;
                         ushort rounder = ushort.Parse(args[2]);
-                        A0P[rounder].SetAsRounder();
+                        A0P.Where(p => p.Key != rounder).ToList().ForEach((p) => p.Value.SetAsClear());
+                        A0F.Hinder = 0; A0F.Supporter = 0;
                     }
                     else
                     {
@@ -2624,7 +2619,10 @@ namespace PSD.ClientAo
                                     msgs.Add(string.Format("{0}代为触发战斗", name));
                                     //A0F.Horn = s;
                                     if (s != 0 && s < 1000)
+                                    {
+                                        A0P.Values.ToList().ForEach((p) => p.SetAsNotTrigger());
                                         A0P[s].SetAsDelegate();
+                                    }
                                 }
                             }
                         }
@@ -3323,13 +3321,6 @@ namespace PSD.ClientAo
                 //    break;
                 case "Z2":
                     A0F.PoolAka = 0; A0F.PoolAo = 0; break;
-                case "Z3":
-                    if (A0F.Supporter != 0 && A0F.Supporter < 1000)
-                        A0P[A0F.Supporter].SetAsClear();
-                    if (A0F.Hinder != 0 && A0F.Hinder < 1000)
-                        A0P[A0F.Hinder].SetAsClear();
-                    A0F.Supporter = 0; A0F.Hinder = 0;
-                    break;
                 case "ZF":
                     if (para == "0")
                         VI.Cout(Uid, "{0}战牌结束阶段开始.", zd.Player(rounder));
@@ -3337,10 +3328,8 @@ namespace PSD.ClientAo
                         VI.Cout(Uid, "{0}战牌结束阶段结束.", zd.Player(rounder));
                     break;
                 case "BC":
-                    if (A0F.Supporter != 0 && A0F.Supporter < 1000)
-                        A0P[A0F.Supporter].SetAsClear();
-                    if (A0F.Hinder != 0 && A0F.Hinder < 1000)
-                        A0P[A0F.Hinder].SetAsClear();
+                    A0P.Where(p => p.Key != rounder).ToList().ForEach((p) => p.Value.SetAsClear());
+                    A0P[rounder].SetAsRounder();
                     A0F.Supporter = 0; A0F.Hinder = 0;
                     if (para == "0")
                         VI.Cout(Uid, "{0}补牌阶段开始.", zd.Player(rounder));
@@ -3354,11 +3343,7 @@ namespace PSD.ClientAo
                         VI.Cout(Uid, "{0}回合结束阶段结束.", zd.Player(rounder));
                     break;
                 case "ED":
-                    A0P[rounder].SetAsClear();
-                    if (A0F.Supporter != 0 && A0F.Supporter < 1000)
-                        A0P[A0F.Supporter].SetAsClear();
-                    if (A0F.Hinder != 0 && A0F.Hinder < 1000)
-                        A0P[A0F.Hinder].SetAsClear();
+                    A0P.Values.ToList().ForEach((p) => p.SetAsClear());
                     A0F.Supporter = 0; A0F.Hinder = 0;
                     A0F.Monster1 = 0; A0F.Monster2 = 0;
                     A0F.Eve1 = 0;
@@ -4350,7 +4335,9 @@ namespace PSD.ClientAo
         {
             int version = (WI as VW.Eywi).Version;
             string[] args = readLine.Split(',');
-            switch (readLine)
+            string header = args[0]; ushort rrounder = 0;
+            if (header.StartsWith("R")) { rrounder = (ushort)(header[1] - '0'); header = "R#" + header.Substring(2); }
+            switch (args[0])
             {
                 case "E0CC": // prepare to use card
                     if (version <= 114)
@@ -4563,6 +4550,14 @@ namespace PSD.ClientAo
                             }
                         }
                         return true;
+                    }
+                    break;
+                case "R#Z3":
+                    if (version <= 137)
+                    {
+                        A0P.Where(p => p.Key != rrounder).ToList().ForEach((p) => p.Value.SetAsClear());
+                        A0F.Supporter = 0; A0F.Hinder = 0;
+                        break;
                     }
                     break;
             }

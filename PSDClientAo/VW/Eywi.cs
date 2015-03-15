@@ -118,6 +118,11 @@ namespace PSD.ClientAo.VW
         #region Version
         private void HandleWithVersion(ref string line, int Version)
         {
+            if (Version <= 137)
+            {
+                if (line[0] == 'R' && Util.Substring(line, 2, 4) == "Z3")
+                    line = "E0FI,U,0";
+            }
             if (Version <= 131)
             {
                 if (line[0] == 'R' && Util.Substring(line, 2, 5) == "ZW7")

@@ -217,6 +217,12 @@ namespace PSD.ClientAo
             Grid rec = mainGrid.Template.FindName("goldenMask", mainGrid) as Grid;
             rec.Background = Resources["maskOfDelegate"] as SolidColorBrush;
         }
+        public void SetAsNotTrigger()
+        {
+            Grid rec = mainGrid.Template.FindName("goldenMask", mainGrid) as Grid;
+            if (rec.Background == Resources["maskOfRounder"] as SolidColorBrush)
+                rec.Background = new SolidColorBrush(Colors.White);
+        }
         public void EnableWeapon()
         {
             weaponLock.Cat = Card.RubanLock.Category.ACTIVE;

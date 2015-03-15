@@ -3344,7 +3344,8 @@ namespace PSD.PSDGamepkg.JNS
                     XI.Board.Garden.Values.Where(p => p.IsAlive && p.GetPetCount() > 0 &&
                     XI.Board.Garden.Values.Where(q => q.IsTared && q.Team == p.Team && p.Uid != q.Uid).Any()).Any();
             }
-            else if (type == 1) {
+            else if (type == 1)
+            {
                 if (XI.Board.Monster1 != 0)
                     return false;
                 if (!player.Tux.Any(p => XI.LibTuple.TL.DecodeTux(p).Type == Tux.TuxType.TP))
@@ -3358,7 +3359,7 @@ namespace PSD.PSDGamepkg.JNS
                 if (dicts[player.Team] <= dicts[player.OppTeam])
                     return true;
             }
-            return true;
+            return false;
         }
         public void JNT2501Action(Player player, int type, string fuse, string argv)
         {
@@ -3584,11 +3585,13 @@ namespace PSD.PSDGamepkg.JNS
                 List<Artiad.Cure> cures = Artiad.Cure.Parse(fuse);
                 foreach (Artiad.Cure cure in cures)
                 {
-                    if (XI.Board.Garden[cure.Who].IsAlive && cure.N > 0 &&
-                            cure.Element != FiveElement.LOVE)
-                        return true;
+                    if (cure.Element != FiveElement.SOL && cure.Element != FiveElement.LOVE)
+                    {
+                        Player py = XI.Board.Garden[cure.Who];
+                        if (py != null && py.Team == player.Team && cure.N > 0)
+                            return true;
+                    }
                 }
-                return false;
             }
             else if (type == 1)
             {
@@ -3638,10 +3641,11 @@ namespace PSD.PSDGamepkg.JNS
                 List<Artiad.Cure> cures = Artiad.Cure.Parse(fuse);
                 foreach (Artiad.Cure cure in cures)
                 {
-                    if (cure.Who == player.Uid &&
-                            cure.Element != FiveElement.SOL && cure.Element != FiveElement.LOVE)
+                    if (cure.Element != FiveElement.SOL && cure.Element != FiveElement.LOVE)
                     {
-                        ++cure.N;
+                        Player py = XI.Board.Garden[cure.Who];
+                        if (py != null && py.Team == player.Team)
+                            ++cure.N;
                     }
                 }
                 if (cures.Count > 0)

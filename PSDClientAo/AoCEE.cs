@@ -39,7 +39,7 @@ namespace PSD.ClientAo
             set { if (mcz05V != value) { mcz05V = value; NotifyPropertyChanged("CZ05Valid"); } }
             get { return mcz05V; }
         }
-        private bool msk1V, msk2V, msk3V, msk4V, msk5V, msk6V, msk7V, mesk1V, mesk2V, mesk3V;
+        private bool msk1V, msk2V, msk3V, msk4V, msk5V, msk6V, msk7V, mesk1V, mesk2V, mesk3V, mesk4V;
         public bool Skill1Valid
         {
             set { if (msk1V != value) { msk1V = value; NotifyPropertyChanged("Skill1Valid"); } }
@@ -150,7 +150,7 @@ namespace PSD.ClientAo
         }
         public Base.Bless ExtSkill4
         {
-            set { if (mesk4 != value) { mesk3 = value; NotifyPropertyChanged("ExtSkill4"); } }
+            set { if (mesk4 != value) { mesk4 = value; NotifyPropertyChanged("ExtSkill4"); } }
             get { return mesk4; }
         }
         public ushort ExtHolder1 { set; get; }

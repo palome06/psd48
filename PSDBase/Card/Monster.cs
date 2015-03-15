@@ -510,9 +510,9 @@ namespace PSD.Base.Card
         {
             int[] pkgs = Card.Level2Pkg(groups);
             if (pkgs == null)
-                return dicts.Where(p => !p.IsEx).Select(p => p.Key).ToList();
+                return dicts.Where(p => !p.Value.IsEx).Select(p => p.Key).ToList();
             else
-                return dicts.Where(p => pkgs.Contains(p.Value.Group) && !p.IsEx).Select(p => p.Key).ToList();
+                return dicts.Where(p => pkgs.Contains(p.Value.Group) && !p.Value.IsEx).Select(p => p.Key).ToList();
         }
 
         public List<Monster> ListAllMonster(int groups)

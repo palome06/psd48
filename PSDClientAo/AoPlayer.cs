@@ -1305,6 +1305,10 @@ namespace PSD.ClientAo
         {
             pb.Dispatcher.BeginInvoke((Action)(() => { pb.SetDelegate(); }));
         }
+        public void SetAsNotTrigger()
+        {
+            pb.Dispatcher.BeginInvoke((Action)(() => { pb.SetAsNotTrigger(); }));
+        }
         public void DisableWeapon()
         {
             pb.Dispatcher.BeginInvoke((Action)(() => { pb.DisableWeapon(); }));

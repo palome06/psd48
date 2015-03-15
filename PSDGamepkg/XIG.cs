@@ -2272,6 +2272,7 @@ namespace PSD.PSDGamepkg
                                 RaiseGMessage("G09P,0");
                         }
                     }
+                    break;
                 case "G0AX":
                     {
                         ushort me = ushort.Parse(args[1]);
@@ -3361,7 +3362,8 @@ namespace PSD.PSDGamepkg
                     if (args[1] == "O") {
                         RaiseGMessage("G0FI,O");
                     } else if (args[1] == "U") { // Just start the fight
-                        Board.InFight = true;
+                        // Board.InFight = true;
+                        RaiseGMessage("G0FI,U," + args[2]);
                     } else {
                         ushort[] lists = new ushort[] { Board.Rounder.Uid, Board.Rounder.Uid,
                              Board.Supporter.Uid, Board.Supporter.Uid,

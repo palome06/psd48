@@ -684,12 +684,12 @@ namespace PSD.PSDGamepkg.JNS
         public void GT03DecrAction(Player player)
         {
             ushort rk = (ushort)(1000 + XI.LibTuple.ML.Encode("GT03"));
-            if (XI.Board.InFight)
+            if (XI.Board.InFightThrough)
             {
                 if (XI.Board.Supporter.Uid == rk)
-                    XI.RaiseGMessage("G17F,S," + rk + ",0");
+                    XI.RaiseGMessage("G17F,S,0");
                 else if (XI.Board.Hinder.Uid == rk)
-                    XI.RaiseGMessage("G17F,H," + rk + ",0");
+                    XI.RaiseGMessage("G17F,H,0");
             }
         }
         public void GT03WinEff()

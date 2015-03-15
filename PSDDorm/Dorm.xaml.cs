@@ -37,6 +37,11 @@ namespace PSDDorm
             InitializeComponent();
             Tuple = new LibGroup();
             dict = new Dictionary<int, string>();
+
+            if (File.Exists("PSDDorm.AKB48Show!"))
+                convCheckBox.Visibility = Visibility.Visible;
+            else
+                convCheckBox.Visibility = Visibility.Collapsed;
         }
 
         private void FileDrop(object sender, DragEventArgs e)
@@ -164,6 +169,45 @@ namespace PSDDorm
                 result, string.Join("", enemies), filePureName);
         }
 
+        private void Encrypt(string path, string name)
+        {
+            if (!Directory.Exists("./mosh"))
+                Directory.CreateDirectory("./mosh");
+            string lName = "./mosh/" + name + ".txt";
+
+            var iter = System.IO.File.ReadLines(path).GetEnumerator();
+            int version = 0, uid = 0; bool issv = false;
+            if (iter.MoveNext())
+            {
+                string firstLine = iter.Current;
+                string[] firsts = firstLine.Split(' ');
+                if (firsts[0].StartsWith("VERSION="))
+                    version = int.Parse(firsts[0].Substring("VERSION=".Length));
+                if (firsts[1].StartsWith("UID="))
+                    uid = ushort.Parse(firsts[1].Substring("UID=".Length));
+                else if (firsts[1].StartsWith("ISSV="))
+                    issv = true;
+            }
+            using (System.IO.StreamWriter sw = new System.IO.StreamWriter(lName, true))
+            {
+                if (issv)
+                    sw.WriteLine("VERSION={0} ISSV=1", version);
+                else
+                    sw.WriteLine("VERSION={0} UID={1}", version, uid);
+                sw.Flush();
+                while (iter.MoveNext())
+                {
+                    string line = iter.Current;
+                    if (version >= 99)
+                    {
+                        line = PSD.Base.LogES.DESDecrypt(line, "AKB48Show!",
+                            (version * version).ToString());
+                    }
+                    sw.WriteLine(line);
+                }
+            };
+        }
+
         private void Save(string path, string name)
         {
             if (!Directory.Exists("./repo"))
@@ -209,13 +253,26 @@ namespace PSDDorm
         {
             if (orgListBox.SelectedItems.Count > 0)
             {
-                foreach (var orgItem in orgListBox.SelectedItems)
+                if (convCheckBox.IsChecked != true)
                 {
-                    RoundItem item = orgItem as RoundItem;
-                    if (item != null)
-                        Save(item.Path, item.Name);
+                    foreach (var orgItem in orgListBox.SelectedItems)
+                    {
+                        RoundItem item = orgItem as RoundItem;
+                        if (item != null)
+                            Save(item.Path, item.Name);
+                    }
+                    MessageBox.Show("录像转化完毕。");
                 }
-                MessageBox.Show("录像转化完毕。");
+                else
+                {
+                    foreach (var orgItem in orgListBox.SelectedItems)
+                    {
+                        RoundItem item = orgItem as RoundItem;
+                        if (item != null)
+                            Encrypt(item.Path, item.Name);
+                    }
+                    MessageBox.Show("录像翻译完毕。");
+                }
             }
         }
 

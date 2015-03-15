@@ -4,7 +4,13 @@
         Title="PSDDorm 0.4.11 录像转换器" Height="380" Width="450">
     <Grid>
         <StackPanel Orientation="Vertical">
-            <GroupBox Header="拖拽至此" FontSize="20" FontFamily="LiSu" VerticalAlignment="Top" Height="300">
+            <GroupBox Height="300">
+                <GroupBox.Header>
+                    <StackPanel Orientation="Horizontal">
+                        <Label FontSize="20" FontFamily="LiSu" VerticalAlignment="Top">拖拽至此</Label>
+                        <CheckBox x:Name="convCheckBox" VerticalAlignment="Center" Visibility="Collapsed">Check it now!</CheckBox>
+                    </StackPanel>
+                </GroupBox.Header>
                 <ListBox x:Name="orgListBox" SelectionMode="Multiple" AllowDrop="True" Margin="2"
                           FontSize="16" FontFamily="KaiTi" Drop="FileDrop"/>
             </GroupBox>

@@ -112,7 +112,8 @@ namespace PSD.PSDGamepkg
             //17027, 17028, 17005, 17025, 10608, 19011
             //10303, 10404, 10602, 17017, 10403, 10504
             //10302, 17012, 17005, 17022, 10605, 17028
-            10105, 10608, 10605, 17022, 19010, 17001
+            //10105, 10608, 10605, 10303, 19010, 17002
+            19014, 17002, 10501, 10303, 19010, 19016
         };
 
         #region Memeber Declaration & Constructor
@@ -1048,6 +1049,8 @@ namespace PSD.PSDGamepkg
                 }
                 else
                 {
+                    if (skill.IsBK)
+                        occur = occur.Replace('#', '*').Replace('$', '*');
                     if (occur.Contains('#'))
                     {
                         string oc = occur.Replace("#", ut.ToString());
