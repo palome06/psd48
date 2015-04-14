@@ -2155,6 +2155,15 @@ namespace PSD.ClientAo
                         A0O.FlyingGet("D" + point, who, 0);
                     }
                     break;
+                case "E0T7":
+                    {
+                        ushort who = ushort.Parse(args[1]);
+                        ushort orgPt = ushort.Parse(args[2]);
+                        ushort newPt = ushort.Parse(args[3]);
+                        VI.Cout(Uid, "{0}更改掷骰的结果为{1}.", zd.Player(who), newPt);
+                        A0O.FlyingGet("D" + newPt, who, 0);
+                    }
+                    break;
                 case "E0IJ":
                     {
                         ushort who = ushort.Parse(args[1]);

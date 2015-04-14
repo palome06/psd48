@@ -72,7 +72,7 @@ namespace PSD.Base.Card
             else if (pkgCode == 3)
                 pkgs = new int[] { 1, 2, 4, 5 };
             else if (pkgCode == 4)
-                pkgs = new int[] { 1, 2, 3, 4, 5, 6, 7 };
+                pkgs = new int[] { 1, 2, 3, 4, 5, 6, 7, 8 };
             return pkgs;
         }
     }

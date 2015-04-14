@@ -69,6 +69,12 @@ namespace PSD.ClientAo
         #endregion Members and Constants
         #region FlyingGet
 
+        private void NextTrail(char fromType, ushort from, char toType, ushort to)
+        {
+            Canvas flyingBody = new Canvas() { Width = 450, Height = 125 };
+            flyingBody.Background = new SolidColorBrush(Colors.LightCoral);
+        }
+
         private void FlyingGet(List<Card.Ruban> rubans,
             double x1, double y1, double x2, double y2, bool fade)
         {

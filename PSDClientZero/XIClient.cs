@@ -1935,6 +1935,9 @@ namespace PSD.ClientZero
                 case "E0TT":
                     VI.Cout(Uid, "{0}掷骰的结果为{1}.", zd.Player(ushort.Parse(args[1])), args[2]);
                     break;
+                case "E0T7":
+                    VI.Cout(Uid, "{0}更改掷骰的结果为{1}.", zd.Player(ushort.Parse(args[1])), args[3]);
+                    break;
                 case "E0IJ":
                     {
                         ushort who = ushort.Parse(args[1]);

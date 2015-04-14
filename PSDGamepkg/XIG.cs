@@ -281,7 +281,7 @@ namespace PSD.PSDGamepkg
                             string range = Util.SSelect(Board,
                                 p => p.IsAlive && p.Team == player.Team);
                             string input = AsyncInput(me, "#获得补牌的,T1" + range, "G0ZW", "0");
-                            RaiseGMessage("G0DH," + input + ",0,2");
+                            RaiseGMessage("G0HG," + input + ",2");
                         }
                     }
                     else if (priority == 400) // leave
@@ -2796,6 +2796,13 @@ namespace PSD.PSDGamepkg
                         RaiseGMessage("G0DH," + who + ",0," + n);
                         break;
                     }
+                case "G0HG":
+                    {
+                        ushort who = ushort.Parse(args[1]);
+                        int n = int.Parse(args[2]);
+                        RaiseGMessage("G0DH," + who + ",0," + n);
+                        break;
+                    }
                 case "G0QR":
                     {
                         ushort who = ushort.Parse(args[1]);
@@ -2812,6 +2819,15 @@ namespace PSD.PSDGamepkg
                         if (number == 0) number = 6;
                         WI.BCast("E0TT," + who + "," + number);
                         Board.DiceValue = number;
+                    }
+                    break;
+                case "G0T7":
+                    {
+                        ushort who = ushort.Parse(args[1]);
+                        ushort orgPt = ushort.Parse(args[2]);
+                        ushort newPt = ushort.Parse(args[3]);
+                        WI.BCast("E0T7," + who + "," + orgPt + "," + newPt);
+                        Board.DiceValue = newPt;
                     }
                     break;
                 case "G0JM":

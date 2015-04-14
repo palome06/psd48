@@ -109,6 +109,7 @@
     <Resource Include="Resources\Token\TKT1903.png" />
     <Resource Include="Resources\Token\TKT1904.png" />
     <Resource Include="Resources\Token\TKT1905.png" />
+    <Resource Include="Resources\Token\TRE04.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Card\Eve\S3W01.png" />
@@ -319,12 +320,6 @@
   <ItemGroup>
     <Resource Include="Resources\Logo\MigiBackground.jpg" />
     <Resource Include="Resources\Logo\RepoBackground.jpg" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\NameBar\NameXJ101.png" />
-    <Resource Include="Resources\NameBar\NameXJ303.png" />
-    <Resource Include="Resources\NameBar\NameXJ501.png" />
-    <Resource Include="Resources\NameBar\NameXJ504.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\PetsSnap\N3W02.png" />
@@ -640,6 +635,7 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\NameBar\Name000.png" />
+    <Resource Include="Resources\NameBar\NameEX506.png" />
     <Resource Include="Resources\NameBar\NameHL001.png" />
     <Resource Include="Resources\NameBar\NameHL002.png" />
     <Resource Include="Resources\NameBar\NameHL003.png" />
@@ -683,6 +679,7 @@
     <Resource Include="Resources\NameBar\NameX3W03.png" />
     <Resource Include="Resources\NameBar\NameX3W04.png" />
     <Resource Include="Resources\NameBar\NameX3W05.png" />
+    <Resource Include="Resources\NameBar\NameXJ101.png" />
     <Resource Include="Resources\NameBar\NameXJ102.png" />
     <Resource Include="Resources\NameBar\NameXJ103.png" />
     <Resource Include="Resources\NameBar\NameXJ104.png" />
@@ -695,6 +692,7 @@
     <Resource Include="Resources\NameBar\NameXJ206.png" />
     <Resource Include="Resources\NameBar\NameXJ207.png" />
     <Resource Include="Resources\NameBar\NameXJ302.png" />
+    <Resource Include="Resources\NameBar\NameXJ303.png" />
     <Resource Include="Resources\NameBar\NameXJ304.png" />
     <Resource Include="Resources\NameBar\NameXJ305.png" />
     <Resource Include="Resources\NameBar\NameXJ306.png" />
@@ -703,8 +701,10 @@
     <Resource Include="Resources\NameBar\NameXJ403.png" />
     <Resource Include="Resources\NameBar\NameXJ404.png" />
     <Resource Include="Resources\NameBar\NameXJ405.png" />
+    <Resource Include="Resources\NameBar\NameXJ501.png" />
     <Resource Include="Resources\NameBar\NameXJ502.png" />
     <Resource Include="Resources\NameBar\NameXJ503.png" />
+    <Resource Include="Resources\NameBar\NameXJ504.png" />
     <Resource Include="Resources\NameBar\NameXJ505.png" />
     <Resource Include="Resources\NameBar\NameXJ506.png" />
     <Resource Include="Resources\NameBar\NameXJ507.png" />
@@ -754,6 +754,9 @@
     <Resource Include="Resources\PetsSnap\TPT3.png" />
   </ItemGroup>
   <ItemGroup>
+    <Resource Include="Resources\Heros\18004.png" />
+  </ItemGroup>
+  <ItemGroup>
     <Resource Include="Resources\Heros\19001.png" />
     <Resource Include="Resources\Heros\19002.png" />
     <Resource Include="Resources\Heros\19003.png" />
@@ -773,6 +776,9 @@
     <Resource Include="Resources\Heros\19017.png" />
     <Resource Include="Resources\Heros\19018.png" />
     <Resource Include="Resources\Heros\19019.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Card\Heros\EX506.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Card\Heros\HL001.png" />

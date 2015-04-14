@@ -113,7 +113,8 @@ namespace PSD.PSDGamepkg
             //10303, 10404, 10602, 17017, 10403, 10504
             //10302, 17012, 17005, 17022, 10605, 17028
             //10105, 10608, 10605, 10303, 19010, 17002
-            19014, 17002, 10501, 10303, 19010, 19016
+            //19014, 10102, 10501, 10303, 19010, 19016
+            17009, 19006, 19017, 10104, 10606, 18004
         };
 
         #region Memeber Declaration & Constructor
@@ -575,8 +576,9 @@ namespace PSD.PSDGamepkg
             string[] g0 = new string[] { "IT", "OT", "HQ", "QZ", "DH", "IH", "OH", "ZH", "LV", "ZW",
                  "IY", "OY", "DS", "CC", "CD", "CE", "XZ", "ZB", "ZC", "ZS", "ZL", "IA", "OA", "IX",
                  "OX", "AX", "IB", "OB", "IW", "OW", "WB", "9P", "IP", "OP", "CZ", "HC", "HD", "HH",
-                 "HI", "HL", "IC", "OC", "HT", "QR", "HZ", "TT", "JM", "WN", "IJ", "OJ", "IE", "OE",
-                 "IS", "OS", "LH", "IV", "OV", "PB", "YM", "HR", "FI", "ON", "SN", "MA", "PH", "ZJ"
+                 "HI", "HL", "IC", "OC", "HT", "HG", "QR", "HZ", "TT", "T7", "JM", "WN", "IJ", "OJ",
+                 "IE", "OE", "IS", "OS", "LH", "IV", "OV", "PB", "YM", "HR", "FI", "ON", "SN", "MA",
+                 "PH", "ZJ"
             };
             string[] g1 = new string[] { "DI", "IU", "OU", "CW", "ZK", "IZ", "OZ", "WP", "SG", "HK",
                  "WJ", "JG", "XR", "EV", "CK", "7F", "YP" };
