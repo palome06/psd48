@@ -22,7 +22,7 @@ namespace PSD.PSDGamepkg.JNS
         }
         public void JNT0101Action(Player player, int type, string fuse, string argst)
         {
-            VI.Cout(0, "TR夙玉发动「望舒剑」.");
+            TargetPlayer(XI.Board.Rounder.Uid, player.Uid);
             XI.RaiseGMessage("G0IA," + player.Uid + ",1,1");
             XI.RaiseGMessage("G0IX," + player.Uid + ",1,1");
         }
@@ -54,7 +54,11 @@ namespace PSD.PSDGamepkg.JNS
                 }
             }
             harms.RemoveAll(p => rvs.Contains(p));
-            VI.Cout(0, "TR夙玉发动「灵光藻玉」.");
+            List<ushort> invs = harms.Where(p => XI.Board.Garden[p.Who].Team == player.Team &&
+                (p.Element == FiveElement.AQUA || p.Element == FiveElement.AGNI) && p.N > 0)
+                .Select(p => p.Who).ToList();
+            if (invs.Count > 0)
+                TargetPlayer(player.Uid, invs);
             if (harms.Count > 0)
                 XI.InnerGMessage(Artiad.Harm.ToMessage(harms), -19);
         }
@@ -249,6 +253,7 @@ namespace PSD.PSDGamepkg.JNS
                 int card = int.Parse(argst.Substring(0, idx));
                 ushort to = ushort.Parse(argst.Substring(idx + 1));
 
+                TargetPlayer(player.Uid, to);
                 List<Artiad.Harm> harms = Artiad.Harm.Parse(fuse);
                 List<Artiad.Harm> rvs = new List<Artiad.Harm>();
                 Artiad.Harm rotation = null;
@@ -433,6 +438,7 @@ namespace PSD.PSDGamepkg.JNS
             string range = Util.SSelect(XI.Board, p => p != player && p.IsTared);
             string target = XI.AsyncInput(player.Uid, "#无法获得宠物效果,T1" + range, "JNT0502", "0");
             ushort who = ushort.Parse(target);
+            TargetPlayer(player.Uid, who);
             XI.RaiseGMessage("G0OE,0," + who);
             VI.Cout(0, "TR凌波对玩家{0}发动了「梦缘」.", XI.DisplayPlayer(who));
             XI.SendOutUAMessage(player.Uid, "JNT0502," + target, "0");
@@ -476,9 +482,15 @@ namespace PSD.PSDGamepkg.JNS
             if (player.IsAlive)
             {
                 if (XI.Board.Rounder.Team == player.Team)
+                {
+                    TargetPlayer(player.Uid, XI.Board.Supporter.Uid);
                     XI.RaiseGMessage("G0IX," + XI.Board.Supporter.Uid + ",1,1");
+                }
                 else if (XI.Board.Rounder.OppTeam == player.Team)
+                {
+                    TargetPlayer(player.Uid, XI.Board.Hinder.Uid);
                     XI.RaiseGMessage("G0IX," + XI.Board.Hinder.Uid + ",1,1");
+                }
             }
         }
         public string JNT0601Input(Player player, int type, string fuse, string prev)
@@ -549,6 +561,7 @@ namespace PSD.PSDGamepkg.JNS
                     Player py = XI.Board.Garden[ut];
                     if (py.Team == player.Team && n > 0)
                         g0ht[i + 1] = (n + 1).ToString();
+                    TargetPlayer(player.Uid, ut);
                 }
                 XI.InnerGMessage(string.Join(",", g0ht), 61);
             }
@@ -752,6 +765,7 @@ namespace PSD.PSDGamepkg.JNS
                     string inTypeStr = Util.Substring(rlink, rcmIdx + 1, -1);
                     if (tux.Code == rName)
                     {
+                        TargetPlayer(player.Uid, to);
                         if (tux.IsTuxEqiup() && inTypeStr.Contains('!'))
                         {
                             int sancm = inTypeStr.IndexOf('!');
@@ -988,6 +1002,7 @@ namespace PSD.PSDGamepkg.JNS
                         XI.RaiseGMessage("G0OX," + py.Uid + ",0," + player.ROMInt);
                         list.Add(py.Uid);
                     }
+                TargetPlayer(player.Uid, list);
                 player.ROM["Away"] = list;
             }
             else if (type == 1)
@@ -1288,6 +1303,7 @@ namespace PSD.PSDGamepkg.JNS
         public void JNT0712Action(Player player, int type, string fuse, string argst)
         {
             ushort ut = ushort.Parse(argst);
+            TargetPlayer(player.Uid, ut);
             XI.RaiseGMessage("G0TT," + player.Uid);
             int va = XI.Board.DiceValue;
             XI.RaiseGMessage("G0TT," + ut);
@@ -1331,6 +1347,7 @@ namespace PSD.PSDGamepkg.JNS
             int n = int.Parse(g0ht[2]) - 1;
             if (n > 0)
                 XI.InnerGMessage("G0HT," + g0ht[1] + "," + n, 86);
+            TargetPlayer(player.Uid, XI.Board.Garden.Values.Where(p => p.IsAlive).Select(p => p.Uid));
             List<Artiad.Toxi> toxis = XI.Board.Garden.Values.Where(p => p.IsAlive).Select(p =>
                 new Artiad.Toxi(p.Uid, player.Uid, FiveElement.A, 1)).ToList();
             XI.RaiseGMessage(Artiad.Toxi.ToMessage(toxis));
@@ -1434,6 +1451,7 @@ namespace PSD.PSDGamepkg.JNS
                 ushort uq = ushort.Parse(argst.Substring(0, idx));
                 ushort ut = ushort.Parse(argst.Substring(idx + 1));
                 XI.RaiseGMessage("G0QZ," + player.Uid + "," + uq);
+                TargetPlayer(player.Uid, ut);
                 XI.RaiseGMessage("G0IJ," + player.Uid + ",2,1," + ut);
             }
             else if (type == 1)
@@ -1616,7 +1634,10 @@ namespace PSD.PSDGamepkg.JNS
                 {
                     string target = XI.AsyncInput(player.Uid, "/T1(p" + ut + ")", "JNT0901", "0");
                     if (target == ut.ToString())
+                    {
+                        TargetPlayer(player.Uid, ut);
                         XI.RaiseGMessage("G1XR,0," + player.Uid + "," + ut + ",1,1");
+                    }
                     //{
                     //    IDictionary<ushort, string> dicts = new Dictionary<ushort, string>();
                     //    dicts.Add(player.Uid, "Q1(p" + string.Join("p", player.Tux) + ")");
@@ -1813,8 +1834,7 @@ namespace PSD.PSDGamepkg.JNS
             string t = XI.AsyncInput(player.Uid, "T1(p" + string.Join("p", opps)
                 + ")", "JNT1003", "0");
             Player py = XI.Board.Garden[ushort.Parse(t)];
-            XI.AsyncInput(player.Uid, "C1(" + Util.RepeatString("p0", py.Tux.Count)
-                + ")", "JNT1003", "0");
+            XI.AsyncInput(player.Uid, "C1(" + Util.RepeatString("p0", py.Tux.Count) + ")", "JNT1003", "0");
             XI.RaiseGMessage("G0HQ,0," + player.Uid + "," + t + ",2,1");
         }
         #endregion TR010 - MuChanglan
@@ -1834,6 +1854,7 @@ namespace PSD.PSDGamepkg.JNS
         public void JNT1101Action(Player player, int type, string fuse, string argst)
         {
             ushort ut = ushort.Parse(argst);
+            TargetPlayer(player.Uid, ut);
             Artiad.Harm thisHarm = null, thatHarm = null;
             List<Artiad.Harm> harms = Artiad.Harm.Parse(fuse);
             foreach (Artiad.Harm harm in harms)
@@ -2063,6 +2084,7 @@ namespace PSD.PSDGamepkg.JNS
             ushort tux = ushort.Parse(argst.Substring(0, idx));
             ushort ut = ushort.Parse(argst.Substring(idx + 1));
 
+            TargetPlayer(player.Uid, ut);
             XI.RaiseGMessage("G0QZ," + player.Uid + "," + tux);
             Artiad.Harm thisHarm = null, thatHarm = null;
             List<Artiad.Harm> harms = Artiad.Harm.Parse(fuse);
@@ -2139,6 +2161,7 @@ namespace PSD.PSDGamepkg.JNS
             ushort tux = ushort.Parse(argst.Substring(0, idx));
             ushort ut = ushort.Parse(argst.Substring(idx + 1));
 
+            TargetPlayer(player.Uid, ut);
             XI.RaiseGMessage("G0QZ," + player.Uid + "," + tux);
             List<Artiad.Harm> harms = Artiad.Harm.Parse(fuse);
             Player leifeng = XI.Board.Garden[ut];
@@ -2331,9 +2354,15 @@ namespace PSD.PSDGamepkg.JNS
             {
                 player.RAMUshort = 2;
                 if (player.Team == XI.Board.Rounder.Team)
+                {
+                    TargetPlayer(player.Uid, XI.Board.Supporter.Uid);
                     XI.RaiseGMessage("G0IX," + XI.Board.Supporter.Uid + ",2");
+                }
                 else
+                {
+                    TargetPlayer(player.Uid, XI.Board.Hinder.Uid);
                     XI.RaiseGMessage("G0IX," + XI.Board.Hinder.Uid + ",2");
+                }
             }
             else if (type == 2)
             {
@@ -2463,6 +2492,8 @@ namespace PSD.PSDGamepkg.JNS
             if (type == 0)
             {
                 IDictionary<ushort, string> discards = new Dictionary<ushort, string>();
+                TargetPlayer(player.Uid, XI.Board.Garden.Values.Where(p => p.IsAlive
+                    && p.Team == player.Team && p.Tux.Count > 0).Select(p => p.Uid));
                 foreach (Player py in XI.Board.Garden.Values)
                 {
                     //if (py.IsAlive && py.Team == player.Team)
@@ -2577,6 +2608,7 @@ namespace PSD.PSDGamepkg.JNS
         {
             List<Player> invs = argst.Split(',').Select(
                 p => XI.Board.Garden[ushort.Parse(p)]).ToList();
+            TargetPlayer(player.Uid, invs.Select(p => p.Uid));
             List<Artiad.Harm> harms = Artiad.Harm.Parse(fuse);
             foreach (Artiad.Harm harm in harms)
             {
@@ -2687,6 +2719,7 @@ namespace PSD.PSDGamepkg.JNS
             ushort sel = ushort.Parse(argst.Substring(cmidx + 1));
             XI.RaiseGMessage("G0QZ," + player.Uid + "," + ut);
             List<string> g0dh = new List<string>();
+            ISet<ushort> lovers = new HashSet<ushort>();
             foreach (Player py in XI.Board.Garden.Values)
             {
                 if (py.IsAlive)
@@ -2695,6 +2728,7 @@ namespace PSD.PSDGamepkg.JNS
                     int n = hro.Spouses.Where(p => !p.StartsWith("!")).Count();
                     if (n > 0)
                     {
+                        lovers.Add(py.Uid);
                         if (sel == 1)
                             g0dh.Add(py.Uid + ",0," + n);
                         else if (sel == 2)
@@ -2702,6 +2736,7 @@ namespace PSD.PSDGamepkg.JNS
                     }
                 }
             }
+            TargetPlayer(player.Uid, lovers);
             if (g0dh.Count > 0)
                 XI.RaiseGMessage("G0DH," + string.Join(",", g0dh));
         }
@@ -2731,6 +2766,7 @@ namespace PSD.PSDGamepkg.JNS
         public void JNT1901Action(Player player, int type, string fuse, string argst)
         {
             ushort ut = ushort.Parse(argst);
+            TargetPlayer(player.Uid, ut);
             Player py = XI.Board.Garden[ut];
             IDictionary<ushort, string> reservation = new Dictionary<ushort, string>();
             if (player.Tux.Count > 1)
@@ -3097,7 +3133,11 @@ namespace PSD.PSDGamepkg.JNS
         }
         public void JNT2102Action(Player player, int type, string fuse, string argst)
         {
-            XI.RaiseGMessage("G0OX," + XI.Board.Hinder.Uid + ",1,4");
+            if (XI.Board.Hinder.Uid != 0)
+            {
+                TargetPlayer(player.Uid, XI.Board.Hinder.Uid);
+                XI.RaiseGMessage("G0OX," + XI.Board.Hinder.Uid + ",1,4");
+            }
         }
         #endregion TR021 - LongMing
         #region TR022 - XiaChulin
@@ -3290,6 +3330,7 @@ namespace PSD.PSDGamepkg.JNS
             ushort tar = ushort.Parse(argst);
             Player py = XI.Board.Garden[tar];
             bool survive = false;
+            TargetPlayer(player.Uid, tar);
             if (py.Tux.Count > 0)
             {
                 string sel1 = XI.AsyncInput(tar, "#请选择是否立即阵亡.##否##是,Y2", "JNT2403", "0");
@@ -3656,6 +3697,7 @@ namespace PSD.PSDGamepkg.JNS
                 string target = XI.AsyncInput(player.Uid, "#获得【天蛇杖】的,/T1" + ATeammatesTared(player), "JNT2802", "1");
                 if (target.StartsWith("/")) return;
                 ushort to = ushort.Parse(target);
+                TargetPlayer(player.Uid, to);
                 //ushort cardId = XI.LibTuple.TL.EncodeTuxCode("WQ02").DBSerial;
                 ushort cardId = 48;
                 if (XI.Board.TuxDises.Contains(cardId))
@@ -3748,7 +3790,11 @@ namespace PSD.PSDGamepkg.JNS
         {
             if (type == 0)
                 XI.RaiseGMessage("G0DS," + player.Uid + ",1");
-            else if (type == 1) { }
+            else if (type == 1)
+            {
+                ushort who = ushort.Parse(fuse.Substring("G0QR,".Length));
+                TargetPlayer(player.Uid, who);
+            }
         }
         public bool JNH0103Valid(Player player, int type, string fuse)
         {
@@ -5328,6 +5374,7 @@ namespace PSD.PSDGamepkg.JNS
             {
                 string[] g0ht = fuse.Split(',');
                 Player py = XI.Board.Garden[ushort.Parse(g0ht[1])];
+                TargetPlayer(player.Uid, py.Uid);
                 bool yesAction = false;
                 if (py.Tux.Count > 0)
                 {
@@ -5401,6 +5448,7 @@ namespace PSD.PSDGamepkg.JNS
         {
             List<Player> losses = XI.Board.Garden.Values.Where(p => p.IsAlive
                     && XI.Board.IsAttendWar(p) && !XI.Board.IsAttendWarSucc(p)).ToList();
+            TargetPlayer(player.Uid, losses.Select(p => p.Uid));
             List<ushort> qzs = losses.Where(p => p.Tux.Count > 0).Select(p => p.Uid).ToList();
             List<Player> hms = losses.Where(p => p.Tux.Count == 0).ToList();
             if (qzs.Count > 0)
@@ -5562,6 +5610,8 @@ namespace PSD.PSDGamepkg.JNS
         }
         public void JNH1202Action(Player player, int type, string fuse, string prev)
         {
+            TargetPlayer(player.Uid, XI.Board.Garden.Values
+                .Where(p => p.IsAlive && p.Uid != p.Uid).Select(p => p.Uid));
             string result = Util.SParal(XI.Board, p => p.IsAlive &&
                 p.Uid != player.Uid && p.Tux.Count > 0, p => p.Uid + ",1,1", ",");
             if (!string.IsNullOrEmpty(result))
@@ -6302,6 +6352,7 @@ namespace PSD.PSDGamepkg.JNS
             ushort[] tars = argst.Substring(spIdx + ",0,".Length).Split(',')
                 .Select(p => ushort.Parse(p)).ToArray();
             XI.RaiseGMessage("G0QZ," + player.Uid + "," + string.Join(",", tuxs));
+            TargetPlayer(player.Uid, tars);
             int mask = 0;
             foreach (ushort mut in tuxs)
             {
@@ -6845,6 +6896,7 @@ namespace PSD.PSDGamepkg.JNS
                     ushort ut = ushort.Parse(g0hg[i]);
                     sets.Add(ut);
                 }
+                TargetPlayer(player.Uid, sets);
                 XI.RaiseGMessage("G0IJ," + player.Uid + ",2," +
                     sets.Count + "," + string.Join(",", sets));
             }

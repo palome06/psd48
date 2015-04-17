@@ -7,6 +7,12 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="pack://application:,,,/PSDRisoLib;component/Resources/ImgRes.xaml"/>
             </ResourceDictionary.MergedDictionaries>
+            <RadialGradientBrush x:Key="lineStroke">
+                <RadialGradientBrush.GradientStops>
+                    <GradientStop Color="Yellow" Offset="1" />
+                    <GradientStop Color="Gold" Offset="0" />
+                </RadialGradientBrush.GradientStops>
+            </RadialGradientBrush>
         </ResourceDictionary>
     </UserControl.Resources>
 

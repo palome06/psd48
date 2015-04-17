@@ -292,10 +292,12 @@ namespace PSD.ClientAo
                 while (true)
                 {
                     string readLine = WI.Recv(Uid, 0);
-                    //if (uid == 1)
-                    //VI.Cout(uid, "★●▲■" + readLine + "★●▲■");
+                    //if (uid == 1) VI.Cout(uid, "★●▲■" + readLine + "★●▲■");
                     if (!string.IsNullOrEmpty(readLine))
                     {
+                        bool clogfree = readLine.StartsWith("<|>");
+                        if (clogfree)
+                            readLine = readLine.Substring("<|>".Length);
                         lock (unhandledMsg)
                         {
                             unhandledMsg.Enqueue(readLine);
@@ -303,9 +305,10 @@ namespace PSD.ClientAo
                         if (isReplay && WI is VW.Eywi)
                         {
                             VW.Eywi eywi = WI as VW.Eywi;
-                            Thread.Sleep(eywi.Duration);
+                            if (!clogfree)
+                                Thread.Sleep(eywi.Duration);
                             while (!eywi.InProcess)
-                                Thread.Sleep(100);
+                                Thread.Sleep(80);
                         }
                     }
                     else
@@ -2716,6 +2719,18 @@ namespace PSD.ClientAo
                         if (slot == 1) { A0P[ut].Weapon = eq; A0P[ut].ExEquip = 0; }
                         else if (slot == 2) { A0P[ut].Armor = eq; A0P[ut].ExEquip = 0; }
                         else if (slot == 3) { A0P[ut].Trove = eq; A0P[ut].ExEquip = 0; }
+                    }
+                    break;
+                case "E0YS":
+                    {
+                        char fromType = args[1][0];
+                        ushort fromUt = ushort.Parse(args[2]);
+                        for (int i = 3; i < args.Length; i += 2)
+                        {
+                            char toType = args[i][0];
+                            ushort toUt = ushort.Parse(args[i + 1]);
+                            A0O.NextTrail(fromType, fromUt, toType, toUt);
+                        }
                     }
                     break;
             }

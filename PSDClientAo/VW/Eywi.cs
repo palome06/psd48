@@ -8,7 +8,9 @@ namespace PSD.ClientAo.VW
 {
     public class Eywi : Base.VW.IWICL
     {
-        private IEnumerator<string> iter;
+        // private IEnumerator<string> iter;
+        private List<string> dixits;
+        private int dixitCursor;
 
         public int Version { set; get; }
         public ushort Uid { set; get; }
@@ -50,7 +52,7 @@ namespace PSD.ClientAo.VW
 
         public Eywi(string fileName)
         {
-            iter = File.ReadLines(fileName).GetEnumerator();
+            IEnumerator<string> iter = File.ReadLines(fileName).GetEnumerator();
             if (iter.MoveNext())
             {
                 string firstLine = iter.Current;
@@ -65,15 +67,23 @@ namespace PSD.ClientAo.VW
             mMagIndex = 2;
             mInProcess = true;
             yMessage = new Queue<string>();
+
+            dixits = new List<string>();
+            while (iter.MoveNext())
+                dixits.Add(iter.Current);
+            dixitCursor = 0;
         }
 
         public string Recv(ushort me, ushort from)
         {
             if (mInProcess)
             {
-                while (iter.MoveNext())
+                while (dixitCursor < dixits.Count)
                 {
-                    string line = iter.Current;
+                    string line = dixits[dixitCursor];
+                    string prefix = (dixitCursor + 1 < dixits.Count &&
+                         IsClogFreeUIEvent(dixits[dixitCursor + 1])) ? "<|>" : "";
+                    ++dixitCursor;
                     if (Version >= 99)
                     {
                         line = Base.LogES.DESDecrypt(line, "AKB48Show!",
@@ -93,7 +103,7 @@ namespace PSD.ClientAo.VW
                             yMessage.Enqueue(line);
                     }
                     else
-                        return line;
+                        return prefix + line;
                 }
             }
             return null;
@@ -113,6 +123,14 @@ namespace PSD.ClientAo.VW
                     return yMessage.Dequeue();
             }
             return null;
+        }
+        // to indicate whether $message is clog-free, then show it directly.
+        // e.g. Target event
+        public bool IsClogFreeUIEvent(string message)
+        {
+            string head = Util.Substring(message, 0, message.IndexOf(','));
+            string[] clogfrees = new string[] { "E0AS", "E0YS" };
+            return clogfrees.Contains(head);
         }
 
         #region Version

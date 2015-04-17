@@ -69,12 +69,6 @@ namespace PSD.ClientAo
         #endregion Members and Constants
         #region FlyingGet
 
-        private void NextTrail(char fromType, ushort from, char toType, ushort to)
-        {
-            Canvas flyingBody = new Canvas() { Width = 450, Height = 125 };
-            flyingBody.Background = new SolidColorBrush(Colors.LightCoral);
-        }
-
         private void FlyingGet(List<Card.Ruban> rubans,
             double x1, double y1, double x2, double y2, bool fade)
         {
@@ -253,11 +247,11 @@ namespace PSD.ClientAo
             switch (s)
             {
                 //case 0: x = CENTER_X; y = CENTER_Y; break;
-                case 1: x = 0; y = 0; break;
+                case 1: x = 0; y = 5; break;
                 case 2: x = 0; y = 170; break;
-                case 3: x = 280; y = 0; break;
+                case 3: x = 280; y = -10; break;
                 case 4: x = 240; y = 390; break;
-                case 5: x = 570; y = 0; break;
+                case 5: x = 570; y = 5; break;
                 case 6: x = 650; y = 170; break;
                 default: x = CENTER_X; y = CENTER_Y; break;
             }
@@ -509,5 +503,95 @@ namespace PSD.ClientAo
         }
 
         #endregion FlashOn
+
+        #region Trails
+        public static readonly TimeSpan TRIAL_TIME = TimeSpan.FromSeconds(0.36);
+        public static readonly TimeSpan TRIAL_KEEP = TimeSpan.FromSeconds(1.2);
+
+        //public const double CENTER_X = 290, CENTER_Y = 112; // OLD_CENTER_Y = 162;
+        //public const double CENTER_X_BIAS = 145;
+
+        //public const double ORCHIS_WIDTH = 450;
+        //public const int ORCHIS_CAP = 9;
+        public void NextTrail(char fromType, ushort from, char toType, ushort to)
+        {
+            if (fromType == toType && from == to)
+                return; // self assignment, do nothing here
+
+            Line line = new Line() { StrokeThickness = 2.5, Stroke = this.Resources["lineStroke"] as RadialGradientBrush };
+            double x1 = 0, y1 = 0, x2 = 0, y2 = 0;
+            if (fromType == 'T')
+                ParseCord(Orch.AD.Player2Position(from), out x1, out y1);
+            else if (fromType == 'M')
+            {
+                if (from == 1) { x1 = 24; y1 = -118; }
+                else if (from == 2) { x1 = 73; y1 = -118; }
+            }
+            else if (fromType == 'P') // TODO: deal with pool
+            {
+                if (from == 1) { } // AKA
+                else if (from == 2) { } // AO
+            }
+            if (toType == 'T')
+                ParseCord(Orch.AD.Player2Position(to), out x2, out y2);
+            else if (toType == 'M')
+            {
+                if (to == 1) { x2 = 24; y2 = -118; }
+                else if (to == 2) { x2 = 73; y2 = -118; }
+            }
+            else if (toType == 'P') // TODO: deal with pool
+            {
+                if (to == 1) { } // AKA
+                else if (to == 2) { } // AO
+            }
+
+            line.X1 = line.X2 = x1;
+            line.Y1 = line.Y2 = y1;
+
+            Storyboard sb = new Storyboard();
+            DoubleAnimation aniG;
+            aniG = new DoubleAnimation() { From = x1, To = x2, Duration = TRIAL_TIME };
+            Storyboard.SetTarget(aniG, line);
+            Storyboard.SetTargetProperty(aniG, new PropertyPath(Line.X2Property));
+            sb.Children.Add(aniG);
+
+            aniG = new DoubleAnimation() { From = y1, To = y2, Duration = TRIAL_TIME };
+            Storyboard.SetTarget(aniG, line);
+            Storyboard.SetTargetProperty(aniG, new PropertyPath(Line.Y2Property));
+            sb.Children.Add(aniG);
+
+            aniG = new DoubleAnimation() { From = x1, To = x2, Duration = TRIAL_TIME };
+            aniG.BeginTime = TRIAL_TIME + TRIAL_KEEP;
+            Storyboard.SetTarget(aniG, line);
+            Storyboard.SetTargetProperty(aniG, new PropertyPath(Line.X1Property));
+            sb.Children.Add(aniG);
+
+            aniG = new DoubleAnimation() { From = y1, To = y2, Duration = TRIAL_TIME };
+            aniG.BeginTime = TRIAL_TIME + TRIAL_KEEP;
+            Storyboard.SetTarget(aniG, line);
+            Storyboard.SetTargetProperty(aniG, new PropertyPath(Line.Y1Property));
+            sb.Children.Add(aniG);
+
+            //var oaukf = new ObjectAnimationUsingKeyFrames();
+            //oaukf.KeyFrames.Add(new DiscreteObjectKeyFrame(
+            //    Visibility.Collapsed, KeyTime.FromTimeSpan(TimeSpan.FromSeconds(3.5))));
+            //Storyboard.SetTarget(oaukf, line);
+            //Storyboard.SetTargetProperty(oaukf, new PropertyPath(Line.VisibilityProperty));
+            //sb.Children.Add(oaukf);
+
+            line.Visibility = Visibility.Visible;
+            aniCanvas.Children.Add(line);
+            sb.Begin();
+
+            new Thread(delegate()
+            {
+                Thread.Sleep(TRIAL_TIME + TRIAL_KEEP + TRIAL_TIME);
+                aniCanvas.Dispatcher.BeginInvoke((Action)(() =>
+                {
+                    aniCanvas.Children.Remove(line);
+                }));
+            }).Start();
+        }
+        #endregion Trails
     }
 }

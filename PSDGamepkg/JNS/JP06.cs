@@ -297,6 +297,7 @@ namespace PSD.PSDGamepkg.JNS
             if (!ai.StartsWith("/"))
             {
                 ushort from = ushort.Parse(ai);
+                TargetPlayer(player.Uid, from);
                 VI.Cout(0, "{0}对{1}使用「偷盗」.", XI.DisplayPlayer(player.Uid), XI.DisplayPlayer(from));
                 string c0 = Util.RepeatString("p0",
                     XI.Board.Garden[from].Tux.Except(XI.Board.ProtectedTux).Count());
@@ -325,6 +326,8 @@ namespace PSD.PSDGamepkg.JNS
         public void JP03Action(Player player, int type, string fuse, string argst)
         {
             VI.Cout(0, "{0}使用「五气朝元」.", player.Uid);
+            TargetPlayer(player.Uid, XI.Board.Garden.Values.Where(p => p.IsAlive &&
+                p.Team == player.Team).Select(p => p.Uid));
             XI.RaiseGMessage(Artiad.Cure.ToMessage(XI.Board.Garden.Values.Where(p => p.IsAlive &&
                 p.Team == player.Team).Select(p => new Artiad.Cure(p.Uid, player.Uid, FiveElement.AQUA, 1))));
         }
@@ -333,6 +336,7 @@ namespace PSD.PSDGamepkg.JNS
         {
             ushort to = ushort.Parse(XI.AsyncInput(player.Uid,
                 "#获得2张补牌,T1" + Util.SSelect(XI.Board, p => p.IsTared), "JP04", "0"));
+            TargetPlayer(player.Uid, to);
             VI.Cout(0, "{0}对{1}使用「鼠儿果」.", XI.DisplayPlayer(player.Uid), XI.DisplayPlayer(to));
             XI.RaiseGMessage("G0DH," + to + ",0,2");
         }
@@ -345,6 +349,7 @@ namespace PSD.PSDGamepkg.JNS
                 ushort to = ushort.Parse(XI.AsyncInput(
                     player.Uid, "#攻击,T1" + Util.SSelect(XI.Board, p => p.IsTared), "JP05", "0"));
                 //ushort to = ushort.Parse(argst);
+                TargetPlayer(player.Uid, to);
                 VI.Cout(0, "{0}对{1}使用「天雷破」.", XI.DisplayPlayer(player.Uid), XI.DisplayPlayer(to));
                 XI.RaiseGMessage(Artiad.Harm.ToMessage(
                     new Artiad.Harm(to, player.Uid, FiveElement.THUNDER, 2, maskFromJP)));
@@ -352,6 +357,7 @@ namespace PSD.PSDGamepkg.JNS
             else if (type == 1)
             {
                 ushort to = ushort.Parse(fuse.Substring("R#EV,".Length));
+                TargetPlayer(player.Uid, to);
                 VI.Cout(0, "{0}对{1}使用「天雷破」.", XI.DisplayPlayer(player.Uid), XI.DisplayPlayer(to));
                 XI.RaiseGMessage(Artiad.Harm.ToMessage(
                     new Artiad.Harm(to, player.Uid, FiveElement.THUNDER, 2, maskFromJP)));
@@ -384,6 +390,7 @@ namespace PSD.PSDGamepkg.JNS
                 if (!second.StartsWith("/"))
                 {
                     ushort card = ushort.Parse(second);
+                    TargetPlayer(player.Uid, owner);
                     if (card == 0)
                     {
                         VI.Cout(0, "{0}对{1}使用「铜钱镖」，弃置其一张手牌.",
@@ -473,6 +480,7 @@ namespace PSD.PSDGamepkg.JNS
                 ushort tg = ushort.Parse(XI.AsyncInput(player.Uid, ic, "「灵葫仙丹」", "1"));
                 if (invs.Contains(tg))
                 {
+                    TargetPlayer(player.Uid, tg);
                     VI.Cout(0, "{0}对{1}使用「灵葫仙丹」.", XI.DisplayPlayer(player.Uid), XI.DisplayPlayer(tg));
                     XI.RaiseGMessage(Artiad.Cure.ToMessage(new Artiad.Cure(tg, player.Uid, FiveElement.A, 2)));
                 }
@@ -502,6 +510,7 @@ namespace PSD.PSDGamepkg.JNS
                 ushort tg = ushort.Parse(XI.AsyncInput(host, ic, "「灵葫仙丹」", "1"));
                 if (invs.Contains(tg))
                 {
+                    TargetPlayer(player.Uid, tg);
                     VI.Cout(0, "{0}对{1}使用「灵葫仙丹」.", XI.DisplayPlayer(host), XI.DisplayPlayer(tg));
                     XI.RaiseGMessage(Artiad.Cure.ToMessage(new Artiad.Cure(tg, host, FiveElement.A, 2)));
                 }
@@ -610,6 +619,7 @@ namespace PSD.PSDGamepkg.JNS
         {
             ushort gamer = ushort.Parse(XI.AsyncInput(player.Uid,
                 "T1" + Util.SSelect(XI.Board, p => p.Team == player.Team && p.IsTared), "「洞冥宝镜」", "0"));
+            TargetPlayer(player.Uid, gamer);
             VI.Cout(0, "{0}对{1}使用「洞冥宝镜」.", XI.DisplayPlayer(player.Uid), XI.DisplayPlayer(gamer));
             XI.RaiseGMessage("G0XZ," + gamer + ",2,0,1");
             //XI.InnerGMessage("G1SG,0", 0);
@@ -908,6 +918,7 @@ namespace PSD.PSDGamepkg.JNS
                             q.Uid != p.Uid && q.Team == p.Team).Any()).Select(p => p.Uid)) + ")";
                     string fromStr = XI.AsyncInput(player.Uid, i1, "JPT1", "0");
                     Player from = XI.Board.Garden[ushort.Parse(fromStr)];
+                    TargetPlayer(player.Uid, from.Uid);
                     do
                     {
                         string i2 = "#交予宠物的,/T1(p" + string.Join("p", XI.Board.Garden.Values.Where(
@@ -991,7 +1002,10 @@ namespace PSD.PSDGamepkg.JNS
             List<Player> pys = list.Select(p => XI.Board.Garden[p]).Where(p =>
                 p != null && p.IsAlive && p.Team == player.Team).ToList();
             if (pys.Count > 0)
+            {
+                TargetPlayer(player.Uid, pys.Select(p => p.Uid));
                 XI.RaiseGMessage("G0DH," + string.Join(",", pys.Select(p => p.Uid + ",0,1")));
+            }
         }
         public bool ZPT1Bribe(Player player, int type, string fuse)
         {
@@ -1405,6 +1419,7 @@ namespace PSD.PSDGamepkg.JNS
                 ushort iv = ushort.Parse(targets.Substring(0, cmidx));
                 ushort jv = ushort.Parse(targets.Substring(cmidx + 1));
                 int mn = Math.Min(3, Math.Min(g[iv].Tux.Count, g[jv].Tux.Count));
+                TargetPlayer(player.Uid, new ushort[] { iv, jv });
                 XI.RaiseGMessage("G1XR,2," + iv + "," + jv + ",0," + mn);
             }
             else if (input == "3")
@@ -1547,6 +1562,7 @@ namespace PSD.PSDGamepkg.JNS
                     XI.AsyncInput(player.Uid, "/", "TPT3", "0"); return;
                 }
                 string tar = XI.AsyncInput(player.Uid, "#【净衣咒】使用,T1" + ATaredTeammates(player), "TPT3", "0");
+                TargetPlayer(player.Uid, tar);
                 Player locuster = XI.Board.Garden[ushort.Parse(tar)];
 
                 int idx = fuse.IndexOf(';');
@@ -2455,6 +2471,14 @@ namespace PSD.PSDGamepkg.JNS
                     "," + locus.Code + "," + locustee + ";" + type + "," + fuse, 101);
             }
             XI.InnerGMessage(cdFuse + ";" + type + "," + fuse, 106);
+        }
+        private void TargetPlayer(ushort from, ushort to)
+        {
+            XI.RaiseGMessage("G2YS,T," + from + ",T," + to);
+        }
+        private void TargetPlayer(ushort from, IEnumerable<ushort> tos)
+        {
+            XI.RaiseGMessage("G2YS,T," + from + "," + string.Join(",", tos.Select(p => "T," + p)));
         }
         #endregion Tux Util
         //private bool IfFuseSatisfy(Player player, string prev, string target)

@@ -515,6 +515,7 @@ namespace PSD.PSDGamepkg
                         ushort mon = ushort.Parse(args[2]);
                         if (mon != 0)
                             Board.Monster2 = mon;
+                        Board.FightTangled = true;
                     }
                     else if (priority == 200)
                     {

@@ -132,7 +132,13 @@ namespace PSD.ClientAo
                 orchis40.ShowFlyingGet(hi, sfrom, sto, isLong);
             }));
         }
-
+        public void NextTrail(char fromType, ushort from, char toType, ushort to)
+        {
+            orchis40.Dispatcher.BeginInvoke((Action)(() =>
+            {
+                orchis40.NextTrail(fromType, from, toType, to);
+            }));
+        }
         #endregion Orchis40
     }
 }

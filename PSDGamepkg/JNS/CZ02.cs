@@ -131,7 +131,7 @@ namespace PSD.PSDGamepkg.JNS
         {
             ushort who = (ushort)(fuse[fuse.IndexOf('R') + 1] - '0');
             if (player.Uid == who)
-                return XI.Board.Monster2 == 0 && XI.Board.MonPiles.Count > 0;
+                return !XI.Board.FightTangled && XI.Board.MonPiles.Count > 0;
             else
                 return false;
         }

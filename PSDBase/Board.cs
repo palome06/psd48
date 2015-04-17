@@ -77,6 +77,8 @@ namespace PSD.Base
         public ushort Eve { get; set; }
         // Round of using card, 0-Nobody, 1-Aka, 2-Ao
         public int UseCardRound { set; get; }
+        // Whether the fight is tangled or not
+        public bool FightTangled { set; get; }
 
         public List<ushort> PZone { private set; get; }
         // Consumed Pets list, to be removed later in ZD
@@ -175,7 +177,6 @@ namespace PSD.Base
                 (player.Uid == Supporter.Uid && SupportSucc);
         }
 
-
         public int CalculateRPool()
         {
             return Rounder.STR + RPool + (SupportSucc ? Supporter.STR : 0);
@@ -194,6 +195,11 @@ namespace PSD.Base
                     return py.Team == Rounder.Team;
             }
             return CalculateRPool() >= CalculateOPool();
+        }
+        public void CleanBattler()
+        {
+            Supporter = null; Hinder = null;
+            SupportSucc = false; HinderSucc = false;
         }
         public List<ushort> OrderedPlayer() { return OrderedPlayer(Rounder.Uid); }
         public List<ushort> OrderedPlayer(ushort start)
@@ -236,6 +242,7 @@ namespace PSD.Base
             RPoolGain = new Dictionary<string, int>();
             OPoolGain = new Dictionary<string, int>();
             IsMonsterDebut = false;
+            FightTangled = false;
         }
         // Create a lumberjack of monster/NPC, act as normal humans
         public static Player Lumberjack(Card.NMB nmb, ushort orgCode)
@@ -265,8 +272,9 @@ namespace PSD.Base
                 state |= !py.Immobilized ? 0 : 4;
                 state |= !py.PetDisabled ? 0 : 8;
                 h09g.Append("," + state);
-                h09g.Append("," + py.HP + "," + py.HPb + "," + py.STR + "," + py.STRa
-                    + "," + py.DEX + "," + py.DEXa + "," + py.Tux.Count
+                h09g.Append("," + py.HP + "," + py.HPb + "," + py.STR + ","
+                    + (InFight ? py.STRa : py.STR) + "," + py.DEX + ","
+                    + (InFight ? py.DEXa : py.DEX) + "," + py.Tux.Count
                     + "," + py.Weapon + "," + py.Armor + "," + py.Trove + "," + py.ExEquip);
                 Card.Luggage lug = tuple.TL.DecodeTux(py.Trove) as Card.Luggage;
                 if (lug != null && lug.Capacities.Count > 0)

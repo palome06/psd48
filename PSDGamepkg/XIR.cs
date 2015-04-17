@@ -283,8 +283,8 @@ namespace PSD.PSDGamepkg
                 DebugCondition();
             else
             {
-                foreach (Player player in garden.Values)
-                    RaiseGMessage("G0HQ,2," + player.Uid + ",1,3");
+                foreach (ushort ut in Board.OrderedPlayer((ushort)1))
+                    RaiseGMessage("G0HQ,2," + ut + ",1,3");
             }
 
             listOfThreads = new List<Thread>();
@@ -590,6 +590,7 @@ namespace PSD.PSDGamepkg
                         }
                     case "Z7":
                         Board.InFightThrough = true;
+                        Board.FightTangled = false;
                         AwakeABCValue(false);
                         RunQuadStage(rstage, 0);
                         rstage = "R" + rounder + "Z1"; break;
@@ -754,8 +755,7 @@ namespace PSD.PSDGamepkg
                         //WI.BCast(rstage + ",0");
                         //RaiseGMessage("G0FI,U," + rounder);
                         RunQuadStage(rstage, 0);
-                        Board.Supporter = null; Board.Hinder = null;
-                        Board.SupportSucc = false; Board.HinderSucc = false;
+                        Board.CleanBattler();
                         rstage = "R" + rounder + "ZZ"; break;
                     case "ZF":
                         WI.BCast(rstage + ",0");
@@ -763,8 +763,7 @@ namespace PSD.PSDGamepkg
                         foreach (Player player in Board.Garden.Values)
                             RaiseGMessage("G0AX," + player.Uid);
                         RunQuadStage(rstage, 0);
-                        Board.Supporter = null; Board.Hinder = null;
-                        Board.SupportSucc = false; Board.HinderSucc = false;
+                        Board.CleanBattler();
                         rstage = "R" + rounder + "ZZ"; break;
                     case "ZZ":
                         RaiseGMessage("G17F,U," + rounder);
@@ -798,7 +797,7 @@ namespace PSD.PSDGamepkg
                         {
                             WI.BCast(rstage + ",0");
                             Board.InFight = false; Board.InFightThrough = false;
-                            Board.Battler = null; Board.Supporter = null; Board.Hinder = null;
+                            Board.Battler = null; Board.CleanBattler();
                             if (Board.MonPiles.Count <= 0)
                                 RaiseGMessage("G1WJ,0");
                             RecycleMonster(false, false);

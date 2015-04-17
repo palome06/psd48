@@ -114,7 +114,7 @@ namespace PSD.PSDGamepkg
             //10302, 17012, 17005, 17022, 10605, 17028
             //10105, 10608, 10605, 10303, 19010, 17002
             //19014, 10102, 10501, 10303, 19010, 19016
-            17009, 19006, 19017, 10104, 10606, 18004
+            19017, 10104, 10606, 18004, 17009, 19006
         };
 
         #region Memeber Declaration & Constructor
@@ -578,12 +578,11 @@ namespace PSD.PSDGamepkg
                  "OX", "AX", "IB", "OB", "IW", "OW", "WB", "9P", "IP", "OP", "CZ", "HC", "HD", "HH",
                  "HI", "HL", "IC", "OC", "HT", "HG", "QR", "HZ", "TT", "T7", "JM", "WN", "IJ", "OJ",
                  "IE", "OE", "IS", "OS", "LH", "IV", "OV", "PB", "YM", "HR", "FI", "ON", "SN", "MA",
-                 "PH", "ZJ"
-            };
+                 "PH", "ZJ" };
             string[] g1 = new string[] { "DI", "IU", "OU", "CW", "ZK", "IZ", "OZ", "WP", "SG", "HK",
                  "WJ", "JG", "XR", "EV", "CK", "7F", "YP" };
             string[] g2 = new string[] { "IN", "RN", "CN", "QC", "FU", "QU", "CL", "ZU", "HU", "WK",
-                 "AK", "IL", "OL", "SW", "AS" };
+                 "AK", "IL", "OL", "SW", "AS", "SY" };
             foreach (string g0event in g0)
                 Util.AddToMultiMap(dict, "G0" + g0event, new SkTriple() { Name = "~100", Priorty = 100 });
             foreach (string g1event in g1)

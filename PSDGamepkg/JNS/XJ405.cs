@@ -73,7 +73,7 @@ namespace PSD.PSDGamepkg.JNS
         }
         public void JN10101Action(Player player, int type, string fuse, string argst)
         {
-            VI.Cout(0, "李逍遥触发「侠骨柔肠」，对{0}的命中+1.", XI.DisplayPlayer(XI.Board.Rounder.Uid));
+            TargetPlayer(XI.Board.Rounder.Uid, player.Uid);
             XI.RaiseGMessage("G0IX," + player.Uid + ",1,1");
         }
         public bool JN10102Valid(Player player, int type, string fuse)
@@ -84,9 +84,9 @@ namespace PSD.PSDGamepkg.JNS
         }
         public void JN10102Action(Player player, int type, string fuse, string argst)
         {
+            TargetPlayer(player.Uid, XI.Board.Hinder.Uid);
             ushort tar = ushort.Parse(XI.AsyncInput(player.Uid, "#获得的,T1(p" +
                 XI.Board.Hinder.Uid + ")", "JN10102", "0"));
-            VI.Cout(0, "李逍遥触发「飞龙探云手」，获得妨碍者{0}一张牌.", XI.DisplayPlayer(tar));
             string c0 = Util.RepeatString("p0", XI.Board.Garden[XI.Board.Hinder.Uid].Tux.Count);
             XI.AsyncInput(player.Uid, "#获得的,C1(" + c0 + ")", "JN10102" , "0");
             XI.RaiseGMessage("G0HQ,0," + player.Uid + "," + XI.Board.Hinder.Uid + ",2,1");
@@ -346,6 +346,8 @@ namespace PSD.PSDGamepkg.JNS
                 if (yes.Equals("2"))
                 {
                     player.RAMUshort = 1;
+                    XI.RaiseGMessage("G17F,U," + player.Uid);
+                    XI.Board.CleanBattler();
                     XI.RaiseGMessage("G0JM,R" + player.Uid + "ZW");
                 }
                 else
@@ -391,8 +393,8 @@ namespace PSD.PSDGamepkg.JNS
             if (argst != "0")
             {
                 player.RestZP = 0;
-                VI.Cout(0, "拜月教主发动「召唤水魔兽」，战力池+5.");
                 XI.RaiseGMessage("G0QZ," + player.Uid + "," + argst);
+                XI.RaiseGMessage("G2YS,T," + player.Uid + ",P," + (ushort)player.Team);
                 XI.RaiseGMessage("G0IP," + player.Team + ",5");
             }
         }
@@ -519,6 +521,7 @@ namespace PSD.PSDGamepkg.JNS
                 {
                     VI.Cout(0, "沈欺霜触发「仙霞五奇」，触发者灵力+3.");
                     player.RAMUshort = 1;
+                    TargetPlayer(player.Uid, XI.Board.Rounder.Uid);
                     XI.RaiseGMessage("G0IA," + XI.Board.Rounder.Uid + ",1,3");
                 }
                 else if (player.Team == XI.Board.Rounder.OppTeam)
@@ -527,6 +530,7 @@ namespace PSD.PSDGamepkg.JNS
                     {
                         VI.Cout(0, "沈欺霜触发「仙霞五奇」，怪物灵力+3.");
                         player.RAMUshort = 1;
+                        XI.RaiseGMessage("G2YS,T," + player.Uid + ",M1");
                         XI.RaiseGMessage("G0IB," + XI.Board.Monster1 + ",3");
                     }
                 }
@@ -538,11 +542,13 @@ namespace PSD.PSDGamepkg.JNS
                     if (player.RAMUshort == 0)
                     {
                         player.RAMUshort = 1;
+                        TargetPlayer(player.Uid, XI.Board.Rounder.Uid);
                         XI.RaiseGMessage("G0IA," + XI.Board.Rounder.Uid + ",1,3");
                     }
                     else if (player.RAMUshort == 1)
                     {
                         player.RAMUshort = 0;
+                        TargetPlayer(player.Uid, XI.Board.Rounder.Uid);
                         XI.RaiseGMessage("G0OA," + XI.Board.Rounder.Uid + ",1,3");
                     }
                 }
@@ -553,17 +559,18 @@ namespace PSD.PSDGamepkg.JNS
                         if (player.RAMUshort == 0)
                         {
                             player.RAMUshort = 1;
+                            XI.RaiseGMessage("G2YS,T," + player.Uid + ",M1");
                             XI.RaiseGMessage("G0IB," + XI.Board.Monster1 + ",3");
                         }
                         else if (player.RAMUshort == 1)
                         {
                             player.RAMUshort = 0;
+                            XI.RaiseGMessage("G2YS,T," + player.Uid + ",M1");
                             XI.RaiseGMessage("G0OB," + XI.Board.Monster1 + ",3");
                         }
                     }
                 }
             }
-            //XI.RaiseGMessage("G0IP," + player.Team + ",3");
         }
         public void JN20302Action(Player player, int type, string fuse, string argst)
         {
@@ -1031,6 +1038,7 @@ namespace PSD.PSDGamepkg.JNS
             XI.RaiseGMessage("G0QZ," + player.Uid + "," + string.Join(",", restCards));
             List<ushort> tos = Util.TakeRange(blocks, player.RAMUshort + 1, blocks.Length)
                 .Select(p => ushort.Parse(p)).ToList();
+            TargetPlayer(player.Uid, tos);
             ++player.RAMUshort;
             int maskDuel = Artiad.IntHelper.SetMask(0, GiftMask.ALIVE_DUEL, true);
             foreach (ushort to in tos)
@@ -1122,6 +1130,7 @@ namespace PSD.PSDGamepkg.JNS
             int idx = args.IndexOf(',');
             ushort who = ushort.Parse(args.Substring(0, idx));
             ushort pet = ushort.Parse(args.Substring(idx + 1));
+            TargetPlayer(player.Uid, who);
             XI.RaiseGMessage("G0HL," + who + "," + pet);
             XI.RaiseGMessage("G0ON," + who + ",M,1," + pet);
             //XI.InnerGMessage(fuse, 141);
@@ -1835,14 +1844,15 @@ namespace PSD.PSDGamepkg.JNS
                     p => p.IsTared && p.Uid != player.Uid).Select(p => p.Uid)) + ")";
                 string target = XI.AsyncInput(player.Uid, "#「结拜」的,T1" + range, "JN50502", "0");
                 XI.RaiseGMessage("G0IJ," + player.Uid + ",2,1," + ushort.Parse(target));
-                VI.Cout(0, "玄霄对玩家{0}发动了「结拜」.", XI.DisplayPlayer(player.TokenTars));
+                TargetPlayer(player.Uid, player.SingleTokenTar);
                 XI.SendOutUAMessage(player.Uid, "JN50502," + target, "0");
                 //if (type == 3)
                 //    XI.InnerGMessage(fuse, 111);
             }
             else if (type == 1)
             {
-                VI.Cout(0, "玄霄触发「结拜」，对玩家{0}的命中+1.", XI.DisplayPlayer(player.TokenTars));
+                TargetPlayer(player.Uid, player.SingleTokenTar);
+                VI.Cout(0, "玄霄触发「结拜」，对玩家{0}的命中+1.", XI.DisplayPlayer(player.SingleTokenTar));
                 XI.RaiseGMessage("G0IX," + player.Uid + ",1,1");
             }
             else if (type == 2)
@@ -2312,6 +2322,7 @@ namespace PSD.PSDGamepkg.JNS
                     string inTypeStr = Util.Substring(rlink, rcmIdx + 1, -1);
                     if (tux.Code == rName)
                     {
+                        TargetPlayer(player.Uid, to);
                         if (tux.IsTuxEqiup() && inTypeStr.Contains('!'))
                         {
                             int sancm = inTypeStr.IndexOf('!');
@@ -2430,6 +2441,7 @@ namespace PSD.PSDGamepkg.JNS
         public void JN60302Action(Player player, int type, string fuse, string args)
         {
             player.RAMUshort = 1;
+            TargetPlayer(player.Uid, XI.Board.Supporter.Uid);
             XI.RaiseGMessage("G0IX," + XI.Board.Supporter.Uid + ",2");
         }
         #endregion XJ503 - LongYou
@@ -2852,6 +2864,7 @@ namespace PSD.PSDGamepkg.JNS
                 if (harm.Who == who && harm.Element != FiveElement.SOL &&
                         harm.Element != FiveElement.LOVE)
                 {
+                    TargetPlayer(player.Uid, who);
                     if ((harm.N -= point) <= 0)
                         rvs.Add(harm);
                     XI.RaiseGMessage("G0OJ," + player.Uid + ",0," + point);
@@ -2972,6 +2985,7 @@ namespace PSD.PSDGamepkg.JNS
         {
             ushort[] uts = argst.Split(',').Select(p => ushort.Parse(p)).ToArray();
             XI.RaiseGMessage("G0QZ," + player.Uid + "," + uts[0]);
+            TargetPlayer(player.Uid, uts);
             XI.RaiseGMessage("G0TT," + uts[1]);
             int va = XI.Board.DiceValue;
             XI.RaiseGMessage("G0TT," + uts[2]);
@@ -3253,12 +3267,19 @@ namespace PSD.PSDGamepkg.JNS
         {
             if (type == 0)
             {
+                XI.RaiseGMessage("G2YS,T" + player.Uid + ",M1");
                 XI.RaiseGMessage("G0OB," + XI.Board.Monster1 + ",2");
                 if (XI.Board.Hinder.IsTared)
+                {
+                    TargetPlayer(player.Uid, XI.Board.Hinder.Uid);
                     XI.RaiseGMessage("G0OX," + XI.Board.Hinder.Uid + ",1,1");
+                }
             }
             else if (type == 1)
+            {
+                XI.RaiseGMessage("G2YS,T" + player.Uid + ",M2");
                 XI.RaiseGMessage("G0OB," + XI.Board.Monster2 + ",2");
+            }
         }
         public bool JNS0902Valid(Player player, int type, string fuse)
         {
@@ -3338,6 +3359,7 @@ namespace PSD.PSDGamepkg.JNS
             if (type == 0)
             {
                 ushort target = ushort.Parse(argst);
+                TargetPlayer(player.Uid, target);
                 XI.RaiseGMessage("G0IJ," + player.Uid + ",2,1," + target);
                 XI.Board.Garden[target].ZPDisabled = true;
             }
@@ -3371,6 +3393,7 @@ namespace PSD.PSDGamepkg.JNS
             int idxc = argst.IndexOf(',');
             ushort t1 = ushort.Parse(argst.Substring(0, idxc));
             ushort t2 = ushort.Parse(argst.Substring(idxc + 1));
+            TargetPlayer(player.Uid, new ushort[] { t1, t2 });
             XI.RaiseGMessage("G0HC,2," + t1 + "," + t2);
         }
         public string JNS0502Input(Player player, int type, string fuse, string prev)
@@ -3458,6 +3481,7 @@ namespace PSD.PSDGamepkg.JNS
             int idx = argst.IndexOf(',');
             ushort who = ushort.Parse(argst.Substring(0, idx));
             ushort pet = ushort.Parse(argst.Substring(idx + 1));
+            TargetPlayer(player.Uid, who);
             XI.RaiseGMessage("G0HL," + who + "," + pet);
             XI.RaiseGMessage("G0ON," + who + ",M,1," + pet);
             //XI.InnerGMessage("G1WJ,0", 91);
@@ -3554,12 +3578,14 @@ namespace PSD.PSDGamepkg.JNS
         }
         private void Harm(Player src, Player py, int n, FiveElement five = FiveElement.A, int mask = 0)
         {
+            TargetPlayer(src.Uid, py.Uid);
             XI.RaiseGMessage(Artiad.Harm.ToMessage(
                 new Artiad.Harm(py.Uid, src == null ? 0 : src.Uid, five, n, mask)));
         }
 
         private void Harm(Player src, IEnumerable<Player> invs, int n, FiveElement five = FiveElement.A, int mask = 0)
         {
+            TargetPlayer(src.Uid, invs.Select(p => p.Uid));
             XI.RaiseGMessage(Artiad.Harm.ToMessage(invs.Select(p =>
                 new Artiad.Harm(p.Uid, src.Uid, five, n, mask))));
         }
@@ -3567,6 +3593,7 @@ namespace PSD.PSDGamepkg.JNS
         private void Harm(Player src, List<Player> invs,
             List<int> ns, List<int> mask = null, FiveElement five = FiveElement.A)
         {
+            TargetPlayer(src.Uid, invs.Select(p => p.Uid));
             int sz = invs.Count;
             XI.RaiseGMessage(Artiad.Harm.ToMessage(Enumerable.Range(0, sz).Select
                 (p => new Artiad.Harm(invs[p].Uid, src.Uid, five, ns[p], mask == null ? 0 : mask[p]))));
@@ -3574,12 +3601,14 @@ namespace PSD.PSDGamepkg.JNS
 
         private void Cure(Player src, Player py, int n, FiveElement five = FiveElement.A)
         {
+            TargetPlayer(src.Uid, py.Uid);
             XI.RaiseGMessage(Artiad.Cure.ToMessage(
                 new Artiad.Cure(py.Uid, src.Uid, five, n)));
         }
 
         private void Cure(Player src, IEnumerable<Player> invs, int n, FiveElement five = FiveElement.A)
         {
+            TargetPlayer(src.Uid, invs.Select(p => p.Uid));
             XI.RaiseGMessage(Artiad.Cure.ToMessage(invs.Select(p => new Artiad.Cure(
                 p.Uid, src.Uid, five, n))));
         }
@@ -3587,9 +3616,21 @@ namespace PSD.PSDGamepkg.JNS
         private void Cure(Player src, List<Player> invs,
             List<int> ns, FiveElement five = FiveElement.A)
         {
+            TargetPlayer(src.Uid, invs.Select(p => p.Uid));
             int sz = invs.Count;
             XI.RaiseGMessage(Artiad.Cure.ToMessage(Enumerable.Range(0, sz).Select
                 (p => new Artiad.Cure(invs[p].Uid, src.Uid, five, ns[p]))));
+        }
+        private void TargetPlayer(ushort from, ushort to)
+        {
+            if (to != 0)
+                XI.RaiseGMessage("G2YS,T," + from + ",T," + to);
+        }
+        private void TargetPlayer(ushort from, IEnumerable<ushort> tos)
+        {
+            List<ushort> to = tos.Where(p => p != 0 && p < 1000).ToList();
+            if (to.Count > 0)
+                XI.RaiseGMessage("G2YS,T," + from + "," + string.Join(",", to.Select(p => "T," + p)));
         }
 
         private string AOthers(Player py)
