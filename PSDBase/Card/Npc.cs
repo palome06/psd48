@@ -14,6 +14,7 @@ namespace PSD.Base.Card
         public string Code { private set; get; }
         // group, e.g. 1 for standard, 0 for test, 2 for SP, etc.
         public int Group { private set; get; }
+        public int Genre { private set; get; }
 
         private int mSTR;
         public int STR
@@ -29,32 +30,16 @@ namespace PSD.Base.Card
         public int Hero { private set; get; }
 
         // public Delegate Type of Handling events
-        public NPC(string code, int group, string name, ushort str, string[] skills, int hero)
+        public NPC(string code, int group, int genre, string name, ushort str, string[] skills, int hero)
         {
-            this.Name = name; this.Group = group; this.Code = code;
+            this.Name = name; this.Code = code;
+            this.Group = group; this.Genre = genre;
             this.STR = this.STRb = str; this.Skills = skills;
             this.Hero = hero;
         }
 
         public bool IsMonster() { return false; }
         public bool IsNPC() { return true; }
-
-        internal static NPC Parse(string line)
-        {
-            if (line != null && line.Length > 0)
-            {
-                string[] content = line.Split('\t');
-                string code = content[0]; // code, e.g. (NC405)
-                int group = int.Parse(content[1]);
-                string name = content[2]; // name, e.g. (Xuanxiao)
-                ushort str = ushort.Parse(content[3]);
-                string[] npcskills = content[4].Split(',');
-                int hero = int.Parse(content[5]);
-                return new NPC(code, group, name, str, npcskills, hero);
-            }
-            else
-                return null;
-        }
     }
 
     public class NPCLib
@@ -65,39 +50,24 @@ namespace PSD.Base.Card
 
         private Utils.ReadonlySQL sql;
 
-        public NPCLib(string path)
-        {
-            firsts = new List<NPC>();
-            string[] lines = System.IO.File.ReadAllLines(path);
-            foreach (string line in lines)
-            {
-                NPC npc = NPC.Parse(line);
-                if (npc != null)
-                    firsts.Add(npc);
-            }
-            ushort cardx = 1;
-            dicts = new Dictionary<ushort, NPC>();
-            foreach (NPC npc in firsts)
-                dicts.Add(cardx++, npc);
-        }
-
         public NPCLib()
         {
             firsts = new List<NPC>();
             sql = new Utils.ReadonlySQL("psd.db3");
             List<string> list = new string[] {
-                "CODE", "VALID", "NAME", "STR", "ACTION", "ORG"
+                "CODE", "VALID", "NAME", "STR", "ACTION", "ORG", "GENRE"
             }.ToList();
             System.Data.DataRowCollection datas = sql.Query(list, "Npc");
             foreach (System.Data.DataRow data in datas)
             {
                 string code = (string)data["CODE"];
                 int valid = (int)((short)data["VALID"]);
+                int genre = (int)((long)data["GENRE"]);
                 string name = (string)data["NAME"];
                 ushort str = (ushort)((short)data["STR"]);
                 string[] npcskills = ((string)data["ACTION"]).Split(',');
                 int org = (int)((long)data["ORG"]);
-                firsts.Add(new NPC(code, valid, name, str, npcskills, org));
+                firsts.Add(new NPC(code, valid, genre, name, str, npcskills, org));
             }
             ushort cardx = 1;
             dicts = new Dictionary<ushort, NPC>();

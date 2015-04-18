@@ -1,16 +1,17 @@
 ﻿<Window x:Class="PSD.ClientAo.Login.LoginDoor"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:rq="clr-namespace:PSD.ClientAo.Request"
         Title="psd 登陆界面" Height="567" Width="768" Closed="WindowClosed">
     <Window.Background>
         <ImageBrush ImageSource="pack://application:,,,/PSDRisoLib;component/Resources/Logo/LoginBgimg.jpg"/>
     </Window.Background>
-    <Border BorderThickness="5" BorderBrush="Black" CornerRadius="30"
+    <Border BorderThickness="5" BorderBrush="Black" CornerRadius="30" x:Name="mainBoard"
                 Margin="40,32,40,32" Background="Gray" Opacity="0.8">
         <Grid VerticalAlignment="Center" HorizontalAlignment="Center">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="130"/>
-                <ColumnDefinition Width="280"/>
+                <ColumnDefinition Width="320"/>
                 <ColumnDefinition Width="128"/>
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
@@ -139,7 +140,7 @@
                                                      ToolTip="使用标准版、资料篇一《凤鸣玉誓》、同人资料篇二《三世轮回》，同人资料篇三《云来奇缘》成熟的版本游戏。（神秘时限体验角色试用中！）"/>
                                         <RadioButton Content="至尊场" Width="120" GroupName="LvGroup" Checked="Lv3Decided"
                                                      ToolTip="使用标准版、资料篇一～三、测试中的资料篇四《逍遥幻境》、番外资料篇《宿命篇》、SP版本游戏。享受至尊全扩的尊贵。"/>
-                                        <RadioButton Content="□限突破场" x:Name="Lv4Radio"  Width="120" GroupName="LvGroup" Checked="Lv4Decided" IsEnabled="False"
+                                        <RadioButton Content="界限突破场" x:Name="Lv4Radio"  Width="120" GroupName="LvGroup" Checked="Lv4Decided" IsEnabled="False"
                                                      ToolTip="对标准版与资料篇一《凤鸣玉誓》进行尝试调整，以及加入少许官方先行角色的测试包。"/>
                                     </WrapPanel>
                                     <Grid Background="LightGray">
@@ -272,6 +273,14 @@
                                         Click="VideoBrowseButtonClick">浏览...</Button>
                             </Grid>
                         </StackPanel>
+                    </Grid>
+                </TabItem>
+                <TabItem x:Name="RequestHourTab" FontFamily="KaiTi" FontSize="18">
+                    <TabItem.Header>
+                        <TextBlock FontSize="20" FontFamily="LiSu" Margin="5,5,5,5">降妖谱</TextBlock>
+                    </TabItem.Header>
+                    <Grid Background="#FFE5E5E5">
+                        <rq:Hour/>
                     </Grid>
                 </TabItem>
             </TabControl>

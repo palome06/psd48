@@ -14,7 +14,12 @@
     </Window.Resources>
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
         <Grid Height="610" Width="1230">
-        <!--<StackPanel Orientation="Horizontal">
+            <Grid Width="1024" Height="610" Margin="-230,0,0,0" Opacity="0.5" IsHitTestVisible="False">
+                <Grid.Background>
+                    <ImageBrush ImageSource="pack://application:,,,/PSDRisoLib;component/Resources/Logo/Screen/00000-01.jpg"/>
+                </Grid.Background>
+            </Grid>
+            <!--<StackPanel Orientation="Horizontal">
             <Border BorderThickness="5" BorderBrush="Black" Height="160" Width="300">
                 <self:PlayerBoard x:Name="pb" Focusable="True"/>
             </Border>
@@ -50,7 +55,8 @@
                                   Height="140" Width="480" Tuple="{StaticResource libGroup}"/>
                 <self:JoyStick x:Name="yfJoy" Canvas.Top="440" Canvas.Left="740" Tuple="{StaticResource libGroup}"/>
 
-                <self:Orchis40 x:Name="yfOrchis40" IsHitTestVisible="False" Tuple="{StaticResource libGroup}"/>
+                <self:Orchis40 x:Name="yfOrchis40" IsHitTestVisible="False" Tuple="{StaticResource libGroup}">
+                </self:Orchis40>
                 
                 <Line X1="0" Y1="62" X2="1024" Y2="62" StrokeThickness="2" Stroke="Black"/>
                 <Line X1="0" Y1="440" X2="1024" Y2="440" StrokeThickness="2" Stroke="Black"/>

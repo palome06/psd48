@@ -17,6 +17,10 @@
     <BitmapImage x:Key="barborder11" UriSource="pack://application:,,,/PSDRisoLib;component/Resources/Logo/Border11.png"/>
     <BitmapImage x:Key="barborder12" UriSource="pack://application:,,,/PSDRisoLib;component/Resources/Logo/Border12.png"/>
 
+    <BitmapImage x:Key="sr00000_01" UriSource="pack://application:,,,/PSDRisoLib;component/Resources/Logo/Screen/00000-01.jpg"/>
+    
+    <Image x:Key="HeroInTestStamp" Source="Logo/HeroInTest.png"/>
+
     <Image x:Key="petsnapGS01" Source="PetsSnap/GS01.png" ToolTip="千杯不醉"/>
     <Image x:Key="petsnapGS02" Source="PetsSnap/GS02.png" ToolTip="五毒兽"/>
     <Image x:Key="petsnapGS03" Source="PetsSnap/GS03.png" ToolTip="蛇妖男"/>

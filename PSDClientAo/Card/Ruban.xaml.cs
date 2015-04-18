@@ -62,6 +62,7 @@ namespace PSD.ClientAo.Card
         {
             this.Face = new Image() { Source = face.Source };
             this.UT = ut;
+
             InitializeComponent();
             cardBody.Content = Face;
             mLoc = Location.NIL; mCat = Category.NIL;
@@ -309,6 +310,35 @@ namespace PSD.ClientAo.Card
         #endregion Move Style
 
         #region Factory Utils
+        public static Ruban GenRubanGray(string str, FrameworkElement uc, Base.LibGroup tuple)
+        {
+            Ruban rb = null;
+            if (str.StartsWith("H0"))
+                rb = new Ruban(uc.TryFindResource("hroCard000") as Image, 0);
+            else if (str.StartsWith("H"))
+            {
+                ushort ut = ushort.Parse(str.Substring("H".Length));
+                Hero hro = tuple.HL.InstanceHero(ut);
+                if (hro != null)
+                {
+                    Image image = uc.TryFindResource("hroCard" + hro.Ofcode) as Image;
+                    FormatConvertedBitmap bitmap = new FormatConvertedBitmap();
+                    bitmap.BeginInit();
+                    bitmap.Source = image.Source as BitmapSource;
+                    bitmap.DestinationFormat = PixelFormats.Gray32Float;
+                    bitmap.EndInit();
+                    // Create Image Element
+                    image = new Image() { Width = image.Width, Height = image.Height, Source = bitmap };
+                    if (image != null)
+                        rb = new Ruban(image, ut);
+                    else
+                        rb = new Ruban(uc.TryFindResource("hroCard000") as Image, ut);
+                }
+                else rb = new Ruban(uc.TryFindResource("hroCard000") as Image, ut);
+                rb.ToolTip = Tips.IchiDisplay.GetHeroTip(tuple, ut);
+            }
+            return rb;
+        }
         public static Ruban GenRuban(string str, FrameworkElement uc, Base.LibGroup tuple)
         {
             Ruban rb = null;
@@ -396,6 +426,34 @@ namespace PSD.ClientAo.Card
                 else
                     rb = new Ruban(uc.TryFindResource("diceImg000") as Image, ut);
                 rb.ToolTip = Tips.IchiDisplay.GetExspTip(tuple, "I" + ut);
+            }
+            else if (str.StartsWith("E0"))
+            {
+                Image image = uc.TryFindResource("eveCard000") as Image;
+                image.RenderTransform = new RotateTransform(90);
+                rb = new Ruban(image, 0);
+            }
+            else if (str.StartsWith("E"))
+            {
+                ushort ut = ushort.Parse(str.Substring("E".Length));
+                Evenement eve = tuple.EL.DecodeEvenement(ut);
+                Image image = uc.TryFindResource("eveCard" + eve.Code) as Image
+                    ?? uc.TryFindResource("eveCard000") as Image;
+
+                FormatConvertedBitmap bp = new FormatConvertedBitmap();
+                bp.BeginInit();
+                bp.Source = image.Source as BitmapSource;
+                bp.EndInit();
+
+                TransformedBitmap tb = new TransformedBitmap();
+                tb.BeginInit();
+                tb.Source = bp;
+                tb.Transform = new RotateTransform(90);
+                tb.EndInit();
+
+                image = new Image() { Source = tb };
+                rb = new Ruban(image, ut);
+                rb.ToolTip = Tips.IchiDisplay.GetEveTip(tuple, ut);
             }
             return rb;
         }

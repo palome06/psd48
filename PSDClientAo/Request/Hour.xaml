@@ -1,0 +1,56 @@
+﻿<UserControl x:Class="PSD.ClientAo.Request.Hour"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Height="280" Width="570">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="pack://application:,,,/PSDRisoLib;component/Resources/ImgRes.xaml"/>
+                <ResourceDictionary Source="OfficeTabDictionary.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+    <TabControl Name="tabSteps" Template="{StaticResource OfficeTabControl}">
+        <TabItem Header="角色牌" IsSelected="True">
+            <ScrollViewer>
+                <StackPanel x:Name="heroStackPanel"/>
+            </ScrollViewer>
+        </TabItem>
+
+        <TabItem Header="手牌">
+            <ScrollViewer>
+                <StackPanel x:Name="tuxStackPanel"/>
+            </ScrollViewer>
+        </TabItem>
+
+        <TabItem Header="怪物牌">
+            <ScrollViewer>
+                <StackPanel x:Name="monStackPanel"/>
+            </ScrollViewer>
+        </TabItem>
+
+        <TabItem Header="事件牌">
+            <ScrollViewer>
+                <StackPanel x:Name="eveStackPanel"/>
+            </ScrollViewer>
+        </TabItem>
+
+        <TabItem Header="NPC牌">
+            <ScrollViewer>
+                <StackPanel x:Name="npcStackPanel"/>
+            </ScrollViewer>
+        </TabItem>
+
+        <TabItem Header="场景牌" IsEnabled="False">
+            <TextBlock>Help tab</TextBlock>
+        </TabItem>
+
+        <TabItem Header="危机牌" IsEnabled="False">
+            <TextBlock>Help tab</TextBlock>
+        </TabItem>
+
+        <TabItem Header="祈愿牌" IsEnabled="False">
+            <TextBlock>Help tab</TextBlock>
+        </TabItem>
+    </TabControl>
+</UserControl>

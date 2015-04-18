@@ -12,6 +12,7 @@ namespace PSD.Base.Card
         public int Avatar { private set; get; }
         // group, e.g. 1 for standard, 0 for test, 2 for SP, etc.
         public int Group { private set; get; }
+        public int Genre { private set; get; }
         // available day of tested hero
         public DayOfWeek[] AvailableDay { set; get; }
         // available test level, e.g. HL012 in Group 6 is tested in RCM Room 3
@@ -42,10 +43,11 @@ namespace PSD.Base.Card
         public string FolderAlias { set; get; }
         public string GuestAlias { set; get; }
 
-        public Hero(string name, int avatar, int group, char gender, ushort hp, ushort str, ushort dex,
+        public Hero(string name, int avatar, int group, int genre, char gender, ushort hp, ushort str, ushort dex,
             List<string> spouses, List<int> isomorphic, int archetype, List<string> skills, string bio)
         {
-            this.Name = name; this.Avatar = avatar; this.Group = group;
+            this.Name = name; this.Avatar = avatar;
+            this.Group = group; this.Genre = genre;
             this.Gender = gender;
             this.HP = hp; this.STR = str; this.DEX = dex;
             this.Spouses = spouses; this.Skills = skills;
@@ -74,43 +76,6 @@ namespace PSD.Base.Card
             AvailableDay = list.ToArray();
             AvailableTestPkg = apkg;
         }
-
-        internal static Hero Parse(string line)
-        {
-            if (line != null && line.Length > 0 && !line.StartsWith("#"))
-            {
-                string[] content = line.Split(new char[] { '\t' });
-                int code = int.Parse(content[0]); // code, e.g. (01004)
-                string name = content[1]; // name, e.g. (Mugongxia)
-                ushort hp = ushort.Parse(content[2]);
-                ushort str = ushort.Parse(content[3]);
-                ushort dex = ushort.Parse(content[4]);
-                char gender = content[5][0];
-                string spousesStr = content[6];
-                List<string> spouses = spousesStr.Equals("^") ?
-                    new List<string>() : spousesStr.Split(',').ToList();
-                string isoStr = content[7];
-                int archetype = 0;
-                List<int> isos = new List<int>();
-                foreach (string isosr in isoStr.Split(','))
-                {
-                    if (isosr.StartsWith("@"))
-                        archetype = int.Parse(isosr.Substring("@".Length));
-                    else if (!string.IsNullOrEmpty(isosr))
-                        isos.Add(int.Parse(isosr));
-                }
-                string skillStr = content[8];
-                List<string> skills = skillStr.Equals("^") ?
-                    new List<string>() : skillStr.Split(',').ToList();
-                string bio = content[9];
-                return new Hero(name, code, 1, gender, hp, str, dex, spouses, isos, archetype, skills, bio)
-                {
-                    Ofcode = "XJ" + (code - 10000)
-                };
-            }
-            else
-                return null;
-        }
         /// <summary>
         /// Force Change Attribute of a hero, used mainly for capability for older version
         /// </summary>
@@ -133,25 +98,13 @@ namespace PSD.Base.Card
         private IDictionary<int, Hero> dicts;
         private Utils.ReadonlySQL sql;
 
-        public HeroLib(string path)
-        {
-            dicts = new Dictionary<int, Hero>();
-            string[] lines = System.IO.File.ReadAllLines(path);
-            foreach (string line in lines)
-            {
-                Hero hero = Hero.Parse(line);
-                if (hero != null)
-                    dicts.Add(hero.Avatar, hero);
-            }
-        }
-
         public HeroLib()
         {
             dicts = new Dictionary<int, Hero>();
             sql = new Utils.ReadonlySQL("psd.db3");
             List<string> list = new string[] {
-                "ID", "VALID", "OFCODE", "NAME", "HP", "STR", "DEX", "GENDER", "SPOUSE",
-                "ISO", "SKILL", "ALIAS", "BIO"
+                "ID", "GENRE", "VALID", "OFCODE", "NAME", "HP", "STR", "DEX",
+                "GENDER", "SPOUSE", "ISO", "SKILL", "ALIAS", "BIO"
             }.ToList();
             System.Data.DataRowCollection datas = sql.Query(list, "Hero");
             foreach (System.Data.DataRow data in datas)
@@ -160,6 +113,7 @@ namespace PSD.Base.Card
                 int group = int.Parse(gs.Contains(",") ? gs.Substring(0, gs.IndexOf(',')) : gs);
                 if (group != 0)
                 {
+                    int genre = (int)((long)data["GENRE"]);
                     int code = (int)((long)data["ID"]);
                     string name = (string)data["NAME"];
                     ushort hp = (ushort)((short)data["HP"]);
@@ -198,7 +152,7 @@ namespace PSD.Base.Card
                         }
                     }
                     string bio = data["BIO"] as string ?? "";
-                    Hero hero = new Hero(name, code, group, gender, hp, str, dex, spouse, isos, archetype, skill, bio)
+                    Hero hero = new Hero(name, code, group, genre, gender, hp, str, dex, spouse, isos, archetype, skill, bio)
                     {
                         Ofcode = data["OFCODE"] as string,
                         TokenAlias = alias[0],
@@ -264,37 +218,6 @@ namespace PSD.Base.Card
             Hero hero = null;
             dicts.TryGetValue(code, out hero);
             return hero;
-        }
-
-        public static void GenerateSQ3(string path)
-        {
-            List<Hero> heros = new List<Hero>();
-            string[] lines = System.IO.File.ReadAllLines(path);
-            foreach (string line in lines)
-            {
-                Hero hero = Hero.Parse(line);
-                if (hero != null)
-                    heros.Add(hero);
-            }
-            Utils.ReadonlySQL sql = new Utils.ReadonlySQL("psd.db3");
-            foreach (Hero hero in heros)
-            {
-                Dictionary<string, int> dc = new Dictionary<string, int>();
-                dc.Add("ID", hero.Avatar);
-                dc.Add("HP", hero.HP);
-                dc.Add("STR", hero.STR);
-                dc.Add("DEX", hero.DEX);
-
-                Dictionary<string, string> ds = new Dictionary<string, string>();
-                ds.Add("VALID", "");
-                ds.Add("NAME", hero.Name);
-                ds.Add("GENDER", hero.Gender.ToString());
-                ds.Add("SPOUSE", string.Join(",", hero.Spouses));
-                ds.Add("ISO", string.Join(",", hero.Isomorphic));
-                ds.Add("SKILL", string.Join(",", hero.Skills));
-
-                sql.Insert(dc, ds, "Hero");
-            }
         }
     }
 }

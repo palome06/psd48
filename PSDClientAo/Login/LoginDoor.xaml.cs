@@ -448,6 +448,12 @@ namespace PSD.ClientAo.Login
         {
             var item = sender as TabControl;
             var selected = item.SelectedItem as TabItem;
+
+            if (selected == RequestHourTab)
+                mainBoard.Opacity = 0.95;
+            else
+                mainBoard.Opacity = 0.8;
+
             if (selected == HallTab) // Hall mode
             {
                 IsHallMode = true;

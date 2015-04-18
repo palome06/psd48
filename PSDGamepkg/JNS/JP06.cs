@@ -1562,8 +1562,8 @@ namespace PSD.PSDGamepkg.JNS
                     XI.AsyncInput(player.Uid, "/", "TPT3", "0"); return;
                 }
                 string tar = XI.AsyncInput(player.Uid, "#【净衣咒】使用,T1" + ATaredTeammates(player), "TPT3", "0");
-                TargetPlayer(player.Uid, tar);
                 Player locuster = XI.Board.Garden[ushort.Parse(tar)];
+                TargetPlayer(player.Uid, locuster.Uid);
 
                 int idx = fuse.IndexOf(';');
                 int jdx = fuse.IndexOf(',', idx + 1);

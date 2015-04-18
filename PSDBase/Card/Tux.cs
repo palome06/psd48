@@ -20,6 +20,7 @@ namespace PSD.Base.Card
         //public int Count { private set; get; }
         // package contains all the tux involved in (e.g.) { 1, 4 }
         public int[] Package { protected set; get; }
+        public int Genre { private set; get; }
         // Package contains the tux number range in given package
         // (e.g.) { 1, 2, 82, 84 } means 1~2 in package 1# an 82~84 in package 4#
         public ushort[] Range { protected set; get; }
@@ -101,17 +102,17 @@ namespace PSD.Base.Card
         protected static LocustActionDelegate DefLocust = (p, t, f, cd, lr, l) => { };
 
         // public Delegate Type of Handling events
-        internal Tux(string name, string code, TuxType type, string description,
+        internal Tux(string name, string code, int genre, TuxType type, string description,
             IDictionary<string, string> special)
         {
             this.Name = name; this.Code = code;
+            this.Genre = genre;
             //this.Count = count;
             this.Type = type;
             this.Description = description; this.Special = special;
         }
 
         public virtual bool IsTuxEqiup() { return false; }
-
         internal virtual void Parse(string countStr, string occurStr, string parasitismStr,
             string priorStr, string isEqStr, string tarStr, string terminiStr, long dbSerial)
         {
@@ -270,13 +271,14 @@ namespace PSD.Base.Card
             sql = new Utils.ReadonlySQL("psd.db3");
             List<string> list = new string[] {
                 "ID", "CODE", "NAME", "COUNT", "OCCURS", "PRIORS", "PARASITISM",
-                "DESCRIPTION", "SPECIAL", "ISEQ", "TARGET", "GROWUP", "TERMHIND"
+                "DESCRIPTION", "SPECIAL", "ISEQ", "TARGET", "GROWUP", "TERMHIND", "GENRE"
             }.ToList();
             System.Data.DataRowCollection datas = sql.Query(list, "Tux");
             foreach (System.Data.DataRow data in datas)
             {
                 long lid = (long)data["ID"];
                 string code = (string)data["CODE"];
+                int genre = (ushort)((long)data["GENRE"]);
                 string name = (string)data["NAME"];
                 //ushort count = (ushort)((short)data["COUNT"]);
                 Tux.TuxType type;
@@ -308,7 +310,7 @@ namespace PSD.Base.Card
                 {
                     string growup = (string)data["GROWUP"];
                     isEqs = "1";
-                    var tux = new Luggage(name, code, type, description, special, growup);
+                    var tux = new Luggage(name, code, genre, type, description, special, growup);
                     tux.Parse(countStr, occur, parasitismStr,
                         priority, isEqs, targets, terministr, (ushort)lid);
                     Firsts.Add(tux);
@@ -316,14 +318,14 @@ namespace PSD.Base.Card
                 else if (type == Tux.TuxType.WQ || type == Tux.TuxType.FJ || type == Tux.TuxType.XB)
                 {
                     string growup = (string)data["GROWUP"];
-                    var tux = new TuxEqiup(name, code, type, description, special, growup);
+                    var tux = new TuxEqiup(name, code, genre, type, description, special, growup);
                     tux.Parse(countStr, occur, parasitismStr,
                         priority, isEqs, targets, terministr, (ushort)lid);
                     Firsts.Add(tux);
                 }
                 else
                 {
-                    var tux = new Tux(name, code, type, description, special);
+                    var tux = new Tux(name, code, genre, type, description, special);
                     tux.Parse(countStr, occur, parasitismStr,
                         priority, isEqs, targets, terministr, (ushort)lid);
                     Firsts.Add(tux);
@@ -669,9 +671,9 @@ namespace PSD.Base.Card
                 CsOccur[consumeType].Length > inType && CsOccur[consumeType][inType].Contains('&');
         }
 
-        public TuxEqiup(string name, string code, TuxType type,
+        public TuxEqiup(string name, string code, int genre, TuxType type,
                 string description, IDictionary<string, string> special, string growup) :
-            base(name, code, type, description, special)
+            base(name, code, genre, type, description, special)
         {
             //int idxh = growup.IndexOf('H');
             int idxa = growup.IndexOf('A');
@@ -700,9 +702,9 @@ namespace PSD.Base.Card
         // Indicate whether in processing of pulling goods, avoid recycle when erase luggage itself.
         public bool Pull { set; get; }
 
-        public Luggage(string name, string code, TuxType type,
+        public Luggage(string name, string code, int genre, TuxType type,
                 string description, IDictionary<string, string> special, string growup) :
-            base(name, code, type, description, special, growup)
+            base(name, code, genre, type, description, special, growup)
         {
             Capacities = new List<string>();
             Pull = false;

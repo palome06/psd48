@@ -16,7 +16,7 @@
     <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>x86</PlatformTarget>
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -128,6 +128,9 @@
     <Compile Include="RepoAngle.xaml.cs">
       <DependentUpon>RepoAngle.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Request\Hour.xaml.cs">
+      <DependentUpon>Hour.xaml</DependentUpon>
+    </Compile>
     <Compile Include="SMC.cs" />
     <Compile Include="AoPlayer.cs" />
     <Compile Include="Card\Suban.xaml.cs">
@@ -226,6 +229,14 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Card\Suban.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Request\Hour.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Request\OfficeTabDictionary.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

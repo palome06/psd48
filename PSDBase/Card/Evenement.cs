@@ -17,6 +17,7 @@ namespace PSD.Base.Card
         public string Description { private set; get; }
         // group, e.g. 1 for standard, 0 for test, 2 for SP, etc.
         public int Group { private set; get; }
+        public int Genre { private set; get; }
 
         public string[] Occurs { set; get; }
         public int[] Priorties { set; get; }
@@ -35,12 +36,12 @@ namespace PSD.Base.Card
             return (mSpi & 0x4) != 0;
         }
 
-        internal Evenement(string name, string code, int count, int group,
+        internal Evenement(string name, string code, int count, int group, int genre,
             string background, string description, string spis)
         {
             this.Name = name; this.Code = code;
             this.Count = count; this.Background = background;
-            this.Group = group;
+            this.Group = group; this.Genre = genre;
             this.Description = description;
             //this.Action += new ActionDelegate();
             mSpi = 0;
@@ -120,25 +121,6 @@ namespace PSD.Base.Card
         //    else
         //        return null;
         //}
-
-        internal static Evenement Parse(string line)
-        {
-            if (line != null && line.Length > 0 && !line.StartsWith("#"))
-            {
-                string[] content = line.Split('\t');
-                string code = content[0]; // code, e.g. (SJ402)
-                string name = content[1]; // name, e.g. (Shufuhuanmingjie)
-                ushort count = ushort.Parse(content[2]);
-                string background = content[3];
-                string description = content[4];
-                string spis = content[5];
-                int group = int.Parse(content[5]);
-                return new Evenement(name, code, count, group, background, description, spis);
-            }
-            else
-                return null;
-        }
-
         public void ForceChange(string field, object value)
         {
             if (field == "Count" && value is ushort)
@@ -153,20 +135,6 @@ namespace PSD.Base.Card
         private IDictionary<ushort, Evenement> dicts;
 
         private Utils.ReadonlySQL sql;
-
-        public EvenementLib(string path)
-        {
-            firsts = new List<Evenement>();
-            string[] lines = System.IO.File.ReadAllLines(path);
-            foreach (string line in lines)
-            {
-                Evenement eve = Evenement.Parse(line);
-                if (eve != null)
-                    firsts.Add(eve);
-            }
-            dicts = new Dictionary<ushort, Evenement>();
-            Refresh();
-        }
         
         public EvenementLib()
         {
@@ -174,7 +142,7 @@ namespace PSD.Base.Card
             sql = new Utils.ReadonlySQL("psd.db3");
             List<string> list = new string[] {
                 "CODE", "VALID", "NAME", "COUNT", "BACKGROUND", "EFFECT", "SPI",
-                "OCCURS", "PRIORS", "ONCES", "TERMINS"
+                "OCCURS", "PRIORS", "ONCES", "TERMINS", "GENRE"
             }.ToList();
             System.Data.DataRowCollection datas = sql.Query(list, "Eve");
             foreach (System.Data.DataRow data in datas)
@@ -184,6 +152,7 @@ namespace PSD.Base.Card
                 {
                     string code = (string)data["CODE"];
                     string name = (string)data["NAME"];
+                    int genre = (int)((long)data["GENRE"]);
                     ushort count = (ushort)((short)data["COUNT"]);
                     string bg = (string)data["BACKGROUND"];
                     string effect = (string)data["EFFECT"];
@@ -203,7 +172,7 @@ namespace PSD.Base.Card
                     string terminss = (string)data["TERMINS"];
                     bool[] termins = string.IsNullOrEmpty(terminss) ? new bool[] { }
                         : terminss.Split(',').Select(p => p != "0").ToArray();
-                    firsts.Add(new Evenement(name, code, count, valid, bg, effect, spis)
+                    firsts.Add(new Evenement(name, code, count, valid, genre, bg, effect, spis)
                     {
                         Occurs = occurs,
                         Priorties = priors,
