@@ -463,6 +463,8 @@ namespace PSD.PSDGamepkg.JNS
             XI.RaiseGMessage("G0YM,3," + pop + ",0");
             XI.Board.Monster1 = pop;
             UEchoCode r5ed = XI.HandleWithNPCEffect(py, npc, false);
+            if (r5ed == UEchoCode.NO_OPTIONS)
+                XI.AsyncInput(rd.Uid, "//", "SJT07", "1");
             if (r5ed == UEchoCode.END_ACTION)
                 XI.RaiseGMessage("G1YP," + XI.Board.Rounder.Uid + "," + pop);
             
@@ -518,6 +520,12 @@ namespace PSD.PSDGamepkg.JNS
             }
         }
         #endregion Package 5#
+        #region Holiday
+        public void SJH01(Player rd)
+        {
+            XI.RaiseGMessage("G0JM," + XI.Board.Rounder.Uid + "ED");
+        }
+        #endregion Holiday
 
         public void SJ001(Player rd)
         {

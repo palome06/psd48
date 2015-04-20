@@ -24,6 +24,7 @@ namespace PSD.Base.Card
         public int Genre { private set; get; }
         // whether put into piles or not
         public bool IsEx { private set; get; }
+        public ushort DBSerial { set; get; }
 
         public int mSTR;
         public int STR
@@ -372,7 +373,8 @@ namespace PSD.Base.Card
                         DebutText = debutText ?? "",
                         PetText = petText ?? "",
                         WinText = winText ?? "",
-                        LoseText = loseText ?? ""
+                        LoseText = loseText ?? "",
+                        DBSerial = (ushort)mid
                     };
                 Firsts.Add(monster);
                 dicts.Add((ushort)mid, monster);
@@ -404,6 +406,15 @@ namespace PSD.Base.Card
                 return dicts.Where(p => !p.Value.IsEx).Select(p => p.Key).ToList();
             else
                 return dicts.Where(p => pkgs.Contains(p.Value.Group) && !p.Value.IsEx).Select(p => p.Key).ToList();
+        }
+
+        public List<ushort> WTF()
+        {
+            int[] pkgs = Card.Level2Pkg(0);
+            if (pkgs == null)
+                return dicts.Select(p => p.Key).ToList();
+            else
+                return dicts.Where(p => pkgs.Contains(p.Value.Group)).Select(p => p.Key).ToList();
         }
 
         public List<Monster> ListAllMonster(int groups)

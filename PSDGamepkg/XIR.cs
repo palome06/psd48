@@ -549,6 +549,7 @@ namespace PSD.PSDGamepkg
                             UEchoCode r5ed = HandleWithNPCEffect(Board.Rounder, npc, true);
                             if (r5ed == UEchoCode.NO_OPTIONS) // cannot take any action, check whether finished
                             {
+                                AsyncInput(Board.Rounder.Uid, "//", rstage, "1");
                                 if (Board.MonPiles.Count <= 0)
                                     RaiseGMessage("G1WJ,0");
                             }

@@ -575,6 +575,12 @@
     <Resource Include="Resources\PetsSnap\NCT13.png" />
   </ItemGroup>
   <ItemGroup>
+    <Resource Include="Resources\Card\NMB\NCH01.png" />
+    <Resource Include="Resources\Card\NMB\NCH03.png" />
+    <Resource Include="Resources\Card\NMB\NCH07.png" />
+    <Resource Include="Resources\Card\NMB\NCH08.png" />
+  </ItemGroup>
+  <ItemGroup>
     <Resource Include="Resources\Card\Eve\SJT01.png" />
     <Resource Include="Resources\Card\Eve\SJT02.png" />
     <Resource Include="Resources\Card\Eve\SJT03.png" />
@@ -585,6 +591,9 @@
     <Resource Include="Resources\Card\Eve\SJT08.png" />
     <Resource Include="Resources\Card\Eve\SJT09.png" />
     <Resource Include="Resources\Card\Eve\SJT10.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Card\Eve\SJH01.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Card\NMB\GFT3.png" />

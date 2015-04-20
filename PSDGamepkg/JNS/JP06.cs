@@ -1469,7 +1469,9 @@ namespace PSD.PSDGamepkg.JNS
             XI.RaiseGMessage("G0YM,3," + pop + ",0");
             XI.Board.Monster1 = pop;
             UEchoCode r5ed = XI.HandleWithNPCEffect(XI.Board.Garden[to], npc, false);
-            if (r5ed == UEchoCode.END_ACTION)
+            if (r5ed == UEchoCode.NO_OPTIONS)
+                XI.AsyncInput(to, "//", "JPT5Action", "1");
+            else if (r5ed == UEchoCode.END_ACTION)
                 XI.RaiseGMessage("G1YP," + player.Uid + "," + pop);
             
             if (XI.Board.Monster1 != 0) // In case the NPC has been taken away

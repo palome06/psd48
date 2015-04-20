@@ -395,6 +395,8 @@
     <Image x:Key="eveCardSJT08" Source="Card/Eve/SJT08.png"/>
     <Image x:Key="eveCardSJT09" Source="Card/Eve/SJT09.png"/>
     <Image x:Key="eveCardSJT10" Source="Card/Eve/SJT10.png"/>
+	
+    <Image x:Key="eveCardSJH01" Source="Card/Eve/SJH01.png"/>
 
     <BitmapImage x:Key="monCard000src" UriSource="Card/Mon00.png"/>
     <Image x:Key="monCard000" Source="Card/Mon00.png"/>
@@ -493,6 +495,11 @@
     <Image x:Key="monCardNCT18" Source="Card/NMB/NCT18.png"/>
 
     <Image x:Key="monCardGSH3" Source="Card/NMB/GSH3.png"/>
+	
+    <Image x:Key="monCardNCH01" Source="Card/NMB/NCH01.png"/>
+    <Image x:Key="monCardNCH03" Source="Card/NMB/NCH03.png"/>
+    <Image x:Key="monCardNCH07" Source="Card/NMB/NCH07.png"/>
+    <Image x:Key="monCardNCH08" Source="Card/NMB/NCH08.png"/>
 
     <Image x:Key="tuxCard000" Source="Card/Tux00.png"/>
     <Image x:Key="tuxCardJP01" Source="Card/Tux/JP01.png"/>

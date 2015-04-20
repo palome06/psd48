@@ -260,5 +260,58 @@ namespace PSD.PSDGamepkg.JNS
                 XI.RaiseGMessage("G0ON,0,M,1," + pop);
             }
         }
+        public void NJH2Action(Player player, string fuse, string args)
+        {
+            List<ushort> pops = XI.DequeueOfPile(XI.Board.TuxPiles, 7).ToList();
+            XI.RaiseGMessage("G2IN,0,7");
+            XI.RaiseGMessage("G1IU," + string.Join(",", pops));
+
+            List<ushort> players = XI.Board.OrderedPlayer(player.Uid);
+            foreach (ushort ut in players)
+            {
+                if (pops.Count <= 0) break;
+                string pubTux = Util.SatoWithBracket(XI.Board.PZone, "p", "(p", ")");
+                string input = XI.AsyncInput(ut, "Z1" + pubTux, "NJH2Action", "0");
+                ushort cd;
+                if (ushort.TryParse(input, out cd) && XI.Board.PZone.Contains(cd))
+                {
+                    XI.RaiseGMessage("G1OU," + cd);
+                    XI.RaiseGMessage("G2QU,0,0," + cd);
+                    XI.RaiseGMessage("G0HQ,2," + ut + ",0,0," + cd);
+                    pops.Remove(cd);
+                }
+            }
+            if (pops.Count > 0)
+            {
+                XI.RaiseGMessage("G1OU," + string.Join(",", pops));
+                XI.RaiseGMessage("G2QU,0,0," + string.Join(",", pops));
+                XI.RaiseGMessage("G0ON,0,C," + pops.Count + "," + pops);
+            }
+            XI.RaiseGMessage("G2FU,3");
+        }
+        public void NJH6Action(Player player, string fuse, string args)
+        {
+            int idx = args.IndexOf(',');
+            ushort who = ushort.Parse(args.Substring(0, idx));
+            ushort ut = ushort.Parse(args.Substring(idx + 1));
+            XI.RaiseGMessage("G0QZ," + who + "," + ut);
+        }
+        public string NJH6Input(Player player, string fuse, string prev)
+        {
+            if (prev == "")
+                return "T1(p" + string.Join("p", XI.Board.Garden.Values.Where(
+                    p => p.IsAlive && p.GetEquipCount() > 0).Select(p => p.Uid)) + ")";
+            else if (prev.IndexOf(',') < 0)
+            {
+                ushort ut = ushort.Parse(prev);
+                return "C1(p" + string.Join("p", XI.Board.Garden[ut].ListOutAllEquips()) + ")";
+            }
+            else
+                return "";
+        }
+        public bool NJH6Valid(Player player, string fuse)
+        {
+            return XI.Board.Garden.Values.Where(p => p.IsAlive && p.GetEquipCount() > 0).Any();
+        }
     }
 }

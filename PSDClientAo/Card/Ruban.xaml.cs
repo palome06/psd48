@@ -310,36 +310,28 @@ namespace PSD.ClientAo.Card
         #endregion Move Style
 
         #region Factory Utils
+        private static void Image2Gray(ref Image image, bool gray)
+        {
+            if (gray)
+            {
+                FormatConvertedBitmap bitmap = new FormatConvertedBitmap();
+                bitmap.BeginInit();
+                bitmap.Source = image.Source as BitmapSource;
+                bitmap.DestinationFormat = PixelFormats.Gray32Float;
+                bitmap.EndInit();
+                // Create Image Element
+                image = new Image() { Width = image.Width, Height = image.Height, Source = bitmap };
+            }
+        }
         public static Ruban GenRubanGray(string str, FrameworkElement uc, Base.LibGroup tuple)
         {
-            Ruban rb = null;
-            if (str.StartsWith("H0"))
-                rb = new Ruban(uc.TryFindResource("hroCard000") as Image, 0);
-            else if (str.StartsWith("H"))
-            {
-                ushort ut = ushort.Parse(str.Substring("H".Length));
-                Hero hro = tuple.HL.InstanceHero(ut);
-                if (hro != null)
-                {
-                    Image image = uc.TryFindResource("hroCard" + hro.Ofcode) as Image;
-                    FormatConvertedBitmap bitmap = new FormatConvertedBitmap();
-                    bitmap.BeginInit();
-                    bitmap.Source = image.Source as BitmapSource;
-                    bitmap.DestinationFormat = PixelFormats.Gray32Float;
-                    bitmap.EndInit();
-                    // Create Image Element
-                    image = new Image() { Width = image.Width, Height = image.Height, Source = bitmap };
-                    if (image != null)
-                        rb = new Ruban(image, ut);
-                    else
-                        rb = new Ruban(uc.TryFindResource("hroCard000") as Image, ut);
-                }
-                else rb = new Ruban(uc.TryFindResource("hroCard000") as Image, ut);
-                rb.ToolTip = Tips.IchiDisplay.GetHeroTip(tuple, ut);
-            }
-            return rb;
+            return GenRuban(str, uc, tuple, true);
         }
         public static Ruban GenRuban(string str, FrameworkElement uc, Base.LibGroup tuple)
+        {
+            return GenRuban(str, uc, tuple, false);
+        }
+        private static Ruban GenRuban(string str, FrameworkElement uc, Base.LibGroup tuple, bool gray)
         {
             Ruban rb = null;
             if (str == "C0")
@@ -367,6 +359,7 @@ namespace PSD.ClientAo.Card
                 if (nmb != null)
                 {
                     Image image = uc.TryFindResource("monCard" + nmb.Code) as Image;
+                    Image2Gray(ref image, gray);
                     if (image != null)
                         rb = new Ruban(image, ut);
                     else
@@ -388,6 +381,7 @@ namespace PSD.ClientAo.Card
                 if (hro != null)
                 {
                     Image image = uc.TryFindResource("hroCard" + hro.Ofcode) as Image;
+                    Image2Gray(ref image, gray);
                     if (image != null)
                         rb = new Ruban(image, ut);
                     else
@@ -452,6 +446,7 @@ namespace PSD.ClientAo.Card
                 tb.EndInit();
 
                 image = new Image() { Source = tb };
+                Image2Gray(ref image, gray);
                 rb = new Ruban(image, ut);
                 rb.ToolTip = Tips.IchiDisplay.GetEveTip(tuple, ut);
             }
