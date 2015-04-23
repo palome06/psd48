@@ -530,7 +530,7 @@ namespace PSD.PSDGamepkg.JNS
                     {
                         VI.Cout(0, "沈欺霜触发「仙霞五奇」，怪物灵力+3.");
                         player.RAMUshort = 1;
-                        XI.RaiseGMessage("G2YS,T," + player.Uid + ",M1");
+                        XI.RaiseGMessage("G2YS,T," + player.Uid + ",M,1");
                         XI.RaiseGMessage("G0IB," + XI.Board.Monster1 + ",3");
                     }
                 }
@@ -559,13 +559,13 @@ namespace PSD.PSDGamepkg.JNS
                         if (player.RAMUshort == 0)
                         {
                             player.RAMUshort = 1;
-                            XI.RaiseGMessage("G2YS,T," + player.Uid + ",M1");
+                            XI.RaiseGMessage("G2YS,T," + player.Uid + ",M,1");
                             XI.RaiseGMessage("G0IB," + XI.Board.Monster1 + ",3");
                         }
                         else if (player.RAMUshort == 1)
                         {
                             player.RAMUshort = 0;
-                            XI.RaiseGMessage("G2YS,T," + player.Uid + ",M1");
+                            XI.RaiseGMessage("G2YS,T," + player.Uid + ",M,1");
                             XI.RaiseGMessage("G0OB," + XI.Board.Monster1 + ",3");
                         }
                     }
@@ -2537,6 +2537,8 @@ namespace PSD.PSDGamepkg.JNS
                     return user != 0 && user != player.Uid && XI.Board.Garden[user].Team == player.OppTeam
                         && (blocks[2] == "JP01" || blocks[2] == "JP06");
                 }
+                else if (type == 7) // G0ZH,0
+                    return true;
             }
             return basecon;
         }
@@ -3267,7 +3269,7 @@ namespace PSD.PSDGamepkg.JNS
         {
             if (type == 0)
             {
-                XI.RaiseGMessage("G2YS,T" + player.Uid + ",M1");
+                XI.RaiseGMessage("G2YS,T" + player.Uid + ",M,1");
                 XI.RaiseGMessage("G0OB," + XI.Board.Monster1 + ",2");
                 if (XI.Board.Hinder.IsTared)
                 {
@@ -3277,7 +3279,7 @@ namespace PSD.PSDGamepkg.JNS
             }
             else if (type == 1)
             {
-                XI.RaiseGMessage("G2YS,T" + player.Uid + ",M2");
+                XI.RaiseGMessage("G2YS,T" + player.Uid + ",M,2");
                 XI.RaiseGMessage("G0OB," + XI.Board.Monster2 + ",2");
             }
         }

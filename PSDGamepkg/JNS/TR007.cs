@@ -987,6 +987,35 @@ namespace PSD.PSDGamepkg.JNS
             else if (type == 2)
                 return IsMathISOS("JNT0706", player, fuse) && player.ROM.ContainsKey("Away") &&
                     ((List<ushort>)player.ROM["Away"]).Count > 0;
+            else if (type == 3) // Loss the tag if leave without self-change
+            {
+                string[] g0oy = fuse.Split(',');
+                for (int i = 1; i < g0oy.Length; i += 2)
+                {
+                    ushort utype = ushort.Parse(g0oy[i]);
+                    ushort who = ushort.Parse(g0oy[i + 1]);
+                    if (utype != 1 && player.ROM.ContainsKey("Away") &&
+                            ((List<ushort>)player.ROM["Away"]).Contains(who))
+                        return true;
+                }
+                return false;
+            } else if (type == 4) // Decrease the DEX value if exists in Away
+            {
+                string[] g0iy = fuse.Split(',');
+                for (int i = 1; i < g0iy.Length; )
+                {
+                    ushort utype = ushort.Parse(g0iy[i]);
+                    ushort who = ushort.Parse(g0iy[i + 1]);
+                    if (player.ROM.ContainsKey("Away") &&
+                            ((List<ushort>)player.ROM["Away"]).Contains(who))
+                        return true;
+                    if (utype == 2)
+                        i += 4;
+                    else
+                        i += 3;
+                }
+                return false;
+            }
             else
                 return false;
         }
@@ -1018,6 +1047,39 @@ namespace PSD.PSDGamepkg.JNS
                     XI.RaiseGMessage("G0IX," + ut + ",0," + player.ROMInt);
                 player.ROMInt = 0;
                 player.ROM.Remove("Away");
+            }
+            else if (type == 3)
+            {
+                List<ushort> list = (List<ushort>)player.ROM["Away"];
+                string[] g0oy = fuse.Split(',');
+                for (int i = 1; i < g0oy.Length; i += 2)
+                {
+                    ushort utype = ushort.Parse(g0oy[i]);
+                    ushort who = ushort.Parse(g0oy[i + 1]);
+                    if (utype != 1)
+                        list.Remove(who);
+                }
+            }
+            else if (type == 4)
+            {
+                List<ushort> list = (List<ushort>)player.ROM["Away"];
+                List<ushort> ins = new List<ushort>();
+                string[] g0iy = fuse.Split(',');
+                for (int i = 1; i < g0iy.Length; )
+                {
+                    ushort utype = ushort.Parse(g0iy[i]);
+                    ushort who = ushort.Parse(g0iy[i + 1]);
+                    if (list.Contains(who))
+                    {
+                        XI.RaiseGMessage("G0OX," + who + ",0," + player.ROMInt);
+                        ins.Add(who);
+                    }
+                    if (utype == 2)
+                        i += 4;
+                    else
+                        i += 3;
+                }
+                TargetPlayer(player.Uid, ins);
             }
         }
         public bool JNT0707Valid(Player player, int type, string fuse)
