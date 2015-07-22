@@ -814,24 +814,25 @@ namespace PSD.PSDGamepkg.JNS
                     if (jm.ContainsKey(iNo))
                         XI.RaiseGMessage("G0OS," + player.Uid + ",1," + isk[jm[iNo]]);
                 }
-                if (player.TokenExcl.Count > 0)
-                {
-                    string input = XI.AsyncInput(player.Uid, "I1(p" +
-                        string.Join("p", player.TokenExcl) + ")", "JNT0702", "0");
-                    iNo = ushort.Parse(input);
-                    if (im.ContainsKey(iNo))
-                    {
-                        XI.RaiseGMessage("G0MA," + player.Uid + "," + im[iNo]);
-                        XI.RaiseGMessage("G0IS," + player.Uid + ",1," + isk[iNo]);
-                    }
-                    XI.RaiseGMessage("G0OJ," + player.Uid + ",1,1,I" + iNo);
-                }
             }
             else if (type == 2)
             {
                 string part = string.Join(",", im.Keys.Select(p => "I" + p));
                 XI.RaiseGMessage("G0IJ," + player.Uid + ",1," + im.Keys.Count + "," + part);
                 XI.RaiseGMessage("G2TZ," + player.Uid + ",0," + part);
+            }
+            // Always ask for select new one
+            if (player.TokenExcl.Count > 0)
+            {
+                string input = XI.AsyncInput(player.Uid, "I1(p" +
+                    string.Join("p", player.TokenExcl) + ")", "JNT0702", "0");
+                ushort iNo = ushort.Parse(input);
+                if (im.ContainsKey(iNo))
+                {
+                    XI.RaiseGMessage("G0MA," + player.Uid + "," + im[iNo]);
+                    XI.RaiseGMessage("G0IS," + player.Uid + ",1," + isk[iNo]);
+                }
+                XI.RaiseGMessage("G0OJ," + player.Uid + ",1,1,I" + iNo);
             }
         }
         //0:G0IS,120;1:G0OS,80;2:G0ZH,0
@@ -5382,7 +5383,7 @@ namespace PSD.PSDGamepkg.JNS
             }
             else if (type == 2 || type == 3)
                 return IsMathISOS("JNH1001", player, fuse) && XI.Board.Garden.Values
-                    .Any(p => p.IsAlive && p.Team == player.Team && p.GetActionPetCount(XI.Board) > 0);
+                    .Any(p => p.IsAlive && p.Team == player.Team && p.GetActivePetCount(XI.Board) > 0);
             else if (type == 4) // G0HT,A,n
             {
                 string[] g0ht = fuse.Split(',');
@@ -5419,7 +5420,7 @@ namespace PSD.PSDGamepkg.JNS
                 foreach (Player py in XI.Board.Garden.Values)
                     if (py.IsAlive && py.Team == player.Team)
                     {
-                        int count = py.GetActionPetCount(XI.Board);
+                        int count = py.GetActivePetCount(XI.Board);
                         py.TuxLimit += count;
                     }
             }
@@ -5428,7 +5429,7 @@ namespace PSD.PSDGamepkg.JNS
                 foreach (Player py in XI.Board.Garden.Values)
                     if (py.IsAlive && py.Team == player.Team)
                     {
-                        int count = py.GetActionPetCount(XI.Board);
+                        int count = py.GetActivePetCount(XI.Board);
                         py.TuxLimit -= count;
                     }
             }
@@ -6032,24 +6033,24 @@ namespace PSD.PSDGamepkg.JNS
                     if (jm.ContainsKey(iNo))
                         XI.RaiseGMessage("G0OS," + player.Uid + ",1," + isk[jm[iNo]]);
                 }
-                if (player.TokenExcl.Count > 0)
-                {
-                    string input = XI.AsyncInput(player.Uid, "I1(p" +
-                        string.Join("p", player.TokenExcl) + ")", "JNH1601", "0");
-                    iNo = ushort.Parse(input);
-                    if (im.ContainsKey(iNo))
-                    {
-                        XI.RaiseGMessage("G0MA," + player.Uid + "," + im[iNo]);
-                        XI.RaiseGMessage("G0IS," + player.Uid + ",1," + isk[iNo]);
-                    }
-                    XI.RaiseGMessage("G0OJ," + player.Uid + ",1,1,I" + iNo);
-                }
             }
             else if (type == 2)
             {
                 string part = string.Join(",", im.Keys.Select(p => "I" + p));
                 XI.RaiseGMessage("G0IJ," + player.Uid + ",1," + im.Keys.Count + "," + part);
                 XI.RaiseGMessage("G2TZ," + player.Uid + ",0," + part);
+            }
+            if (player.TokenExcl.Count > 0)
+            {
+                string input = XI.AsyncInput(player.Uid, "I1(p" +
+                    string.Join("p", player.TokenExcl) + ")", "JNH1601", "0");
+                ushort iNo = ushort.Parse(input);
+                if (im.ContainsKey(iNo))
+                {
+                    XI.RaiseGMessage("G0MA," + player.Uid + "," + im[iNo]);
+                    XI.RaiseGMessage("G0IS," + player.Uid + ",1," + isk[iNo]);
+                }
+                XI.RaiseGMessage("G0OJ," + player.Uid + ",1,1,I" + iNo);
             }
         }
         public bool JNH1602Valid(Player player, int type, string fuse)

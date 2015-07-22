@@ -222,7 +222,7 @@ namespace PSD.Base
             cz01PriceDict = new Dictionary<string, int>();
         }
         public int GetPetCount() { return Pets.Count(p => p != 0); }
-        public int GetActionPetCount(Board board)
+        public int GetActivePetCount(Board board)
         {
             return PetDisabled ? 0 : Pets.Count(p => p != 0 && !board.NotActionPets.Contains(p));
         }

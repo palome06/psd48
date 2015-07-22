@@ -136,8 +136,15 @@ namespace PSD.PSDGamepkg.JNS
         //}
         public bool JN10302Valid(Player player, int type, string fuse)
         {
-            return player.IsAlive && XI.Board.Garden.Values.Where(p => p.IsAlive &&
-                p.Team == player.OppTeam).Select(p => p.GetPetCount()).Sum() < 3;
+            if (player.IsAlive && XI.Board.Garden.Values.Where(p => p.IsAlive &&
+                p.Team == player.OppTeam).Select(p => p.GetPetCount()).Sum() < 3)
+            {
+                if (type == 0)
+                    return true;
+                else if (type == 1)
+                    return IsMathISOS("JN10302", player, fuse);
+            }
+            return false;
         }
         public void JN10302Action(Player player, int type, string fuse, string argst)
         {
@@ -1246,6 +1253,8 @@ namespace PSD.PSDGamepkg.JNS
                 string select = XI.AsyncInput(player.Uid, carg + "," + targ, "JN40302", "0");
                 if (select == "0" || select == "/0" || select == "")
                     break; // On Finish of Catching
+                else if (select.Contains(VI.CinSentinel))
+                    continue;
                 else
                 {
                     int idx = select.LastIndexOf(',');
@@ -1634,23 +1643,13 @@ namespace PSD.PSDGamepkg.JNS
             {
                 string title = (type == 2) ? "G0IA" : "G0OA";
                 foreach (Player py in XI.Board.Garden.Values)
-                    if (py.IsAlive && py.Team == player.Team && !py.PetDisabled)
+                    if (py.IsAlive && py.Team == player.Team && py.Uid != player.Uid && !py.PetDisabled)
                     {
-                        int count = py.GetActionPetCount(XI.Board);
+                         // Not contains herself handled in type=0(IC)
+                        int count = py.GetActivePetCount(XI.Board);
                         if (count > 0)
-                            XI.RaiseGMessage(title + py.Uid + ",0," + count);
+                            XI.RaiseGMessage(title + "," + py.Uid + ",0," + count);
                     }
-            } else if (type == 4)
-            {
-                string[] g0iy = fuse.Split(',');
-                ushort who = ushort.Parse(g0iy[2]);
-                Player py = XI.Board.Garden[who];
-                if (py.Team == player.Team && !py.PetDisabled)
-                {
-                    int count = py.GetActionPetCount(XI.Board);
-                    if (count > 0)
-                        XI.RaiseGMessage("G0IA," + py.Uid + "," + who + "," + count);
-                }
             }
         }
         public bool JN50301Valid(Player player, int type, string fuse)
@@ -1668,14 +1667,8 @@ namespace PSD.PSDGamepkg.JNS
                 return false;
             }
             else if (type == 2 || type == 3)
-                return IsMathISOS("JN50301", player, fuse) && XI.Board.Garden.Values.
-                    Any(p => p.IsAlive && p.Team == player.Team && p.GetActionPetCount(XI.Board) > 0);
-            else if (type == 4) {
-                string[] g0iy = fuse.Split(',');
-                ushort who = ushort.Parse(g0iy[2]);
-                Player py = XI.Board.Garden[who];
-                return py.Team == player.Team && !py.PetDisabled && py.GetActionPetCount(XI.Board) > 0;
-            }
+                return IsMathISOS("JN50301", player, fuse) && XI.Board.Garden.Values.Any(p =>
+                    p.IsAlive && p.Team == player.Team && p.Uid != player.Uid && p.GetActivePetCount(XI.Board) > 0);
             else return false;
         }
         public void JN50302Action(Player player, int type, string fuse, string argst)

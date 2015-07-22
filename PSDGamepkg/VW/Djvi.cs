@@ -123,10 +123,9 @@ namespace PSD.PSDGamepkg.VW
                     Thread.Sleep(100);
             } while (msg == null);
             //if (msg != CinSentinel)
-            --cinReqCount[me].value;
-
-            if (cinReqCount[me].value == 0)
+            if (cinReqCount[me].value - 1 == 0)
                 cinGate[me] = false;
+            --cinReqCount[me].value;
             return msg;
         }
         public string Cin(ushort me, string hintFormat, params object[] args)
@@ -169,14 +168,20 @@ namespace PSD.PSDGamepkg.VW
         // Terminate Cin Tunnel, give pending Cin CinSentinel as result
         public void TerminCinTunnel(ushort me)
         {
-            lock (cinReqCount[me])
-            {
-                int count = cinReqCount[me].value;
-                for (int i = 0; i < count; ++i)
-                    cvQueues[me].Enqueue(CinSentinel);
-                while (cinReqCount[me].value > 0)
-                    Thread.Sleep(100);
-            }
+            //int count = cinReqCount[me].value;
+            //for (int i = 0; i < count; ++i)
+            //    cvQueues[me].Enqueue(CinSentinel);
+            //while (true)
+            //{
+            //    lock (cinReqCount[me])
+            //    {
+            //        if (cinReqCount[me].value <= 0)
+            //            break;
+            //    }
+            //    Thread.Sleep(100);
+            //}
+            // TODO: not sure why it won't work, some CinCential is stucked in FCin loop.
+            ResetCinTunnel(me);
         }
         // Reset Cin Tunnel, clean all pending input request
         public void ResetCinTunnel(ushort me)

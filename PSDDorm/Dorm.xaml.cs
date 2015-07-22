@@ -54,7 +54,7 @@ namespace PSDDorm
             if (files == null)
                 return;
 
-            if (files.Length > 0 && 
+            if (files.Length > 0 &&
                 (e.AllowedEffects & DragDropEffects.Copy) == DragDropEffects.Copy)
             {
                 e.Effects = DragDropEffects.Copy;
@@ -62,6 +62,7 @@ namespace PSDDorm
             else
                 e.Effects = DragDropEffects.None;
 
+            bool anySuccess = false, anyFailure = false;
             foreach (string file in files)
             {
                 try
@@ -75,14 +76,31 @@ namespace PSDDorm
                             Name = title,
                             Path = destFile
                         });
+                        anySuccess = true;
                     }
+                    else if (e.Effects == DragDropEffects.Copy && convCheckBox.IsChecked == true && destFile.EndsWith(".log"))
+                    {
+                        orgListBox.Items.Add(new RoundItem()
+                        {
+                            Name = "log+" + System.IO.Path.GetFileName(file),
+                            Path = destFile
+                        });
+                        anySuccess = true;
+                    }
+                    else
+                        anyFailure = true;
                 }
                 catch
                 {
-                    MessageBox.Show("录像复盘载入失败。");
+                    anyFailure = true;
                 }
             };
-            MessageBox.Show("录像载入完毕。");
+            if (anyFailure && anySuccess)
+                MessageBox.Show("录像载入完毕，部分失败。");
+            else if (anyFailure)
+                MessageBox.Show("录像复盘载入失败。");
+            else if (anySuccess)
+                MessageBox.Show("录像载入完毕。");
         }
 
         private string GetTitleName(string fileName)

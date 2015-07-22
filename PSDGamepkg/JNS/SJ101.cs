@@ -106,7 +106,7 @@ namespace PSD.PSDGamepkg.JNS
                 XI.RaiseGMessage("G2FU,0," + uds[idxs] + ",0," + string.Join(",", pops));
                 string pubTux = Util.SatoWithBracket(XI.Board.PZone, "p", "(p", ")");
                 input = XI.AsyncInput(uds[idxs], "+Z1" + pubTux + ",#获得卡牌的,/T1" + ranges[idxs], "SJ104", "0");
-                if (!input.StartsWith("/"))
+                if (!input.Contains(VI.CinSentinel) && !input.StartsWith("/"))
                 {
                     ips = input.Split(',');
                     ushort cd;

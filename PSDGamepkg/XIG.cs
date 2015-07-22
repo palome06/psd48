@@ -2798,12 +2798,13 @@ namespace PSD.PSDGamepkg
                         break;
                     }
                 case "G0HG":
+                    for (int i = 1; i < args.Length; i += 2)
                     {
-                        ushort who = ushort.Parse(args[1]);
-                        int n = int.Parse(args[2]);
+                        ushort who = ushort.Parse(args[i]);
+                        int n = int.Parse(args[i + 1]);
                         RaiseGMessage("G0DH," + who + ",0," + n);
-                        break;
                     }
+                    break;
                 case "G0QR":
                     {
                         ushort who = ushort.Parse(args[1]);
