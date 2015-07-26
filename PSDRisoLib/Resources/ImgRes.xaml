@@ -67,6 +67,7 @@
     <Image x:Key="petsnapGTT3" Source="PetsSnap/GTT3.png" ToolTip="TR槐妖"/>
     <Image x:Key="petsnapGTT4" Source="PetsSnap/GTT4.png" ToolTip="TR峰龟"/>
     <Image x:Key="petsnapGSH3" Source="PetsSnap/GSH3.png" ToolTip="水菱晶"/>
+    <Image x:Key="petsnapGLH2" Source="PetsSnap/GLH2.png" ToolTip="幻影戟兵"/>
 
     <Image x:Key="npcsnapNC101" Source="PetsSnap/NC101.png" ToolTip="NPC李逍遥"/>
     <Image x:Key="npcsnapNC102" Source="PetsSnap/NC102.png" ToolTip="NPC赵灵儿"/>
@@ -166,6 +167,7 @@
     <Image x:Key="heroHead17025" Source="Heros/17025.png"/>
     <Image x:Key="heroHead17027" Source="Heros/17027.png"/>
     <Image x:Key="heroHead17028" Source="Heros/17028.png"/>
+    <Image x:Key="heroHead17041" Source="Heros/17041.png"/>
 
     <Image x:Key="heroHead18004" Source="Heros/18004.png"/>
 	
@@ -188,6 +190,7 @@
     <Image x:Key="heroHead19017" Source="Heros/19017.png"/>
     <Image x:Key="heroHead19018" Source="Heros/19018.png"/>
     <Image x:Key="heroHead19019" Source="Heros/19019.png"/>
+    <Image x:Key="heroHead19020" Source="Heros/19020.png"/>
 
     <ImageBrush x:Key="nameBar000Brush" ImageSource="NameBar/Name000.png"/>
     <ImageBrush x:Key="nameBarXJ101" ImageSource="NameBar/NameXJ101.png"/>
@@ -251,6 +254,7 @@
     <ImageBrush x:Key="nameBarTR025" ImageSource="NameBar/NameTR025.png"/>
     <ImageBrush x:Key="nameBarTR027" ImageSource="NameBar/NameTR027.png"/>
     <ImageBrush x:Key="nameBarTR028" ImageSource="NameBar/NameTR028.png"/>
+    <ImageBrush x:Key="nameBarTR041" ImageSource="NameBar/NameTR041.png"/>
 	
     <ImageBrush x:Key="nameBarEX506" ImageSource="NameBar/NameEX506.png"/>
 
@@ -273,6 +277,7 @@
     <ImageBrush x:Key="nameBarHL017" ImageSource="NameBar/NameHL017.png"/>
     <ImageBrush x:Key="nameBarHL018" ImageSource="NameBar/NameHL018.png"/>
     <ImageBrush x:Key="nameBarHL019" ImageSource="NameBar/NameHL019.png"/>
+    <ImageBrush x:Key="nameBarHL020" ImageSource="NameBar/NameHL020.png"/>
 
     <SolidColorBrush x:Key="hpBrush" Color="Red"/>
     <SolidColorBrush x:Key="dexBrush" Color="Blue"/>
@@ -326,7 +331,7 @@
     <BitmapImage x:Key="snapTKHL001_7" UriSource="Token/TKH0107.png"/>
     <BitmapImage x:Key="snapTKHL001_8" UriSource="Token/TKH0108.png"/>
     <BitmapImage x:Key="snapTRHL002" UriSource="Token/TRH02.png"/>
-    <BitmapImage x:Key="snapTAHL003" UriSource="Token/TAH0301.png"/>
+    <BitmapImage x:Key="snapTRHL003" UriSource="Token/TRH03.png"/>
     <BitmapImage x:Key="snapTAHL004" UriSource="Token/TAH0401.png"/>
     <BitmapImage x:Key="snapTAHL005" UriSource="Token/TAH0501.png"/>
     <BitmapImage x:Key="snapTAHL006" UriSource="Token/TAH0601.png"/>
@@ -397,6 +402,7 @@
     <Image x:Key="eveCardSJT10" Source="Card/Eve/SJT10.png"/>
 	
     <Image x:Key="eveCardSJH01" Source="Card/Eve/SJH01.png"/>
+    <Image x:Key="eveCardSJH05" Source="Card/Eve/SJH05.png"/>
 
     <BitmapImage x:Key="monCard000src" UriSource="Card/Mon00.png"/>
     <Image x:Key="monCard000" Source="Card/Mon00.png"/>
@@ -493,8 +499,10 @@
     <Image x:Key="monCardNCT16" Source="Card/NMB/NCT16.png"/>
     <Image x:Key="monCardNCT17" Source="Card/NMB/NCT17.png"/>
     <Image x:Key="monCardNCT18" Source="Card/NMB/NCT18.png"/>
+    <Image x:Key="monCardNCT41" Source="Card/NMB/NCT41.png"/>
 
     <Image x:Key="monCardGSH3" Source="Card/NMB/GSH3.png"/>
+    <Image x:Key="monCardGLH2" Source="Card/NMB/GLH2.png"/>
 	
     <Image x:Key="monCardNCH01" Source="Card/NMB/NCH01.png"/>
     <Image x:Key="monCardNCH03" Source="Card/NMB/NCH03.png"/>
@@ -626,6 +634,7 @@
     <Image x:Key="hroCardTR025" Source="Card/Heros/TR025.png"/>
     <Image x:Key="hroCardTR027" Source="Card/Heros/TR027.png"/>
     <Image x:Key="hroCardTR028" Source="Card/Heros/TR028.png"/>
+    <Image x:Key="hroCardTR041" Source="Card/Heros/TR041.png"/>
 
     <Image x:Key="hroCardEX506" Source="Card/Heros/EX506.png"/>
 	
@@ -648,6 +657,7 @@
     <Image x:Key="hroCardHL017" Source="Card/Heros/HL017.png"/>
     <Image x:Key="hroCardHL018" Source="Card/Heros/HL018.png"/>
     <Image x:Key="hroCardHL019" Source="Card/Heros/HL019.png"/>
+    <Image x:Key="hroCardHL020" Source="Card/Heros/HL020.png"/>
 
     <ImageBrush x:Key="dt01Bg" ImageSource="Logo/DT01.png" Opacity="0.9"/>
     <ImageBrush x:Key="dt02Bg" ImageSource="Logo/DT02.png" Opacity="0.9"/>

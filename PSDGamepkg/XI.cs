@@ -114,7 +114,7 @@ namespace PSD.PSDGamepkg
             //10302, 17012, 17005, 17022, 10605, 17028
             //10105, 10608, 10605, 10303, 19010, 17002
             //19014, 10102, 10501, 10303, 19010, 19016
-            10107, 10304, 10606, 18004, 17009, 19006
+            17041, 19020, 10606, 18004, 10303, 19006
         };
 
         #region Memeber Declaration & Constructor
@@ -584,24 +584,24 @@ namespace PSD.PSDGamepkg
             string[] g2 = new string[] { "IN", "RN", "CN", "QC", "FU", "QU", "CL", "ZU", "HU", "WK",
                  "AK", "IL", "OL", "SW", "AS", "SY" };
             foreach (string g0event in g0)
-                Util.AddToMultiMap(dict, "G0" + g0event, new SkTriple() { Name = "~100", Priorty = 100 });
+                Util.AddToMultiMap(dict, "G0" + g0event, new SkTriple() { Name = "~100", Priorty = 100, Occur = "G0" + g0event });
             foreach (string g1event in g1)
-                Util.AddToMultiMap(dict, "G1" + g1event, new SkTriple() { Name = "~100", Priorty = 100 });
+                Util.AddToMultiMap(dict, "G1" + g1event, new SkTriple() { Name = "~100", Priorty = 100, Occur = "G1" + g1event });
             foreach (string g2event in g2)
-                Util.AddToMultiMap(dict, "G2" + g2event, new SkTriple() { Name = "~100", Priorty = 100 });
+                Util.AddToMultiMap(dict, "G2" + g2event, new SkTriple() { Name = "~100", Priorty = 100, Occur = "G2" + g2event });
 
-            Util.AddToMultiMap(dict, "G0OH", new SkTriple() { Name = "~200", Priorty = 200 });
-            Util.AddToMultiMap(dict, "G0ZW", new SkTriple() { Name = "~200", Priorty = 200 });
-            Util.AddToMultiMap(dict, "G0ZW", new SkTriple() { Name = "~300", Priorty = 300 });
-            Util.AddToMultiMap(dict, "G0ZW", new SkTriple() { Name = "~400", Priorty = 400 });
-            Util.AddToMultiMap(dict, "G0OY", new SkTriple() { Name = "~200", Priorty = 200 });
-            Util.AddToMultiMap(dict, "G0OY", new SkTriple() { Name = "~300", Priorty = 300 });
-            Util.AddToMultiMap(dict, "G0CC", new SkTriple() { Name = "~200", Priorty = 200 });
-            Util.AddToMultiMap(dict, "G0CC", new SkTriple() { Name = "~300", Priorty = 300 });
-            Util.AddToMultiMap(dict, "G0CC", new SkTriple() { Name = "~400", Priorty = 400 });
-            Util.AddToMultiMap(dict, "G0HZ", new SkTriple() { Name = "~200", Priorty = 200 });
-            Util.AddToMultiMap(dict, "G1EV", new SkTriple() { Name = "~200", Priorty = 200 });
-            Util.AddToMultiMap(dict, "G1WJ", new SkTriple() { Name = "~200", Priorty = 200 });
+            Util.AddToMultiMap(dict, "G0OH", new SkTriple() { Name = "~200", Priorty = 200, Occur = "G0OH" });
+            Util.AddToMultiMap(dict, "G0ZW", new SkTriple() { Name = "~200", Priorty = 200, Occur = "G0ZW" });
+            Util.AddToMultiMap(dict, "G0ZW", new SkTriple() { Name = "~300", Priorty = 300, Occur = "G0ZW" });
+            Util.AddToMultiMap(dict, "G0ZW", new SkTriple() { Name = "~400", Priorty = 400, Occur = "G0ZW" });
+            Util.AddToMultiMap(dict, "G0OY", new SkTriple() { Name = "~200", Priorty = 200, Occur = "G0OY" });
+            Util.AddToMultiMap(dict, "G0OY", new SkTriple() { Name = "~300", Priorty = 300, Occur = "G0OY" });
+            Util.AddToMultiMap(dict, "G0CC", new SkTriple() { Name = "~200", Priorty = 200, Occur = "G0CC" });
+            Util.AddToMultiMap(dict, "G0CC", new SkTriple() { Name = "~300", Priorty = 300, Occur = "G0CC" });
+            Util.AddToMultiMap(dict, "G0CC", new SkTriple() { Name = "~400", Priorty = 400, Occur = "G0CC" });
+            Util.AddToMultiMap(dict, "G0HZ", new SkTriple() { Name = "~200", Priorty = 200, Occur = "G0HZ" });
+            Util.AddToMultiMap(dict, "G1EV", new SkTriple() { Name = "~200", Priorty = 200, Occur = "G1EV" });
+            Util.AddToMultiMap(dict, "G1WJ", new SkTriple() { Name = "~200", Priorty = 200, Occur = "G1WJ" });
             foreach (string key in dict.Keys)
             {
                 List<SkTriple> value = dict[key];
@@ -707,7 +707,12 @@ namespace PSD.PSDGamepkg
                     case SKTType.SK:
                     default:
                         if (!ucr || skt.Owner == 0 || Board.Garden[skt.Owner].Team == Board.UseCardRound)
-                            result.Add(new SKE(skt) { Tg = skt.Owner });
+                        {
+                            bool b1 = skt.Occur.Contains('#') && skt.Owner != Board.Rounder.Uid;
+                            bool b2 = skt.Occur.Contains('$') && skt.Owner == Board.Rounder.Uid;
+                            if (!b1 && !b2)
+                                result.Add(new SKE(skt) { Tg = skt.Owner });
+                        }
                         break;
                 }
             return result;

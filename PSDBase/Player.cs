@@ -326,13 +326,18 @@ namespace PSD.Base
         }
         public List<ushort> ListOutAllEquips()
         {
+            List<ushort> result = ListOutAllBaseEquip();
+            if (ExCards.Count > 0) result.AddRange(ExCards);
+            if (Fakeq.Count > 0) result.AddRange(Fakeq.Keys);
+            return result;
+        }
+        public List<ushort> ListOutAllBaseEquip()
+        {
             List<ushort> result = new List<ushort>();
             if (Weapon != 0) result.Add(Weapon);
             if (Armor != 0) result.Add(Armor);
             if (Trove != 0) result.Add(Trove);
             if (ExEquip != 0) result.Add(ExEquip);
-            if (ExCards.Count > 0) result.AddRange(ExCards);
-            if (Fakeq.Count > 0) result.AddRange(Fakeq.Keys);
             return result;
         }
         public List<ushort> ListOutAllTuxsWithEncrypt()
@@ -368,9 +373,14 @@ namespace PSD.Base
         {
             return GetBaseEquipCount() + ExCards.Count + Fakeq.Count;
         }
+        public int GetAllCardsCount()
+        {
+            return Tux.Count + GetBaseEquipCount();
+        }
         public bool IsValidPlayer()
         {
             return Uid != 0 && IsAlive && IsReal;
         }
+
     }
 }

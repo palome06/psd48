@@ -2158,6 +2158,42 @@ namespace PSD.PSDGamepkg.JNS
             }
             return false;
         }
+        public void GLH2WinEff()
+        {
+            Cure("GLH2", XI.Board.Rounder, XI.Board.Rounder.HPb / 3);
+        }
+        public void GLH2LoseEff()
+        {
+            if (XI.Board.Hinder.IsValidPlayer())
+                Harm("GLH2", XI.Board.Hinder, XI.Board.Hinder.HPb / 3);
+        }
+        public void GLH2ConsumeAction(Player player, int consumeType, int type, string fuse, string argst)
+        {
+            if (consumeType == 1)
+            {
+                ushort ut = ushort.Parse(argst);
+                int value = XI.Board.Garden[ut].STR;
+                XI.RaiseGMessage("G0IA," + XI.Board.Rounder.Uid + ",1," + value);
+            }
+        }
+        public bool GLH2ConsumeValid(Player player, int consumeType, int type, string fuse)
+        {
+            if (consumeType == 1 && XI.Board.Rounder.DEX >= XI.Board.Battler.AGL)
+                return XI.Board.Garden.Values.Any(p => p.IsAlive && p.Team != player.Team && !XI.Board.IsAttendWar(p));
+            return false;
+        }
+        public string GLH2ConsumeInput(Player player, int consumeType, int type, string fuse, string prev)
+        {
+            if (consumeType == 1)
+            {
+                if (prev == "")
+                    return "/T1(p" + string.Join("p", XI.Board.Garden.Values.Where(p => p.IsAlive &&
+                        p.Team != player.Team && !XI.Board.IsAttendWar(p)).Select(p => p.Uid)) + ")";
+                else
+                    return "";
+            }
+            return "";
+        }
         #endregion Package HL
 
         #region Monster Effect Util

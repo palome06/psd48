@@ -99,7 +99,7 @@ namespace PSD.ClientAo.Request
             foreach (Tux tux in lg.TL.ListAllTuxs(0))
                 AddContent("G", tux.DBSerial, 0, tux.Genre, false);
 
-            genreIndex = new int[] { 1, 5, 6, 9 };
+            genreIndex = new int[] { 1, 5, 6, 7, 9 };
             foreach (int index in genreIndex)
             {
                 GroupBox gb = new GroupBox()

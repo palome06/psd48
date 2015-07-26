@@ -523,7 +523,44 @@ namespace PSD.PSDGamepkg.JNS
         #region Holiday
         public void SJH01(Player rd)
         {
-            XI.RaiseGMessage("G0JM," + XI.Board.Rounder.Uid + "ED");
+            XI.AsyncInput(rd.Uid, "//", "SJH01", "0");
+            XI.RaiseGMessage("G0JM,R" + XI.Board.Rounder.Uid + "ED");
+        }
+        public void SJH05(Player rd)
+        {
+            if (rd.Tux.Count > 0)
+            {
+                Player nx = XI.Board.GetOpponenet(rd);
+                XI.RaiseGMessage("G2FU,0," + nx.Uid + ",0," + string.Join(",", rd.Tux));
+                string select = XI.AsyncInput(nx.Uid, "C1(p" + string.Join("p", rd.Tux) + ")", "SJH05", "0");
+                if (!select.Contains(VI.CinSentinel))
+                {
+                    ushort ut = ushort.Parse(select);
+                    Base.Card.Tux tux = XI.LibTuple.TL.DecodeTux(ut);
+                    if (tux.Type == Tux.TuxType.ZP || new string[] { "TP01", "TP03", "TPT1", "TPT3" }.Contains(tux.Code))
+                        XI.RaiseGMessage("G0QZ," + rd.Uid + "," + ut);
+                    else if (tux.IsTuxEqiup())
+                    {
+                        string tarStr = XI.AsyncInput(nx.Uid, "#装备的,T1(p" + string.Join("p",
+                            XI.Board.Garden.Values.Where(p => p.IsTared).Select(p => p.Uid)) + ")", "SJH05", "1");
+                        if (tarStr != VI.CinSentinel)
+                        {
+                            ushort tar = ushort.Parse(tarStr);
+                            if (tar != rd.Uid)
+                                XI.RaiseGMessage("G0ZB," + tar + ",1," + rd.Uid +
+                                    ",0," + rd.Uid + "," + ut);
+                            else
+                                XI.RaiseGMessage("G0ZB," + rd.Uid + ",0," + ut);
+                        }
+                    }
+                    else
+                    {
+                        string tarStr = XI.AsyncInput(nx.Uid, "#成为此牌使用者的,T1(p" + string.Join("p",
+                            XI.Board.Garden.Values.Where(p => p.IsTared).Select(p => p.Uid)) + ")", "SJH05", "1");
+                        XI.RaiseGMessage("G0CC," + rd.Uid + ",0," + tarStr + "," + tux.Code + "," + ut + ";0,G1EV," + rd.Uid);
+                    }
+                }
+            }
         }
         #endregion Holiday
 

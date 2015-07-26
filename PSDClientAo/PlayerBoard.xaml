@@ -196,7 +196,7 @@
                         Canvas.Right="100" Canvas.Top="98">
                 <Image x:Name="tkTake" Source="{StaticResource snapTKXJ508_4}" Height="18" Width="18"
                         Visibility="Collapsed"/>
-                <Image x:Name="awTake" Source="{StaticResource snapTAHL003}" Height="18" Width="18"
+                <Image x:Name="awTake" Source="{StaticResource snapTAHL005}" Height="18" Width="18"
                         Visibility="Collapsed"/>
             </StackPanel>
 

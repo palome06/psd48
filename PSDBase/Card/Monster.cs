@@ -408,15 +408,6 @@ namespace PSD.Base.Card
                 return dicts.Where(p => pkgs.Contains(p.Value.Group) && !p.Value.IsEx).Select(p => p.Key).ToList();
         }
 
-        public List<ushort> WTF()
-        {
-            int[] pkgs = Card.Level2Pkg(0);
-            if (pkgs == null)
-                return dicts.Select(p => p.Key).ToList();
-            else
-                return dicts.Where(p => pkgs.Contains(p.Value.Group)).Select(p => p.Key).ToList();
-        }
-
         public List<Monster> ListAllMonster(int groups)
         {
             int[] pkgs = Card.Level2Pkg(groups);
