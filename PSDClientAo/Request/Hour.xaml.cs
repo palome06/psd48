@@ -22,18 +22,22 @@ namespace PSD.ClientAo.Request
     {
         private PSD.Base.LibGroup lg;
         private WrapPanel[] wrapPanels;
-        private bool IsGenreNotAvailable(int genre, int group)
+        private bool IsGenreNotAvailable(int group)
         {
+            //if (group == 0)
+            //    return genre == 3 || genre == 4 || genre == 7 || genre == 9;
+            //else
+            //    return group == 0 || group == 3 || group > 5;
             if (group == 0)
-                return genre == 3 || genre == 4 || genre == 7 || genre == 9;
+                return false;
             else
-                return group == 0 || group == 3 || group > 5;
+                return !(group >= 1 && group <= 7);
         }
         private void AddContent(string prefix, int avatar, int group, int genre, bool isInTest)
         {
             Grid grid = new Grid() { Width = 100, Height = 130 };
             Ruban ruban = null;
-            if (!isInTest && IsGenreNotAvailable(genre, group))
+            if (!isInTest && IsGenreNotAvailable(group))
                 ruban = Ruban.GenRubanGray(prefix + avatar, this, lg);
             else
                 ruban = Ruban.GenRuban(prefix + avatar, this, lg);
@@ -61,7 +65,7 @@ namespace PSD.ClientAo.Request
             lg = new PSD.Base.LibGroup();
             InitializeComponent();
             string[] genreName = new string[] { "稻草人", "标准包", "凤鸣玉誓", "SP", "EX",
-                "三世轮回", "云来奇缘", "逍遥幻境", "界限突破", "宿命篇" };
+                "三世轮回", "云来奇缘", "含笑九泉", "界限突破", "宿命篇" };
             int[] genreIndex = new int[] { 1, 2, 3, 5, 6, 4, 7, 9 };
             wrapPanels = new WrapPanel[genreName.Length];
             foreach (int index in genreIndex)
@@ -115,7 +119,10 @@ namespace PSD.ClientAo.Request
                 npcStackPanel.Children.Add(gb);
             }
             foreach (ushort npcCode in lg.NL.ListAllSeleable(0))
-                AddContent("M", Base.Card.NMBLib.CodeOfNPC(npcCode), 0, lg.NL.Decode(npcCode).Genre, false);
+            {
+                NPC npc = lg.NL.Decode(npcCode);
+                AddContent("M", Base.Card.NMBLib.CodeOfNPC(npcCode), npc.Group, npc.Genre, false);
+            }
 
             genreIndex = new int[] { 1, 5, 6, 9 };
             foreach (int index in genreIndex)

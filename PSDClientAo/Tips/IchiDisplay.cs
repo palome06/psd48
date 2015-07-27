@@ -10,7 +10,7 @@ namespace PSD.ClientAo.Tips
 {
     public class IchiDisplay
     {
-        private const int LSIZE = 18, SSIZE = 12;
+        private const int LSIZE = 18, SSIZE = 12, XSSIZE = 9;
 
         public static ToolTip GetHeroTip(LibGroup Tuple, int heroCode)
         {
@@ -47,6 +47,13 @@ namespace PSD.ClientAo.Tips
                 Foreground = new SolidColorBrush(Colors.White),
                 FontFamily = new System.Windows.Media.FontFamily("Times New Roman"),
                 FontSize = SSIZE
+            });
+            pr.Inlines.Add(new Run("   "));
+            pr.Inlines.Add(new Run(string.Format("{0}", hero.Ofcode))
+            {
+                Foreground = new SolidColorBrush(Colors.LightSalmon),
+                FontFamily = new System.Windows.Media.FontFamily("Tahoma"),
+                FontSize = XSSIZE
             });
             foreach (string skillstr in hero.Skills)
             {

@@ -38,6 +38,7 @@ namespace PSD.PSDGamepkg
                 "BP:禁选/RD:轮选/ZY:昭鹰/CP:协同/SS:北软/CJ:召唤/TC:明暗)").Trim().ToUpper();
             int selCode = RuleCode.CastMode(sel);
             int levelCode = RuleCode.LEVEL_ALL;
+            string[] trainer = null;
             if (netMode == "SF")
             {
                 //IsGameCompete = false;
@@ -86,6 +87,7 @@ namespace PSD.PSDGamepkg
 
                 isFinished = false;
                 levelCode = RuleCode.LEVEL_ALL;
+                //trainer = new string[] { "HL003", "HL011", "HL012" };
             }
             else if (netMode == "NT")
             {
@@ -93,8 +95,9 @@ namespace PSD.PSDGamepkg
                 bool teamMode = (teamModeStr == "YJ") ? true : false;
                 string level = GetValue(args, 4, "房间等级，(1:新手场/2:标准场/3:高手场/4:至尊场/5:界限突破场，后附+为特训");
                 bool isTrain = level.Contains("+");
+                trainer = isTrain ? Util.Substring(level, level.IndexOf('+') + 1, -1).Split(',') : null;
                 if (isTrain)
-                    level = level.Substring(0, level.Length - 1);
+                    level = level.Substring(0, level.IndexOf('+'));
                 if (!int.TryParse(level, out levelCode) || levelCode < 0 || levelCode > RuleCode.LEVEL_IPV)
                     levelCode = RuleCode.LEVEL_RCM;
                 else if (levelCode == 0)
@@ -155,11 +158,11 @@ namespace PSD.PSDGamepkg
             Board.RoundIN = "H0PR";
             if (WI is VW.Aywi)
                 HoldRoomTunnel();
-            SelectHero(selCode, levelCode);
+            SelectHero(selCode, levelCode, trainer);
             Run(levelCode, selCode == Base.Rules.RuleCode.MODE_00);
         }
         // invs: players' uid
-        private void StartRoom(int room, int[] opts, ushort[] invs)
+        private void StartRoom(int room, int[] opts, ushort[] invs, string[] trainer)
         {
             int port = Base.NetworkCode.HALL_PORT + room;
             string pipeName = "psd48pipe" + room;
@@ -207,7 +210,8 @@ namespace PSD.PSDGamepkg
             Board.RoundIN = "H0PR";
             if (WI is VW.Aywi)
                 HoldRoomTunnel();
-            SelectHero(opts[1], opts[2]);
+            Console.WriteLine("trainer = " + (trainer == null ? "null" : string.Join(",", trainer)));
+            SelectHero(opts[1], opts[2], trainer);
             Run(opts[2], opts[1] == Base.Rules.RuleCode.MODE_00);
         }
         

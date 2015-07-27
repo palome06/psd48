@@ -213,6 +213,16 @@ namespace PSD.Base.Card
             return dicts.Values.Where(p => p.AvailableTestPkg == (level >> 1)
                 && p.AvailableDay.Contains(DateTime.Now.DayOfWeek)).ToList();
         }
+        public List<Hero> PurgeHeroesWithGivenTrainer(int level, string[] codes)
+        {
+            if (codes == null)
+                return new List<Hero>();
+            if (codes.Length > 6)
+                codes = codes.Take(6).ToArray();
+            List<Hero> list = ListAllHeros(level).Where(p => codes.Contains(p.Ofcode)).ToList();
+            list.AddRange(ListHeroesInTest(level).Where(p => codes.Contains(p.Ofcode)));
+            return list;
+        }
 
         public Hero InstanceHero(int code) {
             Hero hero = null;

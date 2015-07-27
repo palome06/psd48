@@ -19,6 +19,8 @@ namespace PSD.PSDCenter
         public int OptSel { set; get; }
         public int OptLevel { set; get; }
 
+        public string[] Trainers { set; get; }
+
         private bool mReady;
         public bool Ready {
             set
@@ -30,18 +32,26 @@ namespace PSD.PSDCenter
             get { return mReady; }
         }
 
-        public Room(int number, int optTeam, int optSel, int optLevel)
+        public Room(int number, int optTeam, int optSel, int optLevel, string[] trainers)
         {
             Number = number;
             players = new List<ushort>();
             watchers = new List<ushort>();
             OptTeam = optTeam; OptSel = optSel; OptLevel = optLevel;
             Ready = false; Ps = null;
+            if (trainers == null)
+                trainers = new string[0];
+            else if (trainers != null && trainers.Length > 6)
+                Trainers = trainers.Take(6).ToArray();
+            else
+                Trainers = trainers;
+            Trainers = Trainers.Select(p => p.Replace(" ", "").ToUpper()).Where(p => p != "").ToArray();
         }
 
         public string ConvToString()
         {
-            return Number + " " + OptTeam + "," + OptSel + "," + OptLevel;
+            return Number + " " + OptTeam + "," + OptSel + "," + OptLevel + " " +
+                (Trainers == null || Trainers.Length == 0 ? "^" : (string.Join(",", Trainers)));
         }
 
         //public static Room CreateRoom(int number, int optTeam, int optSel, int optPkg)

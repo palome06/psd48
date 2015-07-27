@@ -139,13 +139,14 @@
                                         <RadioButton Content="高手场" Width="120" GroupName="LvGroup" Checked="Lv2Decided" IsChecked="True"
                                                      ToolTip="使用标准版、资料篇一《凤鸣玉誓》、同人资料篇二《三世轮回》，同人资料篇三《云来奇缘》成熟的版本游戏。（神秘时限体验角色试用中！）"/>
                                         <RadioButton Content="至尊场" Width="120" GroupName="LvGroup" Checked="Lv3Decided"
-                                                     ToolTip="使用标准版、资料篇一～三、测试中的资料篇四《逍遥幻境》、番外资料篇《宿命篇》、SP版本游戏。享受至尊全扩的尊贵。"/>
+                                                     ToolTip="使用标准版、资料篇一～三、测试中的资料篇四《含笑九泉》、番外资料篇《宿命篇》、SP版本、EX版本游戏。享受至尊全扩的尊贵。"/>
                                         <RadioButton Content="界限突破场" x:Name="Lv4Radio"  Width="120" GroupName="LvGroup" Checked="Lv4Decided" IsEnabled="False"
                                                      ToolTip="对标准版与资料篇一《凤鸣玉誓》进行尝试调整，以及加入少许官方先行角色的测试包。"/>
                                     </WrapPanel>
-                                    <Grid Background="LightGray">
-                                        <CheckBox x:Name="LvTestCheckBox" ToolTip="测试中角色出现概率大大增加哦。">特训模式</CheckBox>
-                                    </Grid>
+                                    <StackPanel Orientation="Horizontal" Background="LightGray">
+                                        <CheckBox x:Name="LvTestCheckBox" ToolTip="测试中角色出现概率大大增加哦。">特训</CheckBox>
+                                        <TextBox Width="120" x:Name="LvRingText" ToolTip="于此处输入特训角色开牌编号，以逗号隔开（如遥月党专属XJ101,XJ104），不要太贪加入太多哦～"/>
+                                    </StackPanel>
                                 </StackPanel>
                                 <Grid Grid.Column="0" Grid.Row="2" Visibility="Collapsed">
                                     <CheckBox x:Name="HallPkgCB" VerticalAlignment="Top"
@@ -165,7 +166,7 @@
                                               IsChecked="True" />
                                     <CheckBox x:Name="Pkg5CheckBox" Content="云来奇缘" Width="120"
                                               IsChecked="True" />
-                                    <CheckBox x:Name="Pkg6CheckBox" Content="逍遥幻境" Width="120"
+                                    <CheckBox x:Name="Pkg6CheckBox" Content="含笑九泉" Width="120"
                                               IsChecked="False" />
                                     <CheckBox x:Name="Pkg7CheckBox" Content="宿命篇" Width="120"
                                               IsChecked="False" />

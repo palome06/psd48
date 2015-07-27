@@ -179,11 +179,11 @@ namespace PSD.Base
 
         public int CalculateRPool()
         {
-            return Rounder.STR + RPool + (SupportSucc ? Supporter.STR : 0);
+            return Math.Max(Rounder.STR + RPool + (SupportSucc ? Supporter.STR : 0), 0);
         }
         public int CalculateOPool()
         {
-            return Battler.STR + OPool + (HinderSucc ? Hinder.STR : 0);
+            return Math.Max(Battler.STR + OPool + (HinderSucc ? Hinder.STR : 0), 0);
         }
         public bool IsRounderBattleWin()
         {

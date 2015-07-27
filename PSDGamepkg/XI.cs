@@ -16,13 +16,15 @@ namespace PSD.PSDGamepkg
         public int Groups { private set; get; }
         public bool IsTrain { private set; get; }
         public int Level { get { return (Groups << 1) | (IsTrain ? 1 : 0); } }
+        public string[] Trainer { private set; get; }
 
-        public PilesConstruct(LibGroup libTuple, int levelCode)
+        public PilesConstruct(LibGroup libTuple, int levelCode, string[] trainer)
         {
             //this.xi = xi; 
             this.libTuple = libTuple;
             IsTrain = (levelCode % 2 != 0);
             Groups = (levelCode >> 1);
+            this.Trainer = trainer;
         }
 
         //public Base.Card.Hero[,] AllocateHerosRM(int szCand, int szPlayer)
@@ -31,12 +33,14 @@ namespace PSD.PSDGamepkg
         //}
         public Base.Card.Hero[] AllocateHerosRM(int sz)
         {
-            var test = libTuple.HL.ListHeroesInTest(Level);
-            var sels = ListAllSeleableHeros();
+            List<Base.Card.Hero> list = libTuple.HL.PurgeHeroesWithGivenTrainer(Level, Trainer);
+
+            var test = libTuple.HL.ListHeroesInTest(Level).Except(list).ToList();
+            var sels = ListAllSeleableHeros().Except(list).ToArray();
             double probablity = (IsTrain ? 0.48 : Math.Max(0.04, test.Count * 1.0 / (test.Count + sels.Length)));
 
-            List<Base.Card.Hero> list = Base.Card.Card.PickSomeInGivenProbability(
-                libTuple.HL.ListHeroesInTest(Level), probablity).ToList();
+            list.AddRange(Base.Card.Card.PickSomeInGivenProbability(
+                libTuple.HL.ListHeroesInTest(Level), probablity).ToList());
             if (list.Count >= sz)
                 return Base.Card.Card.PickSomeInRandomOrder(list, sz).ToArray();
             else
@@ -1398,9 +1402,9 @@ namespace PSD.PSDGamepkg
         #endregion Util Methods
 
         #region Hero Selection
-        public void SelectHero(int selCode, int levelCode)
+        public void SelectHero(int selCode, int levelCode, string[] trainer)
         {
-            PCS = new PilesConstruct(LibTuple, levelCode);
+            PCS = new PilesConstruct(LibTuple, levelCode, trainer);
             //int prpr = -1; // Params Specification Closed now. (e.g. 31->41, prpr = 4)
             //if (!int.TryParse(Util.Substring(mode, 2, -1), out prpr))
             //    prpr = -1;
@@ -2226,12 +2230,13 @@ namespace PSD.PSDGamepkg
             if (args.Length >= 1)
             {
                 int argType = int.Parse(args[0]);
-                if (argType == 1 && args.Length >= 4)
+                if (argType == 1 && args.Length >= 5)
                 {
                     int room = int.Parse(args[1]);
                     int[] opts = args[2].Split(',').Select(p => int.Parse(p)).ToArray();
-                    ushort[] invs = args[3].Split(',').Select(p => ushort.Parse(p)).ToArray();
-                    new XI().StartRoom(room, opts, invs);
+                    string[] trainer = (args[3] == "^") ? null : args[3].Split(',');
+                    ushort[] invs = args[4].Split(',').Select(p => ushort.Parse(p)).ToArray();
+                    new XI().StartRoom(room, opts, invs, trainer);
                 }
                 if (argType == 0)
                     new XI().StartRoom(args);

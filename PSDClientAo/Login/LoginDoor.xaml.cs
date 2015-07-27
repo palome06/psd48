@@ -110,6 +110,8 @@ namespace PSD.ClientAo.Login
                     int level = IsHallLevelEnabled == false ? 0 :
                          ((PkgMode << 1) | (LvTestCheckBox.IsChecked == true ? 1 : 0));
                     int team = IsHallTeamEnabled ? HallTeamMode : Base.Rules.RuleCode.DEF_CODE;
+                    string[] trainer = (LvTestCheckBox.IsChecked == true && LvRingText.Text.Length > 0) ?
+                        LvRingText.Text.Split(',') : null;
                     if (resume)
                     {
                         int room;
@@ -121,7 +123,7 @@ namespace PSD.ClientAo.Login
                     }
                     else if (!watch)
                     {
-                        AoDisplay a0d = new AoDisplay(addr, nick, ava, record, msglog, mode, level, team);
+                        AoDisplay a0d = new AoDisplay(addr, nick, ava, record, msglog, mode, level, trainer, team);
                         a0d.Show();
                         this.Close();
                     }

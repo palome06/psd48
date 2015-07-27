@@ -2464,15 +2464,11 @@ namespace PSD.PSDGamepkg
                         int delta = int.Parse(args[2]);
                         if (side == Board.Rounder.Team)
                         {
-                            if (delta > Board.RPool)
-                                delta = Board.RPool;
                             Board.RPool -= delta;
                             WI.BCast("E0OP," + side + "," + delta);
                         }
                         else if (side == Board.Rounder.OppTeam)
                         {
-                            if (delta > Board.OPool)
-                                delta = Board.OPool;
                             Board.OPool -= delta;
                             WI.BCast("E0OP," + side + "," + delta);
                         }

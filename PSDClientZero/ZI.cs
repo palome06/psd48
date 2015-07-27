@@ -20,6 +20,7 @@ namespace PSD.ClientZero
         private string name;
         private int avatar;
         private int teamCode, selCode, levelCode;
+        private string[] trainer;
 
         private ushort uid;
         private int room;
@@ -36,11 +37,12 @@ namespace PSD.ClientZero
 
         #region Hall
         public ZI(string name, int avatar, string server, int port,
-            int teamCode, int selCode, int levelCode, bool record, bool msglog)
+            int teamCode, int selCode, int levelCode, string[] trainer, bool record, bool msglog)
         {
             this.name = name; this.avatar = avatar;
             this.server = server; this.port = port;
-            this.teamCode = teamCode; this.selCode = selCode; this.levelCode = levelCode;
+            this.teamCode = teamCode; this.selCode = selCode;
+            this.levelCode = levelCode; this.trainer = trainer;
             this.record = record; this.msglog = msglog;
             roomMates = new List<IchiPlayer>();
         }
@@ -53,8 +55,9 @@ namespace PSD.ClientZero
 
             TcpClient client = new TcpClient(server, port);
             NetworkStream tcpStream = client.GetStream();
+            string trainerjoin = (this.trainer != null && trainer.Length > 0) ? ("," + string.Join(",", trainer)) : "";
             SentByteLine(tcpStream, "C0CO," + name + "," + avatar + ","
-                + teamCode + "," + selCode + "," + levelCode);
+                + teamCode + "," + selCode + "," + levelCode + trainerjoin);
 
             Thread msgThread = new Thread(delegate()
             {
@@ -358,8 +361,9 @@ namespace PSD.ClientZero
                     int levelCode;
                     string level = GetValue(args, 8, "房间等级，(1:新手场/2:标准场/3:高手场/4:至尊场/5:界限突破场，后附+为特训");
                     bool isTrain = level.Contains("+");
+                    string[] trainer = isTrain ? Util.Substring(level, level.IndexOf('+') + 1, -1).Split(',') : null;
                     if (isTrain)
-                        level = level.Substring(0, level.Length - 1);
+                        level = level.Substring(0, level.IndexOf('+'));
                     if (!int.TryParse(level, out levelCode) || levelCode < 0 || levelCode > RuleCode.LEVEL_IPV)
                         levelCode = RuleCode.LEVEL_RCM;
                     else if (levelCode == 0)
@@ -370,7 +374,7 @@ namespace PSD.ClientZero
                     //string name = "Yuan";
                     int port = Base.NetworkCode.HALL_PORT;
                     int avatar = new Random().Next(120);
-                    ZI xin = new ZI(name, avatar, server, port, teamCode, selCode, levelCode, record, msglog);
+                    ZI xin = new ZI(name, avatar, server, port, teamCode, selCode, levelCode, trainer, record, msglog);
                     xin.StartHall();
                 }
                 else

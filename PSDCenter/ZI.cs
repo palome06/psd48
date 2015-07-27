@@ -52,6 +52,13 @@ namespace PSD.PSDCenter
                 int teamCode = int.Parse(blocks[3]);
                 int selCode = int.Parse(blocks[4]);
                 int levelCode = int.Parse(blocks[5]);
+                string[] trainers = null;
+                if (blocks.Length > 6)
+                {
+                    trainers = new string[blocks.Length - 6];
+                    for (int i = 6; i < blocks.Length; ++i)
+                        trainers[i - 6] = blocks[i];
+                }
 
                 ushort uid = RequestUid();
                 Neayer ny = new Neayer(user, avatar, uid)
@@ -67,7 +74,7 @@ namespace PSD.PSDCenter
                 //Thread lThread = new Thread(delegate() { ListenToTalkSocket(socket); });
                 //lThread.Start();
 
-                Room reqRoom = RequestRoom(teamCode, selCode, levelCode);
+                Room reqRoom = RequestRoom(teamCode, selCode, levelCode, trainers);
                 try
                 {
                     lock (reqRoom.players)
@@ -386,7 +393,7 @@ namespace PSD.PSDCenter
         private ushort RequestRoom() { return rmCount++; }
         private ushort RequestQSUid() { return qsCount++; }
 
-        private Room RequestRoom(int teamCode, int selCode, int levelCode)
+        private Room RequestRoom(int teamCode, int selCode, int levelCode, string[] trainers)
         {
             lock (rooms)
             {
@@ -413,7 +420,7 @@ namespace PSD.PSDCenter
                     selCode = RuleCode.MODE_31;
                 if (levelCode == RuleCode.DEF_CODE)
                     levelCode = RuleCode.LEVEL_RCM;
-                Room room = new Room(RequestRoom(), teamCode, selCode, levelCode);
+                Room room = new Room(RequestRoom(), teamCode, selCode, levelCode, trainers);
                 Console.WriteLine("Room {0}# is created. [{1}][{2}][{3}]",
                     room.Number, room.OptTeam, room.OptSel, room.OptLevel);
                 rooms[room.Number] = room; return room;

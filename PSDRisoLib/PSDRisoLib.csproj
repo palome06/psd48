@@ -580,6 +580,7 @@
   <ItemGroup>
     <Resource Include="Resources\Card\NMB\NCH01.png" />
     <Resource Include="Resources\Card\NMB\NCH03.png" />
+    <Resource Include="Resources\Card\NMB\NCH04.png" />
     <Resource Include="Resources\Card\NMB\NCH07.png" />
     <Resource Include="Resources\Card\NMB\NCH08.png" />
   </ItemGroup>
