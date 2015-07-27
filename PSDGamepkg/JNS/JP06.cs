@@ -1042,10 +1042,10 @@ namespace PSD.PSDGamepkg.JNS
                         p => p.IsTared && p.Team == player.OppTeam && p.GetPetCount() > 0)
                         .Select(p => p.Uid).Except(XI.Board.PetProtecedPlayer).ToList();
                     string whoStr = XI.AsyncInput(player.Uid, "T1(p" +
-                        string.Join("p", targets) + ")", "JPT1Action", "0");
+                        string.Join("p", targets) + ")", "TPT1Action", "0");
                     ushort who = ushort.Parse(whoStr);
                     string monStr = XI.AsyncInput(player.Uid, "/M1(p" + string.Join("p", XI.Board.Garden[who]
-                        .Pets.Where(p => p != 0)) + ")", "JPT1Action", "0");
+                        .Pets.Where(p => p != 0)) + ")", "TPT1Action", "0");
                     if (monStr == VI.CinSentinel)
                         break;
                     if (!monStr.StartsWith("/"))

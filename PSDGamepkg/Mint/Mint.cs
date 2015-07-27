@@ -51,18 +51,32 @@ namespace PSD.PSDGamepkg.Mint
         public override string ToString() { return Head + ":" + diva.ToString(); }
         public static Mint Parse(string message)
         {
-            if (message.StartsWith("G0HR"))
-                return HeavyRotation.Parse(message);
-            else if (message.StartsWith("G2IN"))
-                return CardOutOfPile.Parse(message);
-            else if (message.StartsWith("G2CN"))
-                return CardOutOfDise.Parse(message);
-            else if (message.StartsWith("G2FU"))
-                return Stargazer.Parse(message);
-            else if (message.StartsWith("G2SY"))
-                return Target.Parse(message);
+            // if (message.StartsWith("G0HR"))
+            //     return HeavyRotation.Parse(message);
+            // else if (message.StartsWith("G2IN"))
+            //     return CardOutOfPile.Parse(message);
+            // else if (message.StartsWith("G2CN"))
+            //     return CardOutOfDise.Parse(message);
+            // else if (message.StartsWith("G2FU"))
+            //     return Stargazer.Parse(message);
+            // else if (message.StartsWith("G2SY"))
+            //     return Target.Parse(message);
 
-            else if (message.StartsWith("G0"))
+            // else if (message.StartsWith("G0"))
+            //     return DefG0.Parse(message);
+            // else if (message.StartsWith("G1"))
+            //     return DefG1.Parse(message);
+            // else return new Mint();
+
+            foreach (Type type in Assembly.GetAssembly(typeof(Mint)).GetTypes()
+                .Where(myType => myType.IsClass && !myType.IsAbstract && myType.IsSubclassOf(typeof(Mint))))
+            {
+                Method mintTag = type.GetMethod("MintTag");
+                if (mintTag != null && message.StartsWith(mintTag.Invoke(null, null)))
+                    return type.GetMethod("Parse").Invoke(null, message);
+            }
+
+            if (message.StartsWith("G0"))
                 return DefG0.Parse(message);
             else if (message.StartsWith("G1"))
                 return DefG1.Parse(message);
@@ -98,7 +112,8 @@ namespace PSD.PSDGamepkg.Mint
     #endregion Capability
     public class CardOutOfPile : Mint
     {
-        public override string Head { get { return "G2IN"; } }
+        public static string MintTag() { return "G2IN"; }
+        public override string Head { get { return MintTag(); } }
         public override MintType MintType { get { return MintType.UI_ONLY; } }
         public CardOutOfPile(char pile, int count)
         {
@@ -120,7 +135,8 @@ namespace PSD.PSDGamepkg.Mint
 
     public class CardOutOfDise : Mint
     {
-        public override string Head { get { return "G2CN"; } }
+        public static string MintTag() { return "G2CN"; }
+        public override string Head { get { return MintTag(); } }
         public override MintType MintType { get { return MintType.UI_ONLY; } }
         public CardOutOfDise(char pile, int count)
         {
@@ -143,7 +159,8 @@ namespace PSD.PSDGamepkg.Mint
 
     public class Target : Mint
     {
-        public override string Head { get { return "G2SY"; } }
+        public static string MintTag() { return "G2SY"; }
+        public override string Head { get { return MintTag(); } }
         public override MintType MintType { get { return MintType.UI_ONLY; } }
 
         public Target(char fromChar, ushort fromUt, char toChar, ushort toUt)
@@ -188,7 +205,8 @@ namespace PSD.PSDGamepkg.Mint
 
     public class Stargazer : Mint
     {
-        public override string Head { get { return "G2FU"; } }
+        public static string MintTag() { return "G2FU"; }
+        public override string Head { get { return MintTag(); } }
         public override MintType MintType { get { return MintType.UI_ONLY; } }
         private Stargazer() : base() { }
 
@@ -321,7 +339,8 @@ namespace PSD.PSDGamepkg.Mint
 
     public class MoonlightFade : Mint
     {
-    	public override string Head { get { return "G2AS"; } }
+        public static string MintTag() { return "G2AS"; }
+    	public override string Head { get { return MintTag(); } }
     	public override MintType MintType { get { return MintType.UI_ONLY; }}
 
     	public override string ToMessage() { return Head + ",0"; }
@@ -330,6 +349,7 @@ namespace PSD.PSDGamepkg.Mint
 
     public class HeavyRotation : Mint
     {
+        public static string MintTag() { return "G0HR"; }
         public override string Head { get { return "G0HR"; } }
         public override MintType MintType { get { return MintType.GENERAL; } }
 

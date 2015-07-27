@@ -10,6 +10,51 @@ namespace PSD.Base
     public class Board
     {
         public IDictionary<ushort, Player> Garden { set; get; }
+        public Player Rounder
+        {
+            set { mRounder = value; }
+            get { return mRounder ?? Ghost; }
+        }
+        public MintBase Stage { set; get; }
+
+        public bool ClockWised { set; get; }
+
+        private List<ushort> sortedPlayerSequence;
+    }
+
+    public class Ring
+    {
+        // Extra Attender doesn't supported now. (Heyday 3)
+        private Player mTrigger, mHorn;
+        public Player Trigger
+        {
+            set { mTrigger = value; }
+            get { return mTrigger ?? ghost; }
+        }
+        public Player Horn
+        {
+            set { mHorn = value; }
+            get { return mHorn ?? ghost; }
+        }
+        // 1,GT03,NC150
+        public List<string> PosHinders { private set; get; }
+        public List<string> PosSupporters { private set; get; }
+        public bool AllowEcapse { set; get; }
+        // in battle, AX changed in temporary way, and long Debut take action
+        public bool InBattle { set; get; }
+        public bool IsMonsterDebut { set; get; }
+
+        public bool SupportSucc { set; get; }
+        public bool HinderSucc { set; get; }
+
+        public int RPool { set; get; }
+        public int OPool { set; get; }
+
+    }
+
+    public class Board
+    {
+        public IDictionary<ushort, Player> Garden { set; get; }
         private List<ushort> SortedPlayerList { set; get; }
 
         public Player Rounder
