@@ -507,6 +507,8 @@
     <Image x:Key="monCardNCH01" Source="Card/NMB/NCH01.png"/>
     <Image x:Key="monCardNCH03" Source="Card/NMB/NCH03.png"/>
     <Image x:Key="monCardNCH04" Source="Card/NMB/NCH04.png"/>
+    <Image x:Key="monCardNCH05" Source="Card/NMB/NCH05.png"/>
+    <Image x:Key="monCardNCH06" Source="Card/NMB/NCH06.png"/>
     <Image x:Key="monCardNCH07" Source="Card/NMB/NCH07.png"/>
     <Image x:Key="monCardNCH08" Source="Card/NMB/NCH08.png"/>
 
@@ -555,6 +557,8 @@
     <Image x:Key="tuxCardXBT2" Source="Card/Tux/XBT2.png"/>
     <Image x:Key="tuxCardXBT3" Source="Card/Tux/XBT3.png"/>
     <Image x:Key="tuxCardXBT4" Source="Card/Tux/XBT4.png"/>
+	
+    <Image x:Key="tuxCardTPH4" Source="Card/Tux/TPH4.png"/>
 
     <Image x:Key="diceImg000" Source="Card/Dice00.png"/>
     <Image x:Key="diceImg1" Source="Card/Dices/Dice1.png"/>

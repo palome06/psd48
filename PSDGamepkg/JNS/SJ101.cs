@@ -461,6 +461,7 @@ namespace PSD.PSDGamepkg.JNS
             ushort pop = XI.Board.RestNPCPiles.Dequeue();
             NPC npc = XI.LibTuple.NL.Decode(NMBLib.OriginalNPC(pop));
             XI.RaiseGMessage("G0YM,3," + pop + ",0");
+            XI.RaiseGMessage("G1NI," + rd.Uid + "," + pop);
             XI.Board.Monster1 = pop;
             UEchoCode r5ed = XI.HandleWithNPCEffect(py, npc, false);
             if (r5ed == UEchoCode.NO_OPTIONS)
@@ -509,6 +510,7 @@ namespace PSD.PSDGamepkg.JNS
                 ushort pop = XI.Board.RestNPCPiles.Dequeue();
                 NPC npc = XI.LibTuple.NL.Decode(NMBLib.OriginalNPC(pop));
                 XI.RaiseGMessage("G0YM,3," + pop + ",0");
+                XI.RaiseGMessage("G1NI," + rd.Uid + "," + pop);
                 int sr = npc.STR < 5 ? npc.STR : 5;
                 if (rd.Tux.Count > sr)
                     XI.RaiseGMessage("G0DH," + rd.Uid + ",1," + (rd.Tux.Count - sr));

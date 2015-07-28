@@ -404,12 +404,18 @@ namespace PSD.ClientAo.Card
             {
                 ushort dbSerial = ushort.Parse(str.Substring("G".Length));
                 Tux tux = tuple.TL.EncodeTuxDbSerial(dbSerial);
-                Image image = uc.TryFindResource("tuxCard" + tux.Code) as Image;
-                if (image != null)
-                    rb = new Ruban(image, dbSerial);
+                if (tux != null)
+                {
+                    Image image = uc.TryFindResource("tuxCard" + tux.Code) as Image;
+                    Image2Gray(ref image, gray);
+                    if (image != null)
+                        rb = new Ruban(image, dbSerial);
+                    else
+                        rb = new Ruban(uc.TryFindResource("tuxCard000") as Image, dbSerial);
+                    rb.ToolTip = Tips.IchiDisplay.GetTuxDbSerialTip(tuple, dbSerial);
+                }
                 else
                     rb = new Ruban(uc.TryFindResource("tuxCard000") as Image, dbSerial);
-                rb.ToolTip = Tips.IchiDisplay.GetTuxDbSerialTip(tuple, dbSerial);
             }
             else if (str.StartsWith("I"))
             {

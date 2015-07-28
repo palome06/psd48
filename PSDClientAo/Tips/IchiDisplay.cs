@@ -392,6 +392,22 @@ namespace PSD.ClientAo.Tips
                 FontFamily = new System.Windows.Media.FontFamily("Times New Roman"),
                 FontSize = SSIZE
             });
+            if (!string.IsNullOrEmpty(npc.DebutText))
+            {
+                pr.Inlines.Add(new LineBreak());
+                pr.Inlines.Add(new LineBreak());
+                pr.Inlines.Add(new Run("出场效果")
+                {
+                    Foreground = new SolidColorBrush(Colors.LightGreen),
+                    FontSize = SSIZE
+                });
+                pr.Inlines.Add(new LineBreak());
+                pr.Inlines.Add(new Run(npc.DebutText)
+                {
+                    Foreground = new SolidColorBrush(Colors.White),
+                    FontSize = SSIZE
+                });
+            }
             bool entered = false;
             foreach (string skillstr in npc.Skills)
             {

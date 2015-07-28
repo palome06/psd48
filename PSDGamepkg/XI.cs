@@ -584,28 +584,29 @@ namespace PSD.PSDGamepkg
                  "IE", "OE", "IS", "OS", "LH", "IV", "OV", "PB", "YM", "HR", "FI", "ON", "SN", "MA",
                  "PH", "ZJ" };
             string[] g1 = new string[] { "DI", "IU", "OU", "CW", "ZK", "IZ", "OZ", "WP", "SG", "HK",
-                 "WJ", "JG", "XR", "EV", "CK", "7F", "YP" };
+                 "WJ", "JG", "XR", "EV", "CK", "7F", "YP", "NI" };
             string[] g2 = new string[] { "IN", "RN", "CN", "QC", "FU", "QU", "CL", "ZU", "HU", "WK",
                  "AK", "IL", "OL", "SW", "AS", "SY" };
             foreach (string g0event in g0)
-                Util.AddToMultiMap(dict, "G0" + g0event, new SkTriple() { Name = "~100", Priorty = 100, Occur = "G0" + g0event });
+                RegisterBasicSKTs(dict, "G0" + g0event, 100);
             foreach (string g1event in g1)
-                Util.AddToMultiMap(dict, "G1" + g1event, new SkTriple() { Name = "~100", Priorty = 100, Occur = "G1" + g1event });
+                RegisterBasicSKTs(dict, "G1" + g1event, 100);
             foreach (string g2event in g2)
-                Util.AddToMultiMap(dict, "G2" + g2event, new SkTriple() { Name = "~100", Priorty = 100, Occur = "G2" + g2event });
+                RegisterBasicSKTs(dict, "G2" + g2event, 100);
 
-            Util.AddToMultiMap(dict, "G0OH", new SkTriple() { Name = "~200", Priorty = 200, Occur = "G0OH" });
-            Util.AddToMultiMap(dict, "G0ZW", new SkTriple() { Name = "~200", Priorty = 200, Occur = "G0ZW" });
-            Util.AddToMultiMap(dict, "G0ZW", new SkTriple() { Name = "~300", Priorty = 300, Occur = "G0ZW" });
-            Util.AddToMultiMap(dict, "G0ZW", new SkTriple() { Name = "~400", Priorty = 400, Occur = "G0ZW" });
-            Util.AddToMultiMap(dict, "G0OY", new SkTriple() { Name = "~200", Priorty = 200, Occur = "G0OY" });
-            Util.AddToMultiMap(dict, "G0OY", new SkTriple() { Name = "~300", Priorty = 300, Occur = "G0OY" });
-            Util.AddToMultiMap(dict, "G0CC", new SkTriple() { Name = "~200", Priorty = 200, Occur = "G0CC" });
-            Util.AddToMultiMap(dict, "G0CC", new SkTriple() { Name = "~300", Priorty = 300, Occur = "G0CC" });
-            Util.AddToMultiMap(dict, "G0CC", new SkTriple() { Name = "~400", Priorty = 400, Occur = "G0CC" });
-            Util.AddToMultiMap(dict, "G0HZ", new SkTriple() { Name = "~200", Priorty = 200, Occur = "G0HZ" });
-            Util.AddToMultiMap(dict, "G1EV", new SkTriple() { Name = "~200", Priorty = 200, Occur = "G1EV" });
-            Util.AddToMultiMap(dict, "G1WJ", new SkTriple() { Name = "~200", Priorty = 200, Occur = "G1WJ" });
+            RegisterBasicSKTs(dict, "G0OH", 200);
+            RegisterBasicSKTs(dict, "G0ZW", 200);
+            RegisterBasicSKTs(dict, "G0ZW", 300);
+            RegisterBasicSKTs(dict, "G0ZW", 400);
+            RegisterBasicSKTs(dict, "G0OY", 200);
+            RegisterBasicSKTs(dict, "G0OY", 300);
+            RegisterBasicSKTs(dict, "G0CC", 200);
+            RegisterBasicSKTs(dict, "G0CC", 300);
+            RegisterBasicSKTs(dict, "G0CC", 400);
+            RegisterBasicSKTs(dict, "G0HZ", 200);
+            RegisterBasicSKTs(dict, "G1EV", 200);
+            RegisterBasicSKTs(dict, "G1WJ", 200);
+            
             foreach (string key in dict.Keys)
             {
                 List<SkTriple> value = dict[key];
@@ -613,6 +614,11 @@ namespace PSD.PSDGamepkg
                     value.Sort(SkTriple.Cmp);
             }
             //return dict;
+        }
+
+        private void RegisterBasicSKTs(IDictionary<string, List<SkTriple>> dict, string name, int priorty)
+        {
+            Util.AddToMultiMap(dict, name, new SkTriple() { Name = "~" + priorty, Priorty = priorty, Occur = name });
         }
 
         private List<SKE> ParseSingleFromSKTriples(List<SkTriple> list,

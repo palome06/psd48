@@ -29,6 +29,16 @@ namespace PSD.Base.Card
         // original hero code, (e.g.) 10505, and 0 if not exists
         public int Hero { private set; get; }
 
+        public string DebutText { set; get; }
+        public delegate void DebutDelegate(Player trigger);
+        private DebutDelegate mDebut;
+        public DebutDelegate Debut
+        {
+            set { mDebut = value; }
+            get { return mDebut ?? DefDebut; }
+        }
+        private DebutDelegate DefDebut = (t) => { };
+
         // public Delegate Type of Handling events
         public NPC(string code, int group, int genre, string name, ushort str, string[] skills, int hero)
         {
@@ -44,22 +54,21 @@ namespace PSD.Base.Card
 
     public class NPCLib
     {
-        private List<NPC> firsts;
-
         private IDictionary<ushort, NPC> dicts;
 
         private Utils.ReadonlySQL sql;
 
         public NPCLib()
         {
-            firsts = new List<NPC>();
+            dicts = new Dictionary<ushort, NPC>();
             sql = new Utils.ReadonlySQL("psd.db3");
             List<string> list = new string[] {
-                "CODE", "VALID", "NAME", "STR", "ACTION", "ORG", "GENRE"
+                "ID", "CODE", "VALID", "NAME", "STR", "ACTION", "ORG", "DEBUTTEXT", "GENRE"
             }.ToList();
             System.Data.DataRowCollection datas = sql.Query(list, "Npc");
             foreach (System.Data.DataRow data in datas)
             {
+                ushort id = (ushort)((long)data["ID"]);
                 string code = (string)data["CODE"];
                 int valid = (int)((short)data["VALID"]);
                 int genre = (int)((long)data["GENRE"]);
@@ -67,15 +76,14 @@ namespace PSD.Base.Card
                 ushort str = (ushort)((short)data["STR"]);
                 string[] npcskills = ((string)data["ACTION"]).Split(',');
                 int org = (int)((long)data["ORG"]);
-                firsts.Add(new NPC(code, valid, genre, name, str, npcskills, org));
+                string debutText = data["DEBUTTEXT"] as string;
+                dicts.Add(id, new NPC(code, valid, genre, name, str, npcskills, org) { DebutText = debutText ?? "" });
             }
-            ushort cardx = 1;
-            dicts = new Dictionary<ushort, NPC>();
-            foreach (NPC npc in firsts)
-                dicts.Add(cardx++, npc);
         }
 
         public int Size { get { return dicts.Count; } }
+
+        public List<NPC> First { get { return dicts.Values.ToList(); } }
 
         public NPC Decode(ushort code)
         {

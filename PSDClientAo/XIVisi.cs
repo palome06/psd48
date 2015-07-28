@@ -2477,10 +2477,16 @@ namespace PSD.ClientAo
                             List<ushort> mons = Util.TakeRange(args, 3, args.Length)
                                 .Select(p => ushort.Parse(p)).ToList();
                             VI.Cout(Uid, "NPC牌【{0}】被插入放置于牌堆顶第{1}张.", mons, (position + 1));
-                            foreach (ushort mon in mons)
-                                A0O.FlyingGet("M" + mon, 0, 0, true);
+                            A0O.FlyingGet(mons.Select(p => "M" + p).ToList(), 0, 0, true);
                             A0F.MonCount += mons.Count;
                         }
+                    }
+                    else if (args[1] == "7")
+                    {
+                        int count = int.Parse(args[2]);
+                        VI.Cout(Uid, "{0}张怪物牌/NPC牌被置入怪物牌堆.", count);
+                        A0O.FlyingGet(Enumerable.Repeat("M0", count).ToList(), 0, 0, true);
+                        A0F.MonCount += count;
                     }
                     break;
                 case "E0IS":
@@ -2566,7 +2572,19 @@ namespace PSD.ClientAo
                                 VI.Cout(Uid, "{0}将{1}放回手牌堆顶.", zd.Player(who), zd.Tux(cards));
                                 A0O.FlyingGet(cards.Select(p => "C" + p).ToList(), who, 0);
                                 A0F.TuxCount += n;
-                            } // TODO: Put Back Monster/NPC etc.
+                            }
+                            else if (args[1] == "1")
+                            {
+                                VI.Cout(Uid, "{0}将{1}放回怪牌堆顶.", zd.Player(who), zd.Monster(cards));
+                                A0O.FlyingGet(cards.Select(p => "M" + p).ToList(), who, 0);
+                                A0F.MonCount += n;
+                            }
+                            else if (args[1] == "2")
+                            {
+                                VI.Cout(Uid, "{0}将{1}放回事件牌堆顶.", zd.Player(who), zd.Eve(cards));
+                                A0O.FlyingGet(cards.Select(p => "E" + p).ToList(), who, 0);
+                                A0F.EveCount += n;
+                            }
                             i += (3 + n);
                         }
                         else if (hind == 1)
@@ -2576,6 +2594,18 @@ namespace PSD.ClientAo
                                 VI.Cout(Uid, "{0}将{1}张牌放回手牌堆顶.", zd.Player(who), n);
                                 A0O.FlyingGet(Util.RepeatString("C0", n), who, 0);
                                 A0F.TuxCount += n;
+                            }
+                            else if (args[1] == "1")
+                            {
+                                VI.Cout(Uid, "{0}将{1}张牌放回怪牌堆顶.", zd.Player(who), n);
+                                A0O.FlyingGet(Util.RepeatString("M0", n), who, 0);
+                                A0F.MonCount += n;
+                            }
+                            else if (args[1] == "2")
+                            {
+                                VI.Cout(Uid, "{0}将{1}张牌放回事件牌堆顶.", zd.Player(who), n);
+                                A0O.FlyingGet(Util.RepeatString("E0", n), who, 0);
+                                A0F.EveCount += n;
                             }
                             i += 3;
                         }

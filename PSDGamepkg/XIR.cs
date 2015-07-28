@@ -55,9 +55,10 @@ namespace PSD.PSDGamepkg
             //RaiseGMessage("G0HC,0,1,19");
             //Board.MonPiles.PushBack(1022);
             //Board.MonPiles.PushBack(1041);
-            Board.MonPiles.PushBack(57);
-            //Board.MonPiles.PushBack(1057);
-            //Board.MonPiles.PushBack(1004);
+            //Board.MonPiles.PushBack(57);
+            Board.MonPiles.PushBack(1059);
+            Board.MonPiles.PushBack(1062);
+            Board.MonPiles.PushBack(2);
             //Board.MonPiles.PushBack(1);
             //Board.MonPiles.PushBack(17);
             //Board.MonPiles.PushBack(14);
@@ -74,7 +75,7 @@ namespace PSD.PSDGamepkg
             ////Board.EvePiles.PushBack(1);
             //Board.EvePiles.PushBack(22);
             //Board.EvePiles.PushBack(8);
-            Board.EvePiles.PushBack(31);
+            //Board.EvePiles.PushBack(31);
             //Board.EvePiles.PushBack(30);
             //Board.RestNPCPiles.PushBack(1047);
             //Board.EvePiles.PushBack(23);
@@ -139,7 +140,7 @@ namespace PSD.PSDGamepkg
             //RaiseGMessage("G0HQ,2,2,0,0,37,70");
             //RaiseGMessage("G0HQ,2,3,0,0,40");
             //RaiseGMessage("G0HQ,2,1,0,0,77,95,9");
-            //RaiseGMessage("G0HQ,2,2,0,0,8");
+            //RaiseGMessage("G0HQ,2,2,0,0,4");
             //RaiseGMessage("G0HQ,2,1,0,0,36,37");
             //RaiseGMessage("G0HQ,2,6,0,0,88");
             //RaiseGMessage("G0HQ,2,1,0,47,50,49,5,63,8,69");
@@ -260,6 +261,7 @@ namespace PSD.PSDGamepkg
             sk01 = new JNS.SkillCottage(this, VI).RegisterDelegates(LibTuple.SL);
             cz01 = new JNS.OperationCottage(this, VI).RegisterDelegates(LibTuple.ZL);
             nj01 = new JNS.NPCCottage(this, VI).RegisterDelegates(LibTuple.NJL);
+            new JNS.NPCCottage(this, VI).RegisterNPCDelegates(LibTuple.NL);
             ev01 = new JNS.EveCottage(this, VI).RegisterDelegates(LibTuple.EL);
             MappingSksp(out sk02, out sk03, levelCode);
             mt01 = new JNS.MonsterCottage(this, VI).RegisterDelegates(LibTuple.ML);
@@ -546,6 +548,7 @@ namespace PSD.PSDGamepkg
                         {
                             WI.BCast(rstage + "1,0");
                             ushort npcut = Board.Monster1;
+                            RaiseGMessage("G1NI," + Board.Rounder.Uid + "," + npcut);
                             NPC npc = LibTuple.NL.Decode(NMBLib.OriginalNPC(npcut));
                             UEchoCode r5ed = HandleWithNPCEffect(Board.Rounder, npc, true);
                             if (r5ed == UEchoCode.NO_OPTIONS) // cannot take any action, check whether finished

@@ -40,7 +40,7 @@ namespace PSD.PSDCenter
             OptTeam = optTeam; OptSel = optSel; OptLevel = optLevel;
             Ready = false; Ps = null;
             if (trainers == null)
-                trainers = new string[0];
+                Trainers = new string[0];
             else if (trainers != null && trainers.Length > 6)
                 Trainers = trainers.Take(6).ToArray();
             else

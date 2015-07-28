@@ -534,6 +534,7 @@ namespace PSD.PSDGamepkg
                             }
                             else if (NMBLib.IsNPC(mon))
                             {
+                                RaiseGMessage("G1NI," + Board.Rounder.Uid + "," + mon);
                                 NPC npc = LibTuple.NL.Decode(NMBLib.OriginalNPC(mon));
                                 bool doubled = false;
                                 Hero nho = LibTuple.HL.InstanceHero(npc.Hero);
@@ -3187,9 +3188,13 @@ namespace PSD.PSDGamepkg
                                 .Select(p => ushort.Parse(p)).ToList();
                             if (args[1] == "0")
                             {
-                                RaiseGMessage("G0OT," + who + "," + n + "," + string.Join(",", cards));
+                                // We believe we don't claim the card source and its flow now
+                                // RaiseGMessage("G0OT," + who + "," + n + "," + string.Join(",", cards));
                                 Board.TuxPiles.PushBack(cards);
-                            } // TODO: Put Back Monster/NPC etc.
+                            } else if (args[1] == "1")
+                                Board.MonPiles.PushBack(cards);
+                            else if (args[1] == "2")
+                                Board.EvePiles.PushBack(cards);
                             i += (2 + n);
                             word0 += "," + who + ",1," + n;
                             foreach (ushort ut in Board.Garden.Keys)
@@ -3602,6 +3607,17 @@ namespace PSD.PSDGamepkg
                                 }
                             }
                             py.ExMask &= (~0x4);
+                        }
+                    }
+                    break;
+                case "G1NI":
+                    {
+                        ushort who = ushort.Parse(args[1]);
+                        ushort ut = ushort.Parse(args[2]);
+                        if (ut > 0)
+                        {
+                            NPC npc = LibTuple.NL.Decode(Base.Card.NMBLib.OriginalNPC(ut));
+                            npc.Debut(Board.Garden[who]);
                         }
                     }
                     break;

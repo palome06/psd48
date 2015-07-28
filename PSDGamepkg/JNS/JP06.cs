@@ -1467,6 +1467,7 @@ namespace PSD.PSDGamepkg.JNS
             ushort pop = XI.Board.RestNPCPiles.Dequeue();
             NPC npc = XI.LibTuple.NL.Decode(NMBLib.OriginalNPC(pop));
             XI.RaiseGMessage("G0YM,3," + pop + ",0");
+            XI.RaiseGMessage("G1NI," + to + "," + pop);
             XI.Board.Monster1 = pop;
             UEchoCode r5ed = XI.HandleWithNPCEffect(XI.Board.Garden[to], npc, false);
             if (r5ed == UEchoCode.NO_OPTIONS)

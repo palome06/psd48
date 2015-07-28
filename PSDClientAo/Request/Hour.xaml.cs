@@ -85,7 +85,7 @@ namespace PSD.ClientAo.Request
             foreach (Hero hero in lg.HL.ListAllHeros(0))
                 AddContent("H", hero.Avatar, hero.Group, hero.Genre, hero.AvailableTestPkg != 0);
 
-            genreIndex = new int[] { 1, 5, 6 };
+            genreIndex = new int[] { 1, 5, 6, 9 };
             foreach (int index in genreIndex)
             {
                 GroupBox gb = new GroupBox()
@@ -101,7 +101,7 @@ namespace PSD.ClientAo.Request
                 tuxStackPanel.Children.Add(gb);
             }
             foreach (Tux tux in lg.TL.ListAllTuxs(0))
-                AddContent("G", tux.DBSerial, 0, tux.Genre, false);
+                AddContent("G", tux.DBSerial, tux.Package.All(p => !IsGenreNotAvailable(p)) ? 0 : 8, tux.Genre, false);
 
             genreIndex = new int[] { 1, 5, 6, 7, 9 };
             foreach (int index in genreIndex)

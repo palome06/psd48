@@ -138,6 +138,9 @@ namespace PSD.PSDGamepkg.JNS
 
         public void CZ03Action(Player player, string fuse, string args)
         {
+            // string[] argblock = args.Split(',');
+            // ushort which = ushort.Parse(argblock[0]);
+            // XI.LibTuple.NL.Decode(NMBLib.OriginalNPC(p)).Escue.Action(player, type, fuse, args);
             ushort which = ushort.Parse(args);
             if (player.Escue.Contains(which))
             {
@@ -151,13 +154,23 @@ namespace PSD.PSDGamepkg.JNS
         public string CZ03Input(Player player, string fuse, string prev)
         {
             if (prev == "")
+            {
+                // List<ushort> ess = player.Escue.Where(p => XI.LibTuple.NL.Decode(NMBLib.OriginalNPC(p))
+                //     .EscueValid(player, type, fuse)).ToList();
+                // return "/M1(p" + string.Join("p", ess) + ")";
                 return "/M1(p" + string.Join("p", player.Escue) + ")";
+            }
             else
+            {
+                // ushort ut = ushort.Prase(Util.Substring(prev, 0, idx));
+                // return XI.LibTuple.NL.Decode(NMBLib.OriginalNPC(ut)).EscueInput(player, type, prev);
                 return "";
+            }
         }
         public bool CZ03Valid(Player player, string fuse)
         {
             return player.Escue.Count > 0;
+            //return player.Escue.Any(p => XI.LibTuple.NL.Decode(NMBLib.OriginalNPC(p)).EscueValid(player, type, fuse));
         }
 
         public void CZ05Action(Player player, string fuse, string args)

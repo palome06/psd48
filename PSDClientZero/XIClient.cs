@@ -2201,12 +2201,22 @@ namespace PSD.ClientZero
                     {
                         int position = int.Parse(args[2]);
                         if (args[3] == "0")
+                        {
                             VI.Cout(Uid, "一张NPC牌被插入放置于牌堆顶第{0}张.", (position + 1));
+                            ++Z0P.MonCount;
+                        }
                         else {
                             List<ushort> mons = Util.TakeRange(args, 3, args.Length)
                                 .Select(p => ushort.Parse(p)).ToList();
                             VI.Cout(Uid, "NPC牌【{0}】被插入放置于牌堆顶第{1}张.", mons, (position + 1));
+                            Z0P.MonCount += mons.Count;
                         }
+                    }
+                    else if (args[1] == "7")
+                    {
+                        int count = int.Parse(args[2]);
+                        VI.Cout(Uid, "{0}张怪物牌/NPC牌被置入怪物牌堆.", count);
+                        Z0P.MonCount += count;
                     }
                     break;
                 case "E0IS":
@@ -2274,7 +2284,17 @@ namespace PSD.ClientZero
                             {
                                 VI.Cout(Uid, "{0}将{1}放回手牌堆顶.", zd.Player(who), zd.Tux(cards));
                                 Z0P.TuxCount += n;
-                            } // TODO: Put Back Monster/NPC etc.
+                            }
+                            else if (args[1] == "1")
+                            {
+                                VI.Cout(Uid, "{0}将{1}放回怪牌堆顶.", zd.Player(who), zd.Monster(cards));
+                                Z0P.MonCount += n;
+                            }
+                            else if (args[1] == "2")
+                            {
+                                VI.Cout(Uid, "{0}将{1}放回事件牌堆顶.", zd.Player(who), zd.Eve(cards));
+                                Z0P.EveCount += n;
+                            }
                             i += (3 + n);
                         }
                         else if (hind == 1)
@@ -2283,6 +2303,16 @@ namespace PSD.ClientZero
                             {
                                 VI.Cout(Uid, "{0}将{1}张牌放回手牌堆顶.", zd.Player(who), n);
                                 Z0P.TuxCount += n;
+                            }
+                            else if (args[1] == "1")
+                            {
+                                VI.Cout(Uid, "{0}将{1}张牌放回怪牌堆顶.", zd.Player(who), n);
+                                Z0P.MonCount += n;
+                            }
+                            else if (args[1] == "2")
+                            {
+                                VI.Cout(Uid, "{0}将{1}张牌放回事件牌堆顶.", zd.Player(who), n);
+                                Z0P.EveCount += n;
                             }
                             i += 3;
                         }

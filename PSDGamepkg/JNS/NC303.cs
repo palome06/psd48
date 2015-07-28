@@ -48,6 +48,23 @@ namespace PSD.PSDGamepkg.JNS
             }
             return nj01;
         }
+        public IDictionary<string, NPC> RegisterNPCDelegates(NPCLib lib)
+        {
+            NPCCottage njc = this;
+            IDictionary<string, NPC> nj02 = new Dictionary<string, NPC>();
+            foreach (NPC npc in lib.First)
+            {
+                nj02.Add(npc.Code, npc);
+                string njCode = npc.Code;
+                var methodDebut = njc.GetType().GetMethod(njCode + "Debut");
+                if (methodDebut != null)
+                    npc.Debut += new NPC.DebutDelegate(delegate(Player player)
+                    {
+                        methodDebut.Invoke(njc, new object[] { player });
+                    });
+            }
+            return nj02;
+        }
 
         public void NJ01Action(Player player, string fuse, string args)
         {
@@ -233,17 +250,20 @@ namespace PSD.PSDGamepkg.JNS
         }
         public void NJ09Action(Player player, string fuse, string args)
         {
-            string npcCode = fuse.Substring(0, fuse.IndexOf(';'));
-            fuse = fuse.Substring(fuse.IndexOf(';') + 1);
-            ushort ut = NMBLib.CodeOfNPC(XI.LibTuple.NL.Encode(npcCode));
-
-            if (!player.Escue.Contains(ut))
-            {
-                player.Escue.Add(ut);
-                XI.RaiseGMessage("G2IL," + player.Uid + "," + ut);
-                if (XI.Board.Monster1 == ut)
-                    XI.Board.Monster1 = 0;
-            }
+            DefaultPutIntoEscueAction(player, fuse);
+        }
+        public void NJ09EscueAction(Player player, ushort npcUt, int type, string fuse, string args)
+        {
+            ushort side = ushort.Parse(args);
+            NPCStandardEscueAction(player, npcUt);
+            XI.RaiseGMessage("G0IP," + side + ",1");
+        }
+        public string NJ09EscueInput(Player player, ushort npcUt, int type, string fuse, string prev)
+        {
+            if (prev == "")
+                return "S";
+            else
+                return "";
         }
         public bool NJT1Valid(Player player, string fuse)
         {
@@ -289,6 +309,15 @@ namespace PSD.PSDGamepkg.JNS
             }
             XI.RaiseGMessage("G2FU,3");
         }
+        public void NJH3Action(Player player, string fuse, string args)
+        {
+            DefaultPutIntoEscueAction(player, fuse);
+        }
+        public void NJH3EscueAction(Player player, ushort npcUt, int type, string fuse, string argst)
+        {
+            NPCStandardEscueAction(player, npcUt);
+            XI.RaiseGMessage("G0DH," + player.Uid + ",0," + (player.TuxLimit - player.Tux.Count));
+        }
         public void NJH6Action(Player player, string fuse, string args)
         {
             int idx = args.IndexOf(',');
@@ -313,5 +342,55 @@ namespace PSD.PSDGamepkg.JNS
         {
             return XI.Board.Garden.Values.Where(p => p.IsAlive && p.GetEquipCount() > 0).Any();
         }
+
+        #region NPC Single
+        public void NPCStandardEscueAction(Player player, ushort npcUt) // Standard CZ03
+        {
+            if (player.Escue.Contains(npcUt))
+            {
+                player.Escue.Remove(npcUt);
+                XI.RaiseGMessage("G2OL," + player.Uid + "," + npcUt);
+                XI.RaiseGMessage("G0ON," + player.Uid + ",M,1," + npcUt);
+                ushort side = ushort.Parse(XI.AsyncInput(player.Uid, "S", "CZ03", "0"));
+                XI.RaiseGMessage("G0IP," + side + ",1");
+            }
+        }
+        public void DefaultPutIntoEscueAction(Player player, string fuse)
+        {
+            string npcCode = fuse.Substring(0, fuse.IndexOf(';'));
+            fuse = fuse.Substring(fuse.IndexOf(';') + 1);
+            ushort ut = NMBLib.CodeOfNPC(XI.LibTuple.NL.Encode(npcCode));
+
+            if (!player.Escue.Contains(ut))
+            {
+                player.Escue.Add(ut);
+                XI.RaiseGMessage("G2IL," + player.Uid + "," + ut);
+                if (XI.Board.Monster1 == ut)
+                    XI.Board.Monster1 = 0;
+            }
+        }
+        public void NCT41Debut(Player trigger)
+        {
+            int incr = XI.Board.Garden.Values.Where(p => p.IsAlive &&
+                p.Team == trigger.OppTeam).Max(p => p.Tux.Count);
+            ushort me = NMBLib.CodeOfNPC(XI.LibTuple.NL.Encode("NCT41"));
+            XI.RaiseGMessage("G0IB," + me + "," + incr);
+        }
+        public void NCH07Debut(Player trigger)
+        {
+            List<ushort> nmbs = new List<ushort>();
+            ushort pop = XI.Board.RestNPCPiles.Dequeue();
+            if (pop > 0)
+                nmbs.Add(pop);
+            ushort[] pops = XI.Board.RestMonPiles.Dequeue(2);
+            nmbs.AddRange(pops);
+            if (nmbs.Count > 0)
+            {
+                XI.Board.MonPiles.PushBack(nmbs);
+                XI.RaiseGMessage("G0YM,7," + nmbs.Count);
+                XI.Board.MonPiles.Shuffle();
+            }
+        }
+        #endregion NPC Single
     }
 }

@@ -581,6 +581,8 @@
     <Resource Include="Resources\Card\NMB\NCH01.png" />
     <Resource Include="Resources\Card\NMB\NCH03.png" />
     <Resource Include="Resources\Card\NMB\NCH04.png" />
+    <Resource Include="Resources\Card\NMB\NCH05.png" />
+    <Resource Include="Resources\Card\NMB\NCH06.png" />
     <Resource Include="Resources\Card\NMB\NCH07.png" />
     <Resource Include="Resources\Card\NMB\NCH08.png" />
   </ItemGroup>
@@ -639,6 +641,9 @@
     <Resource Include="Resources\Card\Tux\XBT4.png" />
     <Resource Include="Resources\Card\Tux\ZPT2.png" />
     <Resource Include="Resources\Card\Tux\ZPT3.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Card\Tux\TPH4.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\EquipSnap\XB000.png" />

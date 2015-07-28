@@ -15,47 +15,65 @@ namespace PSD.Base
 
         public string Intro { set; get; }
 
-        public delegate void ActionDelegate(Player player, string fuse, string argst);
-
-        public delegate bool ValidDelegate(Player player, string fuse);
-
-        public delegate string InputDelegate(Player player, string fuse, string prev);
+        public SKBranch[] Branches { private set; get; }
 
         private ActionDelegate mAction;
-
+        private EscueActionDelegate mEscueAction;
         public ActionDelegate Action
         {
             set { mAction = value; }
             get { return mAction ?? DefAction; }
         }
+        public EscueActionDelegate EscueAction
+        {
+            set { mEscueAction = value; }
+            get { return mEscueAction ?? DefEscueAction; }
+        }
 
         private InputDelegate mInput;
-
+        private EscueInputDelegate mEscueInput;
         public InputDelegate Input
         {
             set { mInput = value; }
             get { return mInput ?? DefInput; }
         }
+        public EscueInputDelegate EscueInput
+        {
+            set { mEscueInput = value; }
+            get { return mEscueInput ?? DefEscueInput; }
+        }
 
         private ValidDelegate mValid;
-
+        private EscueValidDelegate mEscueValid;
         public ValidDelegate Valid
         {
             set { mValid = value; }
             get { return mValid ?? DefValid; }
         }
-
-        public NCAction(string name, string code, string intro)
+        public EscueValidDelegate EscueValid
         {
-            Name = name; Code = code; Intro = intro;
+            set { mEscueValid = value; }
+            get { return mEscueValid ?? DefEscueValid; }
         }
 
-        private static ActionDelegate DefAction = delegate(
-            Player player, string fuse, string argst) { };
-        private static ValidDelegate DefValid = delegate(
-            Player player, string fuse) { return true; };
-        private static InputDelegate DefInput = delegate(
-            Player player, string fuse, string prev) { return ""; };
+        public NCAction(string name, string code, string intro, string escue)
+        {
+            Name = name; Code = code; Intro = intro;
+            Branches = SKBranch.ParseFromString(escue);
+        }
+
+        public delegate void ActionDelegate(Player player, string fuse, string argst);
+        public delegate bool ValidDelegate(Player player, string fuse);
+        public delegate string InputDelegate(Player player, string fuse, string prev);
+        public delegate void EscueActionDelegate(Player player, ushort npcUt, int type, string fuse, string argst);
+        public delegate bool EscueValidDelegate(Player player, ushort npcUt, int type, string fuse);
+        public delegate string EscueInputDelegate(Player player, ushort npcUt, int type, string fuse, string prev);
+        private static ActionDelegate DefAction = (p, f ,a) => { };
+        private static ValidDelegate DefValid = (p, f) => { return true; };
+        private static InputDelegate DefInput = (p, f, pv) => { return ""; };
+        private static EscueActionDelegate DefEscueAction = (p, u, t, f ,a) => { };
+        private static EscueValidDelegate DefEscueValid = (p, u, t, f) => { return true; };
+        private static EscueInputDelegate DefEscueInput = (p, u, t, f, pv) => { return ""; };
     }
 
     public class NCActionLib
@@ -66,38 +84,19 @@ namespace PSD.Base
 
         private Utils.ReadonlySQL sql;
 
-        public NCActionLib(string path)
-        {
-            Firsts = new List<NCAction>();
-            //dicts = new Dictionary<string, Skill>();
-            string[] lines = System.IO.File.ReadAllLines(path);
-            foreach (string line in lines)
-            {
-                if (line != null && line.Length > 0 && !line.StartsWith("#"))
-                {
-                    string[] content = line.Split('\t');
-                    string code = content[0];
-                    string name = content[1];
-                    string intro = content[2];
-
-                    NCAction nj = new NCAction(name, code, intro);
-                    Firsts.Add(nj);
-                }
-            }
-        }
-
         public NCActionLib()
         {
             Firsts = new List<NCAction>();
             sql = new Utils.ReadonlySQL("psd.db3");
-            List<string> list = new string[] { "CODE", "NAME", "INTRO" }.ToList();
+            List<string> list = new string[] { "CODE", "NAME", "INTRO", "ESCUE" }.ToList();
             System.Data.DataRowCollection datas = sql.Query(list, "NJ");
             foreach (System.Data.DataRow data in datas)
             {
                 string code = (string)data["CODE"];
                 string name = (string)data["NAME"];
                 string intro = (string)data["INTRO"];
-                Firsts.Add(new NCAction(name, code, intro));
+                string escue = (string)data["ESCUE"];
+                Firsts.Add(new NCAction(name, code, intro, escue));
             }
         }
 
