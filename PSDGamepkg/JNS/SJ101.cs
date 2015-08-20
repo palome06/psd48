@@ -522,11 +522,159 @@ namespace PSD.PSDGamepkg.JNS
             }
         }
         #endregion Package 5#
+        #region Package 6#
+        public void SJT11(Player rd)
+        {
+            foreach (ushort ut in XI.Board.OrderedPlayer(rd.Uid))
+            {
+                Player py = XI.Board.Garden[ut];
+                if (py.IsAlive && py.Team == rd.OppTeam)
+                {
+                    XI.RaiseGMessage("G2YS,T," + rd.Uid + ",T," + py.Uid);
+                    XI.RaiseGMessage("G0TT," + rd.Uid);
+                    int valR = XI.Board.DiceValue;
+                    XI.RaiseGMessage("G0TT," + py.Uid);
+                    int valP = XI.Board.DiceValue;
+
+                    if (valR == valP && rd.STR == py.STR)
+                        continue;
+                    bool win = valR > valP || (valR == valP && rd.STR < py.STR);
+                    Player winner = win ? rd : py;
+                    Player losser = win ? py : rd;
+                    int select = 0;
+                    if (losser.Tux.Count > 0 && losser.HasAnyEquips())
+                    {
+                        string sel = XI.AsyncInput(winner.Uid, "#请选择一项##获得手牌##弃置装备,Y2", "SJT11", "0");
+                        if (sel == "1") select = 1;
+                        else if (sel == "2") select = 2;
+                    }
+                    else if (losser.Tux.Count > 0)
+                    {
+                        XI.AsyncInput(winner.Uid, "#请选择一项##获得手牌,Y1", "SJT11", "0");
+                        select = 1;
+                    }
+                    else if (losser.HasAnyEquips())
+                    {
+                        XI.AsyncInput(winner.Uid, "#请选择一项##弃置装备,Y1", "SJT11", "0");
+                        select = 2;
+                    }
+                    if (select == 1)
+                    {
+                        string c0 = Util.RepeatString("p0", XI.Board.Garden[losser.Uid].Tux.Count);
+                        XI.AsyncInput(winner.Uid, "#获得的,C1(" + c0 + ")", "SJT11", "1");
+                        XI.RaiseGMessage("G0HQ,0," + winner.Uid + "," + losser.Uid + ",2,1");
+                    }
+                    else if (select == 2)
+                    {
+                        string c0 = "p" + string.Join("p", losser.ListOutAllEquips());
+                        string which = XI.AsyncInput(winner.Uid, "#弃置的,C1(" + c0 + ")", "SJT11", "1");
+                        if (!which.Contains(VI.CinSentinel))
+                            XI.RaiseGMessage("G0QZ," + losser.Uid + "," + which);
+                    }
+                }
+            }
+        }
+        public void SJT14(Player rd)
+        {
+            int sumMe = XI.Board.Garden.Values.Where(p => p.IsAlive && p.Team == rd.Team)
+                    .Sum(p => p.Pets.Where(q => q != 0 && XI.LibTuple.ML.Decode(q) != null)
+                    .Sum(q => XI.LibTuple.ML.Decode(q).STR));
+            int sumOe = XI.Board.Garden.Values.Where(p => p.IsAlive && p.Team == rd.OppTeam)
+                .Sum(p => p.Pets.Where(q => q != 0 && XI.LibTuple.ML.Decode(q) != null)
+                .Sum(q => XI.LibTuple.ML.Decode(q).STR));
+
+            if (sumMe == sumOe) return;
+            Player py = sumMe < sumOe ? rd : XI.Board.GetOpponenet(rd);
+            string whoStr = XI.AsyncInput(py.Uid, "#执行翻怪,/T1(p" + string.Join("p",
+                XI.Board.Garden.Values.Where(p => p.IsAlive).Select(p => p.Uid)) + ")", "SJT14", "0");
+            if (!whoStr.Contains(VI.CinSentinel) && !whoStr.StartsWith("/"))
+            {
+                ushort who = ushort.Parse(whoStr);
+                XI.RaiseGMessage("G2YS,T," + rd.Uid + ",T," + who);
+                // show the monster
+                ushort pop = XI.Board.RestMonPiles.Dequeue();
+                Monster mon = XI.LibTuple.ML.Decode(pop);
+                XI.RaiseGMessage("G0YM,5," + pop + ",0");
+                int str = mon.STR;
+                string toStr = XI.AsyncInput(who, "#获得此怪物,T1(p" + string.Join("p",
+                    XI.Board.Garden.Values.Where(p => p.IsAlive).Select(p => p.Uid)) + ")", "SJT14", "1");
+                if (!toStr.Contains(VI.CinSentinel))
+                {
+                    ushort to = ushort.Parse(toStr);
+                    XI.RaiseGMessage("G0HC,1," + to + ",0,1," + pop);
+                    if (str > 0)
+                        XI.RaiseGMessage(Artiad.Harm.ToMessage(new Artiad.Harm(who, 0, FiveElement.YIN, str, 0)));
+                }
+            }
+        }
+        #endregion Package 6#
         #region Holiday
         public void SJH01(Player rd)
         {
             XI.AsyncInput(rd.Uid, "//", "SJH01", "0");
             XI.RaiseGMessage("G0JM,R" + XI.Board.Rounder.Uid + "ED");
+        }
+        public void SJH02(Player rd)
+        {
+            List<ushort> list = XI.Board.OrderedPlayer();
+            List<ushort> showList = new List<ushort>(), notShowList = new List<ushort>();
+            foreach (ushort ut in list)
+            {
+                Player py = XI.Board.Garden[ut];
+                if (py.IsAlive)
+                {
+                    bool show = false;
+                    if (!py.Tux.Any(p => XI.LibTuple.TL.DecodeTux(p).Type == Tux.TuxType.TP))
+                    {
+                        string select = XI.AsyncInput(ut, "#是否展示您的手牌？##是##否,Y2", "SJH02", "0");
+                        if (select == "1")
+                            show = true;
+                    }
+                    else
+                        XI.AsyncInput(ut, "#是否展示您的手牌？##否,Y1", "SJH02", "0");
+                    if (show)
+                    {
+                        if (py.Tux.Count > 0)
+                            XI.RaiseGMessage("G2FU,0," + ut + ",0," + string.Join(",", py.Tux));
+                        showList.Add(ut);
+                    } else
+                        notShowList.Add(ut);
+                }
+            }
+            string result = "";
+            if (notShowList.Count > 0)
+                result += "," + string.Join(",", notShowList.Select(p => p + ",1,2"));
+            if (showList.Count > 0)
+                result += "," + string.Join(",", showList.Select(p => p + ",0,2"));
+            if (!string.IsNullOrEmpty(result))
+                XI.RaiseGMessage("G0DH" + result);
+        }
+        public void SJH03(Player rd)
+        {
+            IDictionary<ushort, string> requires = new Dictionary<ushort, string>();
+            foreach (Player py in XI.Board.Garden.Values)
+            {
+                if (py.GetEquipCount() > 0)
+                {
+                    int n = py.GetEquipCount() >= 2 ? 2 : 1;
+                    requires.Add(py.Uid, "#须弃置,Q" + n + "(p" + string.Join("p", py.ListOutAllEquips()) + ")");
+                }
+            }   
+            IDictionary<ushort, string> inputs = XI.MultiAsyncInput(requires);
+            foreach (var pair in inputs)
+                XI.RaiseGMessage("G0QZ," + pair.Key + "," + pair.Value);
+
+            if (XI.Board.Garden.Values.Any(p => p.Escue.Count > 0))
+            {
+                string g2ol = string.Join(",", XI.Board.Garden.Values.Where(p => p.Escue.Count > 0)
+                    .Select(p => string.Join(",", p.Escue.Select(q => p.Uid + "," + q))));
+                XI.RaiseGMessage("G2OL," + g2ol);
+                string g0on = string.Join(",", XI.Board.Garden.Values.Where(p => p.Escue.Count > 0)
+                    .Select(p => p.Uid + ",M," + p.Escue.Count + "," + string.Join(",", p.Escue)));
+                XI.RaiseGMessage("G0ON," + g0on);
+                XI.Board.Garden.Values.ToList().ForEach(p => p.Escue.Clear());
+            }
+            // Remove all SF here
         }
         public void SJH05(Player rd)
         {

@@ -56,9 +56,9 @@ namespace PSD.PSDGamepkg
             //Board.MonPiles.PushBack(1022);
             //Board.MonPiles.PushBack(1041);
             //Board.MonPiles.PushBack(57);
-            Board.MonPiles.PushBack(1059);
-            Board.MonPiles.PushBack(1062);
-            Board.MonPiles.PushBack(2);
+            //Board.MonPiles.PushBack(1059);
+            //Board.MonPiles.PushBack(1062);
+            //Board.MonPiles.PushBack(2);
             //Board.MonPiles.PushBack(1);
             //Board.MonPiles.PushBack(17);
             //Board.MonPiles.PushBack(14);
@@ -73,10 +73,10 @@ namespace PSD.PSDGamepkg
             ////Board.MonPiles.PushBack(1030);
             //Board.EvePiles.PushBack(29);
             ////Board.EvePiles.PushBack(1);
-            //Board.EvePiles.PushBack(22);
-            //Board.EvePiles.PushBack(8);
-            //Board.EvePiles.PushBack(31);
-            //Board.EvePiles.PushBack(30);
+            Board.EvePiles.PushBack(32);
+            //Board.EvePiles.PushBack(36);
+            //Board.EvePiles.PushBack(33);
+            //Board.EvePiles.PushBack(35);
             //Board.RestNPCPiles.PushBack(1047);
             //Board.EvePiles.PushBack(23);
             //while (Board.MonPiles.Count > 0)
@@ -111,8 +111,9 @@ namespace PSD.PSDGamepkg
 
             //for (int i = 0; i < 28; ++i)
             //    Board.MonPiles.Dequeue();
-            //Board.MonPiles.PushBack(1006);
-            //Board.MonPiles.PushBack(37);
+            Board.MonPiles.PushBack(1001);
+            Board.MonPiles.PushBack(29);
+            Board.MonPiles.PushBack(54);
             //Board.MonPiles.PushBack(33);
             //Board.MonPiles.PushBack(4);
             //Board.MonPiles.PushBack(10);
@@ -150,7 +151,7 @@ namespace PSD.PSDGamepkg
             //RaiseGMessage("G0HQ,2,5,0,0,90");
             //RaiseGMessage("G0HQ,2,4,0,0,47,48,52");
             //RaiseGMessage("G0HQ,2,6,0,0,26");
-            //RaiseGMessage("G0HQ,2,1,0,0,36");
+            RaiseGMessage("G0HQ,2,1,0,0,124,109");
             //RaiseGMessage("G0HQ,2,2,0,0,71");
             //RaiseGMessage("G0HQ,2,1,0,61,64,73,74,75,76,65,17,69,71,10,70");
             //RaiseGMessage("G0IJ,3,0,1");

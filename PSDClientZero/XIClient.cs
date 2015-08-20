@@ -813,9 +813,15 @@ namespace PSD.ClientZero
                     int kdx = arg.IndexOf(')');
                     int rest = int.Parse(Util.Substring(arg, 1, jdx));
                     string[] argv = Util.Substring(arg, jdx + "(p".Length, kdx).Split('p');
-                    List<ushort> uss = argv.Select(p => ushort.Parse(p)).ToList();
-                    roundInput = VI.Cin(Uid, "请重排以下{0}怪物{1}{2}.", prevComment, zd.Monster(uss), cancel);
-                    inputValid &= roundInput.Split(',').Intersect(argv).Any();
+                    char cardType = argv[0][0];
+                    List<ushort> uss = argv.Select(p => ushort.Parse(p.Substring(1))).ToList();
+                    if (cardType == 'M')
+                        roundInput = VI.Cin(Uid, "请重排以下{0}怪物{1}{2}.", prevComment, zd.Monster(uss), cancel);
+                    else if (cardType == 'E')
+                        roundInput = VI.Cin(Uid, "请重排以下{0}事件{1}{2}.", prevComment, zd.Eve(uss), cancel);
+                    else if (cardType == 'C')
+                        roundInput = VI.Cin(Uid, "请重排以下{0}手牌{1}{2}.", prevComment, zd.Tux(uss), cancel);
+                    inputValid &= roundInput.Split(',').Intersect(uss.Select(p => p.ToString())).Any();
                     prevComment = ""; cancel = "";
                 }
                 else if (arg[0] == 'W') // Arrangement

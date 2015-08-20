@@ -85,7 +85,7 @@ namespace PSD.ClientAo.Request
             foreach (Hero hero in lg.HL.ListAllHeros(0))
                 AddContent("H", hero.Avatar, hero.Group, hero.Genre, hero.AvailableTestPkg != 0);
 
-            genreIndex = new int[] { 1, 5, 6, 9 };
+            genreIndex = new int[] { 1, 5, 6, 7, 9 };
             foreach (int index in genreIndex)
             {
                 GroupBox gb = new GroupBox()
@@ -143,7 +143,7 @@ namespace PSD.ClientAo.Request
             foreach (Monster mon in lg.ML.ListAllMonster(0))
                 AddContent("M", mon.DBSerial, 0, mon.Genre, false);
 
-            genreIndex = new int[] { 1, 6, 9 };
+            genreIndex = new int[] { 1, 6, 7, 9 };
             foreach (int index in genreIndex)
             {
                 GroupBox gb = new GroupBox()

@@ -158,6 +158,8 @@ namespace PSD.PSDGamepkg
             Board.RoundIN = "H0PR";
             if (WI is VW.Aywi)
                 HoldRoomTunnel();
+            if (selCode == RuleCode.MODE_00)
+                levelCode = 0;
             SelectHero(selCode, levelCode, trainer);
             Run(levelCode, selCode == Base.Rules.RuleCode.MODE_00);
         }
@@ -211,6 +213,8 @@ namespace PSD.PSDGamepkg
             if (WI is VW.Aywi)
                 HoldRoomTunnel();
             Console.WriteLine("trainer = " + (trainer == null ? "null" : string.Join(",", trainer)));
+            if (opts[1] == RuleCode.MODE_00)
+                opts[2] = 0;
             SelectHero(opts[1], opts[2], trainer);
             Run(opts[2], opts[1] == Base.Rules.RuleCode.MODE_00);
         }

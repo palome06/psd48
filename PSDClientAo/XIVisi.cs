@@ -50,10 +50,10 @@ namespace PSD.ClientAo
             {
                 int mPkgCode = mLevelCode >> 1;
                 int mValue = value >> 1;
-                if (mPkgCode < 3 && mValue >= 3)
-                    ad.SetPlayerXBSlot(true);
-                else if (mPkgCode >= 3 && mValue < 3)
-                    ad.SetPlayerXBSlot(false);
+                bool old2Equip = mPkgCode > 0 && mPkgCode < 3;
+                bool new2Equip = mValue > 0 && mValue < 3;
+                if (old2Equip != new2Equip)
+                    ad.SetPlayerXBSlot(!new2Equip);
                 mLevelCode = value;
             }
             get { return mLevelCode; }
@@ -888,9 +888,10 @@ namespace PSD.ClientAo
                     string[] argv = Util.Substring(arg, jdx + "(p".Length, kdx).Split('p');
                     //List<ushort> uss = argv.Select(p => ushort.Parse(p)).ToList();
                     //roundInput = VI.Cin(uid, "请重排以下{0}怪物{1}{2}.", prevComment, zd.Monster(uss), cancel);
-                    List<string> ussnm = argv.Select(p => "M" + p).ToList();
-                    roundInput = VI.CinX(Uid, rest, rest, ussnm, cancellable, keep);
-                    inputValid &= roundInput.Split(',').Intersect(argv).Any();
+                    //List<string> ussnm = argv.Select(p => "M" + p).ToList();
+                    List<string> ussnm = argv.Select(p => p.Substring(1)).ToList();
+                    roundInput = VI.CinX(Uid, rest, rest, argv.ToList(), cancellable, keep);
+                    inputValid &= roundInput.Split(',').Intersect(ussnm).Any();
                     prevComment = ""; cancel = "";
                 }
                 //else if (arg[0] == 'W') // Arrangement

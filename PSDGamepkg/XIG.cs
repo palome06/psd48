@@ -1511,7 +1511,11 @@ namespace PSD.PSDGamepkg
                                 WI.Send("E0XZ," + me + ",1," + dicesType + "," + count, ExceptStaff(me));
                                 WI.Live("E0XZ," + me + ",1," + dicesType + "," + count);
                                 int pick = args.Length > 5 ? int.Parse(args[5]) : count;
-                                string order = AsyncInput(me, "X" + pick + "(p" + Util.Sato(gps, "p") + ")", "G0XZ", "0");
+                                string dicesCode = "";
+                                if (dicesType == 1) dicesCode = "C";
+                                else if (dicesType == 2) dicesCode = "M";
+                                else if (dicesType == 3) dicesCode = "E";
+                                string order = AsyncInput(me, "X" + pick + "(p" + dicesCode + Util.Sato(gps, "p" + dicesCode) + ")", "G0XZ", "0");
                                 if (order != "" && order != "0")
                                 {
                                     List<ushort> orders = new List<ushort>(

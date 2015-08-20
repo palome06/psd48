@@ -3689,19 +3689,35 @@ namespace PSD.PSDGamepkg.JNS
         public bool JNT2802Valid(Player player, int type, string fuse)
         {
             if (type == 0)
+                return IsMathISOS("JNT2802", player, fuse);
+            else if (type == 1)
             {
-                List<Artiad.Cure> cures = Artiad.Cure.Parse(fuse);
-                foreach (Artiad.Cure cure in cures)
+                string[] blocks = fuse.Split(',');
+                for (int i = 1; i < blocks.Length; i += 2)
                 {
-                    if (cure.Element != FiveElement.SOL && cure.Element != FiveElement.LOVE)
+                    if ((blocks[i] == "0" || blocks[i] == "2") &&
+                            player.SingleTokenTar.ToString() == blocks[i + 1])
+                        return true;
+                }
+                return false;
+            }
+            else if (type == 2)
+            {
+                if (player.SingleTokenTar != 0)
+                {
+                    List<Artiad.Cure> cures = Artiad.Cure.Parse(fuse);
+                    foreach (Artiad.Cure cure in cures)
                     {
-                        Player py = XI.Board.Garden[cure.Who];
-                        if (py != null && py.Team == player.Team && cure.N > 0)
-                            return true;
+                        if (cure.Element != FiveElement.SOL && cure.Element != FiveElement.LOVE)
+                        {
+                            Player py = XI.Board.Garden[cure.Who];
+                            if (py != null && py.Uid == player.SingleTokenTar && cure.N > 0)
+                                return true;
+                        }
                     }
                 }
             }
-            else if (type == 1)
+            else if (type == 3)
             {
                 bool death = false;
                 string[] blocks = fuse.Split(',');
@@ -3746,29 +3762,26 @@ namespace PSD.PSDGamepkg.JNS
         {
             if (type == 0)
             {
+                string target = XI.AsyncInput(player.Uid, "#「天蛇杖」的,T1" + AAllTareds(player), "JNT2802", "0");
+                XI.RaiseGMessage("G0IJ," + player.Uid + ",2,1," + ushort.Parse(target));
+                TargetPlayer(player.Uid, player.SingleTokenTar);
+                XI.SendOutUAMessage(player.Uid, "JNT2802," + target, "0");
+            }
+            else if (type == 1)
+            {
+                if (player.SingleTokenTar == XI.Board.Rounder.Uid)
+                    XI.RaiseGMessage("G0OJ," + player.Uid + ",2,1," + player.SingleTokenTar);
+            }
+            else if (type == 2)
+            {
                 List<ushort> candidate = new List<ushort>();
                 List<Artiad.Cure> cures = Artiad.Cure.Parse(fuse);
                 foreach (Artiad.Cure cure in cures)
                 {
                     if (cure.Element != FiveElement.SOL && cure.Element != FiveElement.LOVE)
                     {
-                        Player py = XI.Board.Garden[cure.Who];
-                        if (py != null && py.Team == player.Team)
-                            candidate.Add(py.Uid);
-                    }
-                }
-                string select = XI.AsyncInput(player.Uid, "#HP额外增加的,T1(p" +
-                    string.Join("p", candidate) + ")", "JNT2802Action", "0");
-                if (select != VI.CinSentinel)
-                {
-                    ushort who = ushort.Parse(select);
-                    foreach (Artiad.Cure cure in cures)
-                    {
-                        if (cure.Element != FiveElement.SOL && cure.Element != FiveElement.LOVE)
-                        {
-                            if (cure.Who == who)
-                                ++cure.N;
-                        }
+                        if (cure.Who == player.SingleTokenTar)
+                            ++cure.N;
                     }
                 }
                 if (cures.Count > 0)
@@ -3786,7 +3799,7 @@ namespace PSD.PSDGamepkg.JNS
                 //if (cures.Count > 0)
                 //    XI.InnerGMessage(Artiad.Cure.ToMessage(cures), 16);
             }
-            else if (type == 1)
+            else if (type == 3)
             {
                 string target = XI.AsyncInput(player.Uid, "#获得【天蛇杖】的,/T1" + ATeammatesTared(player), "JNT2802", "1");
                 if (target.StartsWith("/")) return;
@@ -4019,8 +4032,11 @@ namespace PSD.PSDGamepkg.JNS
         }
         public void JNT4102Action(Player player, int type, string fuse, string argst)
         {
-            int incr = XI.Board.Garden.Values.Where(p => p.IsAlive && p.Team == player.OppTeam).Max(p => p.Tux.Count);
-            XI.RaiseGMessage("G0IA," + player.Uid + ",1," + incr);
+            int incr = XI.Board.Garden.Values.Where(p => p.IsAlive && p.Team == player.OppTeam).Max(p => p.Tux.Count) - player.STR;
+            if (incr > 0)
+                XI.RaiseGMessage("G0IA," + player.Uid + ",1," + incr);
+            else if (incr < 0)
+                XI.RaiseGMessage("G0OA," + player.Uid + ",1," + (-incr));
         }
 
         #endregion TR041 - Shuoxuan

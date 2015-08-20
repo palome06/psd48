@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Data;
-using System.Data.SQLite;
+using Mono.Data.Sqlite;
 
 namespace PSD.Base.Utils
 {
@@ -26,10 +26,10 @@ namespace PSD.Base.Utils
         public DataTable GetDataTable(string sql)
         {
             DataTable dt = new DataTable();
-            SQLiteConnection cnn = new SQLiteConnection(dbConnection);
+            SqliteConnection cnn = new SqliteConnection(dbConnection);
             cnn.Open();
-            SQLiteCommand cmd = new SQLiteCommand(cnn) { CommandText = sql };
-            SQLiteDataReader reader = cmd.ExecuteReader();
+            SqliteCommand cmd = new SqliteCommand(cnn) { CommandText = sql };
+            SqliteDataReader reader = cmd.ExecuteReader();
             dt.Load(reader);
             reader.Close();
             cnn.Close();
@@ -37,9 +37,9 @@ namespace PSD.Base.Utils
         }
         private int ExecuteNonQuery(string sql)
         {
-            SQLiteConnection cnn = new SQLiteConnection(dbConnection);
+            SqliteConnection cnn = new SqliteConnection(dbConnection);
             cnn.Open();
-            SQLiteCommand cmd = new SQLiteCommand(cnn) { CommandText = sql };
+            SqliteCommand cmd = new SqliteCommand(cnn) { CommandText = sql };
             int rowUpdated = cmd.ExecuteNonQuery();
             cnn.Clone();
             return rowUpdated;
@@ -51,9 +51,9 @@ namespace PSD.Base.Utils
         /// <returns>A string.</returns>
         public string ExecuteScalar(string sql)
         {
-            SQLiteConnection cnn = new SQLiteConnection(dbConnection);
+            SqliteConnection cnn = new SqliteConnection(dbConnection);
             cnn.Open();
-            SQLiteCommand cmd = new SQLiteCommand(cnn) { CommandText = sql };
+            SqliteCommand cmd = new SqliteCommand(cnn) { CommandText = sql };
             object value = cmd.ExecuteScalar();
             if (value != null)
                 return value.ToString();

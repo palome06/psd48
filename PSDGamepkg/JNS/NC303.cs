@@ -291,7 +291,7 @@ namespace PSD.PSDGamepkg.JNS
             {
                 if (pops.Count <= 0) break;
                 string pubTux = Util.SatoWithBracket(XI.Board.PZone, "p", "(p", ")");
-                string input = XI.AsyncInput(ut, "Z1" + pubTux, "NJH2Action", "0");
+                string input = XI.AsyncInput(ut, "Z1" + pubTux, "NJH2", "0");
                 ushort cd;
                 if (ushort.TryParse(input, out cd) && XI.Board.PZone.Contains(cd))
                 {

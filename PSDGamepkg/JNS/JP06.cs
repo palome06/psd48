@@ -2363,6 +2363,70 @@ namespace PSD.PSDGamepkg.JNS
         }
         #endregion Package of 5 - XB
 
+        #region Package of 6
+        public void ZPT4Action(Player player, int type, string fuse, string argst)
+        {
+            XI.RaiseGMessage("G0TT," + player.Uid);
+            int val = XI.Board.DiceValue;
+            XI.RaiseGMessage("G0IP," + player.Team + "," + val);
+            string rwho = fuse.Substring(0, 2);
+            XI.RaiseGMessage("G0JM," + rwho + "ZN");
+        }
+        public bool ZPT4Bribe(Player player, int type, string fuse)
+        {
+            return player.RestZP > 0 && !player.ZPDisabled && !player.DrTuxDisabled;
+        }
+        public bool ZPT4Valid(Player player, int type, string fuse)
+        {
+            return XI.Board.IsAttendWar(player);
+        }
+        #endregion Package of 6
+
+        #region Package of HL
+        public void TPH4Action(Player player, int type, string fuse, string argst)
+        {
+            XI.RaiseGMessage("G0XZ," + player.Uid + ",3,1,2,1");
+        }
+        public bool TPH4Valid(Player player, int type, string fuse)
+        {
+            return XI.Board.EvePiles.Count >= 2;
+        }
+        public bool WQH1ConsumeValid(Player player, int consumeType, int type, string fuse)
+        {
+            if (consumeType == 0)
+                return XI.Board.Garden.Values.Any(p => p.Uid != player.Uid && p.IsTared) && XI.Board.Battler != null;
+            return false;
+        }
+        public void WQH1ConsumeAction(Player player, int consumeType, int type, string fuse, string argst)
+        {
+            if (consumeType == 0)
+            {
+                ushort selfCode = XI.LibTuple.TL.UniqueEquipSerial("WQH1");
+                ushort tar = ushort.Parse(argst);
+                Player py = XI.Board.Garden[tar];
+                TargetPlayer(player.Uid, tar);
+                if (py.Tux.Count > 0)
+                {
+                    string sel = XI.AsyncInput(tar, "#交出的,Q1(p" + string.Join("p", py.Tux) + ")", "WQH1Consume", "0");
+                    if (!sel.Contains(VI.CinSentinel))
+                    {
+                        ushort tux = ushort.Parse(sel);
+                        XI.RaiseGMessage("G0HQ,0," + player.Uid + "," + tar + ",1,1," + tux);
+                    }
+                }
+                XI.RaiseGMessage("G0HQ,0," + tar + "," + player.Uid + ",0,1," + selfCode);
+            }
+        }
+        public string WQH1ConsumeInput(Player player, int consumeType, int type, string fuse, string prev)
+        {
+            if (consumeType == 0 && prev == "")
+                return "#交予的,/T1(p" + string.Join("p", XI.Board.Garden.Values.Where(
+                    p => p.Uid != player.Uid && p.IsTared).Select(p => p.Uid)) + ")";
+            return "";
+        }
+
+        #endregion Package of HL
+
         #region Equip Util
         public void EquipGeneralIncrAction(TuxEqiup te, Player player)
         {

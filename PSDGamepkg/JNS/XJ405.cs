@@ -1864,7 +1864,7 @@ namespace PSD.PSDGamepkg.JNS
             if (type == 0)
                 return IsMathISOS("JN50502", player, fuse);
             else if (type == 1)
-                return player.TokenTars.Count > 0 && player.TokenTars[0] == XI.Board.Rounder.Uid;
+                return player.TokenTars.Count > 0 && player.SingleTokenTar == XI.Board.Rounder.Uid;
             else if (type == 2)
             {
                 string[] blocks = fuse.Split(',');
@@ -3193,10 +3193,8 @@ namespace PSD.PSDGamepkg.JNS
             if (type == 0)
             {
                 // G0CD,A,T,KN,x1,x2;TF
-                bool basecon = true;
-                basecon = basecon && (player.GetEquipCount() > 0 || player.Tux.Count > 0);
-                basecon = basecon && XI.Board.Garden.Values.Where(p => p.Uid != player.Uid &&
-                        p.IsTared && p.Team == player.Team).Any();
+                bool basecon = player.Tux.Count > 0 || XI.Board.Garden.Values.Where(p => p.IsTared &&
+                    p.Team == player.Team && p.HasAnyEquips()).Any();
                 if (basecon)
                 {
                     string[] blocks = fuse.Substring(0, fuse.IndexOf(';')).Split(',');
