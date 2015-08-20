@@ -73,7 +73,7 @@ namespace PSD.PSDGamepkg
             ////Board.MonPiles.PushBack(1030);
             //Board.EvePiles.PushBack(29);
             ////Board.EvePiles.PushBack(1);
-            Board.EvePiles.PushBack(32);
+            //Board.EvePiles.PushBack(32);
             //Board.EvePiles.PushBack(36);
             //Board.EvePiles.PushBack(33);
             //Board.EvePiles.PushBack(35);
@@ -111,9 +111,9 @@ namespace PSD.PSDGamepkg
 
             //for (int i = 0; i < 28; ++i)
             //    Board.MonPiles.Dequeue();
-            Board.MonPiles.PushBack(1001);
-            Board.MonPiles.PushBack(29);
-            Board.MonPiles.PushBack(54);
+            //Board.MonPiles.PushBack(1001);
+            //Board.MonPiles.PushBack(29);
+            //Board.MonPiles.PushBack(54);
             //Board.MonPiles.PushBack(33);
             //Board.MonPiles.PushBack(4);
             //Board.MonPiles.PushBack(10);
@@ -151,7 +151,7 @@ namespace PSD.PSDGamepkg
             //RaiseGMessage("G0HQ,2,5,0,0,90");
             //RaiseGMessage("G0HQ,2,4,0,0,47,48,52");
             //RaiseGMessage("G0HQ,2,6,0,0,26");
-            RaiseGMessage("G0HQ,2,1,0,0,124,109");
+            RaiseGMessage("G0HQ,2,1,0,0,124,101");
             //RaiseGMessage("G0HQ,2,2,0,0,71");
             //RaiseGMessage("G0HQ,2,1,0,61,64,73,74,75,76,65,17,69,71,10,70");
             //RaiseGMessage("G0IJ,3,0,1");
@@ -264,6 +264,7 @@ namespace PSD.PSDGamepkg
             nj01 = new JNS.NPCCottage(this, VI).RegisterDelegates(LibTuple.NJL);
             new JNS.NPCCottage(this, VI).RegisterNPCDelegates(LibTuple.NL);
             ev01 = new JNS.EveCottage(this, VI).RegisterDelegates(LibTuple.EL);
+            sf01 = new JNS.RuneCottage(this, VI).RegisterDelegates(LibTuple.RL);
             MappingSksp(out sk02, out sk03, levelCode);
             mt01 = new JNS.MonsterCottage(this, VI).RegisterDelegates(LibTuple.ML);
 

@@ -7,15 +7,19 @@ using System.Threading.Tasks;
 
 namespace PSD.Base
 {
-    public class Operation
+    public class Rune
     {
         public string Name { private set; get; }
 
         public string Code { private set; get; }
 
         public string Occur { private set; get; }
-
+        public int Priority { private set; get; }
+        public bool? IsLock { private set; get; }
         public bool IsOnce { private set; get; }
+        public bool IsTermin{private set;get;}
+        public bool IsConsume{private set;get;}
+        public string Description { private set; get; }
 
         public delegate string InputDelegate(Player player, string fuse, string prev);
         private InputDelegate mInput;
@@ -41,10 +45,13 @@ namespace PSD.Base
             get { return mValid ?? DefValid; }
         }
 
-        public Operation(string name, string code, string occur, bool isOnce)
+        public Rune(string name, string code, string occur, int priority, bool? isLock,
+            bool isOnce, bool isTermin, bool isConsume, string desc)
         {
             Name = name; Code = code;
-            Occur = occur; IsOnce = isOnce;
+            Occur = occur; Priority = priority; IsLock = isLock;
+            IsOnce = isOnce; IsTermin = isTermin; IsConsume = isConsume;
+            Description = desc;
         }
 
         private static InputDelegate DefInput = delegate(Player p, string f, string pr) { return ""; };
@@ -52,58 +59,47 @@ namespace PSD.Base
         private static ValidDelegate DefValid = delegate(Player p, string f) { return true; };
     }
 
-    public class OperationLib
+    public class RuneLib
     {
-        public List<Operation> Firsts { private set; get; }
+        public List<Rune> Firsts { private set; get; }
 
         //private IDictionary<string, Skill> dicts;
         private Utils.ReadonlySQL sql;
 
-        public OperationLib(string path)
+        public RuneLib()
         {
-            Firsts = new List<Operation>();
-            //dicts = new Dictionary<string, Skill>();
-            string[] lines = System.IO.File.ReadAllLines(path);
-            foreach (string line in lines)
-            {
-                if (line != null && line.Length > 0 && !line.StartsWith("#"))
-                {
-                    string[] content = line.Split('\t');
-                    string code = content[0]; // code, e.g. (JN10102)
-                    string name = content[1]; // name, e.g. (Feilongtanyunshou)
-                    string occur = content[2];
-                    bool once = content[3] == "1" ? true : false;
-                    Firsts.Add(new Operation(name, code, occur, once));
-                }
-            }
-        }
-
-        public OperationLib()
-        {
-            Firsts = new List<Operation>();
+            Firsts = new List<Rune>();
             sql = new Utils.ReadonlySQL("psd.db3");
             List<string> list = new string[] {
-                "CODE", "NAME", "OCCUR", "ISONCE"
+                "CODE", "NAME", "OCCURS", "PRIORS", "ONCES", "TERMINS", "CONSUME", "DESC"
             }.ToList();
-            System.Data.DataRowCollection datas = sql.Query(list, "Ops");
+            System.Data.DataRowCollection datas = sql.Query(list, "Rune");
             foreach (System.Data.DataRow data in datas)
             {
                 string code = (string)data["CODE"];
                 string name = (string)data["NAME"];
-                string occur = (string)data["OCCUR"];
-                bool once = ((short)data["ISONCE"] == 1);
-                Firsts.Add(new Operation(name, code, occur, once));
+                string occur = (string)data["OCCURS"];
+                bool? @lock = false;
+                if (occur.StartsWith("!") || occur.StartsWith("?"))
+                {
+                    if (occur.StartsWith("!")) @lock = true;
+                    else @lock = null;
+                    occur = occur.Substring(1);
+                }
+                int prior = int.Parse((string)data["PRIORS"]);
+                bool once = ((short)data["ONCES"] == 1);
+                bool termin = ((short)data["TERMINS"] == 1);
+                bool consume = ((short)data["CONSUME"] == 1);
+                string desc = (string)data["DESC"];
+                Firsts.Add(new Rune(name, code, occur, prior, @lock, once, termin, consume, desc));
             }
         }
 
         public int Size { get { return Firsts.Count; } }
 
-        public Operation EncodeOps(string code)
+        public Rune Encode(string code)
         {
-            foreach (Operation op in Firsts)
-                if (op.Code == code)
-                    return op;
-            return null;
+            return Firsts.Find(p => p.Code == code);
         }
     }
 }

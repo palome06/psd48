@@ -60,6 +60,7 @@
     <Compile Include="JNS\FG04.cs" />
     <Compile Include="JNS\JP06.cs" />
     <Compile Include="JNS\NC303.cs" />
+    <Compile Include="JNS\SF09.cs" />
     <Compile Include="JNS\SJ101.cs" />
     <Compile Include="JNS\TR007.cs" />
     <Compile Include="JNS\XJ405.cs" />

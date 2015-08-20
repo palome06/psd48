@@ -606,6 +606,7 @@
     <Resource Include="Resources\Card\Eve\SJH01.png" />
     <Resource Include="Resources\Card\Eve\SJH02.png" />
     <Resource Include="Resources\Card\Eve\SJH03.png" />
+    <Resource Include="Resources\Card\Eve\SJH04.png" />
     <Resource Include="Resources\Card\Eve\SJH05.png" />
   </ItemGroup>
   <ItemGroup>
@@ -649,6 +650,9 @@
     <Resource Include="Resources\Card\Tux\XBT4.png" />
     <Resource Include="Resources\Card\Tux\ZPT2.png" />
     <Resource Include="Resources\Card\Tux\ZPT3.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Card\Tux\JPT6.png" />
     <Resource Include="Resources\Card\Tux\ZPT4.png" />
   </ItemGroup>
   <ItemGroup>

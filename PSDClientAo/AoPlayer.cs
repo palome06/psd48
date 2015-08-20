@@ -279,6 +279,10 @@ namespace PSD.ClientAo
                     pb.npcspStack.Children.Add(pb.TryFindResource("npcsnap" + code) as Image);
                 }));
                 Escue.Add(npcCd);
+                pb.Dispatcher.BeginInvoke((Action)(() =>
+                {
+                    pb.npcButton.Visibility = System.Windows.Visibility.Visible;
+                }));
             }
         }
         [STAThread]
@@ -293,6 +297,13 @@ namespace PSD.ClientAo
                     pb.npcspStack.Children.Remove(pb.TryFindResource("npcsnap" + code) as Image);
                 }));
                 Escue.Remove(npcCd);
+                pb.Dispatcher.BeginInvoke((Action)(() =>
+                {
+                    if (Escue.Count > 0)
+                        pb.npcButton.Visibility = System.Windows.Visibility.Visible;
+                    else
+                        pb.npcButton.Visibility = System.Windows.Visibility.Collapsed;
+                }));
             }
         }
 

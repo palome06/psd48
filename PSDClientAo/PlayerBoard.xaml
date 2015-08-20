@@ -221,7 +221,20 @@
                         </StackPanel>
                     </Button>
                 </Border>
-                <StackPanel x:Name="npcspStack" Orientation="Horizontal" FlowDirection="RightToLeft"/>
+                <Border x:Name="npcBorder" Canvas.Right="-80" Canvas.Top="-20" Height="23"
+                    CornerRadius="1.5" BorderBrush="Transparent" BorderThickness="1.5">
+                    <Button x:Name="npcButton" MaxWidth="170" Height="20"
+                            Visibility="Collapsed" Click="npcButtonClick">
+                        <StackPanel x:Name="npcspStack" Orientation="Horizontal" FlowDirection="RightToLeft"/>
+                    </Button>
+                </Border>
+                <Border x:Name="runeBorder" Canvas.Right="-80" Canvas.Top="-20" Height="23"
+                    CornerRadius="1.5" BorderBrush="Transparent" BorderThickness="1.5">
+                    <Button x:Name="runeButton" MaxWidth="170" Height="20"
+                            Visibility="Collapsed" Click="runeButtonClick">
+                        <StackPanel x:Name="runeStack" Orientation="Horizontal" FlowDirection="RightToLeft"/>
+                    </Button>
+                </Border>
                 <Border x:Name="werBorder" Canvas.Right="-80" Canvas.Top="-20" Height="23"
                     CornerRadius="1.5" BorderBrush="Transparent" BorderThickness="1.5">
                     <Button x:Name="werButton" MaxWidth="170" Height="20"

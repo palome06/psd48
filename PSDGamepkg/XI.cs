@@ -119,7 +119,7 @@ namespace PSD.PSDGamepkg
             //10105, 10608, 10605, 10303, 19010, 17002
             //19014, 10102, 10501, 10303, 19010, 19016
             //17041, 19020, 10606, 18004, 10303, 19006
-            10107, 15008, 10606, 17004, 10303, 19006
+            10607, 15008, 10201, 17004, 10303, 19006
         };
 
         #region Memeber Declaration & Constructor
@@ -146,6 +146,8 @@ namespace PSD.PSDGamepkg
         public IDictionary<string, Base.NCAction> Nj01 { get { return nj01; } }
         // ev01 for mapping from eve code pers effect name to object
         private IDictionary<string, Base.Card.Evenement> ev01;
+
+        private IDictionary<string, Base.Rune> sf01;
 
         public LibGroup LibTuple { private set; get; }
 
@@ -444,6 +446,30 @@ namespace PSD.PSDGamepkg
                 else
                     Util.AddToMultiMap(dict, cz.Occur, skt);
             }
+            foreach (Base.Rune sf in sf01.Values)
+            {
+                SkTriple skt = new SkTriple()
+                {
+                    Name = sf.Code,
+                    Priorty = sf.Priority,
+                    Owner = 0,
+                    InType = 0,
+                    Type = SKTType.SF,
+                    Consume = sf.IsConsume ? 1 : 0,
+                    Lock = sf.IsLock,
+                    IsOnce = sf.IsOnce,
+                    Occur = sf.Occur,
+                    IsTermini = sf.IsTermin
+                };
+                if (sf.Occur.Contains('#') || sf.Occur.Contains('$') || sf.Occur.Contains('*'))
+                {
+                    foreach (ushort p in Board.Garden.Keys)
+                        Util.AddToMultiMap(dict, sf.Occur.Replace("#", p.ToString()).Replace(
+                            "$", p.ToString()).Replace("*", p.ToString()), skt);
+                }
+                else
+                    Util.AddToMultiMap(dict, sf.Occur, skt);
+            }
             foreach (Base.Card.Monster mt in LibTuple.ML.ListAllMonster(levelCode))
             {
                 for (int i = 0; i < mt.EAOccurs.Length; ++i)
@@ -583,7 +609,7 @@ namespace PSD.PSDGamepkg
                  "OX", "AX", "IB", "OB", "IW", "OW", "WB", "9P", "IP", "OP", "CZ", "HC", "HD", "HH",
                  "HI", "HL", "IC", "OC", "HT", "HG", "QR", "HZ", "TT", "T7", "JM", "WN", "IJ", "OJ",
                  "IE", "OE", "IS", "OS", "LH", "IV", "OV", "PB", "YM", "HR", "FI", "ON", "SN", "MA",
-                 "PH", "ZJ" };
+                 "PH", "ZJ", "IF", "OF" };
             string[] g1 = new string[] { "DI", "IU", "OU", "CW", "ZK", "IZ", "OZ", "WP", "SG", "HK",
                  "WJ", "JG", "XR", "EV", "CK", "7F", "YP", "NI" };
             string[] g2 = new string[] { "IN", "RN", "CN", "QC", "FU", "QU", "CL", "ZU", "HU", "WK",
@@ -683,6 +709,7 @@ namespace PSD.PSDGamepkg
                     case SKTType.EQ:
                     case SKTType.CZ:
                     case SKTType.EV:
+                    case SKTType.SF:
                         if (skt.Occur.Contains('#'))
                         {
                             if (!ucr || Board.Rounder.Team == Board.UseCardRound)
@@ -879,6 +906,26 @@ namespace PSD.PSDGamepkg
                             msg += "," + req;
                         pris[player.Uid] += ";" + msg;
                         //iTypes[skt.Tg] += "," + skt.InType;
+                        involved[player.Uid] |= true;
+                    }
+                    else
+                        locks.Add(player.Uid + "," + ske.Name + ";" + ske.InType);
+                    isAnySet |= true;
+                }
+            }
+            else if ((!ske.IsOnce || ske.Tick == 0) && ske.Type == SKTType.SF && sf01.ContainsKey(ske.Name))
+            {
+                Base.Rune sf = sf01[ske.Name];
+                Player player = Board.Garden[ske.Tg];
+                if (player.Runes.Contains(sf.Code) && sf.Valid(player, ske.Fuse))
+                {
+                    if (ske.Lock == false)
+                    {
+                        string msg = ske.Name;
+                        string req = sf.Input(player, ske.Fuse, "");
+                        if (req != "")
+                            msg += "," + req;
+                        pris[player.Uid] += ";" + msg;
                         involved[player.Uid] |= true;
                     }
                     else

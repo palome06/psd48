@@ -17,14 +17,15 @@ namespace PSD.Base
         public SkillLib SL { private set; get; }
         public OperationLib ZL { private set; get; }
         public NCActionLib NJL { private set; get; }
+        public RuneLib RL { private set; get; }
 
         public ExspLib ESL { private set; get; }
 
-        public LibGroup(HeroLib hl, TuxLib tl, NPCLib nl, MonsterLib ml,
-            EvenementLib el, SkillLib sl, OperationLib zl, NCActionLib njl, ExspLib esl)
+        public LibGroup(HeroLib hl, TuxLib tl, NPCLib nl, MonsterLib ml, EvenementLib el,
+            SkillLib sl, OperationLib zl, NCActionLib njl, RuneLib rl, ExspLib esl)
         {
             HL = hl; TL = tl; NL = nl; ML = ml; EL = el;
-            SL = sl; ZL = zl; NJL = njl; ESL = esl;
+            SL = sl; ZL = zl; NJL = njl; RL = rl; ESL = esl;
         }
 
         public LibGroup()
@@ -37,6 +38,7 @@ namespace PSD.Base
             SL = new SkillLib();
             ZL = new OperationLib();
             NJL = new NCActionLib();
+            RL = new RuneLib();
             ESL = new ExspLib();
         }
     }

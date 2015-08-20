@@ -9,7 +9,7 @@ namespace PSD.PSDGamepkg
 {
     #region SKTriple Declaration
 
-    internal enum SKTType { SK, BK, TX, EQ, CZ, NJ, PT, EV }
+    internal enum SKTType { SK, BK, TX, EQ, CZ, NJ, PT, EV, SF }
 
     internal class SkTriple
     {
@@ -388,6 +388,31 @@ namespace PSD.PSDGamepkg
                     WI.BCast(sTop + (args != "" ? "," + args : "") + sType);
                     cz.Action(garden[from], ske.Fuse, args);
                     u5ed = ske.IsTermini ? UEchoCode.END_TERMIN : UEchoCode.END_ACTION;
+                    ++ske.Tick;
+                }
+                else // need further support
+                {
+                    string mU3 = "U3," + otherPara + ";;" + mai + ";;" + ske.InType;
+                    PushIntoLastUV(from, mU3);
+                    WI.Send(mU3, 0, from);
+                    u5ed = UEchoCode.NEXT_STEP;
+                }
+            }
+            else if (ske != null && sf01.ContainsKey(skName))
+            {
+                Rune sf = sf01[skName];
+                string args = (idx < 0) ? "" : mai.Substring(idx + 1);
+                // judge whether args is complete
+                string otherPara = sf.Input(garden[from], ske.Fuse, args);
+                if (otherPara == "")
+                {
+                    string sTop = "U5," + from + ";;" + skName;
+                    string sType = ";;" + ske.InType;
+                    WI.BCast(sTop + (args != "" ? "," + args : "") + sType);
+                    sf.Action(garden[from], ske.Fuse, args);
+                    u5ed = ske.IsTermini ? UEchoCode.END_TERMIN : UEchoCode.END_ACTION;
+                    if (ske.Consume == 1)
+                        RaiseGMessage("G0OF," + from + "," + skName);
                     ++ske.Tick;
                 }
                 else // need further support

@@ -102,6 +102,7 @@ namespace PSD.Base
         public bool DrTuxDisabled { set; get; }
         // Extend Equip Mask, 0 = disabled, 1 = weapon, 2 = armor, 4 = trove
         public int ExMask { set; get; }
+        public List<string> Runes { private set; get; }
 
         private void SetEquipDisabled(string tag, bool value, int maskCode)
         {
@@ -211,6 +212,8 @@ namespace PSD.Base
             Loved = false;
             DrTuxDisabled = false;
 
+            this.Runes = new List<string>();
+
             IsTPOpt = true;
             IsSKOpt = true;
 
@@ -235,6 +238,7 @@ namespace PSD.Base
             PetDisabled = false;
             Loved = false;
             DEXi = 0; STRi = 0;
+            Runes.Clear();
         }
 
         public void ResetRAM()

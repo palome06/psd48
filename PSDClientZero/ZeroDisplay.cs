@@ -53,6 +53,8 @@ namespace PSD.ClientZero
                 result = title + ":" + tuple.ML.Decode(ushort.Parse(title.Substring("PT".Length))).Name;
             else if (title.StartsWith("SJ"))
                 result = title + ":" + tuple.EL.GetEveFromName(title).Name;
+            else if (title.StartsWith("SF"))
+                result = title + ":" + tuple.RL.Encode(title).Name;
             else
                 result = title;
             if (idx >= 0)
@@ -188,6 +190,24 @@ namespace PSD.ClientZero
             if (!codes.Any())
                 return "{}";
             return "{" + string.Join(",", codes.Select(p => GuardWithCode(p))) + "}";
+        }
+        internal string Rune(string code)
+        {
+            return code == "" ? "秘籍" : tuple.RL.Encode(code).Name;
+        }
+        internal string Rune(IEnumerable<string> codes)
+        {
+            if (!codes.Any()) return "{}";
+            return "{" + string.Join(",", codes.Select(p => Rune(p))) + "}";
+        }
+        internal string RuneWithCode(string code)
+        {
+            return code + ":" + Rune(code);
+        }
+        internal string RuneWithCode(IEnumerable<string> codes)
+        {
+            if (!codes.Any()) return "{}";
+            return "{" + string.Join(",", codes.Select(p => RuneWithCode(p))) + "}";
         }
         internal string Hero(int hero)
         {

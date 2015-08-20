@@ -48,12 +48,13 @@ namespace PSD.ClientAo
         {
             private set
             {
-                int mPkgCode = mLevelCode >> 1;
+                //int mPkgCode = mLevelCode >> 1;
                 int mValue = value >> 1;
-                bool old2Equip = mPkgCode > 0 && mPkgCode < 3;
-                bool new2Equip = mValue > 0 && mValue < 3;
-                if (old2Equip != new2Equip)
-                    ad.SetPlayerXBSlot(!new2Equip);
+                //bool old2Equip = mPkgCode > 0 && mPkgCode < 3;
+                //bool new2Equip = mValue > 0 && mValue < 3;
+                //if (old2Equip != new2Equip)
+                //    ad.SetPlayerXBSlot(!new2Equip);
+                ad.SetPlayerXBSlot(mValue == 0 || mValue >= 3);
                 mLevelCode = value;
             }
             get { return mLevelCode; }

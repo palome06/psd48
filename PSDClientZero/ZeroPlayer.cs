@@ -199,6 +199,7 @@ namespace PSD.ClientZero
         public IDictionary<ushort, List<string>> Treasures { private set; get; }
         public int Coss { set; get; }
         public ushort Guardian { set; get; }
+        public List<string> Runes { set; get; }
 
         public int Token { set; get; }
         public List<string> SpecialCards { private set; get; }
@@ -220,6 +221,7 @@ namespace PSD.ClientZero
             Fakeq = new Dictionary<ushort, string>();
 
             Treasures = new Dictionary<ushort, List<string>>();
+            Runes = new List<string>();
 
             Token = 0;
             SpecialCards = new List<string>();
@@ -279,6 +281,8 @@ namespace PSD.ClientZero
 
             if (Trove != 0 && Treasures.ContainsKey(Trove) && Treasures[Trove].Count > 0)
                 Aps(sb, "行囊中：{0}", xic.zd.MixedCards(Treasures[Trove]));
+            if (Runes.Count > 0)
+                Aps(sb, "身法：{0}", xic.zd.Rune(Runes));
 
             string special = "";
             if (Token > 0)

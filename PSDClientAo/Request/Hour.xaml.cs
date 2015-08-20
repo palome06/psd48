@@ -163,7 +163,7 @@ namespace PSD.ClientAo.Request
             {
                 Evenement eve = lg.EL.DecodeEvenement(eveCode);
                 if (eveSet.Add(eve))
-                    AddContent("E", eveCode, 0, eve.Genre, false);
+                    AddContent("E", eveCode, eve.Group, eve.Genre, false);
             }
         }
     }

@@ -389,6 +389,26 @@ namespace PSD.ClientAo
                 }
             }
         }
+        private void npcButtonClick(object sender, RoutedEventArgs e)
+        {
+            if (AD != null)
+            {
+                //if (enabledFakeq == null || enabledFakeq.Count == 0)
+                //{
+                AD.yhTV.Show(AoPlayer.Escue.Select(p => "M" + p).ToList(), AoPlayer.Rank + "NC");
+                //}
+                //else
+                //{
+                //    AD.yhTV.ShowSelectableList(enabledFakeq.Select(p => "M" + p).ToList(),
+                //        AoPlayer.Fakeq.Keys.Except(enabledFakeq).Select(p => "C" + p).ToList(),
+                //        AoPlayer.Rank + "SFQ", "TX");
+                //}
+            }
+        }
+        private void runeButtonClick(object sender, RoutedEventArgs e)
+        {
+            // TODO: showrunesHere
+        }
         private void werButtonClick(object sender, RoutedEventArgs e)
         {
             if (AD != null)
@@ -399,7 +419,6 @@ namespace PSD.ClientAo
                 }
                 else
                 {
-                    //MessageBox.Show("C" + enabledFakeq[0]);
                     AD.yhTV.ShowSelectableList(enabledFakeq.Select(p => "C" + p).ToList(),
                         AoPlayer.Fakeq.Keys.Except(enabledFakeq).Select(p => "C" + p).ToList(),
                         AoPlayer.Rank + "SFQ", "TX");

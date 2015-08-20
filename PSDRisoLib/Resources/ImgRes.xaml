@@ -410,6 +410,7 @@
     <Image x:Key="eveCardSJH01" Source="Card/Eve/SJH01.png"/>
     <Image x:Key="eveCardSJH02" Source="Card/Eve/SJH02.png"/>
     <Image x:Key="eveCardSJH03" Source="Card/Eve/SJH03.png"/>
+    <Image x:Key="eveCardSJH04" Source="Card/Eve/SJH04.png"/>
     <Image x:Key="eveCardSJH05" Source="Card/Eve/SJH05.png"/>
 
     <BitmapImage x:Key="monCard000src" UriSource="Card/Mon00.png"/>
@@ -566,6 +567,7 @@
     <Image x:Key="tuxCardXBT2" Source="Card/Tux/XBT2.png"/>
     <Image x:Key="tuxCardXBT3" Source="Card/Tux/XBT3.png"/>
     <Image x:Key="tuxCardXBT4" Source="Card/Tux/XBT4.png"/>
+    <Image x:Key="tuxCardJPT6" Source="Card/Tux/JPT6.png"/>
     <Image x:Key="tuxCardZPT4" Source="Card/Tux/ZPT4.png"/>
 	
     <Image x:Key="tuxCardTPH1" Source="Card/Tux/TPH1.png"/>
@@ -728,12 +730,12 @@
     <ImageBrush x:Key="loadGuard16" ImageSource="Guard/L16.png"/>
     <ImageBrush x:Key="loadGuard17" ImageSource="Guard/L17.png"/>
 	
-    <ImageBrush x:Key="bufferIconSF01" ImageSource="Buffer/SF01.png"/>
+    <BitmapImage x:Key="bufferIconSF01" UriSource="Buffer/SF01.png"/>
 	<ImageBrush x:Key="bufferIconSF02" ImageSource="Buffer/SF02.png"/>
 	<ImageBrush x:Key="bufferIconSF03" ImageSource="Buffer/SF03.png"/>
 	<ImageBrush x:Key="bufferIconSF04" ImageSource="Buffer/SF04.png"/>
 	<ImageBrush x:Key="bufferIconSF05" ImageSource="Buffer/SF05.png"/>
-	<ImageBrush x:Key="bufferIconSF06" ImageSource="Buffer/SF06.png"/>
+	<BitmapImage x:Key="bufferIconSF06" UriSource="Buffer/SF06.png"/>
 	<ImageBrush x:Key="bufferIconSF07" ImageSource="Buffer/SF07.png"/>
 	<ImageBrush x:Key="bufferIconSF08" ImageSource="Buffer/SF08.png"/>
 	<ImageBrush x:Key="bufferIconSF09" ImageSource="Buffer/SF09.png"/>

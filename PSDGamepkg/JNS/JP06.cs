@@ -2383,6 +2383,11 @@ namespace PSD.PSDGamepkg.JNS
         #endregion Package of 6
 
         #region Package of HL
+        public void TPH1Action(Player player, int type, string fuse, string argst)
+        {
+            if (type == 0)
+                XI.RaiseGMessage("G0IF," + player.Uid + ",SF06");
+        }
         public void TPH4Action(Player player, int type, string fuse, string argst)
         {
             XI.RaiseGMessage("G0XZ," + player.Uid + ",3,1,2,1");
