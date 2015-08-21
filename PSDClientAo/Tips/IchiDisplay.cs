@@ -641,5 +641,54 @@ namespace PSD.ClientAo.Tips
             tt.Content = mainGrid;
             return tt;
         }
+        public static ToolTip GetRuneTip(LibGroup Tuple, ushort runeCode)
+        {
+            Rune rune = Tuple.RL.Decode(runeCode);
+            if (rune == null)
+                return null;
+
+            Grid mainGrid = new Grid();
+            Grid gd1 = new Grid()
+            {
+                Background = new SolidColorBrush(Colors.Black),
+                Opacity = 0.6
+            };
+            gd1.Margin = new Thickness(-10);
+            mainGrid.Children.Add(gd1);
+
+            RichTextBox trb = new RichTextBox()
+            {
+                Background = new SolidColorBrush(Colors.Transparent),
+                FontFamily = new System.Windows.Media.FontFamily("SimSun"),
+                BorderThickness = new Thickness(0)
+            };
+            Paragraph pr = new Paragraph() { Margin = new Thickness(0.0) };
+            pr.Inlines.Add(new Run(rune.Name)
+            {
+                FontWeight = FontWeights.Bold,
+                Foreground = new SolidColorBrush(Colors.Yellow),
+                FontSize = LSIZE
+            });
+            pr.Inlines.Add(new LineBreak());
+            pr.Inlines.Add(new LineBreak());
+            if (!string.IsNullOrEmpty(rune.Description))
+            {
+                pr.Inlines.Add(new Run(rune.Description)
+                {
+                    Foreground = new SolidColorBrush(Colors.White),
+                    FontSize = SSIZE
+                });
+            }
+            trb.Document = new FlowDocument();
+            trb.Document.Blocks.Add(pr);
+
+            Grid gd2 = new Grid() { Width = 300 };
+            gd2.Children.Add(trb);
+            mainGrid.Children.Add(gd2);
+
+            ToolTip tt = new ToolTip();
+            tt.Content = mainGrid;
+            return tt;
+        }
     }
 }

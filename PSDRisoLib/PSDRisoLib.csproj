@@ -877,6 +877,12 @@
 	<Resource Include="Resources\Buffer\SF11.png" />
   </ItemGroup>
   <ItemGroup>
+	<Resource Include="Resources\Card\RuneCard\SF01.png" />
+	<Resource Include="Resources\Card\RuneCard\SF03.png" />
+	<Resource Include="Resources\Card\RuneCard\SF06.png" />
+	<Resource Include="Resources\Card\RuneCard\SF07.png" />
+  </ItemGroup>
+  <ItemGroup>
     <Resource Include="Resources\Logo\Screen\00000-01.jpg" />
   </ItemGroup>
   <ItemGroup>

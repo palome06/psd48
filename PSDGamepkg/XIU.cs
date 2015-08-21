@@ -409,10 +409,10 @@ namespace PSD.PSDGamepkg
                     string sTop = "U5," + from + ";;" + skName;
                     string sType = ";;" + ske.InType;
                     WI.BCast(sTop + (args != "" ? "," + args : "") + sType);
+                    if (ske.Consume == 1)
+                        RaiseGMessage("G0OF," + from + "," + LibTuple.RL.GetSingleIndex(sf));
                     sf.Action(garden[from], ske.Fuse, args);
                     u5ed = ske.IsTermini ? UEchoCode.END_TERMIN : UEchoCode.END_ACTION;
-                    if (ske.Consume == 1)
-                        RaiseGMessage("G0OF," + from + "," + skName);
                     ++ske.Tick;
                 }
                 else // need further support

@@ -2444,23 +2444,17 @@ namespace PSD.ClientZero
                 case "E0IF":
                     {
                         ushort who = ushort.Parse(args[1]);
-                        for (int i = 2; i < args.Length; ++i)
-                        {
-                            string sfCode = args[i];
-                            Z0D[who].Runes.Add(sfCode);
-                        }
-                        VI.Cout(Uid, "{0}获得身法{1}.", zd.Player(who), zd.Rune(Util.TakeRange(args, 2, args.Length)));
+                        ushort[] sfs = Util.TakeRange(args, 2, args.Length).Select(p => ushort.Parse(p)).ToArray();
+                        Z0D[who].Runes.AddRange(sfs);
+                        VI.Cout(Uid, "{0}获得身法{1}.", zd.Player(who), sfs);
                     }
                     break;
                 case "E0OF":
                     {
                         ushort who = ushort.Parse(args[1]);
-                        for (int i = 2; i < args.Length; ++i)
-                        {
-                            string sfCode = args[i];
-                            Z0D[who].Runes.Remove(sfCode);
-                        }
-                        VI.Cout(Uid, "{0}失去身法{1}.", zd.Player(who), zd.Rune(Util.TakeRange(args, 2, args.Length)));
+                        ushort[] sfs = Util.TakeRange(args, 2, args.Length).Select(p => ushort.Parse(p)).ToArray();
+                        Z0D[who].Runes.RemoveAll(p => sfs.Contains(p));
+                        VI.Cout(Uid, "{0}失去身法{1}.", zd.Player(who), sfs);
                     }
                     break;
             }

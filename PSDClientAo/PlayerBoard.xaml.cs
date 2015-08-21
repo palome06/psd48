@@ -407,7 +407,10 @@ namespace PSD.ClientAo
         }
         private void runeButtonClick(object sender, RoutedEventArgs e)
         {
-            // TODO: showrunesHere
+            if (AD != null)
+            {
+                AD.yhTV.Show(AoPlayer.Runes.Select(p => "R" + p).ToList(), AoPlayer.Rank + "SF");
+            }
         }
         private void werButtonClick(object sender, RoutedEventArgs e)
         {

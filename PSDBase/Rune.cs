@@ -101,5 +101,15 @@ namespace PSD.Base
         {
             return Firsts.Find(p => p.Code == code);
         }
+        public Rune Decode(ushort ut)
+        {
+            if (ut == 0 || ut > Firsts.Count)
+                return null;
+            return Firsts[ut - 1];
+        }
+        public ushort GetSingleIndex(Rune rune)
+        {
+            return (ushort)(Firsts.IndexOf(rune) + 1);
+        }
     }
 }

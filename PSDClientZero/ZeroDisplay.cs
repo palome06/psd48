@@ -191,20 +191,20 @@ namespace PSD.ClientZero
                 return "{}";
             return "{" + string.Join(",", codes.Select(p => GuardWithCode(p))) + "}";
         }
-        internal string Rune(string code)
+        internal string Rune(ushort code)
         {
-            return code == "" ? "秘籍" : tuple.RL.Encode(code).Name;
+            return code == 0 ? "秘籍" : tuple.RL.Decode(code).Name;
         }
-        internal string Rune(IEnumerable<string> codes)
+        internal string Rune(IEnumerable<ushort> codes)
         {
             if (!codes.Any()) return "{}";
             return "{" + string.Join(",", codes.Select(p => Rune(p))) + "}";
         }
-        internal string RuneWithCode(string code)
+        internal string RuneWithCode(ushort code)
         {
             return code + ":" + Rune(code);
         }
-        internal string RuneWithCode(IEnumerable<string> codes)
+        internal string RuneWithCode(IEnumerable<ushort> codes)
         {
             if (!codes.Any()) return "{}";
             return "{" + string.Join(",", codes.Select(p => RuneWithCode(p))) + "}";

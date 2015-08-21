@@ -2765,6 +2765,24 @@ namespace PSD.ClientAo
                         }
                     }
                     break;
+                case "E0IF":
+                    {
+                        ushort who = ushort.Parse(args[1]);
+                        List<ushort> sfs = Util.TakeRange(args, 2, args.Length).Select(p => ushort.Parse(p)).ToList();
+                        sfs.ForEach(p => A0P[who].InsRune(p));
+                        VI.Cout(Uid, "{0}获得身法{1}.", zd.Player(who), zd.Rune(sfs));
+                        A0O.FlyingGet(sfs.Select(p => "R" + p).ToList(), who, who);
+                    }
+                    break;
+                case "E0OF":
+                    {
+                        ushort who = ushort.Parse(args[1]);
+                        List<ushort> sfs = Util.TakeRange(args, 2, args.Length).Select(p => ushort.Parse(p)).ToList();
+                        sfs.ForEach(p => A0P[who].DelRune(p));
+                        VI.Cout(Uid, "{0}失去身法{1}.", zd.Player(who), zd.Rune(sfs));
+                        A0O.FlyingGet(sfs.Select(p => "R" + p).ToList(), who, 0);
+                    }
+                    break;
             }
         }
         #endregion E

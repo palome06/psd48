@@ -185,6 +185,24 @@ namespace PSD.ClientAo
                 return "{}";
             return "{" + string.Join(",", codes.Select(p => GuardWithCode(p))) + "}";
         }
+        internal string Rune(ushort code)
+        {
+            return code == 0 ? "秘籍" : tuple.RL.Decode(code).Name;
+        }
+        internal string Rune(IEnumerable<ushort> codes)
+        {
+            if (!codes.Any()) return "{}";
+            return "{" + string.Join(",", codes.Select(p => Rune(p))) + "}";
+        }
+        internal string RuneWithCode(ushort code)
+        {
+            return code + ":" + Rune(code);
+        }
+        internal string RuneWithCode(IEnumerable<ushort> codes)
+        {
+            if (!codes.Any()) return "{}";
+            return "{" + string.Join(",", codes.Select(p => RuneWithCode(p))) + "}";
+        }
         internal string Hero(int hero)
         {
             return hero == 0 ? "姚仙" : tuple.HL.InstanceHero(hero).Name;

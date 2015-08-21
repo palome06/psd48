@@ -37,6 +37,7 @@ namespace PSD.ClientAo
             mExCards = new List<ushort>();
             Fakeq = new Dictionary<ushort, string>();
             Escue = new List<ushort>();
+            Runes = new List<ushort>();
             mInLuggage = new List<string>();
             FolderCount = 0;
 
@@ -303,6 +304,46 @@ namespace PSD.ClientAo
                         pb.npcButton.Visibility = System.Windows.Visibility.Visible;
                     else
                         pb.npcButton.Visibility = System.Windows.Visibility.Collapsed;
+                }));
+            }
+        }
+        public List<ushort> Runes { set; get; }
+        [STAThread]
+        public void InsRune(ushort runeCd)
+        {
+            Base.Rune rune = Tuple.RL.Decode(runeCd);
+            if (rune != null)
+            {
+                string code = rune.Code;
+                pb.Dispatcher.BeginInvoke((Action)(() =>
+                {
+                    pb.runeStack.Children.Add(pb.TryFindResource("bufferIcon" + code) as Image);
+                }));
+                Runes.Add(runeCd);
+                pb.Dispatcher.BeginInvoke((Action)(() =>
+                {
+                    pb.runeButton.Visibility = System.Windows.Visibility.Visible;
+                }));
+            }
+        }
+        [STAThread]
+        public void DelRune(ushort runeCd)
+        {
+            Base.Rune rune = Tuple.RL.Decode(runeCd);
+            if (rune != null)
+            {
+                string code = rune.Code;
+                pb.Dispatcher.BeginInvoke((Action)(() =>
+                {
+                    pb.runeStack.Children.Remove(pb.TryFindResource("bufferIcon" + code) as Image);
+                }));
+                Runes.Remove(runeCd);
+                pb.Dispatcher.BeginInvoke((Action)(() =>
+                {
+                    if (Runes.Count > 0)
+                        pb.runeButton.Visibility = System.Windows.Visibility.Visible;
+                    else
+                        pb.runeButton.Visibility = System.Windows.Visibility.Collapsed;
                 }));
             }
         }

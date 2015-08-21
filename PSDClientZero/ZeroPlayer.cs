@@ -199,7 +199,7 @@ namespace PSD.ClientZero
         public IDictionary<ushort, List<string>> Treasures { private set; get; }
         public int Coss { set; get; }
         public ushort Guardian { set; get; }
-        public List<string> Runes { set; get; }
+        public List<ushort> Runes { set; get; }
 
         public int Token { set; get; }
         public List<string> SpecialCards { private set; get; }
@@ -221,7 +221,7 @@ namespace PSD.ClientZero
             Fakeq = new Dictionary<ushort, string>();
 
             Treasures = new Dictionary<ushort, List<string>>();
-            Runes = new List<string>();
+            Runes = new List<ushort>();
 
             Token = 0;
             SpecialCards = new List<string>();

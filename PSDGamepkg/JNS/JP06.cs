@@ -2386,7 +2386,7 @@ namespace PSD.PSDGamepkg.JNS
         public void TPH1Action(Player player, int type, string fuse, string argst)
         {
             if (type == 0)
-                XI.RaiseGMessage("G0IF," + player.Uid + ",SF06");
+                XI.RaiseGMessage("G0IF," + player.Uid + ",6");
         }
         public void TPH4Action(Player player, int type, string fuse, string argst)
         {

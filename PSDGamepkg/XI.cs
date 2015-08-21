@@ -917,7 +917,7 @@ namespace PSD.PSDGamepkg
             {
                 Base.Rune sf = sf01[ske.Name];
                 Player player = Board.Garden[ske.Tg];
-                if (player.Runes.Contains(sf.Code) && sf.Valid(player, ske.Fuse))
+                if (player.Runes.Any(p => LibTuple.RL.Decode(p).Code == sf.Code) && sf.Valid(player, ske.Fuse))
                 {
                     if (ske.Lock == false)
                     {

@@ -3667,8 +3667,8 @@ namespace PSD.PSDGamepkg
                         ushort who = ushort.Parse(args[1]);
                         for (int i = 2; i < args.Length; ++i)
                         {
-                            string sfCode = args[i];
-                            Board.Garden[who].Runes.Add(sfCode);
+                            ushort sf = ushort.Parse(args[i]);
+                            Board.Garden[who].Runes.Add(sf);
                         }
                         WI.BCast("E0IF," + cmdrst);
                     }
@@ -3678,8 +3678,8 @@ namespace PSD.PSDGamepkg
                         ushort who = ushort.Parse(args[1]);
                         for (int i = 2; i < args.Length; ++i)
                         {
-                            string sfCode = args[i];
-                            Board.Garden[who].Runes.Remove(sfCode);
+                            ushort sf = ushort.Parse(args[i]);
+                            Board.Garden[who].Runes.Remove(sf);
                         }
                         WI.BCast("E0OF," + cmdrst);
                     }
