@@ -337,6 +337,8 @@ namespace PSD.PSDGamepkg
                                     RaiseGMessage("G0MA," + player.Uid + ",0");
                                 while (player.Coss.Count > 0)
                                     RaiseGMessage("G0OV," + player.Uid + ",0");
+                                if (player.Runes.Count > 0)
+                                    RaiseGMessage("G0OF," + player.Uid + "," + string.Join(",", player.Runes));
                             }
                         }
                         if (g1zl != "")
@@ -427,7 +429,7 @@ namespace PSD.PSDGamepkg
                         string[] argv = cmd.Substring(0, hdx).Split(',');
 
                         List<ushort> cards = Util.TakeRange(argv, 5, argv.Length).Select(p =>
-                            ushort.Parse(p)).Where(p => p > 0 && Board.Garden[ust].Tux.Contains(p)).ToList();
+                            ushort.Parse(p)).Where(p => p > 0 && Board.Garden[ust].ListOutAllCards().Contains(p)).ToList();
                         if (cards.Any())
                         {
                             RaiseGMessage("G0OT," + ust + "," + cards.Count + "," + string.Join(",", cards));

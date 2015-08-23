@@ -62,6 +62,32 @@ namespace PSD.PSDGamepkg.JNS
             else
                 return "";
         }
+        public bool SF03Valid(Player player, string fuse)
+        {
+            List<Artiad.Harm> harms = Artiad.Harm.Parse(fuse);
+            foreach (Artiad.Harm harm in harms)
+            {
+                Player py = XI.Board.Garden[harm.Who];
+                if (player.Uid == harm.Who && harm.N > 0 && Artiad.Harm.GetPropedElement().Contains(harm.Element))
+                    return true;
+            }
+            return false;
+        }
+        public void SF03Action(Player player, string fuse, string args)
+        {
+            List<Artiad.Harm> harms = Artiad.Harm.Parse(fuse);
+            List<Artiad.Harm> rvs = new List<Artiad.Harm>();
+            IDictionary<ushort, List<Artiad.Harm>> dict = new Dictionary<ushort, List<Artiad.Harm>>();
+            foreach (Artiad.Harm harm in harms)
+            {
+                Player py = XI.Board.Garden[harm.Who];
+                if (player.Uid == harm.Who && Artiad.Harm.GetPropedElement().Contains(harm.Element))
+                    rvs.Add(harm);
+            }
+            harms.RemoveAll(p => rvs.Contains(p));
+            if (harms.Count > 0)
+                XI.InnerGMessage(Artiad.Harm.ToMessage(harms), -17);
+        }
         public void SF06Action(Player player, string fuse, string args)
         {
             int dv = XI.Board.DiceValue;

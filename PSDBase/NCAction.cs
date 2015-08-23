@@ -71,7 +71,7 @@ namespace PSD.Base
         private static ActionDelegate DefAction = (p, f ,a) => { };
         private static ValidDelegate DefValid = (p, f) => { return true; };
         private static InputDelegate DefInput = (p, f, pv) => { return ""; };
-        private static EscueActionDelegate DefEscueAction = (p, u, t, f ,a) => { };
+        private static EscueActionDelegate DefEscueAction = (p, u, t, f, a) => { };
         private static EscueValidDelegate DefEscueValid = (p, u, t, f) => { return true; };
         private static EscueInputDelegate DefEscueInput = (p, u, t, f, pv) => { return ""; };
     }

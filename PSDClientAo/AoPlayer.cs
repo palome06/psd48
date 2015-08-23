@@ -1385,6 +1385,14 @@ namespace PSD.ClientAo
         {
             pb.Dispatcher.BeginInvoke((Action)(() => { pb.ResumePets(); }));
         }
+        public void ResumeRunes()
+        {
+            pb.Dispatcher.BeginInvoke((Action)(() => { pb.ResumeRune(); }));
+        }
+        public void ResumeEscues()
+        {
+            pb.Dispatcher.BeginInvoke((Action)(() => { pb.ResumeEscue(); }));
+        }
         #endregion Battle Issue
 
         internal void SetAsLoser()

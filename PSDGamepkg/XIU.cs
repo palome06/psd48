@@ -9,7 +9,7 @@ namespace PSD.PSDGamepkg
 {
     #region SKTriple Declaration
 
-    internal enum SKTType { SK, BK, TX, EQ, CZ, NJ, PT, EV, SF }
+    internal enum SKTType { SK, BK, TX, EQ, CZ, NJ, PT, EV, SF, YJ }
 
     internal class SkTriple
     {
@@ -427,25 +427,52 @@ namespace PSD.PSDGamepkg
             {
                 NCAction na = nj01[skName];
                 string args = (idx < 0) ? "" : mai.Substring(idx + 1);
-                // judge whether args is complete
-                string otherPara = na.Input(garden[from], ske.Fuse, args);
-                if (otherPara == "")
+                if (ske.Type == SKTType.NJ)
                 {
-                    // OK, done.
-                    //string enc = c.Encrypt(args);
-                    string sTop = "U5," + from + ";;" + skName;
-                    string sType = ";;" + ske.InType;
-                    WI.BCast(sTop + (args != "" ? "," + args : "") + sType);
-                    na.Action(garden[from], ske.Fuse, args);
-                    u5ed = ske.IsTermini ? UEchoCode.END_TERMIN : UEchoCode.END_ACTION;
-                    ++ske.Tick;
+                    // judge whether args is complete
+                    string otherPara = na.Input(garden[from], ske.Fuse, args);
+                    if (otherPara == "")
+                    {
+                        // OK, done.
+                        //string enc = c.Encrypt(args);
+                        string sTop = "U5," + from + ";;" + skName;
+                        string sType = ";;" + ske.InType;
+                        WI.BCast(sTop + (args != "" ? "," + args : "") + sType);
+                        na.Action(garden[from], ske.Fuse, args);
+                        u5ed = ske.IsTermini ? UEchoCode.END_TERMIN : UEchoCode.END_ACTION;
+                        ++ske.Tick;
+                    }
+                    else // need further support
+                    {
+                        string mU3 = "U3," + otherPara + ";;" + mai + ";;" + ske.InType;
+                        PushIntoLastUV(from, mU3);
+                        WI.Send(mU3, 0, from);
+                        u5ed = UEchoCode.NEXT_STEP;
+                    }
                 }
-                else // need further support
+                else if (ske.Type == SKTType.YJ)
                 {
-                    string mU3 = "U3," + otherPara + ";;" + mai + ";;" + ske.InType;
-                    PushIntoLastUV(from, mU3);
-                    WI.Send(mU3, 0, from);
-                    u5ed = UEchoCode.NEXT_STEP;
+                    int jdx = mai.IndexOf(',', idx + 1);
+                    ushort mcode = ushort.Parse(Util.Substring(mai, idx + 1, jdx));
+                    args = Util.Substring(mai, jdx + 1, -1);
+                    string otherPara = na.EscueInput(garden[from], mcode, ske.InType, ske.Fuse, args);
+                    // args include card code now.
+                    if (otherPara == "")
+                    {
+                        string sTop = "U5," + from + ";;" + skName;
+                        string sType = ";;" + ske.InType;
+                        WI.BCast(sTop + "," + mcode + (args == "" ? "" : ("," + args)) + sType);
+                        na.EscueAction(garden[from], mcode, ske.InType, ske.Fuse, args);
+                        u5ed = ske.IsTermini ? UEchoCode.END_TERMIN : UEchoCode.END_ACTION;
+                        ++ske.Tick;
+                    }
+                    else // need further support
+                    {
+                        string mU3 = "U3," + otherPara + ";;" + mai + ";;" + ske.InType;
+                        PushIntoLastUV(from, mU3);
+                        WI.Send(mU3, 0, from);
+                        u5ed = UEchoCode.NEXT_STEP;
+                    }
                 }
             }
             else if (ske != null && mt01.ContainsKey(skName))
@@ -707,6 +734,21 @@ namespace PSD.PSDGamepkg
                 ushort card = ushort.Parse(skName.Substring("PT".Length));
                 skName = LibTuple.ML.Decode(card).Code;
                 mai = skName + "," + card + comrest;
+            }
+            // FW: FW1 => SF01
+            else if (skName.StartsWith("FW"))
+            {
+                ushort card = ushort.Parse(skName.Substring("FW".Length));
+                skName = LibTuple.RL.Decode(card).Code;
+                mai = skName + comrest;
+            }
+            // YJ: YJ1 => NJ09,1001
+            else if (skName.StartsWith("YJ"))
+            {
+                ushort card = ushort.Parse(skName.Substring("YJ".Length));
+                skName = LibTuple.NL.Decode(card).Skills.First(
+                    p => LibTuple.NJL.EncodeNCAction(p).Branches.Length > 0);
+                mai = skName + "," + Base.Card.NMBLib.CodeOfNPC(card) + comrest;
             }
             return mai;
         }

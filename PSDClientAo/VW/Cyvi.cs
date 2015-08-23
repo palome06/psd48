@@ -403,6 +403,8 @@ namespace PSD.ClientAo.VW
             List<ushort> txs = new List<ushort>();
             List<string> njs = new List<string>();
             List<ushort> pts = new List<ushort>();
+            List<ushort> sfs = new List<ushort>();
+            List<ushort> yjs = new List<ushort>();
             IDictionary<string, string> prevPara = new Dictionary<string, string>();
 
             foreach (string ops in optLst)
@@ -419,6 +421,10 @@ namespace PSD.ClientAo.VW
                     njs.Add(title);
                 else if (title.StartsWith("PT"))
                     pts.Add(ushort.Parse(title.Substring("PT".Length)));
+                else if (title.StartsWith("FW"))
+                    sfs.Add(ushort.Parse(title.Substring("FW".Length)));
+                else if (title.StartsWith("YJ"))
+                    yjs.Add(ushort.Parse(title.Substring("YJ".Length)));
                 if (idx >= 0)
                     prevPara.Add(title, ops.Substring(idx + 1));
             }
@@ -433,13 +439,31 @@ namespace PSD.ClientAo.VW
             }
             if (pts.Count > 0)
                 AD.Mix.StartSelectPT(pts, true);
+            if (sfs.Count > 0)
+                AD.Mix.StartSelectSF(sfs);
+            if (yjs.Count > 0)
+                AD.Mix.StartSelectYJ(yjs.Select(p => Base.Card.NMBLib.CodeOfNPC(p)).ToList());
             AD.yfJoy.CEE.CancelValid = cancellable;
             string any = Cin(uid);
             if (any != CinSentinel)
             {
                 AD.Mix.FinishSelectQard();
                 AD.Mix.FinishSelectPT();
+                AD.Mix.FinishSelectSF();
+                AD.Mix.FinishSelectYJ();
                 HideTip();
+            }
+            if (any.StartsWith("YJ"))
+            {
+                any = any.Substring("YJ".Length);
+                int idx = any.IndexOf(",");
+                if (idx < 0)
+                    any = "YJ" + Base.Card.NMBLib.OriginalNPC(ushort.Parse(any));
+                else
+                {
+                    any = "YJ" + Base.Card.NMBLib.OriginalNPC(
+                        ushort.Parse(any.Substring(0, idx))) + any.Substring(idx);
+                }
             }
             return any;
         }
@@ -554,6 +578,7 @@ namespace PSD.ClientAo.VW
             ad.yfPlayerR2.AoPlayer.DisableArmor();
             ad.yfPlayerR2.AoPlayer.DisableTrove();
             ad.yfPlayerR2.AoPlayer.DisableExEquip();
+            ad.yfPlayerR2.AoPlayer.ResumeRunes();
             // Disable pets
             ad.yfJoy.CEE.ResetHightlight();
             ad.Mix.FinishSelectTarget();

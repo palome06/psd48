@@ -79,13 +79,19 @@
     <Image x:Key="npcsnapNC401" Source="PetsSnap/NC401.png" ToolTip="NPC云天河"/>
     <Image x:Key="npcsnapNC503" Source="PetsSnap/NC503.png" ToolTip="NPC龙幽"/>
 
-    <Image x:Key="npcsnapNC506" Source="PetsSnap/NC506.png" ToolTip="NPC魔翳"/>
-    <Image x:Key="npcsnapNC507" Source="PetsSnap/NC507.png" ToolTip="NPC湮世穹兵"/>
+    <Image x:Key="npcsnapNC506" Source="PetsSnap/NC506.png" ToolTip="NPC-TR魔翳"/>
+    <Image x:Key="npcsnapNC507" Source="PetsSnap/NC507.png" ToolTip="NPC-TR湮世穹兵"/>
     <Image x:Key="npcsnapNCT02" Source="PetsSnap/NCT02.png" ToolTip="NPC-TR徐长卿"/>
     <Image x:Key="npcsnapNCT04" Source="PetsSnap/NCT04.png" ToolTip="NPC-TR凌音"/>
     <Image x:Key="npcsnapNCT05" Source="PetsSnap/NCT05.png" ToolTip="NPC-TR凌波"/>
     <Image x:Key="npcsnapNCT09" Source="PetsSnap/NCT09.png" ToolTip="NPC-TR瑕"/>
     <Image x:Key="npcsnapNCT13" Source="PetsSnap/NCT13.png" ToolTip="NPC-TR谢沧行"/>
+    <Image x:Key="npcsnapNCT20" Source="PetsSnap/NCT20.png" ToolTip="NPC-TR雷元戈"/>
+    <Image x:Key="npcsnapNCT21" Source="PetsSnap/NCT21.png" ToolTip="NPC-TR龙溟"/>
+	
+    <Image x:Key="npcsnapNCH04" Source="PetsSnap/NCH04.png" ToolTip="NPC柒月"/>
+    <Image x:Key="npcsnapNCH05" Source="PetsSnap/NCH05.png" ToolTip="NPC伍阳"/>
+    <Image x:Key="npcsnapNCH06" Source="PetsSnap/NCH06.png" ToolTip="NPC璇英"/>
 
     <Image x:Key="wersnapJPT2" Source="PetsSnap/JPT2.png" ToolTip="TR洒金笺"/>
     <Image x:Key="wersnapTPT2" Source="PetsSnap/TPT2.png" ToolTip="TR天仙玉露"/>
@@ -168,6 +174,7 @@
     <Image x:Key="heroHead17025" Source="Heros/17025.png"/>
     <Image x:Key="heroHead17027" Source="Heros/17027.png"/>
     <Image x:Key="heroHead17028" Source="Heros/17028.png"/>
+    <Image x:Key="heroHead17037" Source="Heros/17037.png"/>
     <Image x:Key="heroHead17041" Source="Heros/17041.png"/>
 
     <Image x:Key="heroHead18004" Source="Heros/18004.png"/>
@@ -255,6 +262,7 @@
     <ImageBrush x:Key="nameBarTR025" ImageSource="NameBar/NameTR025.png"/>
     <ImageBrush x:Key="nameBarTR027" ImageSource="NameBar/NameTR027.png"/>
     <ImageBrush x:Key="nameBarTR028" ImageSource="NameBar/NameTR028.png"/>
+    <ImageBrush x:Key="nameBarTR037" ImageSource="NameBar/NameTR037.png"/>
     <ImageBrush x:Key="nameBarTR041" ImageSource="NameBar/NameTR041.png"/>
 	
     <ImageBrush x:Key="nameBarEX506" ImageSource="NameBar/NameEX506.png"/>
@@ -508,6 +516,8 @@
     <Image x:Key="monCardNCT16" Source="Card/NMB/NCT16.png"/>
     <Image x:Key="monCardNCT17" Source="Card/NMB/NCT17.png"/>
     <Image x:Key="monCardNCT18" Source="Card/NMB/NCT18.png"/>
+    <Image x:Key="monCardNCT20" Source="Card/NMB/NCT20.png"/>
+    <Image x:Key="monCardNCT21" Source="Card/NMB/NCT21.png"/>
     <Image x:Key="monCardNCT41" Source="Card/NMB/NCT41.png"/>
 
     <Image x:Key="monCardGSH3" Source="Card/NMB/GSH3.png"/>
@@ -521,6 +531,7 @@
     <Image x:Key="monCardNCH06" Source="Card/NMB/NCH06.png"/>
     <Image x:Key="monCardNCH07" Source="Card/NMB/NCH07.png"/>
     <Image x:Key="monCardNCH08" Source="Card/NMB/NCH08.png"/>
+    <Image x:Key="monCardNCH09" Source="Card/NMB/NCH09.png"/>
 
     <Image x:Key="tuxCard000" Source="Card/Tux00.png"/>
     <Image x:Key="tuxCardJP01" Source="Card/Tux/JP01.png"/>
@@ -570,6 +581,7 @@
     <Image x:Key="tuxCardJPT6" Source="Card/Tux/JPT6.png"/>
     <Image x:Key="tuxCardZPT4" Source="Card/Tux/ZPT4.png"/>
 	
+    <Image x:Key="tuxCardJPH2" Source="Card/Tux/JPH2.png"/>
     <Image x:Key="tuxCardTPH1" Source="Card/Tux/TPH1.png"/>
     <Image x:Key="tuxCardTPH4" Source="Card/Tux/TPH4.png"/>
 	<Image x:Key="tuxCardWQH1" Source="Card/Tux/WQH1.png"/>
@@ -653,6 +665,7 @@
     <Image x:Key="hroCardTR025" Source="Card/Heros/TR025.png"/>
     <Image x:Key="hroCardTR027" Source="Card/Heros/TR027.png"/>
     <Image x:Key="hroCardTR028" Source="Card/Heros/TR028.png"/>
+    <Image x:Key="hroCardTR037" Source="Card/Heros/TR037.png"/>
     <Image x:Key="hroCardTR041" Source="Card/Heros/TR041.png"/>
 
     <Image x:Key="hroCardEX506" Source="Card/Heros/EX506.png"/>
@@ -731,16 +744,16 @@
     <ImageBrush x:Key="loadGuard17" ImageSource="Guard/L17.png"/>
 	
     <Image x:Key="bufferIconSF01" Source="Buffer/SF01.png" ToolTip="强袭"/>
-	<ImageBrush x:Key="bufferIconSF02" ImageSource="Buffer/SF02.png"/>
-	<ImageBrush x:Key="bufferIconSF03" ImageSource="Buffer/SF03.png"/>
-	<ImageBrush x:Key="bufferIconSF04" ImageSource="Buffer/SF04.png"/>
-	<ImageBrush x:Key="bufferIconSF05" ImageSource="Buffer/SF05.png"/>
+	<Image x:Key="bufferIconSF02" Source="Buffer/SF02.png"/>
+    <Image x:Key="bufferIconSF03" Source="Buffer/SF03.png" ToolTip="法障"/>
+    <Image x:Key="bufferIconSF04" Source="Buffer/SF04.png" ToolTip="坚盾"/>
+	<Image x:Key="bufferIconSF05" Source="Buffer/SF05.png"/>
     <Image x:Key="bufferIconSF06" Source="Buffer/SF06.png" ToolTip="神算"/>
-	<ImageBrush x:Key="bufferIconSF07" ImageSource="Buffer/SF07.png"/>
-	<ImageBrush x:Key="bufferIconSF08" ImageSource="Buffer/SF08.png"/>
-	<ImageBrush x:Key="bufferIconSF09" ImageSource="Buffer/SF09.png"/>
-	<ImageBrush x:Key="bufferIconSF10" ImageSource="Buffer/SF10.png"/>
-	<ImageBrush x:Key="bufferIconSF11" ImageSource="Buffer/SF11.png"/>
+	<Image x:Key="bufferIconSF07" Source="Buffer/SF07.png"/>
+	<Image x:Key="bufferIconSF08" Source="Buffer/SF08.png"/>
+	<Image x:Key="bufferIconSF09" Source="Buffer/SF09.png"/>
+	<Image x:Key="bufferIconSF10" Source="Buffer/SF10.png"/>
+	<Image x:Key="bufferIconSF11" Source="Buffer/SF11.png"/>
 	
 	<Image x:Key="runeCard1" Source="Card/RuneCard/SF01.png"/>
 	<Image x:Key="runeCard3" Source="Card/RuneCard/SF03.png"/>

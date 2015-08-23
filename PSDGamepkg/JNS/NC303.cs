@@ -45,6 +45,16 @@ namespace PSD.PSDGamepkg.JNS
                     {
                         return (string)methodInput.Invoke(njc, new object[] { player, fuse, prev });
                     });
+
+                var methodEscueAction = njc.GetType().GetMethod(njCode + "EscueAction");
+                if (methodEscueAction != null)
+                    nj.EscueAction += (p, ut, t, f, a) => { methodEscueAction.Invoke(njc, new object[] { p, ut, t, f, a }); };
+                var methodEscueValid = njc.GetType().GetMethod(njCode + "EscueValid");
+                if (methodEscueValid != null)
+                    nj.EscueValid += (p, ut, t, f) => { return (bool)methodEscueValid.Invoke(njc, new object[] { p, ut, t, f }); };
+                var methodEscueInput = njc.GetType().GetMethod(njCode + "EscueInput");
+                if (methodEscueInput != null)
+                    nj.EscueInput += (p, ut, t, f, pv) => { return (string)methodEscueInput.Invoke(njc, new object[] { p, ut, t, f, pv }); };
             }
             return nj01;
         }
@@ -58,10 +68,7 @@ namespace PSD.PSDGamepkg.JNS
                 string njCode = npc.Code;
                 var methodDebut = njc.GetType().GetMethod(njCode + "Debut");
                 if (methodDebut != null)
-                    npc.Debut += new NPC.DebutDelegate(delegate(Player player)
-                    {
-                        methodDebut.Invoke(njc, new object[] { player });
-                    });
+                    npc.Debut += (player => { methodDebut.Invoke(njc, new object[] { player }); });
             }
             return nj02;
         }
@@ -250,12 +257,13 @@ namespace PSD.PSDGamepkg.JNS
         }
         public void NJ09Action(Player player, string fuse, string args)
         {
-            DefaultPutIntoEscueAction(player, fuse);
+            DefaultPutIntoEscueAction(player, fuse, player);
         }
         public void NJ09EscueAction(Player player, ushort npcUt, int type, string fuse, string args)
         {
             ushort side = ushort.Parse(args);
-            NPCStandardEscueAction(player, npcUt);
+            EscueDiscard(player, npcUt);
+            //NPCStandardEscueAction(player, npcUt);
             XI.RaiseGMessage("G0IP," + side + ",1");
         }
         public string NJ09EscueInput(Player player, ushort npcUt, int type, string fuse, string prev)
@@ -305,17 +313,17 @@ namespace PSD.PSDGamepkg.JNS
             {
                 XI.RaiseGMessage("G1OU," + string.Join(",", pops));
                 XI.RaiseGMessage("G2QU,0,0," + string.Join(",", pops));
-                XI.RaiseGMessage("G0ON,0,C," + pops.Count + "," + pops);
+                XI.RaiseGMessage("G0ON,0,C," + pops.Count + "," + string.Join(",", pops));
             }
             XI.RaiseGMessage("G2FU,3");
         }
         public void NJH3Action(Player player, string fuse, string args)
         {
-            DefaultPutIntoEscueAction(player, fuse);
+            DefaultPutIntoEscueAction(player, fuse, player);
         }
         public void NJH3EscueAction(Player player, ushort npcUt, int type, string fuse, string argst)
         {
-            NPCStandardEscueAction(player, npcUt);
+            EscueDiscard(player, npcUt);
             XI.RaiseGMessage("G0DH," + player.Uid + ",0," + (player.TuxLimit - player.Tux.Count));
         }
         public void NJH6Action(Player player, string fuse, string args)
@@ -348,14 +356,12 @@ namespace PSD.PSDGamepkg.JNS
         {
             if (player.Escue.Contains(npcUt))
             {
-                player.Escue.Remove(npcUt);
-                XI.RaiseGMessage("G2OL," + player.Uid + "," + npcUt);
-                XI.RaiseGMessage("G0ON," + player.Uid + ",M,1," + npcUt);
+                EscueDiscard(player, npcUt);
                 ushort side = ushort.Parse(XI.AsyncInput(player.Uid, "S", "CZ03", "0"));
                 XI.RaiseGMessage("G0IP," + side + ",1");
             }
         }
-        public void DefaultPutIntoEscueAction(Player player, string fuse)
+        public void DefaultPutIntoEscueAction(Player player, string fuse, Player target)
         {
             string npcCode = fuse.Substring(0, fuse.IndexOf(';'));
             fuse = fuse.Substring(fuse.IndexOf(';') + 1);
@@ -364,10 +370,16 @@ namespace PSD.PSDGamepkg.JNS
             if (!player.Escue.Contains(ut))
             {
                 player.Escue.Add(ut);
-                XI.RaiseGMessage("G2IL," + player.Uid + "," + ut);
+                XI.RaiseGMessage("G2IL," + target.Uid + "," + ut);
                 if (XI.Board.Monster1 == ut)
                     XI.Board.Monster1 = 0;
             }
+        }
+        public void EscueDiscard(Player player, ushort npcUt)
+        {
+            player.Escue.Remove(npcUt);
+            XI.RaiseGMessage("G2OL," + player.Uid + "," + npcUt);
+            XI.RaiseGMessage("G0ON," + player.Uid + ",M,1," + npcUt);
         }
         public void NCT41Debut(Player trigger)
         {

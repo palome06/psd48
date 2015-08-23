@@ -37,8 +37,8 @@ namespace PSD.Base.Card
             set { mDebut = value; }
             get { return mDebut ?? DefDebut; }
         }
-        private DebutDelegate DefDebut = (t) => { };
 
+        private DebutDelegate DefDebut = (t) => { };
         // public Delegate Type of Handling events
         public NPC(string code, int group, int genre, string name, ushort str, string[] skills, int hero)
         {

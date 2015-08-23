@@ -1106,7 +1106,6 @@ namespace PSD.PSDGamepkg.JNS
             ushort card = ushort.Parse(args);
             XI.RaiseGMessage("G0QZ," + player.Uid + "," + card);
             XI.RaiseGMessage("G0XZ," + player.Uid + ",2,1,3,1");
-            
         }
         public string JN40101Input(Player player, int type, string fuse, string prev)
         {

@@ -27,8 +27,7 @@ namespace PSD.ClientAo.OI
             //Sets.AddRange(sets);
             AD.Dispatcher.BeginInvoke((Action)(() =>
             {
-                Television tv = new Television(tag);
-                tv.AoTV = this;
+                Television tv = new Television(tag) { AD = AD, AoTV = this };
                 tv = AD.InsTVDict(tag, tv);
                 //Canvas.SetZIndex(tv, 5);
                 Canvas.SetLeft(tv, 300);
@@ -39,7 +38,7 @@ namespace PSD.ClientAo.OI
                     ruban.Loc = Ruban.Location.WATCH;
                     ruban.Cat = Ruban.Category.SOUND;
                 }
-                tv.ShowTable(hi);
+                tv.ShowTableCard(hi);
             }));
         }
         public void ShowSelectableList(string single, string tag, string prefix)
@@ -49,8 +48,7 @@ namespace PSD.ClientAo.OI
         {
             AD.Dispatcher.BeginInvoke((Action)(() =>
             {
-                Television tv = new Television(tag);
-                tv.AD = AD; tv.AoTV = this;
+                Television tv = new Television(tag) { AD = AD, AoTV = this };
                 tv = AD.InsTVDict(tag, tv);
                 Canvas.SetLeft(tv, 300);
                 Canvas.SetTop(tv, 170);
@@ -69,9 +67,13 @@ namespace PSD.ClientAo.OI
                 vals.AddRange(ivls);
                 if (prefix == "PT")
                     tv.ShowTableMonster(vals);
+                else if (prefix == "FW")
+                    tv.ShowTableRune(vals);
+                else if (prefix == "YJ")
+                    tv.ShowTableEscue(vals);
                 //else if (prefix == "TX") { }
                 else
-                    tv.ShowTable(vals);
+                    tv.ShowTableCard(vals);
             }));
         }
 

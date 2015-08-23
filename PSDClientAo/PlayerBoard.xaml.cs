@@ -143,6 +143,8 @@ namespace PSD.ClientAo
             enabledExcard = new List<ushort>();
             enabledPets = new List<ushort>();
             enabledFakeq = new List<ushort>();
+            enabledEscue = new List<ushort>();
+            enabledRune = new List<ushort>();
             //enabledExEquip = false;
             troveBox.padClickHandler += inLuggageClick;
         }
@@ -331,12 +333,39 @@ namespace PSD.ClientAo
             enabledFakeq.Clear();
             werBorder.BorderBrush = new SolidColorBrush(Colors.Transparent);
         }
-
+        public void EnableRune(IEnumerable<ushort> vset)
+        {
+            enabledRune = vset.ToList();
+            if (enabledRune.Count > 0)
+                runeBorder.BorderBrush = new SolidColorBrush(Colors.Black);
+            else
+                runeBorder.BorderBrush = new SolidColorBrush(Colors.Transparent);
+        }
+        public void ResumeRune()
+        {
+            enabledRune.Clear();
+            runeBorder.BorderBrush = new SolidColorBrush(Colors.Transparent);
+        }
+        public void EnableEscue(IEnumerable<ushort> vset)
+        {
+            enabledEscue = vset.ToList();
+            if (enabledEscue.Count > 0)
+                npcBorder.BorderBrush = new SolidColorBrush(Colors.Black);
+            else
+                npcBorder.BorderBrush = new SolidColorBrush(Colors.Transparent);
+        }
+        public void ResumeEscue()
+        {
+            enabledEscue.Clear();
+            npcBorder.BorderBrush = new SolidColorBrush(Colors.Transparent);
+        }
         internal AoDisplay AD { set; get; }
 
         private List<ushort> enabledExcard;
         private List<ushort> enabledPets;
         private List<ushort> enabledFakeq;
+        private List<ushort> enabledEscue;
+        private List<ushort> enabledRune;
         //private bool enabledExEquip;
 
         private void excardBarClick(object sender, RoutedEventArgs e)
@@ -393,23 +422,32 @@ namespace PSD.ClientAo
         {
             if (AD != null)
             {
-                //if (enabledFakeq == null || enabledFakeq.Count == 0)
-                //{
-                AD.yhTV.Show(AoPlayer.Escue.Select(p => "M" + p).ToList(), AoPlayer.Rank + "NC");
-                //}
-                //else
-                //{
-                //    AD.yhTV.ShowSelectableList(enabledFakeq.Select(p => "M" + p).ToList(),
-                //        AoPlayer.Fakeq.Keys.Except(enabledFakeq).Select(p => "C" + p).ToList(),
-                //        AoPlayer.Rank + "SFQ", "TX");
-                //}
+                if (enabledEscue == null || enabledEscue.Count == 0)
+                {
+                    AD.yhTV.Show(AoPlayer.Escue.Select(p => "M" + p).ToList(), AoPlayer.Rank + "YJ");
+                }
+                else
+                {
+                    AD.yhTV.ShowSelectableList(enabledEscue.Select(p => "M" + p).ToList(),
+                        AoPlayer.Escue.Except(enabledEscue).Select(p => "M" + p).ToList(),
+                        AoPlayer.Rank + "SYJ", "YJ");
+                }
             }
         }
         private void runeButtonClick(object sender, RoutedEventArgs e)
         {
             if (AD != null)
             {
-                AD.yhTV.Show(AoPlayer.Runes.Select(p => "R" + p).ToList(), AoPlayer.Rank + "SF");
+                if (enabledRune == null || enabledRune.Count == 0)
+                {
+                    AD.yhTV.Show(AoPlayer.Runes.Select(p => "R" + p).ToList(), AoPlayer.Rank + "FW");
+                }
+                else
+                {
+                    AD.yhTV.ShowSelectableList(enabledRune.Select(p => "R" + p).ToList(),
+                        AoPlayer.Runes.Except(enabledRune).Select(p => "R" + p).ToList(),
+                        AoPlayer.Rank + "SFW", "FW");
+                }
             }
         }
         private void werButtonClick(object sender, RoutedEventArgs e)

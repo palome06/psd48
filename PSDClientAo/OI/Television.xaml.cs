@@ -44,8 +44,7 @@ namespace PSD.ClientAo.OI
             }
             return null;
         }
-
-        internal void ShowTable(List<Ruban> hi)
+        private void ShowTable(List<Ruban> hi, Action<ushort> ins, Action<ushort> dels)
         {
             mainBoard.Children.Clear();
             int usz = hi.Count;
@@ -60,42 +59,20 @@ namespace PSD.ClientAo.OI
                 ruban.cardBody.Checked += delegate(object sender, RoutedEventArgs e)
                 {
                     if (AD != null)
-                        AD.InsSelectedCard(ruban.UT);
+                        ins(ruban.UT);
                 };
                 ruban.cardBody.Unchecked += delegate(object sender, RoutedEventArgs e)
                 {
                     if (AD != null)
-                        AD.DelSelectedCard(ruban.UT);
+                        dels(ruban.UT);
                 };
             }
             this.Visibility = Visibility.Visible;
         }
-
-        internal void ShowTableMonster(List<Ruban> hi)
-        {
-            mainBoard.Children.Clear();
-            int usz = hi.Count;
-            int idx = 0;
-            foreach (Ruban ruban in hi)
-            {
-                mainBoard.Children.Add(ruban);
-                ruban.LengthLimit = OI.DealTable.MAX_LENGTHCNT;
-                ruban.SetOfIndex(idx, 0, hi.Count);
-                ++idx;
-
-                ruban.cardBody.Checked += delegate(object sender, RoutedEventArgs e)
-                {
-                    if (AD != null)
-                        AD.InsSelectedMon(ruban.UT);
-                };
-                ruban.cardBody.Unchecked += delegate(object sender, RoutedEventArgs e)
-                {
-                    if (AD != null)
-                        AD.DelSelectedMon(ruban.UT);
-                };
-            }
-            this.Visibility = Visibility.Visible;
-        }
+        internal void ShowTableCard(List<Ruban> hi) { ShowTable(hi, AD.InsSelectedCard, AD.DelSelectedCard); }
+        internal void ShowTableMonster(List<Ruban> hi) { ShowTable(hi, AD.InsSelectedMon, AD.DelSelectedMon); }
+        internal void ShowTableRune(List<Ruban> hi) { ShowTable(hi, AD.InsSelectedRune, AD.DelSelectedRune); }
+        internal void ShowTableEscue(List<Ruban> hi) { ShowTable(hi, AD.InsSelectedEscue, AD.DelSelectedEscue); }
 
         private void closeButtonClick(object sender, RoutedEventArgs e)
         {

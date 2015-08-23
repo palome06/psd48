@@ -53,8 +53,15 @@ namespace PSD.ClientZero
                 result = title + ":" + tuple.ML.Decode(ushort.Parse(title.Substring("PT".Length))).Name;
             else if (title.StartsWith("SJ"))
                 result = title + ":" + tuple.EL.GetEveFromName(title).Name;
-            else if (title.StartsWith("SF"))
-                result = title + ":" + tuple.RL.Encode(title).Name;
+            else if (title.StartsWith("FW"))
+                result = title + ":" + tuple.RL.Decode(ushort.Parse(title.Substring("FW".Length))).Name;
+            else if (title.StartsWith("YJ"))
+            {
+                ushort card = ushort.Parse(title.Substring("YJ".Length));
+                string name = tuple.NL.Decode(card).Skills.First(
+                    p => tuple.NJL.EncodeNCAction(p).Branches.Length > 0);
+                result = title + ":" + tuple.NJL.EncodeNCAction(name).Name;
+            }
             else
                 result = title;
             if (idx >= 0)

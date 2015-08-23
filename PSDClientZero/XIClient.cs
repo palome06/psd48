@@ -2446,7 +2446,7 @@ namespace PSD.ClientZero
                         ushort who = ushort.Parse(args[1]);
                         ushort[] sfs = Util.TakeRange(args, 2, args.Length).Select(p => ushort.Parse(p)).ToArray();
                         Z0D[who].Runes.AddRange(sfs);
-                        VI.Cout(Uid, "{0}获得身法{1}.", zd.Player(who), sfs);
+                        VI.Cout(Uid, "{0}获得身法{1}.", zd.Player(who), zd.Rune(sfs));
                     }
                     break;
                 case "E0OF":
@@ -2454,7 +2454,7 @@ namespace PSD.ClientZero
                         ushort who = ushort.Parse(args[1]);
                         ushort[] sfs = Util.TakeRange(args, 2, args.Length).Select(p => ushort.Parse(p)).ToArray();
                         Z0D[who].Runes.RemoveAll(p => sfs.Contains(p));
-                        VI.Cout(Uid, "{0}失去身法{1}.", zd.Player(who), sfs);
+                        VI.Cout(Uid, "{0}失去身法{1}.", zd.Player(who), zd.Rune(sfs));
                     }
                     break;
             }

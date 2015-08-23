@@ -119,7 +119,7 @@ namespace PSD.PSDGamepkg
             //10105, 10608, 10605, 10303, 19010, 17002
             //19014, 10102, 10501, 10303, 19010, 19016
             //17041, 19020, 10606, 18004, 10303, 19006
-            10607, 15008, 10201, 17004, 10303, 19006
+            17008, 15008, 10201, 17037, 10303, 19006
         };
 
         #region Memeber Declaration & Constructor
@@ -143,10 +143,9 @@ namespace PSD.PSDGamepkg
         private IDictionary<string, Operation> cz01;
         // nj01 for mapping from npc effect name to object
         private IDictionary<string, Base.NCAction> nj01;
-        public IDictionary<string, Base.NCAction> Nj01 { get { return nj01; } }
         // ev01 for mapping from eve code pers effect name to object
         private IDictionary<string, Base.Card.Evenement> ev01;
-
+        // sf01 for mapping from rune name to object
         private IDictionary<string, Base.Rune> sf01;
 
         public LibGroup LibTuple { private set; get; }
@@ -507,6 +506,37 @@ namespace PSD.PSDGamepkg
                         }
                     }
             }
+            foreach (NCAction nca in LibTuple.NJL.Firsts)
+            {
+                for (int i = 0; i < nca.Branches.Length; ++i)
+                {
+                    SKBranch skb = nca.Branches[i];
+                    string oc = skb.Occur;
+                    SkTriple skt = new SkTriple()
+                    {
+                        Name = nca.Code,
+                        Priorty = skb.Priority,
+                        Owner = 0,
+                        InType = i,
+                        Type = SKTType.YJ,
+                        Consume = 0, // Consume is handled within Action
+                        Lock = skb.Lock,
+                        IsOnce = skb.Once,
+                        Occur = oc,
+                        IsTermini = skb.Demiurgic
+                    };
+                    if (oc.Contains('#') || oc.Contains('$') || oc.Contains('*'))
+                    {
+                        foreach (Player p in Board.Garden.Values)
+                            Util.AddToMultiMap(dict, oc
+                                .Replace("#", p.Uid.ToString())
+                                .Replace("$", p.Uid.ToString())
+                                .Replace("*", p.Uid.ToString()), skt);
+                    }
+                    else
+                        Util.AddToMultiMap(dict, oc, skt);
+                }
+            }
             foreach (Base.Card.Evenement eve in LibTuple.EL.ListAllEves(levelCode))
             {
                 for (int i = 0; i < eve.Occurs.Length; ++i)
@@ -710,6 +740,7 @@ namespace PSD.PSDGamepkg
                     case SKTType.CZ:
                     case SKTType.EV:
                     case SKTType.SF:
+                    case SKTType.YJ:
                         if (skt.Occur.Contains('#'))
                         {
                             if (!ucr || Board.Rounder.Team == Board.UseCardRound)
@@ -917,11 +948,12 @@ namespace PSD.PSDGamepkg
             {
                 Base.Rune sf = sf01[ske.Name];
                 Player player = Board.Garden[ske.Tg];
-                if (player.Runes.Any(p => LibTuple.RL.Decode(p).Code == sf.Code) && sf.Valid(player, ske.Fuse))
+                ushort rnCode = LibTuple.RL.GetSingleIndex(sf);
+                if (player.Runes.Contains(rnCode) && sf.Valid(player, ske.Fuse))
                 {
                     if (ske.Lock == false)
                     {
-                        string msg = ske.Name;
+                        string msg = "FW" + rnCode;
                         string req = sf.Input(player, ske.Fuse, "");
                         if (req != "")
                             msg += "," + req;
@@ -929,8 +961,33 @@ namespace PSD.PSDGamepkg
                         involved[player.Uid] |= true;
                     }
                     else
-                        locks.Add(player.Uid + "," + ske.Name + ";" + ske.InType);
+                        locks.Add(player.Uid + ",FW" + rnCode + ";" + ske.InType);
                     isAnySet |= true;
+                }
+            }
+            else if ((!ske.IsOnce || ske.Tick == 0) && ske.Type == SKTType.YJ && nj01.ContainsKey(ske.Name))
+            {
+                Base.NCAction na = nj01[ske.Name];
+                Player player = Board.Garden[ske.Tg];
+                foreach (ushort escue in player.Escue)
+                {
+                    ushort orgEscue = Base.Card.NMBLib.OriginalNPC(escue);
+                    Base.Card.NPC npc = LibTuple.NL.Decode(orgEscue);
+                    if (npc.Skills.Contains(na.Code) && na.EscueValid(player, escue, ske.InType, ske.Fuse))
+                    {
+                        if (ske.Lock == false)
+                        {
+                            string msg = "YJ" + orgEscue;
+                            string req = na.EscueInput(player, escue, ske.InType, ske.Fuse, "");
+                            if (req != "")
+                                msg += "," + req;
+                            pris[player.Uid] += ";" + msg;
+                            involved[player.Uid] |= true;
+                        }
+                        else
+                            locks.Add(player.Uid + ",YJ" + orgEscue + ";" + ske.InType);
+                        isAnySet |= true;
+                    }
                 }
             }
             else if ((!ske.IsOnce || ske.Tick == 0) && ske.Type == SKTType.PT && mt01.ContainsKey(ske.Name))

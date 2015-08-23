@@ -674,8 +674,53 @@ namespace PSD.PSDGamepkg.JNS
                 XI.RaiseGMessage("G0ON," + g0on);
                 XI.Board.Garden.Values.ToList().ForEach(p => p.Escue.Clear());
             }
-            // Remove all SF here
+            foreach (Player py in XI.Board.Garden.Values)
+            {
+                if (py.Runes.Count > 0)
+                    XI.RaiseGMessage("G0OF," + py.Uid + "," + string.Join(",", py.Runes));
+            }
         }
+
+        public void SJH04(Player rd)
+        {
+            int n = rd.GetPetCount();
+            bool done = false;
+            while (!done)
+            {
+                List<Player> commer = XI.Board.Garden.Values.Where(p => p.IsAlive && p.GetPetCount() > n).ToList();
+                string selT = XI.AsyncInput(rd.Uid, commer.Count > 0 ? ("/T1(p" + string.Join("p",
+                    commer.Select(p => p.Uid)) + ")") : "/", "SJH04", "0");
+                if (!selT.StartsWith("/") && !selT.Contains(VI.CinSentinel))
+                {
+                    ushort st = ushort.Parse(selT);
+                    Player py = XI.Board.Garden[st];
+
+                    string selM = XI.AsyncInput(rd.Uid, "/M1(p" + string.Join(
+                        "p", py.Pets.Where(p => p != 0)) + ")", "SJH04", "1");
+                    if (!selM.StartsWith("/") && !selM.Contains(VI.CinSentinel))
+                    {
+                        ushort sm = ushort.Parse(selM);
+                        Monster pet = XI.LibTuple.ML.Decode(sm);
+                        XI.RaiseGMessage("G0TT," + rd.Uid);
+                        if (XI.Board.DiceValue + rd.STR > pet.STR) {
+                            XI.RaiseGMessage("G0HL," + st + "," + sm);
+                            XI.RaiseGMessage("G0ON," + st + ",M,1," + sm);
+                        } else {
+                            XI.RaiseGMessage(Artiad.Harm.ToMessage(
+                                new Artiad.Harm(rd.Uid, (sm + 1000), pet.Element, n + 2, 0)));
+                        }
+                        done = true;
+                    }
+                }
+                else if (selT.StartsWith("/"))
+                {
+                    if (n > 0)
+                        XI.RaiseGMessage(Artiad.Harm.ToMessage(new Artiad.Harm(rd.Uid, 0, FiveElement.A, n, 0)));
+                    done = true;
+                }
+            }
+        }
+
         public void SJH05(Player rd)
         {
             if (rd.Tux.Count > 0)

@@ -68,14 +68,16 @@ namespace PSD.PSDGamepkg
             ////Board.MonPiles.PushBack(24);
             ////Board.MonPiles.PushBack(23);
             ////Board.MonPiles.PushBack(22);
-            //Board.MonPiles.PushBack(1);
-            //Board.MonPiles.PushBack(1022);
-            ////Board.MonPiles.PushBack(1030);
+            //Board.MonPiles.PushBack(29);
+            Board.MonPiles.PushBack(1103);
+            Board.MonPiles.PushBack(1108);
+            Board.MonPiles.PushBack(1001);
+            Board.MonPiles.PushBack(1104);
             //Board.EvePiles.PushBack(29);
             ////Board.EvePiles.PushBack(1);
             //Board.EvePiles.PushBack(32);
             //Board.EvePiles.PushBack(36);
-            //Board.EvePiles.PushBack(33);
+            //Board.EvePiles.PushBack(34);
             //Board.EvePiles.PushBack(35);
             //Board.RestNPCPiles.PushBack(1047);
             //Board.EvePiles.PushBack(23);
@@ -151,7 +153,7 @@ namespace PSD.PSDGamepkg
             //RaiseGMessage("G0HQ,2,5,0,0,90");
             //RaiseGMessage("G0HQ,2,4,0,0,47,48,52");
             //RaiseGMessage("G0HQ,2,6,0,0,26");
-            RaiseGMessage("G0HQ,2,1,0,0,124,101");
+            //RaiseGMessage("G0HQ,2,1,0,0,124,101,117,71");
             //RaiseGMessage("G0HQ,2,2,0,0,71");
             //RaiseGMessage("G0HQ,2,1,0,61,64,73,74,75,76,65,17,69,71,10,70");
             //RaiseGMessage("G0IJ,3,0,1");
@@ -166,7 +168,7 @@ namespace PSD.PSDGamepkg
             //RaiseGMessage("G0HQ,2,1,0,0,96,18");
             //RaiseGMessage("G0HQ,2,5,0,0,65,66");
             //RaiseGMessage("G0HQ,2,1,0,0,71,37,95");
-            //RaiseGMessage("G0HQ,2,1,0,0,84");
+            //RaiseGMessage("G0HQ,2,1,0,0,72");
             //RaiseGMessage("G0HQ,2,1,0,0,55,73,95,1,5");
             //RaiseGMessage("G0HQ,2,2,0,0,60");
             //RaiseGMessage("G0HQ,2,3,0,0,66");
@@ -239,8 +241,8 @@ namespace PSD.PSDGamepkg
             //RaiseGMessage("G0OH,1,0,0,5,2,0,0,4,3,0,0,5,4,0,0,5,5,0,0,5,6,0,0,5");
             //RaiseGMessage("G0OH,2,0,0,2,3,0,0,3,4,0,0,5,6,0,0,2");
             //RaiseGMessage("G0OH,1,0,4,12,2,0,4,12");
-            foreach (Player player in Board.Garden.Values)
-                RaiseGMessage("G0HQ,2," + player.Uid + ",1,3");
+            //foreach (Player player in Board.Garden.Values)
+            //    RaiseGMessage("G0HQ,2," + player.Uid + ",1,3");
             //RaiseGMessage("G0HQ,2,4,1,1");
             //RaiseGMessage("G0HQ,2,6,1,2");
             //RaiseGMessage("G0HQ,2,2,1,3");
@@ -261,8 +263,9 @@ namespace PSD.PSDGamepkg
             tx01 = new JNS.TuxCottage(this, VI).RegisterDelegates(LibTuple.TL, levelCode);
             sk01 = new JNS.SkillCottage(this, VI).RegisterDelegates(LibTuple.SL);
             cz01 = new JNS.OperationCottage(this, VI).RegisterDelegates(LibTuple.ZL);
-            nj01 = new JNS.NPCCottage(this, VI).RegisterDelegates(LibTuple.NJL);
-            new JNS.NPCCottage(this, VI).RegisterNPCDelegates(LibTuple.NL);
+            var npcCottage = new JNS.NPCCottage(this, VI);
+            nj01 = npcCottage.RegisterDelegates(LibTuple.NJL);
+            npcCottage.RegisterNPCDelegates(LibTuple.NL); // trigger directly, no SKE generated
             ev01 = new JNS.EveCottage(this, VI).RegisterDelegates(LibTuple.EL);
             sf01 = new JNS.RuneCottage(this, VI).RegisterDelegates(LibTuple.RL);
             MappingSksp(out sk02, out sk03, levelCode);
@@ -893,6 +896,7 @@ namespace PSD.PSDGamepkg
                     // if somebody added now, then re-scan it's related with $zero
                 }
 
+                if (purse.Count == 0 && (sina & 1) == 0) { return false; }
                 // round mode, priority not needed.
                 if (locks.Count > 0)
                 {
@@ -985,6 +989,8 @@ namespace PSD.PSDGamepkg
                                 purse.Add(ske);
                         }
                     }
+                    // TODO R*ZD calls it, where sina == 1, so just ignore it
+                    //if (purse.Count == 0 && (sina & 1) == 0) { return false; }
                     // round mode, priority not needed.
                     if (locks.Count > 0)
                     {

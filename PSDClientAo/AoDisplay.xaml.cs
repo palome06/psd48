@@ -576,7 +576,10 @@ namespace PSD.ClientAo
             selectedMon = new ObservableCollection<ushort>();
             ushort whoes = 0;
             if (self)
+            {
+                whoes = yfPlayerR2.AoPlayer.Rank;
                 yfPlayerR2.EnablePets(wata.Pets.Where(p => p != 0).Intersect(cands).ToList());
+            }
             else
             {
                 List<ushort> pets = yfPlayerR1.AoPlayer.Pets.Where(p => p != 0).Intersect(cands).ToList();
@@ -628,7 +631,7 @@ namespace PSD.ClientAo
         internal void FinishSelectPT()
         {
             PlayerBoard[] pbs = new PlayerBoard[] { yfPlayerR1, yfPlayerR2,
-                yfPlayerR3,yfPlayerO1, yfPlayerO2, yfPlayerO3};
+                yfPlayerR3, yfPlayerO1, yfPlayerO2, yfPlayerO3 };
             foreach (PlayerBoard pb in pbs)
             {
                 pb.ResumePets();
@@ -636,6 +639,93 @@ namespace PSD.ClientAo
             }
         }
 
+        private ObservableCollection<ushort> selectedRune;
+        internal void InsSelectedRune(ushort ut) { if (selectedRune != null) selectedRune.Add(ut); }
+        internal void DelSelectedRune(ushort ut) { if (selectedRune != null) selectedRune.Remove(ut); }
+        internal void StartSelectSF(List<ushort> cands)
+        {
+            AoPlayer wata = yfPlayerR2.AoPlayer;
+            //List<ushort> pets = wata.Pets.Where(p => p != 0).Intersect(cands).ToList();
+            //List<ushort> opts = wata.Pets.Where(p => p != 0).Except(pets).ToList();
+
+            selectedRune = new ObservableCollection<ushort>();
+            ushort whoes = yfPlayerR2.AoPlayer.Rank;
+            yfPlayerR2.EnableRune(wata.Runes.Intersect(cands).ToList());
+
+            selectedRune.CollectionChanged += delegate(object sender, NotifyCollectionChangedEventArgs e)
+            {
+                if (selectedRune != null)
+                {
+                    if (selectedRune.Count == 1)
+                        EnableJoyDecide("FW" + selectedRune[0]);
+                    else if (selectedRune.Count > 1)
+                    {
+                        ushort first = selectedRune[0];
+                        if (tvDict.ContainsKey(whoes + "SFW"))
+                        {
+                            OI.Television tv = tvDict[whoes + "SFW"];
+                            Card.Ruban ruban = tv.GetRuban(selectedRune[0]);
+                            if (ruban != null)
+                            {
+                                ruban.cardBody.IsChecked = false;
+                                return;
+                            }
+                        }
+                    }
+                    else
+                        DisableJoyDecide();
+                }
+            };
+        }
+        internal void FinishSelectSF()
+        {
+            yfPlayerR2.ResumeRune();
+            RmvTVDict(yfPlayerR2.AoPlayer.Rank + "SFW");
+        }
+
+        private ObservableCollection<ushort> selectedEscue;
+        internal void InsSelectedEscue(ushort ut) { if (selectedEscue != null) selectedEscue.Add(ut); }
+        internal void DelSelectedEscue(ushort ut) { if (selectedEscue != null) selectedEscue.Remove(ut); }
+        internal void StartSelectYJ(List<ushort> cands)
+        {
+            AoPlayer wata = yfPlayerR2.AoPlayer;
+            //List<ushort> pets = wata.Pets.Where(p => p != 0).Intersect(cands).ToList();
+            //List<ushort> opts = wata.Pets.Where(p => p != 0).Except(pets).ToList();
+
+            selectedEscue = new ObservableCollection<ushort>();
+            ushort whoes = yfPlayerR2.AoPlayer.Rank;
+            yfPlayerR2.EnableEscue(wata.Escue.Intersect(cands).ToList());
+
+            selectedEscue.CollectionChanged += delegate(object sender, NotifyCollectionChangedEventArgs e)
+            {
+                if (selectedEscue != null)
+                {
+                    if (selectedEscue.Count == 1)
+                        EnableJoyDecide("YJ" + selectedEscue[0]);
+                    else if (selectedEscue.Count > 1)
+                    {
+                        ushort first = selectedEscue[0];
+                        if (tvDict.ContainsKey(whoes + "SYJ"))
+                        {
+                            OI.Television tv = tvDict[whoes + "SYJ"];
+                            Card.Ruban ruban = tv.GetRuban(selectedEscue[0]);
+                            if (ruban != null)
+                            {
+                                ruban.cardBody.IsChecked = false;
+                                return;
+                            }
+                        }
+                    }
+                    else
+                        DisableJoyDecide();
+                }
+            };
+        }
+        internal void FinishSelectYJ()
+        {
+            yfPlayerR2.ResumeEscue();
+            RmvTVDict(yfPlayerR2.AoPlayer.Rank + "SYJ");
+        }
         #endregion Cards Selection and Control Panel
 
         public ushort Player2Position(ushort ut)

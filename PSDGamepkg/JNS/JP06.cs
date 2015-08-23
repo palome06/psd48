@@ -1205,26 +1205,30 @@ namespace PSD.PSDGamepkg.JNS
                     XI.InnerGMessage(Artiad.Harm.ToMessage(harms), 85);
             }
         }
-        public bool TPT2Bribe(Player player, int type, string fuse)
+        public void TPT2Action(Player player, int type, string fuse, string argst)
         {
             if (type == 0)
             {
-                Player r = XI.Board.Rounder;
-                return r != null && r.Uid == player.Uid && !r.DrTuxDisabled;
+                string whoStr = XI.AsyncInput(player.Uid, "#获得「强袭」的,T1(p" + string.Join("p", XI.Board.Garden
+                    .Values.Where(p => p.IsTared  && !p.Runes.Contains(1)).Select(p => p.Uid)) + ")", "TPT2Action", "0");
+                ushort who = ushort.Parse(whoStr);
+                XI.RaiseGMessage("G0IF," + who + ",1");
             }
-            else
-                return !player.DrTuxDisabled;
-        }
-        public void TPT2Action(Player player, int type, string fuse, string argst)
-        {
-            string whoStr = XI.AsyncInput(player.Uid, "#获得补牌的,T1(p" + string.Join("p",
-                XI.Board.Garden.Values.Where(p => p.IsTared).Select(p => p.Uid)) + ")", "JPT2Action", "0");
-            ushort who = ushort.Parse(whoStr);
-            XI.RaiseGMessage("G0DH," + who + ",0,1");
+            else if (type == 1)
+            {
+                string whoStr = XI.AsyncInput(player.Uid, "#获得补牌的,T1(p" + string.Join("p",
+                    XI.Board.Garden.Values.Where(p => p.IsTared).Select(p => p.Uid)) + ")", "TPT2Action", "1");
+                ushort who = ushort.Parse(whoStr);
+                XI.RaiseGMessage("G0DH," + who + ",0,1");
+            }
         }
         public bool TPT2Valid(Player player, int type, string fuse)
         {
-            return XI.Board.Garden.Values.Any(p => p.IsTared);
+            if (type == 0)
+                return XI.Board.Garden.Values.Any(p => p.IsTared && !p.Runes.Contains(1));
+            else if (type == 1)
+                return XI.Board.Garden.Values.Any(p => p.IsTared);
+            return false;
         }
         public bool WQT1ConsumeValid(Player player, int consumeType, int type, string fuse)
         {
@@ -2364,6 +2368,23 @@ namespace PSD.PSDGamepkg.JNS
         #endregion Package of 5 - XB
 
         #region Package of 6
+        public void JPT6Action(Player player, int type, string fuse, string argst)
+        {
+            var ai = XI.AsyncInput(player.Uid, "#进行判定的,T1(p" + string.Join("p",
+                XI.Board.Garden.Values.Where(p => p.IsTared).Select(p => p.Uid)) + ")", "JPT6", "0");
+            if (!ai.StartsWith("/"))
+            {
+                ushort tar = ushort.Parse(ai);
+                TargetPlayer(player.Uid, tar);
+                XI.RaiseGMessage("G0TT," + tar);
+                int val = (XI.Board.DiceValue + 1) / 2;
+                Player py = XI.Board.Garden[tar];
+                if (py.Team == player.Team)
+                    XI.RaiseGMessage(Artiad.Cure.ToMessage(new Artiad.Cure(tar, player.Uid, FiveElement.A, val)));
+                else
+                    XI.RaiseGMessage(Artiad.Harm.ToMessage(new Artiad.Harm(tar, player.Uid, FiveElement.A, val, 0)));
+            }
+        }
         public void ZPT4Action(Player player, int type, string fuse, string argst)
         {
             XI.RaiseGMessage("G0TT," + player.Uid);
@@ -2383,10 +2404,48 @@ namespace PSD.PSDGamepkg.JNS
         #endregion Package of 6
 
         #region Package of HL
+        public void JPH2Action(Player player, int type, string fuse, string argst)
+        {
+            string whoStr = XI.AsyncInput(player.Uid, "#攻击,T1(p" + string.Join("p", XI.Board.Garden
+                    .Values.Where(p => p.IsTared && p.HasAnyEquips())) + ")", "JPH2", "0");
+            ushort who = ushort.Parse(whoStr);
+            Player py = XI.Board.Garden[who];
+            int n = Math.Min(py.GetEquipCount() + 2, 5);
+            string select = XI.AsyncInput(player.Uid, "#请选择一项以响应【罡风惊天】##HP-" + n + "##弃置装备,Y2", "JPH2", "1");
+            if (select == "1")
+                Harm(player, py, n, FiveElement.AERO);
+            else
+            {
+                if (py.HasAnyEquips())
+                    XI.RaiseGMessage("G0QZ," + who + "," + string.Join(",", py.ListOutAllEquips()));
+            }
+        }
+        public bool JPH2Valid(Player player, int type, string fuse)
+        {
+            return XI.Board.Garden.Values.Any(p => p.IsTared && p.HasAnyEquips());
+        }
         public void TPH1Action(Player player, int type, string fuse, string argst)
         {
+            if (type == 0) {
+                string whoStr = XI.AsyncInput(player.Uid, "#获得「神算」的,T1(p" + string.Join("p", XI.Board.Garden
+                    .Values.Where(p => p.IsTared  && !p.Runes.Contains(6)).Select(p => p.Uid)) + ")", "TPH1", "0");
+                ushort who = ushort.Parse(whoStr);
+                XI.RaiseGMessage("G0IF," + who + ",6");
+            } else if (type == 1) {
+                string sel = XI.AsyncInput(player.Uid, "#调整怪物闪避##-1##+1,Y2", "TPH1", "1");
+                if (sel == "1")
+                    XI.RaiseGMessage("G0OW," + XI.Board.Monster1 + ",1");
+                else if (sel == "2")
+                    XI.RaiseGMessage("G0IW," + XI.Board.Monster1 + ",1");
+            }
+        }
+        public bool TPH1Valid(Player player, int type, string fuse)
+        {
             if (type == 0)
-                XI.RaiseGMessage("G0IF," + player.Uid + ",6");
+                return XI.Board.Garden.Values.Any(p => p.IsTared && !p.Runes.Contains(6));
+            else if (type == 1)
+                return true;
+            return false;
         }
         public void TPH4Action(Player player, int type, string fuse, string argst)
         {

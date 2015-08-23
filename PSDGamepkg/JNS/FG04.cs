@@ -987,7 +987,7 @@ namespace PSD.PSDGamepkg.JNS
             {
                 if (mon.RAMUshort == 0)
                 {
-                    string hint = "#请选择「镇狱明王」宠物效果。##战-1，命+2##命-1，战+2,/Y2";
+                    string hint = "#请选择「镇狱明王」宠物效果。##战-1，命+2##命-1，战+2,Y2";
                     string option = XI.AsyncInput(player.Uid, hint, "GHT2IncrAction", "0");
                     if (option == "1")
                         mon.RAMUshort = 1;
