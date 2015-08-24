@@ -270,14 +270,14 @@ namespace PSD.ClientZero
                 PetDisabled ? "禁宠 " : "", Guardian != 0 ? xic.zd.GuardAlias(SelectHero, Coss) : "");
             Aps(sb, "手牌数:{0} HP:{1}/{2} STR:{3}/{4} DEX:{5}/{6}",
                 TuxCount, HP, HPa, STR, STRa, DEX, DEXa);
-            string equipBase = "装备: {0} {1}" + (((xic.LevelCode >> 1) >= 3) ? " {2}  " : "  ") +
-                 ((ExCards.Count > 0 || ExEquip != 0) ? "{3}: {4}" : "");
+            string equipBase = "装备: {0} {1}" + (((xic.LevelCode >> 1) >= 3 || xic.LevelCode == 0) ?
+                 " {2}  " : "  ") + ((ExCards.Count > 0 || ExEquip != 0) ? "{3}: {4}" : "");
             Aps(sb, equipBase, xic.zd.Tux(Weapon), xic.zd.Tux(Armor), xic.zd.Tux(Trove),
                 xic.zd.HeroExCardAlias(SelectHero, Coss),
                 (ExCards.Count > 0 ? xic.zd.Tux(ExCards) : xic.zd.Tux(ExEquip)));
             Aps(sb, "宠物: {0}", xic.zd.Monster(Pets.Where(p => p != 0)));
             if (Escue.Count > 0)
-                Aps(sb, "可助战NPC：{0}", xic.zd.Monster(Escue));
+                Aps(sb, "助战NPC：{0}", xic.zd.Monster(Escue));
 
             if (Trove != 0 && Treasures.ContainsKey(Trove) && Treasures[Trove].Count > 0)
                 Aps(sb, "行囊中：{0}", xic.zd.MixedCards(Treasures[Trove]));

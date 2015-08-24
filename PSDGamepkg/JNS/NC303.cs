@@ -126,10 +126,7 @@ namespace PSD.PSDGamepkg.JNS
         }
         public string NJ02Input(Player player, string fuse, string prev)
         {
-            if (prev == "")
-                return "T1(p" + string.Join("p", XI.Board.Garden.Values.Where(p => p.IsAlive).Select(p => p.Uid)) + ")";
-            else
-                return "";
+            return (prev == "") ? AnyoneAliveString() : "";
         }
         public void NJ03Action(Player player, string fuse, string args)
         {
@@ -139,10 +136,7 @@ namespace PSD.PSDGamepkg.JNS
         }
         public string NJ03Input(Player player, string fuse, string prev)
         {
-            if (prev == "")
-                return "T1(p" + string.Join("p", XI.Board.Garden.Values.Where(p => p.IsAlive).Select(p => p.Uid)) + ")";
-            else
-                return "";
+            return (prev == "") ? AnyoneAliveString() : "";
         }
         public void NJ04Action(Player player, string fuse, string args)
         {
@@ -155,16 +149,14 @@ namespace PSD.PSDGamepkg.JNS
         }
         public string NJ05Input(Player player, string fuse, string prev)
         {
-            if (prev == "")
-                return "T1(p" + string.Join("p", XI.Board.Garden.Values.Where(p => p.IsAlive).Select(p => p.Uid)) + ")";
-            else
-                return "";
+            return (prev == "") ? AnyoneAliveString() : "";
         }
         public void NJ06Action(Player player, string fuse, string args)
         {
             int idx = args.IndexOf(',');
             ushort from = ushort.Parse(args.Substring(0, idx));
             ushort to = ushort.Parse(args.Substring(idx + 1));
+            TargetPlayer(from, to);
             Player py = XI.Board.Garden[from];
             string imc = XI.AsyncInput(from, "Q1(p" + string.Join("p", py.Tux) + ")", "NJ06", "0");
             ushort card = ushort.Parse(imc);
@@ -173,13 +165,13 @@ namespace PSD.PSDGamepkg.JNS
         public string NJ06Input(Player player, string fuse, string prev)
         {
             if (prev == "")
-                return "T1(p" + string.Join("p", XI.Board.Garden.Values.Where(p => p.IsAlive && p.Tux.Count > 0 &&
+                return "#交出牌的,T1(p" + string.Join("p", XI.Board.Garden.Values.Where(p => p.IsAlive && p.Tux.Count > 0 &&
                     XI.Board.Garden.Values.Where(q => q.IsAlive && q.Uid != p.Uid && q.Team == p.Team).Any()).Select(p => p.Uid)) + ")";
             else if (prev.IndexOf(',') < 0)
             {
                 ushort who = ushort.Parse(prev);
                 Player pho = XI.Board.Garden[who];
-                return "T1(p" + string.Join("p", XI.Board.Garden.Values.Where(
+                return "#交予牌的,T1(p" + string.Join("p", XI.Board.Garden.Values.Where(
                     p => p.IsAlive && p.Uid != who && p.Team == pho.Team).Select(p => p.Uid)) + ")";
             }
             else
@@ -196,6 +188,7 @@ namespace PSD.PSDGamepkg.JNS
             int jdx = args.IndexOf(',', idx + 1);
             ushort from = ushort.Parse(args.Substring(0, idx));
             ushort to = ushort.Parse(Util.Substring(args, idx + 1, jdx));
+            TargetPlayer(from, to);
             ushort pet = ushort.Parse(args.Substring(jdx + 1));
             //XI.RaiseGMessage("G0HL," + from + "," + pet);
             XI.RaiseGMessage("G0HC,1," + to + "," + from + ",0," + pet);
@@ -263,7 +256,6 @@ namespace PSD.PSDGamepkg.JNS
         {
             ushort side = ushort.Parse(args);
             EscueDiscard(player, npcUt);
-            //NPCStandardEscueAction(player, npcUt);
             XI.RaiseGMessage("G0IP," + side + ",1");
         }
         public string NJ09EscueInput(Player player, ushort npcUt, int type, string fuse, string prev)
@@ -288,6 +280,70 @@ namespace PSD.PSDGamepkg.JNS
                 XI.RaiseGMessage("G0ON,0,M,1," + pop);
             }
         }
+        public void NJH1Action(Player player, string fuse, string args)
+        {
+            ushort who = ushort.Parse(args);
+            Player py = XI.Board.Garden[who];
+            if (py.Tux.Count > 0)
+                XI.RaiseGMessage("G0DH," + who + ",2," + py.Tux.Count);
+            DefaultPutIntoEscueAction(player, fuse, player);
+        }
+        public string NJH1Input(Player player, string fuse, string prev)
+        {
+            if (prev == "")
+                return "#弃掉所有手牌的,T1(p" + string.Join("p", XI.Board.Garden.Values.Where(
+                    p => p.IsAlive && p.Team == player.Team && p.Tux.Count > 0).Select(p => p.Uid)) + ")";
+            else
+                return "";
+        }
+        public bool NJH1Valid(Player player, string fuse)
+        {
+            return XI.Board.Garden.Values.Any(p => p.IsAlive && p.Team == player.Team && p.Tux.Count > 0);
+        }
+        public void NJH1EscueAction(Player player, ushort npcUt, int type, string fuse, string args)
+        {
+            if (type == 0)
+            {
+                ushort side = ushort.Parse(args);
+                NPC npc = XI.LibTuple.NL.Decode(Base.Card.NMBLib.OriginalNPC(npcUt));
+                npc.ROMUshort = 1;
+                XI.RaiseGMessage("G0IP," + side + ",4");
+            }
+            else if (type == 1)
+            {
+                Player oy = XI.Board.GetOpponenet(player);
+                string next = XI.AsyncInput(oy.Uid, "#获得【阮英扬】的," + AnyoneAliveString(), "NJH1", "0");
+                ushort nx = ushort.Parse(next);
+                NPC npc = XI.LibTuple.NL.Decode(Base.Card.NMBLib.OriginalNPC(npcUt));
+                npc.ROMUshort = 0;
+                if (nx != player.Uid)
+                {
+                    player.Escue.Remove(npcUt);
+                    XI.RaiseGMessage("G2OL," + player.Uid + "," + npcUt);
+                    XI.Board.Garden[nx].Escue.Add(npcUt);
+                    XI.RaiseGMessage("G2IL," + nx + "," + npcUt);
+                }
+            }
+        }
+        public bool NJH1EscueValid(Player player, ushort npcUt, int type, string fuse)
+        {
+            if (type == 0)
+                return true;
+            else if (type == 1)
+            {
+                NPC npc = XI.LibTuple.NL.Decode(Base.Card.NMBLib.OriginalNPC(npcUt));
+                return npc != null && npc.ROMUshort != 0;
+            }
+            else
+                return false;
+        }
+        public string NJH1EscueInput(Player player, ushort npcUt, int type, string fuse, string prev)
+        {
+            if (type == 0 && prev == "")
+                return "S";
+            else
+                return "";
+        }
         public void NJH2Action(Player player, string fuse, string args)
         {
             List<ushort> pops = XI.DequeueOfPile(XI.Board.TuxPiles, 7).ToList();
@@ -299,6 +355,7 @@ namespace PSD.PSDGamepkg.JNS
             {
                 if (pops.Count <= 0) break;
                 string pubTux = Util.SatoWithBracket(XI.Board.PZone, "p", "(p", ")");
+                XI.RaiseGMessage("G2FU,0," + ut + ",0," + string.Join(",", XI.Board.PZone));
                 string input = XI.AsyncInput(ut, "Z1" + pubTux, "NJH2", "0");
                 ushort cd;
                 if (ushort.TryParse(input, out cd) && XI.Board.PZone.Contains(cd))
@@ -308,6 +365,7 @@ namespace PSD.PSDGamepkg.JNS
                     XI.RaiseGMessage("G0HQ,2," + ut + ",0,0," + cd);
                     pops.Remove(cd);
                 }
+                XI.RaiseGMessage("G2FU,3");
             }
             if (pops.Count > 0)
             {
@@ -315,7 +373,6 @@ namespace PSD.PSDGamepkg.JNS
                 XI.RaiseGMessage("G2QU,0,0," + string.Join(",", pops));
                 XI.RaiseGMessage("G0ON,0,C," + pops.Count + "," + string.Join(",", pops));
             }
-            XI.RaiseGMessage("G2FU,3");
         }
         public void NJH3Action(Player player, string fuse, string args)
         {
@@ -325,6 +382,54 @@ namespace PSD.PSDGamepkg.JNS
         {
             EscueDiscard(player, npcUt);
             XI.RaiseGMessage("G0DH," + player.Uid + ",0," + (player.TuxLimit - player.Tux.Count));
+        }
+        public void NJH4Action(Player player, string fuse, string args)
+        {
+            ushort tar = ushort.Parse(args);
+            TargetPlayer(player.Uid, tar);
+            DefaultPutIntoEscueAction(player, fuse, XI.Board.Garden[tar]);
+        }
+        public string NJH4Input(Player player, string fuse, string prev)
+        {
+            return (prev == "") ? AnyoneAliveString() : "";
+        }
+        public void NJH4EscueAction(Player player, ushort npcUt, int type, string fuse, string argst)
+        {
+            Monster monster = XI.Board.Battler as Monster;
+            int n = (monster != null && monster.Level == Monster.ClLevel.BOSS) ? 3 : 1;
+            EscueDiscard(player, npcUt);
+            XI.RaiseGMessage("G0IA," + player.Uid + ",1," + n);
+            XI.RaiseGMessage("G0IX," + player.Uid + ",1," + n);
+        }
+        public void NJH5Action(Player player, string fuse, string args)
+        {
+            ushort tar = ushort.Parse(args);
+            TargetPlayer(player.Uid, tar);
+            DefaultPutIntoEscueAction(player, fuse, XI.Board.Garden[tar]);
+        }
+        public string NJH5Input(Player player, string fuse, string prev)
+        {
+            return (prev == "") ? AnyoneAliveString() : "";
+        }
+        public void NJH5EscueAction(Player player, ushort npcUt, int type, string fuse, string argst)
+        {
+            if (type == 0)
+                XI.RaiseGMessage(Artiad.Harm.ToMessage(new Artiad.Harm(player.Uid, 2000, FiveElement.YIN, 1, 0)));
+            else if (type == 1)
+                EscueDiscard(player, npcUt);
+        }
+        public bool NJH5EscueValid(Player player, ushort npcUt, int type, string fuse)
+        {
+            if (type == 0)
+                return true;
+            else if (type == 1) // G0HD,0/1,A,B,x
+            {
+                string[] g0hd = fuse.Split(',');
+                ushort who = ushort.Parse(g0hd[2]);
+                return who == player.Uid;
+            }
+            else
+                return false;
         }
         public void NJH6Action(Player player, string fuse, string args)
         {
@@ -350,43 +455,44 @@ namespace PSD.PSDGamepkg.JNS
         {
             return XI.Board.Garden.Values.Where(p => p.IsAlive && p.GetEquipCount() > 0).Any();
         }
-
+        public void NJH7Action(Player player, string fuse, string args)
+        {
+            while (XI.Board.TuxPiles.Count > 0)
+            {
+                ushort ut = XI.DequeueOfPile(XI.Board.TuxPiles);
+                XI.RaiseGMessage("G2IN,0,1");
+                Base.Card.Tux tux = XI.LibTuple.TL.DecodeTux(ut);
+                if (tux != null)
+                {
+                    XI.RaiseGMessage("G0ON,0,C,1," + ut);
+                    if (tux.IsTuxEqiup())
+                    {
+                        if (tux.Type == Base.Card.Tux.TuxType.WQ && XI.Board.TuxDises.Contains(ut))
+                        {
+                            string whoStr = XI.AsyncInput(player.Uid, "#获得【" + tux.Name + "】," +
+                                AnyoneAliveString(), "NJH7", "0");
+                            ushort who = ushort.Parse(whoStr);
+                            XI.RaiseGMessage("G2CN,0,1");
+                            XI.RaiseGMessage("G0HQ,2," + who + ",0,0," + ut);
+                            XI.Board.TuxDises.Remove(ut);
+                        }
+                        break;
+                    }
+                }
+            }
+        }
         #region NPC Single
-        public void NPCStandardEscueAction(Player player, ushort npcUt) // Standard CZ03
-        {
-            if (player.Escue.Contains(npcUt))
-            {
-                EscueDiscard(player, npcUt);
-                ushort side = ushort.Parse(XI.AsyncInput(player.Uid, "S", "CZ03", "0"));
-                XI.RaiseGMessage("G0IP," + side + ",1");
-            }
-        }
-        public void DefaultPutIntoEscueAction(Player player, string fuse, Player target)
-        {
-            string npcCode = fuse.Substring(0, fuse.IndexOf(';'));
-            fuse = fuse.Substring(fuse.IndexOf(';') + 1);
-            ushort ut = NMBLib.CodeOfNPC(XI.LibTuple.NL.Encode(npcCode));
-
-            if (!player.Escue.Contains(ut))
-            {
-                player.Escue.Add(ut);
-                XI.RaiseGMessage("G2IL," + target.Uid + "," + ut);
-                if (XI.Board.Monster1 == ut)
-                    XI.Board.Monster1 = 0;
-            }
-        }
-        public void EscueDiscard(Player player, ushort npcUt)
-        {
-            player.Escue.Remove(npcUt);
-            XI.RaiseGMessage("G2OL," + player.Uid + "," + npcUt);
-            XI.RaiseGMessage("G0ON," + player.Uid + ",M,1," + npcUt);
-        }
         public void NCT41Debut(Player trigger)
         {
             int incr = XI.Board.Garden.Values.Where(p => p.IsAlive &&
                 p.Team == trigger.OppTeam).Max(p => p.Tux.Count);
             ushort me = NMBLib.CodeOfNPC(XI.LibTuple.NL.Encode("NCT41"));
             XI.RaiseGMessage("G0IB," + me + "," + incr);
+        }
+        public void NCH05Debut(Player trigger)
+        {
+            XI.Board.Garden.Values.Where(p => p.IsAlive && p.Tux.Count != 3)
+                .Select(p => p.Uid).ToList().ForEach(p => XI.RaiseGMessage("G0DS," + p + ",0,1"));
         }
         public void NCH07Debut(Player trigger)
         {
@@ -402,6 +508,43 @@ namespace PSD.PSDGamepkg.JNS
                 XI.RaiseGMessage("G0YM,7," + nmbs.Count);
                 XI.Board.MonPiles.Shuffle();
             }
+        }
+        #endregion NPC Single
+        #region NPC General
+        public void DefaultPutIntoEscueAction(Player player, string fuse, Player target)
+        {
+            string npcCode = fuse.Substring(0, fuse.IndexOf(';'));
+            fuse = fuse.Substring(fuse.IndexOf(';') + 1);
+            ushort ut = NMBLib.CodeOfNPC(XI.LibTuple.NL.Encode(npcCode));
+
+            if (!target.Escue.Contains(ut))
+            {
+                target.Escue.Add(ut);
+                XI.RaiseGMessage("G2IL," + target.Uid + "," + ut);
+                if (XI.Board.Monster1 == ut)
+                    XI.Board.Monster1 = 0;
+            }
+        }
+        public void EscueDiscard(Player player, ushort npcUt)
+        {
+            player.Escue.Remove(npcUt);
+            XI.RaiseGMessage("G2OL," + player.Uid + "," + npcUt);
+            XI.RaiseGMessage("G0ON," + player.Uid + ",M,1," + npcUt);
+        }
+        private void TargetPlayer(ushort from, ushort to)
+        {
+            if (to != 0)
+                XI.RaiseGMessage("G2YS,T," + from + ",T," + to);
+        }
+        private void TargetPlayer(ushort from, IEnumerable<ushort> tos)
+        {
+            List<ushort> to = tos.Where(p => p != 0 && p < 1000).ToList();
+            if (to.Count > 0)
+                XI.RaiseGMessage("G2YS,T," + from + "," + string.Join(",", to.Select(p => "T," + p)));
+        }
+        private string AnyoneAliveString()
+        {
+            return "T1(p" + string.Join("p", XI.Board.Garden.Values.Where(p => p.IsAlive).Select(p => p.Uid)) + ")";
         }
         #endregion NPC Single
     }

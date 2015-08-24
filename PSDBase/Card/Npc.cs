@@ -39,6 +39,8 @@ namespace PSD.Base.Card
         }
 
         private DebutDelegate DefDebut = (t) => { };
+
+        public ushort ROMUshort { set; get; }
         // public Delegate Type of Handling events
         public NPC(string code, int group, int genre, string name, ushort str, string[] skills, int hero)
         {
@@ -46,6 +48,7 @@ namespace PSD.Base.Card
             this.Group = group; this.Genre = genre;
             this.STR = this.STRb = str; this.Skills = skills;
             this.Hero = hero;
+            ROMUshort = 0;
         }
 
         public bool IsMonster() { return false; }

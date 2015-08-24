@@ -141,6 +141,7 @@
     <Compile Include="VW\Cyvi.cs" />
     <Compile Include="VW\Bywi.cs" />
     <Compile Include="VW\Eywi.cs" />
+    <Compile Include="XIElder.cs" />
     <Compile Include="XIVisi.cs" />
     <Compile Include="ZeroDisplay.cs" />
     <Compile Include="ZI.cs" />

@@ -86,7 +86,7 @@ namespace PSD.PSDGamepkg.JNS
             }
             harms.RemoveAll(p => rvs.Contains(p));
             if (harms.Count > 0)
-                XI.InnerGMessage(Artiad.Harm.ToMessage(harms), -17);
+                XI.InnerGMessage(Artiad.Harm.ToMessage(harms), -18);
         }
         public void SF06Action(Player player, string fuse, string args)
         {

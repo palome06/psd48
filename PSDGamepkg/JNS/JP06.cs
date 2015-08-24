@@ -818,7 +818,7 @@ namespace PSD.PSDGamepkg.JNS
                 {
                     if (harm.Who == player.Uid && harm.Element != FiveElement.LOVE)
                     {
-                        VI.Cout(0, "{0}爆发「踏云靴」,免疫本次伤害，且HP+1.", XI.DisplayPlayer(player.Uid));
+                        VI.Cout(0, "{0}爆发【踏云靴】,免疫本次伤害，且HP+1.", XI.DisplayPlayer(player.Uid));
                         rvs.Add(harm);
                         XI.RaiseGMessage(Artiad.Cure.ToMessage(
                             new Artiad.Cure(player.Uid, player.Uid, FiveElement.A, 1)));
@@ -893,11 +893,11 @@ namespace PSD.PSDGamepkg.JNS
             
             string costr;
             if (b1 && b2)
-                costr = "#请选择「驯化」执行项。##开牌##驯化,Y2";
+                costr = "#请选择【驯化】执行项。##开牌##驯化,Y2";
             else if (b1)
-                costr = "#请选择「驯化」执行项。##开牌,Y1";
+                costr = "#请选择【驯化】执行项。##开牌,Y1";
             else if (b2)
-                costr = "#请选择「驯化」执行项。##驯化,Y1";
+                costr = "#请选择【驯化】执行项。##驯化,Y1";
             else
                 costr = "";
             costr = XI.AsyncInput(player.Uid, costr, "JPT1", "0");
@@ -1240,7 +1240,7 @@ namespace PSD.PSDGamepkg.JNS
         {
             if (consumeType == 1)
             {
-                VI.Cout(0, "{0}爆发「羲和」,令其强制命中.", XI.DisplayPlayer(player.Uid));
+                VI.Cout(0, "{0}爆发【羲和】,令其强制命中.", XI.DisplayPlayer(player.Uid));
                 XI.RaiseGMessage("G0IX," + player.Uid + ",2");
             }
         }
@@ -1254,7 +1254,7 @@ namespace PSD.PSDGamepkg.JNS
         {
             if (consumeType == 1)
             {
-                VI.Cout(0, "{0}爆发「望舒」,令其战力加倍.", XI.DisplayPlayer(player.Uid));
+                VI.Cout(0, "{0}爆发【望舒】,令其战力加倍.", XI.DisplayPlayer(player.Uid));
                 XI.RaiseGMessage("G0IA," + player.Uid + ",1," + player.STRa);
             }
         }
@@ -1294,7 +1294,7 @@ namespace PSD.PSDGamepkg.JNS
                 {
                     if (harm.Who == player.Uid && harm.Element != FiveElement.LOVE)
                     {
-                        VI.Cout(0, "{0}触发「烟月神镜」,将伤害转移给{1}.",
+                        VI.Cout(0, "{0}触发【烟月神镜】,将伤害转移给{1}.",
                             XI.DisplayPlayer(player.Uid), XI.DisplayPlayer(to));
                         XI.RaiseGMessage("G0HQ,0," + to + "," + player.Uid + ",1,1," + ut);
                         rotation = harm;
@@ -1370,7 +1370,7 @@ namespace PSD.PSDGamepkg.JNS
                 {
                     if (harm.Who == player.Uid && harm.Element != FiveElement.LOVE)
                     {
-                        VI.Cout(0, "{0}爆发「寿葫芦」.", XI.DisplayPlayer(player.Uid));
+                        VI.Cout(0, "{0}爆发【寿葫芦】.", XI.DisplayPlayer(player.Uid));
                         harm.N = 1;
                     }
                 }
@@ -1457,7 +1457,7 @@ namespace PSD.PSDGamepkg.JNS
             {
                 ushort to = ushort.Parse(XI.AsyncInput(
                     player.Uid, "T1" + Util.SSelect(XI.Board, p => p.IsTared), "JPT4", "0"));
-                VI.Cout(0, "{0}对{1}使用「锁魂钉」.", XI.DisplayPlayer(player.Uid), XI.DisplayPlayer(to));
+                VI.Cout(0, "{0}对{1}使用【锁魂钉】.", XI.DisplayPlayer(player.Uid), XI.DisplayPlayer(to));
                 int harm = Math.Max(XI.Board.Garden[to].GetPetCount(), 1);
                 XI.RaiseGMessage(Artiad.Harm.ToMessage(new Artiad.Harm(to, player.Uid,
                     FiveElement.A, harm, maskFromJP)));
@@ -1820,7 +1820,7 @@ namespace PSD.PSDGamepkg.JNS
                     else
                     {
                         int dif = revs.Length + lug.Capacities.Count - 4;
-                        string dhead = "#「炼蛊皿」中替换,C" + dif + "(p";
+                        string dhead = "#【炼蛊皿】中替换,C" + dif + "(p";
                         string dinput = XI.AsyncInput(player.Uid, dhead + string.Join("p", lug.Capacities
                             .Select(p => p.Substring("C".Length))) + ")", "XBT2Consume", "1");
                         ushort[] subs = dinput.Split(',').Select(p => ushort.Parse(p)).ToArray();
@@ -1932,7 +1932,7 @@ namespace PSD.PSDGamepkg.JNS
                     }
                     int tcnt = tuxes.Count > 4 ? 4 : tuxes.Count;
                     string head = (tcnt > 1) ? ("/C1~" + tcnt) : "/C1";
-                    return "#置入「炼蛊皿」," + head + "(p" + string.Join("p", tuxes) + ")";
+                    return "#置入【炼蛊皿】," + head + "(p" + string.Join("p", tuxes) + ")";
                 }
                 else if (type == 1 && prev == "")
                 {
@@ -1998,7 +1998,7 @@ namespace PSD.PSDGamepkg.JNS
                     {
                         int tcnt = player.Tux.Count > 2 ? 2 : player.Tux.Count;
                         string head = (tcnt > 1) ? ("/Q1~" + tcnt) : "/Q1";
-                        string input = XI.AsyncInput(player.Uid, "#置入「梦见樽」," + head +
+                        string input = XI.AsyncInput(player.Uid, "#置入【梦见樽】," + head +
                             "(p" + string.Join("p", player.Tux) + ")", "XBT3ConsumeAction", "0");
                         if (input != VI.CinSentinel && !input.StartsWith("/"))
                         {
@@ -2407,11 +2407,11 @@ namespace PSD.PSDGamepkg.JNS
         public void JPH2Action(Player player, int type, string fuse, string argst)
         {
             string whoStr = XI.AsyncInput(player.Uid, "#攻击,T1(p" + string.Join("p", XI.Board.Garden
-                    .Values.Where(p => p.IsTared && p.HasAnyEquips())) + ")", "JPH2", "0");
+                    .Values.Where(p => p.IsTared && p.HasAnyEquips()).Select(p => p.Uid)) + ")", "JPH2", "0");
             ushort who = ushort.Parse(whoStr);
             Player py = XI.Board.Garden[who];
             int n = Math.Min(py.GetEquipCount() + 2, 5);
-            string select = XI.AsyncInput(player.Uid, "#请选择一项以响应【罡风惊天】##HP-" + n + "##弃置装备,Y2", "JPH2", "1");
+            string select = XI.AsyncInput(py.Uid, "#请选择一项以响应【罡风惊天】##HP-" + n + "##弃置装备,Y2", "JPH2", "1");
             if (select == "1")
                 Harm(player, py, n, FiveElement.AERO);
             else

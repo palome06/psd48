@@ -286,9 +286,12 @@ namespace PSD.Base
                 h09g.Append("," + py.ExCards.Count);
                 if (py.ExCards.Count > 0)
                     h09g.Append("," + string.Join(",", py.ExCards));
-                h09g.Append("," + py.Fakeq.Count);
-                if (py.Fakeq.Count > 0)
-                    h09g.Append("," + string.Join(",", py.Fakeq.Select(p => p.Key + "," + p.Value)));
+                //h09g.Append("," + py.Fakeq.Count);
+                //if (py.Fakeq.Count > 0)
+                //    h09g.Append("," + string.Join(",", py.Fakeq.Select(p => p.Key + "," + p.Value)));
+                h09g.Append("," + py.Runes.Count);
+                if (py.Runes.Count > 0)
+                    h09g.Append("," + string.Join(",", py.Runes));
                 h09g.Append("," + py.TokenCount);
                 h09g.Append("," + py.TokenExcl.Count);
                 if (py.TokenExcl.Count > 0)

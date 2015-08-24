@@ -476,9 +476,10 @@
     <Resource Include="Resources\PetsSnap\NCT21.png" />
   </ItemGroup>
   <ItemGroup>
+    <Resource Include="Resources\PetsSnap\NCH02.png" />
     <Resource Include="Resources\PetsSnap\NCH04.png" />
-	<Resource Include="Resources\PetsSnap\NCH05.png" />
-	<Resource Include="Resources\PetsSnap\NCH06.png" />
+    <Resource Include="Resources\PetsSnap\NCH05.png" />
+    <Resource Include="Resources\PetsSnap\NCH06.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Heros\15001.png" />
@@ -586,6 +587,7 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Card\NMB\NCH01.png" />
+    <Resource Include="Resources\Card\NMB\NCH02.png" />
     <Resource Include="Resources\Card\NMB\NCH03.png" />
     <Resource Include="Resources\Card\NMB\NCH04.png" />
     <Resource Include="Resources\Card\NMB\NCH05.png" />
@@ -593,6 +595,7 @@
     <Resource Include="Resources\Card\NMB\NCH07.png" />
     <Resource Include="Resources\Card\NMB\NCH08.png" />
     <Resource Include="Resources\Card\NMB\NCH09.png" />
+    <Resource Include="Resources\Card\NMB\NCH10.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Card\Eve\SJT01.png" />
@@ -875,22 +878,22 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Buffer\SF01.png" />
-	<Resource Include="Resources\Buffer\SF02.png" />
-	<Resource Include="Resources\Buffer\SF03.png" />
-	<Resource Include="Resources\Buffer\SF04.png" />
-	<Resource Include="Resources\Buffer\SF05.png" />
-	<Resource Include="Resources\Buffer\SF06.png" />
-	<Resource Include="Resources\Buffer\SF07.png" />
-	<Resource Include="Resources\Buffer\SF08.png" />
-	<Resource Include="Resources\Buffer\SF09.png" />
-	<Resource Include="Resources\Buffer\SF10.png" />
-	<Resource Include="Resources\Buffer\SF11.png" />
+    <Resource Include="Resources\Buffer\SF02.png" />
+    <Resource Include="Resources\Buffer\SF03.png" />
+    <Resource Include="Resources\Buffer\SF04.png" />
+    <Resource Include="Resources\Buffer\SF05.png" />
+    <Resource Include="Resources\Buffer\SF06.png" />
+    <Resource Include="Resources\Buffer\SF07.png" />
+    <Resource Include="Resources\Buffer\SF08.png" />
+    <Resource Include="Resources\Buffer\SF09.png" />
+    <Resource Include="Resources\Buffer\SF10.png" />
+    <Resource Include="Resources\Buffer\SF11.png" />
   </ItemGroup>
   <ItemGroup>
-	<Resource Include="Resources\Card\RuneCard\SF01.png" />
-	<Resource Include="Resources\Card\RuneCard\SF03.png" />
-	<Resource Include="Resources\Card\RuneCard\SF06.png" />
-	<Resource Include="Resources\Card\RuneCard\SF07.png" />
+    <Resource Include="Resources\Card\RuneCard\SF01.png" />
+    <Resource Include="Resources\Card\RuneCard\SF03.png" />
+    <Resource Include="Resources\Card\RuneCard\SF06.png" />
+    <Resource Include="Resources\Card\RuneCard\SF07.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Logo\Screen\00000-01.jpg" />

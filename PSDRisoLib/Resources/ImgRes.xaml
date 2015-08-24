@@ -2,7 +2,7 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     
     <Image x:Key="loginBackground" Source="Logo/LoginBgimg.jpg"/>
-    
+
     <Image x:Key="rankGIchi" Source="Players/GIchi.png"/>
     <Image x:Key="rankGNi" Source="Players/GNi.png"/>
     <Image x:Key="rankGSan" Source="Players/GSan.png"/>
@@ -18,7 +18,7 @@
     <BitmapImage x:Key="barborder12" UriSource="pack://application:,,,/PSDRisoLib;component/Resources/Logo/Border12.png"/>
 
     <BitmapImage x:Key="sr00000_01" UriSource="pack://application:,,,/PSDRisoLib;component/Resources/Logo/Screen/00000-01.jpg"/>
-    
+
     <Image x:Key="HeroInTestStamp" Source="Logo/HeroInTest.png"/>
 
     <Image x:Key="petsnapGS01" Source="PetsSnap/GS01.png" ToolTip="千杯不醉"/>
@@ -88,7 +88,8 @@
     <Image x:Key="npcsnapNCT13" Source="PetsSnap/NCT13.png" ToolTip="NPC-TR谢沧行"/>
     <Image x:Key="npcsnapNCT20" Source="PetsSnap/NCT20.png" ToolTip="NPC-TR雷元戈"/>
     <Image x:Key="npcsnapNCT21" Source="PetsSnap/NCT21.png" ToolTip="NPC-TR龙溟"/>
-	
+
+    <Image x:Key="npcsnapNCH02" Source="PetsSnap/NCH02.png" ToolTip="NPC阮英扬"/>
     <Image x:Key="npcsnapNCH04" Source="PetsSnap/NCH04.png" ToolTip="NPC柒月"/>
     <Image x:Key="npcsnapNCH05" Source="PetsSnap/NCH05.png" ToolTip="NPC伍阳"/>
     <Image x:Key="npcsnapNCH06" Source="PetsSnap/NCH06.png" ToolTip="NPC璇英"/>
@@ -147,7 +148,7 @@
     <Image x:Key="heroHead15007" Source="Heros/15007.png"/>
     <Image x:Key="heroHead15008" Source="Heros/15008.png"/>
     <Image x:Key="heroHead15009" Source="Heros/15009.png"/>
-    
+
     <Image x:Key="heroHead17001" Source="Heros/17001.png"/>
     <Image x:Key="heroHead17002" Source="Heros/17002.png"/>
     <Image x:Key="heroHead17003" Source="Heros/17003.png"/>
@@ -178,7 +179,7 @@
     <Image x:Key="heroHead17041" Source="Heros/17041.png"/>
 
     <Image x:Key="heroHead18004" Source="Heros/18004.png"/>
-	
+
     <Image x:Key="heroHead19001" Source="Heros/19001.png"/>
     <Image x:Key="heroHead19002" Source="Heros/19002.png"/>
     <Image x:Key="heroHead19003" Source="Heros/19003.png"/>
@@ -264,7 +265,7 @@
     <ImageBrush x:Key="nameBarTR028" ImageSource="NameBar/NameTR028.png"/>
     <ImageBrush x:Key="nameBarTR037" ImageSource="NameBar/NameTR037.png"/>
     <ImageBrush x:Key="nameBarTR041" ImageSource="NameBar/NameTR041.png"/>
-	
+
     <ImageBrush x:Key="nameBarEX506" ImageSource="NameBar/NameEX506.png"/>
 
     <ImageBrush x:Key="nameBarHL001" ImageSource="NameBar/NameHL001.png"/>
@@ -319,7 +320,7 @@
     <ImageBrush x:Key="staEpXBT4" ImageSource="EquipSnap/XBT4.png"/>
     <ImageBrush x:Key="staEpXBH1" ImageSource="EquipSnap/XBH1.png"/>
     <ImageBrush x:Key="staEpXBH2" ImageSource="EquipSnap/XBH2.png"/>
-	
+
     <ImageBrush x:Key="staEpWQH1" ImageSource="EquipSnap/WQH1.png"/>
 
     <BitmapImage x:Key="statusDs" UriSource="StatusIcon/Ds.png"/>
@@ -359,7 +360,7 @@
     <BitmapImage x:Key="snapTKTR019_2" UriSource="Token/TKT1902.png"/>
     <BitmapImage x:Key="snapTKTR019_3" UriSource="Token/TKT1903.png"/>
     <BitmapImage x:Key="snapTKTR019_4" UriSource="Token/TKT1904.png"/>
-    <BitmapImage x:Key="snapTKTR019_5" UriSource="Token/TKT1905.png"/>	
+    <BitmapImage x:Key="snapTKTR019_5" UriSource="Token/TKT1905.png"/>
     <BitmapImage x:Key="snapTREX506" UriSource="Token/TRE04.png"/>
 
     <Image x:Key="exspCard1" Source="Card/ExSp/EP001.png"/>
@@ -414,7 +415,7 @@
     <Image x:Key="eveCardSJT10" Source="Card/Eve/SJT10.png"/>
     <Image x:Key="eveCardSJT11" Source="Card/Eve/SJT11.png"/>
     <Image x:Key="eveCardSJT14" Source="Card/Eve/SJT14.png"/>
-	
+
     <Image x:Key="eveCardSJH01" Source="Card/Eve/SJH01.png"/>
     <Image x:Key="eveCardSJH02" Source="Card/Eve/SJH02.png"/>
     <Image x:Key="eveCardSJH03" Source="Card/Eve/SJH03.png"/>
@@ -523,8 +524,9 @@
     <Image x:Key="monCardGSH3" Source="Card/NMB/GSH3.png"/>
     <Image x:Key="monCardGHH1" Source="Card/NMB/GHH1.png"/>
     <Image x:Key="monCardGLH2" Source="Card/NMB/GLH2.png"/>
-	
+
     <Image x:Key="monCardNCH01" Source="Card/NMB/NCH01.png"/>
+    <Image x:Key="monCardNCH02" Source="Card/NMB/NCH02.png"/>
     <Image x:Key="monCardNCH03" Source="Card/NMB/NCH03.png"/>
     <Image x:Key="monCardNCH04" Source="Card/NMB/NCH04.png"/>
     <Image x:Key="monCardNCH05" Source="Card/NMB/NCH05.png"/>
@@ -532,6 +534,7 @@
     <Image x:Key="monCardNCH07" Source="Card/NMB/NCH07.png"/>
     <Image x:Key="monCardNCH08" Source="Card/NMB/NCH08.png"/>
     <Image x:Key="monCardNCH09" Source="Card/NMB/NCH09.png"/>
+    <Image x:Key="monCardNCH10" Source="Card/NMB/NCH10.png"/>
 
     <Image x:Key="tuxCard000" Source="Card/Tux00.png"/>
     <Image x:Key="tuxCardJP01" Source="Card/Tux/JP01.png"/>
@@ -580,11 +583,11 @@
     <Image x:Key="tuxCardXBT4" Source="Card/Tux/XBT4.png"/>
     <Image x:Key="tuxCardJPT6" Source="Card/Tux/JPT6.png"/>
     <Image x:Key="tuxCardZPT4" Source="Card/Tux/ZPT4.png"/>
-	
+
     <Image x:Key="tuxCardJPH2" Source="Card/Tux/JPH2.png"/>
     <Image x:Key="tuxCardTPH1" Source="Card/Tux/TPH1.png"/>
     <Image x:Key="tuxCardTPH4" Source="Card/Tux/TPH4.png"/>
-	<Image x:Key="tuxCardWQH1" Source="Card/Tux/WQH1.png"/>
+    <Image x:Key="tuxCardWQH1" Source="Card/Tux/WQH1.png"/>
 
     <Image x:Key="diceImg000" Source="Card/Dice00.png"/>
     <Image x:Key="diceImg1" Source="Card/Dices/Dice1.png"/>
@@ -667,9 +670,9 @@
     <Image x:Key="hroCardTR028" Source="Card/Heros/TR028.png"/>
     <Image x:Key="hroCardTR037" Source="Card/Heros/TR037.png"/>
     <Image x:Key="hroCardTR041" Source="Card/Heros/TR041.png"/>
-
-    <Image x:Key="hroCardEX506" Source="Card/Heros/EX506.png"/>
 	
+    <Image x:Key="hroCardEX506" Source="Card/Heros/EX506.png"/>
+
     <Image x:Key="hroCardHL001" Source="Card/Heros/HL001.png"/>
     <Image x:Key="hroCardHL002" Source="Card/Heros/HL002.png"/>
     <Image x:Key="hroCardHL003" Source="Card/Heros/HL003.png"/>
@@ -706,7 +709,7 @@
     <ImageBrush x:Key="bz01ButtonImg" ImageSource="Logo/BZ01.png"/>
     <ImageBrush x:Key="bz02ButtonImg" ImageSource="Logo/BZ02.png"/>
     <ImageBrush x:Key="bz03ButtonImg" ImageSource="Logo/BZ03.png"/>
-    
+
     <ImageBrush x:Key="spderNextIcon" ImageSource="Logo/SpderNext.png"/>
     <ImageBrush x:Key="spderPlayIcon" ImageSource="Logo/SpderPlay.png"/>
     <ImageBrush x:Key="spderPrevIcon" ImageSource="Logo/SpderPrev.png"/>
@@ -742,21 +745,21 @@
     <ImageBrush x:Key="loadGuard15" ImageSource="Guard/L15.png"/>
     <ImageBrush x:Key="loadGuard16" ImageSource="Guard/L16.png"/>
     <ImageBrush x:Key="loadGuard17" ImageSource="Guard/L17.png"/>
-	
+
     <Image x:Key="bufferIconSF01" Source="Buffer/SF01.png" ToolTip="强袭"/>
-	<Image x:Key="bufferIconSF02" Source="Buffer/SF02.png"/>
+    <Image x:Key="bufferIconSF02" Source="Buffer/SF02.png"/>
     <Image x:Key="bufferIconSF03" Source="Buffer/SF03.png" ToolTip="法障"/>
     <Image x:Key="bufferIconSF04" Source="Buffer/SF04.png" ToolTip="坚盾"/>
-	<Image x:Key="bufferIconSF05" Source="Buffer/SF05.png"/>
+    <Image x:Key="bufferIconSF05" Source="Buffer/SF05.png"/>
     <Image x:Key="bufferIconSF06" Source="Buffer/SF06.png" ToolTip="神算"/>
-	<Image x:Key="bufferIconSF07" Source="Buffer/SF07.png"/>
-	<Image x:Key="bufferIconSF08" Source="Buffer/SF08.png"/>
-	<Image x:Key="bufferIconSF09" Source="Buffer/SF09.png"/>
-	<Image x:Key="bufferIconSF10" Source="Buffer/SF10.png"/>
-	<Image x:Key="bufferIconSF11" Source="Buffer/SF11.png"/>
-	
-	<Image x:Key="runeCard1" Source="Card/RuneCard/SF01.png"/>
-	<Image x:Key="runeCard3" Source="Card/RuneCard/SF03.png"/>
-	<Image x:Key="runeCard6" Source="Card/RuneCard/SF06.png"/>
-	<Image x:Key="runeCard7" Source="Card/RuneCard/SF07.png"/>
+    <Image x:Key="bufferIconSF07" Source="Buffer/SF07.png"/>
+    <Image x:Key="bufferIconSF08" Source="Buffer/SF08.png"/>
+    <Image x:Key="bufferIconSF09" Source="Buffer/SF09.png"/>
+    <Image x:Key="bufferIconSF10" Source="Buffer/SF10.png"/>
+    <Image x:Key="bufferIconSF11" Source="Buffer/SF11.png"/>
+
+    <Image x:Key="runeCard1" Source="Card/RuneCard/SF01.png"/>
+    <Image x:Key="runeCard3" Source="Card/RuneCard/SF03.png"/>
+    <Image x:Key="runeCard6" Source="Card/RuneCard/SF06.png"/>
+    <Image x:Key="runeCard7" Source="Card/RuneCard/SF07.png"/>
 </ResourceDictionary>

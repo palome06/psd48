@@ -598,7 +598,7 @@ namespace PSD.ClientZero
             Aps(sb, "/IMGH04：(Info-Monster)查看卡牌代号为GH04的怪物（熔岩兽王）情报");
             Aps(sb, "/IM1021：(Info-Monster)查看代码为1021的NPC（韩菱纱）情报");
             Aps(sb, "/IMNC402：(Info-Monster)查看卡牌代号为NC402的NPC（韩菱纱）情报");
-            Aps(sb, "/IT10：(Info-Tux)查看代码为19的卡牌（天雷破）情报");
+            Aps(sb, "/IT10：(Info-Tux)查看代码为10的卡牌（天雷破）情报");
             Aps(sb, "/ITJP05：(Info-Tux)查看卡牌代号为JP05的卡牌（天雷破）情报");
             Aps(sb, "/IE1：(Info-Eve)查看代码为1的事件牌（仙灵岛的邂逅）情报");
             Aps(sb, "/IESJ101：(Info-Eve)查看卡牌代号为SJ101的事件牌（仙灵岛的邂逅）情报");
