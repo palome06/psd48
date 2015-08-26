@@ -1538,17 +1538,16 @@ namespace PSD.ClientAo
                 case "E0FU":
                     if (args[1].Equals("0"))
                     {
-                        //ushort from = ushort.Parse(args[2]);
-                        var ravs = Util.TakeRange(args, 2, args.Length)
+                        string cardType = args[2];
+                        var ravs = Util.TakeRange(args, 3, args.Length)
                             .Select(p => ushort.Parse(p)).ToList();
-                        //VI.Cout(uid, "你观看了{0}.", zd.Tux(ravs));
-                        VI.Watch(Uid, ravs.Select(p => "C" + p), "E0FU");
+                        VI.Watch(Uid, ravs.Select(p => cardType + p), "E0FU");
                     }
                     else if (args[1].Equals("1"))
                     {
-                        ushort n = ushort.Parse(args[2]);
-                        //VI.Cout(uid, "{0}张卡牌正被观看.", n);
-                        VI.Watch(Uid, Enumerable.Repeat("C0", n), "E0FU");
+                        string cardType = args[2];
+                        ushort n = ushort.Parse(args[3]);
+                        VI.Watch(Uid, Enumerable.Repeat(cardType + "0", n), "E0FU");
                     }
                     else if (args[1].Equals("2"))
                     {
@@ -1563,9 +1562,10 @@ namespace PSD.ClientAo
                     {
                         if (WI is VW.Eywi)
                         {
-                            var ravs = Util.TakeRange(args, 2, args.Length)
+                            string cardType = args[2];
+                            var ravs = Util.TakeRange(args, 3, args.Length)
                                 .Select(p => ushort.Parse(p)).ToList();
-                            VI.Watch(Uid, ravs.Select(p => "C" + p), "E0FU");
+                            VI.Watch(Uid, ravs.Select(p => cardType + p), "E0FU");
                         }
                     }
                     else if (args[1].Equals("5"))
@@ -1634,10 +1634,14 @@ namespace PSD.ClientAo
                     {
                         // E0CL,A,JP04,3,1
                         ushort ust = ushort.Parse(args[1]);
-                        ushort[] ravs = new ushort[args.Length - 3];
-                        for (int i = 3; i < args.Length; ++i)
-                            ravs[i - 3] = ushort.Parse(args[i]);
-                        VI.Cout(Uid, "{0}的{1}({2})被抵消.", zd.Player(ust), zd.Tux(args[2]), Util.SatoString(ravs));
+                        string cardName = args[2];
+                        if (args.Length > 3)
+                        {
+                            ushort[] ravs = Util.TakeRange(args, 3, args.Length).Select(p => ushort.Parse(p)).ToArray();
+                            VI.Cout(Uid, "{0}的{1}({2})被抵消.", zd.Player(ust), zd.Tux(cardName), Util.SatoString(ravs));
+                        }
+                        else
+                            VI.Cout(Uid, "{0}的{1}被抵消.", zd.Player(ust), zd.Tux(cardName));
                         break;
                     }
                 case "E0XZ":
@@ -2496,12 +2500,8 @@ namespace PSD.ClientAo
                         ushort ut = ushort.Parse(args[1]);
                         for (int i = 2; i < args.Length; ++i) {
                             string skillStr = args[i];
-                            Base.Skill sk = Tuple.SL.EncodeSkill(skillStr);
-                            if (sk.IsBK)
-                                A0C.SetNewBKSkill(sk, ut);
-                            else if (ut == Uid)
-                                A0C.SetNewSkill(sk);
-                            VI.Cout(Uid, "{0}获得了技能「{1}」.", zd.Player(ut), zd.SkillName(args[i]));
+                            A0P[ut].GainSkill(skillStr);
+                            VI.Cout(Uid, "{0}获得了技能『{1}』.", zd.Player(ut), zd.SkillName(args[i]));
                         }
                     }
                     break;
@@ -2511,11 +2511,8 @@ namespace PSD.ClientAo
                         for (int i = 2; i < args.Length; ++i) {
                             string skillStr = args[i];
                             Base.Skill sk = Tuple.SL.EncodeSkill(skillStr);
-                            if (sk.IsBK)
-                                A0C.LoseBKSkill(sk.Code);
-                            else if (ut == Uid)
-                                A0C.LoseSkill(sk.Code);
-                            VI.Cout(Uid, "{0}失去了技能「{1}」.", zd.Player(ut), zd.SkillName(args[i]));
+                            A0P[ut].LoseSkill(skillStr);
+                            VI.Cout(Uid, "{0}失去了技能『{1}』.", zd.Player(ut), zd.SkillName(args[i]));
                         }
                     }
                     break;
@@ -2540,7 +2537,7 @@ namespace PSD.ClientAo
                         Base.Card.Hero hero = Tuple.HL.InstanceHero(A0P[ut].SelectHero);
                         if (hero != null && !string.IsNullOrEmpty(hero.GuestAlias))
                             guestName = hero.GuestAlias;
-                        VI.Cout(Uid, "{0}迎来了{1}{2}.", zd.Player(ut), guestName, zd.Hero(hro));
+                        VI.Cout(Uid, "{0}迎来了{1}「{2}」.", zd.Player(ut), guestName, zd.Hero(hro));
                         A0O.FlyingGet("H" + hro, 0, ut);
                         A0P[ut].Coss = hro;
                     }
@@ -2554,7 +2551,7 @@ namespace PSD.ClientAo
                         Base.Card.Hero hero = Tuple.HL.InstanceHero(A0P[ut].SelectHero);
                         if (hero != null && !string.IsNullOrEmpty(hero.GuestAlias))
                             guestName = hero.GuestAlias;
-                        VI.Cout(Uid, "{0}送走了{1}{2}.", zd.Player(ut), guestName, zd.Hero(hro));
+                        VI.Cout(Uid, "{0}送走了{1}「{2}」.", zd.Player(ut), guestName, zd.Hero(hro));
                         A0O.FlyingGet("H" + hro, ut, 0);
                         A0P[ut].Coss = next;
                     }
@@ -4362,6 +4359,15 @@ namespace PSD.ClientAo
                         A0P[Uid].InsMyFolder(folders);
                         //A0M.InsMyFolder(folders);
                         idx += folderCount;
+                        int skillCount = int.Parse(blocks[idx]);
+                        ++idx;
+                        if (skillCount > 0)
+                        {
+                            List<string> skills = Util.TakeRange(blocks, idx, idx + skillCount).ToList();
+                            A0P[Uid].ClearSkill();
+                            A0P[Uid].GainSkill(skills);
+                        }
+                        idx += skillCount;
                     }
                     break;
             }

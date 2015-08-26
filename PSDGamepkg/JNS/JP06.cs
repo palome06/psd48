@@ -443,7 +443,8 @@ namespace PSD.PSDGamepkg.JNS
                     Base.Card.Tux tux = XI.LibTuple.TL.EncodeTuxCode(argv[3]);
                     int inType = int.Parse(Util.Substring(fuse, hdx + 1, fuse.IndexOf(',', hdx)));
                     int prior = tux.Priorities[inType];
-                    XI.InnerGMessage(origin, prior);
+                    if (tux.IsTermini[inType])
+                        XI.InnerGMessage(origin, prior);
                 }
             }
         }
@@ -947,7 +948,6 @@ namespace PSD.PSDGamepkg.JNS
                 List<ushort> pops = XI.DequeueOfPile(XI.Board.TuxPiles, sumO + sumR).ToList();
                 XI.RaiseGMessage("G2IN,0," + (sumO + sumR));
                 XI.RaiseGMessage("G1IU," + string.Join(",", pops));
-                //XI.RaiseGMessage("G2FU,0," + string.Join(",", pops));
 
                 string range1 = Util.SSelect(XI.Board, p => p.Team == player.Team && p.IsAlive);
                 string range2 = Util.SSelect(XI.Board, p => p.Team == player.OppTeam && p.IsAlive);
@@ -967,8 +967,7 @@ namespace PSD.PSDGamepkg.JNS
 
                 do
                 {
-                    //XI.RaiseGMessage("G2FU,1,1," + uds[idxs] + "," + string.Join(",", pops));
-                    XI.RaiseGMessage("G2FU,0," + uds[idxs] + ",0," + string.Join(",", pops));
+                    XI.RaiseGMessage("G2FU,0," + uds[idxs] + ",0,C," + string.Join(",", pops));
                     string pubTux = Util.SatoWithBracket(XI.Board.PZone, "p", "(p", ")");
                     input = XI.AsyncInput(uds[idxs], "+Z1" + pubTux + ",#获得卡牌的,/T1" + ranges[idxs], "JPT1", "0");
                     if (!input.StartsWith("/"))
@@ -1530,7 +1529,7 @@ namespace PSD.PSDGamepkg.JNS
         }
         public bool TPT3Valid(Player player, int type, string fuse)
         {
-            string[] kekkaiA = new string[] { "TP01,0", "TPT3,0", "TPT3,1" };
+            string[] kekkaiA = new string[] { "TP01,0", "TPT3,0", "TPT3,1", "ZPH4,0" };
             string[] kekkaiB = new string[] { "ZP01,0", "TPT1,0" };
             // G0CD,A,T,KN,x..;TF
             if (type == 0)

@@ -51,8 +51,8 @@ namespace PSD.PSDGamepkg.Artiad
             }
             return true;
         }
-
-        public static void ErasePlayerToken(Player player, Board board, Action<string> raiseG)
+        // remove hero-spec RIM/RTM Diva, hero = 0 means removing all
+        public static void ErasePlayerToken(Player player, Board board, Action<string> raiseG, int hero = 0)
         {
             if (player.TokenCount != 0)
                 raiseG("G0OJ," + player.Uid + ",0," + player.TokenCount);
@@ -83,7 +83,7 @@ namespace PSD.PSDGamepkg.Artiad
                 raiseG("G0OJ," + player.Uid + ",4," + folds.Count + "," + string.Join(",", folds));
                 raiseG("G0ON," + player.Uid + ",C," + folds.Count + "," + string.Join(",", folds));
             }
-            player.ResetROM(board);
+            player.ResetROM(board, hero);
             // Remove others' tar token on the player
             foreach (Player py in board.Garden.Values)
             {
@@ -92,20 +92,25 @@ namespace PSD.PSDGamepkg.Artiad
             }
         }
 
-        public static void IncrGuestPlayer(Player player, Hero guest, XI xi)
+        public static List<string> IncrGuestPlayer(Player player, Hero guest, XI xi, int limit)
         {
             List<string> skills = new List<string>();
-            foreach (string skstr in guest.Skills)
+            List<string> source = guest.Skills.ToList();
+            foreach (string skstr in source)
             {
                 Skill skill = xi.LibTuple.SL.EncodeSkill(skstr);
-                if (!skill.IsChange)
-                    skills.Add(skill.Code);
+                if (skill.IsChange && (limit & 0x1) != 0)
+                    continue;
+                if (skill.IsRestrict && (limit & 0x2) != 0)
+                    continue;
+                skills.Add(skill.Code);
             }
             if (skills.Count > 0)
                 xi.RaiseGMessage("G0IS," + player.Uid + ",1," + string.Join(",", skills));
+            return skills;
         }
 
-        public static void DecrGuestPlayer(Player player, Hero guest, XI xi)
+        public static void DecrGuestPlayer(Player player, Hero guest, XI xi, int limit)
         {
             List<ushort> excds = new List<ushort>();
             if (player.ExEquip != 0)
@@ -113,14 +118,18 @@ namespace PSD.PSDGamepkg.Artiad
             excds.AddRange(player.ExCards);
             if (excds.Count > 0)
                 xi.RaiseGMessage("G0QZ," + player.Uid + "," + string.Join(",", excds));
-            ErasePlayerToken(player, xi.Board, xi.RaiseGMessage);
+            ErasePlayerToken(player, xi.Board, xi.RaiseGMessage, guest.Avatar);
 
             List<string> skills = new List<string>();
-            foreach (string skstr in guest.Skills)
+            List<string> source = guest.Skills.ToList(); source.AddRange(guest.RelatedSkills);
+            foreach (string skstr in source)
             {
                 Skill skill = xi.LibTuple.SL.EncodeSkill(skstr);
-                if (!skill.IsChange)
-                    skills.Add(skill.Code);
+                if (skill.IsChange && (limit & 0x1) != 0)
+                    continue;
+                if (skill.IsRestrict && (limit & 0x2) != 0)
+                    continue;
+                skills.Add(skill.Code);
             }
             if (skills.Count > 0)
                 xi.RaiseGMessage("G0OS," + player.Uid + ",1," + string.Join(",", skills));

@@ -200,6 +200,7 @@
     <Image x:Key="heroHead19018" Source="Heros/19018.png"/>
     <Image x:Key="heroHead19019" Source="Heros/19019.png"/>
     <Image x:Key="heroHead19020" Source="Heros/19020.png"/>
+    <Image x:Key="heroHead19021" Source="Heros/19021.png"/>
 
     <ImageBrush x:Key="nameBar000Brush" ImageSource="NameBar/Name000.png"/>
     <ImageBrush x:Key="nameBarXJ101" ImageSource="NameBar/NameXJ101.png"/>
@@ -288,6 +289,7 @@
     <ImageBrush x:Key="nameBarHL018" ImageSource="NameBar/NameHL018.png"/>
     <ImageBrush x:Key="nameBarHL019" ImageSource="NameBar/NameHL019.png"/>
     <ImageBrush x:Key="nameBarHL020" ImageSource="NameBar/NameHL020.png"/>
+    <ImageBrush x:Key="nameBarHL021" ImageSource="NameBar/NameHL021.png"/>
 
     <SolidColorBrush x:Key="hpBrush" Color="Red"/>
     <SolidColorBrush x:Key="dexBrush" Color="Blue"/>
@@ -693,6 +695,7 @@
     <Image x:Key="hroCardHL018" Source="Card/Heros/HL018.png"/>
     <Image x:Key="hroCardHL019" Source="Card/Heros/HL019.png"/>
     <Image x:Key="hroCardHL020" Source="Card/Heros/HL020.png"/>
+    <Image x:Key="hroCardHL021" Source="Card/Heros/HL021.png"/>
 
     <ImageBrush x:Key="dt01Bg" ImageSource="Logo/DT01.png" Opacity="0.9"/>
     <ImageBrush x:Key="dt02Bg" ImageSource="Logo/DT02.png" Opacity="0.9"/>

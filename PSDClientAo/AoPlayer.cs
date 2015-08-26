@@ -46,6 +46,7 @@ namespace PSD.ClientAo
             mExSpCards = new List<string>();
             mPlayerTars = new List<ushort>();
             mMyFolder = new List<ushort>();
+            mSkills = new List<string>();
 
             IsLoved = false;
             IsAlive = false;
@@ -1247,51 +1248,53 @@ namespace PSD.ClientAo
         {
             return mPlayerTars.Contains(ut);
         }
-        //private ushort mPlayerTar;
-        //public ushort PlayerTar
-        //{
-        //    set
-        //    {
-        //        Base.Card.Hero hero = Tuple.HL.InstanceHero(SelectHero);
-        //        if (mPlayerTar != value && hero != null)
-        //        {
-        //            pb.Dispatcher.BeginInvoke((Action)(() =>
-        //            {
-        //                ImageSource imgsrc = pb.TryFindResource("snapTR" + hero.Ofcode) as ImageSource;
-        //                if (mPlayerTar > 0)
-        //                {
-        //                    StackPanel spOldTarget = pb.AD.GetTokenStackPanel(mPlayerTar);
-        //                    foreach (var elem in spOldTarget.Children)
-        //                    {
-        //                        if (elem is Image)
-        //                        {
-        //                            Image oldImg = elem as Image;
-        //                            if (oldImg.Source == imgsrc)
-        //                            {
-        //                                spOldTarget.Children.Remove(oldImg);
-        //                                break;
-        //                            }
-        //                        }
-        //                    }
-        //                }
-        //                if (value > 0)
-        //                {
-        //                    StackPanel spNewTarget = pb.AD.GetTokenStackPanel(value);
-        //                    if (spNewTarget != null)
-        //                    {
-        //                        Image img = new Image() { Source = imgsrc, Height = 18, Width = 18 };
-        //                        img.ToolTip = Tips.IchiDisplay.GetExspTip(Tuple, "TR" + hero.Ofcode);
-        //                        if (img.ToolTip == null)
-        //                                img.ToolTip = hero.TokenAlias;
-        //                        spNewTarget.Children.Add(img);
-        //                    }
-        //                }
-        //                mPlayerTar = value;
-        //            }));
-        //        }
-        //    }
-        //    get { return mPlayerTar; }
-        //}
+
+        private List<string> mSkills;
+        public List<string> Skills { get { return mSkills; } }
+        public void GainSkill(string code) { GainSkill(new List<string> { code }); }
+        public void GainSkill(List<string> codes)
+        {
+            mSkills.AddRange(codes);
+            foreach (string skstr in codes)
+            {
+                Base.Skill sk = Tuple.SL.EncodeSkill(skstr);
+                if (sk != null)
+                {
+                    if (sk.IsBK)
+                        pb.AD.yfJoy.CEE.SetNewBKSkill(sk, Rank);
+                    else if (Rank == pb.AD.SelfUid)
+                        pb.AD.yfJoy.CEE.SetNewSkill(sk);
+                }
+            }
+        }
+        public void LoseSkill(string code) { LoseSkill(new List<string> { code }); }
+        public void LoseSkill(List<string> codes)
+        {
+            mSkills.RemoveAll(p => codes.Contains(p));
+            foreach (string skstr in codes)
+            {
+                Base.Skill sk = Tuple.SL.EncodeSkill(skstr);
+                if (sk != null)
+                {
+                    if (sk.IsBK)
+                        pb.AD.yfJoy.CEE.LoseBKSkill(sk.Code);
+                    else if (Rank == pb.AD.SelfUid)
+                        pb.AD.yfJoy.CEE.LoseSkill(sk.Code);
+                }
+            }
+        }
+        public void ClearSkill()
+        {
+            foreach (string skstr in mSkills)
+            {
+                Base.Skill sk = Tuple.SL.EncodeSkill(skstr);
+                if (sk != null && sk.IsBK)
+                    pb.AD.yfJoy.CEE.LoseBKSkill(sk.Code);
+            }
+            if (Rank == pb.AD.SelfUid)
+                pb.AD.yfJoy.CEE.ResetSkill();
+            mSkills.Clear();
+        }
 
         public void UpdateExCardSpTitle()
         {

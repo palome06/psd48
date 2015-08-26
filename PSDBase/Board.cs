@@ -332,6 +332,9 @@ namespace PSD.Base
             h09f.Add(py.TokenFold.Count.ToString());
             if (py.TokenFold.Count > 0)
                 h09f.Add(string.Join(",", py.TokenFold));
+            h09f.Add(py.Skills.Count.ToString());
+            if (py.Skills.Count > 0)
+                h09f.Add(string.Join(",", py.Skills));
             return string.Join(",", h09f);
         }
         #endregion Serialize the Game Situation

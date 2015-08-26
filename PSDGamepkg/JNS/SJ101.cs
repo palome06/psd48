@@ -89,7 +89,6 @@ namespace PSD.PSDGamepkg.JNS
             List<ushort> pops = XI.DequeueOfPile(XI.Board.TuxPiles, 4).ToList();
             XI.RaiseGMessage("G2IN,0,4");
             XI.RaiseGMessage("G1IU," + string.Join(",", pops));
-            //XI.RaiseGMessage("G2FU,0," + string.Join(",", pops));
             
             string range1 = Util.SSelect(XI.Board, p => p.Team == rd.Team && p.IsAlive);
             string range2 = Util.SSelect(XI.Board, p => p.Team == rd.OppTeam && p.IsAlive);
@@ -102,8 +101,7 @@ namespace PSD.PSDGamepkg.JNS
 
             do 
             {
-                //XI.RaiseGMessage("G2FU,1,1," + uds[idxs] + "," + string.Join(",", pops));
-                XI.RaiseGMessage("G2FU,0," + uds[idxs] + ",0," + string.Join(",", pops));
+                XI.RaiseGMessage("G2FU,0," + uds[idxs] + ",0,C," + string.Join(",", pops));
                 string pubTux = Util.SatoWithBracket(XI.Board.PZone, "p", "(p", ")");
                 input = XI.AsyncInput(uds[idxs], "+Z1" + pubTux + ",#获得卡牌的,/T1" + ranges[idxs], "SJ104", "0");
                 if (!input.Contains(VI.CinSentinel) && !input.StartsWith("/"))
@@ -294,7 +292,7 @@ namespace PSD.PSDGamepkg.JNS
             XI.RaiseGMessage("G1IU," + string.Join(",", pops));
             do 
             {
-                XI.RaiseGMessage("G2FU,0," + rd.Uid + "," + rps.Count + "," + rg + "," + string.Join(",", pops));
+                XI.RaiseGMessage("G2FU,0," + rd.Uid + "," + rps.Count + "," + rg + ",C," + string.Join(",", pops));
                 string pubTux = Util.SatoWithBracket(XI.Board.PZone, "p", "(p", ")");
                 int pubSz = XI.Board.PZone.Count;
                 string pubDig = (pubSz > 1) ? ("+Z1~" + pubSz) : "+Z1";
@@ -324,7 +322,7 @@ namespace PSD.PSDGamepkg.JNS
             XI.RaiseGMessage("G1IU," + string.Join(",", pops));
             do
             {
-                XI.RaiseGMessage("G2FU,0," + od.Uid + "," + ops.Count + "," + og + "," + string.Join(",", pops));
+                XI.RaiseGMessage("G2FU,0," + od.Uid + "," + ops.Count + "," + og + ",C," + string.Join(",", pops));
                 string pubTux = Util.SatoWithBracket(XI.Board.PZone, "p", "(p", ")");
                 int pubSz = XI.Board.PZone.Count;
                 string pubDig = (pubSz > 1) ? ("+Z1~" + pubSz) : "+Z1";
@@ -378,7 +376,7 @@ namespace PSD.PSDGamepkg.JNS
                 XI.RaiseGMessage("G1IU," + string.Join(",", uts));
                 do
                 {
-                    XI.RaiseGMessage("G2FU,0," + py.Uid + ",0," + string.Join(",", uts));
+                    XI.RaiseGMessage("G2FU,0," + py.Uid + ",0,C," + string.Join(",", uts));
                     string pubTux = Util.SatoWithBracket(XI.Board.PZone, "p", "(p", ")");
                     string input = XI.AsyncInput(py.Uid, "+Z1" + pubTux + ",#获得卡牌的,/T1" + ranges, "SJT04", "0");
                     if (!input.StartsWith("/"))
@@ -635,7 +633,7 @@ namespace PSD.PSDGamepkg.JNS
                     if (show)
                     {
                         if (py.Tux.Count > 0)
-                            XI.RaiseGMessage("G2FU,0," + ut + ",0," + string.Join(",", py.Tux));
+                            XI.RaiseGMessage("G2FU,0," + ut + ",0,C," + string.Join(",", py.Tux));
                         showList.Add(ut);
                     } else
                         notShowList.Add(ut);
@@ -726,13 +724,13 @@ namespace PSD.PSDGamepkg.JNS
             if (rd.Tux.Count > 0)
             {
                 Player nx = XI.Board.GetOpponenet(rd);
-                XI.RaiseGMessage("G2FU,0," + nx.Uid + ",0," + string.Join(",", rd.Tux));
+                XI.RaiseGMessage("G2FU,0," + nx.Uid + ",0,C," + string.Join(",", rd.Tux));
                 string select = XI.AsyncInput(nx.Uid, "C1(p" + string.Join("p", rd.Tux) + ")", "SJH05", "0");
                 if (!select.Contains(VI.CinSentinel))
                 {
                     ushort ut = ushort.Parse(select);
                     Base.Card.Tux tux = XI.LibTuple.TL.DecodeTux(ut);
-                    if (tux.Type == Tux.TuxType.ZP || new string[] { "TP01", "TP03", "TPT1", "TPT3" }.Contains(tux.Code))
+                    if (tux.Type == Tux.TuxType.ZP || new string[] { "TP01", "TP03", "TPT1", "TPT3", "TPH4" }.Contains(tux.Code))
                         XI.RaiseGMessage("G0QZ," + rd.Uid + "," + ut);
                     else if (tux.IsTuxEqiup())
                     {

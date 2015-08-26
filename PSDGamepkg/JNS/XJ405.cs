@@ -2917,45 +2917,58 @@ namespace PSD.PSDGamepkg.JNS
         #region SP101 - LiXiaoyao
         public void JNS0101Action(Player player, int type, string fuse, string argst)
         {
-            XI.RaiseGMessage("G0LH,1," + player.Uid + ",12");
+            if (type == 0)
+            {
+                player.RIM["15001.Incr"] = 12 - player.HPb;
+                XI.RaiseGMessage("G0LH,1," + player.Uid + ",12");
+            }
+            else if (type == 1)
+            {
+                int incr = (int)player.RIM["15001.Incr"];
+                if (incr != 0) {
+                    XI.RaiseGMessage("G0LH,1," + player.Uid + "," + (12 - incr));
+                }
+                player.RIM.Remove("15001.Incr");
+            }
         }
         public bool JNS0101Valid(Player player, int type, string fuse)
         {
-            string[] parts = fuse.Split(',');
-            if (parts[1] == player.Uid.ToString())
-            {
-                for (int i = 3; i < parts.Length; ++i)
-                    if (parts[i] == "JNS0101")
-                        return true;
-            }
-            return false;
+            return IsMathISOS("JNS0101", player, fuse);
         }
         public bool JNS0102Valid(Player player, int type, string fuse)
         {
             if (type == 0)
                 return true;
-            else if (type == 1)
+            else if (type == 1 || type == 2)
                 return IsMathISOS("JNS0102", player, fuse);
             else
                 return false;
         }
         public void JNS0102Action(Player player, int type, string fuse, string argst)
         {
-            if (player.Coss.Count > 0)
+            if (player.Coss.Count > 0 && player.RIM.ContainsKey("15001.Hero"))
             {
+                int hero = (int)player.RIM["15001.Hero"];
+                Hero heroin = XI.LibTuple.HL.InstanceHero(hero);
+                if (heroin != null)
+                    Artiad.ContentRule.DecrGuestPlayer(player, heroin, XI, 0x1);
                 int peek = player.Coss.Peek();
                 XI.RaiseGMessage("G0OV," + player.Uid + "," + peek);
                 Hero peekHero = XI.LibTuple.HL.InstanceHero(peek);
                 if (peekHero != null)
-                    Artiad.ContentRule.DecrGuestPlayer(player, peekHero, XI);
-                XI.Board.HeroDises.Add(peek);
+                    XI.Board.HeroDises.Add(peek);
+                player.RIM.Remove("15001.Hero");
             }
-            string order = XI.AsyncInput(player.Uid, "//", "JNS0102", "0");
-            int next = XI.Board.HeroPiles.Dequeue();
-            XI.RaiseGMessage("G0IV," + player.Uid + "," + next);
-            Hero nextHero = XI.LibTuple.HL.InstanceHero(next);
-            if (nextHero != null)
-                Artiad.ContentRule.IncrGuestPlayer(player, nextHero, XI);
+            if (type == 0 || type == 1)
+            {
+                string order = XI.AsyncInput(player.Uid, "//", "JNS0102", "0");
+                int next = XI.Board.HeroPiles.Dequeue();
+                XI.RaiseGMessage("G0IV," + player.Uid + "," + next);
+                player.RIM["15001.Hero"] = next;
+                Hero nextHero = XI.LibTuple.HL.InstanceHero(next);
+                if (nextHero != null)
+                    Artiad.ContentRule.IncrGuestPlayer(player, nextHero, XI, 0x1);
+            }
         }
         public void JNS0103Action(Player player, int type, string fuse, string argst)
         {
@@ -2974,6 +2987,122 @@ namespace PSD.PSDGamepkg.JNS
             return false;
         }
         #endregion SP101 - LiXiaoyao
+        #region SP102 - ZhaoLing'er
+        public bool JNS0201Valid(Player player, int type, string fuse)
+        {
+            if (type == 0)
+            {
+                List<ushort> invs = player.RTM.ContainsKey("15002.Invs") ?
+                        player.RTM["15002.Invs"] as List<ushort> : new List<ushort>();
+                return player.Tux.Count > 0 && XI.Board.Garden.Values.Any(
+                    p => p.IsTared && p.Uid != player.Uid && !invs.Contains(p.Uid));
+            }
+            else if (type == 1)
+                return player.Coss.Count > 0 && player.RIM.ContainsKey("15002.Hero");
+            else if (type == 2)
+            {
+                return player.Coss.Count > 0 && player.RIM.ContainsKey("15002.Hero")
+                        && IsMathISOS("JNS0201", player, fuse);
+            }
+            else
+                return false;
+        }
+        public void JNS0201Action(Player player, int type, string fuse, string argst)
+        {
+            if (player.Coss.Count > 0 && player.RIM.ContainsKey("15002.Hero"))
+            {
+                int hero = (int)player.RIM["15002.Hero"];
+                Hero heroin = XI.LibTuple.HL.InstanceHero(hero);
+                if (heroin != null)
+                    Artiad.ContentRule.DecrGuestPlayer(player, heroin, XI, 0x3);
+                int peek = player.Coss.Peek();
+                XI.RaiseGMessage("G0OV," + player.Uid + "," + peek);
+            }
+            if (type == 0)
+            {
+                int idx = argst.IndexOf(',');
+                ushort discardUt = ushort.Parse(argst.Substring(0, idx));
+                ushort who = ushort.Parse(argst.Substring(idx + 1));
+                XI.RaiseGMessage("G0QZ," + player.Uid + "," + discardUt);
+                Player py = XI.Board.Garden[who];
+                XI.RaiseGMessage("G0IV," + player.Uid + "," + py.SelectHero);
+                player.RIM["15002.Hero"] = py.SelectHero;
+                List<ushort> invs = player.RTM.ContainsKey("15002.Invs") ?
+                    player.RTM["15002.Invs"] as List<ushort> : new List<ushort>();
+                invs.Add(who);
+                player.RTM["15002.Invs"] = invs;
+                Hero nextHero = XI.LibTuple.HL.InstanceHero(py.SelectHero);
+                if (nextHero != null)
+                    Artiad.ContentRule.IncrGuestPlayer(player, nextHero, XI, 0x3);
+            }
+        }
+        public string JNS0201Input(Player player, int type, string fuse, string prev)
+        {
+            if (type == 0 && prev == "")
+            {
+                List<ushort> invs = player.RTM.ContainsKey("15002.Invs") ?
+                    player.RTM["15002.Invs"] as List<ushort> : new List<ushort>();
+                invs = XI.Board.Garden.Values.Where(p => p.IsTared && p.Uid != player.Uid)
+                    .Select(p => p.Uid).Except(invs).ToList();
+                if (invs.Count > 0)
+                {
+                    return "/Q1(p" + string.Join("p", player.Tux) + "),#获取技能,/T1(p" +
+                        string.Join("p", invs) + ")";
+                } else
+                    return "/";
+            }
+            else return "";
+        }
+        public void JNS0202Action(Player player, int type, string fuse, string argst)
+        {
+            if (type == 0)
+            {
+                ushort card = ushort.Parse(argst);
+                XI.RaiseGMessage("G0CC," + player.Uid + ",0," + player.Uid + ",JP03," + card + ";0," + fuse);
+            }
+            else if (type == 1)
+            {
+                foreach (Tux tux in XI.LibTuple.TL.Firsts.Where(p => p.Type == Tux.TuxType.JP))
+                {
+                    if (!player.cz01PriceDict.ContainsKey(tux.Code))
+                        player.cz01PriceDict[tux.Code] = 1;
+                }
+            }
+            else if (type == 2)
+            {
+                foreach (Tux tux in XI.LibTuple.TL.Firsts.Where(p => p.Type == Tux.TuxType.JP))
+                {
+                    if (player.cz01PriceDict.ContainsKey(tux.Code) && player.cz01PriceDict[tux.Code] == 1 && tux.Code != "JP03")
+                        player.cz01PriceDict.Remove(tux.Code);
+                }
+            }
+        }
+        public bool JNS0202Valid(Player player, int type, string fuse)
+        {
+            if (type == 0)
+            {
+                if (player.Tux.Any(p => XI.LibTuple.TL.DecodeTux(p).Type == Tux.TuxType.JP))
+                {
+                    Tux copiee = XI.LibTuple.TL.EncodeTuxCode("JP03");
+                    return copiee.Bribe(player, type, fuse) && copiee.Valid(player, type, fuse);
+                }
+                else return false;
+            }
+            else if (type == 1 || type == 2)
+                return IsMathISOS("JNS0202", player, fuse);
+            else
+                return false;
+        }
+        public string JNS0202Input(Player player, int type, string fuse, string prev)
+        {
+            if (prev == "" && type == 0)
+            {
+                return "/Q1(p" + string.Join("p", player.Tux.Where(p =>
+                    XI.LibTuple.TL.DecodeTux(p).Type == Tux.TuxType.JP)) + ")";
+            }
+            else return "";
+        }
+        #endregion SP102 - ZhaoLing'er
         #region SP103 - Linyueru
         public void JNS0301Action(Player player, int type, string fuse, string argst)
         {
@@ -3410,7 +3539,7 @@ namespace PSD.PSDGamepkg.JNS
             ushort card = ushort.Parse(argst.Substring(0, idx));
             ushort target = ushort.Parse(argst.Substring(idx + 1));
             XI.RaiseGMessage("G0QZ," + player.Uid + "," + card);
-            XI.RaiseGMessage("G2FU,0,0,0," + string.Join(",", XI.Board.Garden[target].Tux));
+            XI.RaiseGMessage("G2FU,0,0,0,C," + string.Join(",", XI.Board.Garden[target].Tux));
         }
         public bool JNS0601Valid(Player player, int type, string fuse)
         {

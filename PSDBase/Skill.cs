@@ -25,6 +25,7 @@ namespace PSD.Base
         public bool[] IsHind { private set; get; }
 
         public bool IsChange { set; get; }
+        public bool IsRestrict { set; get; }
         // whether linked, to tell whether a host message is attached to fuse in Calling
         //public bool IsLinked { set; get; }
 
@@ -259,19 +260,20 @@ namespace PSD.Base
 
                     bool isChange = type.Contains("C");
                     bool isBless = type.Contains("B");
+                    bool isRestrict = type.Contains("R");
                     if (isBless)
                         Firsts.Add(
                             new Bless(name, code, occurs, priors, onces, hinds,
                                 parasitismStr, terminiStr)
                             {
-                                Descripe = descripe, IsChange = isChange
+                                Descripe = descripe, IsChange = isChange, IsRestrict = isRestrict
                             });
                     else
                         Firsts.Add(
                             new Skill(name, code, occurs, priors, onces, hinds,
                                 parasitismStr, terminiStr)
                             {
-                                Descripe = descripe, IsChange = isChange
+                                Descripe = descripe, IsChange = isChange, IsRestrict = isRestrict
                             });
                 }
             }

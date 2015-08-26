@@ -156,7 +156,9 @@ namespace PSD.Base
         public ushort SingleTokenTar { get { return TokenTars.Count > 0 ? TokenTars[0] : (ushort)0; } }
 
         public IDictionary<string, object> ROM { private set; get; }
+        public IDictionary<string, object> RIM { private set; get; } // check hero, to be substituded by first-class Diva
         public IDictionary<string, object> RAM { private set; get; }
+        public IDictionary<string, object> RTM { private set; get; } // check hero, to be substituded by first-class Diva
         public ushort ROMUshort { set; get; }
         public int ROMInt { set; get; }
         public ushort RAMUshort { set; get; }
@@ -199,7 +201,9 @@ namespace PSD.Base
             TokenFold = new List<ushort>();
 
             ROM = new Dictionary<string, object>();
+            RIM = new Dictionary<string, object>();
             RAM = new Dictionary<string, object>();
+            RTM = new Dictionary<string, object>();
             RAMUtList = new List<ushort>();
 
             Coss = new Stack<int>();
@@ -240,7 +244,7 @@ namespace PSD.Base
             Runes.Clear();
         }
 
-        public void ResetRAM()
+        public void ResetRAM(int hero = 0)
         {
             RAM.Clear();
             RAMUshort = 0;
@@ -248,6 +252,18 @@ namespace PSD.Base
             RAMUtList.Clear();
             ZPDisabled = false;
             DrTuxDisabled = false;
+            IDictionary<string, object> newRtm = new Dictionary<string, object>();
+            if (hero != 0)
+            {
+                foreach (var pair in RTM)
+                {
+                    if (!pair.Key.StartsWith(SelectHero + "."))
+                        newRtm.Add(pair.Key, pair.Value);
+                }
+                RTM = newRtm;
+            }
+            else
+                RTM.Clear();
         }
 
         public void ResetTokens()
@@ -259,21 +275,32 @@ namespace PSD.Base
             TokenFold.Clear();
         }
 
-        public void ResetROM(Board board)
+        public void ResetROM(Board board, int hero = 0)
         {
             ResetTokens();
             foreach (string cd in TokenExcl)
             {
                 if (cd.StartsWith("H"))
                 {
-                    int hero = int.Parse(cd.Substring("H".Length));
-                    board.BannedHero.Remove(hero);
+                    int heroSwal = int.Parse(cd.Substring("H".Length));
+                    board.BannedHero.Remove(heroSwal);
                 }
             }
             ROM.Clear();
             ROMUshort = 0;
             ROMInt = 0;
-            ResetRAM();
+            IDictionary<string, object> newRim = new Dictionary<string, object>();
+            if (hero != 0)
+            {
+                foreach (var pair in RIM)
+                {
+                    if (!pair.Key.StartsWith(hero + "."))
+                        newRim.Add(pair.Key, pair.Value);
+                }
+                RIM = newRim;
+            } else
+                RIM.Clear();
+            ResetRAM(hero);
         }
 
         public void InitFromHero(Base.Card.Hero hero, bool reset, bool sdaset, bool sdcset)

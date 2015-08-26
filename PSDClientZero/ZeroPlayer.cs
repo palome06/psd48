@@ -200,6 +200,7 @@ namespace PSD.ClientZero
         public int Coss { set; get; }
         public ushort Guardian { set; get; }
         public List<ushort> Runes { set; get; }
+        //public List<string> Skills { set; get; }
 
         public int Token { set; get; }
         public List<string> SpecialCards { private set; get; }
@@ -222,6 +223,7 @@ namespace PSD.ClientZero
 
             Treasures = new Dictionary<ushort, List<string>>();
             Runes = new List<ushort>();
+            //Skills = new List<string>();
 
             Token = 0;
             SpecialCards = new List<string>();
@@ -245,6 +247,7 @@ namespace PSD.ClientZero
                 IsLoved = false;
                 Immobilized = false;
                 PetDisabled = false;
+                //Skills = hero.Skills.ToList();
             }
         }
         public void ClearStatus()

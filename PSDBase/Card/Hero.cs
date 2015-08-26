@@ -26,6 +26,8 @@ namespace PSD.Base.Card
         public ushort DEX { private set; get; }
         
         public List<string> Skills { private set; get; }
+        // skills that hero could generated. e.g. JNT0701->[JNT0703] contained
+        public List<string> RelatedSkills { set; get; }
         // spouses, (e.g.) {30501,!2}
         public List<string> Spouses { private set; get; }
         public List<int> Isomorphic { private set; get; }
@@ -134,8 +136,23 @@ namespace PSD.Base.Card
                             isos.Add(int.Parse(isosr));
                     }
                     string skills = (string)data["SKILL"];
-                    List<string> skill = string.IsNullOrEmpty(skills) ?
-                        new List<string>() : skills.Split(',').ToList();
+                    List<string> skill, relatedSkill;
+                    if (string.IsNullOrEmpty(skills))
+                    {
+                        skill = new List<string>();
+                        relatedSkill = new List<string>();
+                    }
+                    else if (skills.IndexOf('|') < 0)
+                    {
+                        skill = skills.Split(',').ToList();
+                        relatedSkill = new List<string>();
+                    }
+                    else
+                    {
+                        int idx = skills.IndexOf('|');
+                        skill = skills.Substring(0, idx).Split(',').ToList();
+                        relatedSkill = skills.Substring(idx + 1).Split(',').ToList();
+                    }
                     string[] aliass = (data["ALIAS"] as string ?? "").Split(',');
                     string[] alias = new string[7];
                     for (int i = 0; i < aliass.Length; i += 2)
@@ -161,7 +178,8 @@ namespace PSD.Base.Card
                         ExCardsAlias = alias[3],
                         AwakeAlias = alias[4],
                         FolderAlias = alias[5],
-                        GuestAlias = alias[6]
+                        GuestAlias = alias[6],
+                        RelatedSkills = relatedSkill
                     };
                     hero.SetAvailableParam(gs);
                     dicts.Add(code, hero);
@@ -175,7 +193,7 @@ namespace PSD.Base.Card
         {
             List<Hero> first = ListAllHeros(groups).Where(p => p.Ofcode != "XJ103" &&
                 p.Ofcode != "XJ207" && p.Ofcode != "XJ304" && p.Ofcode != "XJ507" &&
-                p.Ofcode != "HL005" && p.Ofcode != "HL015").ToList();
+                p.Ofcode != "HL005" && p.Ofcode != "HL015" && p.Ofcode != "HL021").ToList();
             if (first.Any(p => p.Ofcode == "XJ505") && first.Any(p => p.Ofcode == "TR011"))
                 first.RemoveAll(p => p.Ofcode == "XJ505");
             return first;

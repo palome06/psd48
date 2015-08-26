@@ -516,8 +516,10 @@ namespace PSD.PSDGamepkg
                         ushort who = ushort.Parse(args[1]);
                         ushort mon = ushort.Parse(args[2]);
                         if (mon != 0)
+                        {
                             Board.Monster2 = mon;
-                        Board.FightTangled = true;
+                            Board.FightTangled = true;
+                        }
                     }
                     else if (priority == 200)
                     {
@@ -640,35 +642,36 @@ namespace PSD.PSDGamepkg
                     {
                         ushort op = ushort.Parse(args[2]);
                         ushort nofp = ushort.Parse(args[3]);
+                        char cap = args[4 + nofp][0];
                         if (op == 0)
                         {
                             if (nofp != 0)
                             {
                                 ushort[] invs = Util.TakeRange(args, 4, 4 + nofp).Select(p => ushort.Parse(p)).ToArray();
-                                WI.Send("E0FU,0," + string.Join(",", Util.TakeRange(args, 4 + nofp, args.Length)), invs);
-                                WI.Send("E0FU,1," + (args.Length - 4 - nofp), ExceptStaff(invs));
-                                WI.Live("E0FU,1," + (args.Length - 4 - nofp));
+                                WI.Send("E0FU,0," + cap + "," + string.Join(",", Util.TakeRange(args, 5 + nofp, args.Length)), invs);
+                                WI.Send("E0FU,1," + cap + "," + (args.Length - 5 - nofp), ExceptStaff(invs));
+                                WI.Live("E0FU,1," + cap + "," + (args.Length - 5 - nofp));
                             }
                             else
-                                WI.BCast("E0FU,0," + string.Join(",", Util.TakeRange(args, 4, args.Length)));
+                                WI.BCast("E0FU,0," + cap + "," + string.Join(",", Util.TakeRange(args, 5, args.Length)));
                         }
                         else
                         {
                             if (nofp != 0)
                             {
                                 ushort[] invs = Util.TakeRange(args, 4, 4 + nofp).Select(p => ushort.Parse(p)).ToArray();
-                                WI.Send("E0FU,0," + string.Join(",", Util.TakeRange(
-                                    args, 4 + nofp, args.Length)), invs.Except(new ushort[] { op }).ToArray());
-                                WI.Send("E0FU,1," + (args.Length - 4 - nofp), ExceptStaff(invs));
-                                WI.Live("E0FU,1," + (args.Length - 4 - nofp));
-                                WI.Send("E0FU,4," + string.Join(",", Util.TakeRange(args, 4 + nofp, args.Length)), 0, op);
+                                WI.Send("E0FU,0," + cap + "," + string.Join(",", Util.TakeRange(
+                                    args, 5 + nofp, args.Length)), invs.Except(new ushort[] { op }).ToArray());
+                                WI.Send("E0FU,1," + cap + "," + (args.Length - 5 - nofp), ExceptStaff(invs));
+                                WI.Live("E0FU,1," + cap + "," + (args.Length - 5 - nofp));
+                                WI.Send("E0FU,4," + cap + "," + string.Join(",", Util.TakeRange(args, 5 + nofp, args.Length)), 0, op);
                             }
                             else
                             {
-                                WI.Send("E0FU,0," + string.Join(",", Util.TakeRange(
-                                    args, 4 + nofp, args.Length)), ExceptStaff(op));
-                                WI.Live("E0FU,0," + string.Join(",", Util.TakeRange(args, 4, args.Length)));
-                                WI.Send("E0FU,4," + string.Join(",", Util.TakeRange(args, 4 + nofp, args.Length)), 0, op);
+                                WI.Send("E0FU,0," + cap + "," + string.Join(",", Util.TakeRange(
+                                    args, 5, args.Length)), ExceptStaff(op));
+                                WI.Live("E0FU,0," + cap + "," + string.Join(",", Util.TakeRange(args, 5, args.Length)));
+                                WI.Send("E0FU,4," + cap + "," + string.Join(",", Util.TakeRange(args, 5 + nofp, args.Length)), 0, op);
                             }
                         }
                     }
@@ -1892,7 +1895,6 @@ namespace PSD.PSDGamepkg
                         {
                             ushort card = ushort.Parse(args[i]);
                             Player player = Board.Garden[me];
-                            Tux tux = LibTuple.TL.DecodeTux(card);
                             if (from != 0 && Board.Garden[from].Tux.Contains(card))
                                 RaiseGMessage("G0OT," + me + ",1," + card);
                             player.ExCards.Add(card);
@@ -1905,7 +1907,6 @@ namespace PSD.PSDGamepkg
                         ushort me = ushort.Parse(args[1]);
                         ushort card = ushort.Parse(args[3]);
                         Player player = Board.Garden[me];
-                        Tux tux = LibTuple.TL.DecodeTux(card);
                         foreach (string tuxInfo in Board.PendingTux)
                         {
                             string[] parts = tuxInfo.Split(',');
@@ -2639,7 +2640,7 @@ namespace PSD.PSDGamepkg
                     break;
                 case "G0HD":
                     {
-                        ushort type = ushort.Parse(args[1]);
+                        //ushort type = ushort.Parse(args[1]);
                         ushort who = ushort.Parse(args[2]);
                         ushort from = ushort.Parse(args[3]);
                         ushort which = ushort.Parse(args[4]);

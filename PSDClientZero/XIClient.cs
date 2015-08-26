@@ -1372,13 +1372,16 @@ namespace PSD.ClientZero
                 case "E0FU":
                     if (args[1].Equals("0"))
                     {
-                        //ushort from = ushort.Parse(args[2]);
-                        var ravs = Util.TakeRange(args, 2, args.Length).Select(p => ushort.Parse(p));
-                        VI.Cout(Uid, "你观看了{0}.", zd.Tux(ravs));
+                        char cardType = args[2][0];
+                        var ravs = Util.TakeRange(args, 3, args.Length).Select(p => ushort.Parse(p));
+                        if (cardType == 'C')
+                            VI.Cout(Uid, "你观看了{0}.", zd.Tux(ravs));
+                        else if (cardType == 'M')
+                            VI.Cout(Uid, "你观看了{0}.", zd.Monster(ravs));
                     }
                     else if (args[1].Equals("1"))
                     {
-                        ushort n = ushort.Parse(args[2]);
+                        ushort n = ushort.Parse(args[3]);
                         VI.Cout(Uid, "{0}张卡牌正被观看.", n);
                     }
                     else if (args[1].Equals("2"))
@@ -1449,14 +1452,18 @@ namespace PSD.ClientZero
                             (argst.Count > 0 ? ("(" + string.Join(",", argst) + ")") : ""), zd.Player(ust));
                         break;
                     }
-                case "E0CL": // cancel card
+                 case "E0CL": // cancel card
                     {
                         // E0CL,A,JP04,3,1
                         ushort ust = ushort.Parse(args[1]);
-                        ushort[] ravs = new ushort[args.Length - 3];
-                        for (int i = 3; i < args.Length; ++i)
-                            ravs[i - 3] = ushort.Parse(args[i]);
-                        VI.Cout(Uid, "{0}的{1}({2})被抵消.", zd.Player(ust), zd.Tux(args[2]), Util.SatoString(ravs));
+                        string cardName = args[2];
+                        if (args.Length > 3)
+                        {
+                            ushort[] ravs = Util.TakeRange(args, 3, args.Length).Select(p => ushort.Parse(p)).ToArray();
+                            VI.Cout(Uid, "{0}的{1}({2})被抵消.", zd.Player(ust), zd.Tux(cardName), Util.SatoString(ravs));
+                        }
+                        else
+                            VI.Cout(Uid, "{0}的{1}被抵消.", zd.Player(ust), zd.Tux(cardName));
                         break;
                     }
                 case "E0XZ":
@@ -1688,7 +1695,7 @@ namespace PSD.ClientZero
                     {
                         ushort who = ushort.Parse(args[1]);
                         int type = int.Parse(args[2]);
-                        if (type == 0 || type == 1 || type == 2)
+                        if (type == 0 || type == 1)
                         {
                             int n = int.Parse(args[3]);
                             int bs = int.Parse(args[4]);
@@ -1710,7 +1717,7 @@ namespace PSD.ClientZero
                     {
                         ushort who = ushort.Parse(args[1]);
                         int type = int.Parse(args[2]);
-                        if (type == 0 || type == 1 || type == 2)
+                        if (type == 0 || type == 1)
                         {
                             int n = int.Parse(args[3]);
                             int bs = int.Parse(args[4]);
@@ -2152,7 +2159,7 @@ namespace PSD.ClientZero
                 case "E0IE":
                 case "E0OE":
                     {
-                        for (int i = 1; i < args.Length; ++i)
+                        for (int i = 2; i < args.Length; ++i)
                         {
                             ushort who = ushort.Parse(args[i]);
                             if (args[0] == "E0IE")
@@ -2229,14 +2236,14 @@ namespace PSD.ClientZero
                     {
                         ushort ut = ushort.Parse(args[1]);
                         for (int i = 2; i < args.Length; ++i)
-                            VI.Cout(Uid, "{0}获得了技能「{1}」.", zd.Player(ut), zd.SkillName(args[i]));
+                            VI.Cout(Uid, "{0}获得了技能『{1}』.", zd.Player(ut), zd.SkillName(args[i]));
                     }
                     break;
                 case "E0OS":
                     {
                         ushort ut = ushort.Parse(args[1]);
                         for (int i = 2; i < args.Length; ++i)
-                            VI.Cout(Uid, "{0}失去了技能「{1}」.", zd.Player(ut), zd.SkillName(args[i]));
+                            VI.Cout(Uid, "{0}失去了技能『{1}』.", zd.Player(ut), zd.SkillName(args[i]));
                     }
                     break;
                 case "E0LH":
@@ -2259,7 +2266,7 @@ namespace PSD.ClientZero
                         Base.Card.Hero hero = Tuple.HL.InstanceHero(Z0D[ut].SelectHero);
                         if (hero != null && !string.IsNullOrEmpty(hero.GuestAlias))
                             guestName = hero.GuestAlias;
-                        VI.Cout(Uid, "{0}迎来了{1}{2}.", zd.Player(ut), guestName, zd.Hero(hro));
+                        VI.Cout(Uid, "{0}迎来了{1}「{2}」.", zd.Player(ut), guestName, zd.Hero(hro));
                         Z0D[ut].Coss = hro;
                     }
                     break;
@@ -2272,7 +2279,7 @@ namespace PSD.ClientZero
                         Base.Card.Hero hero = Tuple.HL.InstanceHero(Z0D[ut].SelectHero);
                         if (hero != null && !string.IsNullOrEmpty(hero.GuestAlias))
                             guestName = hero.GuestAlias;
-                        VI.Cout(Uid, "{0}送走了{1}{2}.", zd.Player(ut), guestName, zd.Hero(hro));
+                        VI.Cout(Uid, "{0}送走了{1}「{2}」.", zd.Player(ut), guestName, zd.Hero(hro));
                         Z0D[ut].Coss = next;
                     }
                     break;
@@ -2656,18 +2663,20 @@ namespace PSD.ClientZero
             StartCinEtc();
             int idx = cmdrst.IndexOf(',');
             ushort major = ushort.Parse(cmdrst.Substring(0, idx));
-            string input = FormattedInputWithCancelFlag(cmdrst.Substring(idx + 1));
-            if (input != VI.CinSentinel)
+            bool decided = false;
+            while (!decided)
             {
-                VI.CloseCinTunnel(Uid);
-                WI.Send("V4," + input, Uid, 0);
-                return true;
+                string input = FormattedInputWithCancelFlag(cmdrst.Substring(idx + 1));
+                if (input == VI.CinSentinel)
+                    decided = true;
+                else
+                {
+                    WI.Send("V4," + input, Uid, 0);
+                    decided = true;
+                    return true;
+                }
             }
-            else
-            {
-                VI.CloseCinTunnel(Uid);
-                return false;
-            }
+            return false;
         }
         public bool HandleV3Message(string cmdrst)
         {
@@ -3776,6 +3785,11 @@ namespace PSD.ClientZero
                             .Select(p => ushort.Parse(p)).ToList();
                         Z0M.Folder = folders;
                         idx += folderCount;
+                        int skillCount = int.Parse(blocks[idx]);
+                        ++idx;
+                        //List<string> skills = Util.TakeRange(blocks, idx, idx + skillCount).ToList();
+                        //Z0M.Skills = skills;
+                        idx += skillCount;
                     }
                     break;
             }

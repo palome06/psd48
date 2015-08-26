@@ -119,7 +119,8 @@ namespace PSD.PSDGamepkg
             //10105, 10608, 10605, 10303, 19010, 17002
             //19014, 10102, 10501, 10303, 19010, 19016
             //17041, 19020, 10606, 18004, 10303, 19006
-            17008, 15008, 10201, 17037, 10303, 19006
+            //17008, 15008, 10201, 17037, 19021, 19006
+            15002, 17007, 10105, 17021, 19018, 10502
         };
 
         #region Memeber Declaration & Constructor
@@ -703,17 +704,13 @@ namespace PSD.PSDGamepkg
         {
             foreach (Player player in Board.Garden.Values.Where(p => p.IsZhu))
             {
-                Base.Card.Hero selHero = LibTuple.HL.InstanceHero(player.SelectHero);
-                if (selHero != null)
+                foreach (string skillStr in player.Skills)
                 {
-                    foreach (string skillStr in selHero.Skills)
+                    Skill skill = LibTuple.SL.EncodeSkill(skillStr);
+                    if (!pocket.Any(p => p.Name == skill.Code))
                     {
-                        Skill skill = LibTuple.SL.EncodeSkill(skillStr);
-                        if (!pocket.Any(p => p.Name == skill.Code))
-                        {
-                            pocket.AddRange(ParseSingleFromSKTriples(
-                                sk02[zero], zero, cond, player.Uid, skill));
-                        }
+                        pocket.AddRange(ParseSingleFromSKTriples(
+                            sk02[zero], zero, cond, player.Uid, skill));
                     }
                 }
                 player.IsZhu = false;

@@ -76,22 +76,23 @@ namespace PSD.PSDGamepkg
             //Board.MonPiles.PushBack(1001);
             //Board.MonPiles.PushBack(1106);
             //Board.MonPiles.PushBack(1104);
-            Board.MonPiles.PushBack(1103);
+            //Board.MonPiles.PushBack(1103);
             //Board.MonPiles.PushBack(4);
-            //Board.MonPiles.PushBack(1102);
-            Board.MonPiles.PushBack(1109);
-            Board.MonPiles.PushBack(1106);
+            //Board.MonPiles.PushBack(1107);
+            //Board.MonPiles.PushBack(1109);
+            //Board.MonPiles.PushBack(1106);
             //Board.EvePiles.PushBack(29);
             ////Board.EvePiles.PushBack(1);
-            //Board.EvePiles.PushBack(32);
+            //Board.EvePiles.PushBack(31);
             //Board.EvePiles.PushBack(36);
             //Board.EvePiles.PushBack(34);
             //Board.EvePiles.PushBack(35);
             //Board.RestNPCPiles.PushBack(1047);
-            //Board.EvePiles.PushBack(23);
+            // Board.HeroPiles.PushBack(19003);
+            //Board.EvePiles.PushBack(31);
             //while (Board.MonPiles.Count > 0)
             //    Board.MonPiles.Dequeue();
-            //Board.MonPiles.PushBack(28);
+            //Board.MonPiles.PushBack(13);
             //Board.MonPiles.PushBack(1019);
             //Board.MonPiles.PushBack(1022);
             //Board.MonPiles.PushBack(7);
@@ -152,10 +153,14 @@ namespace PSD.PSDGamepkg
             //RaiseGMessage("G0HQ,2,3,0,0,40");
             //RaiseGMessage("G0HQ,2,1,0,0,77,95,9");
             //RaiseGMessage("G0HQ,2,2,0,0,4");
-            RaiseGMessage("G0HQ,2,1,0,0,109");
+            //RaiseGMessage("G0HQ,2,1,0,0,19,20");
+            //RaiseGMessage("G0HQ,2,4,0,0,104");
+            //RaiseGMessage("G0HQ,2,5,0,0,34");
             //RaiseGMessage("G0HQ,2,6,0,0,88");
             //RaiseGMessage("G0HQ,2,1,0,47,50,49,5,63,8,69");
-            //RaiseGMessage("G0HQ,2,1,0,0,10,70,72");
+            //RaiseGMessage("G0HQ,2,1,0,0,25,88");
+            //RaiseGMessage("G0HQ,2,2,0,0,26,89");
+            //RaiseGMessage("G0HQ,2,5,0,0,27,28,29");
             //RaiseGMessage("G0HQ,2,1,0,0,48,49,95");
             //RaiseGMessage("G0HQ,2,3,0,0,92");
             //RaiseGMessage("G0HQ,2,5,0,0,90");
@@ -176,10 +181,11 @@ namespace PSD.PSDGamepkg
             //RaiseGMessage("G0HQ,2,1,0,0,96,18");
             //RaiseGMessage("G0HQ,2,5,0,0,65,66");
             //RaiseGMessage("G0HQ,2,1,0,0,71,37,95");
-            //RaiseGMessage("G0HQ,2,1,0,0,72");
+            //RaiseGMessage("G0HQ,2,1,0,0,47,52");
             //RaiseGMessage("G0HQ,2,1,0,0,55,73,95,1,5");
-            //RaiseGMessage("G0HQ,2,2,0,0,60");
-            //RaiseGMessage("G0HQ,2,3,0,0,66");
+            //RaiseGMessage("G0HQ,2,2,0,0,104");
+            //RaiseGMessage("G0HQ,2,3,0,0,48,53");
+            //RaiseGMessage("G0HQ,2,3,0,0,49");
             //RaiseGMessage("G0HQ,2,2,0,0,96");
             //RaiseGMessage("G0HQ,2,2,0,0,90,34,89,88,95");
             //RaiseGMessage("G0HQ,2,1,0,0,95,88,10");
@@ -210,11 +216,15 @@ namespace PSD.PSDGamepkg
             //RaiseGMessage("G0HQ,2,1,0,1,50,49");
             //RaiseGMessage("G0HQ,2,2,0,44,51");
             //RaiseGMessage("G0HQ,2,1,0,16,43");
-            //Board.MonPiles.Dequeue(30);
+            //Board.MonPiles.Dequeue(29);
             //Board.MonPiles.PushBack(1009);
             //RaiseGMessage("G0ZB,6,0,47");
             //RaiseGMessage("G0ZB,2,0,55");
-            //RaiseGMessage("G0ZB,1,0,73");
+            //RaiseGMessage("G0ZB,1,0,47");
+            //RaiseGMessage("G0ZB,1,0,52");
+            //RaiseGMessage("G0ZB,3,0,48");
+            //RaiseGMessage("G0ZB,3,0,53");
+            //RaiseGMessage("G0ZB,5,0,49");
             //RaiseGMessage("G0ZB,1,0,74");
             //RaiseGMessage("G0ZB,4,0,52");
             //RaiseGMessage("G0ZB,5,0,54");
@@ -229,20 +239,24 @@ namespace PSD.PSDGamepkg
             //RaiseGMessage("G0ZB,3,0,73");
             //RaiseGMessage("G0ZB,4,0,47");
             //RaiseGMessage("G0ZB,4,0,48");
-            //RaiseGMessage("G0ZB,4,0,52");
-            //RaiseGMessage("G0HD,1,5,0,5");
-            //RaiseGMessage("G0HD,1,5,0,17");
-            //RaiseGMessage("G0HD,1,1,0,16");
-            //RaiseGMessage("G0HD,1,1,0,30");
-            //RaiseGMessage("G0HD,1,5,0,36");
-            //RaiseGMessage("G0HD,1,6,0,16");
-            //RaiseGMessage("G0HD,1,2,0,2");
-            //RaiseGMessage("G0HD,1,2,0,31");
-            //RaiseGMessage("G0HD,1,3,0,7");
-            //RaiseGMessage("G0HD,1,3,0,12");
-            //RaiseGMessage("G0HD,1,5,0,22");
-            //RaiseGMessage("G0HD,1,4,0,19");
-            //RaiseGMessage("G0HD,1,6,0,9");
+            // Board.Garden[1].Escue.Add(1001);
+            // Board.Garden[3].Escue.Add(1002);
+            // Board.Garden[4].Escue.Add(1003);
+            // RaiseGMessage("G2IL,1,1001,3,1002,4,1003");
+            // //RaiseGMessage("G0ZB,4,0,52");
+            // RaiseGMessage("G0HD,1,5,0,5");
+            // RaiseGMessage("G0HD,1,5,0,17");
+            // RaiseGMessage("G0HD,1,1,0,15");
+            // RaiseGMessage("G0HD,1,1,0,30");
+            // RaiseGMessage("G0HD,1,5,0,36");
+            // RaiseGMessage("G0HD,1,6,0,16");
+            // RaiseGMessage("G0HD,1,2,0,2");
+            // RaiseGMessage("G0HD,1,2,0,31");
+            // RaiseGMessage("G0HD,1,3,0,7");
+            // RaiseGMessage("G0HD,1,3,0,12");
+            // RaiseGMessage("G0HD,1,5,0,22");
+            // RaiseGMessage("G0HD,1,4,0,19");
+            // RaiseGMessage("G0HD,1,6,0,9");
             //RaiseGMessage("G0HD,1,5,0,15");
             //RaiseGMessage("G0HQ,1,0,1,16,5,44,50");
             //RaiseGMessage("G0HQ,4,0,1,43");
@@ -253,8 +267,9 @@ namespace PSD.PSDGamepkg
             //    RaiseGMessage("G0HQ,2," + player.Uid + ",1,3");
             //RaiseGMessage("G0HQ,2,4,1,1");
             //RaiseGMessage("G0HQ,2,6,1,2");
-            RaiseGMessage("G0HQ,2,2,1,3");
-            RaiseGMessage("G0HQ,2,3,1,3");
+            //RaiseGMessage("G0HQ,2,1,1,1");
+            //RaiseGMessage("G0HQ,2,2,1,3");
+            //RaiseGMessage("G0HQ,2,3,1,3");
             //RaiseGMessage("G0HQ,2,4,1,3");
             //RaiseGMessage("G0HQ,2,5,1,3");
             //RaiseGMessage("G0HQ,2,6,1,3");
@@ -810,6 +825,9 @@ namespace PSD.PSDGamepkg
                         WI.BCast(rstage + ",0");
                         Board.InFight = false; Board.InFightThrough = false;
                         RunQuadStage(rstage, 0);
+                        rstage = "R" + rounder + "IC"; break;
+                    case "IC":
+                        RunQuadStage(rstage, 0);
                         rstage = "R" + rounder + "ED"; break;
                     case "ED":
                         {
@@ -872,6 +890,7 @@ namespace PSD.PSDGamepkg
         // return whether actual action has been taken
         private bool RunQuadStage(string zero, int sina)
         {
+            sina |= 0x2; // seems weired, when did sina = 0 happens?
             var garden = Board.Garden;
             if (!sk02.ContainsKey(zero))
             {
@@ -904,7 +923,6 @@ namespace PSD.PSDGamepkg
                     // if somebody added now, then re-scan it's related with $zero
                 }
 
-                if (purse.Count == 0 && (sina & 1) == 0) { return false; }
                 // round mode, priority not needed.
                 if (locks.Count > 0)
                 {
@@ -929,6 +947,8 @@ namespace PSD.PSDGamepkg
                 }
                 if (!garden.Keys.Where(p => involved[p]).Any())
                     break; // No skills could be called, cancel
+                if (!purse.Any(p => p.Lock != true) && (sina & 1) == 0)
+                    break; // Ignore pure tux empty query if necessary
                 foreach (ushort ut in Board.Garden.Keys)
                     if (pris[ut] != "")
                         pris[ut] = pris[ut].Substring(1);
@@ -997,8 +1017,6 @@ namespace PSD.PSDGamepkg
                                 purse.Add(ske);
                         }
                     }
-                    // TODO R*ZD calls it, where sina == 1, so just ignore it
-                    //if (purse.Count == 0 && (sina & 1) == 0) { return false; }
                     // round mode, priority not needed.
                     if (locks.Count > 0)
                     {
@@ -1023,6 +1041,8 @@ namespace PSD.PSDGamepkg
                     }
                     if (!garden.Keys.Where(p => involved[p]).Any())
                         break; // No skills could be called, cancel
+                    if (!purse.Any(p => p.Lock != true) && (sina & 1) == 0)
+                        break; // Ignore pure tux empty query if necessary
                     foreach (ushort ut in Board.Garden.Keys)
                         if (pris[ut] != "")
                             pris[ut] = pris[ut].Substring(1);

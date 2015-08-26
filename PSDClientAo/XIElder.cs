@@ -10,6 +10,7 @@ namespace PSD.ClientAo
     public partial class XIVisi
     {
         #region Old Versions
+        // return true if message is truncated and need no further processing
         private bool DealWithOldMessage(string readLine)
         {
             int version = (WI as VW.Eywi).Version;
@@ -120,6 +121,7 @@ namespace PSD.ClientAo
                                     A0M.insTux(Enumerable.Repeat((ushort)0, tuxCount).ToList());
                             }
                         }
+                        return true;
                     }
                     break;
                 case "E0CC": // prepare to use card
@@ -340,7 +342,6 @@ namespace PSD.ClientAo
                     {
                         A0P.Where(p => p.Key != rrounder).ToList().ForEach((p) => p.Value.SetAsClear());
                         A0F.Supporter = 0; A0F.Hinder = 0;
-                        break;
                     }
                     break;
             }
