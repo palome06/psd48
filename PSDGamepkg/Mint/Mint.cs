@@ -10,12 +10,14 @@ namespace PSD.PSDGamepkg.Mint
 		NONE,
         GENERAL, // G0
 		INNER, // G1, won't cause E communication directly
-		UI_ONLY // G2, trigger E communcation directly
+                UI_ONLY, // G2, trigger E communcation directly
+
+                ROUND // R, rounder
 	};
 
-    public class Mint
-    {
-        private IDictionary<string, object> dict = new Dictionary<string, object>();
+    public class Mint : PSD.Base.Flow.MintBase
+	{
+		private IDictionary<string, object> dict = new Dictionary<string, object>();
 
         public virtual string Head { get { return "****"; } }
 		public virtual MintType MintType { get { return MintType.NONE; } }
@@ -110,8 +112,63 @@ namespace PSD.PSDGamepkg.Mint
             sb.Append("\n");
             return sb.ToString();
 		}
-	}
+        public Mint Parse(string message)
+        {
+            if (message.StartWith("G0HR"))
+                return HeavyRotation.Parse(message);
+            else if (message.StartWith("G2IN"))
+                return CardOutOfPile.Parse(message);
+            else if (message.StartWith("G2CN"))
+                return CardOutOfDise.Parse(message);
+            else if (message.StartWith("G2FU"))
+                return Stargazer.Parse(message);
+            else if (message.StartWith("G2SY"))
+                return Target.Parse(message);
 
+            else if (message.StartWith("G0"))
+                return DefG0.Parse(message);
+            else if (message.StartWith("G1"))
+                return DefG1.Parse(message);
+            else return Mint();
+        }
+    }
+
+    #region Capability
+    public class InRound : Mint
+    {
+        private readonly string rd;
+        public override string Head { get { return rd; } }
+        public override MintType MintType { get { return MintType.ROUND; }}
+        public static InRound Parse(string message)
+        {
+            InRound ir = new InRound(); ir.msg = message;
+            return ir;
+        }
+        public virtual void Handle(XI xi) { }
+    }
+    public class DefG0 : Mint
+    {
+        private readonly string msg;
+        public override string Head { get { return msg.Substring(0, 4); } }
+        public override MintType MintType { get { return MintType.GENERAL; }}
+        public static DefG0 Parse(string message)
+        {
+            DefG0 g0 = new DefG0(); g0.msg = message;
+            return g0;
+        }
+    }
+    public class DefG1 : Mint
+    {
+        private readonly string msg;
+        public override string Head { get { return msg.Substring(0, 4); } }
+        public override MintType MintType { get { return MintType.INNER; }}
+        public static DefG1 Parse(string message)
+        {
+            DefG1 g1 = new DefG1(); g1.msg = message;
+            return g1;
+        }
+    }
+    #endregion Capability
     public class CardOutOfPile : Mint
     {
         public override string Head { get { return "G2IN"; } }

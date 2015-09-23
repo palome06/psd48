@@ -69,6 +69,14 @@ namespace PSD.Base.Utils
             return recipe.Rows;
         }
 
+        public DataRowCollection Query(List<string> queries, string table, string condition)
+        {
+            string query = "SELECT " + string.Join(", ", queries.Select(
+                p => p + "\"" + p + "\"")) + " where " + condition + " from " + table + ";";
+            DataTable recipe = GetDataTable(query);
+            return recipe.Rows;
+        }
+
         public void Insert(Dictionary<string, int> iData,
             Dictionary<string, string> sData, string table)
         {

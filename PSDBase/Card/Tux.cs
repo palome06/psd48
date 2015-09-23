@@ -16,8 +16,6 @@ namespace PSD.Base.Card
         public string Code { private set; get; }
         // Integer in data base to numbering code
         public ushort DBSerial { protected set; get; }
-
-        //public int Count { private set; get; }
         // package contains all the tux involved in (e.g.) { 1, 4 }
         public int[] Package { protected set; get; }
         public int Genre { private set; get; }
@@ -200,70 +198,6 @@ namespace PSD.Base.Card
         private IDictionary<ushort, Tux> dicts;
 
         private Utils.ReadonlySQL sql;
-
-        //public TuxLib(string path)
-        //{
-        //    Firsts = new List<Tux>();
-        //    string[] lines = System.IO.File.ReadAllLines(path);
-        //    foreach (string line in lines)
-        //    {
-        //        if (line != null && line.Length > 0)
-        //        {
-        //            string[] content = line.Split('\t');
-        //            string code = content[0]; // code, e.g. (ZP04)
-        //            string name = content[1]; // name, e.g. (Tianxuanwuyin)
-        //            //ushort count = ushort.Parse(content[2]);
-        //            Tux.TuxType type;
-        //            switch (code.Substring(0, 2))
-        //            {
-        //                case "JP": type = Tux.TuxType.JP; break;
-        //                case "ZP": type = Tux.TuxType.ZP; break;
-        //                case "TP": type = Tux.TuxType.TP; break;
-        //                case "WQ": type = Tux.TuxType.WQ; break;
-        //                case "FJ": type = Tux.TuxType.FJ; break;
-        //                case "XB": type = Tux.TuxType.XB; break;
-        //                default: type = Tux.TuxType.HX; break;
-        //            }
-        //            string countStr = content[2];
-        //            string occur = content[3];
-        //            string priority = content[4];
-        //            string parasitismStr = content[5];
-        //            string description = content[6];
-        //            string descstr = content[7];
-        //            IDictionary<string, string> special = new Dictionary<string, string>();
-        //            string[] descSpt = string.IsNullOrEmpty(descstr) ?
-        //                    new string[] { } : descstr.Split('|');
-        //            for (int i = 1; i < descSpt.Length; i += 2)
-        //                special.Add(descSpt[i], descSpt[i + 1]);
-        //            string isEqs = content[8];
-        //            string targets = content[9];
-        //            string growup = content[10];
-        //            string terminiStr = content[11];
-        //            if (type == Tux.TuxType.WQ || type == Tux.TuxType.FJ || type == Tux.TuxType.XB)
-        //            {
-        //                var tux = new TuxEqiup(name, code, type, description, special, growup);
-        //                tux.Parse(countStr, occur, parasitismStr, priority, isEqs, targets, terminiStr);
-        //                Firsts.Add(tux);
-        //            }
-        //            else
-        //            {
-        //                var tux = new Tux(name, code, type, description, special);
-        //                tux.Parse(countStr, occur, parasitismStr, priority, isEqs, targets, terminiStr);
-        //                Firsts.Add(tux);
-        //            }
-        //        }
-        //    }
-        //    //ushort cardx = 1;
-        //    dicts = new Dictionary<ushort, Tux>();
-        //    foreach (Tux tux in Firsts)
-        //    {
-        //        for (int i = 0; i < tux.Range.Length; i += 2)
-        //        {
-        //            for (ushort j = tux.Range[i]; j <= tux.Range[i + 1]; ++j)
-        //                dicts.Add(j, tux);
-        //        }
-        //    }
-        //}
 
         public TuxLib()
         {

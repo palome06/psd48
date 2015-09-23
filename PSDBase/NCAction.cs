@@ -19,10 +19,11 @@ namespace PSD.Base
 
         private ActionDelegate mAction;
         private EscueActionDelegate mEscueAction;
+
         public ActionDelegate Action
         {
             set { mAction = value; }
-            get { return mAction ?? DefAction; }
+            get { return mAction ?? ((p, f, a) => { }); }
         }
         public EscueActionDelegate EscueAction
         {
@@ -35,7 +36,7 @@ namespace PSD.Base
         public InputDelegate Input
         {
             set { mInput = value; }
-            get { return mInput ?? DefInput; }
+            get { return mInput ?? ((p, f) => { return true; }); }
         }
         public EscueInputDelegate EscueInput
         {
@@ -48,7 +49,7 @@ namespace PSD.Base
         public ValidDelegate Valid
         {
             set { mValid = value; }
-            get { return mValid ?? DefValid; }
+            get { return mValid ?? ((p, f, pr) => { return ""; }); }
         }
         public EscueValidDelegate EscueValid
         {

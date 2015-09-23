@@ -35,13 +35,9 @@ namespace PSD.Base.Card
         public ushort STRb { private set; get; }
         public int AGL { set; get; }
         public ushort AGLb { private set; get; }
-
-        public string[][] EAOccurs { private set; get; }
-        public int[][] EAProperties { private set; get; }
-        public bool[][] EALocks { private set; get; }
-        public bool[][] EAOnces { private set; get; }
-        public bool[][] EAIsTermini { private set; get; }
-
+        // first dimension: 0->Normal, 1->Outbrust, 2->Debut
+        public SKBranch[][] EA { private set; get; }
+        // who owns the pet now
         public ushort Padrone { set; get; }
 
         public string DebutText { set; get; }
@@ -165,11 +161,11 @@ namespace PSD.Base.Card
         public delegate void WLDelegate();
         public delegate void CrActionDelegate(Player player);
         public delegate void CsActionDelegate(Player player,
-            int consumeType, int type, string fuse, string argst);
+            int consumeType, int type, Fuse fuse, string argst);
         public delegate bool CsValidDelegate(Player player,
-            int consumeType, int type, string fuse);
+            int consumeType, int type, Fuse fuse);
         public delegate string CsInputDelegate(Player player,
-            int consumeType, int type, string fuse, string prev);
+            int consumeType, int type, Fuse fuse, string prev);
 
         private DebutDelegate mDebut, mCurtain;
         public DebutDelegate Debut
@@ -229,8 +225,7 @@ namespace PSD.Base.Card
         }
 
         public Monster(string name, string code, int group, int genre, FiveElement element, ushort strb,
-            ushort agl, ClLevel level, string[][] eaoccurs, int[][] eaprops,
-            bool[][] ealocks, bool[][] eaonces, bool[][] eaterminis, string spis)
+            ushort agl, ClLevel level, string eaoccurs, string eaprops, string eamixcodes, string spis)
         {
             this.Name = name; this.Code = code;
             this.Group = Math.Abs(group); this.Genre = genre;
@@ -238,11 +233,13 @@ namespace PSD.Base.Card
             this.Element = element; this.Level = level;
             this.STRb = strb; this.STR = this.STRb;
             this.AGLb = agl; this.AGL = this.AGLb;
-            this.EAOccurs = eaoccurs;
-            this.EAProperties = eaprops;
-            this.EALocks = ealocks;
-            this.EAOnces = eaonces;
-            this.EAIsTermini = eaterminis;
+            string[] eaos = eaoccurs.Split(';');
+            string[] eaps = eaprops.Split(';');
+            string[] eams = eamixcodes.Split(';');
+            int sz = eaos.Length;
+            EA = new SKBranch[sz][];
+            for (int i = 0; i < sz; ++i)
+                EA[i] = SKBranch.ParseFromStrings(eaos[i], eaps[i], eams[i]);
             this.Padrone = 0;
             ParseSpi(spis);
         }
@@ -255,11 +252,11 @@ namespace PSD.Base.Card
         private static CrActionDelegate DefCrAction = new CrActionDelegate(
             delegate(Player player) { });
         private static CsActionDelegate DefCsAction = new CsActionDelegate(
-            delegate(Player player, int consumeType, int type, string fuse, string argst) { });
+            delegate(Player player, int consumeType, int type, Fuse fuse, string argst) { });
         private static CsValidDelegate DefCsValid = new CsValidDelegate(
-            delegate(Player player, int consumeType, int type, string fuse) { return true; });
+            delegate(Player player, int consumeType, int type, Fuse fuse) { return true; });
         private static CsInputDelegate DefCsInput = new CsInputDelegate(
-            delegate(Player player, int consumeType, int type, string fuse, string prev) { return ""; });
+            delegate(Player player, int consumeType, int type, Fuse fuse, string prev) { return ""; });
     }
 
     public class MonsterLib
@@ -309,66 +306,17 @@ namespace PSD.Base.Card
                     case 3: level = Monster.ClLevel.BOSS; break;
                     default: level = Monster.ClLevel.WOODEN; break;
                 }
-                string[] occurs = ((string)data["OCCURS"]).Split(';');
-                string[][] eaoccurs = new string[occurs.Length][];
-                string[] propss = ((string)data["PRIORS"]).Split(';');
-                int[][] eaprops = new int[occurs.Length][];
-                bool[][] ealocks = new bool[occurs.Length][];
-                bool[][] eaonces = new bool[occurs.Length][];
-                string[] eatermis = ((string)data["TERMINI"]).Split(';');
-                bool[][] eaterminies = new bool[occurs.Length][];
-                for (int i = 0; i < occurs.Length; ++i)
-                {
-                    if (occurs[i] == "^")
-                    {
-                        eaoccurs[i] = null;
-                        eaprops[i] = null;
-                        ealocks[i] = null;
-                        eaonces[i] = null;
-                    }
-                    else
-                    {
-                        string[] ods = occurs[i].Split(',');
-                        string[] opss = propss[i].Split(',');
-                        string[] omin = eatermis[i].Split(',');
-                        eaoccurs[i] = new string[ods.Length];
-                        eaprops[i] = new int[ods.Length];
-                        ealocks[i] = new bool[ods.Length];
-                        eaonces[i] = new bool[ods.Length];
-                        eaterminies[i] = new bool[ods.Length];
-                        for (int j = 0; j < ods.Length; ++j)
-                        {
-                            if (ods[j].StartsWith("!"))
-                            {
-                                eaoccurs[i][j] = ods[j].Substring(1);
-                                ealocks[i][j] = true;
-                            }
-                            else
-                            {
-                                eaoccurs[i][j] = ods[j];
-                                ealocks[i][j] = false;
-                            }
-                            if (opss[j].StartsWith("!")) // Only once
-                            {
-                                eaprops[i][j] = int.Parse(opss[j].Substring("!".Length));
-                                eaonces[i][j] = true;
-                            }
-                            else
-                            {
-                                eaprops[i][j] = int.Parse(opss[j]);
-                                eaonces[i][j] = false;
-                            }
-                            eaterminies[i][j] = (omin[j][0] == '1');
-                        }
-                    }
-                }
+                string occurs = (string)data["OCCURS"];
+                string propss = (string)data["PRIORS"];
+                string mixess = (string)data["TERMINI"];
+
                 string spis = data["SPI"] as string;
                 string debutText = data["DEBUTTEXT"] as string;
                 string petText = data["PETTEXT"] as string;
                 string winText = data["WINTEXT"] as string;
                 string loseText = data["LOSETEXT"] as string;
                 Monster monster = new Monster(name, code, group, genre, element, str, agl,
-                    level, eaoccurs, eaprops, ealocks, eaonces, eaterminies, spis)
+                    level, occurs, propss, mixess, spis)
                     {
                         DebutText = debutText ?? "",
                         PetText = petText ?? "",

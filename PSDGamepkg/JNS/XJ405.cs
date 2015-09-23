@@ -1,5 +1,6 @@
 ﻿using PSD.Base;
 using PSD.Base.Card;
+using PSD.Base.Flow;
 using PSD.PSDGamepkg.Mint;
 using System;
 using System.Collections.Generic;
@@ -31,21 +32,21 @@ namespace PSD.PSDGamepkg.JNS
                 string skCode = sk.Code;
                 var methodAction = sc.GetType().GetMethod(skCode + "Action");
                 if (methodAction != null)
-                    sk.Action += new Skill.ActionDelegate(delegate(Player player, int type, string fuse, string argst)
+                    sk.Action += new Skill.ActionDelegate(delegate(Player player, int type, Fuse fuse, string argst)
                     {
-                        methodAction.Invoke(sc, new object[] { player, type, fuse, argst });
+                        methodAction.Invoke(sc, new object[] { player, type, fuse.ToMessage(), argst });
                     });
                 var methodValid = sc.GetType().GetMethod(skCode + "Valid");
                 if (methodValid != null)
-                    sk.Valid += new Skill.ValidDelegate(delegate(Player player, int type, string fuse)
+                    sk.Valid += new Skill.ValidDelegate(delegate(Player player, int type, Fuse fuse)
                     {
-                        return (bool)methodValid.Invoke(sc, new object[] { player, type, fuse });
+                        return (bool)methodValid.Invoke(sc, new object[] { player, type, fuse.ToMessage() });
                     });
                 var methodInput = sc.GetType().GetMethod(skCode + "Input");
                 if (methodInput != null)
-                    sk.Input += new Skill.InputDelegate(delegate(Player player, int type, string fuse, string prev)
+                    sk.Input += new Skill.InputDelegate(delegate(Player player, int type, Fuse fuse, string prev)
                     {
-                        return (string)methodInput.Invoke(sc, new object[] { player, type, fuse, prev });
+                        return (string)methodInput.Invoke(sc, new object[] { player, type, fuse.ToMessage(), prev });
                     });
                 var methodEncrypt = sc.GetType().GetMethod(skCode + "Encrypt");
                 if (methodEncrypt != null)
@@ -58,9 +59,9 @@ namespace PSD.PSDGamepkg.JNS
                     Bless bs = (Bless)sk;
                     var methodBKValid = sc.GetType().GetMethod(skCode + "BKValid");
                     if (methodBKValid != null)
-                        bs.BKValid += new Bless.BKValidDelegate(delegate(Player player, int type, string fuse, ushort owner)
+                        bs.BKValid += new Bless.BKValidDelegate(delegate(Player player, int type, Fuse fuse, ushort owner)
                         {
-                            return (bool)methodBKValid.Invoke(sc, new object[] { player, type, fuse, owner });
+                            return (bool)methodBKValid.Invoke(sc, new object[] { player, type, fuse.ToMessage(), owner });
                         });
                 }
             }

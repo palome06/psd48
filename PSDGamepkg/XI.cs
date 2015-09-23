@@ -719,7 +719,7 @@ namespace PSD.PSDGamepkg
 
         // Parse from SKTriple list to SKT list
         // $ucr: user's round, old controller for R*ZD.
-        private List<SKE> ParseFromSKTriples(List<SkTriple> list, string zero, bool ucr)
+        private List<SKE> ParseFromSKTriples(List<SkTriple> list, Mint mint, bool ucr)
         {
             List<SKE> result = new List<SKE>();
             ucr &= (Board.UseCardRound != 0);
@@ -730,7 +730,7 @@ namespace PSD.PSDGamepkg
                 switch (skt.Type)
                 {
                     case SKTType.BK:
-                        result.AddRange(pys.Select(p => new SKE(skt) { Tg = p }));
+                        result.AddRange(pys.Select(p => new SKE(skt, mint, p)));
                         break;
                     case SKTType.TX:
                     case SKTType.EQ:
@@ -741,15 +741,15 @@ namespace PSD.PSDGamepkg
                         if (skt.Occur.Contains('#'))
                         {
                             if (!ucr || Board.Rounder.Team == Board.UseCardRound)
-                                result.Add(new SKE(skt) { Tg = Board.Rounder.Uid });
+                                result.Add(new SKE(skt, mint, Board.Rounder.Uid)));
                         }
                         else if (skt.Occur.Contains('$'))
                             result.AddRange(pys.Where(p => p != Board.Rounder.Uid)
-                                .Select(p => new SKE(skt) { Tg = p }));
+                                .Select(p => new SKE(skt, mint, p)));
                         else if (skt.Occur.Contains('*'))
-                            result.AddRange(pys.Select(p => new SKE(skt) { Tg = p }));
+                            result.AddRange(pys.Select(p => new SKE(skt, mint, p)));
                         else
-                            result.AddRange(pys.Select(p => new SKE(skt) { Tg = p }));
+                            result.AddRange(pys.Select(p => new SKE(skt, mint, p)));
                         break;
                     case SKTType.PT:
                         if (skt.Consume != 2)
@@ -757,18 +757,18 @@ namespace PSD.PSDGamepkg
                             if (skt.Occur.Contains('#'))
                             {
                                 if (!ucr || Board.Rounder.Team == Board.UseCardRound)
-                                    result.Add(new SKE(skt) { Tg = Board.Rounder.Uid });
+                                    result.Add(new SKE(skt, mint, Board.Rounder.Uid));
                             }
                             else if (skt.Occur.Contains('$'))
                                 result.AddRange(pys.Where(p => p != Board.Rounder.Uid)
-                                    .Select(p => new SKE(skt) { Tg = p }));
+                                    .Select(p => new SKE(skt, mint, p)));
                             else if (skt.Occur.Contains('*'))
-                                result.AddRange(pys.Select(p => new SKE(skt) { Tg = p }));
+                                result.AddRange(pys.Select(p => new SKE(skt, mint, p)));
                             else
-                                result.AddRange(pys.Select(p => new SKE(skt) { Tg = p }));
+                                result.AddRange(pys.Select(p => new SKE(skt, mint, p)));
                         }
                         else
-                            result.Add(new SKE(skt) { Tg = Board.Rounder.Uid });
+                            result.Add(new SKE(skt, mint, Board.Rounder.Uid));
                         break;
                     case SKTType.SK:
                     default:
@@ -777,7 +777,7 @@ namespace PSD.PSDGamepkg
                             bool b1 = skt.Occur.Contains('#') && skt.Owner != Board.Rounder.Uid;
                             bool b2 = skt.Occur.Contains('$') && skt.Owner == Board.Rounder.Uid;
                             if (!b1 && !b2)
-                                result.Add(new SKE(skt) { Tg = skt.Owner });
+                                result.Add(new SKE(skt, mint, skt.Owner));
                         }
                         break;
                 }
