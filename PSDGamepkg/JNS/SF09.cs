@@ -8,16 +8,9 @@ using PSD.Base.Card;
 
 namespace PSD.PSDGamepkg.JNS
 {
-    public class RuneCottage
+    public class RuneCottage : JNSBase
     {
-        private Base.VW.IVI VI { set; get; }
-        //private VW.IWI WI { private set; get; }
-        private XI XI { set; get; }
-
-        public RuneCottage(XI xi, Base.VW.IVI vi)
-        {
-            this.XI = xi; this.VI = vi;
-        }
+        public RuneCottage(XI xi, Base.VW.IVI vi) : base(xi, vi) { }
         // Action class, 0 thread receives and maintain data base.
         // Input class, player.Uid thread receives and maintain data base.
         public IDictionary<string, Rune> RegisterDelegates(RuneLib lib)
@@ -62,16 +55,19 @@ namespace PSD.PSDGamepkg.JNS
             else
                 return "";
         }
+        public bool SF02Valid(Player player, string fuse)
+        {
+            return XI.Board.IsAttendWar(player);
+        }
+        public void SF02Action(Player player, string fuse, string args)
+        {
+            XI.RaiseGMessage("G0IX," + player.Uid + ",1,2");
+        }
         public bool SF03Valid(Player player, string fuse)
         {
             List<Artiad.Harm> harms = Artiad.Harm.Parse(fuse);
-            foreach (Artiad.Harm harm in harms)
-            {
-                Player py = XI.Board.Garden[harm.Who];
-                if (player.Uid == harm.Who && harm.N > 0 && Artiad.Harm.GetPropedElement().Contains(harm.Element))
-                    return true;
-            }
-            return false;
+            return harms.Any(p => player.Uid == p.Who && p.N > 0 &&
+                Artiad.Harm.GetPropedElement().Contains(p.Element));
         }
         public void SF03Action(Player player, string fuse, string args)
         {
@@ -88,14 +84,48 @@ namespace PSD.PSDGamepkg.JNS
             if (harms.Count > 0)
                 XI.InnerGMessage(Artiad.Harm.ToMessage(harms), -18);
         }
-        public void SF06Action(Player player, string fuse, string args)
+        public bool SF04Valid(Player player, string fuse)
+        {
+            List<Artiad.Harm> harms = Artiad.Harm.Parse(fuse);
+            return harms.Any(p => player.Uid == p.Who && p.N > 0 && p.Source != player.Uid &&
+                    p.Element != FiveElement.YIN && p.Element != FiveElement.LOVE);
+        }
+        public void SF04Action(Player player, string fuse, string args)
+        {
+            List<Artiad.Harm> harms = Artiad.Harm.Parse(fuse);
+            bool isAvoid = false;
+            if (harms.Any(p => player.Uid == p.Who && p.N > 0 && p.Source != player.Uid && p.Element == FiveElement.A))
+            {
+                string select = XI.AsyncInput(player.Uid, "#是否抵御此伤害？##是##否,Y2", "0", "SF04");
+                if (select == "1")
+                    isAvoid = true;
+            }
+            if (isAvoid)
+            {
+                harms.RemoveAll(p => player.Uid == p.Who && p.N > 0 && p.Source != player.Uid && p.Element == FiveElement.A);
+                if (harms.Count > 0)
+                    XI.InnerGMessage(Artiad.Harm.ToMessage(harms), -149);
+            }
+            else
+                XI.InnerGMessage(Artiad.Harm.ToMessage(harms), -149);
+            Cure(player, player, 1);
+        }
+        public bool SF05Valid(Player player, string fuse)
+        {
+            return XI.Board.IsAttendWar(player);
+        }
+        public void SF05Action(Player player, string fuse, string args)
+        {
+            XI.RaiseGMessage("G0OA," + player.Uid + ",1,2");
+        }
+        public void SF07Action(Player player, string fuse, string args)
         {
             int dv = XI.Board.DiceValue;
             int[] vals = new int[] { -2, -1, 1, 2 }.Where(p => dv + p >= 1 && dv + p <= 6).ToArray();
             int idx = int.Parse(args) - 1;
             XI.RaiseGMessage("G0T7," + player.Uid + "," + dv + "," + (dv + vals[idx]));
         }
-        public string SF06Input(Player player, string fuse, string prev)
+        public string SF07Input(Player player, string fuse, string prev)
         {
             if (prev == "")
             {

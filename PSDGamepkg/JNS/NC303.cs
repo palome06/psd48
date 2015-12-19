@@ -8,16 +8,9 @@ using PSD.Base;
 
 namespace PSD.PSDGamepkg.JNS
 {
-    public class NPCCottage
+    public class NPCCottage : JNSBase
     {
-        private Base.VW.IVI VI { set; get; }
-        //private VW.IWI WI { private set; get; }
-        private XI XI { set; get; }
-
-        public NPCCottage(XI xi, Base.VW.IVI vi)
-        {
-            this.XI = xi; this.VI = vi;
-        }
+        public NPCCottage(XI xi, Base.VW.IVI vi) : base(xi, vi) { }
 
         public IDictionary<string, NCAction> RegisterDelegates(NCActionLib lib)
         {
@@ -530,21 +523,6 @@ namespace PSD.PSDGamepkg.JNS
             player.Escue.Remove(npcUt);
             XI.RaiseGMessage("G2OL," + player.Uid + "," + npcUt);
             XI.RaiseGMessage("G0ON," + player.Uid + ",M,1," + npcUt);
-        }
-        private void TargetPlayer(ushort from, ushort to)
-        {
-            if (to != 0)
-                XI.RaiseGMessage("G2YS,T," + from + ",T," + to);
-        }
-        private void TargetPlayer(ushort from, IEnumerable<ushort> tos)
-        {
-            List<ushort> to = tos.Where(p => p != 0 && p < 1000).ToList();
-            if (to.Count > 0)
-                XI.RaiseGMessage("G2YS,T," + from + "," + string.Join(",", to.Select(p => "T," + p)));
-        }
-        private string AnyoneAliveString()
-        {
-            return "T1(p" + string.Join("p", XI.Board.Garden.Values.Where(p => p.IsAlive).Select(p => p.Uid)) + ")";
         }
         #endregion NPC Single
     }

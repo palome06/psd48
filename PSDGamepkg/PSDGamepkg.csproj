@@ -40,7 +40,8 @@
   </PropertyGroup>
   <PropertyGroup />
   <ItemGroup>
-    <Reference Include="Mono.Data.Sqlite">
+    <Reference Include="Mono.Data.Sqlite, Version=4.0.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\lib\Mono.Data.Sqlite.dll</HintPath>
     </Reference>
     <Reference Include="System" />
@@ -58,6 +59,7 @@
     <Compile Include="DS\UFSet.cs" />
     <Compile Include="JNS\CZ02.cs" />
     <Compile Include="JNS\FG04.cs" />
+    <Compile Include="JNS\JNSBase.cs" />
     <Compile Include="JNS\JP06.cs" />
     <Compile Include="JNS\NC303.cs" />
     <Compile Include="JNS\SF09.cs" />
