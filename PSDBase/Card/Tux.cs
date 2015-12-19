@@ -340,6 +340,11 @@ namespace PSD.Base.Card
                     for (ushort j = tux.Range[i]; j <= tux.Range[i + 1]; ++j)
                         dicts.Add(j, tux);
                 }
+                if (tux.IsTuxEqiup())
+                {
+                    TuxEqiup te = tux as TuxEqiup;
+                    te.SingleEntry = tux.Range[0];
+                }
             }
         }
 
@@ -417,6 +422,8 @@ namespace PSD.Base.Card
     {
         public int IncrOfSTR { set; get; }
         public int IncrOfDEX { set; get; }
+
+        public ushort SingleEntry { set; get; }
 
         public int[][] CsPriorites { private set; get; }
         public string[][] CsOccur { private set; get; }

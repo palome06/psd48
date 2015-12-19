@@ -463,6 +463,14 @@
     <Resource Include="Resources\Card\NMB\NCT18.png" />
     <Resource Include="Resources\Card\NMB\NCT20.png" />
     <Resource Include="Resources\Card\NMB\NCT21.png" />
+    <Resource Include="Resources\Card\NMB\NCT22.png" />
+    <Resource Include="Resources\Card\NMB\NCT25.png" />
+    <Resource Include="Resources\Card\NMB\NCT27.png" />
+    <Resource Include="Resources\Card\NMB\NCT28.png" />
+    <Resource Include="Resources\Card\NMB\NCT34.png" />
+    <Resource Include="Resources\Card\NMB\NCT39.png" />
+    <Resource Include="Resources\Card\NMB\NCT41.png" />
+    <Resource Include="Resources\Card\NMB\NCT42.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\PetsSnap\NC506.png" />
@@ -473,13 +481,14 @@
     <Resource Include="Resources\PetsSnap\NCT09.png" />
     <Resource Include="Resources\PetsSnap\NCT13.png" />
     <Resource Include="Resources\PetsSnap\NCT20.png" />
-    <Resource Include="Resources\PetsSnap\NCT21.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\PetsSnap\NCH02.png" />
     <Resource Include="Resources\PetsSnap\NCH04.png" />
     <Resource Include="Resources\PetsSnap\NCH05.png" />
     <Resource Include="Resources\PetsSnap\NCH06.png" />
+    <Resource Include="Resources\PetsSnap\NCH11.png" />
+    <Resource Include="Resources\PetsSnap\NCH12.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Heros\15001.png" />
@@ -583,9 +592,6 @@
     <Resource Include="Resources\Card\Heros\TR018.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Resources\Card\NMB\NCT41.png" />
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="Resources\Card\NMB\NCH01.png" />
     <Resource Include="Resources\Card\NMB\NCH02.png" />
     <Resource Include="Resources\Card\NMB\NCH03.png" />
@@ -596,6 +602,8 @@
     <Resource Include="Resources\Card\NMB\NCH08.png" />
     <Resource Include="Resources\Card\NMB\NCH09.png" />
     <Resource Include="Resources\Card\NMB\NCH10.png" />
+    <Resource Include="Resources\Card\NMB\NCH11.png" />
+    <Resource Include="Resources\Card\NMB\NCH12.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Card\Eve\SJT01.png" />
@@ -610,6 +618,8 @@
     <Resource Include="Resources\Card\Eve\SJT10.png" />
     <Resource Include="Resources\Card\Eve\SJT11.png" />
     <Resource Include="Resources\Card\Eve\SJT14.png" />
+    <Resource Include="Resources\Card\Eve\SJT15.png" />
+    <Resource Include="Resources\Card\Eve\SJT17.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Card\Eve\SJH01.png" />
@@ -617,6 +627,8 @@
     <Resource Include="Resources\Card\Eve\SJH03.png" />
     <Resource Include="Resources\Card\Eve\SJH04.png" />
     <Resource Include="Resources\Card\Eve\SJH05.png" />
+    <Resource Include="Resources\Card\Eve\SJH06.png" />
+    <Resource Include="Resources\Card\Eve\SJH07.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Card\NMB\GFT3.png" />

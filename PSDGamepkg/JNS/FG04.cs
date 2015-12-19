@@ -9,16 +9,9 @@ using PSD.PSDGamepkg.Artiad;
 
 namespace PSD.PSDGamepkg.JNS
 {
-    public class MonsterCottage
+    public class MonsterCottage : JNSBase
     {
-        private Base.VW.IVI VI { set; get; }
-        //private VW.IWI WI { private set; get; }
-        private XI XI { set; get; }
-
-        public MonsterCottage(XI xi, Base.VW.IVI vi)
-        {
-            this.XI = xi; this.VI = vi;
-        }
+        public MonsterCottage(XI xi, Base.VW.IVI vi) : base(xi, vi) { }
 
         public IDictionary<string, Monster> RegisterDelegates(MonsterLib lib)
         {
@@ -1834,113 +1827,13 @@ namespace PSD.PSDGamepkg.JNS
         }
         public void GFT3WinEff()
         {
-            List<Player> invs = XI.Board.Garden.Values.Where(p => p.IsAlive &&
-                p.Team == XI.Board.Rounder.Team).ToList();
-            int total = 4;
-            IDictionary<Player, int> sch = new Dictionary<Player, int>();
-            while (total > 0)
-            {
-                if (invs.Count == 1)
-                {
-                    string word = "#HP回复,T1(p" + invs[0].Uid + "),#回复数值,D" + total;
-                    XI.AsyncInput(XI.Board.Rounder.Uid, word, "GFT3WinEff", "0");
-                    sch[invs[0]] = total;
-                    total = 0; invs.Clear();
-                }
-                else
-                {
-                    string ichi = total == 1 ? "/D1" : ("/D1~" + total);
-                    string word = "#HP回复,T1(p" + string.Join("p",
-                        invs.Select(p => p.Uid)) + "),#回复数值," + ichi;
-                    string input = XI.AsyncInput(XI.Board.Rounder.Uid, word, "GFT3WinEff", "0");
-                    if (!input.Contains("/"))
-                    {
-                        string[] ips = input.Split(',');
-                        ushort ut = ushort.Parse(ips[0]);
-                        int zn = int.Parse(ips[1]);
-                        Player py = XI.Board.Garden[ut];
-                        sch[py] = zn;
-                        total -= zn;
-                        invs.Remove(py);
-                    }
-                }
-            }
-            //List<Player> invs = new List<Player>();
-            //foreach (ushort ut in XI.Board.OrderedPlayer())
-            //{
-            //    Player py = XI.Board.Garden[ut];
-            //    if (py.IsAlive && py.Team == XI.Board.Rounder.Team)
-            //        invs.Add(py);
-            //}
-            //int total = 4;
-            //IDictionary<Player, int> sch = new Dictionary<Player, int>();
-            //for (int i = 0; i < invs.Count; ++i)
-            //{
-            //    Player py = invs[i];
-            //    if (total <= 0)
-            //        break;
-            //    string word;
-            //    if (i == invs.Count - 1)
-            //        word = "T1";
-            //    else
-            //        word = "/T1";
-            //    string zero = XI.AsyncInput(XI.Board.Rounder.Uid,
-            //        "#HP回复," + word + "(p" + py.Uid + ")", "GFT3WinEff", "0");
-            //    if (!zero.StartsWith("/"))
-            //    {
-            //        if (i == invs.Count - 1)
-            //            word = "D" + total;
-            //        else if (total > 1)
-            //            word = "/D1~" + total;
-            //        else
-            //            word = "/D1";
-
-            //        string alloc = XI.AsyncInput(XI.Board.Rounder.Uid,
-            //            "#HP回复," + word, "GFT3WinEff", "0");
-            //        if (!alloc.StartsWith("/"))
-            //        {
-            //            int n = int.Parse(alloc);
-            //            sch[py] = n;
-            //            total -= n;
-            //        }
-            //    }
-            //}
-            Cure("GFT3", sch.Keys.ToList(), sch.Values.ToList());
+            Procedure.AssignCurePointToTeam(XI, XI.Board.Rounder, 4, "GFT3WinEff",
+                p => Cure("GFT3", p.Keys.ToList(), p.Values.ToList()));
         }
         public void GFT3LoseEff()
         {
-            List<Player> invs = XI.Board.Garden.Values.Where(p => p.IsAlive &&
-                p.Team == XI.Board.Rounder.OppTeam).ToList();
-            int total = 4;
-            IDictionary<Player, int> sch = new Dictionary<Player, int>();
-            while (total > 0)
-            {
-                if (invs.Count == 1)
-                {
-                    string word = "#HP回复,T1(p" + invs[0].Uid + "),#回复数值,D" + total;
-                    XI.AsyncInput(XI.Board.Opponent.Uid, word, "GFT3WinEff", "0");
-                    sch[invs[0]] = total;
-                    total = 0; invs.Clear();
-                }
-                else
-                {
-                    string ichi = total == 1 ? "/D1" : ("/D1~" + total);
-                    string word = "#HP回复,T1~" + invs.Count + "(p" + string.Join("p",
-                        invs.Select(p => p.Uid)) + "),#回复数值," + ichi;
-                    string input = XI.AsyncInput(XI.Board.Opponent.Uid, word, "GFT3WinEff", "0");
-                    if (!input.Contains("/"))
-                    {
-                        string[] ips = input.Split(',');
-                        ushort ut = ushort.Parse(ips[0]);
-                        int zn = int.Parse(ips[1]);
-                        Player py = XI.Board.Garden[ut];
-                        sch[py] = zn;
-                        total -= zn;
-                        invs.Remove(py);
-                    }
-                }
-            }
-            Cure("GFT3", sch.Keys.ToList(), sch.Values.ToList());
+            Procedure.AssignCurePointToTeam(XI, XI.Board.Opponent, 4, "GFT3LoseEff",
+                p => Cure("GFT3", p.Keys.ToList(), p.Values.ToList()));
         }
         public bool GFT3ConsumeValid(Player player, int consumeType, int type, string fuse)
         {
@@ -2177,7 +2070,7 @@ namespace PSD.PSDGamepkg.JNS
                 }
             }
         }
-        public void GHH1LossEff()
+        public void GHH1LoseEff()
         {
             Harm("GHH1", XI.Board.Garden.Values.Where(p => p.Team == XI.Board.Rounder.Team && p.IsAlive), 3);
             if (XI.Board.Rounder.IsAlive && XI.Board.Rounder.Tux.Count > 0)

@@ -87,12 +87,13 @@
     <Image x:Key="npcsnapNCT09" Source="PetsSnap/NCT09.png" ToolTip="NPC-TR瑕"/>
     <Image x:Key="npcsnapNCT13" Source="PetsSnap/NCT13.png" ToolTip="NPC-TR谢沧行"/>
     <Image x:Key="npcsnapNCT20" Source="PetsSnap/NCT20.png" ToolTip="NPC-TR雷元戈"/>
-    <Image x:Key="npcsnapNCT21" Source="PetsSnap/NCT21.png" ToolTip="NPC-TR龙溟"/>
 
     <Image x:Key="npcsnapNCH02" Source="PetsSnap/NCH02.png" ToolTip="NPC阮英扬"/>
     <Image x:Key="npcsnapNCH04" Source="PetsSnap/NCH04.png" ToolTip="NPC柒月"/>
     <Image x:Key="npcsnapNCH05" Source="PetsSnap/NCH05.png" ToolTip="NPC伍阳"/>
     <Image x:Key="npcsnapNCH06" Source="PetsSnap/NCH06.png" ToolTip="NPC璇英"/>
+    <Image x:Key="npcsnapNCH11" Source="PetsSnap/NCH11.png" ToolTip="NPC水鉴长老"/>
+    <Image x:Key="npcsnapNCH12" Source="PetsSnap/NCH12.png" ToolTip="NPC红依"/>
 
     <Image x:Key="wersnapJPT2" Source="PetsSnap/JPT2.png" ToolTip="TR洒金笺"/>
     <Image x:Key="wersnapTPT2" Source="PetsSnap/TPT2.png" ToolTip="TR天仙玉露"/>
@@ -425,12 +426,16 @@
     <Image x:Key="eveCardSJT10" Source="Card/Eve/SJT10.png"/>
     <Image x:Key="eveCardSJT11" Source="Card/Eve/SJT11.png"/>
     <Image x:Key="eveCardSJT14" Source="Card/Eve/SJT14.png"/>
+    <Image x:Key="eveCardSJT15" Source="Card/Eve/SJT15.png"/>
+    <Image x:Key="eveCardSJT17" Source="Card/Eve/SJT17.png"/>
 
     <Image x:Key="eveCardSJH01" Source="Card/Eve/SJH01.png"/>
     <Image x:Key="eveCardSJH02" Source="Card/Eve/SJH02.png"/>
     <Image x:Key="eveCardSJH03" Source="Card/Eve/SJH03.png"/>
     <Image x:Key="eveCardSJH04" Source="Card/Eve/SJH04.png"/>
     <Image x:Key="eveCardSJH05" Source="Card/Eve/SJH05.png"/>
+    <Image x:Key="eveCardSJH06" Source="Card/Eve/SJH06.png"/>
+    <Image x:Key="eveCardSJH07" Source="Card/Eve/SJH07.png"/>
 
     <BitmapImage x:Key="monCard000src" UriSource="Card/Mon00.png"/>
     <Image x:Key="monCard000" Source="Card/Mon00.png"/>
@@ -529,7 +534,14 @@
     <Image x:Key="monCardNCT18" Source="Card/NMB/NCT18.png"/>
     <Image x:Key="monCardNCT20" Source="Card/NMB/NCT20.png"/>
     <Image x:Key="monCardNCT21" Source="Card/NMB/NCT21.png"/>
+    <Image x:Key="monCardNCT22" Source="Card/NMB/NCT22.png"/>
+    <Image x:Key="monCardNCT25" Source="Card/NMB/NCT25.png"/>
+    <Image x:Key="monCardNCT27" Source="Card/NMB/NCT27.png"/>
+    <Image x:Key="monCardNCT28" Source="Card/NMB/NCT28.png"/>
+    <Image x:Key="monCardNCT34" Source="Card/NMB/NCT34.png"/>
+    <Image x:Key="monCardNCT39" Source="Card/NMB/NCT39.png"/>
     <Image x:Key="monCardNCT41" Source="Card/NMB/NCT41.png"/>
+    <Image x:Key="monCardNCT42" Source="Card/NMB/NCT42.png"/>
 
     <Image x:Key="monCardGSH3" Source="Card/NMB/GSH3.png"/>
     <Image x:Key="monCardGHH1" Source="Card/NMB/GHH1.png"/>
@@ -545,6 +557,8 @@
     <Image x:Key="monCardNCH08" Source="Card/NMB/NCH08.png"/>
     <Image x:Key="monCardNCH09" Source="Card/NMB/NCH09.png"/>
     <Image x:Key="monCardNCH10" Source="Card/NMB/NCH10.png"/>
+    <Image x:Key="monCardNCH11" Source="Card/NMB/NCH11.png"/>
+    <Image x:Key="monCardNCH12" Source="Card/NMB/NCH12.png"/>
 
     <Image x:Key="tuxCard000" Source="Card/Tux00.png"/>
     <Image x:Key="tuxCardJP01" Source="Card/Tux/JP01.png"/>

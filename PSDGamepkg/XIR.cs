@@ -129,6 +129,9 @@ namespace PSD.PSDGamepkg
             //Board.MonPiles.PushBack(4);
             //Board.MonPiles.PushBack(10);
             //Board.MonPiles.PushBack(8);
+            Board.MonPiles.PushBack(1112);
+            Board.MonPiles.PushBack(1111);
+            Board.MonPiles.PushBack(1110);
             //Board.MonPiles.PushBack(1045);
             //Board.MonPiles.PushBack(5);
             //Board.MonPiles.PushBack(1040);
@@ -138,7 +141,7 @@ namespace PSD.PSDGamepkg
             //Board.MonPiles.PushBack(1007);
             //RaiseGMessage("G0HQ,2,1,0,52,10,11");
             //RaiseGMessage("G0HQ,2,1,0,47,49,10,11,12");
-            //Board.MonPiles.PushBack(17);
+            //Board.MonPiles.PushBack(54);
             //RaiseGMessage("G0IJ,1,0,3");
             //Board.MonPiles.PushBack(1016);
             //Board.MonPiles.PushBack(6);
@@ -152,7 +155,7 @@ namespace PSD.PSDGamepkg
             //RaiseGMessage("G0HQ,2,2,0,0,37,70");
             //RaiseGMessage("G0HQ,2,3,0,0,40");
             //RaiseGMessage("G0HQ,2,1,0,0,77,95,9");
-            //RaiseGMessage("G0HQ,2,2,0,0,4");
+            RaiseGMessage("G0HQ,2,1,0,0,49");
             //RaiseGMessage("G0HQ,2,1,0,0,19,20");
             //RaiseGMessage("G0HQ,2,4,0,0,104");
             //RaiseGMessage("G0HQ,2,5,0,0,34");
@@ -220,7 +223,7 @@ namespace PSD.PSDGamepkg
             //Board.MonPiles.PushBack(1009);
             //RaiseGMessage("G0ZB,6,0,47");
             //RaiseGMessage("G0ZB,2,0,55");
-            //RaiseGMessage("G0ZB,1,0,47");
+            RaiseGMessage("G0ZB,1,0,49");
             //RaiseGMessage("G0ZB,1,0,52");
             //RaiseGMessage("G0ZB,3,0,48");
             //RaiseGMessage("G0ZB,3,0,53");
@@ -263,8 +266,9 @@ namespace PSD.PSDGamepkg
             //RaiseGMessage("G0OH,1,0,0,5,2,0,0,4,3,0,0,5,4,0,0,5,5,0,0,5,6,0,0,5");
             //RaiseGMessage("G0OH,2,0,0,2,3,0,0,3,4,0,0,5,6,0,0,2");
             //RaiseGMessage("G0OH,1,0,4,12,2,0,4,12");
-            //foreach (Player player in Board.Garden.Values)
-            //    RaiseGMessage("G0HQ,2," + player.Uid + ",1,3");
+            RaiseGMessage(Artiad.Harm.ToMessage(new Artiad.Harm(1, 1, FiveElement.A, 7, 0)));
+            foreach (Player player in Board.Garden.Values)
+                RaiseGMessage("G0HQ,2," + player.Uid + ",1,3");
             //RaiseGMessage("G0HQ,2,4,1,1");
             //RaiseGMessage("G0HQ,2,6,1,2");
             //RaiseGMessage("G0HQ,2,1,1,1");

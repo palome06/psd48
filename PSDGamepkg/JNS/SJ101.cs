@@ -8,16 +8,9 @@ using System.Threading.Tasks;
 
 namespace PSD.PSDGamepkg.JNS
 {
-    public class EveCottage
+    public class EveCottage : JNSBase
     {
-        private Base.VW.IVI VI { set; get; }
-        //private VW.IWI WI { private set; get; }
-        private XI XI { set; get; }
-
-        public EveCottage(XI XI, Base.VW.IVI vi)
-        {
-            this.XI = XI; this.VI = vi;
-        }
+        public EveCottage(XI XI, Base.VW.IVI vi) : base(XI, vi) { }
         public IDictionary<string, Evenement> RegisterDelegates(EvenementLib lib)
         {
             EveCottage ec = this;
@@ -47,7 +40,7 @@ namespace PSD.PSDGamepkg.JNS
             if (rd.Gender == 'M')
             {
                 XI.RaiseGMessage("G0DH," + rd.Uid + ",0,1");
-                XI.RaiseGMessage(Artiad.Harm.ToMessage(new Artiad.Harm(rd.Uid, 0, FiveElement.THUNDER, 1, 0)));
+                Harm(null, rd, 1, FiveElement.THUNDER);
             }
             else if (rd.Gender == 'F')
             {
@@ -574,6 +567,28 @@ namespace PSD.PSDGamepkg.JNS
         }
         public void SJT14(Player rd)
         {
+            int hpR = XI.Board.Garden.Values.Where(p => p.IsAlive && p.Team == rd.Team).Sum(p => p.HP);
+            int hpO = XI.Board.Garden.Values.Where(p => p.IsAlive && p.Team == rd.OppTeam).Sum(p => p.HP);
+            Player[] lesser;
+            if (hpR < hpO)
+                lesser = new Player[] { rd };
+            else if (hpR > hpO)
+                lesser = new Player[] { XI.Board.GetOpponenet(rd) };
+            else
+                lesser = new Player[] { rd, XI.Board.GetOpponenet(rd) };
+            foreach (Player py in lesser)
+            {
+                int result = 0;
+                XI.RaiseGMessage("G0TT," + py.Uid);
+                result += XI.Board.DiceValue;
+                XI.RaiseGMessage("G0TT," + py.Uid);
+                result += XI.Board.DiceValue;
+                Artiad.Procedure.AssignCurePointToTeam(XI, py, result, "SJT14",
+                    p => Cure(null, p.Keys.ToList(), p.Values.ToList()));
+            }
+        }
+        public void SJT15(Player rd)
+        {
             int sumMe = XI.Board.Garden.Values.Where(p => p.IsAlive && p.Team == rd.Team)
                     .Sum(p => p.Pets.Where(q => q != 0 && XI.LibTuple.ML.Decode(q) != null)
                     .Sum(q => XI.LibTuple.ML.Decode(q).STR));
@@ -605,8 +620,23 @@ namespace PSD.PSDGamepkg.JNS
                 }
             }
         }
+        public void SJT17(Player rd)
+        {
+            foreach (Player py in XI.Board.Garden.Values)
+            {
+                if (py.Runes.Count > 0)
+                    XI.RaiseGMessage("G0OF," + py.Uid + "," + string.Join(",", py.Runes));
+            }
+            ushort[] map = new ushort[] { 0, 1, 2, 3, 4, 5, 6 };
+            foreach (ushort ut in XI.Board.OrderedPlayer(rd.Uid))
+            {
+                XI.RaiseGMessage("G0TT," + ut);
+                int result = XI.Board.DiceValue;
+                XI.RaiseGMessage("G0IF," + ut + "," + map[result]);
+            }
+        }
         #endregion Package 6#
-        #region Holiday
+            #region Holiday
         public void SJH01(Player rd)
         {
             XI.AsyncInput(rd.Uid, "//", "SJH01", "0");
@@ -653,12 +683,23 @@ namespace PSD.PSDGamepkg.JNS
             foreach (Player py in XI.Board.Garden.Values)
             {
                 if (py.GetEquipCount() > 0)
-                {
-                    int n = py.GetEquipCount() >= 2 ? 2 : 1;
-                    requires.Add(py.Uid, "#须弃置,Q" + n + "(p" + string.Join("p", py.ListOutAllEquips()) + ")");
-                }
-            }   
+                    requires.Add(py.Uid, "#须弃置,Q1(p" + string.Join("p", py.ListOutAllEquips()) + ")");
+            }
             IDictionary<ushort, string> inputs = XI.MultiAsyncInput(requires);
+            foreach (var pair in inputs)
+                XI.RaiseGMessage("G0QZ," + pair.Key + "," + pair.Value);
+
+            requires.Clear();
+            foreach (Player py in XI.Board.Garden.Values)
+            {
+                List<ushort> special = py.ListOutAllEquips()
+                    .Where(p => !XI.LibTuple.TL.DecodeTux(p).IsTuxEqiup()).ToList();
+                if (special.Count >= 2)
+                    requires.Add(py.Uid, "#须弃置,Q2(p" + string.Join("p", special) + ")");
+                else if (special.Count == 1)
+                    requires.Add(py.Uid, "#须弃置,Q1(p" + string.Join("p", special) + ")");
+            }
+            inputs = XI.MultiAsyncInput(requires);
             foreach (var pair in inputs)
                 XI.RaiseGMessage("G0QZ," + pair.Key + "," + pair.Value);
 
@@ -754,6 +795,47 @@ namespace PSD.PSDGamepkg.JNS
                     }
                 }
             }
+        }
+        public void SJH06(Player rd)
+        {
+            foreach (ushort ut in XI.Board.OrderedPlayer())
+            {
+                if (rd.Tux.Count == 0) { break; }
+                Player py = XI.Board.Garden[ut];
+                if (ut == rd.Uid || !py.IsAlive) { continue; }
+                string second = XI.AsyncInput(rd.Uid, string.Format("#交予{0}的,Q1(p{1})",
+                    XI.DisplayPlayer(ut), string.Join("p", rd.ListOutAllCards())), "SJH06", "0");
+                ushort card = ushort.Parse(second);
+                if (card == 0)
+                    XI.RaiseGMessage("G0HQ,0," + ut + "," + rd.Uid + ",2,1");
+                else
+                    XI.RaiseGMessage("G0HQ,0," + ut + "," + rd.Uid + ",0,1," + card);
+            }
+            if (!XI.Board.Garden.Values.Any(p => p.IsAlive && p.Uid != rd.Uid && p.HP <= rd.HP) ||
+                !XI.Board.Garden.Values.Any(p => p.IsAlive && p.Uid != rd.Uid && p.STR <= rd.STR) ||
+                !XI.Board.Garden.Values.Any(p => p.IsAlive && p.Uid != rd.Uid && p.DEX <= rd.DEX))
+            {
+                Cure(null, rd, XI.Board.Garden.Values.Count(p => p.IsAlive));
+            }
+        }
+        public void SJH07(Player rd)
+        {
+            int count = 0;
+            foreach (ushort ut in XI.Board.OrderedPlayer())
+            {
+                Player py = XI.Board.Garden[ut];
+                if (ut == rd.Uid || !py.IsAlive || py.GetAllCardsCount() == 0) { continue; }
+                string second = XI.AsyncInput(rd.Uid, string.Format("#获得{0}的,C1(p{1})",
+                    XI.DisplayPlayer(ut), string.Join("p", py.ListOutAllCardsWithEncrypt())), "SJH07", "0");
+                ushort card = ushort.Parse(second);
+                if (card == 0)
+                    XI.RaiseGMessage("G0HQ,0," + rd.Uid + "," + ut + ",2,1");
+                else
+                    XI.RaiseGMessage("G0HQ,0," + rd.Uid + "," + ut + ",0,1," + card);
+                ++count;
+            }
+            if (count > 0)
+                Harm(null, rd, count);
         }
         #endregion Holiday
 

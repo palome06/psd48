@@ -55,6 +55,7 @@
   <ItemGroup>
     <Compile Include="Artiad\Harm.cs" />
     <Compile Include="Artiad\ContentRule.cs" />
+    <Compile Include="Artiad\Procedure.cs" />
     <Compile Include="DS\PriorityQueue.cs" />
     <Compile Include="DS\UFSet.cs" />
     <Compile Include="JNS\CZ02.cs" />

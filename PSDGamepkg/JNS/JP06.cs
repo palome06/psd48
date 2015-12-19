@@ -1550,7 +1550,7 @@ namespace PSD.PSDGamepkg.JNS
         }
         public bool TPT3Valid(Player player, int type, string fuse)
         {
-            string[] kekkaiA = new string[] { "TP01,0", "TPT3,0", "TPT3,1", "ZPH4,0" };
+            string[] kekkaiA = new string[] { "TP01,0", "TPT3,0", "TPT3,1", "ZPT4,0" };
             string[] kekkaiB = new string[] { "ZP01,0", "TPT1,0" };
             // G0CD,A,T,KN,x..;TF
             if (type == 0)

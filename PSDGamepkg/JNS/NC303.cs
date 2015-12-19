@@ -474,13 +474,67 @@ namespace PSD.PSDGamepkg.JNS
                 }
             }
         }
+        public void NJH8Action(Player player, string fuse, string args)
+        {
+            DefaultPutIntoEscueAction(player, fuse, player);
+        }
+        public bool NJH8EscueValid(Player player, ushort npcUt, int type, string fuse)
+        {
+            return XI.Board.Garden.Values.Any(p => p.IsAlive && p.Team == player.Uid && p.GetPetCount() > 0);
+        }
+        public void NJH8EscueAction(Player player, ushort npcUt, int type, string fuse, string argst)
+        {
+            string[] args = argst.Split(',');
+            ushort petOwner = ushort.Parse(args[0]);
+            ushort pet = ushort.Parse(args[1]);
+            ushort caller = ushort.Parse(args[2]);
+
+            EscueDiscard(player, npcUt);
+            XI.RaiseGMessage("G0HI," + petOwner + "," + pet);
+            TargetPlayer(petOwner, caller);
+            XI.RaiseGMessage("G0IA," + player.Uid + ",1,3");
+        }
+        public string NJH8EscueInput(Player player, ushort npcUt, int type, string fuse, string prev)
+        {
+            if (prev == "")
+            {
+                return "#要爆发宠物,/T1(p" + string.Join("p", XI.Board.Garden.Values.Where
+                    (p => p.IsAlive && p.GetPetCount() > 0 && p.Team == player.Uid).Select(p => p.Uid)) + ")";
+            }
+            else if (prev.IndexOf(',') < 0)
+            {
+                ushort who = ushort.Parse(prev);
+                return "#爆发,/M1(p" + string.Join("p",
+                    XI.Board.Garden[who].Pets.Where(p => p != 0)) + "),#凭神的,/T1" + AAlls(player);
+            }
+            else return "";
+        }
+        public void NJH9Action(Player player, string fuse, string args)
+        {
+            DefaultPutIntoEscueAction(player, fuse, player);
+        }
+        public bool NJH9EscueValid(Player player, ushort npcUt, int type, string fuse)
+        {
+            return XI.Board.Garden.Values.Any(p => p.Team == player.Uid && p.HP == 0);
+        }
+        public void NJH9EscueAction(Player player, ushort npcUt, int type, string fuse, string argst)
+        {
+            EscueDiscard(player, npcUt);
+            XI.RaiseGMessage(Artiad.Cure.ToMessage(XI.Board.Garden.Values.Where(p => p.Team == player.Uid &&
+                p.HP == 0).Select(p => new Artiad.Cure(p.Uid, 0, FiveElement.A, 2))));
+            Artiad.Procedure.AssignCurePointToTeam(XI, XI.Board.GetOpponenet(player), 3, "NJH9EscueAction",
+                p => Cure(null, p.Keys.ToList(), p.Values.ToList()));
+            if (XI.Board.Garden.Values.Any(p => p.Team == player.Uid && p.HP == 0))
+                XI.InnerGMessage("G0ZH,0", 0);
+        }
         #region NPC Single
         public void NCT41Debut(Player trigger)
         {
             int incr = XI.Board.Garden.Values.Where(p => p.IsAlive &&
-                p.Team == trigger.OppTeam).Max(p => p.Tux.Count);
+                p.Team == trigger.OppTeam).Max(p => p.Tux.Count) - 1;
             ushort me = NMBLib.CodeOfNPC(XI.LibTuple.NL.Encode("NCT41"));
-            XI.RaiseGMessage("G0IB," + me + "," + incr);
+            if (incr >= 0)
+                XI.RaiseGMessage("G0IB," + me + "," + incr);
         }
         public void NCH05Debut(Player trigger)
         {
@@ -500,6 +554,17 @@ namespace PSD.PSDGamepkg.JNS
                 XI.Board.MonPiles.PushBack(nmbs);
                 XI.RaiseGMessage("G0YM,7," + nmbs.Count);
                 XI.Board.MonPiles.Shuffle();
+            }
+        }
+        public void NCH10Debut(Player trigger)
+        {
+            ushort card = (XI.LibTuple.TL.EncodeTuxCode("WQ03") as TuxEqiup).SingleEntry;
+            ushort who = XI.Board.Garden.Values.Where(p => p.ListOutAllEquips().Contains(card)).Select(p => p.Uid).FirstOrDefault();
+            if (who != 0)
+            {
+                ushort me = NMBLib.CodeOfNPC(XI.LibTuple.NL.Encode("NCH10"));
+                XI.RaiseGMessage("G0QZ," + who + "," + card);
+                XI.RaiseGMessage("G0IB," + me + "," + 3);
             }
         }
         #endregion NPC Single

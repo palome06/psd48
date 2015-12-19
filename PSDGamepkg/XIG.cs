@@ -3668,12 +3668,18 @@ namespace PSD.PSDGamepkg
                 case "G0IF":
                     {
                         ushort who = ushort.Parse(args[1]);
+                        List<ushort> runes = new List<ushort>();
                         for (int i = 2; i < args.Length; ++i)
                         {
                             ushort sf = ushort.Parse(args[i]);
-                            Board.Garden[who].Runes.Add(sf);
+                            if (!Board.Garden[who].Runes.Contains(sf))
+                            {
+                                Board.Garden[who].Runes.Add(sf);
+                                runes.Add(sf);
+                            }
                         }
-                        WI.BCast("E0IF," + cmdrst);
+                        if (runes.Count > 0)
+                            WI.BCast("E0IF," + who + "," + string.Join(",", runes));
                     }
                     break;
                 case "G0OF":
