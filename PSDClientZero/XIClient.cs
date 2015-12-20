@@ -1044,6 +1044,8 @@ namespace PSD.ClientZero
                                     Z0D[who].Weapon = 0;
                                 else if (Z0D[who].Armor == ut)
                                     Z0D[who].Armor = 0;
+                                else if (Z0D[who].Trove == ut)
+                                    Z0D[who].Trove = 0;
                                 else if (Z0D[who].ExCards.Contains(ut))
                                     Z0D[who].ExCards.Remove(ut);
                                 else if (Z0D[who].Fakeq.ContainsKey(ut))
@@ -2206,9 +2208,9 @@ namespace PSD.ClientZero
                     }
                     else if (args[1] == "5")
                     {
-                        ushort mon = ushort.Parse(args[2]);
-                        if (mon != 0)
-                            VI.Cout(Uid, "翻出怪物牌为【{0}】.", zd.Monster(mon));
+                        ushort[] mons = Util.TakeRange(args, 2, args.Length)
+                            .Select(p => ushort.Parse(p)).ToArray();
+                        VI.Cout(Uid, "翻出怪物牌为【{0}】.", zd.Monster(mons));
                     }
                     else if (args[1] == "6")
                     {

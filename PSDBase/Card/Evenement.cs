@@ -60,8 +60,8 @@ namespace PSD.Base.Card
                         mSpi |= 0x2;
                 }
             }
-            Occurs = new string[] { };Priorties = new int [] { };
-            IsOnce = new bool [] { }; IsTermini = new bool [] { };
+            Occurs = new string[] { }; Priorties = new int[] { };
+            IsOnce = new bool[] { }; IsTermini = new bool[] { };
             Lock = new bool[] { };
         }
 
@@ -141,8 +141,7 @@ namespace PSD.Base.Card
             firsts = new List<Evenement>();
             sql = new Utils.ReadonlySQL("psd.db3");
             List<string> list = new string[] {
-                "CODE", "VALID", "NAME", "COUNT", "BACKGROUND", "EFFECT", "SPI",
-                "OCCURS", "PRIORS", "ONCES", "TERMINS", "GENRE"
+                "CODE", "VALID", "NAME", "COUNT", "BACKGROUND", "EFFECT", "SPI", "GENRE"
             }.ToList();
             System.Data.DataRowCollection datas = sql.Query(list, "Eve");
             foreach (System.Data.DataRow data in datas)
@@ -157,29 +156,7 @@ namespace PSD.Base.Card
                     string bg = (string)data["BACKGROUND"];
                     string effect = (string)data["EFFECT"];
                     string spis = (string)data["SPI"];
-
-                    string occurss = (string)data["OCCURS"];
-                    string[] occurs = string.IsNullOrEmpty(occurss) ? new string[] { }
-                        : occurss.Split(',').Select(p => p.StartsWith("!") ? p.Substring(1) : p).ToArray();
-                    bool[] lks = string.IsNullOrEmpty(occurss) ? new bool[] { }
-                        : occurss.Split(',').Select(p => p.StartsWith("!")).ToArray();
-                    string priorss = (string)data["PRIORS"];
-                    int[] priors = string.IsNullOrEmpty(priorss) ? new int[] { }
-                        : priorss.Split(',').Select(p => int.Parse(p)).ToArray();
-                    string oncess = (string)data["ONCES"];
-                    bool[] onces = string.IsNullOrEmpty(oncess) ? new bool[] { }
-                        : oncess.Split(',').Select(p => p != "0").ToArray();
-                    string terminss = (string)data["TERMINS"];
-                    bool[] termins = string.IsNullOrEmpty(terminss) ? new bool[] { }
-                        : terminss.Split(',').Select(p => p != "0").ToArray();
-                    firsts.Add(new Evenement(name, code, count, valid, genre, bg, effect, spis)
-                    {
-                        Occurs = occurs,
-                        Priorties = priors,
-                        IsOnce = onces,
-                        IsTermini = termins,
-                        Lock = lks
-                    });
+                    firsts.Add(new Evenement(name, code, count, valid, genre, bg, effect, spis));
                 }
             }
             dicts = new Dictionary<ushort, Evenement>();

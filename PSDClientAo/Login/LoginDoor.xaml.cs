@@ -107,8 +107,12 @@ namespace PSD.ClientAo.Login
                     bool msglog = true;
                     int mode = IsHallSelModeEnabled ? SelMode : Base.Rules.RuleCode.DEF_CODE;
                     //int pkg = GetPkgCode();
-                    int level = IsHallLevelEnabled == false ? 0 :
-                         ((PkgMode << 1) | (LvTestCheckBox.IsChecked == true ? 1 : 0));
+                    int level = 0;
+                    if (IsHallLevelEnabled != false)
+                    {
+                        if (PkgMode == 4 && LvTryTuxCheckBox.IsChecked == true) { PkgMode = 5; }
+                        level = ((PkgMode << 1) | (LvTestCheckBox.IsChecked == true ? 1 : 0));
+                    }
                     int team = IsHallTeamEnabled ? HallTeamMode : Base.Rules.RuleCode.DEF_CODE;
                     string[] trainer = (LvTestCheckBox.IsChecked == true && LvRingText.Text.Length > 0) ?
                         LvRingText.Text.Split(',') : null;
@@ -205,13 +209,15 @@ namespace PSD.ClientAo.Login
 
         private string GetRandomHeroName()
         {
-            string[] names = new string[] {"凤天凌","瑚月","姬亭","迦兰多","蓉霜","白王",
+            string[] names = new string[] {
+                "凤天凌","瑚月","姬亭","迦兰多","蓉霜","白王",
                 "魂", "左殇", "银翎", "蝶", "瓷儿", "玄鱼", "冷荼", "雷当", "沐小葵", "长鸿",
                 "闻人羽","乐无异","夏夷则","阿阮","沈夜",
                 "夏侯仪","冰璃","封铃笙","慕容璇玑","古德伦",
                 "楚歌","海棠","甄瑶","韩靖","沈嫣","杜晏","夏侯翎",
                 "南宫飞云","燕若雪","柴嵩","赵无双","唐影","秋依水",
-                "越今朝","越祈","闲卿","洛昭言","扁络桓","葛清霏","绮里小媛","嬴旭危"
+                "司空宇","沐月","凤煜","子巧","共工",
+                "皇甫云昭","晴月","方锦","叶凝绮"
             };
             int idx = random.Next(names.Length);
             return names[idx];
@@ -333,8 +339,9 @@ namespace PSD.ClientAo.Login
         private void Lv0Decided(object sender, RoutedEventArgs e) { PkgMode = 1; }
         private void Lv1Decided(object sender, RoutedEventArgs e) { PkgMode = 2; }
         private void Lv2Decided(object sender, RoutedEventArgs e) { PkgMode = 3; }
-        private void Lv3Decided(object sender, RoutedEventArgs e) { PkgMode = 4; }
-        private void Lv4Decided(object sender, RoutedEventArgs e) { PkgMode = 5; }
+        private void Lv3Decided(object sender, RoutedEventArgs e) { PkgMode = 4; LvTryTuxCheckBox.IsEnabled = true; }
+        private void Lv3UnDecided(object sender, RoutedEventArgs e) { LvTryTuxCheckBox.IsEnabled = false; }
+        private void Lv5Decided(object sender, RoutedEventArgs e) { PkgMode = 6; }
 
         private int GetPkgCode()
         {
@@ -479,12 +486,12 @@ namespace PSD.ClientAo.Login
             if (tb.Text == "AKB48Show!")
             {
                 Sel00Radio.IsEnabled = true;
-                Lv4Radio.IsEnabled = true;
+                Lv5Radio.IsEnabled = true;
             }
             else
             {
                 Sel00Radio.IsEnabled = false;
-                Lv4Radio.IsEnabled = false;
+                Lv5Radio.IsEnabled = false;
             }
         }
     }

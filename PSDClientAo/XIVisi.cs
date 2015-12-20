@@ -2463,12 +2463,10 @@ namespace PSD.ClientAo
                     }
                     else if (args[1] == "5")
                     {
-                        ushort mon = ushort.Parse(args[2]);
-                        if (mon != 0)
-                        {
-                            VI.Cout(Uid, "翻出怪物牌为【{0}】.", zd.Monster(mon));
-                            A0O.FlyingGet("M" + mon, 0, 0, true);
-                        }
+                        ushort[] mons = Util.TakeRange(args, 2, args.Length)
+                            .Select(p => ushort.Parse(p)).ToArray();
+                        VI.Cout(Uid, "翻出怪物牌为【{0}】.", zd.Monster(mons));
+                        A0O.FlyingGet(mons.Select(p => "M" + p).ToList(), 0, 0, true);
                     }
                     else if (args[1] == "6")
                     {

@@ -480,7 +480,7 @@ namespace PSD.PSDGamepkg.JNS
         }
         public bool NJH8EscueValid(Player player, ushort npcUt, int type, string fuse)
         {
-            return XI.Board.Garden.Values.Any(p => p.IsAlive && p.Team == player.Uid && p.GetPetCount() > 0);
+            return XI.Board.Garden.Values.Any(p => p.IsAlive && p.Team == player.Team && p.GetPetCount() > 0);
         }
         public void NJH8EscueAction(Player player, ushort npcUt, int type, string fuse, string argst)
         {
@@ -492,15 +492,12 @@ namespace PSD.PSDGamepkg.JNS
             EscueDiscard(player, npcUt);
             XI.RaiseGMessage("G0HI," + petOwner + "," + pet);
             TargetPlayer(petOwner, caller);
-            XI.RaiseGMessage("G0IA," + player.Uid + ",1,3");
+            XI.RaiseGMessage("G0IA," + caller + ",1,3");
         }
         public string NJH8EscueInput(Player player, ushort npcUt, int type, string fuse, string prev)
         {
             if (prev == "")
-            {
-                return "#要爆发宠物,/T1(p" + string.Join("p", XI.Board.Garden.Values.Where
-                    (p => p.IsAlive && p.GetPetCount() > 0 && p.Team == player.Uid).Select(p => p.Uid)) + ")";
-            }
+                return "#要爆发宠物,/T1" + FormatPlayers(p => p.IsAlive && p.GetPetCount() > 0 && p.Team == player.Team);
             else if (prev.IndexOf(',') < 0)
             {
                 ushort who = ushort.Parse(prev);
@@ -515,17 +512,17 @@ namespace PSD.PSDGamepkg.JNS
         }
         public bool NJH9EscueValid(Player player, ushort npcUt, int type, string fuse)
         {
-            return XI.Board.Garden.Values.Any(p => p.Team == player.Uid && p.HP == 0);
+            return XI.Board.Garden.Values.Any(p => p.Team == player.Team && p.IsAlive && p.HP == 0);
         }
         public void NJH9EscueAction(Player player, ushort npcUt, int type, string fuse, string argst)
         {
             EscueDiscard(player, npcUt);
-            XI.RaiseGMessage(Artiad.Cure.ToMessage(XI.Board.Garden.Values.Where(p => p.Team == player.Uid &&
+            XI.RaiseGMessage(Artiad.Cure.ToMessage(XI.Board.Garden.Values.Where(p => p.Team == player.Team &&
                 p.HP == 0).Select(p => new Artiad.Cure(p.Uid, 0, FiveElement.A, 2))));
-            Artiad.Procedure.AssignCurePointToTeam(XI, XI.Board.GetOpponenet(player), 3, "NJH9EscueAction",
+            Artiad.Procedure.AssignCurePointToTeam(XI, XI.Board.GetOpponenet(player), 3, "NJH9",
                 p => Cure(null, p.Keys.ToList(), p.Values.ToList()));
-            if (XI.Board.Garden.Values.Any(p => p.Team == player.Uid && p.HP == 0))
-                XI.InnerGMessage("G0ZH,0", 0);
+            if (XI.Board.Garden.Values.Any(p => p.IsAlive && p.HP == 0))
+                XI.InnerGMessage("G0ZH,0", -15);
         }
         #region NPC Single
         public void NCT41Debut(Player trigger)

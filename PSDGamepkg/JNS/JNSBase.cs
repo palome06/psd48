@@ -57,7 +57,7 @@ namespace PSD.PSDGamepkg.JNS
             if (src != null)
                 TargetPlayer(src.Uid, invs.Select(p => p.Uid));
             XI.RaiseGMessage(Artiad.Harm.ToMessage(invs.Select(p =>
-                new Artiad.Harm(p.Uid, src.Uid, five, n, mask))));
+                new Artiad.Harm(p.Uid, src == null ? 0 : src.Uid, five, n, mask))));
         }
 
         protected void Harm(Player src, List<Player> invs,
@@ -67,7 +67,7 @@ namespace PSD.PSDGamepkg.JNS
                 TargetPlayer(src.Uid, invs.Select(p => p.Uid));
             int sz = invs.Count;
             XI.RaiseGMessage(Artiad.Harm.ToMessage(Enumerable.Range(0, sz).Select
-                (p => new Artiad.Harm(invs[p].Uid, src.Uid, five, ns[p], mask == null ? 0 : mask[p]))));
+                (p => new Artiad.Harm(invs[p].Uid, src == null ? 0 : src.Uid, five, ns[p], mask == null ? 0 : mask[p]))));
         }
 
         protected void Cure(Player src, Player py, int n, FiveElement five = FiveElement.A)
@@ -75,7 +75,7 @@ namespace PSD.PSDGamepkg.JNS
             if (src != null)
                 TargetPlayer(src.Uid, py.Uid);
             XI.RaiseGMessage(Artiad.Cure.ToMessage(
-                new Artiad.Cure(py.Uid, src.Uid, five, n)));
+                new Artiad.Cure(py.Uid, src == null ? 0 : src.Uid, five, n)));
         }
 
         protected void Cure(Player src, IEnumerable<Player> invs, int n, FiveElement five = FiveElement.A)
@@ -83,7 +83,7 @@ namespace PSD.PSDGamepkg.JNS
             if (src != null)
                 TargetPlayer(src.Uid, invs.Select(p => p.Uid));
             XI.RaiseGMessage(Artiad.Cure.ToMessage(invs.Select(p => new Artiad.Cure(
-                p.Uid, src.Uid, five, n))));
+                p.Uid, src == null ? 0 : src.Uid, five, n))));
         }
 
         protected void Cure(Player src, List<Player> invs,
@@ -93,7 +93,7 @@ namespace PSD.PSDGamepkg.JNS
                 TargetPlayer(src.Uid, invs.Select(p => p.Uid));
             int sz = invs.Count;
             XI.RaiseGMessage(Artiad.Cure.ToMessage(Enumerable.Range(0, sz).Select
-                (p => new Artiad.Cure(invs[p].Uid, src.Uid, five, ns[p]))));
+                (p => new Artiad.Cure(invs[p].Uid, src == null ? 0 : src.Uid, five, ns[p]))));
         }
         protected void TargetPlayer(ushort from, ushort to)
         {
@@ -107,11 +107,12 @@ namespace PSD.PSDGamepkg.JNS
                 XI.RaiseGMessage("G2YS,T," + from + "," + string.Join(",", to.Select(p => "T," + p)));
         }
 
-        protected string AOthers(Player py)
+        protected string FormatPlayers(Func<Player, bool> condition)
         {
             return "(p" + string.Join("p", XI.Board.Garden.Values.Where(
-                p => p.IsAlive && p.Uid != py.Uid).Select(p => p.Uid)) + ")";
+                p => condition(p)).Select(p => p.Uid)) + ")";
         }
+        protected string AOthers(Player py) { return FormatPlayers(p => p.IsAlive && p.Uid != py.Uid); }
         protected string AOthersTared(Player py)
         {
             return "(p" + string.Join("p", XI.Board.Garden.Values.Where(

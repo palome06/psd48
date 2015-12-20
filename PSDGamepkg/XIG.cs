@@ -1306,6 +1306,11 @@ namespace PSD.PSDGamepkg
                             if (player.HP > player.HPb)
                                 player.HP = player.HPb;
                         }
+                        if (Board.InFightThrough)
+                        {
+                            AwakeABCValue(false, player);
+                            AwakeABCValue(true, player);
+                        }
                         RaiseGMessage("G2AK," + player.Uid + ","
                             + player.HP + "," + player.HPb + "," + player.STR + "," + player.DEX);
                         // remove all cosses containing the player

@@ -96,19 +96,17 @@ namespace PSD.PSDGamepkg.JNS
             bool isAvoid = false;
             if (harms.Any(p => player.Uid == p.Who && p.N > 0 && p.Source != player.Uid && p.Element == FiveElement.A))
             {
-                string select = XI.AsyncInput(player.Uid, "#是否抵御此伤害？##是##否,Y2", "0", "SF04");
+                string select = XI.AsyncInput(player.Uid, "#是否抵御此伤害？##是##否,Y2", "SF04", "0");
                 if (select == "1")
                     isAvoid = true;
             }
             if (isAvoid)
-            {
                 harms.RemoveAll(p => player.Uid == p.Who && p.N > 0 && p.Source != player.Uid && p.Element == FiveElement.A);
-                if (harms.Count > 0)
-                    XI.InnerGMessage(Artiad.Harm.ToMessage(harms), -149);
-            }
             else
-                XI.InnerGMessage(Artiad.Harm.ToMessage(harms), -149);
+                XI.RaiseGMessage("G0DH," + player.Uid + ",0,1");
             Cure(player, player, 1);
+            if (harms.Count > 0)
+                XI.InnerGMessage(Artiad.Harm.ToMessage(harms), -149);
         }
         public bool SF05Valid(Player player, string fuse)
         {

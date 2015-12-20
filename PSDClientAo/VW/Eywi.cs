@@ -454,6 +454,18 @@ namespace PSD.ClientAo.VW
                 else if (line.StartsWith("H09F"))
                     line += ",0";
             }
+            if (Version <= 146)
+            {
+                if (line.StartsWith("E0YM"))
+                {
+                    string[] args = line.Split(',');
+                    if (args[1] == "5")
+                    {
+                        string pick = args[2];
+                        line = "E0YM,5," + pick;
+                    }
+                }
+            }
         }
         #endregion Version
     }

@@ -487,6 +487,7 @@
     <Resource Include="Resources\PetsSnap\NCH04.png" />
     <Resource Include="Resources\PetsSnap\NCH05.png" />
     <Resource Include="Resources\PetsSnap\NCH06.png" />
+    <Resource Include="Resources\PetsSnap\NCH10.png" />
     <Resource Include="Resources\PetsSnap\NCH11.png" />
     <Resource Include="Resources\PetsSnap\NCH12.png" />
   </ItemGroup>
@@ -553,6 +554,8 @@
     <Resource Include="Resources\EquipSnap\WQT1.png" />
     <Resource Include="Resources\EquipSnap\WQT2.png" />
     <Resource Include="Resources\EquipSnap\WQH1.png" />
+    <Resource Include="Resources\EquipSnap\FJH1.png" />
+    <Resource Include="Resources\EquipSnap\XBH1.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Logo\CZ04.png" />
@@ -674,18 +677,23 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Card\Tux\JPT6.png" />
+    <Resource Include="Resources\Card\Tux\TPT4.png" />
     <Resource Include="Resources\Card\Tux\ZPT4.png" />
+    <Resource Include="Resources\Card\Tux\ZPT5.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Card\Tux\JPH2.png" />
+    <Resource Include="Resources\Card\Tux\JPH4.png" />
     <Resource Include="Resources\Card\Tux\TPH1.png" />
     <Resource Include="Resources\Card\Tux\TPH4.png" />
+    <Resource Include="Resources\Card\Tux\ZPH1.png" />
     <Resource Include="Resources\Card\Tux\WQH1.png" />
+    <Resource Include="Resources\Card\Tux\FJH1.png" />
+    <Resource Include="Resources\Card\Tux\XBH1.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\EquipSnap\XB000.png" />
-    <Resource Include="Resources\EquipSnap\XBH1.png" />
-    <Resource Include="Resources\EquipSnap\XBH2.png" />
+    <Resource Include="Resources\EquipSnap\XBH3.png" />
     <Resource Include="Resources\EquipSnap\XBT1.png" />
     <Resource Include="Resources\EquipSnap\XBT2.png" />
     <Resource Include="Resources\EquipSnap\XBT3.png" />

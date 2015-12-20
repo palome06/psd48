@@ -28,7 +28,7 @@ namespace PSD.PSDGamepkg.Artiad
         }
 
         public static void AssignCurePoint(XI XI, Player decider, int total, 
-            string reason, List<Player> invs, Action<IDictionary<Player, int>> action)
+            string reason, List<Player> invs, Action<IDictionary<Player, int>> cureAction)
         {
             IDictionary<Player, int> sch = new Dictionary<Player, int>();
             while (total > 0)
@@ -38,7 +38,7 @@ namespace PSD.PSDGamepkg.Artiad
                 else if (invs.Count == 1)
                 {
                     string word = "#HP回复,T1(p" + invs[0].Uid + "),#回复数值,D" + total;
-                    XI.AsyncInput(XI.Board.Rounder.Uid, word, reason, "0");
+                    XI.AsyncInput(decider.Uid, word, reason, "0");
                     sch[invs[0]] = total;
                     total = 0; invs.Clear();
                 }
@@ -47,7 +47,7 @@ namespace PSD.PSDGamepkg.Artiad
                     string ichi = total == 1 ? "/D1" : ("/D1~" + total);
                     string word = "#HP回复,T1(p" + string.Join("p",
                         invs.Select(p => p.Uid)) + "),#回复数值," + ichi;
-                    string input = XI.AsyncInput(XI.Board.Rounder.Uid, word, reason, "0");
+                    string input = XI.AsyncInput(decider.Uid, word, reason, "0");
                     if (!input.Contains("/"))
                     {
                         string[] ips = input.Split(',');
@@ -60,14 +60,14 @@ namespace PSD.PSDGamepkg.Artiad
                     }
                 }
             }
-            action(sch);
+            cureAction(sch);
         }
         public static void AssignCurePointToTeam(XI XI, Player decider, int total,
-            string reason, Action<IDictionary<Player, int>> action)
+            string reason, Action<IDictionary<Player, int>> cureAction)
         {
             List<Player> invs = XI.Board.Garden.Values.Where(p => p.IsAlive &&
                     p.Team == decider.Team && p.HP < p.HPb).ToList();
-            AssignCurePoint(XI, decider, total, reason, invs, action);
+            AssignCurePoint(XI, decider, total, reason, invs, cureAction);
         }
 
     }

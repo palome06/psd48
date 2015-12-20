@@ -8,17 +8,10 @@ using System.Threading.Tasks;
 
 namespace PSD.PSDGamepkg.JNS
 {
-    public class TuxCottage
+    public class TuxCottage : JNSBase
     {
         #region Base Operations
-        private Base.VW.IVI VI { set; get; }
-        //private VW.IWI WI { private set; get; }
-        private XI XI { set; get; }
-
-        public TuxCottage(XI xi, Base.VW.IVI vi)
-        {
-            this.XI = xi; this.VI = vi;
-        }
+        public TuxCottage(XI xi, Base.VW.IVI vi) : base(xi, vi) { }
 
         public IDictionary<string, Tux> RegisterDelegates(TuxLib lib, int pkgCode)
         {
@@ -43,10 +36,15 @@ namespace PSD.PSDGamepkg.JNS
                     {
                         return (bool)methodBribe.Invoke(tc, new object[] { player, type, fuse });
                     });
-                else
+                else if (tux.Type == Tux.TuxType.ZP)
                     tux.Bribe += new Tux.ValidDelegate(delegate(Player player, int type, string fuse)
                     {
-                        return (bool)GeneralTuxBride(player);
+                        return (bool)GeneralZPBribe(player);
+                    });
+                else
+                    tux.Bribe += new Tux.ValidDelegate(delegate (Player player, int type, string fuse)
+                    {
+                        return (bool)GeneralTuxBribe(player);
                     });
                 var methodValid = tc.GetType().GetMethod(cardCode + "Valid");
                 if (methodValid != null)
@@ -832,10 +830,6 @@ namespace PSD.PSDGamepkg.JNS
         }
         #endregion FJ
         #region ZP
-        public bool ZP01Bribe(Player player, int type, string fuse)
-        {
-            return player.RestZP > 0 && !player.ZPDisabled && !player.DrTuxDisabled;
-        }
         public bool ZP01Valid(Player player, int type, string fuse)
         {
             return XI.Board.IsAttendWar(player);
@@ -846,10 +840,6 @@ namespace PSD.PSDGamepkg.JNS
             XI.RaiseGMessage("G0JM," + rwho + "Z2");
         }
         // Tiangangzhanqi
-        public bool ZP02Bribe(Player player, int type, string fuse)
-        {
-            return player.RestZP > 0 && !player.ZPDisabled && !player.DrTuxDisabled;
-        }
         public bool ZP02Valid(Player player, int type, string fuse)
         {
             return XI.Board.IsAttendWarSucc(player);
@@ -860,10 +850,6 @@ namespace PSD.PSDGamepkg.JNS
                 XI.RaiseGMessage("G0IA," + player.Uid + ",1," + player.STRa);
         }
         // Jincanwang
-        public bool ZP03Bribe(Player player, int type, string fuse)
-        {
-            return player.RestZP > 0 && !player.ZPDisabled && !player.DrTuxDisabled;
-        }
         public bool ZP03Valid(Player player, int type, string fuse)
         {
             return XI.Board.IsAttendWarSucc(player);
@@ -873,10 +859,6 @@ namespace PSD.PSDGamepkg.JNS
             XI.RaiseGMessage("G0IA," + player.Uid + ",1,3");
         }
         // Tianxuanwuyin
-        public bool ZP04Bribe(Player player, int type, string fuse)
-        {
-            return player.RestZP > 0 && !player.ZPDisabled && !player.DrTuxDisabled;
-        }
         public void ZP04Action(Player player, int type, string fuse, string argst)
         {
             ushort side = ushort.Parse(XI.AsyncInput(player.Uid, "S", "ZP04", "0"));
@@ -1006,10 +988,6 @@ namespace PSD.PSDGamepkg.JNS
                 XI.RaiseGMessage("G0DH," + string.Join(",", pys.Select(p => p.Uid + ",0,1")));
             }
         }
-        public bool ZPT1Bribe(Player player, int type, string fuse)
-        {
-            return player.RestZP > 0 && !player.ZPDisabled && !player.DrTuxDisabled;
-        }
         public void ZPT1Action(Player player, int type, string fuse, string argst)
         {
             int val = (XI.Board.IsAttendWarSucc(player) || !XI.Board.IsAttendWar(player)) ? 1 : 4;
@@ -1054,10 +1032,10 @@ namespace PSD.PSDGamepkg.JNS
                         p => p.IsTared && p.Team == player.OppTeam && p.GetPetCount() > 0)
                         .Select(p => p.Uid).Except(XI.Board.PetProtecedPlayer).ToList();
                     string whoStr = XI.AsyncInput(player.Uid, "T1(p" +
-                        string.Join("p", targets) + ")", "JPT1Action", "0");
+                        string.Join("p", targets) + ")", "TPT1Action", "0");
                     ushort who = ushort.Parse(whoStr);
                     string monStr = XI.AsyncInput(player.Uid, "/M1(p" + string.Join("p", XI.Board.Garden[who]
-                        .Pets.Where(p => p != 0)) + ")", "JPT1Action", "0");
+                        .Pets.Where(p => p != 0)) + ")", "TPT1Action", "0");
                     if (monStr == VI.CinSentinel)
                         break;
                     if (!monStr.StartsWith("/"))
@@ -1516,10 +1494,6 @@ namespace PSD.PSDGamepkg.JNS
             else
                 XI.RaiseGMessage("G0IA," + player.Uid + ",1,2");
         }
-        public bool ZPT2Bribe(Player player, int type, string fuse)
-        {
-            return player.RestZP > 0 && !player.ZPDisabled && !player.DrTuxDisabled;
-        }
         public bool ZPT2Valid(Player player, int type, string fuse)
         {
             return XI.Board.IsAttendWar(player);
@@ -1543,10 +1517,6 @@ namespace PSD.PSDGamepkg.JNS
                 if (player.STRa > 0)
                     XI.RaiseGMessage("G0IX," + player.Uid + ",1," + player.STRa);
             }
-        }
-        public bool ZPT3Bribe(Player player, int type, string fuse)
-        {
-            return player.RestZP > 0 && !player.ZPDisabled && !player.DrTuxDisabled;
         }
         public bool TPT3Valid(Player player, int type, string fuse)
         {
@@ -1588,7 +1558,7 @@ namespace PSD.PSDGamepkg.JNS
                 {
                     XI.AsyncInput(player.Uid, "/", "TPT3", "0"); return;
                 }
-                string tar = XI.AsyncInput(player.Uid, "#【净衣咒】使用,T1" + ATaredTeammates(player), "TPT3", "0");
+                string tar = XI.AsyncInput(player.Uid, "#【净衣咒】使用,T1" + ATeammatesTared(player), "TPT3", "0");
                 Player locuster = XI.Board.Garden[ushort.Parse(tar)];
                 TargetPlayer(player.Uid, locuster.Uid);
 
@@ -2386,7 +2356,6 @@ namespace PSD.PSDGamepkg.JNS
             }
         }
         #endregion Package of 5 - XB
-
         #region Package of 6
         public void JPT6Action(Player player, int type, string fuse, string argst)
         {
@@ -2409,17 +2378,26 @@ namespace PSD.PSDGamepkg.JNS
         {
             XI.RaiseGMessage("G0TT," + player.Uid);
             int val = XI.Board.DiceValue;
-            XI.RaiseGMessage("G0IP," + player.Team + "," + val);
+            if (val == 1 || val == 6)
+                XI.RaiseGMessage("G0OA," + player.Uid + ",2");
+            else
+                XI.RaiseGMessage("G0IP," + player.Team + "," + val);
             string rwho = fuse.Substring(0, 2);
             XI.RaiseGMessage("G0JM," + rwho + "ZN");
-        }
-        public bool ZPT4Bribe(Player player, int type, string fuse)
-        {
-            return player.RestZP > 0 && !player.ZPDisabled && !player.DrTuxDisabled;
         }
         public bool ZPT4Valid(Player player, int type, string fuse)
         {
             return XI.Board.IsAttendWar(player);
+        }
+        public void ZPT5Action(Player player, int type, string fuse, string argst)
+        {
+            int diff = player.HPb - player.HP;
+            if (diff > 0)
+                XI.RaiseGMessage("G0IA," + player.Uid + ",1," + diff);
+        }
+        public bool ZPT5Valid(Player player, int type, string fuse)
+        {
+            return XI.Board.IsAttendWarSucc(player);
         }
         #endregion Package of 6
 
@@ -2475,23 +2453,57 @@ namespace PSD.PSDGamepkg.JNS
         {
             return XI.Board.EvePiles.Count >= 2;
         }
+        public void ZPH1Action(Player player, int type, string fuse, string argst)
+        {
+            var ai = XI.AsyncInput(player.Uid, "#命中-2," + AAllTareds(player), "ZPH1", "0");
+            ushort from = ushort.Parse(ai);
+            TargetPlayer(player.Uid, from);
+            XI.RaiseGMessage("G0OX," + from + ",1,2");
+        }
+        public bool ZPH1Valid(Player player, int type, string fuse)
+        {
+            return XI.Board.Garden.Values.Any(p => p.IsTared);
+        }
         public bool WQH1ConsumeValid(Player player, int consumeType, int type, string fuse)
         {
             if (consumeType == 0)
-                return XI.Board.Garden.Values.Any(p => p.Uid != player.Uid && p.IsTared) && XI.Board.Battler != null;
-            return false;
+            {
+                Tux zp03 = XI.LibTuple.TL.EncodeTuxCode("ZP03");
+                return player.Tux.Count >= 2 && zp03.Bribe(player, type, fuse) && zp03.Valid(player, type, fuse);
+            }
+            else return false;
         }
         public void WQH1ConsumeAction(Player player, int consumeType, int type, string fuse, string argst)
         {
             if (consumeType == 0)
             {
-                ushort selfCode = XI.LibTuple.TL.UniqueEquipSerial("WQH1");
+                XI.RaiseGMessage("G0CC," + player.Uid + ",0," + player.Uid + ",ZP03," + argst + ";0," + fuse);
+                XI.RaiseGMessage("G0CZ,0," + player.Uid);
+            }
+        }
+        public string WQH1ConsumeInput(Player player, int consumeType, int type, string fuse, string prev)
+        {
+            if (consumeType == 0 && prev == "")
+                return "/Q2(p" + string.Join("p", player.Tux) + ")";
+            else return "";
+        }
+        public bool XBH1ConsumeValid(Player player, int consumeType, int type, string fuse)
+        {
+            if (consumeType == 0)
+                return XI.Board.Garden.Values.Any(p => p.Uid != player.Uid && p.IsTared) && XI.Board.Battler != null;
+            return false;
+        }
+        public void XBH1ConsumeAction(Player player, int consumeType, int type, string fuse, string argst)
+        {
+            if (consumeType == 0)
+            {
+                ushort selfCode = XI.LibTuple.TL.UniqueEquipSerial("XBH1");
                 ushort tar = ushort.Parse(argst);
                 Player py = XI.Board.Garden[tar];
                 TargetPlayer(player.Uid, tar);
                 if (py.Tux.Count > 0)
                 {
-                    string sel = XI.AsyncInput(tar, "#交出的,Q1(p" + string.Join("p", py.Tux) + ")", "WQH1Consume", "0");
+                    string sel = XI.AsyncInput(tar, "#交出的,Q1(p" + string.Join("p", py.Tux) + ")", "XBH1", "0");
                     if (!sel.Contains(VI.CinSentinel))
                     {
                         ushort tux = ushort.Parse(sel);
@@ -2501,11 +2513,10 @@ namespace PSD.PSDGamepkg.JNS
                 XI.RaiseGMessage("G0HQ,0," + tar + "," + player.Uid + ",0,1," + selfCode);
             }
         }
-        public string WQH1ConsumeInput(Player player, int consumeType, int type, string fuse, string prev)
+        public string XBH1ConsumeInput(Player player, int consumeType, int type, string fuse, string prev)
         {
             if (consumeType == 0 && prev == "")
-                return "#交予的,/T1(p" + string.Join("p", XI.Board.Garden.Values.Where(
-                    p => p.Uid != player.Uid && p.IsTared).Select(p => p.Uid)) + ")";
+                return "#交予的,/T1" + FormatPlayers(p => p.IsTared && p.Uid != player.Uid);
             return "";
         }
 
@@ -2541,44 +2552,13 @@ namespace PSD.PSDGamepkg.JNS
         #endregion Equip Util
 
         #region Tux Util
-        private string AOthers(Player py)
-        {
-            return "(p" + string.Join("p", XI.Board.Garden.Values.Where(
-                p => p.IsAlive && p.Uid != py.Uid).Select(p => p.Uid)) + ")";
-        }
-        private string AAlls(Player py)
-        {
-            return "(p" + string.Join("p", XI.Board.Garden.Values.Where(
-                p => p.IsAlive).Select(p => p.Uid)) + ")";
-        }
-        private string AAllTareds(Player py)
-        {
-            return "(p" + string.Join("p", XI.Board.Garden.Values.Where(
-                p => p.IsTared).Select(p => p.Uid)) + ")";
-        }
-        private string ATeammates(Player py)
-        {
-            return "(p" + string.Join("p", XI.Board.Garden.Values.Where(
-                p => p.IsAlive && p.Team == py.Team).Select(p => p.Uid)) + ")";
-        }
-        private string ATaredTeammates(Player py)
-        {
-            return "(p" + string.Join("p", XI.Board.Garden.Values.Where(
-                p => p.IsTared && p.Team == py.Team).Select(p => p.Uid)) + ")";
-        }
-        private string AEnemy(Player py)
-        {
-            return "(p" + string.Join("p", XI.Board.Garden.Values.Where(
-                p => p.IsAlive && p.Team == py.OppTeam).Select(p => p.Uid)) + ")";
-        }
-        private void Harm(Player src, Player py, int n, FiveElement five = FiveElement.A, int mask = 0)
-        {
-            XI.RaiseGMessage(Artiad.Harm.ToMessage(
-                new Artiad.Harm(py.Uid, src == null ? 0 : src.Uid, five, n, mask)));
-        }
-        private bool GeneralTuxBride(Player player)
+        private bool GeneralTuxBribe(Player player)
         {
             return !player.DrTuxDisabled;
+        }
+        public bool GeneralZPBribe(Player player)
+        {
+            return player.RestZP > 0 && !player.ZPDisabled && !player.DrTuxDisabled;
         }
         private void GeneralLocustAction(Player player, int type, string fuse,
             string cdFuse, Player locuster, Tux locus)
@@ -2622,14 +2602,6 @@ namespace PSD.PSDGamepkg.JNS
                     "," + locus.Code + "," + locustee + ";" + type + "," + fuse, 101);
             }
             XI.InnerGMessage(cdFuse + ";" + type + "," + fuse, 106);
-        }
-        private void TargetPlayer(ushort from, ushort to)
-        {
-            XI.RaiseGMessage("G2YS,T," + from + ",T," + to);
-        }
-        private void TargetPlayer(ushort from, IEnumerable<ushort> tos)
-        {
-            XI.RaiseGMessage("G2YS,T," + from + "," + string.Join(",", tos.Select(p => "T," + p)));
         }
         #endregion Tux Util
         //private bool IfFuseSatisfy(Player player, string prev, string target)

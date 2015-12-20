@@ -569,21 +569,17 @@ namespace PSD.PSDGamepkg.JNS
         {
             int hpR = XI.Board.Garden.Values.Where(p => p.IsAlive && p.Team == rd.Team).Sum(p => p.HP);
             int hpO = XI.Board.Garden.Values.Where(p => p.IsAlive && p.Team == rd.OppTeam).Sum(p => p.HP);
-            Player[] lesser;
-            if (hpR < hpO)
-                lesser = new Player[] { rd };
-            else if (hpR > hpO)
-                lesser = new Player[] { XI.Board.GetOpponenet(rd) };
-            else
-                lesser = new Player[] { rd, XI.Board.GetOpponenet(rd) };
-            foreach (Player py in lesser)
+            Player lesser = null;
+            if (hpR < hpO) { lesser = rd; }
+            else if (hpR > hpO) { lesser = XI.Board.GetOpponenet(rd); }
+            if (lesser != null)
             {
                 int result = 0;
-                XI.RaiseGMessage("G0TT," + py.Uid);
+                XI.RaiseGMessage("G0TT," + lesser.Uid);
                 result += XI.Board.DiceValue;
-                XI.RaiseGMessage("G0TT," + py.Uid);
+                XI.RaiseGMessage("G0TT," + lesser.Uid);
                 result += XI.Board.DiceValue;
-                Artiad.Procedure.AssignCurePointToTeam(XI, py, result, "SJT14",
+                Artiad.Procedure.AssignCurePointToTeam(XI, lesser, result, "SJT14",
                     p => Cure(null, p.Keys.ToList(), p.Values.ToList()));
             }
         }
@@ -607,7 +603,7 @@ namespace PSD.PSDGamepkg.JNS
                 // show the monster
                 ushort pop = XI.Board.RestMonPiles.Dequeue();
                 Monster mon = XI.LibTuple.ML.Decode(pop);
-                XI.RaiseGMessage("G0YM,5," + pop + ",0");
+                XI.RaiseGMessage("G0YM,5," + pop);
                 int str = mon.STR;
                 string toStr = XI.AsyncInput(who, "#获得此怪物,T1(p" + string.Join("p",
                     XI.Board.Garden.Values.Where(p => p.IsAlive).Select(p => p.Uid)) + ")", "SJT14", "1");

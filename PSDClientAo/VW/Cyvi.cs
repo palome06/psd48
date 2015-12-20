@@ -321,7 +321,7 @@ namespace PSD.ClientAo.VW
             if (r2 <= 6)
                 uss = Enumerable.Range(r1, r2 - r1 + 1).ToList();
             else
-                uss = Enumerable.Range(r1, 7).ToList();
+                uss = Enumerable.Range(r1, 8 - r1).ToList();
             AD.yfDeal.Deal.Show(uss.Select(p => "D" + p), null, 1, 1, cancellable, false);
             string result = Cin(uid);
             if (result != CinSentinel)
