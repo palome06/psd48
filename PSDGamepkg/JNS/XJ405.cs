@@ -1458,7 +1458,7 @@ namespace PSD.PSDGamepkg.JNS
                 XI.RaiseGMessage("G0IA," + player.Uid + ",1,2");
                 player.RAMUshort = 1;
             }
-            else if (type == 1)
+            else if (type == 2)
             {
                 VI.Cout(0, "云天河触发「天河剑」.");
                 XI.RaiseGMessage("G0OA," + player.Uid + ",1,2");

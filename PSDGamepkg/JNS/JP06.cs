@@ -2512,7 +2512,7 @@ namespace PSD.PSDGamepkg.JNS
         }
         public void ZPH1Action(Player player, int type, string fuse, string argst)
         {
-            var ai = XI.AsyncInput(player.Uid, "#命中-2," + AAllTareds(player), "ZPH1", "0");
+            var ai = XI.AsyncInput(player.Uid, "#命中-2,T1" + AAllTareds(player), "ZPH1", "0");
             ushort from = ushort.Parse(ai);
             TargetPlayer(player.Uid, from);
             XI.RaiseGMessage("G0OX," + from + ",1,2");

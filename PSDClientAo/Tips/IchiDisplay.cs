@@ -97,6 +97,8 @@ namespace PSD.ClientAo.Tips
                     spouses.Add("指定场上一名女性");
                 else if (sp == "!6")
                     spouses.Add("指定场上一人男性");
+                else if (sp == "!7")
+                    spouses.Add("全体衡道众统领");
             }
 
             if (spouses.Count > 0)
@@ -487,6 +489,8 @@ namespace PSD.ClientAo.Tips
                             spouses.Add("指定场上一名女性");
                         else if (sp == "!6")
                             spouses.Add("指定场上一人男性");
+                        else if (sp == "!7")
+                            spouses.Add("全体衡道众统领");
                     }
                     if (spouses.Count > 0)
                     {

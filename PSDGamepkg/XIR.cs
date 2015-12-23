@@ -57,8 +57,8 @@ namespace PSD.PSDGamepkg
             //Board.MonPiles.PushBack(1041);
             //Board.MonPiles.PushBack(57);
             //Board.MonPiles.PushBack(1059);
-            //Board.MonPiles.PushBack(1062);
-            //Board.MonPiles.PushBack(2);
+            //Board.MonPiles.PushBack(1068);
+            //Board.MonPiles.PushBack(3);
             //Board.MonPiles.PushBack(1);
             //Board.MonPiles.PushBack(17);
             //Board.MonPiles.PushBack(14);
@@ -83,7 +83,7 @@ namespace PSD.PSDGamepkg
             //Board.MonPiles.PushBack(1106);
             //Board.EvePiles.PushBack(29);
             ////Board.EvePiles.PushBack(1);
-            //Board.EvePiles.PushBack(41);
+            Board.EvePiles.PushBack(31);
             //Board.EvePiles.PushBack(36);
             //Board.EvePiles.PushBack(34);
             //Board.EvePiles.PushBack(35);
@@ -141,8 +141,12 @@ namespace PSD.PSDGamepkg
             //Board.MonPiles.PushBack(1040);
             //Board.MonPiles.PushBack(9);
             //Board.MonPiles.PushBack(1031);
-            //Board.MonPiles.PushBack(1);
+            Board.MonPiles.PushBack(1);
             //Board.MonPiles.PushBack(1007);
+            Board.RestMonPiles.PushBack(2);
+            Board.RestMonPiles.PushBack(3);
+            Board.RestMonPiles.PushBack(7);
+            Board.RestMonPiles.PushBack(17);
             //RaiseGMessage("G0HQ,2,1,0,52,10,11");
             //RaiseGMessage("G0HQ,2,1,0,47,49,10,11,12");
             //Board.MonPiles.PushBack(54);
@@ -159,7 +163,8 @@ namespace PSD.PSDGamepkg
             //RaiseGMessage("G0HQ,2,2,0,0,37,70");
             //RaiseGMessage("G0HQ,2,3,0,0,84");
             //RaiseGMessage("G0HQ,2,1,0,0,77,95,9");
-            //RaiseGMessage("G0HQ,2,1,0,0,123");
+            //RaiseGMessage("G0HQ,2,1,0,0,123,101");
+            //RaiseGMessage("G0HQ,2,1,0,0,101");
             //RaiseGMessage("G0HQ,2,1,0,0,101,127");
             //RaiseGMessage("G0HQ,2,4,0,0,104");
             //RaiseGMessage("G0HQ,2,5,0,0,34");
@@ -327,7 +332,7 @@ namespace PSD.PSDGamepkg
                     RaiseGMessage("G0IS," + player.Uid + ",0," + string.Join(",", hero.Skills));
             }
             Board.RoundIN = "H0ST";
-            RunQuadStage("H0ST", 0); // Game start stage
+            RunQuadStage("H0ST"); // Game start stage
             if (inDebug)
                 DebugCondition();
             else
@@ -354,7 +359,7 @@ namespace PSD.PSDGamepkg
                     string jt = jumpTareget.ToString();
                     string je = jumpEnd.ToString();
                     var thread0 = new Thread(() => Util.SafeExecute(() => RunRound(jt, je),
-                        delegate(Exception e)
+                        delegate (Exception e)
                         {
                             if (!(e is ThreadAbortException))
                                 Log.Logger(e.ToString());
@@ -412,17 +417,17 @@ namespace PSD.PSDGamepkg
                         }
                         break;
                     case "OC":
-                        RunQuadStage(rstage, 0);
+                        RunQuadStage(rstage);
                         rstage = "R" + rounder + "ST";
                         break;
                     case "ST":
                         WI.BCast(rstage + ",0");
-                        RunQuadStage(rstage, 0);
+                        RunQuadStage(rstage);
                         WI.BCast(rstage + ",1");
                         rstage = "R" + rounder + "EP";
                         break;
                     case "EP":
-                        RunQuadStage(rstage, 0);
+                        RunQuadStage(rstage);
                         rstage = "R" + rounder + "EV";
                         break;
                     case "EV":
@@ -438,22 +443,22 @@ namespace PSD.PSDGamepkg
                         }
                         break;
                     case "EE":
-                        RunQuadStage(rstage, 0);
+                        RunQuadStage(rstage);
                         rstage = "R" + rounder + "GS"; break;
                     case "GS":
-                        RunQuadStage(rstage, 0);
+                        RunQuadStage(rstage);
                         rstage = "R" + rounder + "GR"; break;
                     case "GR":
                         WI.BCast(rstage + ",0");
-                        RunQuadStage(rstage, 3);
+                        RunQuadMixedStage(rstage, 3, null, null);
                         WI.BCast(rstage + ",1");
                         rstage = "R" + rounder + "GE"; break;
                     case "GE":
-                        RunQuadStage(rstage, 0);
+                        RunQuadStage(rstage);
                         rstage = "R" + rounder + "GF"; break;
                     //rstage = rounder == 1 ?"R200":"R100"; break;
                     case "GF":
-                        RunQuadStage(rstage, 0);
+                        RunQuadStage(rstage);
                         rstage = "R" + rounder + "Z0"; break;
                     case "Z0":
                         Board.Monster1 = 0; Board.Monster2 = 0;
@@ -461,7 +466,7 @@ namespace PSD.PSDGamepkg
                         Board.RPoolGain.Clear(); Board.OPoolGain.Clear();
                         Board.Battler = null;
                         RaiseGMessage("G1SG,0");
-                        RunQuadStage(rstage, 0);
+                        RunQuadStage(rstage);
                         rstage = "R" + rounder + "ZW"; break;
                     case "ZW":
                         {
@@ -476,7 +481,7 @@ namespace PSD.PSDGamepkg
                             Board.PosSupporters.AddRange(sMember.Select(p => "T" + p).ToList());
                             Board.AllowNoSupport = true;
                             Board.AllowNoHinder = true;
-                            RunQuadStage(rstage, 0);
+                            RunQuadStage(rstage);
                             // Trigger side
                             bool isFight = false; // decide to show fight or just pass
                             string spsm = "#为支援者(决定)", spsn = "#为支援者(建议)";
@@ -563,7 +568,7 @@ namespace PSD.PSDGamepkg
                         }
                         break;
                     case "ZU":
-                        RunQuadStage(rstage, 0);
+                        RunQuadStage(rstage);
                         rstage = "R" + rounder + "ZM";
                         break;
                     case "ZM":
@@ -581,7 +586,7 @@ namespace PSD.PSDGamepkg
                             WI.BCast("R" + rounder + "ZM1," + Board.Monster1);
                             RaiseGMessage("G0YM,0," + Board.Monster1 + "," + Board.Mon1From);
                             Board.Battler = NMBLib.Decode(Board.Monster1, LibTuple.ML, LibTuple.NL);
-                            RunQuadStage(rstage, 0);
+                            RunQuadStage(rstage);
                             if (NMBLib.IsNPC(Board.Monster1))
                                 rstage = "R" + rounder + "NP";
                             else if (NMBLib.IsMonster(Board.Monster1))
@@ -643,37 +648,37 @@ namespace PSD.PSDGamepkg
                         Board.InFightThrough = true;
                         Board.FightTangled = false;
                         AwakeABCValue(false);
-                        RunQuadStage(rstage, 0);
+                        RunQuadStage(rstage);
                         rstage = "R" + rounder + "Z1"; break;
                     case "Z1":
                         WI.BCast(rstage + ",0");
-                        RaiseGMessage("G09P,0");
-                        RunQuadStage(rstage, 0);
+                        RunQuadMixedStage(rstage, 0,
+                            new int[] { -100, 300 },
+                            new Action[] { () => RaiseGMessage("G09P,0"), () => RaiseGMessage("G0CZ,2") });
                         WI.BCast(rstage + ",1");
-                        RaiseGMessage("G0CZ,2");
                         rstage = "R" + rounder + "Z8"; break;
                     case "Z8":
-                        RunQuadStage(rstage, 0);
+                        RunQuadStage(rstage);
                         rstage = "R" + rounder + "CC"; break;
                     case "CC":
                         WI.BCast(rstage + ",0");
-                        RunQuadStage(rstage, 0);
+                        RunQuadStage(rstage);
                         WI.BCast(rstage + ",1");
                         //Board.Battler.Debut();
                         Board.IsMonsterDebut = true;
                         LibTuple.ML.Decode(Board.Monster1).Debut();
                         rstage = "R" + rounder + "PD"; break;
                     case "PD":
-                        RunQuadStage(rstage, 0);
+                        RunQuadStage(rstage);
                         rstage = "R" + rounder + "ZC"; break;
                     case "ZC":
                         Board.InFight = true;
                         AwakeABCValue(true);
-                        RunQuadStage(rstage, 0);
+                        RunQuadStage(rstage);
                         RaiseGMessage("G09P,0");
                         rstage = "R" + rounder + "ZI"; break;
                     case "ZI":
-                        RunQuadStage(rstage, 0);
+                        RunQuadStage(rstage);
                         rstage = "R" + rounder + "ZD"; break;
                     case "ZD":
                         WI.BCast(rstage + ",0");
@@ -696,7 +701,7 @@ namespace PSD.PSDGamepkg
                         //}
                         //else
                         //    RunQuadStage(rstage, 1);
-                        RunSeperateStage(rstage, 1, delegate(Board bd)
+                        RunSeperateStage(rstage, 1, delegate (Board bd)
                             { return bd.IsRounderBattleWin(); });
                         WI.BCast(rstage + ",1");
                         rstage = "R" + rounder + "ZN"; break;
@@ -704,7 +709,7 @@ namespace PSD.PSDGamepkg
                         Board.IsBattleWin = Board.IsRounderBattleWin();
                         Board.PoolDelta = Board.CalculateRPool() - Board.CalculateOPool();
                         WI.BCast(rstage + "," + (Board.IsBattleWin ? "0" : "1"));
-                        RunQuadStage(rstage, 0);
+                        RunQuadStage(rstage);
                         rstage = "R" + rounder + "VS"; break;
                     case "VT":
                         {
@@ -725,7 +730,7 @@ namespace PSD.PSDGamepkg
                                 }
                             }
                             //WI.BCast(rstage + "2," + (Board.IsBattleWin ? "0" : "1"));
-                            RunQuadStage(rstage, 0);
+                            RunQuadStage(rstage);
 
                             RecycleMonster(mon1zero, mon2zero);
                             Board.InFightThrough = false;
@@ -780,7 +785,7 @@ namespace PSD.PSDGamepkg
                                 }
                             }
                             //WI.BCast(rstage + "2," + (Board.IsBattleWin ? "0" : "1"));
-                            RunQuadStage(rstage, 0);
+                            RunQuadStage(rstage);
 
                             RecycleMonster(mon1zero, mon2zero);
                             Board.InFightThrough = false;
@@ -796,7 +801,7 @@ namespace PSD.PSDGamepkg
                         RaiseGMessage("G1HK,1");
                         foreach (Player player in Board.Garden.Values)
                             RaiseGMessage("G0AX," + player.Uid);
-                        RunQuadStage(rstage, 0);
+                        RunQuadStage(rstage);
                         rstage = "R" + rounder + "Z3"; break;
                     case "Z3":
                         Board.InFight = false; Board.InFightThrough = false;
@@ -805,7 +810,7 @@ namespace PSD.PSDGamepkg
                         RecycleMonster(false, false);
                         //WI.BCast(rstage + ",0");
                         //RaiseGMessage("G0FI,U," + rounder);
-                        RunQuadStage(rstage, 0);
+                        RunQuadStage(rstage);
                         Board.CleanBattler();
                         rstage = "R" + rounder + "ZZ"; break;
                     case "ZF":
@@ -813,39 +818,39 @@ namespace PSD.PSDGamepkg
                         Board.InFight = false; Board.InFightThrough = false;
                         foreach (Player player in Board.Garden.Values)
                             RaiseGMessage("G0AX," + player.Uid);
-                        RunQuadStage(rstage, 0);
+                        RunQuadStage(rstage);
                         Board.CleanBattler();
                         rstage = "R" + rounder + "ZZ"; break;
                     case "ZZ":
                         RaiseGMessage("G17F,U," + rounder);
-                        RunQuadStage(rstage, 0);
+                        RunQuadStage(rstage);
                         rstage = "R" + rounder + "BB"; break;
                     case "BB":
-                        RunQuadStage(rstage, 0);
+                        RunQuadStage(rstage);
                         rstage = "R" + rounder + "BC"; break;
                     case "BC":
                         WI.BCast(rstage + ",0");
                         Board.InFight = false; Board.InFightThrough = false;
-                        RunQuadStage(rstage, 0);
+                        RunQuadStage(rstage);
                         if (Board.Battler != null)
                             RaiseGMessage("G0HT," + Board.Rounder.Uid + ",2");
                         else
                             RaiseGMessage("G0HT," + Board.Rounder.Uid + ",1");
                         rstage = "R" + rounder + "BD"; break;
                     case "BD":
-                        RunQuadStage(rstage, 0);
+                        RunQuadStage(rstage);
                         rstage = "R" + rounder + "QR"; break;
                     case "QR":
-                        RunQuadStage(rstage, 0);
+                        RunQuadStage(rstage);
                         RaiseGMessage("G0QR," + Board.Rounder.Uid);
                         rstage = "R" + rounder + "TM"; break;
                     case "TM":
                         WI.BCast(rstage + ",0");
                         Board.InFight = false; Board.InFightThrough = false;
-                        RunQuadStage(rstage, 0);
+                        RunQuadStage(rstage);
                         rstage = "R" + rounder + "IC"; break;
                     case "IC":
-                        RunQuadStage(rstage, 0);
+                        RunQuadStage(rstage);
                         rstage = "R" + rounder + "ED"; break;
                     case "ED":
                         {
@@ -863,7 +868,7 @@ namespace PSD.PSDGamepkg
                             }
                             foreach (Player player in Board.Garden.Values)
                                 RaiseGMessage("G0AX," + player.Uid);
-                            RunQuadStage(rstage, 0);
+                            RunQuadStage(rstage);
                             if (Board.PendingTux.Count > 0)
                             {
                                 IDictionary<ushort, List<ushort>> imt = new Dictionary<ushort, List<ushort>>();
@@ -904,9 +909,9 @@ namespace PSD.PSDGamepkg
                 }
             }
         }
-        //private void RunQuadStage(string zero) { RunQuadStage(zero, 1); }
+        private void RunQuadStage(string zero) { RunQuadMixedStage(zero, 0, null, null); }
         // return whether actual action has been taken
-        private bool RunQuadStage(string zero, int sina)
+        private bool RunQuadMixedStage(string zero, int sina, int[] silentPriority, Action[] silentAction)
         {
             sina |= 0x2; // seems weired, when did sina = 0 happens?
             var garden = Board.Garden;
@@ -922,70 +927,97 @@ namespace PSD.PSDGamepkg
             string[] pris = new string[garden.Count + 1];
 
             bool actualAction = false;
+            int priorty = int.MinValue; int silentIdx = 0;
+            bool isAllThrough = false;
             WI.RecvInfStart();
             do
             {
-                Fill(involved, false);
-                Fill(pris, "");
-                List<string> locks = new List<string>();
-                List<SKE> purse = new List<SKE>();
-
-                AddZhuSkillBackward(pocket, zero, (sina & 4) != 0);
-                foreach (SKE ske in pocket)
+                do
                 {
-                    if ((sina & 1) != 0 && ske.Type == SKTType.TX && garden[ske.Tg].IsAlive)
-                        involved[ske.Tg] = true;
-                    bool ias = SKE2Message(ske, zero, involved, pris, locks);
-                    if (ias)
-                        purse.Add(ske);
-                    // if somebody added now, then re-scan it's related with $zero
-                }
+                    Fill(involved, false);
+                    Fill(pris, "");
+                    List<string> locks = new List<string>();
+                    List<SKE> purse = new List<SKE>();
 
-                // round mode, priority not needed.
-                if (locks.Count > 0)
-                {
-                    locks.Sort(LockSkillCompare);
-                    Queue<string> queue = new Queue<string>(locks);
-                    while (queue.Count > 0)
+                    bool isAnySet = false;
+                    AddZhuSkillBackward(pocket, zero, (sina & 4) != 0);
+                    foreach (SKE ske in pocket)
                     {
-                        string msg = queue.Dequeue();
-                        int idx = msg.IndexOf(',');
-                        ushort me = ushort.Parse(msg.Substring(0, idx));
-                        int jdx = msg.LastIndexOf(';');
-                        string mai = Util.Substring(msg, idx + 1, jdx);
-                        string inType = Util.Substring(msg, jdx + 1, -1);
-
-                        string skName;
-                        mai = DecodeSimplifiedCommand(mai, out skName);
-                        SKE ske = SKE.Find(skName, me, purse);
-                        if (ske != null)
-                            HandleU24Message(me, involved, mai, ske);
-                        //UKEvenMessage(involved, pocket, null);
+                        if (!isAnySet && ske.Priorty < priorty)
+                            continue;
+                        // if not set and priority equals given event, then handle the event directly
+                        if (silentPriority != null && !isAnySet && ske.Priorty > silentPriority[silentIdx])
+                        {
+                            priorty = silentPriority[silentIdx];
+                            silentAction[silentIdx]();
+                            ++silentIdx;
+                        }
+                        // base as the first one if not set
+                        if (!isAnySet || ske.Priorty == priorty)
+                        {
+                            if ((sina & 1) != 0 && ske.Type == SKTType.TX && garden[ske.Tg].IsAlive)
+                                involved[ske.Tg] = true;
+                            bool ias = SKE2Message(ske, zero, involved, pris, locks);
+                            if (ias)
+                                purse.Add(ske);
+                            isAnySet |= ias;
+                            priorty = ske.Priorty;
+                            //}
+                        }
+                        // if somebody added now, then re-scan it's related with $zero
                     }
-                }
-                if (!garden.Keys.Where(p => involved[p]).Any())
-                    break; // No skills could be called, cancel
-                if (!purse.Any(p => p.Lock != true) && (sina & 1) == 0)
-                    break; // Ignore pure tux empty query if necessary
-                foreach (ushort ut in Board.Garden.Keys)
-                    if (pris[ut] != "")
-                        pris[ut] = pris[ut].Substring(1);
-                SendOutU1Message(involved, pris, sina);
-                UEchoCode echo = UKEvenMessage(involved, purse, pris, sina);
-                actualAction |= (echo == UEchoCode.END_ACTION);
-                if (actualAction && ((sina & 4) != 0))
-                    break;
-                if (echo == UEchoCode.END_TERMIN) // skill updated
-                    pocket = ParseFromSKTriples(sk02[zero], zero, (sina & 4) != 0);
-                //actualAction |= UKEvenMessage(involved, purse, pris, sina);
-                //if (actualAction && ((sina & 4) != 0))
-                //    break;
-            } while (!IsAllClear(involved, false));
+
+                    if (!isAnySet) { isAllThrough = true; }
+
+                    // round mode, priority not needed.
+                    if (locks.Count > 0)
+                    {
+                        locks.Sort(LockSkillCompare);
+                        Queue<string> queue = new Queue<string>(locks);
+                        while (queue.Count > 0)
+                        {
+                            string msg = queue.Dequeue();
+                            int idx = msg.IndexOf(',');
+                            ushort me = ushort.Parse(msg.Substring(0, idx));
+                            int jdx = msg.LastIndexOf(';');
+                            string mai = Util.Substring(msg, idx + 1, jdx);
+                            string inType = Util.Substring(msg, jdx + 1, -1);
+
+                            string skName;
+                            mai = DecodeSimplifiedCommand(mai, out skName);
+                            SKE ske = SKE.Find(skName, me, purse);
+                            if (ske != null)
+                                HandleU24Message(me, involved, mai, ske);
+                            //UKEvenMessage(involved, pocket, null);
+                        }
+                    }
+                    if (!garden.Keys.Where(p => involved[p]).Any())
+                        break; // No skills could be called, cancel
+                    if (!purse.Any(p => p.Lock != true) && (sina & 1) == 0)
+                        break; // Ignore pure tux empty query if necessary
+                    foreach (ushort ut in Board.Garden.Keys)
+                        if (pris[ut] != "")
+                            pris[ut] = pris[ut].Substring(1);
+                    SendOutU1Message(involved, pris, sina);
+                    UEchoCode echo = UKEvenMessage(involved, purse, pris, sina);
+                    actualAction |= (echo == UEchoCode.END_ACTION);
+                    if (actualAction && ((sina & 4) != 0))
+                        break;
+                    if (echo == UEchoCode.END_TERMIN) // skill updated
+                        pocket = ParseFromSKTriples(sk02[zero], zero, (sina & 4) != 0);
+                } while (!IsAllClear(involved, false));
+                ++priorty;
+            } while (!isAllThrough);
             RaiseGMessage("G2AS,0");
             WI.RecvInfEnd();
+            if (silentPriority != null)
+            {
+                for (int i = silentIdx; i < silentPriority.Length; ++i)
+                    silentAction[silentIdx]();
+            }
             return actualAction;
         }
-        
+
         // Run in Separate Ways
         // return whether actual action has been taken
         private bool RunSeperateStage(string zero, int sina, Func<Board, bool> judge)
@@ -1180,7 +1212,8 @@ namespace PSD.PSDGamepkg
                             Consume = 0,
                             Lock = false,
                             IsOnce = false,
-                        }) { Tg = player.Uid, Fuse = nfuse };
+                        })
+                        { Tg = player.Uid, Fuse = nfuse };
                         purse.Add(skt);
                         string ip = nj01[npsk].Input(player, nfuse, "");
                         if (ip != "") ip = "," + ip;

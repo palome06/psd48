@@ -111,5 +111,9 @@ namespace PSD.Base
         {
             return (ushort)(Firsts.IndexOf(rune) + 1);
         }
+        public ushort[] GetFullAppendableList()
+        {
+            return new ushort[] { 1, 2, 3, 4, 5, 6 };
+        }
     }
 }

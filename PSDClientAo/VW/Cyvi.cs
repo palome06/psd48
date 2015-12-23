@@ -350,7 +350,7 @@ namespace PSD.ClientAo.VW
             IEnumerable<ushort> runes, bool cancellable, bool keep)
         {
             ShowTip(prevComment);
-            AD.yfDeal.Deal.Show(dbSerials.Select(p => "F" + p),
+            AD.yfDeal.Deal.Show(runes.Select(p => "R" + p),
                 null, r1, r2, cancellable, keep);
             string result = Cin(uid);
             if (result != CinSentinel)

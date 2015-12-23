@@ -272,6 +272,13 @@ namespace PSD.PSDGamepkg.JNS
                 XI.RaiseGMessage("G0ON,0,M,1," + pop);
             }
         }
+        public void NJT2Action(Player player, string fuse, string args)
+        {
+            string sel = XI.AsyncInput(player.Uid, "T1" + AAllTareds(player) +
+                ",F1(p" + string.Join("p", XI.LibTuple.RL.GetFullAppendableList()) + ")", "NJT2", "0");
+            if (!string.IsNullOrEmpty(sel) && !sel.StartsWith(VI.CinSentinel))
+                XI.RaiseGMessage("G0IF," + sel);
+        }
         public void NJH1Action(Player player, string fuse, string args)
         {
             ushort who = ushort.Parse(args);

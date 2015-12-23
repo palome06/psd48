@@ -495,6 +495,8 @@ namespace PSD.ClientZero
                             return "指定场上一名女性";
                         else if (p == "!6")
                             return "指定场上一人男性";
+                        else if (p == "!7")
+                            return "全体衡道众统领";
                         else
                             return "";
                     })));

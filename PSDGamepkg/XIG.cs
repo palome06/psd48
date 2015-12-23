@@ -1218,8 +1218,8 @@ namespace PSD.PSDGamepkg
                                             candidates.Add("!PT" + card);
                                         }
                                     }
-                                    // !3:TR-Lingyin, !4:TR-Xuanji
-                                    else if (spo == 3 || spo == 4)
+                                    // !3:TR-Lingyin, !4:TR-Xuanji, !7-QiliXiaoyuan
+                                    else if (spo == 3 || spo == 4 || spo == 7)
                                     {
                                         Func<Player, bool> genJudge;
                                         if (spo == 3)
@@ -1228,6 +1228,9 @@ namespace PSD.PSDGamepkg
                                         else if (spo == 4)
                                             genJudge = p => LibTuple.HL
                                                 .InstanceHero(p.SelectHero).Bio.Contains("B");
+                                        else if (spo == 7)
+                                            genJudge = p => LibTuple.HL
+                                                .InstanceHero(p.SelectHero).Bio.Contains("D");
                                         else
                                             genJudge = p => true;
                                         var pys = Board.Garden.Values.Where(p => p.IsAlive && p.HP > 0 &&
@@ -2169,7 +2172,7 @@ namespace PSD.PSDGamepkg
                             player.STRi = 1;
                             WI.BCast("E0IA," + me + ",2");
                         }
-                        if (Board.InFight)
+                        if (Board.InFightThrough)
                             RaiseGMessage("G09P,1");
                         break;
                     }
@@ -2208,7 +2211,7 @@ namespace PSD.PSDGamepkg
                             player.STRi = -1;
                             WI.BCast("E0OA," + me + ",2");
                         }
-                        if (Board.InFight)
+                        if (Board.InFightThrough)
                             RaiseGMessage("G09P,1");
                         break;
                     }
@@ -2247,7 +2250,7 @@ namespace PSD.PSDGamepkg
                             {
                                 player.DEXi = 1;
                                 WI.BCast("E0IX," + me + ",2");
-                            } if (Board.InFight)
+                            } if (Board.InFightThrough)
                                 RaiseGMessage("G09P,0");
                         }
                         break;
@@ -2288,7 +2291,7 @@ namespace PSD.PSDGamepkg
                                 player.DEXi = 1;
                                 WI.BCast("E0OX," + me + ",2");
                             }
-                            if (Board.InFight)
+                            if (Board.InFightThrough)
                                 RaiseGMessage("G09P,0");
                         }
                     }
