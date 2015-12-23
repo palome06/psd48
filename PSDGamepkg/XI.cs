@@ -121,8 +121,8 @@ namespace PSD.PSDGamepkg
             //17041, 19020, 10606, 18004, 10303, 19006
             //17008, 15008, 10201, 17037, 19021, 19006
             //15002, 17007, 10105, 17021, 19018, 10502
-            //17039, 19018, 17027, 17022, 17034, 17025
-            10206, 10303, 17027, 10305, 17034, 17025
+            //17039, 19018, 17027, 17022, 17034, 17042
+            17036, 10303, 17027, 10305, 17034, 17025
         };
 
         #region Memeber Declaration & Constructor
@@ -643,8 +643,8 @@ namespace PSD.PSDGamepkg
                  "HI", "HL", "IC", "OC", "HT", "HG", "QR", "HZ", "TT", "T7", "JM", "WN", "IJ", "OJ",
                  "IE", "OE", "IS", "OS", "LH", "IV", "OV", "PB", "YM", "HR", "FI", "ON", "SN", "MA",
                  "PH", "ZJ", "IF", "OF" };
-            string[] g1 = new string[] { "DI", "IU", "OU", "CW", "ZK", "IZ", "OZ", "WP", "SG", "HK",
-                 "WJ", "JG", "XR", "EV", "CK", "7F", "YP", "NI" };
+            string[] g1 = new string[] { "DI", "IU", "OU", "TH", "CW", "ZK", "IZ", "OZ", "WP", "SG",
+                 "HK", "WJ", "JG", "XR", "EV", "CK", "7F", "YP", "NI" };
             string[] g2 = new string[] { "IN", "RN", "CN", "QC", "FU", "QU", "CL", "ZU", "HU", "WK",
                  "AK", "IL", "OL", "SW", "AS", "SY" };
             foreach (string g0event in g0)
@@ -654,7 +654,7 @@ namespace PSD.PSDGamepkg
             foreach (string g2event in g2)
                 RegisterBasicSKTs(dict, "G2" + g2event, 100);
 
-            RegisterBasicSKTs(dict, "G0OH", 200);
+            RegisterBasicSKTs(dict, "G1TH", 200);
             RegisterBasicSKTs(dict, "G0ZW", 200);
             RegisterBasicSKTs(dict, "G0ZW", 300);
             RegisterBasicSKTs(dict, "G0ZW", 400);

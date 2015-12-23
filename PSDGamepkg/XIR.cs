@@ -83,7 +83,7 @@ namespace PSD.PSDGamepkg
             //Board.MonPiles.PushBack(1106);
             //Board.EvePiles.PushBack(29);
             ////Board.EvePiles.PushBack(1);
-            //Board.EvePiles.PushBack(31);
+            //Board.EvePiles.PushBack(41);
             //Board.EvePiles.PushBack(36);
             //Board.EvePiles.PushBack(34);
             //Board.EvePiles.PushBack(35);
@@ -109,9 +109,10 @@ namespace PSD.PSDGamepkg
             //Board.MonPiles.PushBack(1030);
             //Board.MonPiles.PushBack(23);
             //Board.MonPiles.PushBack(19);
-            Board.MonPiles.PushBack(2);
+            //Board.MonPiles.PushBack(2);
             //Board.MonPiles.PushBack(37);
-            //Board.MonPiles.PushBack(1003);
+            //Board.MonPiles.PushBack(1025);
+            //Board.RestNPCPiles.PushBack(1025);
             //List<ushort> mons = new List<ushort>()
             //{
             //    31,32,33,34,35,36,37,38,39,40
@@ -128,7 +129,7 @@ namespace PSD.PSDGamepkg
             //Board.MonPiles.PushBack(33);
             //Board.MonPiles.PushBack(4);
             //Board.MonPiles.PushBack(10);
-            Board.MonPiles.PushBack(8);
+            //Board.MonPiles.PushBack(8);
             //Board.MonPiles.PushBack(19);
             //Board.RestNPCPiles.PushBack(1075);
             //Board.MonPiles.PushBack(1112);
@@ -158,7 +159,7 @@ namespace PSD.PSDGamepkg
             //RaiseGMessage("G0HQ,2,2,0,0,37,70");
             //RaiseGMessage("G0HQ,2,3,0,0,84");
             //RaiseGMessage("G0HQ,2,1,0,0,77,95,9");
-            //RaiseGMessage("G0HQ,2,1,0,0,49");
+            //RaiseGMessage("G0HQ,2,1,0,0,123");
             //RaiseGMessage("G0HQ,2,1,0,0,101,127");
             //RaiseGMessage("G0HQ,2,4,0,0,104");
             //RaiseGMessage("G0HQ,2,5,0,0,34");
@@ -273,14 +274,16 @@ namespace PSD.PSDGamepkg
             //RaiseGMessage("G0OH,1,0,4,12,2,0,4,12");
             //RaiseGMessage(Artiad.Harm.ToMessage(new ushort[] { 1, 4, 5, 6 }
             //    .Select(p => new Artiad.Harm(p, 1, FiveElement.YIN, 6, 0))));
+            //RaiseGMessage(Artiad.Harm.ToMessage(new Artiad.Harm(2, 2, FiveElement.YIN, 4, 0)));
+            //RaiseGMessage(Artiad.Harm.ToMessage(new Artiad.Harm(2, 2, FiveElement.YIN, 3, 0)));
             //Board.Garden[3].Escue.Add(1112);
             //RaiseGMessage("G2IL,3,1112");
-            RaiseGMessage("G0IF,1,4");
-            RaiseGMessage("G0IF,2,4");
-            RaiseGMessage("G0IF,4,4");
+            //RaiseGMessage("G0IF,1,4");
+            //RaiseGMessage("G0IF,2,4");
+            //RaiseGMessage("G0IF,4,4");
             foreach (Player player in Board.Garden.Values)
                 RaiseGMessage("G0HQ,2," + player.Uid + ",1,3");
-            //RaiseGMessage("G0HQ,2,4,1,1");
+            //RaiseGMessage("G0HQ,2,4,1,8");
             //RaiseGMessage("G0HQ,2,6,1,2");
             //RaiseGMessage("G0HQ,2,1,1,1");
             //RaiseGMessage("G0HQ,2,2,1,3");

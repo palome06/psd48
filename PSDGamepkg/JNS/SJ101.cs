@@ -83,9 +83,6 @@ namespace PSD.PSDGamepkg.JNS
             XI.RaiseGMessage("G2IN,0,4");
             XI.RaiseGMessage("G1IU," + string.Join(",", pops));
             
-            string range1 = Util.SSelect(XI.Board, p => p.Team == rd.Team && p.IsAlive);
-            string range2 = Util.SSelect(XI.Board, p => p.Team == rd.OppTeam && p.IsAlive);
-
             ushort[] uds = { rd.Uid, nx.Uid };
             string[] ranges = { Util.SSelect(XI.Board, p => p.Team == rd.Team && p.IsAlive),
                         Util.SSelect(XI.Board, p => p.Team == rd.OppTeam && p.IsAlive) };

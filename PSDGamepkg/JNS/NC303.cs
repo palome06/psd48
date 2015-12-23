@@ -95,7 +95,6 @@ namespace PSD.PSDGamepkg.JNS
                     p => p.IsAlive && p.Team == player.Team && p.Tux.Count > 0).Select(p => p.Uid)) + ")";
             else if (prev.IndexOf(',') < 0)
             {
-                ushort who = ushort.Parse(prev);
                 return "#待加入的,T1(p" + string.Join("p", XI.Board.Garden.Values.Where(
                     p => p.Team == player.Team).Select(p => p.Uid)) + ")";
             }

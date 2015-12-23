@@ -73,7 +73,6 @@ namespace PSD.PSDGamepkg.JNS
         {
             List<Artiad.Harm> harms = Artiad.Harm.Parse(fuse);
             List<Artiad.Harm> rvs = new List<Artiad.Harm>();
-            IDictionary<ushort, List<Artiad.Harm>> dict = new Dictionary<ushort, List<Artiad.Harm>>();
             foreach (Artiad.Harm harm in harms)
             {
                 Player py = XI.Board.Garden[harm.Who];
@@ -115,6 +114,16 @@ namespace PSD.PSDGamepkg.JNS
         public void SF05Action(Player player, string fuse, string args)
         {
             XI.RaiseGMessage("G0OA," + player.Uid + ",1,2");
+        }
+        public bool SF06Valid(Player player, string fuse)
+        {
+            List<Artiad.Harm> harms = Artiad.Harm.Parse(fuse);
+            return player.IsAlive && harms.Any(p => p.Who == player.Uid && p.N > 0);
+        }
+        public void SF06Action(Player player, string fuse, string args)
+        {
+            Harm(null, player, 1);
+            XI.RaiseGMessage("G1CK," + player.Uid + ",SF06,0");
         }
         public void SF07Action(Player player, string fuse, string args)
         {

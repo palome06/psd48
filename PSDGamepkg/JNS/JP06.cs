@@ -2374,6 +2374,59 @@ namespace PSD.PSDGamepkg.JNS
                     XI.RaiseGMessage(Artiad.Harm.ToMessage(new Artiad.Harm(tar, player.Uid, FiveElement.A, val, 0)));
             }
         }
+        public bool TPT4Valid(Player player, int type, string fuse)
+        {
+            if (type == 0)
+            {
+                return XI.Board.Garden.Values.Any(p => p.IsTared && p.Team == player.Team && p.Runes.Count > 0) &&
+                    XI.Board.Garden.Values.Any(p => p.IsTared && p.Team == player.OppTeam && p.Runes.Count > 0);
+            }
+            else if (type == 1)
+            {
+                List<Artiad.Harm> harms = Artiad.Harm.Parse(fuse);
+                return harms.Any(p => XI.Board.Garden[p.Who].IsTared && XI.Board.Garden[p.Who].HP <= p.N);
+            }
+            else return false;
+        }
+        public void TPT4Action(Player player, int type, string fuse, string argst)
+        {
+            if (type == 0)
+            {
+                string person = XI.AsyncInput(player.Uid, "#弃置我方,T1" + FormatPlayers(p =>
+                    p.IsTared && p.Team == player.Team && p.Runes.Count > 0) + ",#弃置对方,T1" + FormatPlayers(p =>
+                    p.IsTared && p.Team == player.OppTeam && p.Runes.Count > 0), "TPT4", "0");
+                if (!string.IsNullOrEmpty(person) && !person.StartsWith("/"))
+                {
+                    int idx = person.IndexOf(',');
+                    ushort ur = ushort.Parse(person.Substring(0, idx));
+                    ushort uo = ushort.Parse(person.Substring(idx + 1));
+                    string target = XI.AsyncInput(player.Uid, "#弃置我方,F1(p" + string.Join("p", XI.Board.Garden[ur].Runes) +
+                        "),#弃置对方,F1(p" + string.Join("p", XI.Board.Garden[uo].Runes) + ")", "TPT4", "1");
+                    if (!string.IsNullOrEmpty(target) && !target.StartsWith("/"))
+                    {
+                        int jdx = target.IndexOf(',');
+                        ushort tr = ushort.Parse(target.Substring(0, jdx));
+                        ushort to = ushort.Parse(target.Substring(jdx + 1));
+                        XI.RaiseGMessage("G0OF," + ur + "," + tr);
+                        XI.RaiseGMessage("G0OF," + uo + "," + to);
+                    }
+                }
+            }
+            else if (type == 1)
+            {
+                List<Artiad.Harm> harms = Artiad.Harm.Parse(fuse);
+                List<ushort> targets = harms.Where(p => XI.Board.Garden[p.Who].IsTared &&
+                    XI.Board.Garden[p.Who].HP <= p.N).Select(p => p.Who).Distinct().ToList();
+                string result = XI.AsyncInput(player.Uid, "T1(p" + string.Join("p", targets) + ")", "TPT4", "2");
+                if (!string.IsNullOrEmpty(result) && !result.StartsWith("/"))
+                {
+                    ushort who = ushort.Parse(result);
+                    XI.RaiseGMessage("G0TT," + who);
+                    int value = XI.Board.DiceValue;
+                    Cure(player, XI.Board.Garden[who], value);
+                }
+            }
+        }
         public void ZPT4Action(Player player, int type, string fuse, string argst)
         {
             XI.RaiseGMessage("G0TT," + player.Uid);
@@ -2421,6 +2474,10 @@ namespace PSD.PSDGamepkg.JNS
         public bool JPH2Valid(Player player, int type, string fuse)
         {
             return XI.Board.Garden.Values.Any(p => p.IsTared && p.HasAnyEquips());
+        }
+        public bool JPH4Valid(Player player, int type, string fuse)
+        {
+            return false;
         }
         public void TPH1Action(Player player, int type, string fuse, string argst)
         {

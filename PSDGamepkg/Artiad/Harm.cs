@@ -112,17 +112,17 @@ namespace PSD.PSDGamepkg.Artiad
             return new FiveElement[] { FiveElement.AQUA, FiveElement.AGNI,
                 FiveElement.THUNDER, FiveElement.AERO, FiveElement.SATURN };
         }
-        public static string ToMessage(Harm harm)
+        public static string ToMessage(Harm harm, string head = "G0OH")
         {
-            return "G0OH," + harm.Who + "," + harm.Source + "," + IntHelper.Elem2Int(harm.Element)
-                + "," + harm.N + "," + harm.Mask;
+            return head + "," + harm.Who + "," + harm.Source + "," +
+                IntHelper.Elem2Int(harm.Element) + "," + harm.N + "," + harm.Mask;
         }
-        public static string ToMessage(IEnumerable<Harm> harms)
+        public static string ToMessage(IEnumerable<Harm> harms, string head = "G0OH")
         {
             string op = string.Join(",", harms.Select(p => p.Who + "," +
                     p.Source + "," + IntHelper.Elem2Int(p.Element) + "," + p.N + "," + p.Mask));
             if (!string.IsNullOrEmpty(op))
-                return "G0OH," + op;
+                return head + "," + op;
             else
                 return "";
         }

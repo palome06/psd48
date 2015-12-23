@@ -3534,6 +3534,85 @@ namespace PSD.PSDGamepkg.JNS
                 return "";
         }
         #endregion TR034 - Mingxiu
+        #region TR036 - LuoMaiming
+        public bool JNT3601Valid(Player player, int type, string fuse)
+        {
+            if (type == 0 || type == 1)
+                return IsMathISOS("JNT3601", player, fuse);
+            else if (type == 2)
+            {
+                Base.Card.Monster mon = XI.Board.Battler as Monster;
+                if (mon != null && (mon.Element == FiveElement.AQUA || 
+                        mon.Element == FiveElement.AGNI || mon.Element == FiveElement.SOL))
+                {
+                    return XI.Board.Garden.Values.Any(p => p.IsAlive && p.Team == player.Team && XI.Board.IsAttendWar(p));
+                }
+            }
+            return false;
+        }
+        public void JNT3601Action(Player player, int type, string fuse, string argst)
+        {
+            if (type == 0)
+            {
+                foreach (Player py in XI.Board.Garden.Values)
+                {
+                    if (py.IsAlive && py.Team == player.Team)
+                        ++py.TuxLimit;
+                }
+            }
+            else if (type == 1)
+            {
+                foreach (Player py in XI.Board.Garden.Values)
+                {
+                    if (py.IsAlive && py.Team == player.Team)
+                        --py.TuxLimit;
+                }
+            }
+            else if (type == 2)
+            {
+                XI.RaiseGMessage("G0DH," + string.Join(",", XI.Board.Garden.Values.Where(p => p.IsAlive &&
+                    p.Team == player.Team && XI.Board.IsAttendWar(p)).Select(p => p.Uid + ",0,1")));
+            }
+        }
+        public bool JNT3602Valid(Player player, int type, string fuse)
+        {
+            if (type == 0)
+                return player.Tux.Count > 0 && XI.Board.Garden.Values.Any(p => p.IsTared && p.Uid != player.Uid);
+            else if (type == 1)
+            {
+                string[] g1ck = fuse.Split(',');
+                return g1ck[2] == "SF06" && g1ck[3] == "0";
+            }
+            else
+                return false;
+        }
+        public void JNT3602Action(Player player, int type, string fuse, string argst)
+        {
+            if (type == 0)
+            {
+                int idx = argst.IndexOf(',');
+                ushort ut = ushort.Parse(argst.Substring(0, idx));
+                ushort to = ushort.Parse(argst.Substring(idx + 1));
+                XI.RaiseGMessage("G0HQ,0," + to + "," + player.Uid + ",1,1," + ut);
+                XI.RaiseGMessage("G0IF," + to + ",6");
+            }
+            else if (type == 1)
+            {
+                if (argst == "1")
+                    Cure(player, player, 2);
+                else
+                    XI.RaiseGMessage("G0DH," + player.Uid + ",0,1");
+            }
+        }
+        public string JNT3602Input(Player player, int type, string fuse, string prev)
+        {
+            if (type == 0 && prev == "")
+                return "/Q1(p" + string.Join("p", player.Tux) + "),/T1" + AOthersTared(player);
+            else if (type == 1 && prev == "")
+                return "#请选择「嗜血法阵」执行项。##HP+2##补一张牌,Y2";
+            else return "";
+        }
+        #endregion TR036 - LuoMaiming
         #region TR037 - YingXuwei
         public bool JNT3701Valid(Player player, int type, string fuse)
         {
@@ -4081,13 +4160,13 @@ namespace PSD.PSDGamepkg.JNS
         public bool JNT4201Valid(Player player, int type, string fuse)
         {
             List<Artiad.Harm> harms = Artiad.Harm.Parse(fuse);
-            return harms.Any(p => XI.Board.Garden[p.Who].Tux.Count <= p.N);
+            return harms.Any(p => XI.Board.Garden[p.Who].IsAlive && XI.Board.Garden[p.Who].Tux.Count <= p.N);
         }
         public void JNT4201Action(Player player, int type, string fuse, string argst)
         {
             List<Artiad.Harm> harms = Artiad.Harm.Parse(fuse);
-            List<Player> tos = harms.Where(p => XI.Board.Garden[p.Who].Tux.Count <= p.N)
-                .Select(p => XI.Board.Garden[p.Who]).Distinct().ToList();
+            List<Player> tos = harms.Where(p => XI.Board.Garden[p.Who].IsAlive &&
+                XI.Board.Garden[p.Who].Tux.Count <= p.N).Select(p => XI.Board.Garden[p.Who]).Distinct().ToList();
             Cure(player, tos, 1);
         }
         public bool JNT4202Valid(Player player, int type, string fuse)

@@ -78,8 +78,7 @@ namespace PSD.PSDGamepkg.JNS
         public void JN10102Action(Player player, int type, string fuse, string argst)
         {
             TargetPlayer(player.Uid, XI.Board.Hinder.Uid);
-            ushort tar = ushort.Parse(XI.AsyncInput(player.Uid, "#获得的,T1(p" +
-                XI.Board.Hinder.Uid + ")", "JN10102", "0"));
+            XI.AsyncInput(player.Uid, "#获得的,T1(p" + XI.Board.Hinder.Uid + ")", "JN10102", "0");
             string c0 = Util.RepeatString("p0", XI.Board.Garden[XI.Board.Hinder.Uid].Tux.Count);
             XI.AsyncInput(player.Uid, "#获得的,C1(" + c0 + ")", "JN10102" , "0");
             XI.RaiseGMessage("G0HQ,0," + player.Uid + "," + XI.Board.Hinder.Uid + ",2,1");
@@ -2954,7 +2953,7 @@ namespace PSD.PSDGamepkg.JNS
             }
             if (type == 0 || type == 1)
             {
-                string order = XI.AsyncInput(player.Uid, "//", "JNS0102", "0");
+                XI.AsyncInput(player.Uid, "//", "JNS0102", "0");
                 int next = XI.Board.HeroPiles.Dequeue();
                 XI.RaiseGMessage("G0IV," + player.Uid + "," + next);
                 player.RIM["15001.Hero"] = next;

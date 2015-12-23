@@ -157,56 +157,21 @@ namespace PSD.PSDGamepkg
             int nextPriority = priority + 1; // might change during execution
             switch (args[0])
             {
-                case "G0OH":
+                case "G1TH":
                     if (priority == 100)
                     {
-                        string result = "";
-                        List<Artiad.Harm> harms = Artiad.Harm.Parse(cmd);
-                        foreach (Artiad.Harm harm in harms)
-                        {
-                            Player py = Board.Garden[harm.Who];
-                            //if (Artiad.IntHelper.IsMaskSet(harm.Mask, GiftMask.ALIVE) && py.HP - harm.N <= 0)
-                            //    harm.N = py.HP - 1;
-                            if (harm.N > 0)
-                            {
-                                if (py.HP - harm.N <= 0)
-                                    harm.N = py.HP;
-                                py.HP -= harm.N;
-                                if (harm.N > 0)
-                                {
-                                    result += "," + harm.Who + "," + Artiad.IntHelper.Elem2Int(harm.Element)
-                                        + "," + harm.N + "," + py.HP;
-                                }
-                                //if (player.HP == 0)
-                                //    death += "," + me;
-                            }
-                        }
-                        if (!result.Equals(""))
-                            WI.BCast("E0OH" + result);
-                        //if (!death.Equals(""))
-                        //    RaiseGMessage("G0ZH" + death);
+                        WI.BCast("E0OH," + string.Join(",", Artiad.Harm.Parse(cmd).Select(p => p.Who +
+                            "," + Artiad.IntHelper.Elem2Int(p.Element) + "," + p.N + "," + Board.Garden[p.Who].HP)));
                     }
                     else if (priority == 200)
                     {
-                        List<ushort> zeros = Board.Garden.Values.Where(p => p.IsAlive && p.HP == 0)
-                            .Select(p => p.Uid).ToList();
+                        List<ushort> zeros = Board.Garden.Values.Where(p => p.IsAlive &&
+                            p.HP == 0).Select(p => p.Uid).ToList();
                         if (zeros.Count > 0)
                         {
                             WI.BCast("E0ZH," + string.Join(",", zeros));
                             RaiseGMessage("G0ZH,0");
                         }
-                        // ISet<ushort> death = new HashSet<ushort>();
-                        // List<Artiad.Harm> harms = Artiad.Harm.Parse(cmd);
-                        // foreach (Artiad.Harm harm in harms)
-                        // {
-                        //     if (Board.Garden[harm.Who].IsAlive && Board.Garden[harm.Who].HP == 0)
-                        //         death.Add(harm.Who);
-                        // }
-                        // if (death.Count > 0)
-                        // {
-                        //     WI.BCast("E0ZH," + string.Join(",", death));
-                        //     RaiseGMessage("G0ZH," + string.Join(",", death));
-                        // }
                     }
                     break;
                 case "G0ZW":
@@ -1127,6 +1092,24 @@ namespace PSD.PSDGamepkg
                         }
                         if (g1di != "")
                             RaiseGMessage("G1DI" + g1di);
+                    }
+                    break;
+                case "G0OH":
+                    {
+                        List<Artiad.Harm> harms = Artiad.Harm.Parse(cmd);
+                        foreach (Artiad.Harm harm in harms)
+                        {
+                            Player py = Board.Garden[harm.Who];
+                            if (harm.N > 0)
+                            {
+                                if (py.HP - harm.N <= 0)
+                                    harm.N = py.HP;
+                                py.HP -= harm.N;
+                            }
+                        }
+                        harms.RemoveAll(p => p.N <= 0);
+                        if (harms.Count > 0)
+                            RaiseGMessage(Artiad.Harm.ToMessage(harms, "G1TH"));
                     }
                     break;
                 case "G0IH":
