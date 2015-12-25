@@ -83,7 +83,7 @@ namespace PSD.PSDGamepkg
             //Board.MonPiles.PushBack(1106);
             //Board.EvePiles.PushBack(29);
             ////Board.EvePiles.PushBack(1);
-            Board.EvePiles.PushBack(31);
+            //Board.EvePiles.PushBack(31);
             //Board.EvePiles.PushBack(36);
             //Board.EvePiles.PushBack(34);
             //Board.EvePiles.PushBack(35);
@@ -139,14 +139,14 @@ namespace PSD.PSDGamepkg
             //Board.MonPiles.PushBack(1045);
             //Board.MonPiles.PushBack(5);
             //Board.MonPiles.PushBack(1040);
-            //Board.MonPiles.PushBack(9);
+            //Board.MonPiles.PushBack(1109);
             //Board.MonPiles.PushBack(1031);
-            Board.MonPiles.PushBack(1);
+            //Board.MonPiles.PushBack(1);
             //Board.MonPiles.PushBack(1007);
-            Board.RestMonPiles.PushBack(2);
-            Board.RestMonPiles.PushBack(3);
-            Board.RestMonPiles.PushBack(7);
-            Board.RestMonPiles.PushBack(17);
+            //Board.RestMonPiles.PushBack(2);
+            //Board.RestMonPiles.PushBack(3);
+            //Board.RestMonPiles.PushBack(7);
+            //Board.RestMonPiles.PushBack(17);
             //RaiseGMessage("G0HQ,2,1,0,52,10,11");
             //RaiseGMessage("G0HQ,2,1,0,47,49,10,11,12");
             //Board.MonPiles.PushBack(54);
@@ -164,7 +164,7 @@ namespace PSD.PSDGamepkg
             //RaiseGMessage("G0HQ,2,3,0,0,84");
             //RaiseGMessage("G0HQ,2,1,0,0,77,95,9");
             //RaiseGMessage("G0HQ,2,1,0,0,123,101");
-            //RaiseGMessage("G0HQ,2,1,0,0,101");
+            //RaiseGMessage("G0HQ,2,1,0,0,80");
             //RaiseGMessage("G0HQ,2,1,0,0,101,127");
             //RaiseGMessage("G0HQ,2,4,0,0,104");
             //RaiseGMessage("G0HQ,2,5,0,0,34");
@@ -223,6 +223,8 @@ namespace PSD.PSDGamepkg
             //Board.EvePiles.PushBack(3);
             //ushort[] parts = Board.EvePiles.Dequeue(6);
             //Board.EvePiles.PushBack(39);
+            //Board.EvePiles.PushBack(17);
+            //Board.EvePiles.PushBack(18);
             //Board.EvePiles.PushBack(parts);
             //Board.RestNPCPiles.PushBack(1001);
             //RaiseGMessage("G0HQ,2,3,0,50");
@@ -946,12 +948,13 @@ namespace PSD.PSDGamepkg
                         if (!isAnySet && ske.Priorty < priorty)
                             continue;
                         // if not set and priority equals given event, then handle the event directly
-                        if (silentPriority != null && !isAnySet && ske.Priorty > silentPriority[silentIdx])
-                        {
-                            priorty = silentPriority[silentIdx];
-                            silentAction[silentIdx]();
-                            ++silentIdx;
-                        }
+                        if (silentPriority != null && !isAnySet)
+                            while (silentIdx < silentPriority.Length && ske.Priorty > silentPriority[silentIdx])
+                            {
+                                priorty = silentPriority[silentIdx];
+                                silentAction[silentIdx]();
+                                ++silentIdx;
+                            }
                         // base as the first one if not set
                         if (!isAnySet || ske.Priorty == priorty)
                         {

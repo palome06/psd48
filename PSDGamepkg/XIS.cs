@@ -220,7 +220,6 @@ namespace PSD.PSDGamepkg
         }
         
 		private void HandleHoldOfWatcher(ushort wuid) {
-			VW.Aywi aywi = WI as VW.Aywi;
             WI.Send("H0SM," + SelCode + "," + PCS.Level, 0, wuid);
             if (Board.RoundIN != "H0PR")
             {
@@ -273,7 +272,6 @@ namespace PSD.PSDGamepkg
 		}
         private void HandleHoldOfReconnect(ushort wuid)
         {
-            VW.Aywi aywi = WI as VW.Aywi;
             VI.Cout(0, "{0}#玩家恢复连接。", wuid);
             // If detected all recovered, BCase H0RK,0
             WI.Send("H09R," + wuid, 0, wuid);

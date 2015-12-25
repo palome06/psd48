@@ -122,8 +122,9 @@ namespace PSD.PSDGamepkg
             //17008, 15008, 10201, 17037, 19021, 19006
             //15002, 17007, 10105, 17021, 19018, 10502
             //17039, 19018, 17027, 17022, 17034, 17042
-            // 17023, 17036, 17027, 10305, 17034, 17025
-            17023, 17036, 17027, 17045, 17043, 10305
+            //17023, 17036, 17027, 10305, 17034, 17025
+            //17024, 17036, 17027, 17045, 17043, 17040
+            17024, 17036, 19007, 17045, 19013, 17040
         };
 
         #region Memeber Declaration & Constructor
@@ -196,6 +197,7 @@ namespace PSD.PSDGamepkg
             //List<ushort> tuxLst = Base.Card.Card.GeneratePiles(null,
             //    new ushort[] { 1, (ushort)LibTuple.TL.Size });
             List<ushort> tuxLst = LibTuple.TL.ListAllTuxCodes(levelCode);
+            //Console.WriteLine("tuxLst = {" + string.Join(",", tuxLst) + "} (" + tuxLst.Count + ")");
             Util.Shuffle(tuxLst);
             Board.TuxPiles = new Base.Utils.Rueue<ushort>(tuxLst);
             List<ushort> eveLst = Base.Card.Card.GeneratePiles(null,
@@ -208,10 +210,6 @@ namespace PSD.PSDGamepkg
                 .Select(p => Base.Card.NMBLib.CodeOfMonster(p)).ToList();
             List<ushort> npcLst = LibTuple.NL.ListAllSeleable(levelCode)
                 .Select(p => Base.Card.NMBLib.CodeOfNPC(p)).ToList();
-            //npcLst.Shuffle();
-            //monLst.AddRange(npcLst.Take(10));
-            ////Util.Shuffle(monLst);
-            //monLst.Shuffle();
             monLst.Shuffle(); npcLst.Shuffle();
             List<ushort> nmbLst = new List<ushort>();
             for (int i = 0; i < 10; ++i)

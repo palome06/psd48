@@ -2282,6 +2282,12 @@ namespace PSD.ClientZero
                         VI.Cout(Uid, "{0}张怪物牌/NPC牌被置入怪物牌堆.", count);
                         Z0P.MonCount += count;
                     }
+                    else if (args[1] == "8")
+                    {
+                        ushort[] tuxes = Util.TakeRange(args, 2, args.Length)
+                            .Select(p => ushort.Parse(p)).ToArray();
+                        VI.Cout(Uid, "翻出手牌为【{0}】.", zd.Tux(tuxes));
+                    }
                     break;
                 case "E0IS":
                     {

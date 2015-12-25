@@ -2191,7 +2191,6 @@ namespace PSD.PSDGamepkg.JNS
         private void Cure(string monCode, Player py, int n, FiveElement five)
         {
             ushort monValue = XI.LibTuple.ML.Encode(monCode);
-            Base.Card.Monster mon = XI.LibTuple.ML.Decode(monValue);
             XI.RaiseGMessage(Artiad.Cure.ToMessage(
                 new Cure(py.Uid, (monValue + 1000), five, n)));
         }

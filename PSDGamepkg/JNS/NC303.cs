@@ -463,20 +463,21 @@ namespace PSD.PSDGamepkg.JNS
                 Base.Card.Tux tux = XI.LibTuple.TL.DecodeTux(ut);
                 if (tux != null)
                 {
-                    XI.RaiseGMessage("G0ON,0,C,1," + ut);
                     if (tux.IsTuxEqiup())
                     {
-                        if (tux.Type == Base.Card.Tux.TuxType.WQ && XI.Board.TuxDises.Contains(ut))
+                        if (tux.Type == Base.Card.Tux.TuxType.WQ)
                         {
                             string whoStr = XI.AsyncInput(player.Uid, "#获得【" + tux.Name + "】," +
                                 AnyoneAliveString(), "NJH7", "0");
                             ushort who = ushort.Parse(whoStr);
-                            XI.RaiseGMessage("G2CN,0,1");
                             XI.RaiseGMessage("G0HQ,2," + who + ",0,0," + ut);
-                            XI.Board.TuxDises.Remove(ut);
                         }
+                        else
+                            XI.RaiseGMessage("G0ON,0,C,1," + ut);
                         break;
                     }
+                    else
+                        XI.RaiseGMessage("G0ON,0,C,1," + ut);
                 }
             }
         }

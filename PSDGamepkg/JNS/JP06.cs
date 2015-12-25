@@ -516,9 +516,7 @@ namespace PSD.PSDGamepkg.JNS
                 string last = null; bool locusSucc = false;
                 foreach (string tuxInfo in XI.Board.PendingTux)
                 {
-                    List<ushort> accu = new List<ushort>();
                     string[] parts = tuxInfo.Split(',');
-                    string utstr = parts[0];
                     if (parts[1] == "G0CC")
                         last = tuxInfo;
                 }
@@ -589,9 +587,7 @@ namespace PSD.PSDGamepkg.JNS
             string last = null;
             foreach (string tuxInfo in XI.Board.PendingTux)
             {
-                List<ushort> accu = new List<ushort>();
                 string[] parts = tuxInfo.Split(',');
-                string utstr = parts[0];
                 if (parts[1] == "G0CC")
                     last = tuxInfo;
             }
@@ -869,7 +865,10 @@ namespace PSD.PSDGamepkg.JNS
         #region Package of 4
         public void JPT1Action(Player player, int type, string fuse, string argst)
         {
-            string[] args = argst.Split(',');
+            JPT1FullOperation(player, true);
+        }
+        private void JPT1FullOperation(Player player, bool needDiscard)
+        {
             bool b1 = XI.Board.Garden.Values.Where(p => p.IsAlive && p.GetPetCount() > 0).Any();
             bool b2 = player.Tux.Count > 0 && XI.Board.Garden.Values.Where(p => p.IsAlive && p.GetPetCount() > 0 &&
                 XI.Board.Garden.Values.Where(q => q.IsTared && q.Team == p.Team && p.Uid != q.Uid).Any()).Any();
@@ -890,10 +889,13 @@ namespace PSD.PSDGamepkg.JNS
                     XI.AsyncInput(player.Uid, "/", "JPT1", "0");
                 else
                 {
-                    string i0 = "#弃置的,Q1(p" + string.Join("p", player.Tux) + ")";
-                    string qzStr = XI.AsyncInput(player.Uid, i0, "JPT1", "0");
-                    ushort ut = ushort.Parse(qzStr);
-                    XI.RaiseGMessage("G0QZ," + player.Uid + "," + ut);
+                    if (needDiscard)
+                    {
+                        string i0 = "#弃置的,Q1(p" + string.Join("p", player.Tux) + ")";
+                        string qzStr = XI.AsyncInput(player.Uid, i0, "JPT1", "0");
+                        ushort ut = ushort.Parse(qzStr);
+                        XI.RaiseGMessage("G0QZ," + player.Uid + "," + ut);
+                    }
 
                     string i1 = "#交出宠物的,T1(p" + string.Join("p", XI.Board.Garden.Values.Where(
                         p => p.IsTared && p.Pets.Where(q => q != 0).Any() &&
@@ -930,9 +932,6 @@ namespace PSD.PSDGamepkg.JNS
                 List<ushort> pops = XI.DequeueOfPile(XI.Board.TuxPiles, sumO + sumR).ToList();
                 XI.RaiseGMessage("G2IN,0," + (sumO + sumR));
                 XI.RaiseGMessage("G1IU," + string.Join(",", pops));
-
-                string range1 = Util.SSelect(XI.Board, p => p.Team == player.Team && p.IsAlive);
-                string range2 = Util.SSelect(XI.Board, p => p.Team == player.OppTeam && p.IsAlive);
 
                 ushort[] uds = { player.Uid, op.Uid };
                 string[] ranges = { Util.SSelect(XI.Board, p => p.Team == player.Team && p.IsAlive),
@@ -1156,9 +1155,7 @@ namespace PSD.PSDGamepkg.JNS
                 string last = null; bool locusSucc = false;
                 foreach (string tuxInfo in XI.Board.PendingTux)
                 {
-                    List<ushort> accu = new List<ushort>();
                     string[] parts = tuxInfo.Split(',');
-                    string utstr = parts[0];
                     if (parts[1] == "G0CC")
                         last = tuxInfo;
                 }
@@ -1195,7 +1192,7 @@ namespace PSD.PSDGamepkg.JNS
         public void TPT2Action(Player player, int type, string fuse, string argst)
         {
             string whoStr = XI.AsyncInput(player.Uid, "#获得补牌的,T1(p" + string.Join("p",
-                XI.Board.Garden.Values.Where(p => p.IsTared).Select(p => p.Uid)) + ")", "JPT2Action", "0");
+                XI.Board.Garden.Values.Where(p => p.IsTared).Select(p => p.Uid)) + ")", "TPT2Action", "0");
             ushort who = ushort.Parse(whoStr);
             XI.RaiseGMessage("G0DH," + who + ",0,1");
         }
@@ -1203,31 +1200,6 @@ namespace PSD.PSDGamepkg.JNS
         {
             return XI.Board.Garden.Values.Any(p => p.IsTared);
         }
-        //public void TPT2Action(Player player, int type, string fuse, string argst)
-        //{
-        //    if (type == 0)
-        //    {
-        //        string whoStr = XI.AsyncInput(player.Uid, "#获得「强袭」的,T1(p" + string.Join("p", XI.Board.Garden
-        //            .Values.Where(p => p.IsTared  && !p.Runes.Contains(1)).Select(p => p.Uid)) + ")", "TPT2Action", "0");
-        //        ushort who = ushort.Parse(whoStr);
-        //        XI.RaiseGMessage("G0IF," + who + ",1");
-        //    }
-        //    else if (type == 1)
-        //    {
-        //        string whoStr = XI.AsyncInput(player.Uid, "#获得补牌的,T1(p" + string.Join("p",
-        //            XI.Board.Garden.Values.Where(p => p.IsTared).Select(p => p.Uid)) + ")", "TPT2Action", "1");
-        //        ushort who = ushort.Parse(whoStr);
-        //        XI.RaiseGMessage("G0DH," + who + ",0,1");
-        //    }
-        //}
-        //public bool TPT2Valid(Player player, int type, string fuse)
-        //{
-        //    if (type == 0)
-        //        return XI.Board.Garden.Values.Any(p => p.IsTared && !p.Runes.Contains(1));
-        //    else if (type == 1)
-        //        return XI.Board.Garden.Values.Any(p => p.IsTared);
-        //    return false;
-        //}
         public bool WQT1ConsumeValid(Player player, int consumeType, int type, string fuse)
         {
             if (consumeType == 1)
@@ -1432,7 +1404,6 @@ namespace PSD.PSDGamepkg.JNS
                 int cmidx = targets.IndexOf(',');
                 ushort iv = ushort.Parse(targets.Substring(0, cmidx));
                 ushort jv = ushort.Parse(targets.Substring(cmidx + 1));
-                int mn = Math.Min(g[iv].Tux.Count, g[jv].Tux.Count);
 
                 List<ushort> imon = g[iv].Pets.Where(p => p != 0).ToList();
                 string iipt = XI.AsyncInput(iv, "M1(p" + string.Join("p", imon), "JPT3", "0");
@@ -1448,18 +1419,17 @@ namespace PSD.PSDGamepkg.JNS
             else // if input == "1"
                 XI.RaiseGMessage("G1EV," + player.Uid + ",1");
         }
-        public void JPT4Action(Player player, int type, string fuse, string argst)
+        private void JPT4FullOperation(Player player, Func<Player, int> harmValue)
         {
             int maskFromJP = Artiad.IntHelper.SetMask(0, GiftMask.FROM_TUX, true);
-            if (type == 0)
-            {
-                ushort to = ushort.Parse(XI.AsyncInput(
-                    player.Uid, "T1" + Util.SSelect(XI.Board, p => p.IsTared), "JPT4", "0"));
-                VI.Cout(0, "{0}对{1}使用【锁魂钉】.", XI.DisplayPlayer(player.Uid), XI.DisplayPlayer(to));
-                int harm = Math.Max(XI.Board.Garden[to].GetPetCount(), 1);
-                XI.RaiseGMessage(Artiad.Harm.ToMessage(new Artiad.Harm(to, player.Uid,
-                    FiveElement.A, harm, maskFromJP)));
-            }
+            ushort to = ushort.Parse(XI.AsyncInput(player.Uid, "T1" + FormatPlayers(p => p.IsTared), "JPT4", "0"));
+            VI.Cout(0, "{0}对{1}使用【锁魂钉】.", XI.DisplayPlayer(player.Uid), XI.DisplayPlayer(to));
+            XI.RaiseGMessage(Artiad.Harm.ToMessage(new Artiad.Harm(to, player.Uid,
+                FiveElement.A, harmValue(XI.Board.Garden[to]), maskFromJP)));
+        }
+        public void JPT4Action(Player player, int type, string fuse, string argst)
+        {
+            JPT4FullOperation(player, (p) => Math.Max(p.GetPetCount(), 1));
         }
         public void JPT5Action(Player player, int type, string fuse, string argst)
         {
@@ -1562,12 +1532,7 @@ namespace PSD.PSDGamepkg.JNS
                 Player locuster = XI.Board.Garden[ushort.Parse(tar)];
                 TargetPlayer(player.Uid, locuster.Uid);
 
-                int idx = fuse.IndexOf(';');
-                int jdx = fuse.IndexOf(',', idx + 1);
-                string cdFuse = Util.Substring(fuse, 0, idx);
-                ushort sktType = ushort.Parse(Util.Substring(fuse, idx + 1, jdx));
-                string sktFuse = Util.Substring(fuse, jdx + 1, -1);
-
+                string cdFuse = Util.Substring(fuse, 0, fuse.IndexOf(';'));
                 string[] g0cd = cdFuse.Split(',');
                 // Warning: self might be more than two tuxes
                 // G1CW,A[1st:Org],B[2nd:Target],C[2nd:Provider],JP04;cdFuse;TF
@@ -2195,7 +2160,6 @@ namespace PSD.PSDGamepkg.JNS
                     ushort ust = ushort.Parse(args[1]);
                     string cardname = args[4];
                     int hdx = fuse.IndexOf(';');
-                    int idx = fuse.IndexOf(',', hdx);
 
                     Base.Card.Tux tuxBase = XI.LibTuple.TL.EncodeTuxCode(cardname);
                     if (tuxBase.Type == Tux.TuxType.ZP)
@@ -2233,10 +2197,8 @@ namespace PSD.PSDGamepkg.JNS
                         || (player.Team == XI.Board.Rounder.OppTeam && XI.Board.IsBattleWin);
                     if (meLose)
                     {
-                        List<string> rms = new List<string>();
                         foreach (string tuxInfo in XI.Board.PendingTux)
                         {
-                            List<ushort> accu = new List<ushort>();
                             string[] parts = tuxInfo.Split(',');
                             if (parts[1] == "XBT4Consume")
                                 return true;
@@ -2245,10 +2207,8 @@ namespace PSD.PSDGamepkg.JNS
                 }
                 else if (type == 2)
                 {
-                    List<string> rms = new List<string>();
                     foreach (string tuxInfo in XI.Board.PendingTux)
                     {
-                        List<ushort> accu = new List<ushort>();
                         string[] parts = tuxInfo.Split(',');
                         if (parts[1] == "XBT4Consume")
                             return true;
@@ -2267,16 +2227,7 @@ namespace PSD.PSDGamepkg.JNS
             {
                 string[] args = fuse.Split(',');
                 // G0CC,A,0,B,TP02,17,36
-                ushort ust = ushort.Parse(args[1]);
-                string cardname = args[4];
-                int hdx = fuse.IndexOf(';');
-                int idx = fuse.IndexOf(',', hdx);
-
-                int sktInType = int.Parse(Util.Substring(fuse, hdx + 1, idx));
-                string sktFuse = Util.Substring(fuse, idx + 1, -1);
-                Base.Card.Tux tuxBase = XI.LibTuple.TL.EncodeTuxCode(cardname);
-                string[] argv = fuse.Substring(0, hdx).Split(',');
-
+                string[] argv = Util.Substring(fuse, 0, fuse.IndexOf(';')).Split(',');
                 List<ushort> cards = Util.TakeRange(argv, 5, argv.Length).Select(p =>
                     ushort.Parse(p)).Where(p => p > 0).ToList();
 
@@ -2324,9 +2275,7 @@ namespace PSD.PSDGamepkg.JNS
                 List<string> rms = new List<string>();
                 foreach (string tuxInfo in XI.Board.PendingTux)
                 {
-                    List<ushort> accu = new List<ushort>();
                     string[] parts = tuxInfo.Split(',');
-                    string utstr = parts[0];
                     if (parts[1] == "XBT4Consume")
                     {
                         tuxes.AddRange(Util.TakeRange(parts, 2, parts.Length).Select(p => ushort.Parse(p)));
@@ -2440,7 +2389,7 @@ namespace PSD.PSDGamepkg.JNS
         }
         public bool ZPT4Valid(Player player, int type, string fuse)
         {
-            return XI.Board.IsAttendWar(player);
+            return XI.Board.IsAttendWar(player) && player.HP < player.HPb;
         }
         public void ZPT5Action(Player player, int type, string fuse, string argst)
         {
@@ -2579,6 +2528,41 @@ namespace PSD.PSDGamepkg.JNS
 
         #endregion Package of HL
 
+        #region Renewed
+        public bool TPR1Valid(Player player, int type, string fuse)
+        {
+           return XI.Board.Garden.Values.Any(p => p.IsTared);
+        }
+        public void TPR1Action(Player player, int type, string fuse, string argst)
+        {
+           if (type == 0)
+           {
+               string whoStr = XI.AsyncInput(player.Uid, "#获得标记的,T1" + FormatPlayers(p => p.IsTared) +
+                    ",F1(p" + string.Join("p", XI.LibTuple.RL.GetFullAppendableList()) + ")", "TPR1Action", "0");
+               XI.RaiseGMessage("G0IF," + whoStr);
+           }
+           else if (type == 1)
+           {
+               string whoStr = XI.AsyncInput(player.Uid, "#获得补牌的,T1(p" +
+                   FormatPlayers(p => p.IsTared), "TPR1Action", "1");
+               ushort who = ushort.Parse(whoStr);
+               XI.RaiseGMessage("G0DH," + who + ",0,1");
+           }
+        }
+        public bool JPR1Valid(Player player, int type, string fuse)
+        {
+            return JPT1Valid(player, type, fuse);
+        }
+        public void JPR1Action(Player player, int type, string fuse, string argst)
+        {
+            JPT1FullOperation(player, false);
+        }
+        public void JPR2Action(Player player, int type, string fuse, string argst)
+        {
+            JPT4FullOperation(player, (p) => Math.Max(1, Math.Max(p.GetPetCount(), p.GetBaseEquipCount())));
+        }
+        #endregion Renewed
+
         #region Equip Util
         public void EquipGeneralIncrAction(TuxEqiup te, Player player)
         {
@@ -2632,9 +2616,7 @@ namespace PSD.PSDGamepkg.JNS
             string last = null;
             foreach (string tuxInfo in XI.Board.PendingTux)
             {
-                List<ushort> accu = new List<ushort>();
                 string[] parts = tuxInfo.Split(',');
-                string utstr = parts[0];
                 if (parts[1] == "G0CC")
                     last = tuxInfo;
             }

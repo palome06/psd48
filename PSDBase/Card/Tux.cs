@@ -382,18 +382,28 @@ namespace PSD.Base.Card
             else
                 return Firsts.Where(p => p.Package.Any(q => pkgs.Contains(q))).ToList();
         }
+        public List<Tux> ListAllTuxSeleable(int groups)
+        {
+            List<Tux> first = ListAllTuxs(groups);
+            string[] duplicated = { "TPT2", "JPT1", "JPT4" };
+            string[] keeppace = { "TPR1", "JPR1", "JPR2" };
+            for (int i = 0; i < duplicated.Length; ++i)
+            {
+                if (first.Any(p => p.Code == duplicated[i]) && first.Any(p => p.Code == keeppace[i]))
+                    first.RemoveAll(p => p.Code == duplicated[i]);
+            }
+            return first;
+        }
         public List<ushort> ListAllTuxCodes(int groups)
         {
             int[] pkgs = Card.Level2Pkg(groups);
-            if (pkgs == null)
-                return dicts.Keys.ToList();
-            List<Tux> txs = ListAllTuxs(groups);
+            List<Tux> txs = ListAllTuxSeleable(groups);
             List<ushort> us = new List<ushort>();
             foreach (Tux tux in txs)
             {
                 for (int i = 0; i < tux.Package.Length; ++i)
                 {
-                    if (pkgs.Contains(tux.Package[i]))
+                    if (pkgs == null || pkgs.Contains(tux.Package[i]))
                     {
                         for (ushort j = tux.Range[i * 2]; j <= tux.Range[i * 2 + 1]; ++j)
                             us.Add(j);

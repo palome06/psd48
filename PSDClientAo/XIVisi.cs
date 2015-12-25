@@ -2544,6 +2544,13 @@ namespace PSD.ClientAo
                         A0O.FlyingGet(Enumerable.Repeat("M0", count).ToList(), 0, 0, true);
                         A0F.MonCount += count;
                     }
+                    else if (args[1] == "8")
+                    {
+                        ushort[] tuxes = Util.TakeRange(args, 2, args.Length)
+                            .Select(p => ushort.Parse(p)).ToArray();
+                        VI.Cout(Uid, "翻出手牌为【{0}】.", zd.Tux(tuxes));
+                        A0O.FlyingGet(tuxes.Select(p => "C" + p).ToList(), 0, 0, true);
+                    }
                     break;
                 case "E0IS":
                     {
