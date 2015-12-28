@@ -2389,7 +2389,7 @@ namespace PSD.PSDGamepkg.JNS
         }
         public bool ZPT4Valid(Player player, int type, string fuse)
         {
-            return XI.Board.IsAttendWar(player) && player.HP < player.HPb;
+            return XI.Board.IsAttendWar(player);
         }
         public void ZPT5Action(Player player, int type, string fuse, string argst)
         {
@@ -2399,7 +2399,7 @@ namespace PSD.PSDGamepkg.JNS
         }
         public bool ZPT5Valid(Player player, int type, string fuse)
         {
-            return XI.Board.IsAttendWarSucc(player);
+            return XI.Board.IsAttendWarSucc(player) && player.HP < player.HPb;
         }
         #endregion Package of 6
 

@@ -3630,8 +3630,76 @@ namespace PSD.PSDGamepkg.JNS
                     XI.RaiseGMessage("G0ZB," + to + ",0," + cardId);
             }
         }
-        #endregion
+        #endregion TR028 - Wuhou
+        #region TR029 - Xianqing
+        public bool JNT2901Valid(Player player, int type, string fuse)
+        {
+            var g = XI.Board.Garden;
+            List<Artiad.Harm> harm = Artiad.Harm.Parse(fuse);
+            return player.Tux.Count > 0 && harm.Any(p => p.Who != player.Uid && g[p.Who].IsTared && 
+                 g[p.Who].Team == player.Team && Artiad.Harm.GetPropedElement().Contains(p.Element) && p.N > 0);
+        }
+        public void JNT2901Action(Player player, int type, string fuse, string argst)
+        {
+            var g = XI.Board.Garden;
+            List<Artiad.Harm> harm = Artiad.Harm.Parse(fuse);
+            List<ushort> invs = harm.Where(p => g[p.Who].IsTared && p.Who != player.Uid && g[p.Who].Team == player.Team &&
+                 Artiad.Harm.GetPropedElement().Contains(p.Element) && p.N > 0).Select(p => p.Who).Distinct().ToList();
+            while (invs.Count > 0)
+            {
+                string giver = XI.AsyncInput(player.Uid, "#给予,/T1" + (invs.Count > 1 ? ("~" + invs.Count) : "") +
+                     "(p" + string.Join("p", invs) + ")", "JNT2901", "0");
+                if (giver.StartsWith("/") || giver.Contains(VI.CinSentinel))
+                    break;
+                string give = XI.AsyncInput(player.Uid, "#给予,/Q1(p" +
+                    string.Join("p", player.Tux) + ")", "JNT2901", "1");
+                if (!give.StartsWith("/") && !give.Contains(VI.CinSentinel))
+                {
+                    ushort who = ushort.Parse(giver);
+                    ushort cardUt = ushort.Parse(give);
+                    Player py = XI.Board.Garden[who];
+                    TargetPlayer(player.Uid, who);
+                    invs.Remove(who);
 
+                    XI.RaiseGMessage("G0HQ,0," + who + "," + player.Uid + ",1,1," + cardUt);
+                    List<ushort> canUse = py.Tux.Where(p => XI.LibTuple.TL.DecodeTux(p) != null && (XI.LibTuple.TL
+                        .DecodeTux(p).Type == Tux.TuxType.JP || XI.LibTuple.TL.DecodeTux(p).IsTuxEqiup())).ToList();
+                    if (canUse.Count != 0)
+                    {
+                        string uses = XI.AsyncInput(who, "#使用,/Q1(p" +
+                            string.Join("p", canUse) + ")", "JNT2901", "2");
+                        if (!uses.StartsWith("/") && !uses.Contains(VI.CinSentinel))
+                        {
+                            ushort useUt = ushort.Parse(uses);
+                            Tux useTux = XI.LibTuple.TL.DecodeTux(useUt);
+                            if (useTux.IsTuxEqiup())
+                                (useTux as TuxEqiup).UseAction(useUt, g[who]);
+                            else
+                                XI.RaiseGMessage("G0CC," + who + ",0," + who +
+                                     "," + useTux.Code + "," + useUt + ";0," + fuse);
+                        }
+                    }
+                    else
+                        XI.AsyncInput(who, "/", "JNT2901", "2");
+                    if (player.Tux.Count == 0)
+                        XI.RaiseGMessage("G0DH," + player.Uid + ",0,1");
+                }
+            }
+        }
+        public bool JNT2902Valid(Player player, int type, string fuse)
+        {
+            bool b1 = XI.Board.Rounder.Team == player.Team && XI.Board.Supporter.Uid != 0 && !XI.Board.SupportSucc;
+            bool b2 = XI.Board.Rounder.Team == player.OppTeam && XI.Board.Hinder.Uid != 0 && !XI.Board.HinderSucc;
+            return !XI.Board.IsAttendWar(player) && (b1 || b2);
+        }
+        public void JNT2902Action(Player player, int type, string fuse, string argst)
+        {
+            if (XI.Board.Rounder.Team == player.Team)
+                XI.RaiseGMessage("G17F,S," + player.Uid);
+            else if (XI.Board.Rounder.Team == player.OppTeam)
+                XI.RaiseGMessage("G17F,H," + player.Uid);
+        }
+        #endregion TR029 - Xianqing
         #region TR034 - Mingxiu
         public bool JNT3401Valid(Player player, int type, string fuse)
         {
@@ -4184,10 +4252,9 @@ namespace PSD.PSDGamepkg.JNS
         }
         public bool JNT4002Valid(Player player, int type, string fuse)
         {
-            bool b1 = XI.Board.Supporter != null && XI.Board.Supporter.Team == player.Team && !XI.Board.SupportSucc;
-            bool b2 = XI.Board.Hinder != null && XI.Board.Hinder.Team == player.Team && !XI.Board.HinderSucc;
-            bool b3 = XI.Board.Garden.Values.Any(p => p.IsTared &&
-                p.Team == player.Team && !XI.Board.IsAttendWar(player));
+            bool b1 = XI.Board.Supporter.Uid != 0 && XI.Board.Supporter.Team == player.Team && !XI.Board.SupportSucc;
+            bool b2 = XI.Board.Hinder.Uid != 0 && XI.Board.Hinder.Team == player.Team && !XI.Board.HinderSucc;
+            bool b3 = XI.Board.Garden.Values.Any(p => p.IsTared && p.Team == player.Team && !XI.Board.IsAttendWar(p));
             return (b1 || b2) && b3;
         }
         public void JNT4002Action(Player player, int type, string fuse, string argst)

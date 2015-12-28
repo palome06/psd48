@@ -159,7 +159,7 @@ namespace PSD.PSDGamepkg
             //RaiseGMessage("G0HQ,2,3,0,20,26");
             //RaiseGMessage("G0HQ,2,1,0,0,49,11,10");
             //Board.RestNPCPiles.PushBack(1057);
-            //RaiseGMessage("G0HQ,2,1,0,0,17,70");
+            RaiseGMessage("G0HQ,2,1,0,0,76");
             //RaiseGMessage("G0HQ,2,2,0,0,37,70");
             //RaiseGMessage("G0HQ,2,3,0,0,84");
             //RaiseGMessage("G0HQ,2,1,0,0,77,95,9");
@@ -227,6 +227,7 @@ namespace PSD.PSDGamepkg
             //Board.EvePiles.PushBack(18);
             //Board.EvePiles.PushBack(parts);
             //Board.RestNPCPiles.PushBack(1001);
+            //Board.HeroPiles.PushBack(10403);
             //RaiseGMessage("G0HQ,2,3,0,50");
             //RaiseGMessage("G0ZB,3,0,50");
             //RaiseGMessage("G0HQ,2,1,0,1,50,49");
@@ -592,7 +593,7 @@ namespace PSD.PSDGamepkg
                             if (NMBLib.IsNPC(Board.Monster1))
                                 rstage = "R" + rounder + "NP";
                             else if (NMBLib.IsMonster(Board.Monster1))
-                                rstage = "R" + rounder + "Z7";
+                                rstage = "R" + rounder + "Z1";
                             else
                                 rstage = "H0TM";
                             break;
@@ -626,7 +627,7 @@ namespace PSD.PSDGamepkg
                                     if (NMBLib.IsNPC(Board.Monster1))
                                         rstage = "R" + rounder + "NP";
                                     else if (NMBLib.IsMonster(Board.Monster1))
-                                        rstage = "R" + rounder + "Z7";
+                                        rstage = "R" + rounder + "Z1";
                                     else
                                         rstage = "H0TM";
                                 }
@@ -646,17 +647,15 @@ namespace PSD.PSDGamepkg
                             }
                             break;
                         }
-                    case "Z7":
-                        Board.InFightThrough = true;
-                        Board.FightTangled = false;
-                        AwakeABCValue(false);
-                        RunQuadStage(rstage);
-                        rstage = "R" + rounder + "Z1"; break;
                     case "Z1":
                         WI.BCast(rstage + ",0");
                         RunQuadMixedStage(rstage, 0,
-                            new int[] { -100, 300 },
-                            new Action[] { () => RaiseGMessage("G09P,0"), () => RaiseGMessage("G0CZ,2") });
+                            new int[] { -300, -100, 300 },
+                            new Action[] { () => {
+                                Board.InFightThrough = true;
+                                Board.FightTangled = false;
+                                AwakeABCValue(false);
+                            }, () => RaiseGMessage("G09P,0"), () => RaiseGMessage("G0CZ,2") });
                         WI.BCast(rstage + ",1");
                         rstage = "R" + rounder + "Z8"; break;
                     case "Z8":

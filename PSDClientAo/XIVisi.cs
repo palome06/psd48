@@ -2730,6 +2730,7 @@ namespace PSD.ClientAo
                             msgs.AddRange(leavers.Select(p => string.Format("{0}退出战斗", 
                                 (p == 0 ? "无人" : (p < 1000 ? zd.Player(p) :
                                 zd.Monster((ushort)(p - 1000)))))));
+                            leavers.ForEach(p => { if (p < 1000) A0P[p].SetAsClear(); });
                         }
                         if (msgs.Count > 0)
                             VI.Cout(Uid, string.Join(",", msgs) + ".");
