@@ -177,10 +177,10 @@ namespace PSD.ClientAo.VW
             HideTip();
         }
         internal string CinH(ushort uid, string prevComment,
-            int r1, int r2, IEnumerable<ushort> heros)
+            int r1, int r2, IEnumerable<ushort> heros, bool cancellable, bool keep)
         {
             ShowTip(prevComment);
-            AD.yfDeal.Deal.Show(heros.Select(p => "H" + p), null, r1, r2, false, false);
+            AD.yfDeal.Deal.Show(heros.Select(p => "H" + p), null, r1, r2, cancellable, keep);
             string result = Cin(uid);
             if (result != CinSentinel)
                 HideTip();

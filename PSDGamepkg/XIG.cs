@@ -1144,7 +1144,9 @@ namespace PSD.PSDGamepkg
                         {
                             List<string> candidates = new List<string>();
                             Hero hero = LibTuple.HL.InstanceHero(player.SelectHero);
-                            foreach (string spos in hero.Spouses)
+                            List<string> spCollection = hero.Spouses.ToList();
+                            spCollection.AddRange(player.ExSpouses);
+                            foreach (string spos in spCollection)
                             {
                                 if (!spos.StartsWith("!"))
                                 {
@@ -1286,7 +1288,7 @@ namespace PSD.PSDGamepkg
                         }
                         else
                             player.InitFromHero(hero, false, Board.InFightThrough, Board.InFight);
-                        if (changeType == 2)
+                        if (changeType == 2 || (changeType == 1 && args.Length > 4))
                         {
                             player.HP = int.Parse(args[4]);
                             if (player.HP > player.HPb)
@@ -3111,6 +3113,7 @@ namespace PSD.PSDGamepkg
                         ushort op = ushort.Parse(args[2]);
                         bool hind = (op & 1) == 0;
                         bool roolBack = (op & 2) == 0;
+                        // bool fromChange = op & 4;
                         string e0is = "";
                         for (int i = 3; i < args.Length; ++i)
                         {

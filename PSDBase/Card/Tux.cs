@@ -191,6 +191,11 @@ namespace PSD.Base.Card
         {
             return Occurs != null && Occurs.Length > inType && Occurs[inType].Contains('&');
         }
+
+        public bool IsSameType(Tux tux)
+        {
+            return tux != null && ((IsTuxEqiup() && tux.IsTuxEqiup()) || Type == tux.Type);
+        }
     }
 
     public class TuxLib

@@ -103,6 +103,7 @@ namespace PSD.Base
         // Extend Equip Mask, 0 = disabled, 1 = weapon, 2 = armor, 4 = trove
         public int ExMask { set; get; }
         public List<ushort> Runes { private set; get; }
+        public List<string> ExSpouses { private set; get; }
 
         private void SetEquipDisabled(string tag, bool value, int maskCode)
         {
@@ -193,6 +194,7 @@ namespace PSD.Base
             Escue = new List<ushort>();
             Fakeq = new Dictionary<ushort, string>();
             this.Runes = new List<ushort>();
+            this.ExSpouses = new List<string>();
 
             TokenAwake = false;
             TokenCount = 0;

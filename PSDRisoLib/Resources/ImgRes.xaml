@@ -87,6 +87,7 @@
     <Image x:Key="npcsnapNCT09" Source="PetsSnap/NCT09.png" ToolTip="NPC-TR瑕"/>
     <Image x:Key="npcsnapNCT13" Source="PetsSnap/NCT13.png" ToolTip="NPC-TR谢沧行"/>
     <Image x:Key="npcsnapNCT20" Source="PetsSnap/NCT20.png" ToolTip="NPC-TR雷元戈"/>
+    <Image x:Key="npcsnapNCT33" Source="PetsSnap/NCT33.png" ToolTip="NPC-TR豆包"/>
 
     <Image x:Key="npcsnapNCH02" Source="PetsSnap/NCH02.png" ToolTip="NPC阮英扬"/>
     <Image x:Key="npcsnapNCH04" Source="PetsSnap/NCH04.png" ToolTip="NPC柒月"/>
@@ -178,6 +179,8 @@
     <Image x:Key="heroHead17027" Source="Heros/17027.png"/>
     <Image x:Key="heroHead17028" Source="Heros/17028.png"/>
     <Image x:Key="heroHead17029" Source="Heros/17029.png"/>
+    <Image x:Key="heroHead17032" Source="Heros/17032.png"/>
+    <Image x:Key="heroHead17033" Source="Heros/17033.png"/>
     <Image x:Key="heroHead17034" Source="Heros/17034.png"/>
     <Image x:Key="heroHead17036" Source="Heros/17036.png"/>
     <Image x:Key="heroHead17037" Source="Heros/17037.png"/>
@@ -186,6 +189,7 @@
     <Image x:Key="heroHead17041" Source="Heros/17041.png"/>
     <Image x:Key="heroHead17042" Source="Heros/17042.png"/>
     <Image x:Key="heroHead17043" Source="Heros/17043.png"/>
+    <Image x:Key="heroHead17044" Source="Heros/17044.png"/>
     <Image x:Key="heroHead17045" Source="Heros/17045.png"/>
 
     <Image x:Key="heroHead18002" Source="Heros/18002.png"/>
@@ -278,6 +282,8 @@
     <ImageBrush x:Key="nameBarTR027" ImageSource="NameBar/NameTR027.png"/>
     <ImageBrush x:Key="nameBarTR028" ImageSource="NameBar/NameTR028.png"/>
     <ImageBrush x:Key="nameBarTR029" ImageSource="NameBar/NameTR029.png"/>
+    <ImageBrush x:Key="nameBarTR032" ImageSource="NameBar/NameTR032.png"/>
+    <ImageBrush x:Key="nameBarTR033" ImageSource="NameBar/NameTR033.png"/>
     <ImageBrush x:Key="nameBarTR034" ImageSource="NameBar/NameTR034.png"/>
     <ImageBrush x:Key="nameBarTR036" ImageSource="NameBar/NameTR036.png"/>
     <ImageBrush x:Key="nameBarTR037" ImageSource="NameBar/NameTR037.png"/>
@@ -286,6 +292,7 @@
     <ImageBrush x:Key="nameBarTR041" ImageSource="NameBar/NameTR041.png"/>
     <ImageBrush x:Key="nameBarTR042" ImageSource="NameBar/NameTR042.png"/>
     <ImageBrush x:Key="nameBarTR043" ImageSource="NameBar/NameTR043.png"/>
+    <ImageBrush x:Key="nameBarTR044" ImageSource="NameBar/NameTR044.png"/>
     <ImageBrush x:Key="nameBarTR045" ImageSource="NameBar/NameTR045.png"/>
 
     <ImageBrush x:Key="nameBarEX408" ImageSource="NameBar/NameEX408.png"/>
@@ -359,6 +366,7 @@
     <BitmapImage x:Key="snapTRSP502" UriSource="Token/TRS05.png"/>
     <BitmapImage x:Key="snapTRTR008" UriSource="Token/TRT08.png"/>
     <BitmapImage x:Key="snapTRTR028" UriSource="Token/TRT28.png"/>
+    <BitmapImage x:Key="snapTRTR032" UriSource="Token/TRT32.png"/>
     <BitmapImage x:Key="snapTKHL001_1" UriSource="Token/TKH0101.png"/>
     <BitmapImage x:Key="snapTKHL001_2" UriSource="Token/TKH0102.png"/>
     <BitmapImage x:Key="snapTKHL001_3" UriSource="Token/TKH0103.png"/>
@@ -378,6 +386,7 @@
     <BitmapImage x:Key="snapTKHL019_3" UriSource="Token/TKH1903.png"/>
     <BitmapImage x:Key="snapTKHL019_4" UriSource="Token/TKH1904.png"/>
     <BitmapImage x:Key="snapTKHL019_5" UriSource="Token/TKH1905.png"/>
+    <BitmapImage x:Key="snapTKHL019_6" UriSource="Token/TKH1906.png"/>
     <BitmapImage x:Key="snapTRHL005" UriSource="Token/TRH05.png"/>
     <BitmapImage x:Key="snapTRHL019" UriSource="Token/TRH19.png"/>
     <BitmapImage x:Key="snapTKEX301_1" UriSource="Token/TKE0201.png"/>
@@ -438,8 +447,10 @@
     <Image x:Key="eveCardSJT09" Source="Card/Eve/SJT09.png"/>
     <Image x:Key="eveCardSJT10" Source="Card/Eve/SJT10.png"/>
     <Image x:Key="eveCardSJT11" Source="Card/Eve/SJT11.png"/>
+    <Image x:Key="eveCardSJT12" Source="Card/Eve/SJT12.png"/>
     <Image x:Key="eveCardSJT14" Source="Card/Eve/SJT14.png"/>
     <Image x:Key="eveCardSJT15" Source="Card/Eve/SJT15.png"/>
+    <Image x:Key="eveCardSJT16" Source="Card/Eve/SJT16.png"/>
     <Image x:Key="eveCardSJT17" Source="Card/Eve/SJT17.png"/>
 
     <Image x:Key="eveCardSJH01" Source="Card/Eve/SJH01.png"/>
@@ -554,6 +565,8 @@
     <Image x:Key="monCardNCT27" Source="Card/NMB/NCT27.png"/>
     <Image x:Key="monCardNCT28" Source="Card/NMB/NCT28.png"/>
     <Image x:Key="monCardNCT29" Source="Card/NMB/NCT29.png"/>
+    <Image x:Key="monCardNCT32" Source="Card/NMB/NCT32.png"/>
+    <Image x:Key="monCardNCT33" Source="Card/NMB/NCT33.png"/>
     <Image x:Key="monCardNCT34" Source="Card/NMB/NCT34.png"/>
     <Image x:Key="monCardNCT36" Source="Card/NMB/NCT36.png"/>
     <Image x:Key="monCardNCT39" Source="Card/NMB/NCT39.png"/>
@@ -561,6 +574,7 @@
     <Image x:Key="monCardNCT41" Source="Card/NMB/NCT41.png"/>
     <Image x:Key="monCardNCT42" Source="Card/NMB/NCT42.png"/>
     <Image x:Key="monCardNCT43" Source="Card/NMB/NCT43.png"/>
+    <Image x:Key="monCardNCT44" Source="Card/NMB/NCT44.png"/>
     <Image x:Key="monCardNCT45" Source="Card/NMB/NCT45.png"/>
 
     <Image x:Key="monCardGSH3" Source="Card/NMB/GSH3.png"/>
@@ -722,6 +736,8 @@
     <Image x:Key="hroCardTR027" Source="Card/Heros/TR027.png"/>
     <Image x:Key="hroCardTR028" Source="Card/Heros/TR028.png"/>
     <Image x:Key="hroCardTR029" Source="Card/Heros/TR029.png"/>
+    <Image x:Key="hroCardTR032" Source="Card/Heros/TR032.png"/>
+    <Image x:Key="hroCardTR033" Source="Card/Heros/TR033.png"/>
     <Image x:Key="hroCardTR034" Source="Card/Heros/TR034.png"/>
     <Image x:Key="hroCardTR036" Source="Card/Heros/TR036.png"/>
     <Image x:Key="hroCardTR037" Source="Card/Heros/TR037.png"/>
@@ -730,6 +746,7 @@
     <Image x:Key="hroCardTR041" Source="Card/Heros/TR041.png"/>
     <Image x:Key="hroCardTR042" Source="Card/Heros/TR042.png"/>
     <Image x:Key="hroCardTR043" Source="Card/Heros/TR043.png"/>
+    <Image x:Key="hroCardTR044" Source="Card/Heros/TR044.png"/>
     <Image x:Key="hroCardTR045" Source="Card/Heros/TR045.png"/>
 
     <Image x:Key="hroCardEX301" Source="Card/Heros/EX301.png"/>

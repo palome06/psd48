@@ -113,87 +113,84 @@ namespace PSD.Base.Card
             {
                 string gs = (string)data["VALID"];
                 int group = int.Parse(gs.Contains(",") ? gs.Substring(0, gs.IndexOf(',')) : gs);
-                if (group != 0)
+
+                int genre = (int)((long)data["GENRE"]);
+                int code = (int)((long)data["ID"]);
+                string name = (string)data["NAME"];
+                ushort hp = (ushort)((short)data["HP"]);
+                ushort str = (ushort)((short)data["STR"]);
+                ushort dex = (ushort)((short)data["DEX"]);
+                char gender = ((string)data["GENDER"])[0];
+                string spouses = (string)data["SPOUSE"];
+                List<string> spouse = string.IsNullOrEmpty(spouses) ?
+                    new List<string>() : spouses.Split(',').ToList();
+                string isoStr = (string)data["ISO"];
+                int archetype = 0;
+                List<int> isos = new List<int>();
+                foreach (string isosr in isoStr.Split(','))
                 {
-                    int genre = (int)((long)data["GENRE"]);
-                    int code = (int)((long)data["ID"]);
-                    string name = (string)data["NAME"];
-                    ushort hp = (ushort)((short)data["HP"]);
-                    ushort str = (ushort)((short)data["STR"]);
-                    ushort dex = (ushort)((short)data["DEX"]);
-                    char gender = ((string)data["GENDER"])[0];
-                    string spouses = (string)data["SPOUSE"];
-                    List<string> spouse = string.IsNullOrEmpty(spouses) ?
-                        new List<string>() : spouses.Split(',').ToList();
-                    string isoStr = (string)data["ISO"];
-                    int archetype = 0;
-                    List<int> isos = new List<int>();
-                    foreach (string isosr in isoStr.Split(','))
-                    {
-                        if (isosr.StartsWith("@"))
-                            archetype = int.Parse(isosr.Substring("@".Length));
-                        else if (!string.IsNullOrEmpty(isosr))
-                            isos.Add(int.Parse(isosr));
-                    }
-                    string skills = (string)data["SKILL"];
-                    List<string> skill, relatedSkill;
-                    if (string.IsNullOrEmpty(skills))
-                    {
-                        skill = new List<string>();
-                        relatedSkill = new List<string>();
-                    }
-                    else if (skills.IndexOf('|') < 0)
-                    {
-                        skill = skills.Split(',').ToList();
-                        relatedSkill = new List<string>();
-                    }
-                    else
-                    {
-                        int idx = skills.IndexOf('|');
-                        skill = skills.Substring(0, idx).Split(',').ToList();
-                        relatedSkill = skills.Substring(idx + 1).Split(',').ToList();
-                    }
-                    string[] aliass = (data["ALIAS"] as string ?? "").Split(',');
-                    string[] alias = new string[7];
-                    for (int i = 0; i < aliass.Length; i += 2)
-                    {
-                        switch (aliass[i])
-                        {
-                            case "K": alias[0] = aliass[i + 1]; break;
-                            case "C": alias[1] = aliass[i + 1]; break;
-                            case "T": alias[2] = aliass[i + 1]; break;
-                            case "E": alias[3] = aliass[i + 1]; break;
-                            case "A": alias[4] = aliass[i + 1]; break;
-                            case "F": alias[5] = aliass[i + 1]; break;
-                            case "V": alias[6] = aliass[i + 1]; break;
-                        }
-                    }
-                    string bio = data["BIO"] as string ?? "";
-                    Hero hero = new Hero(name, code, group, genre, gender, hp, str, dex, spouse, isos, archetype, skill, bio)
-                    {
-                        Ofcode = data["OFCODE"] as string,
-                        TokenAlias = alias[0],
-                        PeopleAlias = alias[1],
-                        PlayerTarAlias = alias[2],
-                        ExCardsAlias = alias[3],
-                        AwakeAlias = alias[4],
-                        FolderAlias = alias[5],
-                        GuestAlias = alias[6],
-                        RelatedSkills = relatedSkill
-                    };
-                    hero.SetAvailableParam(gs);
-                    dicts.Add(code, hero);
+                    if (isosr.StartsWith("@"))
+                        archetype = int.Parse(isosr.Substring("@".Length));
+                    else if (!string.IsNullOrEmpty(isosr))
+                        isos.Add(int.Parse(isosr));
                 }
+                string skills = (string)data["SKILL"];
+                List<string> skill, relatedSkill;
+                if (string.IsNullOrEmpty(skills))
+                {
+                    skill = new List<string>();
+                    relatedSkill = new List<string>();
+                }
+                else if (skills.IndexOf('|') < 0)
+                {
+                    skill = skills.Split(',').ToList();
+                    relatedSkill = new List<string>();
+                }
+                else
+                {
+                    int idx = skills.IndexOf('|');
+                    skill = skills.Substring(0, idx).Split(',').ToList();
+                    relatedSkill = skills.Substring(idx + 1).Split(',').ToList();
+                }
+                string[] aliass = (data["ALIAS"] as string ?? "").Split(',');
+                string[] alias = new string[7];
+                for (int i = 0; i < aliass.Length; i += 2)
+                {
+                    switch (aliass[i])
+                    {
+                        case "K": alias[0] = aliass[i + 1]; break;
+                        case "C": alias[1] = aliass[i + 1]; break;
+                        case "T": alias[2] = aliass[i + 1]; break;
+                        case "E": alias[3] = aliass[i + 1]; break;
+                        case "A": alias[4] = aliass[i + 1]; break;
+                        case "F": alias[5] = aliass[i + 1]; break;
+                        case "V": alias[6] = aliass[i + 1]; break;
+                    }
+                }
+                string bio = data["BIO"] as string ?? "";
+                Hero hero = new Hero(name, code, group, genre, gender, hp, str, dex, spouse, isos, archetype, skill, bio)
+                {
+                    Ofcode = data["OFCODE"] as string,
+                    TokenAlias = alias[0],
+                    PeopleAlias = alias[1],
+                    PlayerTarAlias = alias[2],
+                    ExCardsAlias = alias[3],
+                    AwakeAlias = alias[4],
+                    FolderAlias = alias[5],
+                    GuestAlias = alias[6],
+                    RelatedSkills = relatedSkill
+                };
+                hero.SetAvailableParam(gs);
+                dicts.Add(code, hero);
             }
         }
-
-        public int Size { get { return dicts.Count; } }
 
         public List<Hero> ListAllSeleable(int groups)
         {
             List<Hero> first = ListAllHeros(groups).Where(p => p.Ofcode != "XJ103" &&
                 p.Ofcode != "XJ207" && p.Ofcode != "XJ304" && p.Ofcode != "XJ507" &&
-                p.Ofcode != "HL005" && p.Ofcode != "HL015" && p.Ofcode != "HL021").ToList();
+                p.Ofcode != "TR031" && p.Ofcode != "TR033" &&
+                p.Ofcode != "HL005" && p.Ofcode != "HL015").ToList();
             if (first.Any(p => p.Ofcode == "XJ505") && first.Any(p => p.Ofcode == "TR011"))
                 first.RemoveAll(p => p.Ofcode == "XJ505");
             return first;
@@ -202,9 +199,9 @@ namespace PSD.Base.Card
         {
             int[] pkgs = Card.Level2Pkg(groups);
             if (pkgs != null)
-                return dicts.Values.Where(p => pkgs.Contains(p.Group)).ToList();
+                return dicts.Values.Where(p => p.Group != 0 && pkgs.Contains(p.Group)).ToList();
             else
-                return dicts.Values.ToList();
+                return dicts.Values.Where(p => p.Group != 0).ToList();
         }
         //public Hero[,] SRPickList(int cand, int people)
         //{
@@ -228,7 +225,7 @@ namespace PSD.Base.Card
         //}
         public List<Hero> ListHeroesInTest(int level)
         {
-            return dicts.Values.Where(p => p.AvailableTestPkg == (level >> 1)
+            return dicts.Values.Where(p => p.Group != 0 && p.AvailableTestPkg == (level >> 1)
                 && p.AvailableDay.Contains(DateTime.Now.DayOfWeek)).ToList();
         }
         public List<Hero> PurgeHeroesWithGivenTrainer(int level, string[] codes)

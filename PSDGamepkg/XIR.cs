@@ -62,14 +62,16 @@ namespace PSD.PSDGamepkg
             //Board.MonPiles.PushBack(1);
             //Board.MonPiles.PushBack(17);
             //Board.MonPiles.PushBack(14);
-            //Board.MonPiles.PushBack(8);
+            Board.MonPiles.PushBack(1003);
+            Board.MonPiles.PushBack(8);
             ////Board.MonPiles.PushBack(24);
             ////Board.MonPiles.PushBack(25);
             ////Board.MonPiles.PushBack(24);
             ////Board.MonPiles.PushBack(23);
             ////Board.MonPiles.PushBack(22);
             //Board.MonPiles.PushBack(29);
-            //Board.MonPiles.PushBack(1);
+            //Board.MonPiles.PushBack(1001);
+            //Board.MonPiles.PushBack(32);
             //Board.MonPiles.PushBack(1103);
             //Board.MonPiles.PushBack(1105);
             //Board.MonPiles.PushBack(1108);
@@ -83,11 +85,12 @@ namespace PSD.PSDGamepkg
             //Board.MonPiles.PushBack(1106);
             //Board.EvePiles.PushBack(29);
             ////Board.EvePiles.PushBack(1);
-            //Board.EvePiles.PushBack(31);
+            //Board.EvePiles.PushBack(39);
+            //Board.EvePiles.PushBack(42);
             //Board.EvePiles.PushBack(36);
             //Board.EvePiles.PushBack(34);
-            //Board.EvePiles.PushBack(35);
-            //Board.RestNPCPiles.PushBack(1047);
+            Board.EvePiles.PushBack(30);
+            Board.RestNPCPiles.PushBack(1067);
             // Board.HeroPiles.PushBack(19003);
             //Board.EvePiles.PushBack(31);
             //while (Board.MonPiles.Count > 0)
@@ -159,7 +162,7 @@ namespace PSD.PSDGamepkg
             //RaiseGMessage("G0HQ,2,3,0,20,26");
             //RaiseGMessage("G0HQ,2,1,0,0,49,11,10");
             //Board.RestNPCPiles.PushBack(1057);
-            RaiseGMessage("G0HQ,2,1,0,0,76");
+            //RaiseGMessage("G0HQ,2,1,0,0,81");
             //RaiseGMessage("G0HQ,2,2,0,0,37,70");
             //RaiseGMessage("G0HQ,2,3,0,0,84");
             //RaiseGMessage("G0HQ,2,1,0,0,77,95,9");
@@ -282,8 +285,8 @@ namespace PSD.PSDGamepkg
             //RaiseGMessage("G0OH,1,0,4,12,2,0,4,12");
             //RaiseGMessage(Artiad.Harm.ToMessage(new ushort[] { 1, 4, 5, 6 }
             //    .Select(p => new Artiad.Harm(p, 1, FiveElement.YIN, 6, 0))));
-            //RaiseGMessage(Artiad.Harm.ToMessage(new Artiad.Harm(2, 2, FiveElement.YIN, 4, 0)));
-            //RaiseGMessage(Artiad.Harm.ToMessage(new Artiad.Harm(2, 2, FiveElement.YIN, 3, 0)));
+            RaiseGMessage(Artiad.Harm.ToMessage(new Artiad.Harm(4, 4, FiveElement.YIN, 7, 0)));
+            RaiseGMessage(Artiad.Harm.ToMessage(new Artiad.Harm(6, 6, FiveElement.YIN, 2, 0)));
             //Board.Garden[3].Escue.Add(1112);
             //RaiseGMessage("G2IL,3,1112");
             //RaiseGMessage("G0IF,1,4");

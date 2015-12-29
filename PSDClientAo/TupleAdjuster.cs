@@ -10,21 +10,17 @@ namespace PSD.ClientAo
     {
         public void ConvertTuple(LibGroup tuple, int version)
         {
-            if (version <= 131)
+            if (version <= 110)
             {
-                Base.Card.Evenement eve = tuple.EL.GetEveFromName("SJ104");
-                if (eve != null)
-                    eve.ForceChange("Count", (ushort)1);
-                tuple.EL.Refresh();
-                Base.Skill skill = tuple.SL.EncodeSkill("JNH1102");
+                Skill skill = tuple.SL.EncodeSkill("JN50502");
                 if (skill != null)
                 {
-                    skill.ForceChange("Occurs", RemoveOnArray(skill.Occurs, 2));
-                    skill.ForceChange("Priorities", RemoveOnArray(skill.Priorities, 2));
-                    skill.ForceChange("IsOnce", RemoveOnArray(skill.IsOnce, 2));
-                    skill.ForceChange("IsTermini", RemoveOnArray(skill.IsTermini, 2));
-                    skill.ForceChange("Lock", RemoveOnArray(skill.Lock, 2));
-                    skill.ForceChange("IsHind", RemoveOnArray(skill.IsHind, 2));
+                    skill.ForceChange("Occurs", AppendOnArray(skill.Occurs, "G0IY", 3));
+                    skill.ForceChange("Priorities", AppendOnArray(skill.Priorities, 110, 3));
+                    skill.ForceChange("IsOnce", AppendOnArray(skill.IsOnce, true, 3));
+                    skill.ForceChange("IsTermini", AppendOnArray(skill.IsTermini, false, 3));
+                    skill.ForceChange("Lock", AppendOnArray(skill.Lock, true, 3));
+                    skill.ForceChange("IsHind", AppendOnArray(skill.IsHind, false, 3));
                 }
             }
             if (version <= 114)
@@ -40,17 +36,21 @@ namespace PSD.ClientAo
                     skill.ForceChange("IsHind", AppendOnArray(skill.IsHind, true, 2));
                 }
             }
-            if (version <= 110)
+            if (version <= 131)
             {
-                Base.Skill skill = tuple.SL.EncodeSkill("JN50502");
+                Base.Card.Evenement eve = tuple.EL.GetEveFromName("SJ104");
+                if (eve != null)
+                    eve.ForceChange("Count", (ushort)1);
+                tuple.EL.Refresh();
+                Skill skill = tuple.SL.EncodeSkill("JNH1102");
                 if (skill != null)
                 {
-                    skill.ForceChange("Occurs", AppendOnArray(skill.Occurs, "G0IY", 3));
-                    skill.ForceChange("Priorities", AppendOnArray(skill.Priorities, 110, 3));
-                    skill.ForceChange("IsOnce", AppendOnArray(skill.IsOnce, true, 3));
-                    skill.ForceChange("IsTermini", AppendOnArray(skill.IsTermini, false, 3));
-                    skill.ForceChange("Lock", AppendOnArray(skill.Lock, true, 3));
-                    skill.ForceChange("IsHind", AppendOnArray(skill.IsHind, false, 3));
+                    skill.ForceChange("Occurs", RemoveOnArray(skill.Occurs, 2));
+                    skill.ForceChange("Priorities", RemoveOnArray(skill.Priorities, 2));
+                    skill.ForceChange("IsOnce", RemoveOnArray(skill.IsOnce, 2));
+                    skill.ForceChange("IsTermini", RemoveOnArray(skill.IsTermini, 2));
+                    skill.ForceChange("Lock", RemoveOnArray(skill.Lock, 2));
+                    skill.ForceChange("IsHind", RemoveOnArray(skill.IsHind, 2));
                 }
             }
             if (version <= 107)
@@ -59,6 +59,16 @@ namespace PSD.ClientAo
                 if (hero != null)
                     hero.ForceChange("HP", (ushort)7);
             }
+            if (version <= 148)
+            {
+                Base.Card.Evenement eve = tuple.EL.GetEveFromName("SJT12");
+                if (eve != null)
+                    eve.ForceChange("Count", (ushort)0);
+                eve = tuple.EL.GetEveFromName("SJT16");
+                if (eve != null)
+                    eve.ForceChange("Count", (ushort)0);
+                tuple.EL.Refresh();
+            }            
         }
 
         private Type[] AppendOnArray<Type>(Type[] array, Type item, int index)

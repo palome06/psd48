@@ -532,6 +532,18 @@ namespace PSD.PSDGamepkg.JNS
                 XI.InnerGMessage("G0ZH,0", -15);
         }
         #region NPC Single
+        public void NCT32Debut(Player trigger)
+        {
+            if (XI.Board.InFight)
+                ++XI.Board.Rounder.RestZP;
+        }
+        public void NCT33Debut(Player trigger)
+        {
+            int tval = XI.Board.Rounder.Tux.Count;
+            ushort me = NMBLib.CodeOfNPC(XI.LibTuple.NL.Encode("NCT33"));
+            if (tval < 5)
+                XI.RaiseGMessage("G0IB," + me + "," + (5 - tval));
+        }
         public void NCT41Debut(Player trigger)
         {
             int incr = XI.Board.Garden.Values.Where(p => p.IsAlive &&

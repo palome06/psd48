@@ -1014,6 +1014,55 @@ namespace PSD.ClientZero
                     prevComment = ""; cancel = "";
                     roundInput = input;
                 }
+                else if (arg[0] == 'H')
+                {
+                    int idx = arg.IndexOf('~');
+                    int jdx = arg.IndexOf('(');
+                    int kdx = arg.IndexOf(')');
+                    string input;
+                    if (idx >= 1)
+                    {
+                        int r1 = int.Parse(Substring(arg, 1, idx));
+                        int r2 = int.Parse(Substring(arg, idx + 1, jdx));
+                        if (jdx >= 0)
+                        {
+                            string[] argv = Substring(arg, jdx + "(p".Length, kdx).Split('p');
+                            int[] uss = argv.Select(p => int.Parse(p)).ToArray();
+                            if (argv.Length < r1)
+                            {
+                                r1 = r2 = argv.Length;
+                                input = VI.Cin(Uid, "请选择{0}名角色为{1}目标，可选{2}{3}.",
+                                    argv.Length, prevComment, zd.HeroWithCode(uss), cancel);
+                            }
+                            else
+                                input = VI.Cin(Uid, "请选择{0}至{1}名角色为{2}目标，可选{3}{4}."
+                                    , r1, r2, prevComment, zd.HeroWithCode(uss), cancel);
+                            inputValid &= input.Split(',').Intersect(argv).Any();
+                        }
+                        else
+                            input = VI.Cin(Uid, "请选择{0}至{1}名角色为{2}目标{3}.", r1, r2, prevComment, cancel);
+                        inputValid &= !(CountItemFromComma(input) < r1 || CountItemFromComma(input) > r2);
+                    }
+                    else
+                    {
+                        int r = int.Parse(Substring(arg, 1, jdx));
+                        if (jdx >= 0)
+                        {
+                            string[] argv = Substring(arg, jdx + "(p".Length, kdx).Split('p');
+                            int[] uss = argv.Select(p => int.Parse(p)).ToArray();
+                            if (argv.Length < r)
+                                r = argv.Length;
+                            input = VI.Cin(Uid, "请选择{0}名角色为{1}目标，可选{2}{3}.",
+                                r, prevComment, zd.HeroWithCode(uss), cancel);
+                            inputValid &= input.Split(',').Intersect(argv).Any();
+                        }
+                        else
+                            input = VI.Cin(Uid, "请选择{0}名角色为{1}目标{2}.", r, prevComment, cancel);
+                        inputValid &= CountItemFromComma(input) == r;
+                    }
+                    prevComment = ""; cancel = "";
+                    roundInput = input;
+                }
                 else if (arg[0] == '!')
                 {
                     roundInput = arg.Substring(1);

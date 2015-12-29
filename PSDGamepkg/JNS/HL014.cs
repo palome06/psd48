@@ -1081,7 +1081,7 @@ namespace PSD.PSDGamepkg.JNS
             }
             else if (type == 3 || type == 4) // IS/OS
             {
-                if (IsMathISOS("JNH0801", player, fuse) && XI.Board.InFight)
+                if (IsMathISOS("JNH0701", player, fuse) && XI.Board.InFight)
                 {
                     return (XI.Board.IsAttendWar(player) && player.TokenExcl.Count > 0) ||
                     player.TokenExcl.Any(p => XI.LibTuple.NL.Decode(NMBLib.OriginalNPC(

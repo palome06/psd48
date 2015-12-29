@@ -11,17 +11,19 @@ namespace PSD.PSDGamepkg.Artiad
     {
         public static bool IsNPCJoinable(NPC npc, HeroLib hl, Board board)
         {
-            if (!npc.Skills.Contains("NJ01"))
-                return false;
-            Hero hero = hl.InstanceHero(npc.Hero);
-            if (hero == null)
+            return npc.Skills.Contains("NJ01") && IsHeroJoinable(hl.InstanceHero(npc.Hero), hl, board);
+        }
+
+        public static bool IsHeroJoinable(Hero hero, HeroLib hl, Board board)
+        {
+            if (hero == null || hero.Group == 0)
                 return false;
             Hero hrc = hl.InstanceHero(hero.Archetype);
             foreach (Player py in board.Garden.Values)
             {
                 if (py.SelectHero == 0)
                     continue;
-                if (py.SelectHero == npc.Hero && py.IsAlive)
+                if (py.SelectHero == hero.Avatar && py.IsAlive)
                     return false;
                 foreach (int isoId in hero.Isomorphic)
                 {
@@ -36,7 +38,7 @@ namespace PSD.PSDGamepkg.Artiad
             }
             foreach (int ib in board.BannedHero)
             {
-                if (ib == npc.Hero)
+                if (ib == hero.Avatar)
                     return false;
                 foreach (int isoId in hero.Isomorphic)
                 {

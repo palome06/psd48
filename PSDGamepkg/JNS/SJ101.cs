@@ -562,6 +562,12 @@ namespace PSD.PSDGamepkg.JNS
                 }
             }
         }
+        public void SJT12(Player rd)
+        {
+            var pys = XI.Board.Garden.Values.Where(p => p.IsAlive && p.Tux.Count > 0).ToList();
+            if (pys.Any())
+                XI.RaiseGMessage("G1XR,1,0,0," + string.Join(",", pys.Select(p => p.Uid)));
+        }
         public void SJT14(Player rd)
         {
             int hpR = XI.Board.Garden.Values.Where(p => p.IsAlive && p.Team == rd.Team).Sum(p => p.HP);
@@ -613,6 +619,31 @@ namespace PSD.PSDGamepkg.JNS
                 }
             }
         }
+        public void SJT16(Player rd)
+        {
+            ushort cardUt = XI.DequeueOfPile(XI.Board.TuxPiles);
+            XI.RaiseGMessage("G2IN,0,1");
+            Tux tux = XI.LibTuple.TL.DecodeTux(cardUt);
+            XI.RaiseGMessage("G0ON,0,C,1," + cardUt);
+
+            List<ushort> list = XI.Board.OrderedPlayer();
+            foreach (ushort ut in list)
+            {
+                Player py = XI.Board.Garden[ut];
+                if (py.IsAlive && py.Tux.Count > 0)
+                {
+                    XI.AsyncInput(ut, "//", "SJT16", "0");
+                    XI.RaiseGMessage("G2FU,0," + ut + ",0,C," + string.Join(",", py.Tux));
+                    List<ushort> nots = py.Tux.Where(p => !tux.IsSameType(XI.LibTuple.TL.DecodeTux(p))).ToList();
+                    if (nots.Count > 0)
+                        XI.RaiseGMessage("G0QZ," + ut + "," + string.Join(",", nots));
+                }
+            }
+            List<ushort> rest = XI.Board.Garden.Values.Where(
+                p => p.IsAlive && p.Tux.Count <= 1).Select(p => p.Uid).ToList();
+            if (rest.Count > 0)
+                XI.RaiseGMessage("G0DH," + string.Join(",", rest.Select(p => p + ",0,1")));
+        }
         public void SJT17(Player rd)
         {
             foreach (Player py in XI.Board.Garden.Values)
@@ -629,7 +660,7 @@ namespace PSD.PSDGamepkg.JNS
             }
         }
         #endregion Package 6#
-            #region Holiday
+        #region Holiday
         public void SJH01(Player rd)
         {
             XI.AsyncInput(rd.Uid, "//", "SJH01", "0");

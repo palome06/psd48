@@ -849,7 +849,7 @@ namespace PSD.ClientAo
                     {
                         string[] argv = Substring(arg, jdx + "(p".Length, kdx).Split('p');
                         List<ushort> uss = argv.Select(p => ushort.Parse(p)).ToList();
-                        input = VI.CinH(Uid, prevComment, r1, r2, uss);
+                        input = VI.CinH(Uid, prevComment, r1, r2, uss, false, false);
                         inputValid &= input.Split(',').Intersect(argv).Any();
                     }
                     else { input = ""; inputValid = false; }
@@ -1095,6 +1095,58 @@ namespace PSD.ClientAo
                         }
                         else
                             input = VI.Cin(Uid, "请选择{0}枚标记为{1}目标{2}.", r, prevComment, cancel);
+                        inputValid &= CountItemFromComma(input) == r;
+                    }
+                    prevComment = ""; cancel = "";
+                    roundInput = input;
+                }
+                else if (arg[0] == 'H')
+                {
+                    int idx = arg.IndexOf('~');
+                    int jdx = arg.IndexOf('(');
+                    int kdx = arg.IndexOf(')');
+                    string input;
+                    if (idx >= 1)
+                    {
+                        int r1 = int.Parse(Substring(arg, 1, idx));
+                        int r2 = int.Parse(Substring(arg, idx + 1, jdx));
+                        string inst;
+                        if (jdx >= 0)
+                        {
+                            string[] argv = Substring(arg, jdx + "(p".Length, kdx).Split('p');
+                            ushort[] uss = argv.Select(p => ushort.Parse(p)).ToArray();
+                            if (argv.Length < r1)
+                            {
+                                r1 = r2 = argv.Length;
+                                inst = string.Format("请选择{0}名角色为{1}目标.", argv.Length, prevComment);
+                            }
+                            else
+                                inst = string.Format("请选择{0}至{1}名角色为{2}目标.", r1, r2, prevComment);
+                            input = VI.CinH(Uid, inst, r1, r2, uss, cancellable, keep);
+                            inputValid &= input.Split(',').Intersect(argv).Any();
+                        }
+                        else
+                        {
+                            inst = string.Format("请选择{0}至{1}名角色为{2}目标.", r1, r2, prevComment);
+                            input = VI.CinH(Uid, inst, r1, r2, null, cancellable, keep);
+                        }
+                        inputValid &= !(CountItemFromComma(input) < r1 || CountItemFromComma(input) > r2);
+                    }
+                    else
+                    {
+                        int r = int.Parse(Substring(arg, 1, jdx));
+                        if (jdx >= 0)
+                        {
+                            string[] argv = Substring(arg, jdx + "(p".Length, kdx).Split('p');
+                            ushort[] uss = argv.Select(p => ushort.Parse(p)).ToArray();
+                            if (argv.Length < r)
+                                r = argv.Length;
+                            string inst = string.Format("请选择{0}名角色为{1}目标.", r, prevComment);
+                            input = VI.CinH(Uid, inst, r, r, uss, cancellable, keep);
+                            inputValid &= input.Split(',').Intersect(argv).Any();
+                        }
+                        else
+                            input = VI.Cin(Uid, "请选择{0}名角色为{1}目标{2}.", r, prevComment, cancel);
                         inputValid &= CountItemFromComma(input) == r;
                     }
                     prevComment = ""; cancel = "";

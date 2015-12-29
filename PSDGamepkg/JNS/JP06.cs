@@ -2364,7 +2364,7 @@ namespace PSD.PSDGamepkg.JNS
             else if (type == 1)
             {
                 List<Artiad.Harm> harms = Artiad.Harm.Parse(fuse);
-                List<ushort> targets = harms.Where(p => XI.Board.Garden[p.Who].IsTared &&
+                List<ushort> targets = harms.Where(p => XI.Board.Garden[p.Who].IsTared && p.Element != FiveElement.LOVE &&
                     XI.Board.Garden[p.Who].HP <= p.N).Select(p => p.Who).Distinct().ToList();
                 string result = XI.AsyncInput(player.Uid, "T1(p" + string.Join("p", targets) + ")", "TPT4", "2");
                 if (!string.IsNullOrEmpty(result) && !result.StartsWith("/"))
