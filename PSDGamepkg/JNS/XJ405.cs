@@ -1508,41 +1508,27 @@ namespace PSD.PSDGamepkg.JNS
             ushort card = ushort.Parse(args[0]);
             if (card != 0)
             {
-                ushort choose = ushort.Parse(args[1]);
-                if (choose == 1)
-                {
-                    VI.Cout(0, "韩菱纱发动「搜囊探宝」.");
-                    XI.RaiseGMessage("G0CC," + player.Uid + ",0," + player.Uid + ",JP06," + card + ";0," + fuse);
-                }
-                else if (choose == 2)
-                {
-                    VI.Cout(0, "韩菱纱发动「搜囊探宝」.");
-                    XI.RaiseGMessage("G0CC," + player.Uid + ",0," + player.Uid + ",JP01," + card + ";0," + fuse);
-                }
+                ushort db = ushort.Parse(args[1]);
+                string cardCode = XI.LibTuple.TL.EncodeTuxDbSerial(db).Code;
+                XI.RaiseGMessage("G0CC," + player.Uid + ",0," +
+                    player.Uid + "," + cardCode + "," + card + ";0," + fuse);
             }
         }
         public string JN50201Input(Player player, int type, string fuse, string prev)
         {
             if (prev == "")
             {
-                bool tp01 = false;
-                foreach (Player p in XI.Board.Garden.Values)
-                {
-                    if (p != player && (p.Tux.Count > 0))
-                    {
-                        tp01 |= true; break;
-                    }
-                }
-                string cp = "/Q1(p" + Util.Sato(player.Tux, "p") + ")";
-                return cp + (tp01 ? ",#请选择「搜囊探宝」执行项。##铜钱镖##偷盗,/Y2" :
-                    ",#请选择「搜囊探宝」执行项。##铜钱镖,/Y1");
+                ushort jp01 = XI.LibTuple.TL.EncodeTuxCode("JP01").DBSerial;
+                ushort jp06 = XI.LibTuple.TL.EncodeTuxCode("JP06").DBSerial;
+                bool jp01Valid = XI.Board.Garden.Values.Any(p => p.Uid != player.Uid && p.Tux.Count > 0);
+                return "/Q1(p" + string.Join("p", player.Tux) + "),#请选择『搜囊探宝』执行项,/G1(p"
+                    + jp06 + (jp01Valid ? ("p" + jp01) : "") + ")";
             }
             else
                 return "";
         }
         public void JN50202Action(Player player, int type, string fuse, string argst)
         {
-            VI.Cout(0, "韩菱纱发动「劫富济贫」.");
             XI.RaiseGMessage("G0DH," + player.Uid + ",0,1");
             if (player.Tux.Count >= 2)
                 XI.RaiseGMessage("G0DH," + player.Uid + ",1,1");
@@ -3391,7 +3377,7 @@ namespace PSD.PSDGamepkg.JNS
         {
             if (type == 0)
             {
-                XI.RaiseGMessage("G2YS,T" + player.Uid + ",M,1");
+                XI.RaiseGMessage("G2YS,T," + player.Uid + ",M,1");
                 XI.RaiseGMessage("G0OB," + XI.Board.Monster1 + ",2");
                 if (XI.Board.Hinder.IsTared)
                 {
@@ -3401,7 +3387,7 @@ namespace PSD.PSDGamepkg.JNS
             }
             else if (type == 1)
             {
-                XI.RaiseGMessage("G2YS,T" + player.Uid + ",M,2");
+                XI.RaiseGMessage("G2YS,T," + player.Uid + ",M,2");
                 XI.RaiseGMessage("G0OB," + XI.Board.Monster2 + ",2");
             }
         }

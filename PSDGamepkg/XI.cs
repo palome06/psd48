@@ -127,7 +127,7 @@ namespace PSD.PSDGamepkg
             //17024, 17036, 19007, 17045, 19013, 17040
             //17029, 10305, 15002, 19016, 15001, 17004
             //17029, 10206, 17005, 17040, 17027, 19003
-            17044, 10206, 17005, 17040, 10303, 17032
+            19002, 10305, 19010, 17040, 10303, 17032
         };
 
         #region Memeber Declaration & Constructor
@@ -646,7 +646,7 @@ namespace PSD.PSDGamepkg
                  "IE", "OE", "IS", "OS", "LH", "IV", "OV", "PB", "YM", "HR", "FI", "ON", "SN", "MA",
                  "PH", "ZJ", "IF", "OF" };
             string[] g1 = new string[] { "DI", "IU", "OU", "TH", "CW", "ZK", "IZ", "OZ", "WP", "SG",
-                 "HK", "WJ", "JG", "XR", "EV", "CK", "7F", "YP", "NI" };
+                 "HK", "WJ", "JG", "XR", "EV", "CK", "7F", "YP", "NI", "GE", "LY" };
             string[] g2 = new string[] { "IN", "RN", "CN", "QC", "FU", "QU", "CL", "ZU", "HU", "WK",
                  "AK", "IL", "OL", "SW", "AS", "SY" };
             foreach (string g0event in g0)

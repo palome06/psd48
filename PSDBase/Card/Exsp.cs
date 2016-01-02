@@ -10,16 +10,21 @@ namespace PSD.Base.Card
         public string Name { private set; get; }
         // Code, (e.g.) TRXJ608
         public string Code { private set; get; }
+        // type of Exsp: 0-General, 1-Target, 2-Token, 3-ICard, 4-Mark
+        public ushort Type { private set; get; }
+        // Hero holding the Exsp, (e.g.) TR004
+        public int Hero { private set; get; }
 
-        public List<string> Skills{private set;get;}
-        public IDictionary<string, string> Description{private set;get;}
+        public List<string> Skills { private set; get; }
+        public IDictionary<string, string> Description { private set; get; }
 
         private ExspLib lib;
 
-        internal Exsp(string name, string code, List<string> skills,
-            IDictionary<string, string> description, ExspLib lib)
+        internal Exsp(string name, ushort type, int hero, string code,
+            List<string> skills, IDictionary<string, string> description, ExspLib lib)
         {
-            this.Name = name; this.Code = code;
+            Name = name; Code = code;
+            Type = type; Hero = hero;
             this.lib = lib;
             Skills = skills;
             Description = description;
@@ -38,13 +43,16 @@ namespace PSD.Base.Card
             firsts = new List<Exsp>();
             sql = new Utils.ReadonlySQL("psd.db3");
             List<string> list = new string[] {
-                "NAME", "CODE", "SKILL", "DESC"
+                "TYPE", "NAME", "HERO", "CODE", "SKILL", "DESC"
             }.ToList();
             System.Data.DataRowCollection datas = sql.Query(list, "Exsp");
             foreach (System.Data.DataRow data in datas)
             {
-                //short type = (ushort)((short)data["TYPE"]);
+                ushort type = (ushort)((short)data["TYPE"]);
                 string name = (string)data["NAME"];
+                //string heroStr = (string)data["HERO"];
+                //int hero = string.IsNullOrEmpty(heroStr) ? 0 : int.Parse(heroStr);
+                int hero = (int)((long)data["HERO"]);
                 string codeGroup = (string)data["CODE"];
                 string skillstr = (string)data["SKILL"];
                 List<string> skill = string.IsNullOrEmpty(skillstr) ?
@@ -57,7 +65,7 @@ namespace PSD.Base.Card
                     id.Add(descSpt[i], descSpt[i + 1]);
                 string[] codes = codeGroup.Split(',');
                 foreach (string code in codes)
-                    firsts.Add(new Exsp(name, code, skill, id, this));
+                    firsts.Add(new Exsp(name, type, hero, code, skill, id, this));
             }
             dicts = new Dictionary<string, Exsp>();
             foreach (Exsp exsp in firsts)
@@ -70,6 +78,11 @@ namespace PSD.Base.Card
             if (dicts.TryGetValue(code, out exsp))
                 return exsp;
             else return null;
+        }
+
+        public List<Exsp> Firsts
+        {
+            get { return dicts.Values.ToList(); }
         }
     }
 }

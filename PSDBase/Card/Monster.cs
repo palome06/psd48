@@ -50,6 +50,7 @@ namespace PSD.Base.Card
         public string LoseText { set; get; }
 
         public ushort RAMUshort { set; get; }
+        public int RAMInt { set; get; }
 
         #region SPI Info
         private int mSpiHW, mSpiHL, mSpiHw, mSpiHl, mSpiHC, mSpiHc;

@@ -35,12 +35,16 @@ namespace PSD.ClientAo.Request
         }
         private void AddContent(string prefix, int avatar, int group, int genre, bool isInTest)
         {
+            AddContent(prefix + avatar, group, wrapPanels[genre], isInTest);
+        }
+        private void AddContent(string code, int group, WrapPanel wp, bool isInTest)
+        {
             Grid grid = new Grid() { Width = 100, Height = 130 };
             Ruban ruban = null;
             if (!isInTest && IsGenreNotAvailable(group))
-                ruban = Ruban.GenRubanGray(prefix + avatar, this, lg);
+                ruban = Ruban.GenRubanGray(code, this, lg);
             else
-                ruban = Ruban.GenRuban(prefix + avatar, this, lg);
+                ruban = Ruban.GenRuban(code, this, lg);
             ruban.Loc = Ruban.Location.WATCH; ruban.Cat = Ruban.Category.SOUND;
             ruban.VerticalAlignment = System.Windows.VerticalAlignment.Center;
             ruban.HorizontalAlignment = System.Windows.HorizontalAlignment.Center;
@@ -58,11 +62,11 @@ namespace PSD.ClientAo.Request
                 };
                 grid.Children.Add(img);
             }
-            wrapPanels[genre].Children.Add(grid);
+            wp.Children.Add(grid);
         }
         public Hour()
         {
-            lg = new PSD.Base.LibGroup();
+            lg = new Base.LibGroup();
             InitializeComponent();
             string[] genreName = new string[] { "稻草人", "标准包", "凤鸣玉誓", "SP", "EX",
                 "三世轮回", "云来奇缘", "含笑九泉", "界限突破", "宿命篇" };
@@ -121,7 +125,7 @@ namespace PSD.ClientAo.Request
             foreach (ushort npcCode in lg.NL.ListAllSeleable(0))
             {
                 NPC npc = lg.NL.Decode(npcCode);
-                AddContent("M", Base.Card.NMBLib.CodeOfNPC(npcCode), npc.Group, npc.Genre, false);
+                AddContent("M", NMBLib.CodeOfNPC(npcCode), npc.Group, npc.Genre, false);
             }
 
             genreIndex = new int[] { 1, 5, 6, 9 };
@@ -141,7 +145,7 @@ namespace PSD.ClientAo.Request
             }
             //ushort counter = 1;
             foreach (Monster mon in lg.ML.ListAllMonster(0))
-                AddContent("M", mon.DBSerial, 0, mon.Genre, false);
+                AddContent("M", mon.DBSerial, mon.Group, mon.Genre, false);
 
             genreIndex = new int[] { 1, 6, 7, 9 };
             foreach (int index in genreIndex)
@@ -164,6 +168,31 @@ namespace PSD.ClientAo.Request
                 Evenement eve = lg.EL.DecodeEvenement(eveCode);
                 if (eveSet.Add(eve))
                     AddContent("E", eveCode, eve.Group, eve.Genre, false);
+            }
+
+            IDictionary<int, WrapPanel> iCardDict = new Dictionary<int, WrapPanel>();
+            foreach (Exsp exsp in lg.ESL.Firsts.Where(p => p.Type == 3))
+            {
+                string[] codes = exsp.Code.Split(',');
+                if (!codes.Any(p => p.StartsWith("I")))
+                    continue;
+                Hero hero = lg.HL.InstanceHero(exsp.Hero);
+                string code = codes.First(p => p.StartsWith("I"));
+                if (!iCardDict.ContainsKey(exsp.Hero))
+                {
+                    GroupBox gb = new GroupBox()
+                    {
+                        Header = new TextBlock()
+                        {
+                            FontSize = 24,
+                            FontFamily = new FontFamily("Lisu"),
+                            Text = hero.Name
+                        }
+                    };
+                    gb.Content = iCardDict[exsp.Hero] = new WrapPanel();
+                    iCardStackPanel.Children.Add(gb);
+                }
+                AddContent(code, hero.Group, iCardDict[exsp.Hero], false);
             }
         }
     }

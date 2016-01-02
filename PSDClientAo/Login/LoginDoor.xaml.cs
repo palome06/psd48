@@ -294,11 +294,13 @@ namespace PSD.ClientAo.Login
         {
             HallLevelPanel.IsEnabled = true;
             IsHallLevelEnabled = true;
+            HallTesterPanel.IsEnabled = true;
         }
         private void HallLevelDisabled(object sender, RoutedEventArgs e)
         {
             HallLevelPanel.IsEnabled = false;
             IsHallLevelEnabled = false;
+            HallTesterPanel.IsEnabled = false;
         }
         private void HallTeamEnabled(object sender, RoutedEventArgs e)
         {

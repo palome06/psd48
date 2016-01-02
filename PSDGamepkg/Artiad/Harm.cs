@@ -27,6 +27,19 @@ namespace PSD.PSDGamepkg.Artiad
             }
         }
 
+        public static int Elem2Index(FiveElement element)
+        {
+            switch (element)
+            {
+                case FiveElement.AQUA: return 0;
+                case FiveElement.AGNI: return 1;
+                case FiveElement.THUNDER: return 2;
+                case FiveElement.AERO: return 3;
+                case FiveElement.SATURN: return 4;
+                default: return -1;
+            }
+        }
+
         public static FiveElement Int2Elem(int code)
         {
             switch (code)

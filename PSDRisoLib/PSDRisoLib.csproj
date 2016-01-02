@@ -435,6 +435,8 @@
     <Resource Include="Resources\Card\ExSp\EP020.png" />
     <Resource Include="Resources\Card\ExSp\EP021.png" />
     <Resource Include="Resources\Card\ExSp\EP022.png" />
+    <Resource Include="Resources\Card\ExSp\EP023.png" />
+    <Resource Include="Resources\Card\ExSp\EP024.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Card\NMB\NC303.jpg" />
@@ -493,6 +495,7 @@
     <Resource Include="Resources\PetsSnap\NCT09.png" />
     <Resource Include="Resources\PetsSnap\NCT13.png" />
     <Resource Include="Resources\PetsSnap\NCT20.png" />
+    <Resource Include="Resources\PetsSnap\NCT33.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\PetsSnap\NCH02.png" />
@@ -658,9 +661,13 @@
     <Resource Include="Resources\Card\NMB\GST4.png" />
     <Resource Include="Resources\Card\NMB\GTT3.png" />
     <Resource Include="Resources\Card\NMB\GTT4.png" />
+    <Resource Include="Resources\Card\NMB\GSH1.png" />
     <Resource Include="Resources\Card\NMB\GSH3.png" />
     <Resource Include="Resources\Card\NMB\GHH1.png" />
     <Resource Include="Resources\Card\NMB\GLH2.png" />
+    <Resource Include="Resources\Card\NMB\GFH1.png" />
+    <Resource Include="Resources\Card\NMB\GFH2.png" />
+    <Resource Include="Resources\Card\NMB\GTH1.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\PetsSnap\GFT3.png" />
@@ -673,9 +680,13 @@
     <Resource Include="Resources\PetsSnap\GST4.png" />
     <Resource Include="Resources\PetsSnap\GTT3.png" />
     <Resource Include="Resources\PetsSnap\GTT4.png" />
+    <Resource Include="Resources\PetsSnap\GSH1.png" />
     <Resource Include="Resources\PetsSnap\GSH3.png" />
     <Resource Include="Resources\PetsSnap\GHH1.png" />
     <Resource Include="Resources\PetsSnap\GLH2.png" />
+    <Resource Include="Resources\PetsSnap\GFH1.png" />
+    <Resource Include="Resources\PetsSnap\GFH2.png" />
+    <Resource Include="Resources\PetsSnap\GTH1.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Card\Tux\JPT3.png" />
@@ -686,6 +697,7 @@
     <Resource Include="Resources\Card\Tux\XBT2.png" />
     <Resource Include="Resources\Card\Tux\XBT3.png" />
     <Resource Include="Resources\Card\Tux\XBT4.png" />
+    <Resource Include="Resources\Card\Tux\XBT5.png" />
     <Resource Include="Resources\Card\Tux\ZPT2.png" />
     <Resource Include="Resources\Card\Tux\ZPT3.png" />
   </ItemGroup>
@@ -697,13 +709,16 @@
     <Resource Include="Resources\Card\Tux\JPR1.png" />
     <Resource Include="Resources\Card\Tux\JPR2.png" />
     <Resource Include="Resources\Card\Tux\TPR1.png" />
+    <Resource Include="Resources\Card\Tux\XBR1.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Card\Tux\JPH2.png" />
     <Resource Include="Resources\Card\Tux\JPH4.png" />
     <Resource Include="Resources\Card\Tux\TPH1.png" />
+    <Resource Include="Resources\Card\Tux\TPH3.png" />
     <Resource Include="Resources\Card\Tux\TPH4.png" />
     <Resource Include="Resources\Card\Tux\ZPH1.png" />
+    <Resource Include="Resources\Card\Tux\ZPH2.png" />
     <Resource Include="Resources\Card\Tux\WQH1.png" />
     <Resource Include="Resources\Card\Tux\FJH1.png" />
     <Resource Include="Resources\Card\Tux\XBH1.png" />
@@ -715,6 +730,8 @@
     <Resource Include="Resources\EquipSnap\XBT2.png" />
     <Resource Include="Resources\EquipSnap\XBT3.png" />
     <Resource Include="Resources\EquipSnap\XBT4.png" />
+    <Resource Include="Resources\EquipSnap\XBT5.png" />
+    <Resource Include="Resources\EquipSnap\XBR1.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\NameBar\Name000.png" />
@@ -954,6 +971,8 @@
     <Resource Include="Resources\Guard\L15.png" />
     <Resource Include="Resources\Guard\L16.png" />
     <Resource Include="Resources\Guard\L17.png" />
+    <Resource Include="Resources\Guard\L18.png" />
+    <Resource Include="Resources\Guard\L19.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Buffer\SF01.png" />

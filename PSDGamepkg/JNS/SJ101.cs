@@ -794,8 +794,8 @@ namespace PSD.PSDGamepkg.JNS
                 if (!select.Contains(VI.CinSentinel))
                 {
                     ushort ut = ushort.Parse(select);
-                    Base.Card.Tux tux = XI.LibTuple.TL.DecodeTux(ut);
-                    if (tux.Type == Tux.TuxType.ZP || new string[] { "TP01", "TP03", "TPT1", "TPT3", "TPH4" }.Contains(tux.Code))
+                    Tux tux = XI.LibTuple.TL.DecodeTux(ut);
+                    if (!Artiad.ContentRule.IsTuxUsableEveryWhere(tux))
                         XI.RaiseGMessage("G0QZ," + rd.Uid + "," + ut);
                     else if (tux.IsTuxEqiup())
                     {
@@ -815,7 +815,11 @@ namespace PSD.PSDGamepkg.JNS
                     {
                         string tarStr = XI.AsyncInput(nx.Uid, "#成为此牌使用者的,T1(p" + string.Join("p",
                             XI.Board.Garden.Values.Where(p => p.IsTared).Select(p => p.Uid)) + ")", "SJH05", "1");
-                        XI.RaiseGMessage("G0CC," + rd.Uid + ",0," + tarStr + "," + tux.Code + "," + ut + ";0,G1EV," + rd.Uid);
+                        ushort tar = ushort.Parse(tarStr);
+                        if (tux.Valid(XI.Board.Garden[tar], 0, "G1EV," + rd.Uid))
+                            XI.RaiseGMessage("G0CC," + rd.Uid + ",0," + tarStr + "," + tux.Code + "," + ut + ";0,G1EV," + rd.Uid);
+                        else
+                            XI.RaiseGMessage("G0QZ," + rd.Uid + "," + ut);
                     }
                 }
             }
@@ -827,6 +831,7 @@ namespace PSD.PSDGamepkg.JNS
                 if (rd.Tux.Count == 0) { break; }
                 Player py = XI.Board.Garden[ut];
                 if (ut == rd.Uid || !py.IsAlive) { continue; }
+                TargetPlayer(rd.Uid, ut);
                 string second = XI.AsyncInput(rd.Uid, string.Format("#交予{0}的,Q1(p{1})",
                     XI.DisplayPlayer(ut), string.Join("p", rd.ListOutAllCards())), "SJH06", "0");
                 ushort card = ushort.Parse(second);
@@ -849,6 +854,7 @@ namespace PSD.PSDGamepkg.JNS
             {
                 Player py = XI.Board.Garden[ut];
                 if (ut == rd.Uid || !py.IsAlive || py.GetAllCardsCount() == 0) { continue; }
+                TargetPlayer(rd.Uid, ut);
                 string second = XI.AsyncInput(rd.Uid, string.Format("#获得{0}的,C1(p{1})",
                     XI.DisplayPlayer(ut), string.Join("p", py.ListOutAllCardsWithEncrypt())), "SJH07", "0");
                 ushort card = ushort.Parse(second);

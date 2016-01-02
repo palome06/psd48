@@ -1,6 +1,6 @@
 ﻿<UserControl x:Class="PSD.ClientAo.Request.Hour"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Height="280" Width="570">
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Height="320" Width="570">
     <UserControl.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -41,11 +41,17 @@
             </ScrollViewer>
         </TabItem>
 
-        <TabItem Header="场景牌" IsEnabled="False">
-            <TextBlock>Help tab</TextBlock>
+        <TabItem Header="专属牌">
+            <ScrollViewer>
+                <StackPanel x:Name="iCardStackPanel"/>
+            </ScrollViewer>
         </TabItem>
 
         <TabItem Header="危机牌" IsEnabled="False">
+            <TextBlock>Help tab</TextBlock>
+        </TabItem>
+        
+        <TabItem Header="场景牌" IsEnabled="False">
             <TextBlock>Help tab</TextBlock>
         </TabItem>
 

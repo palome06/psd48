@@ -1,12 +1,9 @@
 ﻿using PSD.Base;
 using PSD.Base.Card;
-using PSD.ClientZero;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace PSD.PSDGamepkg
 {
@@ -62,8 +59,10 @@ namespace PSD.PSDGamepkg
             //Board.MonPiles.PushBack(1);
             //Board.MonPiles.PushBack(17);
             //Board.MonPiles.PushBack(14);
-            Board.MonPiles.PushBack(1003);
-            Board.MonPiles.PushBack(8);
+            //Board.MonPiles.PushBack(46);
+            //Board.MonPiles.PushBack(41);
+            //Board.MonPiles.PushBack(13);
+            //Board.MonPiles.PushBack(49);
             ////Board.MonPiles.PushBack(24);
             ////Board.MonPiles.PushBack(25);
             ////Board.MonPiles.PushBack(24);
@@ -89,8 +88,8 @@ namespace PSD.PSDGamepkg
             //Board.EvePiles.PushBack(42);
             //Board.EvePiles.PushBack(36);
             //Board.EvePiles.PushBack(34);
-            Board.EvePiles.PushBack(30);
-            Board.RestNPCPiles.PushBack(1067);
+            //Board.EvePiles.PushBack(30);
+            //Board.RestNPCPiles.PushBack(1067);
             // Board.HeroPiles.PushBack(19003);
             //Board.EvePiles.PushBack(31);
             //while (Board.MonPiles.Count > 0)
@@ -130,7 +129,7 @@ namespace PSD.PSDGamepkg
             //Board.MonPiles.PushBack(29);
             //Board.MonPiles.PushBack(54);
             //Board.MonPiles.PushBack(33);
-            //Board.MonPiles.PushBack(4);
+            //Board.MonPiles.PushBack(13);
             //Board.MonPiles.PushBack(10);
             //Board.MonPiles.PushBack(8);
             //Board.MonPiles.PushBack(19);
@@ -139,8 +138,8 @@ namespace PSD.PSDGamepkg
             //Board.MonPiles.PushBack(1111);
             //Board.MonPiles.PushBack(1110);
             //Board.MonPiles.PushBack(17);
-            //Board.MonPiles.PushBack(1045);
-            //Board.MonPiles.PushBack(5);
+            //Board.MonDises.Add(4);
+            //Board.MonPiles.PushBack(6);
             //Board.MonPiles.PushBack(1040);
             //Board.MonPiles.PushBack(1109);
             //Board.MonPiles.PushBack(1031);
@@ -150,6 +149,9 @@ namespace PSD.PSDGamepkg
             //Board.RestMonPiles.PushBack(3);
             //Board.RestMonPiles.PushBack(7);
             //Board.RestMonPiles.PushBack(17);
+            //Board.TuxPiles.PushBack(76);
+            //Board.TuxPiles.PushBack(75);
+            //Board.TuxPiles.PushBack(1);
             //RaiseGMessage("G0HQ,2,1,0,52,10,11");
             //RaiseGMessage("G0HQ,2,1,0,47,49,10,11,12");
             //Board.MonPiles.PushBack(54);
@@ -162,12 +164,12 @@ namespace PSD.PSDGamepkg
             //RaiseGMessage("G0HQ,2,3,0,20,26");
             //RaiseGMessage("G0HQ,2,1,0,0,49,11,10");
             //Board.RestNPCPiles.PushBack(1057);
-            //RaiseGMessage("G0HQ,2,1,0,0,81");
+            //RaiseGMessage("G0HQ,2,1,0,0,137,138");
             //RaiseGMessage("G0HQ,2,2,0,0,37,70");
             //RaiseGMessage("G0HQ,2,3,0,0,84");
             //RaiseGMessage("G0HQ,2,1,0,0,77,95,9");
             //RaiseGMessage("G0HQ,2,1,0,0,123,101");
-            //RaiseGMessage("G0HQ,2,1,0,0,80");
+            //RaiseGMessage("G0HQ,2,1,0,0,70");
             //RaiseGMessage("G0HQ,2,1,0,0,101,127");
             //RaiseGMessage("G0HQ,2,4,0,0,104");
             //RaiseGMessage("G0HQ,2,5,0,0,34");
@@ -198,7 +200,7 @@ namespace PSD.PSDGamepkg
             //RaiseGMessage("G0HQ,2,1,0,0,71,37,95");
             //RaiseGMessage("G0HQ,2,1,0,0,47,52");
             //RaiseGMessage("G0HQ,2,1,0,0,55,73,95,1,5");
-            //RaiseGMessage("G0HQ,2,2,0,0,104");
+            //RaiseGMessage("G0HQ,2,2,0,0,110");
             //RaiseGMessage("G0HQ,2,3,0,0,48,53");
             //RaiseGMessage("G0HQ,2,3,0,0,49");
             //RaiseGMessage("G0HQ,2,2,0,0,96");
@@ -209,7 +211,7 @@ namespace PSD.PSDGamepkg
             //RaiseGMessage("G0HQ,2,1,0,1,47,48,49,51,52");
             //RaiseGMessage("G0HQ,2,1,0,71,72,10,79,8");
             //RaiseGMessage("G0HQ,2,2,0,55,84");
-            //RaiseGMessage("G0HQ,2,3,0,49");
+            //RaiseGMessage("G0HQ,2,1,0,0,50");
             //RaiseGMessage("G0HQ,2,4,0,50,32,1,2");
             //RaiseGMessage("G0HQ,2,5,0,51");
             //RaiseGMessage("G0HQ,2,6,0,0,52");
@@ -259,24 +261,24 @@ namespace PSD.PSDGamepkg
             //RaiseGMessage("G0ZB,3,0,73");
             //RaiseGMessage("G0ZB,4,0,47");
             //RaiseGMessage("G0ZB,4,0,48");
-            // Board.Garden[1].Escue.Add(1001);
-            // Board.Garden[3].Escue.Add(1002);
-            // Board.Garden[4].Escue.Add(1003);
-            // RaiseGMessage("G2IL,1,1001,3,1002,4,1003");
-            // //RaiseGMessage("G0ZB,4,0,52");
-            // RaiseGMessage("G0HD,1,5,0,5");
-            // RaiseGMessage("G0HD,1,5,0,17");
-            // RaiseGMessage("G0HD,1,1,0,15");
-            // RaiseGMessage("G0HD,1,1,0,30");
-            // RaiseGMessage("G0HD,1,5,0,36");
-            // RaiseGMessage("G0HD,1,6,0,16");
-            // RaiseGMessage("G0HD,1,2,0,2");
-            // RaiseGMessage("G0HD,1,2,0,31");
-            // RaiseGMessage("G0HD,1,3,0,7");
-            // RaiseGMessage("G0HD,1,3,0,12");
-            // RaiseGMessage("G0HD,1,5,0,22");
-            // RaiseGMessage("G0HD,1,4,0,19");
-            // RaiseGMessage("G0HD,1,6,0,9");
+            //Board.Garden[1].Escue.Add(1001);
+            //Board.Garden[3].Escue.Add(1002);
+            //Board.Garden[4].Escue.Add(1003);
+            //RaiseGMessage("G2IL,1,1001,3,1002,4,1003");
+            //RaiseGMessage("G0ZB,4,0,52");
+            //RaiseGMessage("G0HD,1,5,0,5");
+            //RaiseGMessage("G0HD,1,5,0,17");
+            //RaiseGMessage("G0HD,1,2,0,19");
+            //RaiseGMessage("G0HD,1,1,0,30");
+            //RaiseGMessage("G0HD,1,5,0,36");
+            //RaiseGMessage("G0HD,1,6,0,16");
+            //RaiseGMessage("G0HD,1,2,0,2");
+            //RaiseGMessage("G0HD,1,2,0,31");
+            //RaiseGMessage("G0HD,1,3,0,7");
+            //RaiseGMessage("G0HD,1,3,0,12");
+            //RaiseGMessage("G0HD,1,5,0,22");
+            //RaiseGMessage("G0HD,1,4,0,19");
+            //RaiseGMessage("G0HD,1,6,0,9");
             //RaiseGMessage("G0HD,1,5,0,15");
             //RaiseGMessage("G0HQ,1,0,1,16,5,44,50");
             //RaiseGMessage("G0HQ,4,0,1,43");
@@ -285,8 +287,8 @@ namespace PSD.PSDGamepkg
             //RaiseGMessage("G0OH,1,0,4,12,2,0,4,12");
             //RaiseGMessage(Artiad.Harm.ToMessage(new ushort[] { 1, 4, 5, 6 }
             //    .Select(p => new Artiad.Harm(p, 1, FiveElement.YIN, 6, 0))));
-            RaiseGMessage(Artiad.Harm.ToMessage(new Artiad.Harm(4, 4, FiveElement.YIN, 7, 0)));
-            RaiseGMessage(Artiad.Harm.ToMessage(new Artiad.Harm(6, 6, FiveElement.YIN, 2, 0)));
+            //RaiseGMessage(Artiad.Harm.ToMessage(new Artiad.Harm(4, 4, FiveElement.YIN, 7, 0)));
+            //RaiseGMessage(Artiad.Harm.ToMessage(new Artiad.Harm(6, 6, FiveElement.YIN, 2, 0)));
             //Board.Garden[3].Escue.Add(1112);
             //RaiseGMessage("G2IL,3,1112");
             //RaiseGMessage("G0IF,1,4");
@@ -351,7 +353,7 @@ namespace PSD.PSDGamepkg
             jumpTareget = "R100"; jumpEnd = "H0TM";
             while (!isFinished)
             {
-                System.Threading.Thread.Sleep(1000);
+                Thread.Sleep(1000);
                 bool valid;
                 lock (jumpTareget)
                 {
@@ -487,7 +489,8 @@ namespace PSD.PSDGamepkg
                             Board.PosSupporters.AddRange(sMember.Select(p => "T" + p).ToList());
                             Board.AllowNoSupport = true;
                             Board.AllowNoHinder = true;
-                            RunQuadStage(rstage);
+
+                            RunQuadMixedStage(rstage, 0, null, null);
                             // Trigger side
                             bool isFight = false; // decide to show fight or just pass
                             string spsm = "#为支援者(决定)", spsn = "#为支援者(建议)";
@@ -527,11 +530,14 @@ namespace PSD.PSDGamepkg
                             {
                                 RaiseGMessage("G17F,O");
                                 // Ensure XI.Board.Mon1From == 0
-                                ushort mons = DequeueOfPile(Board.MonPiles);
-                                RaiseGMessage("G2IN,1,1");
+                                if (Board.Mon1From == 0 || Board.Monster1 == 0)
+                                {
+                                    ushort mons = DequeueOfPile(Board.MonPiles);
+                                    RaiseGMessage("G2IN,1,1");
+                                    WI.BCast(rstage + "7,0," + mons);
+                                    RaiseGMessage("G0ON,0,M,1," + mons);
+                                }
                                 Board.Battler = null;
-                                WI.BCast(rstage + "7,0," + mons);
-                                RaiseGMessage("G0ON,0,M,1," + mons);
                                 rstage = "R" + rounder + "ZF";
                             }
                             else
@@ -753,16 +759,10 @@ namespace PSD.PSDGamepkg
                             if (Board.IsBattleWin) // OK, win
                             {
                                 if (Board.Monster1 != 0)
-                                {
-                                    var mon1 = LibTuple.ML.Decode(Board.Monster1);
-                                    mon1.WinEff();
-                                }
+                                    RaiseGMessage("G1GE,W," + Board.Monster1);
                                 bool hasMonster2 = Board.Monster2 != 0 && NMBLib.IsMonster(Board.Monster2);
                                 if (hasMonster2)
-                                {
-                                    var mon2 = LibTuple.ML.Decode(Board.Monster2);
-                                    mon2.WinEff();
-                                }
+                                    RaiseGMessage("G1GE,W," + Board.Monster2);
                                 if (Board.Monster1 != 0 && Board.Mon1Catchable)
                                 {
                                     RaiseGMessage("G0HC,0," + Board.Rounder.Uid +
@@ -778,15 +778,9 @@ namespace PSD.PSDGamepkg
                             else
                             {
                                 if (Board.Monster1 != 0)
-                                {
-                                    var mon1 = LibTuple.ML.Decode(Board.Monster1);
-                                    mon1.LoseEff();
-                                }
+                                    RaiseGMessage("G1GE,L," + Board.Monster1);
                                 if (Board.Monster2 != 0 && NMBLib.IsMonster(Board.Monster2))
-                                {
-                                    var mon2 = LibTuple.ML.Decode(Board.Monster2);
-                                    mon2.LoseEff();
-                                }
+                                    RaiseGMessage("G1GE,L," + Board.Monster2);
                             }
                             //WI.BCast(rstage + "2," + (Board.IsBattleWin ? "0" : "1"));
                             RunQuadStage(rstage);

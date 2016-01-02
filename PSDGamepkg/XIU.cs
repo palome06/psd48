@@ -331,7 +331,7 @@ namespace PSD.PSDGamepkg
                     if (tux.IsTuxEqiup())
                     {
                         Base.Card.TuxEqiup tue = tux as Base.Card.TuxEqiup;
-                        tue.UseAction(ccode, Board.Garden[from]);
+                        tue.UseAction(ccode, Board.Garden[from], false);
                         u5ed = ske.IsTermini ? UEchoCode.END_TERMIN : UEchoCode.END_ACTION;
                     }
                     //else

@@ -243,15 +243,15 @@ namespace PSD.PSDGamepkg.JNS
                     }
                     var methodUseAction = tc.GetType().GetMethod(cardCode + "UseAction");
                     if (methodUseAction != null)
-                        tue.UseAction += new TuxEqiup.CsUseActionDelegate(delegate(ushort cardUt, Player player)
+                        tue.UseAction += delegate(ushort cardUt, Player player, bool fromSky)
                         {
-                            methodUseAction.Invoke(tc, new object[] { cardUt, player });
-                        });
+                            methodUseAction.Invoke(tc, new object[] { cardUt, player, fromSky });
+                        };
                     else
-                        tue.UseAction += new TuxEqiup.CsUseActionDelegate(delegate(ushort cardUt, Player player)
+                        tue.UseAction += delegate (ushort cardUt, Player player, bool fromSky)
                         {
-                            EquipGeneralUseAction(cardUt, player);
-                        });
+                            EquipGeneralUseAction(cardUt, player, fromSky);
+                        };
                     var methodInsAction = tc.GetType().GetMethod(cardCode + "InsAction");
                     if (methodInsAction != null)
                         tue.InsAction += new TuxEqiup.CrActionDelegate(delegate(Player player)
@@ -869,9 +869,9 @@ namespace PSD.PSDGamepkg.JNS
         }
         private void JPT1FullOperation(Player player, bool needDiscard)
         {
-            bool b1 = XI.Board.Garden.Values.Where(p => p.IsAlive && p.GetPetCount() > 0).Any();
-            bool b2 = player.Tux.Count > 0 && XI.Board.Garden.Values.Where(p => p.IsAlive && p.GetPetCount() > 0 &&
-                XI.Board.Garden.Values.Where(q => q.IsTared && q.Team == p.Team && p.Uid != q.Uid).Any()).Any();
+            bool b1 = XI.Board.Garden.Values.Any(p => p.IsAlive && p.GetPetCount() > 0);
+            bool b2 = ((!needDiscard || player.Tux.Count > 0) && XI.Board.Garden.Values.Any(p => p.IsAlive && p.GetPetCount() > 0 &&
+                XI.Board.Garden.Values.Any(q => q.IsTared && q.Team == p.Team && p.Uid != q.Uid)));
             
             string costr;
             if (b1 && b2)
@@ -1349,7 +1349,7 @@ namespace PSD.PSDGamepkg.JNS
                 XI.RaiseGMessage("G0DH," + player.Uid + ",0,1");
             }
         }
-        public void FJT2UseAction(ushort cardUt, Player player)
+        public void FJT2UseAction(ushort cardUt, Player player, bool fromSky)
         {
             string tarStr = XI.AsyncInput(player.Uid, "#装备的,T1(p" + string.Join("p",
                 XI.Board.Garden.Values.Where(p => p.IsTared).Select(p => p.Uid)) + ")", "FJT2UseAction", "0");
@@ -1359,6 +1359,8 @@ namespace PSD.PSDGamepkg.JNS
                 if (tar != player.Uid)
                     XI.RaiseGMessage("G0ZB," + tar + ",1," + player.Uid +
                         ",0," + player.Uid + "," + cardUt);
+                else if (fromSky)
+                    XI.RaiseGMessage("G0ZB," + player.Uid + ",4," + cardUt);
                 else
                     XI.RaiseGMessage("G0ZB," + player.Uid + ",0," + cardUt);
             }
@@ -1433,8 +1435,8 @@ namespace PSD.PSDGamepkg.JNS
         }
         public void JPT5Action(Player player, int type, string fuse, string argst)
         {
-            ushort to = ushort.Parse(XI.AsyncInput(
-                    player.Uid, "T1" + Util.SSelect(XI.Board, p => p.IsTared), "JPT5", "0"));
+            ushort to = ushort.Parse(XI.AsyncInput(player.Uid, "#【还魂香】作用,T1" +
+                Util.SSelect(XI.Board, p => p.IsTared), "JPT5", "0"));
 
             ushort pop = XI.Board.RestNPCPiles.Dequeue();
             NPC npc = XI.LibTuple.NL.Decode(NMBLib.OriginalNPC(pop));
@@ -1443,7 +1445,7 @@ namespace PSD.PSDGamepkg.JNS
             XI.Board.Monster1 = pop;
             UEchoCode r5ed = XI.HandleWithNPCEffect(XI.Board.Garden[to], npc, false);
             if (r5ed == UEchoCode.NO_OPTIONS)
-                XI.AsyncInput(to, "//", "JPT5Action", "1");
+                XI.AsyncInput(to, "//", "JPT5", "1");
             else if (r5ed == UEchoCode.END_ACTION)
                 XI.RaiseGMessage("G1YP," + player.Uid + "," + pop);
             
@@ -1679,10 +1681,10 @@ namespace PSD.PSDGamepkg.JNS
         {
             XI.RaiseGMessage("G0DH," + player.Uid + ",0,1");
         }
-        public void XBT2DelAction(Player player)
+        private void XBT2FullDelAction(Player player, string cardName)
         {
-            Base.Card.Luggage lug = XI.LibTuple.TL.EncodeTuxCode("XBT2") as Base.Card.Luggage;
-            ushort lugCode = XI.LibTuple.TL.UniqueEquipSerial("XBT2");
+            Luggage lug = XI.LibTuple.TL.EncodeTuxCode(cardName) as Luggage;
+            ushort lugCode = XI.LibTuple.TL.UniqueEquipSerial(cardName);
             if (lug != null && lug.Capacities.Count > 0)
             {
                 List<string> cap = lug.Capacities.ToList();
@@ -1693,9 +1695,14 @@ namespace PSD.PSDGamepkg.JNS
                     + string.Join(",", cap.Select(p => p.Substring("C".Length))));
             }
         }
-        public bool XBT2ConsumeValid(Player player, int consumeType, int type, string fuse)
+        public void XBT2DelAction(Player player)
         {
-            Base.Card.Luggage lug = XI.LibTuple.TL.EncodeTuxCode("XBT2") as Base.Card.Luggage;
+            XBT2FullDelAction(player, "XBT2");
+        }
+        private bool XBT2FullConsumeValid(Player player, int consumeType,
+            int type, string fuse, bool eqOnly, string cardName)
+        {
+            Base.Card.Luggage lug = XI.LibTuple.TL.EncodeTuxCode(cardName) as Base.Card.Luggage;
             if (lug != null && consumeType == 0)
             {
                 if (type == 0)
@@ -1706,14 +1713,19 @@ namespace PSD.PSDGamepkg.JNS
                         bool drIn = g1di[idx + 1] == "0";
                         int n = int.Parse(g1di[idx + 2]);
                         if (who == player.Uid && !drIn && n > 0)
-                            return true;
+                        {
+                            ushort[] uts = Util.TakeRange(g1di, idx + 4, idx + 4 + n)
+                                .Select(p => ushort.Parse(p)).ToArray();
+                            if (uts.Any(p => (!eqOnly || !XI.LibTuple.TL.DecodeTux(p).IsTuxEqiup())))
+                                return true;
+                        }
                         idx += (4 + n);
                     }
                 }
                 else if (type == 1)
                 {
-                    bool isRd = XI.Board.RoundIN == "R" + XI.Board.Rounder.Uid + "QR";
-                    if (lug.Capacities.Count >= 2 && isRd)
+                    bool isRd = eqOnly || (XI.Board.RoundIN == "R" + XI.Board.Rounder.Uid + "QR");
+                    if (lug.Capacities.Count >= 2 && eqOnly)
                     {
                         string[] g1di = fuse.Split(',');
                         for (int idx = 1; idx < g1di.Length; )
@@ -1723,8 +1735,10 @@ namespace PSD.PSDGamepkg.JNS
                             int n = int.Parse(g1di[idx + 2]);
                             if (who != player.Uid && !drIn && n > 0)
                             {
-                                if (Util.TakeRange(g1di, idx + 4, idx + 4 + n).Select(p =>
-                                        ushort.Parse(p)).Any(p => XI.Board.TuxDises.Contains(p)))
+                                ushort[] uts = Util.TakeRange(g1di, idx + 4, idx + 4 + n)
+                                    .Select(p => ushort.Parse(p)).ToArray();
+                                uts = uts.Intersect(XI.Board.TuxDises).ToArray();
+                                if (uts.Any(p => !eqOnly || !XI.LibTuple.TL.DecodeTux(p).IsTuxEqiup()))
                                     return true;
                             }
                             idx += (4 + n);
@@ -1734,10 +1748,15 @@ namespace PSD.PSDGamepkg.JNS
             }
             return false;
         }
-        public void XBT2ConsumeAction(Player player, int consumeType, int type, string fuse, string argst)
+        public bool XBT2ConsumeValid(Player player, int consumeType, int type, string fuse)
         {
-            Base.Card.Luggage lug = XI.LibTuple.TL.EncodeTuxCode("XBT2") as Base.Card.Luggage;
-            ushort lugCode = XI.LibTuple.TL.UniqueEquipSerial("XBT2");
+            return XBT2FullConsumeValid(player, consumeType, type, fuse, false, "XBT2");
+        }
+        private void XBT2FullConsumeAction(Player player, int consumeType,
+            int type, string fuse, string argst, string cardName)
+        {
+            Luggage lug = XI.LibTuple.TL.EncodeTuxCode(cardName) as Luggage;
+            ushort lugCode = XI.LibTuple.TL.UniqueEquipSerial(cardName);
             if (lug != null && lugCode != 0 && consumeType == 0)
             {
                 if (type == 0)
@@ -1777,7 +1796,7 @@ namespace PSD.PSDGamepkg.JNS
                         int dif = revs.Length + lug.Capacities.Count - 4;
                         string dhead = "#【炼蛊皿】中替换,C" + dif + "(p";
                         string dinput = XI.AsyncInput(player.Uid, dhead + string.Join("p", lug.Capacities
-                            .Select(p => p.Substring("C".Length))) + ")", "XBT2Consume", "1");
+                            .Select(p => p.Substring("C".Length))) + ")", cardName + "Consume", "1");
                         ushort[] subs = dinput.Split(',').Select(p => ushort.Parse(p)).ToArray();
                         XI.RaiseGMessage("G0SN," + player.Uid + "," + lugCode
                             + ",1," + string.Join(",", subs.Select(p => "C" + p)));
@@ -1865,10 +1884,15 @@ namespace PSD.PSDGamepkg.JNS
                 }
             }
         }
-        public string XBT2ConsumeInput(Player player, int consumeType, int type, string fuse, string prev)
+        public void XBT2ConsumeAction(Player player, int consumeType, int type, string fuse, string argst)
         {
-            Base.Card.Luggage lug = XI.LibTuple.TL.EncodeTuxCode("XBT2") as Base.Card.Luggage;
-            ushort lugCode = XI.LibTuple.TL.UniqueEquipSerial("XBT2");
+            XBT2FullConsumeAction(player, consumeType, type, fuse, argst, "XBT2");
+        }
+        private string XBT2FullConsumeInput(Player player, int consumeType, int type,
+            string fuse, string prev, bool eqOnly, string cardName)
+        {
+            Luggage lug = XI.LibTuple.TL.EncodeTuxCode(cardName) as Luggage;
+            ushort lugCode = XI.LibTuple.TL.UniqueEquipSerial(cardName);
             if (lug != null && lugCode != 0 && consumeType == 0)
             {
                 if (type == 0 && prev == "")
@@ -1881,8 +1905,12 @@ namespace PSD.PSDGamepkg.JNS
                         bool drIn = g1di[idx + 1] == "0";
                         int n = int.Parse(g1di[idx + 2]);
                         if (who == player.Uid && !drIn && n > 0)
-                            tuxes.AddRange(Util.TakeRange(g1di, idx + 4, idx + 4 + n)
-                                .Select(p => ushort.Parse(p)));
+                        {
+                            ushort[] uts = Util.TakeRange(g1di, idx + 4, idx + 4 + n)
+                               .Select(p => ushort.Parse(p)).ToArray();
+                            tuxes.AddRange(uts.Where(p => !eqOnly ||
+                                !XI.LibTuple.TL.DecodeTux(p).IsTuxEqiup()));
+                        }
                         idx += (4 + n);
                     }
                     int tcnt = tuxes.Count > 4 ? 4 : tuxes.Count;
@@ -1899,8 +1927,12 @@ namespace PSD.PSDGamepkg.JNS
                         bool drIn = g1di[idx + 1] == "0";
                         int n = int.Parse(g1di[idx + 2]);
                         if (who != player.Uid && !drIn && n > 0)
-                            tuxes.AddRange(Util.TakeRange(g1di, idx + 4, idx + 4 + n)
-                                .Select(p => ushort.Parse(p)));
+                        {
+                            ushort[] uts = Util.TakeRange(g1di, idx + 4, idx + 4 + n)
+                                  .Select(p => ushort.Parse(p)).ToArray();
+                            tuxes.AddRange(uts.Where(p => !eqOnly ||
+                                !XI.LibTuple.TL.DecodeTux(p).IsTuxEqiup()));
+                        }
                         idx += (4 + n);
                     }
                     return "#获得的,/C1(p" + string.Join("p", tuxes) + "),#弃置的,/C2(p"
@@ -1908,6 +1940,10 @@ namespace PSD.PSDGamepkg.JNS
                 }
             }
             return "";
+        }
+        public string XBT2ConsumeInput(Player player, int consumeType, int type, string fuse, string prev)
+        {
+            return XBT2FullConsumeInput(player, consumeType, type, fuse, prev, false, "XBT2");
         }
         public void XBT3InsAction(Player player)
         {
@@ -2238,37 +2274,6 @@ namespace PSD.PSDGamepkg.JNS
                 XI.RaiseGMessage("G2TZ," + player.Uid + ",0," + string.Join(",", cards.Select(p => "C" + p)));
                 XI.InnerGMessage(fuse, 201);
             }
-            //else if (lug != null && type == 1)
-            //{
-            //    string n1di = "";
-            //    List<ushort> tuxes = new List<ushort>();
-            //    string[] g1di = fuse.Split(',');
-            //    for (int idx = 1; idx < g1di.Length; )
-            //    {
-            //        ushort who = ushort.Parse(g1di[idx]);
-            //        bool drIn = g1di[idx + 1] == "0";
-            //        int n = int.Parse(g1di[idx + 2]);
-            //        if (XI.Board.Garden[who].Team == player.Team && !drIn && n > 0)
-            //        {
-            //            List<ushort> cds = Util.TakeRange(g1di, idx + 3, idx + 3 + n)
-            //                .Select(p => ushort.Parse(p)).ToList();
-            //            if (cds.Count > 0 && !cds.Any(p => XI.LibTuple.TL.DecodeTux(p).Type != Tux.TuxType.ZP))
-            //            {
-            //                XI.RaiseGMessage("G0OT," + who + "," + cds.Count + "," + string.Join(",", cds));
-            //                tuxes.AddRange(cds);
-            //            }
-            //            else
-            //                n1di += "," + string.Join(",", Util.TakeRange(g1di, idx, idx + 3 + n));
-            //        }
-            //        else
-            //            n1di += "," + string.Join(",", Util.TakeRange(g1di, idx, idx + 3 + n));
-            //        idx += (3 + n);
-            //    }
-            //    if (tuxes.Count > 0)
-            //        XI.Board.PendingTux.Enqueue(player.Uid + "," + "XBT4Consume," + string.Join(",", tuxes));
-            //    if (n1di.Length > 0)
-            //        XI.InnerGMessage("G1DI" + n1di, 51);
-            //}
             else if (lug != null && (type == 1 || type == 2))
             {
                 List<ushort> tuxes = new List<ushort>();
@@ -2451,6 +2456,25 @@ namespace PSD.PSDGamepkg.JNS
                 return true;
             return false;
         }
+        public void TPH3Action(Player player, int type, string fuse, string argst)
+        {
+            Player rd = XI.Board.Rounder;
+            string rtx = rd.Tux.Count > 0 ? string.Join(",", rd.Tux) : "";
+            string ptx = player.Tux.Count > 0 ? string.Join(",", player.Tux) : "";
+            int rtxn = rd.Tux.Count, ptxn = player.Tux.Count;
+            if (rtx != "")
+                XI.RaiseGMessage("G0HQ,0," + player.Uid + "," + rd.Uid + ",1," + rtxn + "," + rtx);
+            if (ptx != "")
+                XI.RaiseGMessage("G0HQ,0," + rd.Uid + "," + player.Uid + ",1," + ptxn + "," + ptx);
+            if (rd.Tux.Count < rd.TuxLimit && player.Tux.Count > 0)
+            {
+                int delta = Math.Min(rd.TuxLimit - rd.Tux.Count, player.Tux.Count);
+                string giveBack = XI.AsyncInput(player.Uid, "#交还的,Q" + delta +
+                    "(p" + string.Join("p", player.Tux) + ")", "TPH3", "0");
+                if (!giveBack.Contains(VI.CinSentinel))
+                    XI.RaiseGMessage("G0HQ,0," + rd.Uid + "," + player.Uid + ",1," + delta + "," + giveBack);
+            }
+        }
         public void TPH4Action(Player player, int type, string fuse, string argst)
         {
             XI.RaiseGMessage("G0XZ," + player.Uid + ",3,1,2,1");
@@ -2492,6 +2516,54 @@ namespace PSD.PSDGamepkg.JNS
             if (consumeType == 0 && prev == "")
                 return "/Q2(p" + string.Join("p", player.Tux) + ")";
             else return "";
+        }
+        public bool FJH1ConsumeValid(Player player, int consumeType, int type, string fuse)
+        {
+            return player.Uid == XI.Board.Rounder.Uid && fuse.Split(',').Contains("L");
+        }
+        public void FJH1ConsumeAction(Player player, int consumeType, int type, string fuse, string argst)
+        {
+            string[] g1ge = fuse.Split(',');
+            for (int i = 1; i < g1ge.Length; i += 2)
+            {
+                bool? isWin = null;
+                if (g1ge[i] == "W")
+                    isWin = true;
+                else if (g1ge[i] == "L")
+                    isWin = false;
+                ushort monCode = ushort.Parse(g1ge[i + 1]);
+                Monster monster = XI.LibTuple.ML.Decode(monCode);
+                if (monster != null)
+                {
+                    if (isWin == true)
+                        monster.WinEff();
+                    else if (isWin == false)
+                    {
+                        XI.RaiseGMessage(Artiad.Harm.ToMessage(
+                            new Artiad.Harm(player.Uid, (monCode + 1000), monster.Element, 1, 0)));
+                    }
+                }
+            }
+        }
+        public void FJH1UseAction(ushort cardUt, Player player, bool fromSky)
+        {
+            string tarStr = XI.AsyncInput(player.Uid, "#装备的,T1(p" + string.Join("p",
+                XI.Board.Garden.Values.Where(p => p.IsTared).Select(p => p.Uid)) + ")", "FJH1", "0");
+            if (tarStr != VI.CinSentinel)
+            {
+                ushort tar = ushort.Parse(tarStr);
+                if (tar != player.Uid)
+                    XI.RaiseGMessage("G0ZB," + tar + ",1," + player.Uid +
+                        ",0," + player.Uid + "," + cardUt);
+                else if (fromSky)
+                    XI.RaiseGMessage("G0ZB," + player.Uid + ",4," + cardUt);
+                else
+                    XI.RaiseGMessage("G0ZB," + player.Uid + ",0," + cardUt);
+            }
+        }
+        public void FJH1DelAction(Player player)
+        {
+            Cure(player, player, 1);
         }
         public bool XBH1ConsumeValid(Player player, int consumeType, int type, string fuse)
         {
@@ -2543,7 +2615,7 @@ namespace PSD.PSDGamepkg.JNS
            }
            else if (type == 1)
            {
-               string whoStr = XI.AsyncInput(player.Uid, "#获得补牌的,T1(p" +
+               string whoStr = XI.AsyncInput(player.Uid, "#获得补牌的,T1" +
                    FormatPlayers(p => p.IsTared), "TPR1Action", "1");
                ushort who = ushort.Parse(whoStr);
                XI.RaiseGMessage("G0DH," + who + ",0,1");
@@ -2551,7 +2623,7 @@ namespace PSD.PSDGamepkg.JNS
         }
         public bool JPR1Valid(Player player, int type, string fuse)
         {
-            return JPT1Valid(player, type, fuse);
+            return XI.Board.Garden.Values.Where(p => p.IsAlive && p.GetPetCount() > 0).Any();
         }
         public void JPR1Action(Player player, int type, string fuse, string argst)
         {
@@ -2560,6 +2632,26 @@ namespace PSD.PSDGamepkg.JNS
         public void JPR2Action(Player player, int type, string fuse, string argst)
         {
             JPT4FullOperation(player, (p) => Math.Max(1, Math.Max(p.GetPetCount(), p.GetBaseEquipCount())));
+        }
+        public void XBR1InsAction(Player player)
+        {
+            XBT2InsAction(player);
+        }
+        public void XBR1DelAction(Player player)
+        {
+            XBT2FullDelAction(player, "XBR1");
+        }
+        public bool XBR1ConsumeValid(Player player, int consumeType, int type, string fuse)
+        {
+            return XBT2FullConsumeValid(player, consumeType, type, fuse, true, "XBR1");
+        }
+        public void XBR1ConsumeAction(Player player, int consumeType, int type, string fuse, string argst)
+        {
+            XBT2FullConsumeAction(player, consumeType, type, fuse, argst, "XBR1");
+        }
+        public string XBR1ConsumeInput(Player player, int consumeType, int type, string fuse, string prev)
+        {
+            return XBT2FullConsumeInput(player, consumeType, type, fuse, prev, true, "XBR1");
         }
         #endregion Renewed
 
@@ -2586,9 +2678,12 @@ namespace PSD.PSDGamepkg.JNS
             else if (te.IncrOfDEX < 0)
                 XI.RaiseGMessage("G0IA," + player.Uid + ",0," + (-te.IncrOfDEX));
         }
-        private void EquipGeneralUseAction(ushort cardUt, Player player)
+        private void EquipGeneralUseAction(ushort cardUt, Player player, bool fromSky)
         {
-            XI.RaiseGMessage("G0ZB," + player.Uid + ",0," + cardUt);
+            if (fromSky)
+                XI.RaiseGMessage("G0ZB," + player.Uid + ",4," + cardUt);
+            else
+                XI.RaiseGMessage("G0ZB," + player.Uid + ",0," + cardUt);
         }
         #endregion Equip Util
 

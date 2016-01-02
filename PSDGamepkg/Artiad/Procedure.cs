@@ -16,7 +16,7 @@ namespace PSD.PSDGamepkg.Artiad
                 ushort pop = XI.Board.RestNPCPiles.Dequeue();
                 NPC npc = XI.LibTuple.NL.Decode(NMBLib.OriginalNPC(pop));
                 XI.RaiseGMessage("G1NI," + player.Uid + "," + pop);
-                if (Artiad.ContentRule.IsNPCJoinable(npc, XI.LibTuple.HL, XI.Board))
+                if (Artiad.ContentRule.IsNPCJoinable(npc, XI))
                 {
                     XI.RaiseGMessage("G0OY,0," + player.Uid);
                     int hp = (XI.LibTuple.HL.InstanceHero(npc.Hero).HP + 1) / 2;
@@ -27,7 +27,7 @@ namespace PSD.PSDGamepkg.Artiad
             } while (XI.Board.RestNPCPiles.Count > 0 && !done);
         }
 
-        public static void AssignCurePoint(XI XI, Player decider, int total, 
+        public static void AssignCurePoint(XI XI, Player decider, int total,
             string reason, List<Player> invs, Action<IDictionary<Player, int>> cureAction)
         {
             IDictionary<Player, int> sch = new Dictionary<Player, int>();
@@ -70,5 +70,21 @@ namespace PSD.PSDGamepkg.Artiad
             AssignCurePoint(XI, decider, total, reason, invs, cureAction);
         }
 
+        public static bool UseCardDirectly(Player player, ushort cardUt,
+            string fuse, XI xi, ushort provider)
+        {
+            Tux tux = xi.LibTuple.TL.DecodeTux(cardUt);
+            if (!ContentRule.IsTuxUsableEveryWhere(tux))
+                return false;
+            if (tux.IsTuxEqiup())
+                (tux as TuxEqiup).UseAction(cardUt, player, provider != player.Uid);
+            else
+            {
+                ushort who = player.Uid;
+                xi.RaiseGMessage("G0CC," + provider + ",0," + who +
+                    "," + tux.Code + "," + cardUt + ";0," + fuse);
+            }
+            return true;
+        }
     }
 }

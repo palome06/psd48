@@ -9,15 +9,20 @@ namespace PSD.PSDGamepkg.Artiad
 {
     public class ContentRule
     {
-        public static bool IsNPCJoinable(NPC npc, HeroLib hl, Board board)
+        public static bool IsNPCJoinable(NPC npc, XI xi)
         {
-            return npc.Skills.Contains("NJ01") && IsHeroJoinable(hl.InstanceHero(npc.Hero), hl, board);
+            return npc.Skills.Contains("NJ01") &&
+                IsHeroJoinable(xi.LibTuple.HL.InstanceHero(npc.Hero), xi);
         }
 
-        public static bool IsHeroJoinable(Hero hero, HeroLib hl, Board board)
+        public static bool IsHeroJoinable(Hero hero, XI xi)
         {
-            if (hero == null || hero.Group == 0)
+            if (hero == null)
                 return false;
+            if (!xi.PCS.ListAllSeleableHeros().Contains(hero))
+                return false;
+            HeroLib hl = xi.LibTuple.HL;
+            Board board = xi.Board;
             Hero hrc = hl.InstanceHero(hero.Archetype);
             foreach (Player py in board.Garden.Values)
             {
@@ -135,6 +140,12 @@ namespace PSD.PSDGamepkg.Artiad
             }
             if (skills.Count > 0)
                 xi.RaiseGMessage("G0OS," + player.Uid + ",1," + string.Join(",", skills));
+        }
+
+        public static bool IsTuxUsableEveryWhere(Tux tux)
+        {
+            return tux.Type != Tux.TuxType.ZP && !new string[] {
+                "TP01", "TP03", "TPT1", "TPT3", "TPH3", "TPH4" }.Contains(tux.Code);
         }
     }
 }

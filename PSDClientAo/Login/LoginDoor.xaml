@@ -2,12 +2,12 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:rq="clr-namespace:PSD.ClientAo.Request"
-        Title="psd 登陆界面" Height="567" Width="768" Closed="WindowClosed">
+        Title="psd 登陆界面" Height="580" Width="768" Closed="WindowClosed">
     <Window.Background>
         <ImageBrush ImageSource="pack://application:,,,/PSDRisoLib;component/Resources/Logo/LoginBgimg.jpg"/>
     </Window.Background>
     <Border BorderThickness="5" BorderBrush="Black" CornerRadius="30" x:Name="mainBoard"
-                Margin="40,32,40,32" Background="Gray" Opacity="0.8">
+                Margin="40,16,40,16" Background="Gray" Opacity="0.8">
         <Grid VerticalAlignment="Center" HorizontalAlignment="Center">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="130"/>
@@ -79,6 +79,8 @@
                                     <RowDefinition Height="Auto"/>
                                     <RowDefinition Height="10"/>
                                     <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="10"/>
+                                    <RowDefinition Height="Auto"/>
                                 </Grid.RowDefinitions>
                                 <CheckBox x:Name="HallSelModeCB" Grid.Column="0" Grid.Row="0"
                                           Checked="HallSelModeEnabled" Unchecked="HallSelModeDisabled">
@@ -143,15 +145,6 @@
                                         <RadioButton Content="界限突破场" x:Name="Lv5Radio"  Width="120" GroupName="LvGroup" Checked="Lv5Decided" IsEnabled="False"
                                                      ToolTip="对标准版与资料篇一《凤鸣玉誓》进行尝试调整，以及加入少许官方先行角色的测试包。"/>
                                     </WrapPanel>
-                                    <StackPanel Orientation="Horizontal" Background="LightGray">
-                                        <CheckBox x:Name="LvTestCheckBox" ToolTip="测试中角色出现概率大大增加哦。">特训</CheckBox>
-                                        <TextBox Width="120" x:Name="LvRingText" ToolTip="于此处输入特训角色开牌编号，以逗号隔开（如遥月党专属XJ101,XJ104），不要太贪加入太多哦～"/>
-                                        <Grid Width="20"/>
-                                        <CheckBox x:Name="LvTryTuxCheckBox" VerticalAlignment="Center" IsEnabled="False">
-                                            <CheckBox.ToolTip>不成比例加入部分资料篇四《含笑九泉》、番外资料篇《宿命篇》的手牌。成为吃螃蟹的勇士吧！</CheckBox.ToolTip>
-                                            手牌体验
-                                        </CheckBox>
-                                    </StackPanel>
                                 </StackPanel>
                                 <Grid Grid.Column="0" Grid.Row="2" Visibility="Collapsed">
                                     <CheckBox x:Name="HallPkgCB" VerticalAlignment="Top"
@@ -177,10 +170,23 @@
                                               IsChecked="False" />
                                 </WrapPanel>
 
-                                <CheckBox x:Name="HallTeamCB" Grid.Column="0" Grid.Row="4"
+                                <TextBlock Grid.Column="0" Grid.Row="4">其它选项：</TextBlock>
+                                <StackPanel x:Name="HallTesterPanel" Grid.Column="1" Grid.Row="4" Orientation="Vertical">
+                                    <StackPanel Orientation="Horizontal" Background="LightGray">
+                                        <CheckBox x:Name="LvTestCheckBox" ToolTip="测试中角色出现概率大大增加哦。">特训</CheckBox>
+                                        <TextBox Width="140" x:Name="LvRingText" ToolTip="于此处输入特训角色开牌编号，以逗号隔开（如遥月党专属XJ101,XJ104），不要太贪加入太多哦～"/>
+                                        <Grid Width="20"/>
+                                        <CheckBox x:Name="LvTryTuxCheckBox" VerticalAlignment="Center" IsEnabled="False">
+                                            <CheckBox.ToolTip>不成比例加入部分资料篇四《含笑九泉》、番外资料篇《宿命篇》的手牌。成为吃螃蟹的勇士吧！</CheckBox.ToolTip>
+                                            新手牌体验
+                                        </CheckBox>
+                                    </StackPanel>
+                                </StackPanel>
+                                
+                                <CheckBox x:Name="HallTeamCB" Grid.Column="0" Grid.Row="6"
                                           Checked="HallTeamEnabled" Unchecked="HallTeamDisabled">
                                     选队倾向：</CheckBox>
-                                <StackPanel x:Name="HallTeamPanel" Grid.Column="1" Grid.Row="4" Orientation="Vertical">
+                                <StackPanel x:Name="HallTeamPanel" Grid.Column="1" Grid.Row="6" Orientation="Vertical">
                                     <WrapPanel>
                                         <RadioButton Content="无选队" Width="120" GroupName="TeamOptGroup"
                                                  Checked="HallTeamNoDecided"/>

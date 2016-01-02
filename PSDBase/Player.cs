@@ -327,6 +327,7 @@ namespace PSD.Base
                 cz01PriceDict.Add("JP03", 1);
                 cz01PriceDict.Add("WQ04", 2);
                 cz01PriceDict.Add("{E}WQ04", 2);
+                cz01PriceDict.Add("JPH4", 2);
             }
         }
         public bool RemoveCard(ushort card, List<ushort> discards)

@@ -109,7 +109,7 @@ namespace PSD.PSDGamepkg.JNS
             NPC npc = XI.LibTuple.NL.Decode(XI.LibTuple.NL.Encode(npcCode));
             bool anyFriends = XI.Board.Garden.Values.Where(p => p.IsAlive
                 && p.Team == player.Team && p.Tux.Count > 0).Any();
-            return anyFriends && Artiad.ContentRule.IsNPCJoinable(npc, XI.LibTuple.HL, XI.Board);
+            return anyFriends && Artiad.ContentRule.IsNPCJoinable(npc, XI);
         }
         public void NJ02Action(Player player, string fuse, string args) {
             ushort who = ushort.Parse(args);
