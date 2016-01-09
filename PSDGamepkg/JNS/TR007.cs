@@ -3791,7 +3791,8 @@ namespace PSD.PSDGamepkg.JNS
                         return false;
                     return true;
                 };
-                return XI.Board.Garden.Values.Any(p => p.HP == 0 && p.Team == player.Team && !p.Loved && spouseContains(p));
+                return XI.Board.Garden.Values.Any(p => p.HP == 0 && p.Team == player.Team &&
+                     p.IsAlive && !p.Loved && spouseContains(p));
             }
             else if (type == 1)
                 return player.ROM.ContainsKey("ExSpTo") && ((List<ushort>)player.ROM["ExSpTo"]).Count > 0;
@@ -3849,7 +3850,7 @@ namespace PSD.PSDGamepkg.JNS
                     return true;
                 };
                 List<ushort> list = XI.Board.Garden.Values.Where(p => p.HP == 0 && p.Team == player.Team &&
-                    !p.Loved && spouseContains(p)).Select(p => p.Uid).ToList();
+                    p.IsAlive && !p.Loved && spouseContains(p)).Select(p => p.Uid).ToList();
                 return "/T1" + (list.Count > 1 ? ("~" + list.Count) : "") + "(p" + string.Join("p", list) + ")";
             }
             else return "";

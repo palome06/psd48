@@ -55,7 +55,7 @@ namespace PSD.Base
         public int DEXi { set; get; } // -1, -inf; 0, normal; 1, inf
         public int TuxLimit { set; get; }
 
-        public IDictionary<string, int> cz01PriceDict { private set; get; }
+        public IDictionary<string, List<string>> cz01PriceDict { private set; get; }
 
         #endregion Property
 
@@ -227,7 +227,7 @@ namespace PSD.Base
             IsRan = false;
             IsZhu = false;
 
-            cz01PriceDict = new Dictionary<string, int>();
+            cz01PriceDict = new Dictionary<string, List<string>>();
         }
         public int GetPetCount() { return Pets.Count(p => p != 0); }
         public int GetActivePetCount(Board board)
@@ -323,11 +323,7 @@ namespace PSD.Base
                 Loved = false;
                 TuxLimit = 3;
 
-                cz01PriceDict.Clear();
-                cz01PriceDict.Add("JP03", 1);
-                cz01PriceDict.Add("WQ04", 2);
-                cz01PriceDict.Add("{E}WQ04", 2);
-                cz01PriceDict.Add("JPH4", 2);
+                LoadDefaultPrice();
             }
         }
         public bool RemoveCard(ushort card, List<ushort> discards)
@@ -414,6 +410,54 @@ namespace PSD.Base
         {
             return Uid != 0 && IsAlive && IsReal;
         }
-
+        #region TuxPrice
+        private void LoadDefaultPrice()
+        {
+            cz01PriceDict.Clear();
+            AddToPrice("JP03", false, "0", '=', 1);
+            AddToPrice("WQ04", false, "0", '=', 2);
+            AddToPrice("WQ04", true, "0", '=', 2);
+            AddToPrice("JPH4", false, "0", '=', 2);
+        }
+        public void AddToPrice(string tuxCode, bool inEq, string reason, char type, int price)
+        {
+            string prefix = (inEq ? "{E}" : "") + tuxCode;
+            if (!cz01PriceDict.ContainsKey(prefix))
+                cz01PriceDict[prefix] = new List<string>();
+            cz01PriceDict[prefix].Add(reason + "," + type + "," + price);
+        }
+        public void RemoveFromPrice(string tuxCode, bool inEq, string reason)
+        {
+            string prefix = (inEq ? "{E}" : "") + tuxCode;
+            if (cz01PriceDict.ContainsKey(prefix))
+            {
+                cz01PriceDict[prefix].RemoveAll(p => p.StartsWith(reason + ","));
+                if (cz01PriceDict[prefix].Count == 0)
+                    cz01PriceDict.Remove(prefix);
+            }
+        }
+        public int GetPrice(string tuxCode, bool inEq)
+        {
+            string prefix = (inEq ? "{E}" : "") + tuxCode;
+            int zero = 0;
+            if (cz01PriceDict.ContainsKey(prefix))
+            {
+                foreach (string line in cz01PriceDict[prefix])
+                {
+                    string[] lines = line.Split(',');
+                    int value = int.Parse(lines[2]);
+                    if (lines[1] == "!")
+                        return value;
+                    else if (lines[1] == "=")
+                        zero = value > zero ? value : zero;
+                    else if (lines[1] == "+")
+                        zero += value;
+                    else if (lines[1] == "-")
+                        zero -= value;
+                }
+            }
+            return zero < 0 ? 0 : zero;
+        }
+        #endregion TuxPrice
     }
 }

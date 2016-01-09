@@ -301,13 +301,6 @@ namespace PSD.PSDGamepkg
                     if (otherPara == "")
                     {
                         // OK, done.
-                        string enc = tux.Encrypt(args);
-                        string sTop = "U5," + from + ";;" + skName;
-                        string sType = ";;" + ske.InType;
-
-                        string mMsg = sTop + (args != "" ? "," + args : "") + sType;
-                        string mEnc = sTop + (enc != "" ? "," + enc : "") + sType;
-
                         string cargs = (args == "^") ? "" : "," + args;
                         if (tux.Type == Base.Card.Tux.TuxType.ZP)
                             RaiseGMessage("G0CZ,0," + from);
@@ -330,15 +323,9 @@ namespace PSD.PSDGamepkg
                     //RaiseGMessage("G0ZB," + from + ",0," + ccode);
                     if (tux.IsTuxEqiup())
                     {
-                        Base.Card.TuxEqiup tue = tux as Base.Card.TuxEqiup;
-                        tue.UseAction(ccode, Board.Garden[from], false);
+                        RaiseGMessage("G1UE," + from + "," + from + "," + ccode);
                         u5ed = ske.IsTermini ? UEchoCode.END_TERMIN : UEchoCode.END_ACTION;
                     }
-                    //else
-                    //{
-                    //    RaiseGMessage("G0ZB," + from + ",3," + ccode);
-                    //    u5ed = ske.IsTermini ? UEchoCode.END_TERMIN : UEchoCode.END_ACTION;
-                    //}
                 }
                 else
                 {
@@ -478,10 +465,8 @@ namespace PSD.PSDGamepkg
             else if (ske != null && mt01.ContainsKey(skName))
             {
                 Base.Card.Monster mt = mt01[skName];
-                int jdx = mai.IndexOf(',', idx + 1);
-                ushort mcode = ushort.Parse(Util.Substring(mai, idx + 1, jdx));
                 string args = mai.Substring(idx + 1);
-                // args include card code now.
+                // args starts with monster card code now.
                 int consumeCode = ske.Consume;
                 string otherPara = mt.ConsumeInput(garden[from], consumeCode, ske.InType, ske.Fuse, args);
                 if (otherPara == "")
@@ -505,8 +490,6 @@ namespace PSD.PSDGamepkg
             else if (ske != null && ev01.ContainsKey(skName))
             {
                 Base.Card.Evenement ev = ev01[skName];
-                string args = (idx < 0) ? "" : mai.Substring(idx + 1);
-                // args include card code now.
                 string sTop = "U5," + from + ";;" + skName;
                 string sType = ";;" + ske.InType;
                 WI.BCast(sTop + sType);

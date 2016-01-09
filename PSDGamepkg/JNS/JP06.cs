@@ -1352,7 +1352,7 @@ namespace PSD.PSDGamepkg.JNS
         public void FJT2UseAction(ushort cardUt, Player player, bool fromSky)
         {
             string tarStr = XI.AsyncInput(player.Uid, "#装备的,T1(p" + string.Join("p",
-                XI.Board.Garden.Values.Where(p => p.IsTared).Select(p => p.Uid)) + ")", "FJT2UseAction", "0");
+                XI.Board.Garden.Values.Where(p => p.IsTared).Select(p => p.Uid)) + ")", "FJT2", "0");
             if (tarStr != VI.CinSentinel)
             {
                 ushort tar = ushort.Parse(tarStr);
@@ -1725,7 +1725,7 @@ namespace PSD.PSDGamepkg.JNS
                 else if (type == 1)
                 {
                     bool isRd = eqOnly || (XI.Board.RoundIN == "R" + XI.Board.Rounder.Uid + "QR");
-                    if (lug.Capacities.Count >= 2 && eqOnly)
+                    if (lug.Capacities.Count >= 2 && isRd)
                     {
                         string[] g1di = fuse.Split(',');
                         for (int idx = 1; idx < g1di.Length; )
@@ -2405,6 +2405,29 @@ namespace PSD.PSDGamepkg.JNS
         public bool ZPT5Valid(Player player, int type, string fuse)
         {
             return XI.Board.IsAttendWarSucc(player) && player.HP < player.HPb;
+        }
+        public bool XBT5ConsumeValid(Player player, int consumeType, int type, string fuse)
+        {
+            if (consumeType == 0)
+            {
+                Tux zp04 = XI.LibTuple.TL.EncodeTuxCode("ZP04");
+                return player.Tux.Count > 0 && zp04.Bribe(player, type, fuse) && zp04.Valid(player, type, fuse);
+            }
+            else return false;
+        }
+        public void XBT5ConsumeAction(Player player, int consumeType, int type, string fuse, string argst)
+        {
+            if (consumeType == 0)
+            {
+                XI.RaiseGMessage("G0CC," + player.Uid + ",0," + player.Uid + ",ZP04," + argst + ";0," + fuse);
+                XI.RaiseGMessage("G0CZ,0," + player.Uid);
+            }
+        }
+        public string XBT5ConsumeInput(Player player, int consumeType, int type, string fuse, string prev)
+        {
+            if (consumeType == 0 && prev == "")
+                return "/Q1(p" + string.Join("p", player.Tux) + ")";
+            else return "";
         }
         #endregion Package of 6
 

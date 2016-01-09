@@ -56,7 +56,7 @@ namespace PSD.PSDGamepkg.JNS
             Tux tux = XI.LibTuple.TL.DecodeTux(card);
             if (player.Tux.Contains(card))
             {
-                int price = player.cz01PriceDict[tux.Code];
+                int price = player.GetPrice(tux.Code, false);
                 XI.RaiseGMessage("G2ZU,0," + player.Uid + "," + card);
                 XI.RaiseGMessage("G0QZ," + player.Uid + "," + card);
                 if (price > 0)
@@ -64,7 +64,7 @@ namespace PSD.PSDGamepkg.JNS
             }
             else if (player.Weapon == card || player.ExEquip == card)
             {
-                int price = player.cz01PriceDict["{E}" + tux.Code];
+                int price = player.GetPrice(tux.Code, true);
                 XI.RaiseGMessage("G2ZU,0," + player.Uid + "," + card);
                 XI.RaiseGMessage("G0QZ," + player.Uid + "," + card);
                 if (price > 0)
@@ -75,43 +75,22 @@ namespace PSD.PSDGamepkg.JNS
         {
             if (prev != "")
                 return "";
-            else {
+            else
+            {
                 var tl = XI.LibTuple.TL;
                 List<ushort> goods = new List<ushort>();
-                foreach (var pair in player.cz01PriceDict)
-                {
-                    goods.AddRange(player.Tux.Where(p => tl.DecodeTux(p).Code.Equals(pair.Key)));
-                    if (!player.WeaponDisabled)
-                    {
-                        if (player.Weapon != 0 && ("{E}" + tl.DecodeTux(player.Weapon).Code).Equals(pair.Key))
-                            goods.Add(player.Weapon);
-                        if (player.ExEquip != 0 && ("{E}" + tl.DecodeTux(player.ExEquip).Code).Equals(pair.Key))
-                            goods.Add(player.ExEquip);
-                    }
-                }
+                goods.AddRange(player.Tux.Where(p => player.GetPrice(tl.DecodeTux(p).Code, false) > 0));
+                if (!player.WeaponDisabled)
+                    goods.AddRange(player.ListOutAllEquips().Where(p => player.GetPrice(tl.DecodeTux(p).Code, true) > 0));
                 return "/Q1(p" + string.Join("p", goods) + ")";
             }
         }
         public bool CZ01Valid(Player player, string fuse)
         {
             ushort who = (ushort)(fuse[fuse.IndexOf('R') + 1] - '0');
-            if (player.Uid == who)
-            {
-                var tl = XI.LibTuple.TL;
-                foreach (var pair in player.cz01PriceDict)
-                {
-                    if (player.Tux.Any(p => tl.DecodeTux(p).Code.Equals(pair.Key)))
-                        return true;
-                    if (!player.WeaponDisabled)
-                    {
-                        if (player.Weapon != 0 && ("{E}" + tl.DecodeTux(player.Weapon).Code).Equals(pair.Key))
-                            return true;
-                        if (player.ExEquip != 0 && ("{E}" + tl.DecodeTux(player.ExEquip).Code).Equals(pair.Key))
-                            return true;
-                    }
-                }
-            }
-            return false;
+            var tl = XI.LibTuple.TL;
+            return player.Uid == who && (player.Tux.Any(p => player.GetPrice(tl.DecodeTux(p).Code, false) > 0) ||
+                    player.ListOutAllEquips().Any(p => player.GetPrice(tl.DecodeTux(p).Code, true) > 0));
         }
 
         public void CZ02Action(Player player, string fuse, string args)

@@ -3051,18 +3051,12 @@ namespace PSD.PSDGamepkg.JNS
             else if (type == 1)
             {
                 foreach (Tux tux in XI.LibTuple.TL.Firsts.Where(p => p.Type == Tux.TuxType.JP))
-                {
-                    if (!player.cz01PriceDict.ContainsKey(tux.Code))
-                        player.cz01PriceDict[tux.Code] = 1;
-                }
+                    player.AddToPrice(tux.Code, false, "JNS0202", '=', 1);
             }
             else if (type == 2)
             {
                 foreach (Tux tux in XI.LibTuple.TL.Firsts.Where(p => p.Type == Tux.TuxType.JP))
-                {
-                    if (player.cz01PriceDict.ContainsKey(tux.Code) && player.cz01PriceDict[tux.Code] == 1 && tux.Code != "JP03")
-                        player.cz01PriceDict.Remove(tux.Code);
-                }
+                    player.RemoveFromPrice(tux.Code, false, "JNS0202");
             }
         }
         public bool JNS0202Valid(Player player, int type, string fuse)

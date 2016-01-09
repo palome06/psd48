@@ -77,7 +77,7 @@ namespace PSD.PSDGamepkg.Artiad
             if (!ContentRule.IsTuxUsableEveryWhere(tux))
                 return false;
             if (tux.IsTuxEqiup())
-                (tux as TuxEqiup).UseAction(cardUt, player, provider != player.Uid);
+                xi.RaiseGMessage("G1UE," + player.Uid + "," + provider + "," + cardUt);
             else
             {
                 ushort who = player.Uid;

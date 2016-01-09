@@ -3741,6 +3741,15 @@ namespace PSD.PSDGamepkg
                         }
                     }
                     break;
+                case "G1UE":
+                    {
+                        ushort who = ushort.Parse(args[1]);
+                        ushort provider = ushort.Parse(args[2]);
+                        ushort cardUt = ushort.Parse(args[3]);
+                        TuxEqiup te = LibTuple.TL.DecodeTux(cardUt) as TuxEqiup;
+                        te.UseAction(cardUt, Board.Garden[who], provider != who);
+                    }
+                    break;
             }
         }
         #endregion G-Detail

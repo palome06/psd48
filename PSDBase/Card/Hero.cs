@@ -185,12 +185,16 @@ namespace PSD.Base.Card
             }
         }
 
-        public List<Hero> ListAllSeleable(int groups)
+        public List<Hero> ListAllJoinableHeroes(int groups)
         {
-            List<Hero> first = ListAllHeros(groups).Where(p => p.Ofcode != "XJ103" &&
+            return ListAllHeros(groups).Where(p => p.Ofcode != "XJ103" &&
                 p.Ofcode != "XJ207" && p.Ofcode != "XJ304" && p.Ofcode != "XJ507" &&
                 p.Ofcode != "TR031" && p.Ofcode != "TR033" &&
                 p.Ofcode != "HL005" && p.Ofcode != "HL015").ToList();
+        }
+        public List<Hero> ListAllSeleable(int groups)
+        {
+            List<Hero> first = ListAllJoinableHeroes(groups);
             if (first.Any(p => p.Ofcode == "XJ505") && first.Any(p => p.Ofcode == "TR011"))
                 first.RemoveAll(p => p.Ofcode == "XJ505");
             return first;
