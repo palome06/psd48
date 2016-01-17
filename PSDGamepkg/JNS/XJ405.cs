@@ -1183,7 +1183,7 @@ namespace PSD.PSDGamepkg.JNS
         }
         public bool JN40202Valid(Player player, int type, string fuse)
         {
-            return !XI.Board.IsRounderBattleWin() && XI.Board.Garden.Values
+            return !XI.Board.IsBattleWin && XI.Board.Garden.Values
                 .Any(p => p.IsTared && p.Uid != player.Uid);
         }
         public void JN40202Action(Player player, int type, string fuse, string argst)
@@ -1362,7 +1362,7 @@ namespace PSD.PSDGamepkg.JNS
                     bool b1 = XI.Board.Rounder.Uid == player.Uid;
                     bool b2 = XI.Board.IsAttendWar(player);
                     bool b3 = false;
-                    bool b4 = XI.Board.IsRounderBattleWin();
+                    bool b4 = XI.Board.IsBattleWin;
                     bool b5 = XI.Board.Rounder.Team == player.Team;
                     return (mon1 != null && mon1.IsTuxInvolved(b1, b2, b3, b4, b5)) ||
                         (mon2 != null && mon2.IsTuxInvolved(b1, b2, b3, b4, b5));
@@ -2498,7 +2498,7 @@ namespace PSD.PSDGamepkg.JNS
                     bool b1 = XI.Board.Rounder.Uid == player.Uid;
                     bool b2 = XI.Board.IsAttendWar(player);
                     bool b3 = false;
-                    bool b4 = XI.Board.IsRounderBattleWin();
+                    bool b4 = XI.Board.IsBattleWin;
                     bool b5 = XI.Board.Rounder.Team == player.Team;
                     return (mon1 != null && (mon1.IsTuxInvolved(b1, b2, b3, b4, b5) ||
                         mon1.IsHarmInvolvedTeam(b3, b4, b5))) || (mon2 != null &&

@@ -10,6 +10,12 @@ namespace PSD.ClientAo
     {
         public void ConvertTuple(LibGroup tuple, int version)
         {
+            if (version <= 107)
+            {
+                Base.Card.Hero hero = tuple.HL.InstanceHero(17002);
+                if (hero != null)
+                    hero.ForceChange("HP", (ushort)7);
+            }
             if (version <= 110)
             {
                 Skill skill = tuple.SL.EncodeSkill("JN50502");
@@ -53,11 +59,11 @@ namespace PSD.ClientAo
                     skill.ForceChange("IsHind", RemoveOnArray(skill.IsHind, 2));
                 }
             }
-            if (version <= 107)
+            if (version <= 147)
             {
-                Base.Card.Hero hero = tuple.HL.InstanceHero(17002);
-                if (hero != null)
-                    hero.ForceChange("HP", (ushort)7);
+                Skill skill = tuple.SL.EncodeSkill("JNT2501");
+                if (skill != null)
+                    skill.ForceChange("Name", "里蜀山之主");
             }
             if (version <= 148)
             {
@@ -68,7 +74,20 @@ namespace PSD.ClientAo
                 if (eve != null)
                     eve.ForceChange("Count", (ushort)0);
                 tuple.EL.Refresh();
-            }            
+
+                Skill skill = tuple.SL.EncodeSkill("JNH1001");
+                if (skill != null)
+                    skill.ForceChange("Name", "灵水咒");
+                skill = tuple.SL.EncodeSkill("JNH1002");
+                if (skill != null)
+                    skill.ForceChange("Name", "六龙阵");
+                skill = tuple.SL.EncodeSkill("JNE0201");
+                if (skill != null)
+                    skill.ForceChange("Name", "生意经");
+                skill = tuple.SL.EncodeSkill("JNE0202");
+                if (skill != null)
+                    skill.ForceChange("Name", "轮回之剑");
+            }
         }
 
         private Type[] AppendOnArray<Type>(Type[] array, Type item, int index)

@@ -62,8 +62,9 @@ namespace PSD.ClientAo
             TcpClient client = new TcpClient(server, port);
             NetworkStream tcpStream = client.GetStream();
             string trainerjoin = (this.trainer != null && trainer.Length > 0) ? ("," + string.Join(",", trainer)) : "";
+            int version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.Revision;
             SentByteLine(tcpStream, "C0CO," + name + "," + avatar + ","
-                + teamCode + "," + selCode + "," + levelCode + trainerjoin);
+                + teamCode + "," + selCode + "," + levelCode + "," + version + trainerjoin);
             Thread msgThread = new Thread(delegate()
             {
                 try

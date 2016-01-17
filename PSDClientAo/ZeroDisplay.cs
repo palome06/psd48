@@ -21,7 +21,7 @@ namespace PSD.ClientAo
         internal string SkillName(string code)
         {
             var skill = tuple.SL.EncodeSkill(code);
-            return skill.Name;
+            return skill == null ? "大法" : skill.Name;
         }
         internal string SKTXCZ(string ops) { return SKTXCZ(ops, false, "0"); }
         internal string SKTXCZ(string ops, bool hind, string inType)
@@ -38,7 +38,7 @@ namespace PSD.ClientAo
                 int inTypeInt;
                 if (!int.TryParse(inType, out inTypeInt))
                     inTypeInt = 0;
-                if (skill != null && (!hind || !skill.IsHind[inTypeInt]))
+                if (skill != null && (!hind || inTypeInt >= skill.IsHind.Length || !skill.IsHind[inTypeInt]))
                     result = title + ":" + skill.Name + (arg == "" ? "" : arg);
                 else
                     return "";

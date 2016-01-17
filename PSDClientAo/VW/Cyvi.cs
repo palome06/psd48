@@ -115,7 +115,10 @@ namespace PSD.ClientAo.VW
         }
         public void ReportWrongVersion(string version)
         {
-            Auxs.MessageHouse.Show("PSDClientAo 版本不符", "远端服务器版本为" + version + "，请进行调整。");
+            AD.Dispatcher.BeginInvoke((Action)(() =>
+            {
+                Auxs.MessageHouse.Show("PSDClientAo 版本不符", "远端服务器版本为" + version + "，请进行调整。");
+            }));
         }
         #endregion Message Flow Section
         #region Detail Cin Events
@@ -324,6 +327,8 @@ namespace PSD.ClientAo.VW
             List<int> uss;
             if (r2 <= 6)
                 uss = Enumerable.Range(r1, r2 - r1 + 1).ToList();
+            else if (r1 > 6)
+                uss = new List<int> { 7 };
             else
                 uss = Enumerable.Range(r1, 8 - r1).ToList();
             AD.yfDeal.Deal.Show(uss.Select(p => "D" + p), null, 1, 1, cancellable, false);

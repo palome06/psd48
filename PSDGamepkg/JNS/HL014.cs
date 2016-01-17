@@ -3756,8 +3756,8 @@ namespace PSD.PSDGamepkg.JNS
         public bool JNE0203Valid(Player player, int type, string fuse)
         {
             if (type == 0)
-                return player.Team == XI.Board.Rounder.Team && XI.Board.IsBattleWin
-                     && XI.Board.PoolDelta >= 2 && player.Tux.Count > 0;
+                return player.Team == XI.Board.Rounder.Team && XI.Board.IsAttendWar(player) &&
+                    XI.Board.IsBattleWin && XI.Board.PoolDelta >= 2 && player.Tux.Count > 0;
             else if (type == 1)
                 return player.ExCards.Count > 0;
             else

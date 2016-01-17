@@ -358,6 +358,13 @@ namespace PSD.PSDGamepkg
             //RaiseGMessage("G0HQ,2,4,1,3");
             //RaiseGMessage("G0HQ,2,5,1,3");
             //RaiseGMessage("G0HQ,2,6,1,3");
+            //while (true)
+            //{
+            //    string inp = AsyncInput((ushort)6, "/D10~16", "XID", "0");
+            //    if (inp.StartsWith("/"))
+            //        break;
+            //    RaiseGMessage("G0DH,6,0," + inp);
+            //}
         }
     }
 }

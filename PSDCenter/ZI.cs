@@ -52,12 +52,23 @@ namespace PSD.PSDCenter
                 int teamCode = int.Parse(blocks[3]);
                 int selCode = int.Parse(blocks[4]);
                 int levelCode = int.Parse(blocks[5]);
+                
+                var ass = System.Reflection.Assembly.GetExecutingAssembly().GetName();
+                if (blocks.Length <= 6 || int.Parse(blocks[6]) != ass.Version.Revision)
+                { // version error, report exit
+                    Console.WriteLine(user + " has tried connecting with a wrong version.");
+                    SentByteLine(ns, "C0XV," + ass.Version.ToString());
+                    socket.Close();
+                    return;
+                }
+
                 string[] trainers = null;
-                if (blocks.Length > 6)
+                int trainerOffset = 7;
+                if (blocks.Length > trainerOffset)
                 {
-                    trainers = new string[blocks.Length - 6];
-                    for (int i = 6; i < blocks.Length; ++i)
-                        trainers[i - 6] = blocks[i];
+                    trainers = new string[blocks.Length - trainerOffset];
+                    for (int i = trainerOffset; i < blocks.Length; ++i)
+                        trainers[i - trainerOffset] = blocks[i];
                 }
 
                 ushort uid = RequestUid();

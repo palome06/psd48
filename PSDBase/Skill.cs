@@ -161,6 +161,8 @@ namespace PSD.Base
                 Lock = value as bool?[];
             else if (field == "IsHind" && value is bool[])
                 IsHind = value as bool[];
+            else if (field == "Name" && value is string)
+                Name = value as string;
         }
     }
 

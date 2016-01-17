@@ -5,7 +5,7 @@
         xmlns:besu="clr-namespace:PSD.Base;assembly=Base"
         xmlns:besucd="clr-namespace:PSD.Base.Card;assembly=Base"
         xmlns:sfio="clr-namespace:PSD.ClientAo.OI"
-        Title="PSDClientAo v0.4.15" Height="640" Width="1260" ResizeMode="NoResize"
+        Title="PSDClientAo v0.4.16" Height="640" Width="1260" ResizeMode="NoResize"
         Closed="WindowClosed">
     <Window.Resources>
         <besu:LibGroup x:Key="libGroup"/>

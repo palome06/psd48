@@ -55,9 +55,10 @@ namespace PSD.ClientZero
 
             TcpClient client = new TcpClient(server, port);
             NetworkStream tcpStream = client.GetStream();
+            int version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.Revision;
             string trainerjoin = (this.trainer != null && trainer.Length > 0) ? ("," + string.Join(",", trainer)) : "";
             SentByteLine(tcpStream, "C0CO," + name + "," + avatar + ","
-                + teamCode + "," + selCode + "," + levelCode + trainerjoin);
+                + teamCode + "," + selCode + "," + levelCode + "," + version + trainerjoin);
 
             Thread msgThread = new Thread(delegate()
             {
@@ -79,7 +80,13 @@ namespace PSD.ClientZero
             while (!done)
             {
                 string line = ReadByteLine(tcpStream);
-                if (line.StartsWith("C0CN,"))
+                if (line.StartsWith("G0XV,"))
+                {
+                    string expectVersion = line.Substring("C0XV,".Length);
+                    VI.Cout(uid, "Version Missmatch. Expect " + expectVersion + ", please get updated.", uid);
+
+                }
+                else if (line.StartsWith("C0CN,"))
                 {
                     uid = ushort.Parse(line.Substring("C1CO,".Length));
                     VI.Cout(uid, "Allocated with uid {0}", uid);

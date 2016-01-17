@@ -19,17 +19,28 @@ namespace PSD.ClientAo.Auxs
 
         public new string Title
         {
-            get { return this.lblTitle.Text; }
-            set { this.lblTitle.Text = value; }
+            get { return lblTitle.Text; }
+            set { lblTitle.Text = value; }
         }
 
         public string Message
         {
-            get { return this.lblMsg.Text; }
-            set { this.lblMsg.Text = value; }
+            get { return lblMsg.Text; }
+            set { lblMsg.Text = value; }
         }
 
-
+        private int mSelection = 2;
+        public int Selection
+        {
+            get { return mSelection; }
+            set {
+                mSelection = value;
+                if (mSelection == 1)
+                    yesBoarder.Visibility = Visibility.Collapsed;
+                else if (mSelection > 1)
+                    yesBoarder.Visibility = Visibility.Visible;
+            }
+        }
 
         /// <summary>
         /// 静态方法 模拟MESSAGEBOX.Show方法
@@ -43,21 +54,21 @@ namespace PSD.ClientAo.Auxs
             return new MessageHouse()
             {
                 Title = title,
-                Message = msg
+                Message = msg,
+                Selection = 1
             }.ShowDialog();
         }
 
         private void Yes_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            this.DialogResult = true;
-            this.Close();
+            DialogResult = true;
+            Close();
         }
 
         private void No_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-
-            this.DialogResult = false;
-            this.Close();
+            DialogResult = false;
+            Close();
         }
     }
 }

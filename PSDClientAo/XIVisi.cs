@@ -277,7 +277,7 @@ namespace PSD.ClientAo
                     if (say != null && WI != null)
                         WI.SendDirect(say, Uid);
                 }
-            }, delegate(Exception e) { Log.Logg(e.ToString()); })).Start();
+            }, delegate (Exception e) { Log.Logg(e.ToString()); })).Start();
             SingleThreadMessageStart();
             new Thread(() => Util.SafeExecute(() =>
             {
@@ -287,7 +287,7 @@ namespace PSD.ClientAo
                     if (hear != null)
                         HandleYMessage(hear);
                 }
-            }, delegate(Exception e) { Log.Logg(e.ToString()); })).Start();
+            }, delegate (Exception e) { Log.Logg(e.ToString()); })).Start();
             new Thread(() => Util.SafeExecute(() =>
             {
                 while (true)
@@ -315,7 +315,7 @@ namespace PSD.ClientAo
                     else
                         Thread.Sleep(100);
                 }
-            }, delegate(Exception e) { Log.Logg(e.ToString()); })).Start();
+            }, delegate (Exception e) { Log.Logg(e.ToString()); })).Start();
         }
         // called at the beginning or Cin-interrupted
         //public void SingleThreadMessageStart(List<string> list)
@@ -324,7 +324,7 @@ namespace PSD.ClientAo
             //ParameterizedThreadStart ParStart = new ParameterizedThreadStart(SingleThreadMessage);
             //Thread myThread = new Thread(ParStart);
             Thread myThread = new Thread(() => Util.SafeExecute(() => SingleThreadMessage(),
-                        delegate(Exception e) { Log.Logg(e.ToString()); }));
+                        delegate (Exception e) { Log.Logg(e.ToString()); }));
             lock (listOfThreads)
             {
                 if (listOfThreads.Count > 100)
@@ -940,7 +940,7 @@ namespace PSD.ClientAo
                             break;
                         ipValue += 6;
                         coma = string.Format("请继续输入{0}数值，已累加{1}.", prevComment, ipValue);
-                        eachInput = VI.CinD(Uid, 1, r2 - 6, coma, cancellable);
+                        eachInput = VI.CinD(Uid, (r1 - ipValue < 1 ? 1 : r1 - ipValue), r2 - ipValue, coma, cancellable);
                     }
                     int ipValueThis = int.Parse(eachInput);
                     if (ipValueThis == 0) ipValue = 0;
@@ -1231,7 +1231,7 @@ namespace PSD.ClientAo
             switch (args[0])
             {
                 case "E0IT":
-                    for (int idx = 1; idx < args.Length; )
+                    for (int idx = 1; idx < args.Length;)
                     {
                         ushort who = ushort.Parse(args[idx]);
                         int type = int.Parse(args[idx + 1]);
@@ -1258,7 +1258,7 @@ namespace PSD.ClientAo
                     }
                     break;
                 case "E0OT":
-                    for (int idx = 1; idx < args.Length; )
+                    for (int idx = 1; idx < args.Length;)
                     {
                         ushort who = ushort.Parse(args[idx]);
                         int type = int.Parse(args[idx + 1]);
@@ -1323,7 +1323,7 @@ namespace PSD.ClientAo
                     }
                     break;
                 case "E0ON":
-                    for (int idx = 1; idx < args.Length; )
+                    for (int idx = 1; idx < args.Length;)
                     {
                         ushort fromZone = ushort.Parse(args[idx]);
                         string cardType = args[idx + 1];
@@ -1377,7 +1377,7 @@ namespace PSD.ClientAo
                     }
                     break;
                 case "E0RN":
-                    for (int i = 1; i < args.Length; )
+                    for (int i = 1; i < args.Length;)
                     {
                         ushort from = ushort.Parse(args[i]);
                         ushort to = ushort.Parse(args[i + 1]);
@@ -1466,7 +1466,7 @@ namespace PSD.ClientAo
                         }
                         else if (type == 4)
                         {
-                            for (int idx = 3; idx < args.Length; )
+                            for (int idx = 3; idx < args.Length;)
                             {
                                 ushort fromZone = ushort.Parse(args[idx]);
                                 int n = int.Parse(args[idx + 1]);
@@ -2581,7 +2581,8 @@ namespace PSD.ClientAo
                             ++A0F.MonCount;
                             A0O.FlyingGet("M0", 0, 0, true);
                         }
-                        else {
+                        else
+                        {
                             List<ushort> mons = Util.TakeRange(args, 3, args.Length)
                                 .Select(p => ushort.Parse(p)).ToList();
                             VI.Cout(Uid, "NPC牌【{0}】被插入放置于牌堆顶第{1}张.", mons, (position + 1));
@@ -2607,7 +2608,8 @@ namespace PSD.ClientAo
                 case "E0IS":
                     {
                         ushort ut = ushort.Parse(args[1]);
-                        for (int i = 2; i < args.Length; ++i) {
+                        for (int i = 2; i < args.Length; ++i)
+                        {
                             string skillStr = args[i];
                             A0P[ut].GainSkill(skillStr);
                             VI.Cout(Uid, "{0}获得了技能『{1}』.", zd.Player(ut), zd.SkillName(args[i]));
@@ -2617,7 +2619,8 @@ namespace PSD.ClientAo
                 case "E0OS":
                     {
                         ushort ut = ushort.Parse(args[1]);
-                        for (int i = 2; i < args.Length; ++i) {
+                        for (int i = 2; i < args.Length; ++i)
+                        {
                             string skillStr = args[i];
                             Base.Skill sk = Tuple.SL.EncodeSkill(skillStr);
                             A0P[ut].LoseSkill(skillStr);
@@ -2666,7 +2669,7 @@ namespace PSD.ClientAo
                     }
                     break;
                 case "E0PB":
-                    for (int i = 2; i < args.Length; )
+                    for (int i = 2; i < args.Length;)
                     {
                         ushort who = ushort.Parse(args[i]);
                         ushort hind = ushort.Parse(args[i + 1]);
@@ -2748,24 +2751,32 @@ namespace PSD.ClientAo
                                 (s < 1000 ? zd.Player(s) : zd.Monster((ushort)(s - 1000))));
                             if (old != 0)
                                 leavers.Add(old);
-                            if (s != 0) {
+                            if (s != 0)
+                            {
                                 joiners.Add(s);
-                                if (position == 'T') {
+                                if (position == 'T')
+                                {
                                     msgs.Add(string.Format("{0}触发战斗", name));
                                     //A0F.Trigger = s;
                                     if (s != 0 && s < 1000)
                                         A0P[s].SetAsRounder();
-                                } else if (position == 'S') {
+                                }
+                                else if (position == 'S')
+                                {
                                     msgs.Add(string.Format("{0}支援", name));
                                     A0F.Supporter = s;
                                     if (s != 0 && s < 1000)
                                         A0P[s].SetAsSpSucc();
-                                } else if (position == 'H') {
+                                }
+                                else if (position == 'H')
+                                {
                                     msgs.Add(string.Format("{0}妨碍", name));
                                     A0F.Hinder = s;
                                     if (s != 0 && s < 1000)
                                         A0P[s].SetAsSpSucc();
-                                } else if (position == 'W') {
+                                }
+                                else if (position == 'W')
+                                {
                                     msgs.Add(string.Format("{0}代为触发战斗", name));
                                     //A0F.Horn = s;
                                     if (s != 0 && s < 1000)
@@ -2779,7 +2790,7 @@ namespace PSD.ClientAo
                         leavers.RemoveAll(p => joiners.Contains(p));
                         if (leavers.Count > 0)
                         {
-                            msgs.AddRange(leavers.Select(p => string.Format("{0}退出战斗", 
+                            msgs.AddRange(leavers.Select(p => string.Format("{0}退出战斗",
                                 (p == 0 ? "无人" : (p < 1000 ? zd.Player(p) :
                                 zd.Monster((ushort)(p - 1000)))))));
                             leavers.ForEach(p => { if (p < 1000) A0P[p].SetAsClear(); });
@@ -3150,11 +3161,12 @@ namespace PSD.ClientAo
                 string input = FormattedInputWithCancelFlag(string.Join(
                     ",", Util.TakeRange(blocks, 1 + invCount, blocks.Length)));
                 if (input == VI.CinSentinel)
-                    return false; 
+                    return false;
                 VI.CloseCinTunnel(Uid);
                 WI.Send("V1," + input, Uid, 0);
                 return true;
-            } else
+            }
+            else
                 return false;
         }
         public bool HandleV2Message(string cmdrst)
@@ -4248,7 +4260,7 @@ namespace PSD.ClientAo
                 case "H09G":
                     {
                         string[] blocks = cmdrst.Split(',');
-                        for (int idx = 0; idx < blocks.Length; )
+                        for (int idx = 0; idx < blocks.Length;)
                         {
                             ushort who = ushort.Parse(blocks[idx]);
                             int hero = int.Parse(blocks[idx + 1]);
