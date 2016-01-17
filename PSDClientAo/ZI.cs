@@ -82,6 +82,11 @@ namespace PSD.ClientAo
             while (!done)
             {
                 string line = ReadByteLine(tcpStream);
+                if (line.StartsWith("C0XV,"))
+                {
+                    cyvi.ReportWrongVersion(line.Substring("C0XV,".Length));
+                    return;
+                }
                 if (line.StartsWith("C0CN,"))
                 {
                     uid = ushort.Parse(line.Substring("C1CO,".Length));
@@ -296,9 +301,9 @@ namespace PSD.ClientAo
             byte[] byte2 = new byte[2];
             ns.Read(byte2, 0, 2);
             ushort value = (ushort)((byte2[0] << 8) + byte2[1]);
-            byte[] actual = new byte[1024];
-            if (value > 1024)
-                value = 1024;
+            byte[] actual = new byte[2048];
+            if (value > 2048)
+                value = 2048;
             ns.Read(actual, 0, value);
             return Encoding.Unicode.GetString(actual, 0, value);
         }

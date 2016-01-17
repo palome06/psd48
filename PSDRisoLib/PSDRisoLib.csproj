@@ -465,6 +465,7 @@
     <Resource Include="Resources\Card\NMB\NCT16.png" />
     <Resource Include="Resources\Card\NMB\NCT17.png" />
     <Resource Include="Resources\Card\NMB\NCT18.png" />
+    <Resource Include="Resources\Card\NMB\NCT19.png" />
     <Resource Include="Resources\Card\NMB\NCT20.png" />
     <Resource Include="Resources\Card\NMB\NCT21.png" />
     <Resource Include="Resources\Card\NMB\NCT22.png" />
@@ -477,7 +478,9 @@
     <Resource Include="Resources\Card\NMB\NCT32.png" />
     <Resource Include="Resources\Card\NMB\NCT33.png" />
     <Resource Include="Resources\Card\NMB\NCT34.png" />
+    <Resource Include="Resources\Card\NMB\NCT35.png" />
     <Resource Include="Resources\Card\NMB\NCT36.png" />
+    <Resource Include="Resources\Card\NMB\NCT37.png" />
     <Resource Include="Resources\Card\NMB\NCT39.png" />
     <Resource Include="Resources\Card\NMB\NCT40.png" />
     <Resource Include="Resources\Card\NMB\NCT41.png" />
@@ -496,6 +499,7 @@
     <Resource Include="Resources\PetsSnap\NCT13.png" />
     <Resource Include="Resources\PetsSnap\NCT20.png" />
     <Resource Include="Resources\PetsSnap\NCT33.png" />
+    <Resource Include="Resources\PetsSnap\NCT37.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\PetsSnap\NCH02.png" />
@@ -662,6 +666,7 @@
     <Resource Include="Resources\Card\NMB\GTT3.png" />
     <Resource Include="Resources\Card\NMB\GTT4.png" />
     <Resource Include="Resources\Card\NMB\GSH1.png" />
+    <Resource Include="Resources\Card\NMB\GSH2.png" />
     <Resource Include="Resources\Card\NMB\GSH3.png" />
     <Resource Include="Resources\Card\NMB\GHH1.png" />
     <Resource Include="Resources\Card\NMB\GLH2.png" />
@@ -681,6 +686,7 @@
     <Resource Include="Resources\PetsSnap\GTT3.png" />
     <Resource Include="Resources\PetsSnap\GTT4.png" />
     <Resource Include="Resources\PetsSnap\GSH1.png" />
+    <Resource Include="Resources\PetsSnap\GSH2.png" />
     <Resource Include="Resources\PetsSnap\GSH3.png" />
     <Resource Include="Resources\PetsSnap\GHH1.png" />
     <Resource Include="Resources\PetsSnap\GLH2.png" />
@@ -758,7 +764,6 @@
     <Resource Include="Resources\NameBar\NameHL019.png" />
     <Resource Include="Resources\NameBar\NameHL020.png" />
     <Resource Include="Resources\NameBar\NameHL021.png" />
-    <Resource Include="Resources\NameBar\NameSP301.png" />
     <Resource Include="Resources\NameBar\NameTR001.png" />
     <Resource Include="Resources\NameBar\NameTR002.png" />
     <Resource Include="Resources\NameBar\NameTR003.png" />
@@ -824,6 +829,7 @@
     <Resource Include="Resources\Logo\Smooth.png" />
   </ItemGroup>
   <ItemGroup>
+    <Resource Include="Resources\NameBar\NameTR019.png" />
     <Resource Include="Resources\NameBar\NameTR020.png" />
     <Resource Include="Resources\NameBar\NameTR021.png" />
     <Resource Include="Resources\NameBar\NameTR022.png" />
@@ -836,6 +842,7 @@
     <Resource Include="Resources\NameBar\NameTR032.png" />
     <Resource Include="Resources\NameBar\NameTR033.png" />
     <Resource Include="Resources\NameBar\NameTR034.png" />
+    <Resource Include="Resources\NameBar\NameTR035.png" />
     <Resource Include="Resources\NameBar\NameTR036.png" />
     <Resource Include="Resources\NameBar\NameTR037.png" />
     <Resource Include="Resources\NameBar\NameTR039.png" />
@@ -847,6 +854,7 @@
     <Resource Include="Resources\NameBar\NameTR045.png" />
     <Resource Include="Resources\Card\Heros\TR007.png" />
     <Resource Include="Resources\Card\Heros\TR008.png" />
+    <Resource Include="Resources\Card\Heros\TR019.png" />
     <Resource Include="Resources\Card\Heros\TR020.png" />
     <Resource Include="Resources\Card\Heros\TR021.png" />
     <Resource Include="Resources\Card\Heros\TR022.png" />
@@ -859,6 +867,7 @@
     <Resource Include="Resources\Card\Heros\TR032.png" />
     <Resource Include="Resources\Card\Heros\TR033.png" />
     <Resource Include="Resources\Card\Heros\TR034.png" />
+    <Resource Include="Resources\Card\Heros\TR035.png" />
     <Resource Include="Resources\Card\Heros\TR036.png" />
     <Resource Include="Resources\Card\Heros\TR037.png" />
     <Resource Include="Resources\Card\Heros\TR039.png" />
@@ -870,6 +879,7 @@
     <Resource Include="Resources\Card\Heros\TR045.png" />
     <Resource Include="Resources\Heros\17007.png" />
     <Resource Include="Resources\Heros\17008.png" />
+    <Resource Include="Resources\Heros\17019.png" />
     <Resource Include="Resources\Heros\17020.png" />
     <Resource Include="Resources\Heros\17021.png" />
     <Resource Include="Resources\Heros\17022.png" />
@@ -882,6 +892,7 @@
     <Resource Include="Resources\Heros\17032.png" />
     <Resource Include="Resources\Heros\17033.png" />
     <Resource Include="Resources\Heros\17034.png" />
+    <Resource Include="Resources\Heros\17035.png" />
     <Resource Include="Resources\Heros\17036.png" />
     <Resource Include="Resources\Heros\17037.png" />
     <Resource Include="Resources\Heros\17039.png" />

@@ -171,6 +171,24 @@ namespace PSD.ClientAo.Request
             }
 
             IDictionary<int, WrapPanel> iCardDict = new Dictionary<int, WrapPanel>();
+
+            GroupBox gbOfRune = new GroupBox()
+            {
+                Header = new TextBlock()
+                {
+                    FontSize = 24,
+                    FontFamily = new FontFamily("Lisu"),
+                    Text = "标准标记"
+                }
+            };
+            WrapPanel wpOfRune = new WrapPanel();
+            gbOfRune.Content = wpOfRune;
+            iCardStackPanel.Children.Add(gbOfRune);
+            foreach (Base.Rune rune in lg.RL.Firsts)
+            {
+                ushort rnCode = lg.RL.GetSingleIndex(rune);
+                AddContent("R" + rnCode, 0, wpOfRune, false);
+            }
             foreach (Exsp exsp in lg.ESL.Firsts.Where(p => p.Type == 3))
             {
                 string[] codes = exsp.Code.Split(',');

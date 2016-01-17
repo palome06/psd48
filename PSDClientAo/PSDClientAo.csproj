@@ -66,6 +66,9 @@
     <Compile Include="AoCEE.cs" />
     <Compile Include="AoMix.cs" />
     <Compile Include="Auxs\FlashWindowHelper.cs" />
+    <Compile Include="Auxs\MessageHouse.xaml.cs">
+      <DependentUpon>MessageHouse.xaml</DependentUpon>
+    </Compile>
     <Compile Include="CananPaint.xaml.cs">
       <DependentUpon>CananPaint.xaml</DependentUpon>
     </Compile>
@@ -145,6 +148,10 @@
     <Compile Include="XIVisi.cs" />
     <Compile Include="ZeroDisplay.cs" />
     <Compile Include="ZI.cs" />
+    <Page Include="Auxs\MessageHouse.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="CananPaint.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

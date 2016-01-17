@@ -2410,8 +2410,12 @@ namespace PSD.PSDGamepkg.JNS
         {
             if (consumeType == 0)
             {
-                Tux zp04 = XI.LibTuple.TL.EncodeTuxCode("ZP04");
-                return player.Tux.Count > 0 && zp04.Bribe(player, type, fuse) && zp04.Valid(player, type, fuse);
+                if (type == 0)
+                {
+                    Tux zp04 = XI.LibTuple.TL.EncodeTuxCode("ZP04");
+                    return player.Tux.Count > 0 && zp04.Bribe(player, type, fuse) && zp04.Valid(player, type, fuse);
+                }
+                else return false;
             }
             else return false;
         }
@@ -2419,13 +2423,16 @@ namespace PSD.PSDGamepkg.JNS
         {
             if (consumeType == 0)
             {
-                XI.RaiseGMessage("G0CC," + player.Uid + ",0," + player.Uid + ",ZP04," + argst + ";0," + fuse);
-                XI.RaiseGMessage("G0CZ,0," + player.Uid);
+                if (type == 0)
+                {
+                    XI.RaiseGMessage("G0CC," + player.Uid + ",0," + player.Uid + ",ZP04," + argst + ";0," + fuse);
+                    XI.RaiseGMessage("G0CZ,0," + player.Uid);
+                }
             }
         }
         public string XBT5ConsumeInput(Player player, int consumeType, int type, string fuse, string prev)
         {
-            if (consumeType == 0 && prev == "")
+            if (consumeType == 0 && type == 0 && prev == "")
                 return "/Q1(p" + string.Join("p", player.Tux) + ")";
             else return "";
         }

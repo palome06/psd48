@@ -113,6 +113,10 @@ namespace PSD.ClientAo.VW
             }
             else return false;
         }
+        public void ReportWrongVersion(string version)
+        {
+            Auxs.MessageHouse.Show("PSDClientAo 版本不符", "远端服务器版本为" + version + "，请进行调整。");
+        }
         #endregion Message Flow Section
         #region Detail Cin Events
         // Cin of case Y.

@@ -120,6 +120,22 @@
                 <TextBlock x:Name="skillExtText4" FontSize="10"
                            Text="{Binding Path=ExtSkill4, Converter={StaticResource sknmConv}}"/>
             </Button>
+            <Button Canvas.Left="-88" Width="61" Height="20" Canvas.Top="-20" Background="DodgerBlue"
+                    IsEnabled="{Binding Path=ExtSkill5Valid}"
+                     ToolTip="{Binding Path=ExtSkill5, Converter={StaticResource sktpConv}}"
+                    Visibility="{Binding Path=ExtSkill5, Converter={StaticResource skivConv}}"
+                    Click="ExtSkill5ButtonClick">
+                <TextBlock x:Name="skillExtText5" FontSize="10"
+                           Text="{Binding Path=ExtSkill5, Converter={StaticResource sknmConv}}"/>
+            </Button>
+            <Button Canvas.Left="-152" Width="61" Height="20" Canvas.Top="-20" Background="DodgerBlue"
+                    IsEnabled="{Binding Path=ExtSkill6Valid}"
+                     ToolTip="{Binding Path=ExtSkill6, Converter={StaticResource sktpConv}}"
+                    Visibility="{Binding Path=ExtSkill6, Converter={StaticResource skivConv}}"
+                    Click="ExtSkill6ButtonClick">
+                <TextBlock x:Name="skillExtText6" FontSize="10"
+                           Text="{Binding Path=ExtSkill6, Converter={StaticResource sknmConv}}"/>
+            </Button>
             <StackPanel Orientation="Vertical" Canvas.Right="0" Canvas.Bottom="0">
                 <CheckBox FontFamily="Simsun" Checked="SkOptChecked"
                           Unchecked="SkOptUnchecked" IsChecked="True">技能优化</CheckBox>

@@ -2257,7 +2257,7 @@ namespace PSD.ClientAo
                         ushort who = ushort.Parse(args[2]);
                         ushort mon = ushort.Parse(args[3]);
                         A0F.Monster2 = mon;
-                        VI.Cout(Uid, "{0}触发混战的结果为【{1}】，钦慕效果生效.", zd.Player(who), zd.Monster(mon));
+                        VI.Cout(Uid, "触发混战【{0}】的钦慕效果生效.", zd.Monster(mon));
                     }
                     break;
                 case "E0TT":

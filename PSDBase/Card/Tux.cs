@@ -367,6 +367,10 @@ namespace PSD.Base.Card
             }
             return ans;
         }
+        public bool IsTuxInGroup(Tux tux, int level)
+        {
+            return ListAllTuxSeleable(level).Contains(tux);
+        }
     }
 
     public class TuxEqiup : Tux

@@ -41,7 +41,7 @@
             </ScrollViewer>
         </TabItem>
 
-        <TabItem Header="专属牌">
+        <TabItem Header="标记/专属">
             <ScrollViewer>
                 <StackPanel x:Name="iCardStackPanel"/>
             </ScrollViewer>

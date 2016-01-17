@@ -612,6 +612,7 @@ namespace PSD.PSDGamepkg
             RegisterBasicSKTs(dict, "G0CC", 300);
             RegisterBasicSKTs(dict, "G0CC", 400);
             RegisterBasicSKTs(dict, "G0HZ", 200);
+            RegisterBasicSKTs(dict, "G0HZ", 300);
             RegisterBasicSKTs(dict, "G1EV", 200);
             RegisterBasicSKTs(dict, "G1WJ", 200);
             
@@ -680,8 +681,6 @@ namespace PSD.PSDGamepkg
                 switch (skt.Type)
                 {
                     case SKTType.BK:
-                        result.AddRange(pys.Select(p => new SKE(skt) { Tg = p }));
-                        break;
                     case SKTType.TX:
                     case SKTType.EQ:
                     case SKTType.CZ:

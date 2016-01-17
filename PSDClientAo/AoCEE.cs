@@ -39,7 +39,8 @@ namespace PSD.ClientAo
             set { if (mcz05V != value) { mcz05V = value; NotifyPropertyChanged("CZ05Valid"); } }
             get { return mcz05V; }
         }
-        private bool msk1V, msk2V, msk3V, msk4V, msk5V, msk6V, msk7V, mesk1V, mesk2V, mesk3V, mesk4V;
+        private bool msk1V, msk2V, msk3V, msk4V, msk5V, msk6V, msk7V;
+        private bool mesk1V, mesk2V, mesk3V, mesk4V, mesk5V, mesk6V;
         public bool Skill1Valid
         {
             set { if (msk1V != value) { msk1V = value; NotifyPropertyChanged("Skill1Valid"); } }
@@ -95,9 +96,19 @@ namespace PSD.ClientAo
             set { if (mesk4V != value) { mesk4V = value; NotifyPropertyChanged("ExtSkill4Valid"); } }
             get { return mesk4V; }
         }
+        public bool ExtSkill5Valid
+        {
+            set { if (mesk5V != value) { mesk5V = value; NotifyPropertyChanged("ExtSkill5Valid"); } }
+            get { return mesk5V; }
+        }
+        public bool ExtSkill6Valid
+        {
+            set { if (mesk6V != value) { mesk6V = value; NotifyPropertyChanged("ExtSkill6Valid"); } }
+            get { return mesk6V; }
+        }
 
         private Base.Skill msk1, msk2, msk3, msk4, msk5, msk6, msk7;
-        private Base.Bless mesk1, mesk2, mesk3, mesk4;
+        private Base.Bless mesk1, mesk2, mesk3, mesk4, mesk5, mesk6;
         public Base.Skill Skill1
         {
             set { if (msk1 != value) { msk1 = value; NotifyPropertyChanged("Skill1"); } }
@@ -153,10 +164,22 @@ namespace PSD.ClientAo
             set { if (mesk4 != value) { mesk4 = value; NotifyPropertyChanged("ExtSkill4"); } }
             get { return mesk4; }
         }
+        public Base.Bless ExtSkill5
+        {
+            set { if (mesk5 != value) { mesk5 = value; NotifyPropertyChanged("ExtSkill5"); } }
+            get { return mesk5; }
+        }
+        public Base.Bless ExtSkill6
+        {
+            set { if (mesk6 != value) { mesk6 = value; NotifyPropertyChanged("ExtSkill6"); } }
+            get { return mesk6; }
+        }
         public ushort ExtHolder1 { set; get; }
         public ushort ExtHolder2 { set; get; }
         public ushort ExtHolder3 { set; get; }
         public ushort ExtHolder4 { set; get; }
+        public ushort ExtHolder5 { set; get; }
+        public ushort ExtHolder6 { set; get; }
 
         public JoyStick js { set; get; }
 
@@ -181,6 +204,8 @@ namespace PSD.ClientAo
             ExtSkill2Valid = false;
             ExtSkill3Valid = false;
             ExtSkill4Valid = false;
+            ExtSkill5Valid = false;
+            ExtSkill6Valid = false;
             CZ01Valid = false;
             CZ02Valid = false;
             CZ03Valid = false;
@@ -215,6 +240,10 @@ namespace PSD.ClientAo
                 ExtSkill3Valid = valid;
             else if (IsCodeEqual(skName, ExtSkill4))
                 ExtSkill4Valid = valid;
+            else if (IsCodeEqual(skName, ExtSkill5))
+                ExtSkill5Valid = valid;
+            else if (IsCodeEqual(skName, ExtSkill6))
+                ExtSkill6Valid = valid;
         }
         public void SetCZHighlight(string czName, bool valid)
         {
@@ -282,6 +311,8 @@ namespace PSD.ClientAo
             else if (nextBKSkill == 1) { ExtSkill2 = bs; ExtHolder2 = to; ++nextBKSkill; return true; }
             else if (nextBKSkill == 2) { ExtSkill3 = bs; ExtHolder3 = to; ++nextBKSkill; return true; }
             else if (nextBKSkill == 3) { ExtSkill4 = bs; ExtHolder4 = to; ++nextBKSkill; return true; }
+            else if (nextBKSkill == 4) { ExtSkill5 = bs; ExtHolder5 = to; ++nextBKSkill; return true; }
+            else if (nextBKSkill == 5) { ExtSkill6 = bs; ExtHolder6 = to; ++nextBKSkill; return true; }
             else return false;
         }
 
@@ -320,14 +351,15 @@ namespace PSD.ClientAo
         }
         public void ResetBKSkill()
         {
-            ExtSkill1 = null; ExtSkill2 = null; ExtSkill3 = null; ExtSkill4 = null;
+            ExtSkill1 = null; ExtSkill2 = null; ExtSkill3 = null;
+            ExtSkill4 = null; ExtSkill5 = null; ExtSkill6 = null;
             nextBKSkill = 0;
         }
         public void LoseBKSkill(string code)
         {
-            Base.Bless[] skills = new Base.Bless[] {
-                 ExtSkill1, ExtSkill2, ExtSkill3, ExtSkill4, null };
-            Base.Bless[] hsk = new Base.Bless[4];
+            Base.Bless[] skills = new Base.Bless[] { ExtSkill1, ExtSkill2,
+                ExtSkill3, ExtSkill4,ExtSkill5, ExtSkill6, null };
+            Base.Bless[] hsk = new Base.Bless[6];
             int idx = 0; bool found = false;
             while (idx < skills.Length - 1)
             {
@@ -348,8 +380,9 @@ namespace PSD.ClientAo
             }
             ExtSkill1 = hsk[0]; ExtSkill2 = hsk[1];
             ExtSkill3 = hsk[2]; ExtSkill4 = hsk[3];
+            ExtSkill5 = hsk[4]; ExtSkill6 = hsk[5];
             idx = 0;
-            while (idx < 4) { if (hsk[idx] == null) break; ++idx; }
+            while (idx < 6) { if (hsk[idx] == null) break; ++idx; }
             nextBKSkill = idx;
         }
         //public void ResetBKSKill(string code)

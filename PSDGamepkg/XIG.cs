@@ -504,14 +504,24 @@ namespace PSD.PSDGamepkg
                         ushort mon = Board.Monster2;
                         if (mon == 0)
                             WI.BCast("E0HZ,0," + who);
-                        else
+                        else if (NMBLib.IsMonster(mon))
+                        {
+                            WI.BCast("E0HZ,1," + who + "," + mon);
+                            RaiseGMessage("G0YM,1," + mon + ",0");
+                        }
+                        else if (NMBLib.IsNPC(mon))
+                            WI.BCast("E0HZ,2," + who + "," + mon);
+                    }
+                    else if (priority == 300)
+                    {
+                        ushort who = ushort.Parse(args[1]);
+                        ushort mon = Board.Monster2;
+                        if (mon != 0)
                         {
                             if (NMBLib.IsMonster(mon))
                             {
                                 RaiseGMessage("G0IP," + Board.Rounder.OppTeam + "," +
                                     LibTuple.ML.Decode(NMBLib.OriginalMonster(mon)).STR);
-                                WI.BCast("E0HZ,1," + who + "," + mon);
-                                RaiseGMessage("G0YM,1," + mon + ",0");
                             }
                             else if (NMBLib.IsNPC(mon))
                             {
@@ -544,14 +554,11 @@ namespace PSD.PSDGamepkg
                                 }
                                 if (doubled)
                                 {
-                                    RaiseGMessage("G0IP," + Board.Rounder.Team + "," + (npc.STR * 2));
                                     WI.BCast("E0HZ,3," + who + "," + mon);
+                                    RaiseGMessage("G0IP," + Board.Rounder.Team + "," + (npc.STR * 2));
                                 }
                                 else
-                                {
                                     RaiseGMessage("G0IP," + Board.Rounder.Team + "," + npc.STR);
-                                    WI.BCast("E0HZ,2," + who + "," + mon);
-                                }
                                 RaiseGMessage("G0YM,1," + mon + ",0");
                             }
                         }
@@ -1168,7 +1175,7 @@ namespace PSD.PSDGamepkg
                             Hero hero = LibTuple.HL.InstanceHero(player.SelectHero);
                             List<string> spCollection = hero.Spouses.ToList();
                             spCollection.AddRange(player.ExSpouses);
-                            foreach (string spos in spCollection)
+                            foreach (string spos in spCollection.Distinct())
                             {
                                 if (!spos.StartsWith("!"))
                                 {
@@ -1184,7 +1191,7 @@ namespace PSD.PSDGamepkg
                                                 pys.Add(py);
                                             else
                                             {
-                                                Base.Card.Hero hro = LibTuple.HL.InstanceHero(py.SelectHero);
+                                                Hero hro = LibTuple.HL.InstanceHero(py.SelectHero);
                                                 if (hro != null && hro.Archetype == spo)
                                                     pys.Add(py);
                                             }
