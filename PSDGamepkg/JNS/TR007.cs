@@ -368,9 +368,9 @@ namespace PSD.PSDGamepkg.JNS
             bool meLose = (player.Team == XI.Board.Rounder.Team && !XI.Board.IsBattleWin)
                 || (player.Team == XI.Board.Rounder.OppTeam && XI.Board.IsBattleWin);
             Base.Card.Monster mon1 = XI.LibTuple.ML.Decode(XI.Board.Monster1);
-            bool has1 = mon1 != null && player.TokenExcl.Contains("I" + (Util.GetFiveElementId(mon1.Element) + 1));
+            bool has1 = mon1 != null && player.TokenExcl.Contains("I" + mon1.Element.Elem2Int());
             Base.Card.Monster mon2 = XI.LibTuple.ML.Decode(XI.Board.Monster2);
-            bool has2 = mon2 != null && player.TokenExcl.Contains("I" + (Util.GetFiveElementId(mon2.Element) + 1));
+            bool has2 = mon2 != null && player.TokenExcl.Contains("I" + mon1.Element.Elem2Int());
             return XI.Board.IsAttendWar(player) && meLose && (has1 || has2);
         }
         public void JNT0402Action(Player player, int type, string fuse, string argst)
@@ -391,11 +391,11 @@ namespace PSD.PSDGamepkg.JNS
             {
                 List<int> sets = new List<int>();
                 Base.Card.Monster mon1 = XI.LibTuple.ML.Decode(XI.Board.Monster1);
-                if (mon1 != null && player.TokenExcl.Contains("I" + (Util.GetFiveElementId(mon1.Element) + 1)))
-                    sets.Add(Util.GetFiveElementId(mon1.Element) + 1);
+                if (mon1 != null && player.TokenExcl.Contains("I" + mon1.Element.Elem2Int()))
+                    sets.Add(mon1.Element.Elem2Int());
                 Base.Card.Monster mon2 = XI.LibTuple.ML.Decode(XI.Board.Monster2);
-                if (mon2 != null && player.TokenExcl.Contains("I" + (Util.GetFiveElementId(mon2.Element) + 1)))
-                    sets.Add(Util.GetFiveElementId(mon2.Element) + 1);
+                if (mon2 != null && player.TokenExcl.Contains("I" + mon2.Element.Elem2Int()))
+                    sets.Add(mon2,Element.Elem2Int());
                 return "/I1(p" + string.Join("p", sets.Select(p => "I" + p)) + "),#获得补牌,/T1(p" +
                     string.Join("p", XI.Board.Garden.Values.Where(p => p.IsAlive).Select(p => p.Uid)) + ")";
             }
@@ -2423,7 +2423,7 @@ namespace PSD.PSDGamepkg.JNS
                 return player.RAMUshort == 1 || player.RAMUshort == 2;
             else if (type >= 3 && type <= 6)
             {
-                int zidx = Util.GetFiveElementId(FiveElement.AQUA);
+                int zidx = FiveElement.AQUA.Elem2Index();
                 bool has = XI.Board.Garden.Values.Where(p => p.IsAlive &&
                     p.Team == player.Team && p.Pets[zidx] != 0).Any();
                 if (type == 3)

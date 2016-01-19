@@ -113,8 +113,7 @@ namespace PSD.PSDGamepkg.JNS
         }
         public void NJ02Action(Player player, string fuse, string args) {
             ushort who = ushort.Parse(args);
-            XI.RaiseGMessage(Artiad.Cure.ToMessage(
-                            new Artiad.Cure(who, 0, FiveElement.A, 1)));
+            Cure(XI.Board.Garden[who], 1);
         }
         public string NJ02Input(Player player, string fuse, string prev)
         {
@@ -123,7 +122,7 @@ namespace PSD.PSDGamepkg.JNS
         public void NJ03Action(Player player, string fuse, string args)
         {
             ushort who = ushort.Parse(args);
-            XI.RaiseGMessage(Artiad.Harm.ToMessage(new Artiad.Harm(player.Uid, 2000, FiveElement.A, 1, 0)));
+            Harm(player, 1);
             XI.RaiseGMessage("G0DH," + who + ",0,1");
         }
         public string NJ03Input(Player player, string fuse, string prev)
@@ -137,7 +136,7 @@ namespace PSD.PSDGamepkg.JNS
         public void NJ05Action(Player player, string fuse, string args)
         {
             ushort who = ushort.Parse(args);
-            XI.RaiseGMessage(Artiad.Harm.ToMessage(new Artiad.Harm(who, 2000, FiveElement.A, 1, 0)));
+            Harm(player, 1);
         }
         public string NJ05Input(Player player, string fuse, string prev)
         {
@@ -413,7 +412,7 @@ namespace PSD.PSDGamepkg.JNS
         public void NJH5EscueAction(Player player, ushort npcUt, int type, string fuse, string argst)
         {
             if (type == 0)
-                XI.RaiseGMessage(Artiad.Harm.ToMessage(new Artiad.Harm(player.Uid, 2000, FiveElement.YIN, 1, 0)));
+                Harm(player, 1, FiveElement.A, (int)HPEvoMask.TUX_INAVO);
             else if (type == 1)
                 EscueDiscard(player, npcUt);
         }
@@ -524,8 +523,7 @@ namespace PSD.PSDGamepkg.JNS
         public void NJH9EscueAction(Player player, ushort npcUt, int type, string fuse, string argst)
         {
             EscueDiscard(player, npcUt);
-            XI.RaiseGMessage(Artiad.Cure.ToMessage(XI.Board.Garden.Values.Where(p => p.Team == player.Team &&
-                p.HP == 0).Select(p => new Artiad.Cure(p.Uid, 0, FiveElement.A, 2))));
+            Cure(XI.Board.Garden.Values.Where(p => p.Team == player.Team && p.HP == 0), 2);
             Artiad.Procedure.AssignCurePointToTeam(XI, XI.Board.GetOpponenet(player), 3, "NJH9",
                 p => Cure(null, p.Keys.ToList(), p.Values.ToList()));
             if (XI.Board.Garden.Values.Any(p => p.IsAlive && p.HP == 0))
@@ -606,5 +604,21 @@ namespace PSD.PSDGamepkg.JNS
             XI.RaiseGMessage("G0ON," + player.Uid + ",M,1," + npcUt);
         }
         #endregion NPC Single
+
+        #region NPC Effect Util
+        private void Harm(Player py, int n, FiveElement element = FiveElement.A, int mask = (int)HPEvoMask.FROM_NMB)
+        {
+            Harm(null, py, n, element, mask);
+        }
+        private void Cure(Player py, int n, FiveElement element = FiveElement.A, int mask = (int)HPEvoMask.FROM_NMB)
+        {
+            Cure(null, py, n, element, mask);
+        }
+        private void Cure(IEnumerable<Player> pys, int n, FiveElement element = FiveElement.A,
+            int mask = (int)HPEvoMask.FROM_NMB)
+        {
+            Cure(null, pys, n, element, mask);
+        }
+        #endregion NPC Effect Util
     }
 }

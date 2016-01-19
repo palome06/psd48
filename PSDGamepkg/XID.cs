@@ -3,8 +3,8 @@ using PSD.Base.Card;
 
 namespace PSD.PSDGamepkg
 {
-	public partial class XI
-    {
+      public partial class XI
+      {
         private int[] mode00heroes = new int[] {
             //10602, 17005, 10107, 10404, 10501, 10504
             //10102, 10303, 10605, 10402, 10305, 10504

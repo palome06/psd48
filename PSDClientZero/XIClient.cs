@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using PSD.Base;
+using PSD.Base.Card;
 
 namespace PSD.ClientZero
 {
@@ -1137,7 +1138,7 @@ namespace PSD.ClientZero
                             int tuxCount = 0;
                             foreach (ushort ut in cards)
                             {
-                                Base.Card.Tux tux = Tuple.TL.DecodeTux(ut);
+                                Tux tux = Tuple.TL.DecodeTux(ut);
                                 if (Z0D[who].Weapon == ut)
                                     Z0D[who].Weapon = 0;
                                 else if (Z0D[who].Armor == ut)
@@ -1381,30 +1382,21 @@ namespace PSD.ClientZero
                     }
                 case "E0ZH":
                     {
-                        string result = "";
-                        for (int i = 1; i < args.Length; ++i)
-                        {
-                            ushort py = ushort.Parse(args[i]);
-                            result += "," + zd.Player(py);
-                        }
-                        if (result != "")
-                            VI.Cout(Uid, "以下角色处于濒死状态：{0}.", result.Substring(1));
+                        VI.Cout(Uid, "以下角色处于濒死状态：{0}.", zd.Player(
+                            Util.TakeRange(args, 2, args.Length).Select(p => ushort.Parse(p))));
                         break;
                     }
                 case "E0LV":
+                    for (int idx = 1; idx < args.Length;)
                     {
-                        int idx = 1;
-                        while (idx < args.Length)
-                        {
-                            ushort who = ushort.Parse(args[idx]);
-                            int count = int.Parse(args[idx + 1]);
-                            VI.Cout(Uid, "{0}对{1}发动了倾慕.", zd.PlayerWithMonster(
-                                Util.TakeRange(args, idx + 2, idx + 2 + count)), zd.Player(who));
-                            idx += (2 + count);
-                            Z0D[who].IsLoved = true;
-                        }
-                        break;
+                        ushort who = ushort.Parse(args[idx]);
+                        int count = int.Parse(args[idx + 1]);
+                        VI.Cout(Uid, "{0}对{1}发动了倾慕.", zd.PlayerWithMonster(
+                            Util.TakeRange(args, idx + 2, idx + 2 + count)), zd.Player(who));
+                        idx += (2 + count);
+                        Z0D[who].IsLoved = true;
                     }
+                    break;
                 case "E0ZW":
                     {
                         string result = "";
@@ -1696,7 +1688,7 @@ namespace PSD.ClientZero
                             argvs = "(" + argvs.Substring(1) + ")";
 
                         bool hind = false; int acType = consumeType % 2;
-                        Base.Card.TuxEqiup tuxeq = Tuple.TL.DecodeTux(card) as Base.Card.TuxEqiup;
+                        TuxEqiup tuxeq = Tuple.TL.DecodeTux(card) as TuxEqiup;
                         if (tuxeq != null && tuxeq.CsHind[acType][type])
                             hind = true;
                         if (!hind)
@@ -1998,8 +1990,8 @@ namespace PSD.ClientZero
                         else
                             VI.Cout(Uid, "{0}从{1}获得了宠物{2}.", zd.Player(who),
                                 zd.Player(from), zd.Monster(pet));
-                        Base.Card.Monster monster = Tuple.ML.Decode(pet);
-                        int five = Util.GetFiveElementId(monster.Element);
+                        Monster monster = Tuple.ML.Decode(pet);
+                        int five = monster.Element.Elem2Index();
                         Z0D[who].Pets[five] = pet;
                     }
                     break;
@@ -2008,8 +2000,8 @@ namespace PSD.ClientZero
                         ushort who = ushort.Parse(args[1]);
                         ushort pet = ushort.Parse(args[2]);
                         VI.Cout(Uid, "{0}失去了宠物{1}.", zd.Player(who), zd.Monster(pet));
-                        Base.Card.Monster monster = Tuple.ML.Decode(pet);
-                        int five = Util.GetFiveElementId(monster.Element);
+                        Monster monster = Tuple.ML.Decode(pet);
+                        int five = monster.Element.Elem2Index();
                         Z0D[who].Pets[five] = 0;
                     }
                     break;
@@ -2369,7 +2361,7 @@ namespace PSD.ClientZero
                         ushort ut = ushort.Parse(args[1]);
                         int hro = int.Parse(args[2]);
                         string guestName = "副角色牌";
-                        Base.Card.Hero hero = Tuple.HL.InstanceHero(Z0D[ut].SelectHero);
+                        Hero hero = Tuple.HL.InstanceHero(Z0D[ut].SelectHero);
                         if (hero != null && !string.IsNullOrEmpty(hero.GuestAlias))
                             guestName = hero.GuestAlias;
                         VI.Cout(Uid, "{0}迎来了{1}「{2}」.", zd.Player(ut), guestName, zd.Hero(hro));
@@ -2382,7 +2374,7 @@ namespace PSD.ClientZero
                         int hro = int.Parse(args[2]);
                         int next = int.Parse(args[3]);
                         string guestName = "副角色牌";
-                        Base.Card.Hero hero = Tuple.HL.InstanceHero(Z0D[ut].SelectHero);
+                        Hero hero = Tuple.HL.InstanceHero(Z0D[ut].SelectHero);
                         if (hero != null && !string.IsNullOrEmpty(hero.GuestAlias))
                             guestName = hero.GuestAlias;
                         VI.Cout(Uid, "{0}送走了{1}「{2}」.", zd.Player(ut), guestName, zd.Hero(hro));
@@ -2525,23 +2517,6 @@ namespace PSD.ClientZero
                         else
                             VI.Cout(Uid, "{0}撤销{1}.", zd.Player(who),
                                 zd.GuardAlias(Z0D[who].SelectHero, Z0D[who].Coss));
-                    }
-                    break;
-                case "E0PH":
-                    {
-                        string result = "";
-                        for (int i = 1; i < args.Length; i += 4)
-                        {
-                            ushort from = ushort.Parse(args[i]);
-                            ushort prop = ushort.Parse(args[i + 1]);
-                            ushort n = ushort.Parse(args[i + 2]);
-                            ushort now = ushort.Parse(args[i + 3]);
-                            result += string.Format("\n{0}HP流失-{1}({2})，当前HP={3}.",
-                                zd.Player(from), n, zd.Prop(prop), now);
-                            Z0D[from].HP = now;
-                        }
-                        if (result != "")
-                            VI.Cout(Uid, result.Substring(1));
                     }
                     break;
                 case "E0ZJ":

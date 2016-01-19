@@ -1675,7 +1675,7 @@ namespace PSD.PSDGamepkg.JNS
                     List<Artiad.Harm> rvs = new List<Artiad.Harm>();
                     foreach (Artiad.Harm harm in harms)
                     {
-                        int elemCode = Util.GetFiveElementId(harm.Element) + 1;
+                        int elemCode = harm.Element.Elem2Int();
                         if (harm.Who == player.Uid && elemCode == mon.RAMUshort)
                             rvs.Add(harm);
                     }
@@ -1695,7 +1695,7 @@ namespace PSD.PSDGamepkg.JNS
                 {
                     foreach (Artiad.Harm harm in harms)
                     {
-                        int elemCode = Util.GetFiveElementId(harm.Element) + 1;
+                        int elemCode = harm.Element.Elem2Int();
                         if (harm.Who == player.Uid && elemCode == mon.RAMUshort)
                             return true;
                     }

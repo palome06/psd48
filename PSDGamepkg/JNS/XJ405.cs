@@ -1118,7 +1118,7 @@ namespace PSD.PSDGamepkg.JNS
             {
                 ushort card = ushort.Parse(blocks[4]);
                 Base.Card.Monster monster = XI.LibTuple.ML.Decode(card);
-                int element = Util.GetFiveElementId(monster.Element);
+                int element = monster.Element.Elem2Index();
                 if (element >= 0)
                 {
                     return XI.Board.Garden.Values.Where(p => p.IsAlive &&
@@ -1142,7 +1142,7 @@ namespace PSD.PSDGamepkg.JNS
             string[] blocks = fuse.Split(',');
             ushort card = ushort.Parse(blocks[4]);
             Base.Card.Monster monster = XI.LibTuple.ML.Decode(card);
-            int element = Util.GetFiveElementId(monster.Element);
+            int element = monster.Element.Elem2Index();
             if (prev == "")
                 return "#弃置宠物的,/T1(p" + string.Join("p", XI.Board.Garden.Values.Where(
                     p => p.IsAlive && p.Team == player.OppTeam && p.Pets[element] != 0)

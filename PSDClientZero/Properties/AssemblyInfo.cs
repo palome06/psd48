@@ -5,12 +5,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("PSDClientZero v0.4.16")]
+[assembly: AssemblyTitle("PSDClientZero v0.4.17")]
 [assembly: AssemblyDescription("PSDClientZero")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("iptcg")]
 [assembly: AssemblyProduct("PSDClientZero")]
-[assembly: AssemblyCopyright("Copyright © 2007-2015 Ventdealic")]
+[assembly: AssemblyCopyright("Copyright © 2007-2016 Ventdealic")]
 [assembly: AssemblyTrademark("iptcg")]
 [assembly: AssemblyCulture("")]
 
@@ -32,5 +32,5 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("0.4.16.149")]
-[assembly: AssemblyFileVersion("0.4.16.149")]
+[assembly: AssemblyVersion("0.4.17.150")]
+[assembly: AssemblyFileVersion("0.4.17.150")]

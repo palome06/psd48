@@ -54,46 +54,58 @@ namespace PSD.PSDGamepkg.JNS
 
         protected void Harm(Player src, IEnumerable<Player> invs, int n, FiveElement five = FiveElement.A, int mask = 0)
         {
-            if (src != null)
-                TargetPlayer(src.Uid, invs.Select(p => p.Uid));
-            XI.RaiseGMessage(Artiad.Harm.ToMessage(invs.Select(p =>
-                new Artiad.Harm(p.Uid, src == null ? 0 : src.Uid, five, n, mask))));
+            if (invs.Any())
+            {
+                if (src != null)
+                    TargetPlayer(src.Uid, invs.Select(p => p.Uid));
+                XI.RaiseGMessage(Artiad.Harm.ToMessage(invs.Select(p =>
+                    new Artiad.Harm(p.Uid, src == null ? 0 : src.Uid, five, n, mask))));
+            }
         }
 
         protected void Harm(Player src, List<Player> invs,
             List<int> ns, List<int> mask = null, FiveElement five = FiveElement.A)
         {
-            if (src != null)
-                TargetPlayer(src.Uid, invs.Select(p => p.Uid));
-            int sz = invs.Count;
-            XI.RaiseGMessage(Artiad.Harm.ToMessage(Enumerable.Range(0, sz).Select
-                (p => new Artiad.Harm(invs[p].Uid, src == null ? 0 : src.Uid, five, ns[p], mask == null ? 0 : mask[p]))));
+            if (invs.Any())
+            {
+                if (src != null)
+                    TargetPlayer(src.Uid, invs.Select(p => p.Uid));
+                int sz = invs.Count;
+                XI.RaiseGMessage(Artiad.Harm.ToMessage(Enumerable.Range(0, sz).Select(p =>
+                    new Artiad.Harm(invs[p].Uid, src == null ? 0 : src.Uid, five, ns[p], mask == null ? 0 : mask[p]))));
+            }
         }
 
-        protected void Cure(Player src, Player py, int n, FiveElement five = FiveElement.A)
+        protected void Cure(Player src, Player py, int n, FiveElement five = FiveElement.A, int mask = 0)
         {
             if (src != null)
                 TargetPlayer(src.Uid, py.Uid);
             XI.RaiseGMessage(Artiad.Cure.ToMessage(
-                new Artiad.Cure(py.Uid, src == null ? 0 : src.Uid, five, n)));
+                new Artiad.Cure(py.Uid, src == null ? 0 : src.Uid, five, n, mask)));
         }
 
-        protected void Cure(Player src, IEnumerable<Player> invs, int n, FiveElement five = FiveElement.A)
+        protected void Cure(Player src, IEnumerable<Player> invs, int n, FiveElement five = FiveElement.A, int mask = 0)
         {
-            if (src != null)
-                TargetPlayer(src.Uid, invs.Select(p => p.Uid));
-            XI.RaiseGMessage(Artiad.Cure.ToMessage(invs.Select(p => new Artiad.Cure(
-                p.Uid, src == null ? 0 : src.Uid, five, n))));
+            if (invs.Any())
+            {
+                if (src != null)
+                    TargetPlayer(src.Uid, invs.Select(p => p.Uid));
+                XI.RaiseGMessage(Artiad.Cure.ToMessage(invs.Select(p => new Artiad.Cure(
+                    p.Uid, src == null ? 0 : src.Uid, five, n, mask))));
+            }
         }
 
         protected void Cure(Player src, List<Player> invs,
-            List<int> ns, FiveElement five = FiveElement.A)
+            List<int> ns, FiveElement five = FiveElement.A, int mask = 0)
         {
-            if (src != null)
-                TargetPlayer(src.Uid, invs.Select(p => p.Uid));
-            int sz = invs.Count;
-            XI.RaiseGMessage(Artiad.Cure.ToMessage(Enumerable.Range(0, sz).Select
-                (p => new Artiad.Cure(invs[p].Uid, src == null ? 0 : src.Uid, five, ns[p]))));
+            if (invs.Any())
+            {
+                if (src != null)
+                    TargetPlayer(src.Uid, invs.Select(p => p.Uid));
+                int sz = invs.Count;
+                XI.RaiseGMessage(Artiad.Cure.ToMessage(Enumerable.Range(0, sz).Select
+                    (p => new Artiad.Cure(invs[p].Uid, src == null ? 0 : src.Uid, five, ns[p], mask))));
+            }
         }
         protected void TargetPlayer(ushort from, ushort to)
         {

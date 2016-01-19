@@ -120,18 +120,6 @@ namespace PSD.ClientZero
             else
                 return new T[0];
         }
-        public static int GetFiveElementId(Base.Card.FiveElement five)
-        {
-            switch (five)
-            {
-                case Base.Card.FiveElement.AQUA: return 0;
-                case Base.Card.FiveElement.AGNI: return 1;
-                case Base.Card.FiveElement.THUNDER: return 2;
-                case Base.Card.FiveElement.AERO: return 3;
-                case Base.Card.FiveElement.SATURN: return 4;
-                default: return -1;
-            }
-        }
         public static void SafeExecute(Action action, Action<Exception> handler)
         {
             //try { action(); }

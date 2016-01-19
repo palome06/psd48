@@ -12,7 +12,7 @@ using System.Windows;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("PSDDorm")]
-[assembly: AssemblyCopyright("Copyright © 2007-2015 Ventdealic")]
+[assembly: AssemblyCopyright("Copyright © 2007-2016 Ventdealic")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -51,5 +51,5 @@ using System.Windows;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("0.4.16.2")]
-[assembly: AssemblyFileVersion("0.4.16.2")]
+[assembly: AssemblyVersion("0.4.17.2")]
+[assembly: AssemblyFileVersion("0.4.17.2")]

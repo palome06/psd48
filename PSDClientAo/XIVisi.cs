@@ -1,4 +1,5 @@
 ﻿using PSD.Base;
+using PSD.Base.Card;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -1270,7 +1271,7 @@ namespace PSD.ClientAo
                             int tuxCount = 0;
                             foreach (ushort ut in cards)
                             {
-                                Base.Card.Tux tux = Tuple.TL.DecodeTux(ut);
+                                Tux tux = Tuple.TL.DecodeTux(ut);
                                 if (A0P[who].Weapon == ut)
                                     A0P[who].Weapon = 0;
                                 else if (A0P[who].Armor == ut)
@@ -1550,30 +1551,21 @@ namespace PSD.ClientAo
                     }
                 case "E0ZH":
                     {
-                        string result = "";
-                        for (int i = 1; i < args.Length; ++i)
-                        {
-                            ushort py = ushort.Parse(args[i]);
-                            result += "," + zd.Player(py);
-                        }
-                        if (result != "")
-                            VI.Cout(Uid, "以下角色处于濒死状态：{0}.", result.Substring(1));
+                        VI.Cout(Uid, "以下角色处于濒死状态：{0}.", zd.Player(
+                            Util.TakeRange(args, 2, args.Length).Select(p => ushort.Parse(p))));
                         break;
                     }
                 case "E0LV":
+                    for (int idx = 1; idx < args.Length;)
                     {
-                        int idx = 1;
-                        while (idx < args.Length)
-                        {
-                            ushort who = ushort.Parse(args[idx]);
-                            int count = int.Parse(args[idx + 1]);
-                            VI.Cout(Uid, "{0}对{1}发动了倾慕.", zd.PlayerWithMonster(
-                                Util.TakeRange(args, idx + 2, idx + 2 + count)), zd.Player(who));
-                            idx += (2 + count);
-                            A0P[who].IsLoved = true;
-                        }
-                        break;
+                        ushort who = ushort.Parse(args[idx]);
+                        int count = int.Parse(args[idx + 1]);
+                        VI.Cout(Uid, "{0}对{1}发动了倾慕.", zd.PlayerWithMonster(
+                            Util.TakeRange(args, idx + 2, idx + 2 + count)), zd.Player(who));
+                        idx += (2 + count);
+                        A0P[who].IsLoved = true;
                     }
+                    break;
                 case "E0ZW":
                     {
                         string result = "";
@@ -1883,7 +1875,7 @@ namespace PSD.ClientAo
                             argvs = "(" + argvs.Substring(1) + ")";
 
                         bool hind = false; int acType = consumeType % 2;
-                        Base.Card.TuxEqiup tuxeq = Tuple.TL.DecodeTux(card) as Base.Card.TuxEqiup;
+                        TuxEqiup tuxeq = Tuple.TL.DecodeTux(card) as TuxEqiup;
                         if (tuxeq != null && tuxeq.CsHind[acType][type])
                             hind = true;
                         if (!hind)
@@ -2205,8 +2197,8 @@ namespace PSD.ClientAo
                             VI.Cout(Uid, "{0}获得了宠物{1}.", zd.Player(who), zd.Monster(pet));
                         else
                             VI.Cout(Uid, "{0}从{1}处获得了宠物{2}.", zd.Player(who), zd.Player(from), zd.Monster(pet));
-                        Base.Card.Monster monster = Tuple.ML.Decode(pet);
-                        int five = Util.GetFiveElementId(monster.Element);
+                        Monster monster = Tuple.ML.Decode(pet);
+                        int five = monster.Element.Elem2Index();
                         A0P[who].SetPet(five, pet);
                         List<string> cedcards = new List<string>();
                         cedcards.Add("M" + pet);
@@ -2218,8 +2210,8 @@ namespace PSD.ClientAo
                         ushort who = ushort.Parse(args[1]);
                         ushort pet = ushort.Parse(args[2]);
                         VI.Cout(Uid, "{0}失去了宠物{1}.", zd.Player(who), zd.Monster(pet));
-                        Base.Card.Monster monster = Tuple.ML.Decode(pet);
-                        int five = Util.GetFiveElementId(monster.Element);
+                        Monster monster = Tuple.ML.Decode(pet);
+                        int five = monster.Element.Elem2Index();
                         A0P[who].SetPet(five, 0);
                         List<string> cedcards = new List<string>();
                         cedcards.Add("M" + pet);
@@ -2646,7 +2638,7 @@ namespace PSD.ClientAo
                         ushort ut = ushort.Parse(args[1]);
                         int hro = int.Parse(args[2]);
                         string guestName = "副角色牌";
-                        Base.Card.Hero hero = Tuple.HL.InstanceHero(A0P[ut].SelectHero);
+                        Hero hero = Tuple.HL.InstanceHero(A0P[ut].SelectHero);
                         if (hero != null && !string.IsNullOrEmpty(hero.GuestAlias))
                             guestName = hero.GuestAlias;
                         VI.Cout(Uid, "{0}迎来了{1}「{2}」.", zd.Player(ut), guestName, zd.Hero(hro));
@@ -2660,7 +2652,7 @@ namespace PSD.ClientAo
                         int hro = int.Parse(args[2]);
                         int next = int.Parse(args[3]);
                         string guestName = "副角色牌";
-                        Base.Card.Hero hero = Tuple.HL.InstanceHero(A0P[ut].SelectHero);
+                        Hero hero = Tuple.HL.InstanceHero(A0P[ut].SelectHero);
                         if (hero != null && !string.IsNullOrEmpty(hero.GuestAlias))
                             guestName = hero.GuestAlias;
                         VI.Cout(Uid, "{0}送走了{1}「{2}」.", zd.Player(ut), guestName, zd.Hero(hro));

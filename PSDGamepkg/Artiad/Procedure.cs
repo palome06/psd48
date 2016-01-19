@@ -86,5 +86,16 @@ namespace PSD.PSDGamepkg.Artiad
             }
             return true;
         }
+
+        public static void ArticuloMortis(XI xi, Base.VW.IWISV wi)
+        {
+            List<ushort> zeros = xi.Board.Garden.Values.Where(
+                p => p.IsAlive && p.HP == 0).Select(p => p.Uid).ToList();
+            if (zeros.Count > 0)
+            {
+                wi.BCast("E0ZH," + string.Join(",", zeros));
+                xi.RaiseGMessage("G0ZH,0");
+            }
+        }
     }
 }

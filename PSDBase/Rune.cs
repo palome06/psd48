@@ -115,5 +115,13 @@ namespace PSD.Base
         {
             return new ushort[] { 1, 2, 3, 4, 5, 6 };
         }
+        public ushort[] GetFullPositive()
+        {
+            return new ushort[] { 1, 2, 3, 4 };
+        }
+        public ushort[] GetFullNegative()
+        {
+            return new ushort[] { 5, 6 };
+        }
     }
 }

@@ -53,7 +53,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Artiad\Harm.cs" />
+    <Compile Include="Artiad\HPIssue.cs" />
     <Compile Include="Artiad\ContentRule.cs" />
     <Compile Include="Artiad\Procedure.cs" />
     <Compile Include="DS\PriorityQueue.cs" />

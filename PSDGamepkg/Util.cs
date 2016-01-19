@@ -122,6 +122,13 @@ namespace PSD.PSDGamepkg
                 dict.Add(key, list);
             }
         }
+        public static void PlusToMap<K>(IDictionary<K, int> dict, K key, int delta)
+        {
+            if (dict.ContainsKey(key))
+                dict[key] += delta;
+            else
+                dict.Add(key, 1);
+        }
         public static T[] TakeRange<T>(T[] blocks, int jdx, int kdx)
         {
             if (jdx <= kdx && kdx <= blocks.Length)
@@ -151,18 +158,6 @@ namespace PSD.PSDGamepkg
         public static bool TryNotEmpty(IDictionary<string, object> map, string key)
         {
             return map.ContainsKey(key) && (string)map[key] != "";
-        }
-        public static int GetFiveElementId(Base.Card.FiveElement five)
-        {
-            switch (five)
-            {
-                case Base.Card.FiveElement.AQUA: return 0;
-                case Base.Card.FiveElement.AGNI: return 1;
-                case Base.Card.FiveElement.THUNDER: return 2;
-                case Base.Card.FiveElement.AERO: return 3;
-                case Base.Card.FiveElement.SATURN: return 4;
-                default: return -1;
-            }
         }
         public static void SafeExecute(Action action, Action<Exception> handler)
         {

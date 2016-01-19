@@ -67,27 +67,21 @@ namespace PSD.PSDGamepkg.JNS
         {
             List<Artiad.Harm> harms = Artiad.Harm.Parse(fuse);
             return harms.Any(p => player.Uid == p.Who && p.N > 0 &&
-                Artiad.Harm.GetPropedElement().Contains(p.Element));
+                p.Element.IsPropedElement() && !HPEvoMask.SK_INAVO.IsSet(p.Mask));
         }
         public void SF03Action(Player player, string fuse, string args)
         {
             List<Artiad.Harm> harms = Artiad.Harm.Parse(fuse);
-            List<Artiad.Harm> rvs = new List<Artiad.Harm>();
-            foreach (Artiad.Harm harm in harms)
-            {
-                Player py = XI.Board.Garden[harm.Who];
-                if (player.Uid == harm.Who && Artiad.Harm.GetPropedElement().Contains(harm.Element))
-                    rvs.Add(harm);
-            }
-            harms.RemoveAll(p => rvs.Contains(p));
+            harms.RemoveAll(p => player.Uid == p.Who && p.N > 0 &&
+                p.Element.IsPropedElement() && !HPEvoMask.SK_INAVO.IsSet(p.Mask));
             if (harms.Count > 0)
                 XI.InnerGMessage(Artiad.Harm.ToMessage(harms), -18);
         }
         public bool SF04Valid(Player player, string fuse)
         {
             List<Artiad.Harm> harms = Artiad.Harm.Parse(fuse);
-            return harms.Any(p => player.Uid == p.Who && p.N > 0 && p.Source != player.Uid &&
-                    p.Element != FiveElement.YIN && p.Element != FiveElement.LOVE);
+            return harms.Any(p => player.Uid == p.Who && p.N > 0 &&
+                 p.Source != player.Uid && p.IsAvoidable());
         }
         public void SF04Action(Player player, string fuse, string args)
         {

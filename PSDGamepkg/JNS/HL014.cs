@@ -2409,7 +2409,7 @@ namespace PSD.PSDGamepkg.JNS
                     {
                         ushort mons = ushort.Parse(g0hcs[i]);
                         Monster pet = XI.LibTuple.ML.Decode(mons);
-                        int pe = Util.GetFiveElementId(pet.Element);
+                        int pe = pet.Element.Elem2Index();
                         if (py.Pets[pe] != 0)
                             return true;
                     }
@@ -2453,7 +2453,7 @@ namespace PSD.PSDGamepkg.JNS
                     {
                         ushort mons = ushort.Parse(g0hcs[i]);
                         Monster pet = XI.LibTuple.ML.Decode(mons);
-                        int pe = Util.GetFiveElementId(pet.Element);
+                        int pe = pet.Element.Elem2Index();
                         if (py.Pets[pe] != 0)
                             getMons.Add(py.Pets[pe]);
                     }
@@ -2649,8 +2649,8 @@ namespace PSD.PSDGamepkg.JNS
             }
             else if (type == 2 || type == 3)
             {
-                int thisEle = Util.GetFiveElementId(elem);
-                int advEle = Util.GetFiveElementId(adv);
+                int thisEle = elem.Element.Elem2Index();
+                int advEle = adv.Element.Elem2Index();
                 return IsMathISOS(skillName, player, fuse) && XI.Board.Garden.Values.
                     Any(p => p.IsAlive && (p.Pets[thisEle] != 0 || p.Pets[advEle] != 0));
             }
@@ -2696,8 +2696,8 @@ namespace PSD.PSDGamepkg.JNS
             }
             else if (type == 2)
             {
-                int thisEle = Util.GetFiveElementId(elem);
-                int advEle = Util.GetFiveElementId(adv);
+                int thisEle = elem.Element.Elem2Index();
+                int advEle = adv.Element.Elem2Index();
                 List<ushort> actionPets = new List<ushort>();
                 foreach (Player py in XI.Board.Garden.Values.Where(p => p.IsAlive && !p.PetDisabled))
                 {
@@ -2714,8 +2714,8 @@ namespace PSD.PSDGamepkg.JNS
             }
             else if (type == 3)
             {
-                int thisEle = Util.GetFiveElementId(elem);
-                int advEle = Util.GetFiveElementId(adv);
+                int thisEle = elem.Element.Elem2Index();
+                int advEle = adv.Element.Elem2Index();
                 List<ushort> actionPets = new List<ushort>();
                 foreach (Player py in XI.Board.Garden.Values.Where(p => p.IsAlive && !p.PetDisabled))
                 {

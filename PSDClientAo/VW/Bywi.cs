@@ -32,8 +32,6 @@ namespace PSD.ClientAo.VW
 
         private NetworkStream stream;
 
-        private IDictionary<ushort, IchiPlayer> uidict;
-
         #region Connect Issue
         private bool ConnectDo(TcpClient client, bool watch)
         {
@@ -304,7 +302,6 @@ namespace PSD.ClientAo.VW
             msgNQueues = new Queue<string>();
             msgTalk = new Queue<string>();
 
-            uidict = new Dictionary<ushort, IchiPlayer>();
             this.visi = visi;
         }
 

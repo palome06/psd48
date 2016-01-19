@@ -160,19 +160,11 @@ namespace PSD.PSDGamepkg
                 case "G1TH":
                     if (priority == 100)
                     {
-                        WI.BCast("E0OH," + string.Join(",", Artiad.Harm.Parse(cmd).Select(p => p.Who +
-                            "," + Artiad.IntHelper.Elem2Int(p.Element) + "," + p.N + "," + Board.Garden[p.Who].HP)));
+                        Artiad.HpIssueSemaphore.Telegraph(WI.BCast, Artiad.Harm.Parse(cmd).Select(p =>
+                            new Artiad.HpIssueSemaphore(p.Who, false, p.Element, -p.N, Board.Garden[p.Who].HP)));
                     }
                     else if (priority == 200)
-                    {
-                        List<ushort> zeros = Board.Garden.Values.Where(p => p.IsAlive &&
-                            p.HP == 0).Select(p => p.Uid).ToList();
-                        if (zeros.Count > 0)
-                        {
-                            WI.BCast("E0ZH," + string.Join(",", zeros));
-                            RaiseGMessage("G0ZH,0");
-                        }
-                    }
+                        Artiad.Procedure.ArticuloMortis(this, WI);
                     break;
                 case "G0ZW":
                     if (priority == 100)
@@ -1129,21 +1121,20 @@ namespace PSD.PSDGamepkg
                         foreach (Artiad.Harm harm in harms)
                         {
                             Player py = Board.Garden[harm.Who];
-                            if (harm.N > 0)
-                            {
-                                if (py.HP - harm.N <= 0)
-                                    harm.N = py.HP;
-                                py.HP -= harm.N;
-                            }
+                            if (!py.IsValidPlayer() || harm.N < 0) { harm.N = -1; continue; }
+                            if (HPEvoMask.TERMIN_AT.IsSet(harm.Mask))
+                                harm.N = (harm.N < py.HP) ? py.HP - harm.N : 0;
+                            else if (harm.N > 0)
+                                harm.N = (harm.N < py.HP) ? harm.N : py.HP;
+                            py.HP -= harm.N;
                         }
                         harms.RemoveAll(p => p.N <= 0);
                         if (harms.Count > 0)
-                            RaiseGMessage(Artiad.Harm.ToMessage(harms, "G1TH"));
+                            RaiseGMessage(Artiad.HarmResult.ToMessage(harms));
                     }
                     break;
                 case "G0IH":
                     {
-                        string result = "";
                         List<Artiad.Cure> cures = Artiad.Cure.Parse(cmd);
                         foreach (Artiad.Cure cure in cures)
                         {
@@ -1153,15 +1144,13 @@ namespace PSD.PSDGamepkg
                                 if (py.HP + cure.N >= py.HPb)
                                     cure.N = (py.HPb - py.HP);
                                 py.HP += cure.N;
-                                if (cure.N > 0)
-                                {
-                                    result += "," + cure.Who + "," + Artiad.IntHelper.Elem2Int(cure.Element)
-                                        + "," + cure.N + "," + py.HP;
-                                }
                             }
                         }
-                        if (!result.Equals(""))
-                            WI.BCast("E0IH" + result);
+                        if (cures.Any(p => p.N != 0))
+                        {
+                            Artiad.HpIssueSemaphore.Telegraph(WI.BCast, cures.Where(p => p.N != 0).Select(p => 
+                                new Artiad.HpIssueSemaphore(p.Who, false, p.Element, p.N, Board.Garden[p.Who].HP)));
+                        }
                         break;
                     }
                 case "G0ZH": // cmdrst of G0ZH won't affect the operations.
@@ -1282,15 +1271,10 @@ namespace PSD.PSDGamepkg
                                 gains.Add(player.Uid, candidates);
                         }
                         if (gains.Count > 0)
-                            RaiseGMessage("G0LV," + string.Join(",", gains.Select(p => p.Key + "," +
-                                 p.Value.Count() + "," + string.Join(",", p.Value))));
-                        if (gains.Count > 0)
-                            RaiseGMessage(Artiad.Cure.ToMessage(gains.Select(p =>
-                                new Artiad.Cure(p.Key, 0, FiveElement.LOVE, p.Value.Count()))));
-                        if (loses.Count > 0)
-                            RaiseGMessage(Artiad.Harm.ToMessage(loses.Select(p =>
-                                new Artiad.Harm(p.Key, 0, FiveElement.LOVE, p.Value, 0))));
-
+                        {
+                            RaiseGMessage(Artiad.Love.ToMessage(gains.Select(p =>
+                                new Artiad.Love(p.Key, p.Value))));
+                        }
                         // if HP is still 0, then marked as death
                         zeros = Board.Garden.Values.Where(p => p.IsAlive && p.HP == 0).ToList();
                         if (zeros.Count > 0)
@@ -1298,7 +1282,41 @@ namespace PSD.PSDGamepkg
                     }
                     break;
                 case "G0LV":
-                    WI.BCast("E0LV," + cmdrst);
+                    {
+                        WI.BCast("E0LV," + cmdrst);
+                        List<Artiad.Love> loves = Artiad.Love.Parse(cmd);
+                        IDictionary<Player, int> change = new Dictionary<Player, int>();
+                        foreach (Artiad.Love love in loves)
+                        {
+                            Player py = Board.Garden[love.Princess];
+                            int n = love.Prince.Count;
+                            Util.PlusToMap(change, py, n);
+                            foreach (string prince in love.Prince)
+                            {
+                                if (!prince.StartsWith("!"))
+                                {
+                                    ushort pr = ushort.Parse(prince);
+                                    Player giver = Board.Garden[pr];
+                                    if (giver != null)
+                                        Util.PlusToMap(change, giver, -1);
+                                }
+                            }
+                        }
+                        foreach (var pair in change)
+                        {
+                            if (pair.Value < -pair.Key.HP)
+                                change[pair.Key] = -pair.Key.HP;
+                            if (pair.Value > pair.Key.HPb - pair.Key.HP)
+                                change[pair.Key] = pair.Key.HPb - pair.Key.HP;
+                            pair.Key.HP += pair.Value;
+                        }
+                        if (change.Any(p => p.Value != 0))
+                        {
+                            Artiad.HpIssueSemaphore.Telegraph(WI.BCast, change.Where(p => p.Value != 0).Select(
+                                p => new Artiad.HpIssueSemaphore(p.Key.Uid, true, null, p.Value, p.Key.HP)));
+                        }
+                        Artiad.Procedure.ArticuloMortis(this, WI);
+                    }
                     break;
                 case "G0IY":
                     {
@@ -2564,7 +2582,7 @@ namespace PSD.PSDGamepkg
                         {
                             ushort mons = ushort.Parse(args[i]);
                             Monster pet = LibTuple.ML.Decode(mons);
-                            int pe = Util.GetFiveElementId(pet.Element);
+                            int pe = pet.Element.Elem2Index();
                             if (!cpets[pe].Contains(mons))
                                 cpets[pe].Add(mons);
                             if (from != 0)
@@ -2602,7 +2620,7 @@ namespace PSD.PSDGamepkg
                         ushort which = ushort.Parse(args[5]);
 
                         Monster pet = LibTuple.ML.Decode(which);
-                        int pe = Util.GetFiveElementId(pet.Element);
+                        int pe = pet.Element.Elem2Index();
                         Player player = Board.Garden[who];
                         if (player.Pets[pe] == 0)
                         {
@@ -2672,7 +2690,7 @@ namespace PSD.PSDGamepkg
                         ushort from = ushort.Parse(args[3]);
                         ushort which = ushort.Parse(args[4]);
                         Monster mon = LibTuple.ML.Decode(which);
-                        int pe = Util.GetFiveElementId(mon.Element);
+                        int pe = mon.Element.Elem2Index();
                         Player player = Board.Garden[who];
                         player.Pets[pe] = which;
                         RaiseGMessage("G0WB," + which);
@@ -2706,7 +2724,7 @@ namespace PSD.PSDGamepkg
 
                         Player player = Board.Garden[me];
                         Monster monster = LibTuple.ML.Decode(mons);
-                        int pe = Util.GetFiveElementId(monster.Element);
+                        int pe = monster.Element.Elem2Index();
                         if (player.Pets[pe] == mons)
                         {
                             if (consumeType == 1)
@@ -2794,7 +2812,7 @@ namespace PSD.PSDGamepkg
                         ushort who = ushort.Parse(args[1]);
                         ushort which = ushort.Parse(args[2]);
                         Monster pet = LibTuple.ML.Decode(which);
-                        int pe = Util.GetFiveElementId(pet.Element);
+                        int pe = pet.Element.Elem2Index();
                         Player player = Board.Garden[who];
                         if (player.Pets[pe] == which)
                         {
@@ -2836,7 +2854,7 @@ namespace PSD.PSDGamepkg
                             ushort which = ushort.Parse(args[i + 2]);
                             Player player = Board.Garden[who];
                             Monster pet = LibTuple.ML.Decode(which);
-                            int pe = Util.GetFiveElementId(pet.Element);
+                            int pe = pet.Element.Elem2Index();
                             if (player.Pets[pe] == which)
                             {
                                 pet.DecrAction(player);
@@ -3084,7 +3102,7 @@ namespace PSD.PSDGamepkg
                                 if (Board.NotActionPets.Contains(pt))
                                 {
                                     Board.NotActionPets.Remove(pt);
-                                    int elem = Util.GetFiveElementId(LibTuple.ML.Decode(pt).Element);
+                                    int elem = LibTuple.ML.Decode(pt).Element.Elem2Index();
                                     foreach (Player py in Board.Garden.Values)
                                     {
                                         if (py.Pets[elem] == pt && !py.PetDisabled)
@@ -3131,7 +3149,7 @@ namespace PSD.PSDGamepkg
                                 if (!Board.NotActionPets.Contains(pt))
                                 {
                                     Board.NotActionPets.Add(pt);
-                                    int elem = Util.GetFiveElementId(LibTuple.ML.Decode(pt).Element);
+                                    int elem = LibTuple.ML.Decode(pt).Element.Elem2Index();
                                     foreach (Player py in Board.Garden.Values)
                                     {
                                         if (py.Pets[elem] == pt && !py.PetDisabled)
@@ -3588,34 +3606,6 @@ namespace PSD.PSDGamepkg
                         ushort guad = ushort.Parse(args[2]);
                         Board.Garden[who].Guardian = guad;
                         WI.BCast("E0MA," + cmdrst);
-                    }
-                    break;
-                case "G0PH":
-                    {
-                        string result = "";
-                        List<Artiad.Toxi> toxis = Artiad.Toxi.Parse(cmd);
-                        foreach (Artiad.Toxi toxi in toxis)
-                        {
-                            Player py = Board.Garden[toxi.Who];
-                            if (toxi.N > 0)
-                            {
-                                if (py.HP - toxi.N <= 0)
-                                    toxi.N = py.HP;
-                                py.HP -= toxi.N;
-                                if (toxi.N > 0)
-                                    result += "," + toxi.Who + "," + Artiad.IntHelper.Elem2Int(
-                                        toxi.Element) + "," + toxi.N + "," + py.HP;
-                            }
-                        }
-                        if (!result.Equals(""))
-                            WI.BCast("E0PH" + result);
-                        List<ushort> zeros = Board.Garden.Values.Where(p => p.IsAlive && p.HP == 0)
-                            .Select(p => p.Uid).ToList();
-                        if (zeros.Count > 0)
-                        {
-                            WI.BCast("E0ZH," + string.Join(",", zeros));
-                            RaiseGMessage("G0ZH,0");
-                        }
                     }
                     break;
                 case "G0ZJ":

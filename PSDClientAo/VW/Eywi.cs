@@ -466,6 +466,25 @@ namespace PSD.ClientAo.VW
                     }
                 }
             }
+            if (Version <= 149)
+            {
+                if (line.StartsWith("E0PH"))
+                    line = "E0OH" + line.Substring(line.IndexOf(','));
+                if (line.StartsWith("E0OH") || line.StartsWith("E0IH"))
+                {
+                    string[] e0h = line.Split(',');
+                    for (int i = 1; i < e0h.Length; i += 4)
+                    {
+                        int elemCode = int.Parse(e0h[i + 1]);
+                        // YIN = 6, SOL = 7, A = 8, LOVE = 9
+                        if (elemCode == 6 || elemCode == 7 || elemCode == 8)
+                            e0h[i + 1] = "0,0";
+                        else if (elemCode == 9)
+                            e0h[i + 1] = "1,0";
+                    }
+                    line = string.Join(",", e0h);
+                }
+            }
         }
         #endregion Version
     }

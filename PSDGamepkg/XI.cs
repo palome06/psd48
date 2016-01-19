@@ -585,12 +585,12 @@ namespace PSD.PSDGamepkg
                 }
             }
 
-            string[] g0 = new string[] { "IT", "OT", "HQ", "QZ", "DH", "IH", "OH", "ZH", "LV", "ZW",
-                 "IY", "OY", "DS", "CC", "CD", "CE", "XZ", "ZB", "ZC", "ZS", "ZL", "IA", "OA", "IX",
-                 "OX", "AX", "IB", "OB", "IW", "OW", "WB", "9P", "IP", "OP", "CZ", "HC", "HD", "HH",
-                 "HI", "HL", "IC", "OC", "HT", "HG", "QR", "HZ", "TT", "T7", "JM", "WN", "IJ", "OJ",
-                 "IE", "OE", "IS", "OS", "LH", "IV", "OV", "PB", "YM", "HR", "FI", "ON", "SN", "MA",
-                 "PH", "ZJ", "IF", "OF" };
+            string[] g0 = new string[] { "IT", "OT", "HQ", "QZ", "DH", "IH", "OH", "ZH", "LV", "LU",
+                 "ZW", "IY", "OY", "DS", "CC", "CD", "CE", "XZ", "ZB", "ZC", "ZS", "ZL", "IA", "OA",
+                 "IX", "OX", "AX", "IB", "OB", "IW", "OW", "WB", "9P", "IP", "OP", "CZ", "HC", "HD",
+                 "HH", "HI", "HL", "IC", "OC", "HT", "HG", "QR", "HZ", "TT", "T7", "JM", "WN", "IJ",
+                 "OJ", "IE", "OE", "IS", "OS", "LH", "IV", "OV", "PB", "YM", "HR", "FI", "ON", "SN",
+                 "MA", "ZJ", "IF", "OF" };
             string[] g1 = new string[] { "DI", "IU", "OU", "TH", "CW", "ZK", "IZ", "OZ", "WP", "SG",
                  "HK", "WJ", "JG", "XR", "EV", "CK", "7F", "YP", "NI", "GE", "LY", "UE" };
             string[] g2 = new string[] { "IN", "RN", "CN", "QC", "FU", "QU", "CL", "ZU", "HU", "WK",

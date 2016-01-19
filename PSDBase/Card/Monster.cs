@@ -289,16 +289,7 @@ namespace PSD.Base.Card
                 int group = (int)((short)data["VALID"]);
                 int genre = (int)((long)data["GENRE"]);
                 short five = (short)data["FIVE"];
-                FiveElement element;
-                switch (five)
-                {
-                    case 1: element = FiveElement.AQUA; break;
-                    case 2: element = FiveElement.AGNI; break;
-                    case 3: element = FiveElement.THUNDER; break;
-                    case 4: element = FiveElement.AERO; break;
-                    case 5: element = FiveElement.SATURN; break;
-                    default: element = FiveElement.GLOBAL; break;
-                }
+                FiveElement element = FiveElementHelper.Int2Elem(five);
                 ushort str = (ushort)((short)data["STR"]);
                 ushort agl = (ushort)((short)data["AGL"]);
                 short levelCode = (short)data["LEVEL"];

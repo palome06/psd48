@@ -128,11 +128,7 @@ namespace PSD.PSDGamepkg.JNS
             {
                 string input = XI.AsyncInput(XI.Board.Rounder.Uid,"#HP将为1的,T1" + range, "SJ202", "0");
                 ushort target = ushort.Parse(input);
-                Player targetPy = XI.Board.Garden[target];
-                int dHp = targetPy.HP - 1;
-                int maskDuel = Artiad.IntHelper.SetMask(0, GiftMask.INCOUNTABLE, true);
-                XI.RaiseGMessage(Artiad.Harm.ToMessage(
-                    new Artiad.Harm(target, 0, FiveElement.SOL, dHp, maskDuel)));
+                Harm(null, XI.Board.Garden[target], 1, FiveElement.A, (int)HPEvoMask.TERMIN_AT);
             }
             string msg = Util.SParal(XI.Board, p => p.IsAlive && p.Team.Equals(XI.Board.Rounder.Team),
                 p => p.Uid + ",0,1", ",");
@@ -163,8 +159,7 @@ namespace PSD.PSDGamepkg.JNS
         public void SJ302(Player rd)
         {
             int minHp = XI.Board.Garden.Values.Where(p => p.IsAlive).Min(p => p.HP);
-            XI.RaiseGMessage(Artiad.Cure.ToMessage(XI.Board.Garden.Values.Where(p => p.IsAlive &&
-                p.HP == minHp).Select(p => new Artiad.Cure(p.Uid, 0, FiveElement.A, 2))));
+            Cure(null, XI.Board.Garden.Values.Where(p => p.IsAlive && p.HP == minHp), 2);
         }
         public void SJ303(Player rd)
         {
@@ -194,11 +189,9 @@ namespace PSD.PSDGamepkg.JNS
                 p => p.Team == rd.OppTeam).Sum(p => p.GetPetCount());
             if (countOfPet > 0)
             {
-                string range = Util.SSelect(XI.Board, p => p.IsAlive && p.Team == rd.Team);
-                string input = XI.AsyncInput(rd.Uid, "#回复HP的,T1" + range, "S3W02", "0");
+                string input = XI.AsyncInput(rd.Uid, "#回复HP的,T1" + ATeammates(rd), "S3W02", "0");
                 ushort target = ushort.Parse(input);
-                XI.RaiseGMessage(Artiad.Cure.ToMessage(
-                    new Artiad.Cure(target, 0, FiveElement.A, countOfPet)));
+                Cure(null, XI.Board.Garden[target], countOfPet);
             }
         }
         #endregion Eve Of Pal3A
@@ -482,7 +475,7 @@ namespace PSD.PSDGamepkg.JNS
         {
             List<Artiad.Cure> cures = XI.Board.Garden.Values
                 .Where(p => p.IsAlive && p.Tux.Count < 3).Select(p =>
-                    new Artiad.Cure(p.Uid, 0, FiveElement.A, 3 - p.Tux.Count)).ToList();
+                    new Artiad.Cure(p.Uid, 0, FiveElement.A, 3 - p.Tux.Count, 0)).ToList();
             List<Artiad.Harm> harms = XI.Board.Garden.Values
                 .Where(p => p.IsAlive && p.Tux.Count > 3).Select(p =>
                     new Artiad.Harm(p.Uid, 0, FiveElement.A, p.Tux.Count - 3, 0)).ToList();
@@ -588,34 +581,25 @@ namespace PSD.PSDGamepkg.JNS
         }
         public void SJT15(Player rd)
         {
-            int sumMe = XI.Board.Garden.Values.Where(p => p.IsAlive && p.Team == rd.Team)
-                    .Sum(p => p.Pets.Where(q => q != 0 && XI.LibTuple.ML.Decode(q) != null)
-                    .Sum(q => XI.LibTuple.ML.Decode(q).STR));
-            int sumOe = XI.Board.Garden.Values.Where(p => p.IsAlive && p.Team == rd.OppTeam)
-                .Sum(p => p.Pets.Where(q => q != 0 && XI.LibTuple.ML.Decode(q) != null)
-                .Sum(q => XI.LibTuple.ML.Decode(q).STR));
-
-            if (sumMe == sumOe) return;
-            Player py = sumMe < sumOe ? rd : XI.Board.GetOpponenet(rd);
-            string whoStr = XI.AsyncInput(py.Uid, "#执行翻怪,/T1(p" + string.Join("p",
-                XI.Board.Garden.Values.Where(p => p.IsAlive).Select(p => p.Uid)) + ")", "SJT14", "0");
-            if (!whoStr.Contains(VI.CinSentinel) && !whoStr.StartsWith("/"))
+            int n = XI.Board.Garden.Values.Where(p => p.IsAlive && p.Team == rd.OppTeam).Select(
+                p => p.Runes).Count(p => XI.LibTuple.RL.GetFullPositive().Contains(p)).Sum();
+            if (n > 0)
             {
-                ushort who = ushort.Parse(whoStr);
-                XI.RaiseGMessage("G2YS,T," + rd.Uid + ",T," + who);
-                // show the monster
-                ushort pop = XI.Board.RestMonPiles.Dequeue();
-                Monster mon = XI.LibTuple.ML.Decode(pop);
-                XI.RaiseGMessage("G0YM,5," + pop);
-                int str = mon.STR;
-                string toStr = XI.AsyncInput(who, "#获得此怪物,T1(p" + string.Join("p",
-                    XI.Board.Garden.Values.Where(p => p.IsAlive).Select(p => p.Uid)) + ")", "SJT14", "1");
-                if (!toStr.Contains(VI.CinSentinel))
+                foreach (Player py in XI.Board.Garden.Values)
                 {
-                    ushort to = ushort.Parse(toStr);
-                    XI.RaiseGMessage("G0HC,1," + to + ",0,1," + pop);
-                    if (str > 0)
-                        XI.RaiseGMessage(Artiad.Harm.ToMessage(new Artiad.Harm(who, 0, FiveElement.YIN, str, 0)));
+                    if (py.Team == rd.OppTeam && py.IsAlive)
+                    {
+                        List<ushort> runes = py.Runes.Intersect(XI.LibTuple.RL.GetFullPositive()).ToList();
+                        if (runes.Count > 0)
+                            XI.RaiseGMessage("G0OF," + py.Uid + "," + string.Join(",", runes));
+                    }
+                }
+                string whoStr = XI.AsyncInput(rd.Uid, "#承担伤害,T1" + ATeammates(rd), "SJT15", "0");
+                if (!whoStr.Contains(VI.CinSentinel))
+                {
+                    ushort who = ushort.Parse(whoStr);
+                    XI.RaiseGMessage("G2YS,T," + rd.Uid + ",T," + who);
+                    Harm(null, XI.Board.Garden[who], n, FiveElement.SOLARIS);
                 }
             }
         }
