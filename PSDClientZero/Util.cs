@@ -62,25 +62,6 @@ namespace PSD.ClientZero
                 str += "," + array[i];
             return str.Length > 1 ? str.Substring(1) : "";
         }
-        public static string SSelect(Board board, Func<Player, bool> func)
-        {
-            var v = board.Garden.Values.Where(func).Select(p => p.Uid.ToString());
-            string msg = Sato(v, "p");
-            if (msg.Length > 0)
-                return "(p" + msg + ")";
-            else
-                return null;
-        }
-        public static string SParal(Board board, Func<Player, bool> where,
-            Func<Player, string> stringize, string sepeartor)
-        {
-            var v = board.Garden.Values.Where(where).Select(stringize);
-            string msg = Sato(v, sepeartor);
-            if (msg.Length > 0)
-                return msg;
-            else
-                return null;
-        }
         public static string Substring(string content, int start, int end)
         {
             if (start < 0)

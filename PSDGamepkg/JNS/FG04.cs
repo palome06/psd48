@@ -620,17 +620,14 @@ namespace PSD.PSDGamepkg.JNS
                 List<ushort> zeros = XI.Board.Garden.Values.Where(
                     p => p.IsAlive && p.HP == 0).Select(p => p.Uid).ToList();
                 string ic = zeros.Count > 0 ? "#复活,T1(p" + string.Join("p", zeros) + ")" : "/";
-                ushort tg = ushort.Parse(XI.AsyncInput(player.Uid, ic, "GF04ConsumeAction", "1"));
+                ushort tg = ushort.Parse(XI.AsyncInput(player.Uid, ic, "GF04", "1"));
 
                 if (zeros.Contains(tg))
                 {
-                    VI.Cout(0, "{0}爆发「彩依」，使得{1}满HP复活.", XI.DisplayPlayer(player.Uid), XI.DisplayPlayer(tg));
                     Player tgp = XI.Board.Garden[tg];
-                    Cure("GF04", tgp, tgp.HPb, FiveElement.SOL);
+                    Cure("GF04", tgp, tgp.HPb - tgp.HP, (long)HPEvoMask.TERMIN_AT);
                 }
-                zeros = XI.Board.Garden.Values.Where(p => p.IsAlive && p.HP == 0).Select(p => p.Uid).ToList();
-                if (zeros.Count > 0)
-                    XI.InnerGMessage("G0ZH,0", 0);
+                Artiad.Procedure.ArticuloMortis(XI, XI.WI, false);
             }
         }
         #endregion Aero
@@ -1241,14 +1238,8 @@ namespace PSD.PSDGamepkg.JNS
             if (consumeType == 0)
             {
                 List<Artiad.Harm> harms = Artiad.Harm.Parse(fuse);
-                List<Artiad.Harm> rvs = new List<Artiad.Harm>();
-                foreach (Artiad.Harm harm in harms)
-                {
-                    if (harm.Who == player.Uid && harm.Element != FiveElement.LOVE &&
-                            !Artiad.Harm.GetPropedElement().Contains(harm.Element) && harm.Source != harm.Who)
-                        rvs.Add(harm);
-                }
-                harms.RemoveAll(p => rvs.Contains(p));
+                harms.RemoveAll(p => p.Who == player.Uid && p.Source != p.Who &&
+                    p.N > 0 && p.Element == FiveElement.A && !HPEvoMask.IMMUNE_INVAO.IsSet(p.Mask));
                 if (harms.Count > 0)
                     XI.InnerGMessage(Artiad.Harm.ToMessage(harms), -9);
             }
@@ -1257,14 +1248,8 @@ namespace PSD.PSDGamepkg.JNS
         {
             if (consumeType == 0)
             {
-                List<Artiad.Harm> harms = Artiad.Harm.Parse(fuse);
-                foreach (Artiad.Harm harm in harms)
-                {
-                    if (harm.Who == player.Uid && harm.Element != FiveElement.LOVE &&
-                        !Artiad.Harm.GetPropedElement().Contains(harm.Element) && harm.Source != harm.Who)
-                        return true;
-                }
-                return false;
+                return Artiad.Harm.Parse(fuse).Any(p => p.Who == player.Uid && p.Source != p.Who &&
+                    p.N > 0 && p.Element == FiveElement.A && !HPEvoMask.IMMUNE_INVAO.IsSet(p.Mask));
             }
             return false;
         }
@@ -1715,38 +1700,20 @@ namespace PSD.PSDGamepkg.JNS
         public void GLT3ConsumeAction(Player player, int consumeType, int type, string fuse, string argst)
         {
             if (consumeType == 0)
-            {
-                List<Artiad.Harm> harms = Artiad.Harm.Parse(fuse);
-                List<Artiad.Harm> rvs = new List<Artiad.Harm>();
-                foreach (Artiad.Harm harm in harms)
-                {
-                    if (harm.Who == player.Uid && harm.Element != FiveElement.LOVE &&
-                            Artiad.Harm.GetPropedElement().Contains(harm.Element))
-                        rvs.Add(harm);
-                }
-                harms.RemoveAll(p => rvs.Contains(p));
                 XI.RaiseGMessage("G0DH," + player.Uid + ",0,1");
-            }
         }
         public bool GLT3ConsumeValid(Player player, int consumeType, int type, string fuse)
         {
             if (consumeType == 0)
             {
-                List<Artiad.Harm> harms = Artiad.Harm.Parse(fuse);
-                foreach (Artiad.Harm harm in harms)
-                {
-                    if (harm.Who == player.Uid && harm.Element != FiveElement.LOVE &&
-                            Artiad.Harm.GetPropedElement().Contains(harm.Element))
-                        return true;
-                }
-                return false;
+                return Artiad.Harm.Parse(fuse).Any(p => p.Who == player.Uid &&
+                    p.N > 0 && p.Element.IsPropedElement());
             }
             return false;
         }
         public void GLT3WinEff()
         {
-            string target = XI.AsyncInput(XI.Board.Rounder.Uid, "#补牌,T1(p" + string.Join("p",
-                XI.Board.Garden.Values.Where(p => p.IsAlive).Select(p => p.Uid)) + ")", "GLT3WinEff", "0");
+            string target = XI.AsyncInput(XI.Board.Rounder.Uid, "#补牌,T1" + AAlls(null), "GLT3WinEff", "0");
             XI.RaiseGMessage("G0DH," + target + ",0,1");
         }
         public void GLT3LoseEff()
@@ -2304,7 +2271,7 @@ namespace PSD.PSDGamepkg.JNS
         {
             Player rd = XI.Board.Rounder;
             XI.RaiseGMessage("G0DH," + rd.Uid + ",0,1");
-            int saturn = Artiad.IntHelper.Elem2Index(FiveElement.SATURN);
+            int saturn = FiveElement.SATURN.Elem2Index();
             if (rd.Pets[saturn] != 0)
             {
                 XI.RaiseGMessage("G0HL," + rd.Uid + "," + rd.Pets[saturn]);
@@ -2322,7 +2289,7 @@ namespace PSD.PSDGamepkg.JNS
             if (XI.Board.Supporter.IsValidPlayer())
                 Harm("GTH1", XI.Board.Supporter, 3);
             var lv = XI.Board.Garden.Values;
-            int saturn = Artiad.IntHelper.Elem2Index(FiveElement.SATURN);
+            int saturn = FiveElement.SATURN.Elem2Index();
             List<Player> others = lv.Where(p =>
                 p.Team == XI.Board.Rounder.Team && p.Pets[saturn] != 0).ToList();
             if (others.Any() && XI.Board.Mon1From == 0)
@@ -2413,61 +2380,59 @@ namespace PSD.PSDGamepkg.JNS
 
         #region Monster Effect Util
 
-        private void Harm(string monCode, Player py, int n, int mask = 0)
+        private void Harm(string monCode, Player py, int n, long mask = 0)
         {
+            mask = HPEvoMask.FROM_NMB.Set(mask);
             ushort monValue = XI.LibTuple.ML.Encode(monCode);
             Monster mon = XI.LibTuple.ML.Decode(monValue);
             XI.RaiseGMessage(Artiad.Harm.ToMessage(
                 new Harm(py.Uid, (monValue + 1000), mon.Element, n, mask)));
         }
 
-        private void Harm(string monCode, IEnumerable<Player> invs, int n, int mask = 0)
+        private void Harm(string monCode, IEnumerable<Player> invs, int n, long mask = 0)
         {
+            mask = HPEvoMask.FROM_NMB.Set(mask);
             ushort monValue = XI.LibTuple.ML.Encode(monCode);
-            Base.Card.Monster mon = XI.LibTuple.ML.Decode(monValue);
+            Monster mon = XI.LibTuple.ML.Decode(monValue);
             XI.RaiseGMessage(Artiad.Harm.ToMessage(invs.Select(p => new Harm(
                 p.Uid, (monValue + 1000), mon.Element, n, mask))));
         }
 
-        private void Harm(string monCode, List<Player> invs, List<int> ns, List<int> mask = null)
+        private void Harm(string monCode, List<Player> invs, List<int> ns, long mask = 0)
         {
+            mask = HPEvoMask.FROM_NMB.Set(mask);
             ushort monValue = XI.LibTuple.ML.Encode(monCode);
             int sz = invs.Count;
-            Base.Card.Monster mon = XI.LibTuple.ML.Decode(monValue);
+            Monster mon = XI.LibTuple.ML.Decode(monValue);
             XI.RaiseGMessage(Artiad.Harm.ToMessage(Enumerable.Range(0, sz).Select
-                (p => new Harm(invs[p].Uid, (monValue + 1000), mon.Element, ns[p], mask == null ? 0 : mask[p]))));
+                (p => new Harm(invs[p].Uid, (monValue + 1000), mon.Element, ns[p], mask))));
         }
 
-        private void Cure(string monCode, Player py, int n)
+        private void Cure(string monCode, Player py, int n, long mask = 0)
         {
+            mask = HPEvoMask.FROM_NMB.Set(mask);
             ushort monValue = XI.LibTuple.ML.Encode(monCode);
-            Base.Card.Monster mon = XI.LibTuple.ML.Decode(monValue);
+            Monster mon = XI.LibTuple.ML.Decode(monValue);
             XI.RaiseGMessage(Artiad.Cure.ToMessage(
-                new Cure(py.Uid, (monValue + 1000), mon.Element, n)));
+                new Cure(py.Uid, (monValue + 1000), mon.Element, n, mask)));
         }
-
-        private void Cure(string monCode, Player py, int n, FiveElement five)
+        private void Cure(string monCode, IEnumerable<Player> invs, int n, long mask = 0)
         {
+            mask = HPEvoMask.FROM_NMB.Set(mask);
             ushort monValue = XI.LibTuple.ML.Encode(monCode);
-            XI.RaiseGMessage(Artiad.Cure.ToMessage(
-                new Cure(py.Uid, (monValue + 1000), five, n)));
-        }
-
-        private void Cure(string monCode, IEnumerable<Player> invs, int n)
-        {
-            ushort monValue = XI.LibTuple.ML.Encode(monCode);
-            Base.Card.Monster mon = XI.LibTuple.ML.Decode(monValue);
+            Monster mon = XI.LibTuple.ML.Decode(monValue);
             XI.RaiseGMessage(Artiad.Cure.ToMessage(invs.Select(p => new Cure(
-                p.Uid, (monValue + 1000), mon.Element, n))));
+                p.Uid, (monValue + 1000), mon.Element, n, mask))));
         }
 
-        private void Cure(string monCode, List<Player> invs, List<int> ns)
+        private void Cure(string monCode, List<Player> invs, List<int> ns, long mask = 0)
         {
+            mask = HPEvoMask.FROM_NMB.Set(mask);
             ushort monValue = XI.LibTuple.ML.Encode(monCode);
             int sz = invs.Count;
-            Base.Card.Monster mon = XI.LibTuple.ML.Decode(monValue);
+            Monster mon = XI.LibTuple.ML.Decode(monValue);
             XI.RaiseGMessage(Artiad.Cure.ToMessage(Enumerable.Range(0, sz).Select
-                (p => new Cure(invs[p].Uid, (monValue + 1000), mon.Element, ns[p]))));
+                (p => new Cure(invs[p].Uid, (monValue + 1000), mon.Element, ns[p], mask))));
         }
 
         #endregion Monster Effect Util

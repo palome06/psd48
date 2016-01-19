@@ -66,14 +66,14 @@ namespace PSD.PSDGamepkg.JNS
         public bool SF03Valid(Player player, string fuse)
         {
             List<Artiad.Harm> harms = Artiad.Harm.Parse(fuse);
-            return harms.Any(p => player.Uid == p.Who && p.N > 0 &&
-                p.Element.IsPropedElement() && !HPEvoMask.SK_INAVO.IsSet(p.Mask));
+            return harms.Any(p => player.Uid == p.Who && p.N > 0 && p.Element.IsPropedElement() &&
+                !HPEvoMask.IMMUNE_INVAO.IsSet(p.Mask) && !HPEvoMask.DECR_INVAO.IsSet(p.Mask));
         }
         public void SF03Action(Player player, string fuse, string args)
         {
             List<Artiad.Harm> harms = Artiad.Harm.Parse(fuse);
-            harms.RemoveAll(p => player.Uid == p.Who && p.N > 0 &&
-                p.Element.IsPropedElement() && !HPEvoMask.SK_INAVO.IsSet(p.Mask));
+            harms.RemoveAll(p => player.Uid == p.Who && p.N > 0 && p.Element.IsPropedElement() &&
+                !HPEvoMask.IMMUNE_INVAO.IsSet(p.Mask) && !HPEvoMask.DECR_INVAO.IsSet(p.Mask));
             if (harms.Count > 0)
                 XI.InnerGMessage(Artiad.Harm.ToMessage(harms), -18);
         }
@@ -81,7 +81,7 @@ namespace PSD.PSDGamepkg.JNS
         {
             List<Artiad.Harm> harms = Artiad.Harm.Parse(fuse);
             return harms.Any(p => player.Uid == p.Who && p.N > 0 &&
-                 p.Source != player.Uid && p.IsAvoidable());
+                 p.Source != player.Uid && !HPEvoMask.TUX_INAVO.IsSet(p.Mask));
         }
         public void SF04Action(Player player, string fuse, string args)
         {

@@ -352,9 +352,9 @@ namespace PSD.PSDGamepkg.JNS
             foreach (ushort ut in players)
             {
                 if (pops.Count <= 0) break;
-                string pubTux = Util.SatoWithBracket(XI.Board.PZone, "p", "(p", ")");
                 XI.RaiseGMessage("G2FU,0," + ut + ",0,C," + string.Join(",", XI.Board.PZone));
-                string input = XI.AsyncInput(ut, "Z1" + pubTux, "NJH2", "0");
+                string input = XI.AsyncInput(ut, "Z1(p" +
+                    string.Join("p", XI.Board.PZone) + ")", "NJH2", "0");
                 ushort cd;
                 if (ushort.TryParse(input, out cd) && XI.Board.PZone.Contains(cd))
                 {

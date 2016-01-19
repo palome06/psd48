@@ -46,18 +46,15 @@ namespace PSD.PSDGamepkg.JNS
             {
                 if (rd.Armor != 0)
                     XI.RaiseGMessage("G0QZ," + rd.Uid + "," + rd.Armor);
-                string range = Util.SSelect(XI.Board, p => p.IsAlive && p.Gender == 'M');
-                if (range != null)
+                if (XI.Board.Garden.Values.Any(p => p.IsAlive && p.Gender == 'M'))
                 {
-                    string input = XI.AsyncInput(rd.Uid, "#「天雷破」的,/T1" + range, "SJ101", "0");
-                    if (input != "0" && input != "" && input != "/0")
+                    string input = XI.AsyncInput(rd.Uid, "#「天雷破」的,/T1" + 
+                        FormatPlayers(p => p.IsAlive && p.Gender == 'M'), "SJ101", "0");
+                    if (!input.StartsWith("/") && input != VI.CinSentinel)
                     {
                         ushort target = ushort.Parse(input);
-                        XI.VI.Cout(0, "{0}对{1}预定使用「天雷破」.", XI.DisplayPlayer(rd.Uid), XI.DisplayPlayer(target));
                         XI.RaiseGMessage("G0CC," + rd.Uid + ",0," + rd.Uid + ",JP05,0;1,R" + rd.Uid + "EV," + target);
                     }
-                    else
-                        XI.VI.Cout(0, "{0}放弃使用「天雷破」.", XI.DisplayPlayer(rd.Uid));
                 }
             }
         }
@@ -70,9 +67,8 @@ namespace PSD.PSDGamepkg.JNS
         }
         public void SJ103(Player rd)
         {
-            string range1 = Util.SSelect(XI.Board, p => p.Team == rd.Team && p.IsAlive);
-            string range2 = Util.SSelect(XI.Board, p => p.Team == rd.OppTeam && p.IsAlive);
-            string input = XI.AsyncInput(rd.Uid, "#获得2张手牌的,T1" + range1 + ",T1" + range2, "SJ103", "0");
+            string input = XI.AsyncInput(rd.Uid, "#获得2张手牌的,T1" +
+                ATeammates(rd) + ",T1" + AEnemy(rd), "SJ103", "0");
             string[] ips = input.Split(',');
             XI.RaiseGMessage("G0DH," + ips[0] + ",0,2," + ips[1] + ",0,2");
         }
@@ -84,16 +80,15 @@ namespace PSD.PSDGamepkg.JNS
             XI.RaiseGMessage("G1IU," + string.Join(",", pops));
             
             ushort[] uds = { rd.Uid, nx.Uid };
-            string[] ranges = { Util.SSelect(XI.Board, p => p.Team == rd.Team && p.IsAlive),
-                        Util.SSelect(XI.Board, p => p.Team == rd.OppTeam && p.IsAlive) };
+            string[] ranges = { ATeammates(rd), AEnemy(rd) };
             string input; string[] ips;
             int idxs = 1;
 
             do 
             {
                 XI.RaiseGMessage("G2FU,0," + uds[idxs] + ",0,C," + string.Join(",", pops));
-                string pubTux = Util.SatoWithBracket(XI.Board.PZone, "p", "(p", ")");
-                input = XI.AsyncInput(uds[idxs], "+Z1" + pubTux + ",#获得卡牌的,/T1" + ranges[idxs], "SJ104", "0");
+                input = XI.AsyncInput(uds[idxs], "+Z1(p" + string.Join("p", XI.Board.PZone) +
+                    "),#获得卡牌的,/T1" + ranges[idxs], "SJ104", "0");
                 if (!input.Contains(VI.CinSentinel) && !input.StartsWith("/"))
                 {
                     ips = input.Split(',');
@@ -115,18 +110,18 @@ namespace PSD.PSDGamepkg.JNS
         #region Eve Of Pal2
         public void SJ201(Player rd)
         {
-            string msg = Util.SParal(XI.Board, p => p.IsAlive && p.HP <= 3,
-                p => p.Uid + ",0,1", ",");
-            if (msg != null)
-                XI.RaiseGMessage("G0DH," + msg);
+            List<Player> invs = XI.Board.Garden.Values.Where(p => p.IsAlive && p.HP <= 3).ToList();
+            if (invs.Count > 0)
+                XI.RaiseGMessage("G0DH," + string.Join(",", invs.Select(p => p.Uid + ",0,1")));
         }
 
         public void SJ202(Player rd)
         {
-            string range = Util.SSelect(XI.Board, p => p.IsAlive && p.HP >= 2 && p.Team == rd.Team);
-            if (range != null)
+            List<ushort> invs = XI.Board.Garden.Values.Where(p => p.IsAlive &&
+                p.HP >= 2 && p.Team == rd.Team).Select(p => p.Uid).ToList();
+            if (invs.Count > 0)
             {
-                string input = XI.AsyncInput(XI.Board.Rounder.Uid,"#HP将为1的,T1" + range, "SJ202", "0");
+                string input = XI.AsyncInput(rd.Uid,"#HP将为1的,T1(p" + string.Join("p", invs) + ")", "SJ202", "0");
                 ushort target = ushort.Parse(input);
                 Harm(null, XI.Board.Garden[target], 1, FiveElement.A, (int)HPEvoMask.TERMIN_AT);
             }
@@ -276,10 +271,10 @@ namespace PSD.PSDGamepkg.JNS
             do 
             {
                 XI.RaiseGMessage("G2FU,0," + rd.Uid + "," + rps.Count + "," + rg + ",C," + string.Join(",", pops));
-                string pubTux = Util.SatoWithBracket(XI.Board.PZone, "p", "(p", ")");
                 int pubSz = XI.Board.PZone.Count;
                 string pubDig = (pubSz > 1) ? ("+Z1~" + pubSz) : "+Z1";
-                string input = XI.AsyncInput(rd.Uid, pubDig + pubTux + ",#获得卡牌的,/T1" + rf, "SJT03", "0");
+                string input = XI.AsyncInput(rd.Uid, pubDig + "(p" +
+                    string.Join("p", XI.Board.PZone) + "),#获得卡牌的,/T1" + rf, "SJT03", "0");
                 if (!input.StartsWith("/") && input != VI.CinSentinel)
                 {
                     string[] ips = input.Split(',');
@@ -306,10 +301,10 @@ namespace PSD.PSDGamepkg.JNS
             do
             {
                 XI.RaiseGMessage("G2FU,0," + od.Uid + "," + ops.Count + "," + og + ",C," + string.Join(",", pops));
-                string pubTux = Util.SatoWithBracket(XI.Board.PZone, "p", "(p", ")");
                 int pubSz = XI.Board.PZone.Count;
                 string pubDig = (pubSz > 1) ? ("+Z1~" + pubSz) : "+Z1";
-                string input = XI.AsyncInput(od.Uid, pubDig + pubTux + ",#获得卡牌的,/T1" + of, "SJT03", "0");
+                string input = XI.AsyncInput(od.Uid, pubDig + "(p" +
+                    string.Join("p", XI.Board.PZone) + "),#获得卡牌的,/T1" + of, "SJT03", "0");
                 if (!input.StartsWith("/") && input != VI.CinSentinel)
                 {
                     string[] ips = input.Split(',');
@@ -360,8 +355,8 @@ namespace PSD.PSDGamepkg.JNS
                 do
                 {
                     XI.RaiseGMessage("G2FU,0," + py.Uid + ",0,C," + string.Join(",", uts));
-                    string pubTux = Util.SatoWithBracket(XI.Board.PZone, "p", "(p", ")");
-                    string input = XI.AsyncInput(py.Uid, "+Z1" + pubTux + ",#获得卡牌的,/T1" + ranges, "SJT04", "0");
+                    string input = XI.AsyncInput(py.Uid, "+Z1(p" + string.Join("p",
+                        XI.Board.PZone) + ")" + ",#获得卡牌的,/T1" + ranges, "SJT04", "0");
                     if (!input.StartsWith("/"))
                     {
                         string[] ips = input.Split(',');
@@ -581,8 +576,8 @@ namespace PSD.PSDGamepkg.JNS
         }
         public void SJT15(Player rd)
         {
-            int n = XI.Board.Garden.Values.Where(p => p.IsAlive && p.Team == rd.OppTeam).Select(
-                p => p.Runes).Count(p => XI.LibTuple.RL.GetFullPositive().Contains(p)).Sum();
+            int n = XI.Board.Garden.Values.Where(p => p.IsAlive && p.Team == rd.OppTeam)
+                .Sum(p => p.Runes.Intersect(XI.LibTuple.RL.GetFullPositive()).Count());
             if (n > 0)
             {
                 foreach (Player py in XI.Board.Garden.Values)

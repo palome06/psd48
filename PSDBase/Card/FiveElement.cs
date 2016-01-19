@@ -16,14 +16,23 @@ namespace PSD.Base.Card
 
     public enum HPEvoMask
     {
-        AVO_MASK = 0x3,
-        TUX_INAVO = 0x1, SK_INAVO = 0x2,
+        AVO_MASK = 0xF,
+        TUX_INAVO = 0x1, // Tux Free
+        IMMUNE_INVAO = 0x2, // Cannot Avoid Directly
+        DECR_INVAO = 0x4, // Cannot get decreased
+        CHAIN_INVAO = 0x8, // Cannot get increased or trigger new harms
+        // SEL: 0001
+        // YIN: 1101
+        // SOL: 0111
 
-        FINAL_MASK = 0x3 << 2,
-        ALIVE = 0x1 << 2, TERMIN_AT = 0x2 << 2,
+        FINAL_MASK = 0x3 << 4,
+        ALIVE = 0x1 << 4, TERMIN_AT = 0x2 << 4,
 
-        SRC_MASK = 0x3 << 4,
-        FROM_JP = 0x1 << 4, FROM_SK = 0x2 << 4, FROM_NMB = 0x3 << 4,
+        SRC_MASK = 0x3 << 6,
+        FROM_JP = 0x1 << 6, FROM_SK = 0x2 << 6, FROM_NMB = 0x3 << 6,
+
+        RESERVED_MASK = 0x3 << 8,
+        RSV_DUEL = 0x1 << 8, RSV_WORM = 0x2 << 8,
     }
 
     public static class FiveElementHelper
@@ -62,7 +71,9 @@ namespace PSD.Base.Card
             switch (mask)
             {
                 case HPEvoMask.TUX_INAVO:
-                case HPEvoMask.SK_INAVO:
+                case HPEvoMask.IMMUNE_INVAO:
+                case HPEvoMask.DECR_INVAO:
+                case HPEvoMask.CHAIN_INVAO:
                     return (code & (long)mask) == (long)mask;
                 case HPEvoMask.ALIVE:
                 case HPEvoMask.TERMIN_AT:
@@ -71,6 +82,9 @@ namespace PSD.Base.Card
                 case HPEvoMask.FROM_SK:
                 case HPEvoMask.FROM_NMB:
                     return (code & (long)HPEvoMask.SRC_MASK) == (long)mask;
+                case HPEvoMask.RSV_DUEL:
+                case HPEvoMask.RSV_WORM:
+                    return (code & (long)HPEvoMask.RESERVED_MASK) == (long)mask;
                 default: return false;
             }
         }
@@ -81,7 +95,9 @@ namespace PSD.Base.Card
             switch (mask)
             {
                 case HPEvoMask.TUX_INAVO:
-                case HPEvoMask.SK_INAVO:
+                case HPEvoMask.IMMUNE_INVAO:
+                case HPEvoMask.DECR_INVAO:
+                case HPEvoMask.CHAIN_INVAO:
                     preMask = (long)mask; break;
                 case HPEvoMask.ALIVE:
                 case HPEvoMask.TERMIN_AT:
@@ -90,6 +106,9 @@ namespace PSD.Base.Card
                 case HPEvoMask.FROM_SK:
                 case HPEvoMask.FROM_NMB:
                     preMask = (long)HPEvoMask.SRC_MASK; break;
+                case HPEvoMask.RSV_DUEL:
+                case HPEvoMask.RSV_WORM:
+                    preMask = (long)HPEvoMask.RESERVED_MASK; break;
             }
             return (code & ~preMask) | (long)mask;
         }
@@ -101,6 +120,7 @@ namespace PSD.Base.Card
                 case HPEvoMask.AVO_MASK:
                 case HPEvoMask.FINAL_MASK:
                 case HPEvoMask.SRC_MASK:
+                case HPEvoMask.RESERVED_MASK:
                     return code & ~(long)mask;
             }
             return code;

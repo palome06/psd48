@@ -244,10 +244,8 @@ namespace PSD.PSDGamepkg.JNS
         {
             if (prev == "")
             {
-                string c = (player.Tux.Count > 1 ? "/+Q1~" + player.Tux.Count : "Q1") +
-                    Util.SatoWithBracket(player.Tux, "p", "(p", ")");
-                string t = "/T1" + Util.SSelect(XI.Board, p => p != player && p.IsTared && p.Team == player.Team);
-                return c + "," + t;
+                return (player.Tux.Count > 1 ? ("/+Q1~" + player.Tux.Count) : "/+Q1") + "(p" + string.Join("p",
+                    player.Tux) + "),/T1" + FormatPlayers(p => p != player && p.IsTared && p.Team == player.Team);
             }
             else return "";
         }
@@ -469,13 +467,8 @@ namespace PSD.PSDGamepkg.JNS
         }
         public bool JN20202Valid(Player player, int type, string fuse)
         {
-            if (player.Tux.Count > 0)
-            {
-                string[] blocks = fuse.Split(',');
-                return blocks[2] != "1";
-            }
-            else
-                return false;
+            Tux tp01 = XI.LibTuple.TL.EncodeTuxCode("TP01");
+            return tp01.Valid(player, type, fuse);
         }
         public void JN20202Action(Player player, int type, string fuse, string argst)
         {
@@ -661,43 +654,14 @@ namespace PSD.PSDGamepkg.JNS
         #region XJ302 - TangXuejian
         public bool JN30201Valid(Player player, int type, string fuse)
         {
-            if (player.Tux.Count > 0)
-            {
-                List<Artiad.Harm> harms = Artiad.Harm.Parse(fuse);
-                foreach (Artiad.Harm harm in harms)
-                {
-                    if (XI.Board.Garden[harm.Who].IsAlive && harm.N > 0 &&
-                        harm.Element != FiveElement.LOVE &&
-                        !Artiad.IntHelper.IsMaskSet(harm.Mask, GiftMask.TERMIN))
-                    {
-                        if (!player.IsSKOpt)
-                            return true;
-                        else if (player.IsSKOpt && harm.Who != player.Uid)
-                            return true;
-                    }
-                }
-                return false;
-            }
-            return false;
+            return player.Tux.Count > 0 && Artiad.Harm.Parse(fuse).Any(p => XI.Board.Garden[p.Who].IsAlive &&
+                p.N > 0 && !HPEvoMask.CHAIN_INVAO.IsSet(p.Mask) && (!player.IsSKOpt || p.Who != player.Uid));
         }
         public void JN30201Action(Player player, int type, string fuse, string argst)
         {
-            ushort card = ushort.Parse(argst);
-            List<Artiad.Harm> harms = Artiad.Harm.Parse(fuse);
-            ISet<Player> invs = new HashSet<Player>();
-            foreach (Artiad.Harm harm in harms)
-            {
-                if (XI.Board.Garden[harm.Who].IsAlive && harm.N > 0 && harm.Element != FiveElement.LOVE
-                        && !Artiad.IntHelper.IsMaskSet(harm.Mask, GiftMask.TERMIN))
-                    invs.Add(XI.Board.Garden[harm.Who]);
-            }
-            if (invs.Count > 0)
-            {
-                VI.Cout(0, "唐雪见发动「追打」.");
-                XI.RaiseGMessage("G0QZ," + player.Uid + "," + card);
-                Harm(player, invs, 1);
-            }
-            //XI.InnerGMessage(fuse, 151);
+            XI.RaiseGMessage("G0QZ," + player.Uid + "," + argst);
+            Harm(player, Artiad.Harm.Parse(fuse).Where(p => XI.Board.Garden[p.Who].IsAlive && p.N > 0 &&
+                !HPEvoMask.CHAIN_INVAO.IsSet(p.Mask)).Select(p => XI.Board.Garden[p.Who]).Distinct(), 1);
         }
         public string JN30201Input(Player player, int type, string fuse, string prev)
         {
@@ -740,7 +704,7 @@ namespace PSD.PSDGamepkg.JNS
         public void JN30203Action(Player player, int type, string fuse, string argst)
         {
             VI.Cout(0, "唐雪见发动「好胜」.");
-            Harm(player, player, 2, FiveElement.YIN);
+            Harm(player, player, 2, FiveElement.A, (long)HPEvoMask.TUX_INAVO);
             if (player.IsAlive)
                 XI.RaiseGMessage("G0DH," + player.Uid + ",0,2");
         }
@@ -759,7 +723,7 @@ namespace PSD.PSDGamepkg.JNS
             {
                 if (Util.TryNotEmpty(player.RAM, "JPName") && player.RAMUshort == 0)
                 {
-                    Base.Card.Tux tux = XI.LibTuple.TL.EncodeTuxCode((string)player.RAM["JPName"]);
+                    Tux tux = XI.LibTuple.TL.EncodeTuxCode((string)player.RAM["JPName"]);
                     if (tux != null && tux.Valid(player, 0, fuse))
                         return true;
                 }
@@ -771,7 +735,7 @@ namespace PSD.PSDGamepkg.JNS
                 if (player.RAMUshort == 0 && blocks[1].Equals(player.Uid.ToString()))
                 {
                     string cardCode = blocks[4];
-                    Base.Card.Tux tux = XI.LibTuple.TL.EncodeTuxCode(cardCode);
+                    Tux tux = XI.LibTuple.TL.EncodeTuxCode(cardCode);
                     if (tux != null && tux.Type == Base.Card.Tux.TuxType.JP)
                         return true;
                 }
@@ -934,43 +898,12 @@ namespace PSD.PSDGamepkg.JNS
             ushort who = ushort.Parse(input);
             if (who != 0)
                 XI.RaiseGMessage("G0DH," + who + ",0,2");
-            //XI.InnerGMessage(fuse, 131);
         }
         public bool JN30502Valid(Player player, int type, string fuse)
         {
             string[] blocks = fuse.Split(',');
-            //if (type == 0)
-            //{
-            //    // G0IC,A,x
-            //    ushort who = ushort.Parse(blocks[1]);
-            //    return who == player.Uid;
-            //}
-            //else if (type == 1)
-            //{
-            //    // G0OY,0/1,A
-            //    ushort who = ushort.Parse(blocks[2]);
-            //    return who == player.Uid && player.Pets.Where(p => p != 0).Any();
-            //}
-            //if (type == 0)
-            //{
-            //    // G0HD,0,A,B,x/G0HD,1,A,B,x
-            //    ushort who = ushort.Parse(blocks[2]);
-            //    //ushort pt = ushort.Parse(blocks[1] == "0" ? blocks[3] : blocks[4]);
-            //    return who == player.Uid;
-            //}
-            //else if (type == 1)
-            //{
-            //    // G0HL,A,x
-            //    ushort who = ushort.Parse(blocks[1]);
-            //    ushort pt = ushort.Parse(blocks[2]);
-            //    return who == player.Uid && XI.Board.Garden[who].Pets.Contains(pt);
-            //}
-            //else if (type == 2)
-            //{
             ushort x = ushort.Parse(blocks[1]);
             return player.Pets.Contains(x);
-            //}
-            //return false;
         }
         public void JN30502Action(Player player, int type, string fuse, string argst)
         {
@@ -1043,7 +976,7 @@ namespace PSD.PSDGamepkg.JNS
                 .Select(p => ushort.Parse(p)).ToList();
             TargetPlayer(player.Uid, tos);
             ++player.RAMUshort;
-            int maskDuel = Artiad.IntHelper.SetMask(0, GiftMask.ALIVE_DUEL, true);
+            long maskDuel = HPEvoMask.ALIVE.Set(HPEvoMask.TUX_INAVO.Set((long)HPEvoMask.RSV_DUEL));
             foreach (ushort to in tos)
             {
                 XI.RaiseGMessage("G0TT," + player.Uid);
@@ -1051,36 +984,17 @@ namespace PSD.PSDGamepkg.JNS
                 XI.RaiseGMessage("G0TT," + to);
                 int toDice = XI.Board.DiceValue;
                 if (myDice > toDice)
-                    Harm(player, XI.Board.Garden[to], 3, FiveElement.YIN, maskDuel);
+                    Harm(player, XI.Board.Garden[to], 3, FiveElement.A, maskDuel);
                 else if (myDice < toDice)
-                    Harm(player, player, 3, FiveElement.YIN, maskDuel);
+                    Harm(player, player, 3, FiveElement.A, maskDuel);
                 else
-                    Harm(player, new Player[] { XI.Board.Garden[to], player }, 2, FiveElement.YIN, maskDuel);
+                    Harm(player, new Player[] { XI.Board.Garden[to], player }, 2, FiveElement.A, maskDuel);
             }
         }
-        public bool JN30602Valid(Player player, int type, string fuse)
+        public bool JN30602Valid(Player player, int type, string fuse) // No Action called, handled in ALIVE flag
         {
-            List<Artiad.Harm> harms = Artiad.Harm.Parse(fuse);
-            foreach (Artiad.Harm harm in harms)
-            {
-                Player py = XI.Board.Garden[harm.Who];
-                if (Artiad.IntHelper.IsMaskSet(harm.Mask, GiftMask.ALIVE_DUEL)
-                        && harm.N > 0 && py.HP >= 2 && py.HP - harm.N < 1)
-                    return true;
-            }
-            return false;
-        }
-        public void JN30602Action(Player player, int type, string fuse, string args)
-        {
-            List<Artiad.Harm> harms = Artiad.Harm.Parse(fuse);
-            foreach (Artiad.Harm harm in harms)
-            {
-                Player py = XI.Board.Garden[harm.Who];
-                if (Artiad.IntHelper.IsMaskSet(harm.Mask, GiftMask.ALIVE_DUEL)
-                        && harm.N > 0 && py.HP >= 2 && py.HP - harm.N < 1)
-                    harm.N = py.HP - 1;
-            }
-            XI.InnerGMessage(Artiad.Harm.ToMessage(harms), 96);
+            return Artiad.Harm.Parse(fuse).Any(p => HPEvoMask.RSV_DUEL.IsSet(p.Mask) && p.N > 0 &&
+                XI.Board.Garden[p.Who].HP >= 2 && XI.Board.Garden[p.Who].HP - p.N < 1);
         }
         public bool JN30603Valid(Player player, int type, string fuse)
         {
@@ -1088,7 +1002,6 @@ namespace PSD.PSDGamepkg.JNS
         }
         public void JN30603Action(Player player, int type, string fuse, string argst)
         {
-            VI.Cout(0, "重楼触发「降临」，对{0}的妨碍命中+2.", XI.DisplayPlayer(XI.Board.Rounder.Uid));
             XI.RaiseGMessage("G0IX," + player.Uid + ",1,2");
         }
         #endregion XJ306 - ChongLou
@@ -1242,8 +1155,7 @@ namespace PSD.PSDGamepkg.JNS
                 XI.RaiseGMessage("G0HQ,0," + player.Uid + "," + getGroup);
             do
             {
-                string targ = "/T1" + Util.SSelect(XI.Board, p => p.IsTared &&
-                    p.Uid != player.Uid && p.Team == player.Team);
+                string targ = "/T1" + FormatPlayers(p => p.IsTared && p.Uid != player.Uid && p.Team == player.Team);
                 string carg = "(p" + string.Join("p", player.Tux) + ")";
                 carg = (player.Tux.Count > 1) ? ("/+Q1~" + player.Tux.Count + carg) : ("/+Q1" + carg);
                 string select = XI.AsyncInput(player.Uid, carg + "," + targ, "JN40302", "0");
@@ -1265,7 +1177,7 @@ namespace PSD.PSDGamepkg.JNS
                         VI.Cout(0, "星璇发动「兄弟」将{0}交给了{1}.",
                             XI.DisplayTux(cards), XI.DisplayPlayer(to));
                         XI.RaiseGMessage("G0HQ,0," + to + "," + player.Uid + ",1,"
-                            + cards.Count() + "," + Util.Sato(cards, ","));
+                            + cards.Count() + "," + string.Join(",", cards));
                     }
                 }
             } while (player.Tux.Count > 0);
@@ -1357,8 +1269,8 @@ namespace PSD.PSDGamepkg.JNS
                 }
                 else if (type == 5)
                 {// Ask for WN/LS
-                    Base.Card.Monster mon1 = XI.LibTuple.ML.Decode(XI.Board.Monster1);
-                    Base.Card.Monster mon2 = XI.LibTuple.ML.Decode(XI.Board.Monster2);
+                    Monster mon1 = XI.LibTuple.ML.Decode(XI.Board.Monster1);
+                    Monster mon2 = XI.LibTuple.ML.Decode(XI.Board.Monster2);
                     bool b1 = XI.Board.Rounder.Uid == player.Uid;
                     bool b2 = XI.Board.IsAttendWar(player);
                     bool b3 = false;
@@ -1572,7 +1484,7 @@ namespace PSD.PSDGamepkg.JNS
             string select = null;
             do
             {
-                string targ = "/T1" + Util.SSelect(XI.Board, p => p.IsTared && p.Uid != player.Uid);
+                string targ = "/T1" + FormatPlayers(p => p.IsTared && p.Uid != player.Uid);
                 string carg = "(p" + string.Join("p", possiCards) + ")";
                 carg = (possiCards.Count > 1) ? ("/+Q1~" + possiCards.Count + carg) : ("/+Q1" + carg);
                 select = XI.AsyncInput(player.Uid, carg + "," + targ, "JN50203", "0");
@@ -1591,7 +1503,8 @@ namespace PSD.PSDGamepkg.JNS
                         VI.Cout(0, "韩菱纱将「盗墓」获得的卡牌{0}交给了{1}.", XI.DisplayTux(cards), XI.DisplayPlayer(to));
                         foreach (ushort cd in cards)
                             possiCards.Remove(cd);
-                        XI.RaiseGMessage("G0HQ,0," + to + "," + player.Uid + ",1," + cards.Count() + "," + Util.Sato(cards, ","));
+                        XI.RaiseGMessage("G0HQ,0," + to + "," + player.Uid + ",1," +
+                            cards.Count() + "," + string.Join(",", cards));
                     }
                 }
             } while (possiCards.Count > 0);
@@ -2821,17 +2734,8 @@ namespace PSD.PSDGamepkg.JNS
         }
         public bool JN60802Valid(Player player, int type, string fuse)
         {
-            if (player.TokenCount > 0)
-            {
-                List<Artiad.Harm> harms = Artiad.Harm.Parse(fuse);
-                foreach (Artiad.Harm harm in harms)
-                {
-                    if (XI.Board.Garden[harm.Who].IsTared && harm.Element != FiveElement.SOL &&
-                            harm.Element != FiveElement.LOVE && harm.N > 0)
-                        return true;
-                }
-            }
-            return false;
+            return player.TokenCount > 0 && Artiad.Harm.Parse(fuse).Any(p => XI.Board.Garden[p.Who].IsTared &&
+                p.N > 0 && !HPEvoMask.TERMIN_AT.IsSet(p.Mask) && !HPEvoMask.DECR_INVAO.IsSet(p.Mask));
         }
         public void JN60802Action(Player player, int type, string fuse, string argst)
         {
@@ -2841,8 +2745,8 @@ namespace PSD.PSDGamepkg.JNS
             List<Artiad.Harm> rvs = new List<Artiad.Harm>();
             foreach (Artiad.Harm harm in harms)
             {
-                if (harm.Who == who && harm.Element != FiveElement.SOL &&
-                        harm.Element != FiveElement.LOVE)
+                if (harm.Who == who && !HPEvoMask.TERMIN_AT.IsSet(harm.Mask) &&
+                    !HPEvoMask.DECR_INVAO.IsSet(harm.Mask))
                 {
                     TargetPlayer(player.Uid, who);
                     if ((harm.N -= point) <= 0)
@@ -2858,15 +2762,9 @@ namespace PSD.PSDGamepkg.JNS
         {
             if (prev == "")
             {
-                ISet<ushort> cands = new HashSet<ushort>();
-                List<Artiad.Harm> harms = Artiad.Harm.Parse(fuse);
-                foreach (Artiad.Harm harm in harms)
-                {
-                    if (XI.Board.Garden[harm.Who].IsTared && harm.Element != FiveElement.SOL &&
-                            harm.Element != FiveElement.LOVE && harm.N > 0)
-                        cands.Add(harm.Who);
-                }
-                return "#「雷屏」作用,/T1(p" + string.Join("p", cands) + ")";
+                return "#「雷屏」作用,/T1(p" + string.Join("p", Artiad.Harm.Parse(fuse).Where(p => p.N > 0 && 
+                    XI.Board.Garden[p.Who].IsTared && !HPEvoMask.TERMIN_AT.IsSet(p.Mask) &&
+                    !HPEvoMask.DECR_INVAO.IsSet(p.Mask)).Select(p => p.Who).Distinct()) + ")";
             }
             else if (prev.IndexOf(',') < 0)
             {
@@ -3654,5 +3552,35 @@ namespace PSD.PSDGamepkg.JNS
                 return "";
         }
         #endregion SP504 - Xiaoman
+
+        #region Override JNSBase Util Functions
+        protected new void Harm(Player src, Player py, int n, FiveElement five = FiveElement.A, long mask = 0)
+        {
+            base.Harm(src, py, n, five, HPEvoMask.FROM_SK.Set(mask));
+        }
+        protected new void Harm(Player src, IEnumerable<Player> invs, int n, FiveElement five = FiveElement.A, long mask = 0)
+        {
+            base.Harm(src, invs, n, five, HPEvoMask.FROM_SK.Set(mask));
+        }
+        protected new void Harm(Player src, List<Player> invs,
+            List<int> ns, FiveElement five = FiveElement.A, long mask = 0)
+        {
+            base.Harm(src, invs, ns, five, HPEvoMask.FROM_SK.Set(mask));
+        }
+
+        protected new void Cure(Player src, Player py, int n, FiveElement five = FiveElement.A, long mask = 0)
+        {
+            base.Cure(src, py, n, five, HPEvoMask.FROM_SK.Set(mask));
+        }
+        protected new void Cure(Player src, IEnumerable<Player> invs, int n, FiveElement five = FiveElement.A, long mask = 0)
+        {
+            base.Cure(src, invs, n, five, HPEvoMask.FROM_SK.Set(mask));
+        }
+        protected new void Cure(Player src, List<Player> invs,
+            List<int> ns, FiveElement five = FiveElement.A, long mask = 0)
+        {
+            base.Cure(src, invs, ns, five, HPEvoMask.FROM_SK.Set(mask));
+        }
+        #endregion Override JNSBase Util Functions
     }
 }

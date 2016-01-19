@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace PSD.PSDGamepkg
 {
@@ -31,51 +30,10 @@ namespace PSD.PSDGamepkg
                 randomSortTable[random.NextDouble()] = someType;
             return randomSortTable.OrderBy(KVP => KVP.Key).Take(maxCount).Select(KVP => KVP.Value);
         }
-        public static string SatoString<T>(IEnumerable<T> array)
-        {
-            return Sato(array.Select(p => p.ToString()), ",");
-        }
-        public static string SatoWithBracket<T>(IEnumerable<T> array, string separator, string prefix, string suffix)
-        {
-            string str = Sato(array, separator);
-            return str == "" ? "" : prefix + str + suffix;
-        }
-        public static string Sato<T>(IEnumerable<T> array, string separator)
-        {
-            string str = "";
-            foreach (T obj in array)
-                str += separator + obj.ToString();
-            return str.Length > 1 ? str.Substring(separator.Length) : "";
-        }
-        public static string SatoBool(bool[] array, int start, int end)
-        {
-            string str = "";
-            for (int i = start; i < end; ++i)
-                if (array[i])
-                    str += "," + i;
-            return str.Length > 1 ? str.Substring(1) : "";
-        }
-        public static string CombineArray<T>(T[] array, int start, int end)
-        {
-            string str = "";
-            for (int i = start; i < end; ++i)
-                str += "," + array[i];
-            return str.Length > 1 ? str.Substring(1) : "";
-        }
-        public static string SSelect(Board board, Func<Player, bool> func)
-        {
-            var v = board.Garden.Values.Where(func).Select(p => p.Uid.ToString());
-            string msg = Sato(v, "p");
-            if (msg.Length > 0)
-                return "(p" + msg + ")";
-            else
-                return null;
-        }
         public static string SParal(Board board, Func<Player, bool> where,
             Func<Player, string> stringize, string sepeartor)
         {
-            var v = board.Garden.Values.Where(where).Select(stringize);
-            string msg = Sato(v, sepeartor);
+            string msg = string.Join(sepeartor, board.Garden.Values.Where(where).Select(stringize));
             if (msg.Length > 0)
                 return msg;
             else

@@ -164,7 +164,7 @@ namespace PSD.PSDGamepkg
                             new Artiad.HpIssueSemaphore(p.Who, false, p.Element, -p.N, Board.Garden[p.Who].HP)));
                     }
                     else if (priority == 200)
-                        Artiad.Procedure.ArticuloMortis(this, WI);
+                        Artiad.Procedure.ArticuloMortis(this, WI, true);
                     break;
                 case "G0ZW":
                     if (priority == 100)
@@ -237,9 +237,8 @@ namespace PSD.PSDGamepkg
                         {
                             ushort me = ushort.Parse(args[i]);
                             Player player = Board.Garden[me];
-                            string range = Util.SSelect(Board,
-                                p => p.IsAlive && p.Team == player.Team);
-                            string input = AsyncInput(me, "#获得补牌的,T1" + range, "G0ZW", "0");
+                            string input = AsyncInput(me, "#获得补牌的,T1(p" + string.Join("p", Board.Garden.Values
+                                .Where(p => p.IsAlive && p.Team == player.Team).Select(p => p.Uid)) + ")", "G0ZW", "0");
                             RaiseGMessage("G0HG," + input + ",2");
                         }
                     }
@@ -1122,10 +1121,10 @@ namespace PSD.PSDGamepkg
                         {
                             Player py = Board.Garden[harm.Who];
                             if (!py.IsValidPlayer() || harm.N < 0) { harm.N = -1; continue; }
-                            if (HPEvoMask.TERMIN_AT.IsSet(harm.Mask))
-                                harm.N = (harm.N < py.HP) ? py.HP - harm.N : 0;
-                            else if (harm.N > 0)
+                            if (harm.N > 0)
                                 harm.N = (harm.N < py.HP) ? harm.N : py.HP;
+                            if (HPEvoMask.ALIVE.IsSet(harm.Mask) && harm.N == py.HP)
+                                harm.N = py.HP - 1;
                             py.HP -= harm.N;
                         }
                         harms.RemoveAll(p => p.N <= 0);
@@ -1315,7 +1314,7 @@ namespace PSD.PSDGamepkg
                             Artiad.HpIssueSemaphore.Telegraph(WI.BCast, change.Where(p => p.Value != 0).Select(
                                 p => new Artiad.HpIssueSemaphore(p.Key.Uid, true, null, p.Value, p.Key.HP)));
                         }
-                        Artiad.Procedure.ArticuloMortis(this, WI);
+                        Artiad.Procedure.ArticuloMortis(this, WI, true);
                     }
                     break;
                 case "G0IY":
@@ -1524,7 +1523,7 @@ namespace PSD.PSDGamepkg
                         {
                             ushort who = ushort.Parse(args[3]);
                             var gps = Board.Garden[who].Tux;
-                            WI.Send("E0XZ," + me + ",5," + args[3] + "," + Util.SatoString(gps), 0, me);
+                            WI.Send("E0XZ," + me + ",5," + args[3] + "," + string.Join(",", gps), 0, me);
                             WI.Send("E0XZ," + me + ",6," + args[3], ExceptStaff(me));
                             WI.Live("E0XZ," + me + ",6," + args[3]);
                         }
@@ -1560,7 +1559,9 @@ namespace PSD.PSDGamepkg
                                 if (dicesType == 1) dicesCode = "C";
                                 else if (dicesType == 2) dicesCode = "M";
                                 else if (dicesType == 3) dicesCode = "E";
-                                string order = AsyncInput(me, "X" + pick + "(p" + dicesCode + Util.Sato(gps, "p" + dicesCode) + ")", "G0XZ", "0");
+                                string serpChar = "p" + dicesCode;
+                                string order = AsyncInput(me, "X" + pick + "(" + serpChar +
+                                    string.Join(serpChar, gps) + ")", "G0XZ", "0");
                                 if (order != "" && order != "0")
                                 {
                                     List<ushort> orders = new List<ushort>(
@@ -1580,10 +1581,9 @@ namespace PSD.PSDGamepkg
                                     if (!result.Contains(-1) && orders.Count == gps.Length)
                                     {
                                         WI.Send("E0XZ," + me + ",2," + dicesType + "," + order, 0, me);
-                                        WI.Send("E0XZ," + me + ",3," + dicesType + ","
-                                            + Util.SatoString(result), ExceptStaff(me));
-                                        WI.Live("E0XZ," + me + ",3," + dicesType + ","
-                                             + Util.SatoString(result));
+                                        WI.Send("E0XZ," + me + ",3," + dicesType +
+                                            "," + string.Join(",", result), ExceptStaff(me));
+                                        WI.Live("E0XZ," + me + ",3," + dicesType + "," + string.Join(",", result));
                                         piles.Dequeue(count);
                                         piles.PushBack(orders);
                                     }
@@ -2594,7 +2594,7 @@ namespace PSD.PSDGamepkg
                                 RaiseGMessage("G0HD,0," + who + "," + from + "," + cpets[i].First());
                             else if (cpets[i].Count > 1)
                             {
-                                string mai = "#保留的,M1(p" + Util.Sato(cpets[i], "p") + ")";
+                                string mai = "#保留的,M1(p" + string.Join("p", cpets[i]) + ")";
                                 ushort sel = ushort.Parse(AsyncInput(who, mai, cmd, "0"));
                                 ushort old = player.Pets[i];
                                 if (old != 0 && sel != old)

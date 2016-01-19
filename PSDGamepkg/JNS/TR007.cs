@@ -436,14 +436,11 @@ namespace PSD.PSDGamepkg.JNS
         }
         public void JNT0502Action(Player player, int type, string fuse, string argst)
         {
-            string range = Util.SSelect(XI.Board, p => p != player && p.IsTared);
-            string target = XI.AsyncInput(player.Uid, "#无法获得宠物效果,T1" + range, "JNT0502", "0");
+            string target = XI.AsyncInput(player.Uid, "#无宠物效果,T1" + AOthersTared(player), "JNT0502", "0");
             ushort who = ushort.Parse(target);
             TargetPlayer(player.Uid, who);
             XI.RaiseGMessage("G0OE,0," + who);
-            VI.Cout(0, "TR凌波对玩家{0}发动了「梦缘」.", XI.DisplayPlayer(who));
             XI.SendOutUAMessage(player.Uid, "JNT0502," + target, "0");
-            //XI.InnerGMessage("G0OY,2," + player.Uid, 81);
         }
         public bool JNT0502Valid(Player player, int type, string fuse)
         {
@@ -1700,9 +1697,7 @@ namespace PSD.PSDGamepkg.JNS
                 {
                     ushort me = ushort.Parse(args[i]);
                     Player py = XI.Board.Garden[me];
-                    string range = Util.SSelect(XI.Board,
-                        p => p.IsAlive && p.Team == player.Team);
-                    string input = XI.AsyncInput(me, "#获得补牌的,T1" + range, "G0ZW", "0");
+                    string input = XI.AsyncInput(me, "#获得补牌的,T1" + ATeammates(player), "G0ZW", "0");
                     XI.RaiseGMessage("G0HG," + input + ",2");
                 }
             XI.InnerGMessage(fuse, 301);
@@ -1965,9 +1960,8 @@ namespace PSD.PSDGamepkg.JNS
                 ushort card = ushort.Parse(argst);
                 XI.RaiseGMessage("G0QZ," + player.Uid + "," + card);
 
-                ushort gamer = ushort.Parse(XI.AsyncInput(player.Uid, "T1" + Util.SSelect(
-                    XI.Board, p => p.Team == player.Team && p.IsAlive), "JNT1201", "0"));
-                VI.Cout(0, "{0}对{1}发动「天循两仪」.", XI.DisplayPlayer(player.Uid), XI.DisplayPlayer(gamer));
+                ushort gamer = ushort.Parse(XI.AsyncInput(player.Uid,
+                    "T1" + ATeammates(player), "JNT1201", "0"));
                 XI.RaiseGMessage("G0XZ," + gamer + ",2,0,1");
 
                 if (XI.Board.InFight)
@@ -2804,8 +2798,8 @@ namespace PSD.PSDGamepkg.JNS
                 do
                 {
                     XI.RaiseGMessage("G2FU,0," + uds[idxs] + ",0,C," + string.Join(",", ot1));
-                    string pubTux = Util.SatoWithBracket(XI.Board.PZone, "p", "(p", ")");
-                    string input = XI.AsyncInput(uds[idxs], "Z1" + pubTux, "JNT1901", "0");
+                    string input = XI.AsyncInput(uds[idxs], "Z1(p" +
+                        string.Join("p", XI.Board.PZone) + ")", "JNT1901", "0");
                     if (!input.StartsWith("/"))
                     {
                         ushort cd = ushort.Parse(input);
