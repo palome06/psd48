@@ -7,7 +7,7 @@ using PSD.Base.Card;
 
 namespace PSD.PSDGamepkg.Artiad
 {
-    public class ContentRule
+    public static class ContentRule
     {
         public static bool IsNPCJoinable(NPC npc, XI xi)
         {
@@ -58,6 +58,22 @@ namespace PSD.PSDGamepkg.Artiad
             }
             return true;
         }
+
+        public static List<Hero> GetJoinableHeroChain(Hero hero, XI xi)
+        {
+            List<Hero> heros = new List<Hero>();
+            if (hero == null)
+                return heros;
+            if (IsHeroJoinable(hero, xi))
+                heros.Add(hero);
+            foreach (int isoId in hero.Isomorphic)
+            {
+                Hero iso = xi.LibTuple.HL.InstanceHero(isoId);
+                if (iso != null && IsHeroJoinable(iso, xi))
+                    heros.Add(iso);
+            }
+            return heros;
+        }
         // remove hero-spec RIM/RTM Diva, hero = 0 means removing all
         public static void ErasePlayerToken(Player player, Board board, Action<string> raiseG, int hero = 0)
         {
@@ -65,15 +81,15 @@ namespace PSD.PSDGamepkg.Artiad
                 raiseG("G0OJ," + player.Uid + ",0," + player.TokenCount);
             if (player.TokenExcl.Count > 0)
             {
-                raiseG("G2TZ,0," + player.Uid + "," + string.Join(",", player.TokenExcl));
-                raiseG("G0OJ," + player.Uid + ",1," + player.TokenExcl.Count
-                    + "," + string.Join(",", player.TokenExcl));
                 IDictionary<char, List<ushort>> allKinds = new Dictionary<char, List<ushort>>();
                 foreach (string cd in player.TokenExcl)
                 {
                     if (cd[0] != 'H')
                         Util.AddToMultiMap(allKinds, cd[0], ushort.Parse(cd.Substring(1)));
                 }
+                raiseG("G2TZ,0," + player.Uid + "," + string.Join(",", player.TokenExcl));
+                raiseG("G0OJ," + player.Uid + ",1," + player.TokenExcl.Count
+                    + "," + string.Join(",", player.TokenExcl));
                 if (allKinds.Count > 0)
                     raiseG("G0ON," + string.Join(",", allKinds.Select(p => player.Uid +
                         "," + p.Key + "," + p.Value.Count + "," + string.Join(",", p.Value))));
@@ -145,7 +161,7 @@ namespace PSD.PSDGamepkg.Artiad
         public static bool IsTuxUsableEveryWhere(Tux tux)
         {
             return tux.Type != Tux.TuxType.ZP && !new string[] {
-                "TP01", "TP03", "TPT1", "TPT3", "TPH3", "TPH4" }.Contains(tux.Code);
+                "TP01", "TP03", "TPT1", "TPT3", "TPH2", "TPH3", "TPH4" }.Contains(tux.Code);
         }
     }
 }

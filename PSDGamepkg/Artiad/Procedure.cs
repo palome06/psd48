@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace PSD.PSDGamepkg.Artiad
 {
-    public class Procedure
+    public static class Procedure
     {
         public static void LoopOfNPCUntilJoinable(XI XI, Player player)
         {
@@ -96,6 +96,59 @@ namespace PSD.PSDGamepkg.Artiad
                 if (notify)
                     wi.BCast("E0ZH," + string.Join(",", zeros));
                 xi.RaiseGMessage("G0ZH,0");
+            }
+        }
+
+        public static void RotateHarm(Player from, Player to,
+            bool flatten, Func<int, int> valFunc, ref List<Artiad.Harm> harms)
+        {
+            Artiad.Harm rotation = null;
+            foreach (Artiad.Harm harm in harms)
+            {
+                if (harm.Who == from.Uid && harm.N > 0 && !HPEvoMask.IMMUNE_INVAO
+                    .IsSet(harm.Mask) && !HPEvoMask.DECR_INVAO.IsSet(harm.Mask))
+                {
+                    rotation = harm;
+                }
+            }
+            if (rotation != null)
+            {
+                harms.Remove(rotation);
+                if (flatten && HPEvoMask.TERMIN_AT.IsSet(rotation.Mask))
+                    rotation.Mask = HPEvoMask.TERMIN_AT.Reset(rotation.Mask);
+                rotation.N = valFunc(rotation.N);
+                foreach (Artiad.Harm harm in harms)
+                {
+                    if (harm.Who == to.Uid)
+                    {
+                        bool ta1 = HPEvoMask.TERMIN_AT.IsSet(harm.Mask);
+                        bool ta2 = HPEvoMask.TERMIN_AT.IsSet(rotation.Mask);
+                        // Swallowed A with the termin_at harm
+                        if (ta1 && ta2)
+                        {
+                            harm.N = Math.Max(harm.N, rotation.N);
+                            rotation = null;
+                        }
+                        else if (ta2)
+                        {
+                            HPEvoMask.TERMIN_AT.Set(harm.N);
+                            harm.N = rotation.N;
+                            rotation = null;
+                        }
+                        else if (ta1) { rotation = null; }
+                        else if (harm.Element == rotation.Element)
+                        {
+                            harm.N += rotation.N;
+                            rotation = null;
+                        }
+                    }
+                    if (rotation == null) { break; }
+                }
+            }
+            if (rotation != null)
+            {
+                rotation.Who = to.Uid;
+                harms.Add(rotation);
             }
         }
     }

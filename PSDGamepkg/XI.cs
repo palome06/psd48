@@ -523,7 +523,7 @@ namespace PSD.PSDGamepkg
                 IDictionary<string, List<string>> occurTable =
                     new Dictionary<string, List<string>>();
                 ISet<string> occurNotLocked = new HashSet<string>();
-                IDictionary<string, bool> occurLock = new Dictionary<string, bool>();
+                // IDictionary<string, bool> occurLock = new Dictionary<string, bool>();
                 // occurTable: {sktName,InType : occur,priorty,owner}
                 foreach (var pair in dict)
                 {
@@ -563,7 +563,7 @@ namespace PSD.PSDGamepkg
                         string[] splits = triple.Split(',');
                         string oc = splits[0];
                         int priority = int.Parse(splits[1]);
-                        ushort owner = ushort.Parse(splits[2]);
+                        // ushort owner = ushort.Parse(splits[2]);
                         string acOccur = splits[3];
 
                         SkTriple skt = new SkTriple()
@@ -1191,7 +1191,7 @@ namespace PSD.PSDGamepkg
                         string[] splits = triple.Split(',');
                         string oc = splits[0];
                         int priority = int.Parse(splits[1]);
-                        ushort owner = ushort.Parse(splits[2]);
+                        // ushort owner = ushort.Parse(splits[2]);
                         string acOccur = splits[3];
 
                         SkTriple skt = new SkTriple()
@@ -1220,7 +1220,7 @@ namespace PSD.PSDGamepkg
             IDictionary<string, List<string>> links)
         {
             bool anyPara = false;
-            List<SkTriple> parasitism = new List<SkTriple>();
+            // maybe need check parasitism chain list from others?
             for (int i = 0; i < skill.Occurs.Length; ++i)
             {
                 string occur = skill.Occurs[i];
@@ -1285,7 +1285,6 @@ namespace PSD.PSDGamepkg
                         int start = int.Parse(Util.Substring(occur, "&".Length, nexdex));
                         int end = int.Parse(Util.Substring(occur, nexdex + 1, -1));
                         //skt.Occur = string.Join("&", Util.TakeRange(skill.Parasitism, start, end));
-                        List<string> parList = new List<string>();
                         for (int j = start; j < end; ++j)
                         {
                             // WQ02,0 : JN10201,0

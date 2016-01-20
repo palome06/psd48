@@ -830,6 +830,61 @@ namespace PSD.ClientAo
                     prevComment = ""; cancel = "";
                     roundInput = input;
                 }
+                else if (arg[0] == 'E')
+                {
+                    int idx = arg.IndexOf('~');
+                    int jdx = arg.IndexOf('(');
+                    int kdx = arg.IndexOf(')');
+                    string input;
+                    if (idx >= 1)
+                    {
+                        int r1 = int.Parse(Substring(arg, 1, idx));
+                        int r2 = int.Parse(Substring(arg, idx + 1, jdx));
+                        if (jdx >= 0)
+                        {
+                            string[] argv = Substring(arg, jdx + "(p".Length, kdx).Split('p');
+                            List<ushort> uss = argv.Select(p => ushort.Parse(p)).ToList();
+                            string inst;
+                            if (argv.Length < r1)
+                            {
+                                r1 = r2 = argv.Length;
+                                inst = string.Format("请选择{0}张事件牌为{1}目标。", r1, prevComment);
+                            }
+                            else
+                                inst = string.Format("请选择{0}至{1}张事件牌为{2}目标。", r1, r2, prevComment);
+                            input = VI.CinE(Uid, inst, r1, r2, uss, cancellable, keep);
+                            inputValid &= input.Split(',').Intersect(argv).Any();
+                        }
+                        else
+                        {
+                            string inst = string.Format("请选择{0}至{1}张事件牌为{2}目标。", r1, r2, prevComment);
+                            input = VI.CinE(Uid, inst, r1, r2, null, cancellable, keep);
+                        }
+                        inputValid &= !(CountItemFromComma(input) < r1 || CountItemFromComma(input) > r2);
+                    }
+                    else
+                    {
+                        int r = int.Parse(Substring(arg, 1, jdx));
+                        if (jdx >= 0)
+                        {
+                            string[] argv = Substring(arg, jdx + "(p".Length, kdx).Split('p');
+                            List<ushort> uss = argv.Select(p => ushort.Parse(p)).ToList();
+                            if (argv.Length < r)
+                                r = argv.Length;
+                            string inst = string.Format("请选择{0}张事件牌为{1}目标。", r, prevComment);
+                            input = VI.CinE(Uid, inst, r, r, uss, cancellable, keep);
+                            inputValid &= input.Split(',').Intersect(argv).Any();
+                        }
+                        else
+                        {
+                            string inst = string.Format("请选择{0}张事件牌为{1}目标。", r, prevComment);
+                            input = VI.CinE(Uid, inst, r, r, null, cancellable, keep);
+                        }
+                        inputValid &= (CountItemFromComma(input) == r);
+                    }
+                    prevComment = ""; cancel = "";
+                    roundInput = input;
+                }
                 else if (arg[0] == 'H')
                 {
                     int idx = arg.IndexOf('~');
@@ -1485,76 +1540,40 @@ namespace PSD.ClientAo
                         break;
                     }
                 case "E0QZ":
-                    {
-                        ushort from = ushort.Parse(args[1]);
-                        var cards = Util.TakeRange(args, 2, args.Length).Select(p => ushort.Parse(p)).ToList();
-                        VI.Cout(Uid, "{0}弃置卡牌{1}.", zd.Player(from), zd.Tux(cards));
-                        List<string> cedcards = cards.Select(p => "C" + p).ToList();
-                        A0O.FlyingGet(cedcards, from, 0);
-                        //foreach (ushort card in cards)
-                        //{
-                        //    if (Z0D[from].Weapon == card)
-                        //        Z0D[from].Weapon = 0;
-                        //    else if (Z0D[from].Armor == card)
-                        //        Z0D[from].Armor = 0;
-                        //    else if (Z0D[from].ExCards.Contains(card))
-                        //        Z0D[from].ExCards.Remove(card);
-                        //    else
-                        //    {
-                        //        --Z0D[from].TuxCount;
-                        //        if (uid == from)
-                        //            Z0M.Tux.Remove(card);
-                        //    }
-                        //}
-                        break;
-                    }
+                    VI.Cout(Uid, "{0}弃置卡牌{1}.", zd.Player(ushort.Parse(args[1])),
+                        zd.Tux(Util.TakeRange(args, 2, args.Length).Select(p => ushort.Parse(p))));
+                    break;
                 case "E0IH":
-                    {
-                        string result = "", revive = "";
-                        for (int i = 1; i < args.Length; i += 4)
-                        {
-                            ushort from = ushort.Parse(args[i]);
-                            ushort prop = ushort.Parse(args[i + 1]);
-                            ushort n = ushort.Parse(args[i + 2]);
-                            ushort now = ushort.Parse(args[i + 3]);
-                            result += string.Format("\n{0}HP+{1}({2})，当前HP={3}.", zd.Player(from), n, zd.Prop(prop), now);
-                            A0P[from].HP = now;
-                            if (now == n)
-                                revive += ("," + zd.Player(from));
-                        }
-                        if (result != "")
-                            VI.Cout(Uid, result.Substring(1));
-                        if (revive != "")
-                            VI.Cout(Uid, "以下角色脱离濒死状态：{0}.", revive.Substring(1));
-                        break;
-                    }
                 case "E0OH":
                     {
-                        string result = "";
-                        for (int i = 1; i < args.Length; i += 4)
+                        List<string> hpIssues = new List<string>();
+                        List<ushort> revive = new List<ushort>();
+                        for (int i = 1; i < args.Length; i += 5)
                         {
                             ushort from = ushort.Parse(args[i]);
-                            ushort prop = ushort.Parse(args[i + 1]);
-                            ushort n = ushort.Parse(args[i + 2]);
-                            ushort now = ushort.Parse(args[i + 3]);
-                            result += string.Format("\n{0}HP-{1}({2})，当前HP={3}.",
-                                zd.Player(from), n, zd.Prop(prop), now);
+                            ushort isLove = ushort.Parse(args[i + 1]);
+                            ushort prop = ushort.Parse(args[i + 2]);
+                            ushort n = ushort.Parse(args[i + 3]);
+                            ushort now = ushort.Parse(args[i + 4]);
+                            string msgBase = "{0}HP" + ("E0IH" == args[0] ? "+" : "-") + "{1}({2}),当前HP={3}.";
+                            if (isLove == 1)
+                                hpIssues.Add(string.Format(msgBase, zd.Player(from), n, "倾慕", now));
+                            else
+                                hpIssues.Add(string.Format(msgBase, zd.Player(from), n, zd.Prop(prop), now));
                             A0P[from].HP = now;
-                            //if (now == 0)
-                            //    death += ("," + zd.Player(from));
+                            if (now == n && "E0IH" == args[0])
+                                revive.Add(from);
                         }
-                        if (result != "")
-                            VI.Cout(Uid, result.Substring(1));
-                        //if (death != "")
-                        //    VI.Cout(uid, "以下角色处于濒死状态：{0}.", death.Substring(1));
-                        break;
+                        if (hpIssues.Count > 0)
+                            VI.Cout(Uid, string.Join("\n", hpIssues));
+                        if (revive.Count > 0)
+                            VI.Cout(Uid, "{0}脱离濒死状态.", zd.Player(revive));
                     }
+                    break;
                 case "E0ZH":
-                    {
-                        VI.Cout(Uid, "以下角色处于濒死状态：{0}.", zd.Player(
-                            Util.TakeRange(args, 2, args.Length).Select(p => ushort.Parse(p))));
-                        break;
-                    }
+                    VI.Cout(Uid, "{0}处于濒死状态.", zd.Player(
+                        Util.TakeRange(args, 1, args.Length).Select(p => ushort.Parse(p))));
+                    break;
                 case "E0LV":
                     for (int idx = 1; idx < args.Length;)
                     {

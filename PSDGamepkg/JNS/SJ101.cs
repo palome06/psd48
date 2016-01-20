@@ -630,12 +630,12 @@ namespace PSD.PSDGamepkg.JNS
                 if (py.Runes.Count > 0)
                     XI.RaiseGMessage("G0OF," + py.Uid + "," + string.Join(",", py.Runes));
             }
-            ushort[] map = new ushort[] { 0, 1, 2, 3, 4, 5, 6 };
+            ushort[] fuseMap = new ushort[] { 0, 1, 2, 3, 4, 5, 6 };
             foreach (ushort ut in XI.Board.OrderedPlayer(rd.Uid))
             {
                 XI.RaiseGMessage("G0TT," + ut);
                 int result = XI.Board.DiceValue;
-                XI.RaiseGMessage("G0IF," + ut + "," + map[result]);
+                XI.RaiseGMessage("G0IF," + ut + "," + fuseMap[result]);
             }
         }
         #endregion Package 6#

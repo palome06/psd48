@@ -327,6 +327,7 @@ namespace PSD.ClientAo
         {
             switch (prop)
             {
+                case 0: return "物";
                 case 1: return "水";
                 case 2: return "火";
                 case 3: return "雷";
@@ -334,9 +335,6 @@ namespace PSD.ClientAo
                 case 5: return "土";
                 case 6: return "阴";
                 case 7: return "阳";
-                case 8: return "物";
-                case 9: return "钦慕";
-                case 10: return "阴·决";
                 default: return "属性" + prop;
             }
         }

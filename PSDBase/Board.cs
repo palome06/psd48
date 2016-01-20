@@ -223,6 +223,16 @@ namespace PSD.Base
             }
             return list;
         }
+        public ushort? GetNextPlayer(ushort rounder)
+        {
+            List<ushort> ordered = OrderedPlayer();
+            foreach (ushort ut in ordered)
+            {
+                if (ut != rounder && Garden[ut].IsAlive)
+                    return ut;
+            }
+            return null;
+        }
 
         public Board()
         {

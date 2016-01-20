@@ -945,8 +945,9 @@ namespace PSD.PSDGamepkg.JNS
                     !HPEvoMask.TUX_INAVO.IsSet(p.Mask) && !HPEvoMask.DECR_INVAO.IsSet(p.Mask);
                 List<ushort> invs = harms.Where(p => yes(p)).Select(p => p.Who).Distinct().ToList();
 
-                string whoStr = XI.AsyncInput(player.Uid, "T1(p" + string.Join("p", invs) + ")", "JPT1", "0");
+                string whoStr = XI.AsyncInput(player.Uid, "T1(p" + string.Join("p", invs) + ")", "TPT1", "0");
                 ushort who = ushort.Parse(whoStr);
+                TargetPlayer(player.Uid, who);
 
                 foreach (Artiad.Harm harm in harms)
                 {
@@ -973,8 +974,9 @@ namespace PSD.PSDGamepkg.JNS
                     !HPEvoMask.TUX_INAVO.IsSet(p.Mask) && !HPEvoMask.DECR_INVAO.IsSet(p.Mask);
                 List<ushort> invs = harms.Where(p => yes(p)).Select(p => p.Who).Distinct().ToList();
 
-                string whoStr = XI.AsyncInput(player.Uid, "T1(p" + string.Join("p", invs) + ")", "JPT1", "0");
+                string whoStr = XI.AsyncInput(player.Uid, "T1(p" + string.Join("p", invs) + ")", "TPT1", "0");
                 ushort who = ushort.Parse(whoStr);
+                TargetPlayer(player.Uid, who);
 
                 foreach (Artiad.Harm harm in harms)
                 {
@@ -1082,47 +1084,13 @@ namespace PSD.PSDGamepkg.JNS
                 int idx = argst.IndexOf(',');
                 ushort ut = ushort.Parse(argst.Substring(0, idx));
                 ushort to = ushort.Parse(argst.Substring(idx + 1));
+                Player py = XI.Board.Garden[to];
                 // G0OH,A,Src,p,n,...
                 List<Artiad.Harm> harms = Artiad.Harm.Parse(fuse);
-                Artiad.Harm rotation = null;
-                foreach (Artiad.Harm harm in harms)
-                {
-                    if (harm.Who == player.Uid && harm.N > 0 && !HPEvoMask.IMMUNE_INVAO
-                        .IsSet(harm.Mask) && !HPEvoMask.DECR_INVAO.IsSet(harm.Mask))
-                    {
-                        XI.RaiseGMessage("G0HQ,0," + to + "," + player.Uid + ",1,1," + ut);
-                        rotation = harm;
-                    }
-                }
-                if (rotation != null)
-                {
-                    harms.Remove(rotation);
-                    if (HPEvoMask.TERMIN_AT.IsSet(rotation.Mask))
-                        rotation.Mask = HPEvoMask.TERMIN_AT.Reset(rotation.Mask);
-                    foreach (Artiad.Harm harm in harms)
-                    {
-                        if (harm.Who == to)
-                        {
-                            if (HPEvoMask.TERMIN_AT.IsSet(harm.Mask))
-                            {
-                                rotation = null; break; // Swallowed by the termin_at harm
-                            }
-                            if (harm.Element == rotation.Element)
-                            {
-                                ++harm.N;
-                                rotation = null; break;
-                            }
-                        }
-                    }
-                }
-                if (rotation != null)
-                {
-                    rotation.Who = to;
-                    rotation.N = 1;
-                    harms.Add(rotation);
-                }
+                XI.RaiseGMessage("G0HQ,0," + to + "," + player.Uid + ",1,1," + ut);
+                Artiad.Procedure.RotateHarm(player, py, true, (v) => 1, ref harms);
                 if (harms.Count > 0)
-                    XI.InnerGMessage(Artiad.Harm.ToMessage(harms), -109);
+                     XI.InnerGMessage(Artiad.Harm.ToMessage(harms), -109);
             }
         }
         public string FJT1ConsumeInput(Player player, int consumeType, int type, string fuse, string prev)

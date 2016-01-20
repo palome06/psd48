@@ -1633,13 +1633,29 @@ namespace PSD.PSDGamepkg.JNS
         public void GHT4IncrAction(Player player)
         {
             Base.Card.Monster mon = XI.LibTuple.ML.Decode(XI.LibTuple.ML.Encode("GHT4"));
-            if (mon != null)
+            if (mon != null && mon.RAMUshort == 0)
             {
-                if (mon.RAMUshort == 0)
+                bool done = false;
+                while (!done)
                 {
-                    string hint = "#请选择「炎舞」效果免疫伤害的属性。##水##火##雷##风##土,Y5";
-                    string option = XI.AsyncInput(player.Uid, hint, "GHT4IncrAction", "0");
-                    mon.RAMUshort = ushort.Parse(option);
+                    done = true;
+                    string classInput = XI.AsyncInput(player.Uid, "#请选择「炎舞」免疫伤害的属性。" +
+                        "##五灵属性##高阶属性,Y2", "GHT4IncrAction", "0");
+                    if (classInput == "1")
+                    {
+                        string option = XI.AsyncInput(player.Uid, "#请选择「炎舞」免疫伤害的属性。" +
+                            "##水##火##雷##风##土,/Y5", "GHT4IncrAction", "1");
+                        if (option.StartsWith("/")) { done = false; }
+                        else { mon.RAMUshort = ushort.Parse(option); }
+                    }
+                    else if (classInput == "2")
+                    {
+                        string option = XI.AsyncInput(player.Uid, "#请选择「炎舞」免疫伤害的属性。" +
+                            "##阴##阳,/Y2", "GHT4IncrAction", "2");
+                        if (option == "1") { mon.RAMUshort = (ushort)FiveElement.YINN.Elem2Int(); }
+                        else if (option == "2") { mon.RAMUshort = (ushort)FiveElement.SOLARIS.Elem2Int(); }
+                        else if (option.StartsWith("/")) { done = false; }
+                    }
                 }
             }
         }
@@ -1657,14 +1673,8 @@ namespace PSD.PSDGamepkg.JNS
                 Base.Card.Monster mon = XI.LibTuple.ML.Decode(XI.LibTuple.ML.Encode("GHT4"));
                 if (mon != null)
                 {
-                    List<Artiad.Harm> rvs = new List<Artiad.Harm>();
-                    foreach (Artiad.Harm harm in harms)
-                    {
-                        int elemCode = harm.Element.Elem2Int();
-                        if (harm.Who == player.Uid && elemCode == mon.RAMUshort)
-                            rvs.Add(harm);
-                    }
-                    harms.RemoveAll(p => rvs.Contains(p));
+                    harms.RemoveAll(p => p.Element.Elem2Int() == mon.RAMUshort &&
+                        p.Who == player.Uid && !HPEvoMask.IMMUNE_INVAO.IsSet(p.Mask));
                 }
                 if (harms.Count > 0)
                     XI.InnerGMessage(Artiad.Harm.ToMessage(harms), -9);
@@ -1676,16 +1686,8 @@ namespace PSD.PSDGamepkg.JNS
             {
                 List<Artiad.Harm> harms = Artiad.Harm.Parse(fuse);
                 Base.Card.Monster mon = XI.LibTuple.ML.Decode(XI.LibTuple.ML.Encode("GHT4"));
-                if (mon != null)
-                {
-                    foreach (Artiad.Harm harm in harms)
-                    {
-                        int elemCode = harm.Element.Elem2Int();
-                        if (harm.Who == player.Uid && elemCode == mon.RAMUshort)
-                            return true;
-                    }
-                }
-                return false;
+                return mon != null && harms.Any(p => p.Element.Elem2Int() == mon.RAMUshort &&
+                    p.Who == player.Uid && !HPEvoMask.IMMUNE_INVAO.IsSet(p.Mask));
             }
             return false;
         }

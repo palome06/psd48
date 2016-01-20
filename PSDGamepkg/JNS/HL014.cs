@@ -258,6 +258,7 @@ namespace PSD.PSDGamepkg.JNS
                     else { ++p.N; }
                 }
             });
+            TargetPlayer(player.Uid, harms.Select(p => p.Who).Distinct());
             XI.RaiseGMessage("G1CK," + player.Uid + ",JNH0203,0");
             XI.InnerGMessage(Artiad.Harm.ToMessage(harms), -189);
         }
@@ -337,6 +338,7 @@ namespace PSD.PSDGamepkg.JNS
             XI.RaiseGMessage("G0IJ," + player.Uid + ",2,1," + ut);
 
             Player tar = XI.Board.Garden[ut];
+            TargetPlayer(player.Uid, tar.Uid);
             string c0 = Util.RepeatString("p0", tar.Tux.Count);
             XI.AsyncInput(player.Uid, "#展示的,C1(" + c0 + ")", "JNH0206", "0");
             List<ushort> vals = tar.Tux.ToList();
@@ -385,34 +387,12 @@ namespace PSD.PSDGamepkg.JNS
         public void JNH0301Action(Player player, int type, string fuse, string argst)
         {
             List<Artiad.Harm> harms = Artiad.Harm.Parse(fuse);
-            Artiad.Harm thisHarm = null, thatHarm = null;
             string[] blocks = argst.Split(',');
             ushort to = ushort.Parse(blocks[0]);
             TargetPlayer(player.Uid, to);
             //int mValue = 0; 
             XI.RaiseGMessage("G0QZ," + player.Uid + "," + string.Join(",", Util.TakeRange(blocks, 1, blocks.Length)));
-            bool action = false;
-            foreach (Artiad.Harm harm in harms)
-            {
-                if (harm.Who == player.Uid && !HPEvoMask.DECR_INVAO.IsSet(harm.Mask) &&
-                    !HPEvoMask.TERMIN_AT.IsSet(harm.Mask))
-                {
-                    thisHarm = harm;
-                    action = true;
-                }
-                else if (harm.Who == to)
-                    thatHarm = harm;
-            }
-            if (action)
-            {
-                if (thatHarm != null && thatHarm.Element == thisHarm.Element)
-                {
-                    thatHarm.N += thisHarm.N;
-                    harms.Remove(thisHarm);
-                }
-                else
-                    thisHarm.Who = to;
-            }
+            Artiad.Procedure.RotateHarm(player, XI.Board.Garden[to], false, (v) => v, ref harms);
             XI.InnerGMessage(Artiad.Harm.ToMessage(harms), -54);
             if (XI.Board.Garden[to].IsAlive)
             {
@@ -557,16 +537,7 @@ namespace PSD.PSDGamepkg.JNS
             if (type == 0)
                 return true;
             else if (type == 1)
-            {
-                string[] parts = fuse.Split(',');
-                if (parts[1] == player.Uid.ToString())
-                {
-                    for (int i = 3; i < parts.Length; ++i)
-                        if (parts[i] == "JNH0302")
-                            //return (player.ROMUshort != 0);
-                            return !XI.Board.ClockWised;
-                }
-            }
+                return !XI.Board.ClockWised && IsMathISOS("JNH0302", player, fuse);
             else if (type == 2)
             {
                 string[] parts = fuse.Split(',');
@@ -1337,6 +1308,7 @@ namespace PSD.PSDGamepkg.JNS
                     n1di += "," + string.Join(",", Util.TakeRange(g1di, idx, idx + 4 + n));
                 idx += (4 + n);
             }
+            TargetPlayer(player.Uid, tar);
             //XI.RaiseGMessage("G2CN,0,1");
             //XI.Board.TuxDises.Remove(ut);
             rest.Remove(ut); eqs.Remove(ut);
@@ -2801,8 +2773,7 @@ namespace PSD.PSDGamepkg.JNS
         public void JNH1610Action(Player player, int type, string fuse, string argst)
         {
             ushort ut = ushort.Parse(argst.Substring(argst.IndexOf(',') + 1));
-            ushort uid = player.Uid;
-            XI.RaiseGMessage("G0CC," + uid + ",0," + uid + ",JP03," + ut + ";0," + fuse);
+            XI.RaiseGMessage("G0CC," + player.Uid + ",0," + player.Uid + ",JP03," + ut + ";0," + fuse);
         }
         public string JNH1610Input(Player player, int type, string fuse, string prev)
         {
@@ -3121,16 +3092,7 @@ namespace PSD.PSDGamepkg.JNS
         public bool JNH1901Valid(Player player, int type, string fuse)
         {
             if (type == 0) // Gain the Token in 6'
-            {
-                string[] parts = fuse.Split(',');
-                if (parts[1] == player.Uid.ToString())
-                {
-                    for (int i = 3; i < parts.Length; ++i)
-                        if (parts[i] == "JNH1901")
-                            return true;
-                }
-                return false;
-            }
+                return IsMathISOS("JNH1901", player, fuse);
             else if (type == 1 || type == 2)
                 return player.TokenCount == 0;
             else
@@ -3412,8 +3374,9 @@ namespace PSD.PSDGamepkg.JNS
                 else if (prev.IndexOf(',') < 0)
                 {
                     ushort who = ushort.Parse(prev);
-                    return "/" + (who == player.Uid ? "Q" : "C") + "1(p" + string.Join("p", XI.Board.Garden[who].ListOutAllEquips())
-                        + "),#弃置魔灵,/C2(p" + string.Join("p", player.TokenFold) + ")";
+                    return "/" + (who == player.Uid ? "Q" : "C") + "1(p" +
+                        string.Join("p", XI.Board.Garden[who].ListOutAllEquips()) +
+                        "),#弃置魔灵,/C2(p" + string.Join("p", player.TokenFold) + ")";
                 }
                 else
                     return "";
@@ -3493,11 +3456,11 @@ namespace PSD.PSDGamepkg.JNS
             if (meWin)
             {
                 int diff1 = XI.Board.PoolDelta;
-                ushort[] props = new ushort[] { 0, 1, 2, 3, 4 };
+                FiveElement[] props = FiveElementHelper.GetPropedElements();
                 int opr = props.Count(q => XI.Board.Garden.Values.Where(p => p.IsAlive &&
-                    p.Team == player.OppTeam).Any(r => r.Pets[q] != 0));
+                    p.Team == player.OppTeam).Any(r => r.Pets[q.Elem2Index()] != 0));
                 int rpr = props.Count(q => XI.Board.Garden.Values.Where(p => p.IsAlive &&
-                    p.Team == player.Team).Any(r => r.Pets[q] != 0));
+                    p.Team == player.Team).Any(r => r.Pets[q.Elem2Index()] != 0));
                 return diff1 >= 2 && opr > rpr;
             }
             else
@@ -3506,11 +3469,11 @@ namespace PSD.PSDGamepkg.JNS
         public void JNH2103Action(Player player, int type, string fuse, string argst)
         {
             int diff1 = XI.Board.PoolDelta;
-            ushort[] props = new ushort[] { 0, 1, 2, 3, 4 };
+            FiveElement[] props = FiveElementHelper.GetPropedElements();
             int opr = props.Count(q => XI.Board.Garden.Values.Where(p => p.IsAlive &&
-                p.Team == player.OppTeam).Any(r => r.Pets[q] != 0));
+                p.Team == player.OppTeam).Any(r => r.Pets[q.Elem2Index()] != 0));
             int rpr = props.Count(q => XI.Board.Garden.Values.Where(p => p.IsAlive &&
-                p.Team == player.Team).Any(r => r.Pets[q] != 0));
+                p.Team == player.Team).Any(r => r.Pets[q.Elem2Index()] != 0));
             int diff = System.Math.Min(diff1, opr - rpr);
             string rSel = XI.AsyncInput(player.Uid, "#补" + diff + "张牌,T1" +
                 ATeammatesTared(player), "JNH2103", "0");
@@ -3605,7 +3568,7 @@ namespace PSD.PSDGamepkg.JNS
                 string[] g0on = fuse.Split(',');
                 for (int idx = 1; idx < g0on.Length;)
                 {
-                    string fromZone = g0on[idx];
+                    // string fromZone = g0on[idx];
                     string cardType = g0on[idx + 1];
                     int cnt = int.Parse(g0on[idx + 2]);
                     if (cnt > 0)
@@ -3654,7 +3617,7 @@ namespace PSD.PSDGamepkg.JNS
                 string[] g0on = fuse.Split(',');
                 for (int idx = 1; idx < g0on.Length;)
                 {
-                    string fromZone = g0on[idx];
+                    // string fromZone = g0on[idx];
                     string cardType = g0on[idx + 1];
                     int cnt = int.Parse(g0on[idx + 2]);
                     if (cnt > 0)
@@ -3713,16 +3676,7 @@ namespace PSD.PSDGamepkg.JNS
         public bool JNE0301Valid(Player player, int type, string fuse)
         {
             if (type == 0)
-            {
-                string[] parts = fuse.Split(',');
-                if (parts[1] == player.Uid.ToString())
-                {
-                    for (int i = 3; i < parts.Length; ++i)
-                        if (parts[i] == "JNE0301")
-                            return true;
-                }
-                return false;
-            }
+                return IsMathISOS("JNE0301", player, fuse);
             else if (type == 1)
                 return true;
             else

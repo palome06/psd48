@@ -481,7 +481,6 @@ namespace PSD.PSDGamepkg
                     if (priority == 100)
                     {
                         //Board.IsTangled = true;
-                        ushort who = ushort.Parse(args[1]);
                         ushort mon = ushort.Parse(args[2]);
                         if (mon != 0)
                         {
@@ -574,8 +573,7 @@ namespace PSD.PSDGamepkg
                     if (priority == 100)
                     {
                         ushort trigger = ushort.Parse(args[1]);
-                        ushort type = ushort.Parse(args[2]);
-
+                        // ushort type = ushort.Parse(args[2]);
                         ushort eveCard = DequeueOfPile(Board.EvePiles);
                         RaiseGMessage("G2IN,2,1");
                         //WI.BCast("E0EV," + eveCard);
@@ -1117,6 +1115,29 @@ namespace PSD.PSDGamepkg
                 case "G0OH":
                     {
                         List<Artiad.Harm> harms = Artiad.Harm.Parse(cmd);
+                        // FiveElement.YINN
+                        List<Artiad.Harm> yinns = harms.Where(p => p.Element == FiveElement.YINN &&
+                            !HPEvoMask.IMMUNE_INVAO.IsSet(p.Mask)).ToList();
+                        if (yinns.Count > 0)
+                        {
+                            IDictionary<ushort, string> yinnAsk = new Dictionary<ushort, string>();
+                            yinns.ForEach(p => yinnAsk[p.Who] = "#是否弃置全部手牌抵御阴伤##弃置手牌##HP-" + p.N + ",Y2");
+                            IDictionary<ushort, string> yinnAns = MultiAsyncInput(yinnAsk);
+                            List<Player> escapes = new List<Player>();
+                            foreach (var pair in yinnAns)
+                            {
+                                if (pair.Value == "1")
+                                {
+                                    Player py = Board.Garden[pair.Key];
+                                    if (py.IsAlive && py.Tux.Count > 0)
+                                        escapes.Add(py);
+                                    harms.RemoveAll(p => p.Who == pair.Key && p.Element == FiveElement.YINN &&
+                                        !HPEvoMask.IMMUNE_INVAO.IsSet(p.Mask));
+                                }
+                            }
+                            if (escapes.Count > 0)
+                                RaiseGMessage("G0DH," + string.Join(",", escapes.Select(p => p.Uid + ",2," + p.Tux.Count)));
+                        }
                         foreach (Artiad.Harm harm in harms)
                         {
                             Player py = Board.Garden[harm.Who];
@@ -1301,17 +1322,21 @@ namespace PSD.PSDGamepkg
                                 }
                             }
                         }
+                        IDictionary<Player, int> purgedChange = new Dictionary<Player, int>();
                         foreach (var pair in change)
                         {
-                            if (pair.Value < -pair.Key.HP)
-                                change[pair.Key] = -pair.Key.HP;
-                            if (pair.Value > pair.Key.HPb - pair.Key.HP)
-                                change[pair.Key] = pair.Key.HPb - pair.Key.HP;
-                            pair.Key.HP += pair.Value;
+                            int value = pair.Value;
+                            if (value < -pair.Key.HP)
+                                value = -pair.Key.HP;
+                            if (value > pair.Key.HPb - pair.Key.HP)
+                                value = pair.Key.HPb - pair.Key.HP;
+                            if (value != 0)
+                                purgedChange[pair.Key] = value;
+                            pair.Key.HP += value;
                         }
-                        if (change.Any(p => p.Value != 0))
+                        if (purgedChange.Count > 0)
                         {
-                            Artiad.HpIssueSemaphore.Telegraph(WI.BCast, change.Where(p => p.Value != 0).Select(
+                            Artiad.HpIssueSemaphore.Telegraph(WI.BCast, purgedChange.Select(
                                 p => new Artiad.HpIssueSemaphore(p.Key.Uid, true, null, p.Value, p.Key.HP)));
                         }
                         Artiad.Procedure.ArticuloMortis(this, WI, true);
@@ -3572,7 +3597,6 @@ namespace PSD.PSDGamepkg
                     break;
                 case "G0SN":
                     {
-                        ushort who = ushort.Parse(args[1]);
                         ushort lugUt = ushort.Parse(args[2]);
                         bool dirIn = args[3] == "0";
                         string[] cards = Util.TakeRange(args, 4, args.Length);

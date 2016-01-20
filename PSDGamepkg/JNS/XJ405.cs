@@ -114,7 +114,6 @@ namespace PSD.PSDGamepkg.JNS
             XI.RaiseGMessage("G0OS," + player.Uid + ",0,JN10202");
             XI.RaiseGMessage("G0IY,1," + player.Uid + ",10103");
             XI.RaiseGMessage("G0IS," + player.Uid + ",0,JN10302,JN10303");
-            //XI.InnerGMessage(fuse, 121);
         }
         #endregion XJ102 - ZhaoLing'er
         #region XJ103 - Mengshe
@@ -1073,7 +1072,7 @@ namespace PSD.PSDGamepkg.JNS
         public bool JN40201Valid(Player player, int type, string fuse)
         {
             if (type == 0 || (type == 1 && XI.Board.Rounder.Uid == player.Uid))
-            {
+            { // Trigger Support Status in self round'
                 if (player.RAMUshort == 0 && XI.Board.SupportSucc)
                     return true;
                 else if (player.RAMUshort == 1 && !XI.Board.SupportSucc)
@@ -1690,37 +1689,17 @@ namespace PSD.PSDGamepkg.JNS
         #region XJ405 - Xuanxiao
         public bool JN50501Valid(Player player, int type, string fuse)
         {
-            List<Artiad.Harm> harms = Artiad.Harm.Parse(fuse);
-            foreach (Artiad.Harm harm in harms)
-            {
-                if (harm.Who == player.Uid && (harm.Element == FiveElement.AQUA ||
-                        harm.Element == FiveElement.AGNI))
-                    return true;
-            }
-            return false;
+            return Artiad.Harm.Parse(fuse).Any(p => p.Who == player.Uid &&
+                !HPEvoMask.IMMUNE_INVAO.IsSet(p.Mask) && p.N > 0 &&
+                (p.Element == FiveElement.AQUA || p.Element == FiveElement.AGNI));
         }
         public void JN50501Action(Player player, int type, string fuse, string argst)
         {
             // G0OH,A,Src,p,n,...
             List<Artiad.Harm> harms = Artiad.Harm.Parse(fuse);
-            List<Artiad.Harm> rvs = new List<Artiad.Harm>();
-            foreach (Artiad.Harm harm in harms)
-            {
-                if (harm.Who == player.Uid)
-                {
-                    if (harm.Element == FiveElement.AQUA)
-                    {
-                        VI.Cout(0, "玄霄发动「凝冰焚炎」,免疫本次水属性伤害.");
-                        rvs.Add(harm);
-                    }
-                    else if (harm.Element == FiveElement.AGNI)
-                    {
-                        VI.Cout(0, "玄霄发动「凝冰焚炎」,免疫本次火属性伤害.");
-                        rvs.Add(harm);
-                    }
-                }
-            }
-            harms.RemoveAll(p => rvs.Contains(p));
+            harms.RemoveAll(p => p.Who == player.Uid &&
+                !HPEvoMask.IMMUNE_INVAO.IsSet(p.Mask) &&
+                (p.Element == FiveElement.AQUA || p.Element == FiveElement.AGNI));
             if (harms.Count > 0)
                 XI.InnerGMessage(Artiad.Harm.ToMessage(harms), -39);
         }
@@ -1733,8 +1712,6 @@ namespace PSD.PSDGamepkg.JNS
                 XI.RaiseGMessage("G0IJ," + player.Uid + ",2,1," + ushort.Parse(target));
                 TargetPlayer(player.Uid, player.SingleTokenTar);
                 XI.SendOutUAMessage(player.Uid, "JN50502," + target, "0");
-                //if (type == 3)
-                //    XI.InnerGMessage(fuse, 111);
             }
             else if (type == 1)
             {
@@ -2985,7 +2962,7 @@ namespace PSD.PSDGamepkg.JNS
         #endregion SP102 - ZhaoLing'er
         #region SP103 - Linyueru
         public void JNS0301Action(Player player, int type, string fuse, string argst)
-        {
+        { // Harm Value is Combined' from Homeland and Taiwan version, (1 + 3) / 2 = 2
             ushort[] uts = argst.Split(',').Select(p => ushort.Parse(p)).ToArray();
             XI.RaiseGMessage("G0QZ," + player.Uid + "," + uts[0]);
             TargetPlayer(player.Uid, uts);
@@ -3285,15 +3262,7 @@ namespace PSD.PSDGamepkg.JNS
         }
         public bool JNS0902Valid(Player player, int type, string fuse)
         {
-            // G0IS/G0OS
-            string[] parts = fuse.Split(',');
-            if (parts[1] == player.Uid.ToString())
-            {
-                for (int i = 3; i < parts.Length; ++i)
-                    if (parts[i] == "JNS0902")
-                        return true;
-            }
-            return false;
+            return IsMathISOS("JNS0902", player, fuse);
         }
         public void JNS0902Action(Player player, int type, string fuse, string argst)
         {

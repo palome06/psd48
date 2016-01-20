@@ -136,7 +136,7 @@ namespace PSD.PSDGamepkg.JNS
         public void NJ05Action(Player player, string fuse, string args)
         {
             ushort who = ushort.Parse(args);
-            Harm(player, 1);
+            Harm(XI.Board.Garden[who], 1);
         }
         public string NJ05Input(Player player, string fuse, string prev)
         {
@@ -606,18 +606,17 @@ namespace PSD.PSDGamepkg.JNS
         #endregion NPC Single
 
         #region NPC Effect Util
-        private void Harm(Player py, int n, FiveElement element = FiveElement.A, int mask = (int)HPEvoMask.FROM_NMB)
+        private void Harm(Player py, int n, FiveElement element = FiveElement.A, long mask = 0)
         {
-            Harm(null, py, n, element, mask);
+            Harm(null, py, n, element, HPEvoMask.FROM_NMB.Set(mask));
         }
-        private void Cure(Player py, int n, FiveElement element = FiveElement.A, int mask = (int)HPEvoMask.FROM_NMB)
+        private void Cure(Player py, int n, FiveElement element = FiveElement.A, long mask = 0)
         {
-            Cure(null, py, n, element, mask);
+            Cure(null, py, n, element, HPEvoMask.FROM_NMB.Set(mask));
         }
-        private void Cure(IEnumerable<Player> pys, int n, FiveElement element = FiveElement.A,
-            int mask = (int)HPEvoMask.FROM_NMB)
+        private void Cure(IEnumerable<Player> pys, int n, FiveElement element = FiveElement.A, long mask = 0)
         {
-            Cure(null, pys, n, element, mask);
+            Cure(null, pys, n, element, HPEvoMask.FROM_NMB.Set(mask));
         }
         #endregion NPC Effect Util
     }

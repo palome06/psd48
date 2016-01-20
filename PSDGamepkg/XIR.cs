@@ -36,14 +36,11 @@ namespace PSD.PSDGamepkg
             MappingSksp(out sk02, out sk03, levelCode);
             mt01 = new JNS.MonsterCottage(this, VI).RegisterDelegates(LibTuple.ML);
 
-            IDictionary<ushort, int> hipc = new Dictionary<ushort, int>();
             foreach (Player player in garden.Values)
             {
                 Base.Card.Hero hero = LibTuple.HL.InstanceHero(player.SelectHero);
                 player.InitFromHero(hero, true, false, false);
             }
-            //hipc.Add(player.Uid, player.SelectHero);
-            //xiclients[player.Uid].Heros = hipc;
             foreach (Player player in garden.Values)
             {
                 Base.Card.Hero hero = LibTuple.HL.InstanceHero(player.SelectHero);
@@ -559,58 +556,48 @@ namespace PSD.PSDGamepkg
                         RunQuadStage(rstage);
                         rstage = "R" + rounder + "ED"; break;
                     case "ED":
-                        {
-                            WI.BCast(rstage + ",0");
-                            Board.InFight = false; Board.InFightThrough = false;
-                            Board.Battler = null; Board.CleanBattler();
-                            if (Board.MonPiles.Count <= 0)
-                                RaiseGMessage("G1WJ,0");
-                            RecycleMonster(false, false);
-                            if (Board.Eve != 0)
-                            {
-                                RaiseGMessage("G0ON,10,E,1," + Board.Eve);
-                                RaiseGMessage("G0YM,2,0,0");
-                                Board.Eve = 0;
-                            }
-                            foreach (Player player in Board.Garden.Values)
-                                RaiseGMessage("G0AX," + player.Uid);
-                            RunQuadStage(rstage);
-                            if (Board.PendingTux.Count > 0)
-                            {
-                                IDictionary<ushort, List<ushort>> imt = new Dictionary<ushort, List<ushort>>();
-                                foreach (string pendItem in Board.PendingTux)
+                        WI.BCast(rstage + ",0");
+                        RunQuadMixedStage(rstage, 0,
+                            new int[] { -100, 100 },
+                            new Action[] { () => {
+                                Board.InFight = false; Board.InFightThrough = false;
+                                Board.Battler = null; Board.CleanBattler();
+                                if (Board.MonPiles.Count <= 0)
+                                    RaiseGMessage("G1WJ,0");
+                                RecycleMonster(false, false);
+                                if (Board.Eve != 0)
                                 {
-                                    ushort pendWho = ushort.Parse(pendItem.Substring(0, pendItem.IndexOf(',')));
-                                    ushort pendTux = ushort.Parse(pendItem.Substring(pendItem.LastIndexOf(',') + 1));
-                                    Util.AddToMultiMap(imt, pendWho, pendTux);
+                                    RaiseGMessage("G0ON,10,E,1," + Board.Eve);
+                                    RaiseGMessage("G0YM,2,0,0");
+                                    Board.Eve = 0;
                                 }
-                                if (imt.Count > 0)
-                                    RaiseGMessage("G0ON," + string.Join(",", imt.Select(p => p.Key + ",C," +
-                                        p.Value.Count + "," + string.Join(",", p.Value))));
-                            }
-                            if (!Board.Rounder.IsAlive && Board.Garden.Values.Any(p => p.IsAlive && p.HP == 0))
-                                RaiseGMessage("G0ZH,1");
-                            List<ushort> ordered = Board.OrderedPlayer();
-                            bool found = false;
-                            foreach (ushort ut in ordered)
-                            {
-                                if (ut != rounder && Board.Garden[ut].IsAlive)
+                                foreach (Player player in Board.Garden.Values)
+                                    RaiseGMessage("G0AX," + player.Uid);
+                            }, () => {
+                                if (Board.PendingTux.Count > 0)
                                 {
-                                    found = true;
-                                    rstage = "R" + ut + "00";
-                                    break;
+                                    IDictionary<ushort, List<ushort>> imt = new Dictionary<ushort, List<ushort>>();
+                                    foreach (string pendItem in Board.PendingTux)
+                                    {
+                                        ushort pendWho = ushort.Parse(pendItem.Substring(0, pendItem.IndexOf(',')));
+                                        ushort pendTux = ushort.Parse(pendItem.Substring(pendItem.LastIndexOf(',') + 1));
+                                        Util.AddToMultiMap(imt, pendWho, pendTux);
+                                    }
+                                    if (imt.Count > 0)
+                                        RaiseGMessage("G0ON," + string.Join(",", imt.Select(p => p.Key + ",C," +
+                                            p.Value.Count + "," + string.Join(",", p.Value))));
                                 }
-                            }
-                            if (!found)
-                            {
-                                if (Board.Rounder.IsAlive)
-                                    RaiseGMessage("G0WN," + Board.Rounder.Team);
-                                else
-                                    RaiseGMessage("G0WN,0");
-                            }
-                            foreach (Player player in Board.Garden.Values)
-                                player.ResetRAM();
-                        }
+                                if (!Board.Rounder.IsAlive && Board.Garden.Values.Any(p => p.IsAlive && p.HP == 0))
+                                    RaiseGMessage("G0ZH,1");
+                            } });
+                        if (Board.GetNextPlayer(rounder) != null)
+                            rstage = "R" + Board.GetNextPlayer(rounder) + "00";
+                        else if (Board.Rounder.IsAlive)
+                            RaiseGMessage("G0WN," + Board.Rounder.Team);
+                        else
+                            RaiseGMessage("G0WN,0");
+                        foreach (Player player in Board.Garden.Values)
+                            player.ResetRAM();
                         break;
                 }
             }
@@ -688,7 +675,6 @@ namespace PSD.PSDGamepkg
                             ushort me = ushort.Parse(msg.Substring(0, idx));
                             int jdx = msg.LastIndexOf(';');
                             string mai = Util.Substring(msg, idx + 1, jdx);
-                            string inType = Util.Substring(msg, jdx + 1, -1);
 
                             string skName;
                             mai = DecodeSimplifiedCommand(mai, out skName);
@@ -786,7 +772,6 @@ namespace PSD.PSDGamepkg
                             ushort me = ushort.Parse(msg.Substring(0, idx));
                             int jdx = msg.LastIndexOf(';');
                             string mai = Util.Substring(msg, idx + 1, jdx);
-                            string inType = Util.Substring(msg, jdx + 1, -1);
 
                             string skName;
                             mai = DecodeSimplifiedCommand(mai, out skName);
@@ -879,7 +864,7 @@ namespace PSD.PSDGamepkg
             }
             if (Board.Monster2 != 0)
             {
-                Monster mon2 = LibTuple.ML.Decode(NMBLib.OriginalMonster(Board.Monster2));
+                //Monster mon2 = LibTuple.ML.Decode(NMBLib.OriginalMonster(Board.Monster2));
                 //if (mon2 != null)
                 //    mon2.Curtain();
                 if (!zero2)
