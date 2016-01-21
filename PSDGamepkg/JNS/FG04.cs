@@ -1635,33 +1635,15 @@ namespace PSD.PSDGamepkg.JNS
             Base.Card.Monster mon = XI.LibTuple.ML.Decode(XI.LibTuple.ML.Encode("GHT4"));
             if (mon != null && mon.RAMUshort == 0)
             {
-                bool done = false;
-                while (!done)
-                {
-                    done = true;
-                    string classInput = XI.AsyncInput(player.Uid, "#请选择「炎舞」免疫伤害的属性。" +
-                        "##五灵属性##高阶属性,Y2", "GHT4IncrAction", "0");
-                    if (classInput == "1")
-                    {
-                        string option = XI.AsyncInput(player.Uid, "#请选择「炎舞」免疫伤害的属性。" +
-                            "##水##火##雷##风##土,/Y5", "GHT4IncrAction", "1");
-                        if (option.StartsWith("/")) { done = false; }
-                        else { mon.RAMUshort = ushort.Parse(option); }
-                    }
-                    else if (classInput == "2")
-                    {
-                        string option = XI.AsyncInput(player.Uid, "#请选择「炎舞」免疫伤害的属性。" +
-                            "##阴##阳,/Y2", "GHT4IncrAction", "2");
-                        if (option == "1") { mon.RAMUshort = (ushort)FiveElement.YINN.Elem2Int(); }
-                        else if (option == "2") { mon.RAMUshort = (ushort)FiveElement.SOLARIS.Elem2Int(); }
-                        else if (option.StartsWith("/")) { done = false; }
-                    }
-                }
+                string opt = XI.AsyncInput(player.Uid, "#免疫伤害,V1(p" + string.Join("p",
+                    FiveElementHelper.GetPropedElements().Select(p => p.Elem2Int())) + ")", "GHT4IncrAction", "0");
+                mon.RAMUshort = ushort.Parse(opt);
+                XI.RaiseGMessage("G2FU,2," + player.Uid + ",V," + opt);
             }
         }
         public void GHT4DecrAction(Player player)
         {
-            Base.Card.Monster mon = XI.LibTuple.ML.Decode(XI.LibTuple.ML.Encode("GHT4"));
+            Monster mon = XI.LibTuple.ML.Decode(XI.LibTuple.ML.Encode("GHT4"));
             if (mon != null)
                 mon.RAMUshort = 0;
         }

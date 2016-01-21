@@ -3162,7 +3162,7 @@ namespace PSD.PSDGamepkg.JNS
                 ushort who = ushort.Parse(argst.Substring(0, idx));
                 ushort card = ushort.Parse(argst.Substring(idx + 1));
                 XI.Board.ProtectedTux.Add(card);
-                XI.RaiseGMessage("G2FU,2," + who + "," + card);
+                XI.RaiseGMessage("G2FU,2," + who + ",C," + card);
                 player.RAMUshort = card;
                 //XI.InnerGMessage(fuse, 91);
             }

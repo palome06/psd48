@@ -1061,6 +1061,52 @@ namespace PSD.ClientZero
                     prevComment = ""; cancel = "";
                     roundInput = input;
                 }
+                else if (arg[0] == 'V')
+                {
+                    int idx = arg.IndexOf('~');
+                    int jdx = arg.IndexOf('(');
+                    int kdx = arg.IndexOf(')');
+                    string input;
+                    if (idx >= 1)
+                    {
+                        int r1 = int.Parse(Substring(arg, 1, idx));
+                        int r2 = int.Parse(Substring(arg, idx + 1, jdx));
+                        if (jdx >= 0)
+                        {
+                            string[] argv = Substring(arg, jdx + "(p".Length, kdx).Split('p');
+                            int[] uss = argv.Select(p => int.Parse(p)).ToArray();
+                            if (argv.Length < r1)
+                            {
+                                r1 = r2 = argv.Length;
+                                input = VI.Cin(Uid, "请选择{0}种属性为{1}目标，可选{2}{3}.", argv.Length, prevComment, zd.Prop(uss), cancel);
+                            }
+                            else
+                                input = VI.Cin(Uid, "请选择{0}至{1}种属性为{2}目标，可选{3}{4}.", r1, r2, prevComment, zd.Prop(uss), cancel);
+                            inputValid &= input.Split(',').Intersect(argv).Any();
+                        }
+                        else
+                            input = VI.Cin(Uid, "请选择{0}至{1}种属性为{2}目标{3}.", r1, r2, prevComment, cancel);
+                        inputValid &= !(CountItemFromComma(input) < r1 || CountItemFromComma(input) > r2);
+                    }
+                    else
+                    {
+                        int r = int.Parse(Substring(arg, 1, jdx));
+                        if (jdx >= 0)
+                        {
+                            string[] argv = Substring(arg, jdx + "(p".Length, kdx).Split('p');
+                            int[] uss = argv.Select(p => int.Parse(p)).ToArray();
+                            if (argv.Length < r)
+                                r = argv.Length;
+                            input = VI.Cin(Uid, "请选择{0}种属性为{1}目标，可选{2}{3}.", r, prevComment, zd.Prop(uss), cancel);
+                            inputValid &= input.Split(',').Intersect(argv).Any();
+                        }
+                        else
+                            input = VI.Cin(Uid, "请选择{0}种属性为{1}目标{2}.", r, prevComment, cancel);
+                        inputValid &= CountItemFromComma(input) == r;
+                    }
+                    prevComment = ""; cancel = "";
+                    roundInput = input;
+                }
                 else if (arg[0] == 'H')
                 {
                     int idx = arg.IndexOf('~');
@@ -1377,14 +1423,14 @@ namespace PSD.ClientZero
                         {
                             ushort from = ushort.Parse(args[i]);
                             ushort isLove = ushort.Parse(args[i + 1]);
-                            ushort prop = ushort.Parse(args[i + 2]);
+                            int prop = ushort.Parse(args[i + 2]);
                             ushort n = ushort.Parse(args[i + 3]);
                             ushort now = ushort.Parse(args[i + 4]);
                             string msgBase = "{0}HP" + ("E0IH" == args[0] ? "+" : "-") + "{1}({2}),当前HP={3}.";
                             if (isLove == 1)
                                 hpIssues.Add(string.Format(msgBase, zd.Player(from), n, "倾慕", now));
                             else
-                                hpIssues.Add(string.Format(msgBase, zd.Player(from), n, zd.Prop(prop), now));
+                                hpIssues.Add(string.Format(msgBase, zd.Player(from), n, zd.PropName(prop), now));
                             Z0D[from].HP = now;
                             if (now == n && "E0IH" == args[0])
                                 revive.Add(from);
@@ -1477,12 +1523,17 @@ namespace PSD.ClientZero
                 case "E0FU":
                     if (args[1].Equals("0"))
                     {
-                        char cardType = args[2][0];
-                        var ravs = Util.TakeRange(args, 3, args.Length).Select(p => ushort.Parse(p));
-                        if (cardType == 'C')
+                        string cardType = args[2];
+                        ushort[] ravs = Util.TakeRange(args, 3, args.Length)
+                            .Select(p => ushort.Parse(p)).ToArray();
+                        if (cardType == "C")
                             VI.Cout(Uid, "你观看了{0}.", zd.Tux(ravs));
-                        else if (cardType == 'M')
+                        else if (cardType == "M")
                             VI.Cout(Uid, "你观看了{0}.", zd.Monster(ravs));
+                        else if (cardType == "E")
+                            VI.Cout(Uid, "你观看了{0}.", zd.Eve(ravs));
+                        else if (cardType == "G")
+                            VI.Cout(Uid, "你观看了{0}.", zd.TuxDbSerial(ravs));
                     }
                     else if (args[1].Equals("1"))
                     {
@@ -1492,9 +1543,21 @@ namespace PSD.ClientZero
                     else if (args[1].Equals("2"))
                     {
                         ushort who = ushort.Parse(args[2]);
-                        ushort[] invs = Util.TakeRange(args, 3, args.Length)
+                        ushort[] invs = Util.TakeRange(args, 4, args.Length)
                             .Select(p => ushort.Parse(p)).ToArray();
-                        VI.Cout(Uid, "{0}展示了卡牌{1}.", who, zd.Tux(invs));
+                        string cardType = args[3];
+                        if (cardType == "C")
+                            VI.Cout(Uid, "{0}展示了卡牌{1}.", who, zd.Tux(invs));
+                        if (cardType == "M")
+                            VI.Cout(Uid, "{0}展示了卡牌{1}.", who, zd.Monster(invs));
+                        if (cardType == "E")
+                            VI.Cout(Uid, "{0}展示了卡牌{1}.", who, zd.Eve(invs));
+                        if (cardType == "G")
+                            VI.Cout(Uid, "{0}展示了卡牌{1}.", who, zd.TuxDbSerial(invs));
+                        if (cardType == "F")
+                            VI.Cout(Uid, "{0}声明了标记{1}.", who, zd.Rune(invs));
+                        if (cardType == "V")
+                            VI.Cout(Uid, "{0}声明了属性{1}.", who, zd.Prop(invs.Select(p => (int)p)));
                     }
                     else if (args[1].Equals("3"))
                         VI.Cout(Uid, "观看完毕.");

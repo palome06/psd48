@@ -3320,6 +3320,56 @@ namespace PSD.PSDGamepkg.JNS
         }
         #endregion TR025 - Liaori
         #region TR026 - Huaying
+        public bool JNT2601Valid(Player player, int type, string fuse)
+        {
+            if (type == 0)
+            {
+                return Artiad.Harm.Parse(fuse).Any(p => XI.Board.Garden[p.Who].Team == player.Team &&
+                    XI.Board.Garden[p.Who].IsTared && p.N > 0 && !HPEvoMask.IMMUNE_INVAO.IsSet(p.Mask) &&
+                    player.TokenExcl.Contains("V" + p.Element.Elem2Int()));
+            }
+            else if (type == 1)
+                return IsMathISOS("JNT2601", player, fuse);
+            else return false;
+        }
+        public void JNT2601Action(Player player, int type, string fuse, string argst)
+        {
+            if (type == 0)
+            {
+                int idx = argst.IndexOf(',');
+                ushort tar = ushort.Parse(argst.Substring(0, idx));
+                int elem = int.Parse(argst.Substring(idx + 1));
+                XI.RaiseGMessage("G0OJ," + player.Uid + ",1,1,V" + elem);
+                XI.RaiseGMessage("G2TZ,0," + player.Uid + ",V" + elem);
+
+                List<Artiad.Harm> harms = Artiad.Harm.Parse(fuse);
+                harms.RemoveAll(p => p.Who == tar && p.Element.Elem2Int() == elem);
+                if (harms.Count > 0)
+                    XI.InnerGMessage(Artiad.Harm.ToMessage(harms), -9);
+            }
+            else if (type == 1)
+            {
+                XI.RaiseGMessage("G0IJ," + player.Uid + ",1,5,V1,V2,V3,V4,V5");
+                XI.RaiseGMessage("G2TZ," + player.Uid + ",0,V1,V2,V3,V4,V5");
+            }
+        }
+        public string JNT2601Input(Player player, int type, string fuse, string prev)
+        {
+            if (type == 0 && prev == "")
+            {
+                return "#免伤,/T1(p" + string.Join("p", Artiad.Harm.Parse(fuse).Where(p =>
+                    XI.Board.Garden[p.Who].Team == player.Team && XI.Board.Garden[p.Who].IsTared &&
+                    p.N > 0 && !HPEvoMask.IMMUNE_INVAO.IsSet(p.Mask) &&
+                    player.TokenExcl.Contains("V" + p.Element.Elem2Int())).Select(p => p.Who).Distinct()) + ")";
+            }
+            else if (type == 0 && prev.IndexOf(',') < 0)
+            {
+                ushort who = ushort.Parse(prev);
+                return "#免疫属性,/V1(p" + string.Join("p", Artiad.Harm.Parse(fuse).Where(p => p.Who == who &&
+                    p.N > 0 && !HPEvoMask.IMMUNE_INVAO.IsSet(p.Mask)).Select(p => p.Element.Elem2Int()).ToList()) + ")";
+            }
+            else return "";
+        }
         public bool JNT2602Valid(Player player, int type, string fuse)
         {
             return player.RAMUshort == 0 && XI.Board.Garden.Values.Any(p => p.Team == player.Team && p.GetPetCount() > 0);
@@ -3338,7 +3388,7 @@ namespace PSD.PSDGamepkg.JNS
             {
                 Player op = XI.Board.GetOpponenet(player);
                 string monStr = XI.AsyncInput(op.Uid, "#弃置宠物,M1(p" + string.Join("p", XI.Board.Garden.Values
-                    .Where(p => p => p.Team == player.OppTeam && p.Pets[fiveIdx] != 0)
+                    .Where(p => p.Team == player.OppTeam && p.Pets[fiveIdx] != 0)
                     .Select(p => p.Pets[fiveIdx])) + ")", "JNT2602", "0");
                 if (monStr != VI.CinSentinel)
                 {
@@ -4071,7 +4121,7 @@ namespace PSD.PSDGamepkg.JNS
                 XI.RaiseGMessage("G0YM,2,0,0");
                 XI.RaiseGMessage("G0IJ," + player.Uid + ",1,1,E" + XI.Board.Eve);
 
-                XI.Board.MonDises.Remove(ut);
+                XI.Board.EveDises.Remove(ut);
                 XI.RaiseGMessage("G2CN,1,1");
                 XI.Board.Eve = ut;
 

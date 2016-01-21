@@ -93,6 +93,7 @@
     <Image x:Key="npcsnapNCT09" Source="PetsSnap/NCT09.png" ToolTip="NPC-TR瑕"/>
     <Image x:Key="npcsnapNCT13" Source="PetsSnap/NCT13.png" ToolTip="NPC-TR谢沧行"/>
     <Image x:Key="npcsnapNCT20" Source="PetsSnap/NCT20.png" ToolTip="NPC-TR雷元戈"/>
+    <Image x:Key="npcsnapNCT31" Source="PetsSnap/NCT31.png" ToolTip="NPC-TR洛昭言"/>
     <Image x:Key="npcsnapNCT33" Source="PetsSnap/NCT33.png" ToolTip="NPC-TR豆包"/>
     <Image x:Key="npcsnapNCT37" Source="PetsSnap/NCT37.png" ToolTip="NPC-TR嬴旭危"/>
 
@@ -184,15 +185,19 @@
     <Image x:Key="heroHead17023" Source="Heros/17023.png"/>
     <Image x:Key="heroHead17024" Source="Heros/17024.png"/>
     <Image x:Key="heroHead17025" Source="Heros/17025.png"/>
+    <Image x:Key="heroHead17026" Source="Heros/17026.png"/>
     <Image x:Key="heroHead17027" Source="Heros/17027.png"/>
     <Image x:Key="heroHead17028" Source="Heros/17028.png"/>
     <Image x:Key="heroHead17029" Source="Heros/17029.png"/>
+    <Image x:Key="heroHead17030" Source="Heros/17030.png"/>
+    <Image x:Key="heroHead17031" Source="Heros/17031.png"/>
     <Image x:Key="heroHead17032" Source="Heros/17032.png"/>
     <Image x:Key="heroHead17033" Source="Heros/17033.png"/>
     <Image x:Key="heroHead17034" Source="Heros/17034.png"/>
     <Image x:Key="heroHead17035" Source="Heros/17035.png"/>
     <Image x:Key="heroHead17036" Source="Heros/17036.png"/>
     <Image x:Key="heroHead17037" Source="Heros/17037.png"/>
+    <Image x:Key="heroHead17038" Source="Heros/17038.png"/>
     <Image x:Key="heroHead17039" Source="Heros/17039.png"/>
     <Image x:Key="heroHead17040" Source="Heros/17040.png"/>
     <Image x:Key="heroHead17041" Source="Heros/17041.png"/>
@@ -288,15 +293,19 @@
     <ImageBrush x:Key="nameBarTR023" ImageSource="NameBar/NameTR023.png"/>
     <ImageBrush x:Key="nameBarTR024" ImageSource="NameBar/NameTR024.png"/>
     <ImageBrush x:Key="nameBarTR025" ImageSource="NameBar/NameTR025.png"/>
+    <ImageBrush x:Key="nameBarTR026" ImageSource="NameBar/NameTR026.png"/>
     <ImageBrush x:Key="nameBarTR027" ImageSource="NameBar/NameTR027.png"/>
     <ImageBrush x:Key="nameBarTR028" ImageSource="NameBar/NameTR028.png"/>
     <ImageBrush x:Key="nameBarTR029" ImageSource="NameBar/NameTR029.png"/>
+    <ImageBrush x:Key="nameBarTR030" ImageSource="NameBar/NameTR030.png"/>
+    <ImageBrush x:Key="nameBarTR031" ImageSource="NameBar/NameTR031.png"/>
     <ImageBrush x:Key="nameBarTR032" ImageSource="NameBar/NameTR032.png"/>
     <ImageBrush x:Key="nameBarTR033" ImageSource="NameBar/NameTR033.png"/>
     <ImageBrush x:Key="nameBarTR034" ImageSource="NameBar/NameTR034.png"/>
     <ImageBrush x:Key="nameBarTR035" ImageSource="NameBar/NameTR035.png"/>
     <ImageBrush x:Key="nameBarTR036" ImageSource="NameBar/NameTR036.png"/>
     <ImageBrush x:Key="nameBarTR037" ImageSource="NameBar/NameTR037.png"/>
+    <ImageBrush x:Key="nameBarTR038" ImageSource="NameBar/NameTR038.png"/>
     <ImageBrush x:Key="nameBarTR039" ImageSource="NameBar/NameTR039.png"/>
     <ImageBrush x:Key="nameBarTR040" ImageSource="NameBar/NameTR040.png"/>
     <ImageBrush x:Key="nameBarTR041" ImageSource="NameBar/NameTR041.png"/>
@@ -480,9 +489,9 @@
     <Image x:Key="monCardGS01" Source="Card/NMB/GS01.png"/>
     <Image x:Key="monCardGS02" Source="Card/NMB/GS02.png"/>
     <Image x:Key="monCardGS03" Source="Card/NMB/GS03.png"/>
-    <Image x:Key="monCardGS04" Source="Card/NMB/GS04.png" ToolTip="水魔兽"/>
+    <Image x:Key="monCardGS04" Source="Card/NMB/GS04.png"/>
     <Image x:Key="monCardGH01" Source="Card/NMB/GH01.png"/>
-    <Image x:Key="monCardGH02" Source="Card/NMB/GH02.png" ToolTip="肥肥"/>
+    <Image x:Key="monCardGH02" Source="Card/NMB/GH02.png"/>
     <Image x:Key="monCardGH03" Source="Card/NMB/GH03.png"/>
     <Image x:Key="monCardGH04" Source="Card/NMB/GH04.png"/>
     <Image x:Key="monCardGL01" Source="Card/NMB/GL01.png"/>
@@ -577,15 +586,19 @@
     <Image x:Key="monCardNCT23" Source="Card/NMB/NCT23.png"/>
     <Image x:Key="monCardNCT24" Source="Card/NMB/NCT24.png"/>
     <Image x:Key="monCardNCT25" Source="Card/NMB/NCT25.png"/>
+    <Image x:Key="monCardNCT26" Source="Card/NMB/NCT26.png"/>
     <Image x:Key="monCardNCT27" Source="Card/NMB/NCT27.png"/>
     <Image x:Key="monCardNCT28" Source="Card/NMB/NCT28.png"/>
     <Image x:Key="monCardNCT29" Source="Card/NMB/NCT29.png"/>
+    <Image x:Key="monCardNCT30" Source="Card/NMB/NCT30.png"/>
+    <Image x:Key="monCardNCT31" Source="Card/NMB/NCT31.png"/>
     <Image x:Key="monCardNCT32" Source="Card/NMB/NCT32.png"/>
     <Image x:Key="monCardNCT33" Source="Card/NMB/NCT33.png"/>
     <Image x:Key="monCardNCT34" Source="Card/NMB/NCT34.png"/>
     <Image x:Key="monCardNCT35" Source="Card/NMB/NCT35.png"/>
     <Image x:Key="monCardNCT36" Source="Card/NMB/NCT36.png"/>
     <Image x:Key="monCardNCT37" Source="Card/NMB/NCT37.png"/>
+    <Image x:Key="monCardNCT38" Source="Card/NMB/NCT38.png"/>
     <Image x:Key="monCardNCT39" Source="Card/NMB/NCT39.png"/>
     <Image x:Key="monCardNCT40" Source="Card/NMB/NCT40.png"/>
     <Image x:Key="monCardNCT41" Source="Card/NMB/NCT41.png"/>
@@ -690,6 +703,14 @@
     <Image x:Key="diceImg5" Source="Card/Dices/Dice5.png"/>
     <Image x:Key="diceImg6" Source="Card/Dices/Dice6.png"/>
     <Image x:Key="diceImg7" Source="Card/Dices/Dice6Plus.png"/>
+	
+    <Image x:Key="fiveImg1" Source="Card/Five/WL01.png"/>
+    <Image x:Key="fiveImg2" Source="Card/Five/WL02.png"/>
+    <Image x:Key="fiveImg3" Source="Card/Five/WL03.png"/>
+    <Image x:Key="fiveImg4" Source="Card/Five/WL04.png"/>
+    <Image x:Key="fiveImg5" Source="Card/Five/WL05.png"/>
+    <Image x:Key="fiveImg6" Source="Card/Five/WL06.png"/>
+    <Image x:Key="fiveImg7" Source="Card/Five/WL07.png"/>
 
     <Image x:Key="hroCard000" Source="Card/Hro00.png"/>
     <Image x:Key="hroCardXJ101" Source="Card/Heros/XJ101.png"/>
@@ -760,9 +781,12 @@
     <Image x:Key="hroCardTR023" Source="Card/Heros/TR023.png"/>
     <Image x:Key="hroCardTR024" Source="Card/Heros/TR024.png"/>
     <Image x:Key="hroCardTR025" Source="Card/Heros/TR025.png"/>
+    <Image x:Key="hroCardTR026" Source="Card/Heros/TR026.png"/>
     <Image x:Key="hroCardTR027" Source="Card/Heros/TR027.png"/>
     <Image x:Key="hroCardTR028" Source="Card/Heros/TR028.png"/>
     <Image x:Key="hroCardTR029" Source="Card/Heros/TR029.png"/>
+    <Image x:Key="hroCardTR030" Source="Card/Heros/TR030.png"/>
+    <Image x:Key="hroCardTR031" Source="Card/Heros/TR031.png"/>
     <Image x:Key="hroCardTR032" Source="Card/Heros/TR032.png"/>
     <Image x:Key="hroCardTR033" Source="Card/Heros/TR033.png"/>
     <Image x:Key="hroCardTR034" Source="Card/Heros/TR034.png"/>

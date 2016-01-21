@@ -74,8 +74,6 @@ namespace PSD.ClientZero
         }
         internal string Tux(IEnumerable<ushort> cards)
         {
-            if (!cards.Any())
-                return "{}";
             return "{" + string.Join(",", cards.Select(p => Tux(p))) + "}";
         }
         internal string Tux(string cardName)
@@ -84,8 +82,6 @@ namespace PSD.ClientZero
         }
         internal string Tux(IEnumerable<string> cardNames)
         {
-            if (!cardNames.Any())
-                return "{}";
             return "{" + string.Join(",", cardNames.Select(p => Tux(p))) + "}";
         }
         internal string TuxDbSerial(ushort dbSerial)
@@ -94,8 +90,6 @@ namespace PSD.ClientZero
         }
         internal string TuxDbSerial(IEnumerable<ushort> dbSerials)
         {
-            if (!dbSerials.Any())
-                return "{}";
             return "{" + string.Join(",", dbSerials.Select(p => TuxDbSerial(p))) + "}";
         }
         internal string TuxAs(IDictionary<ushort, string> cards)
@@ -111,8 +105,6 @@ namespace PSD.ClientZero
         }
         internal string Player(IEnumerable<ushort> players)
         {
-            if (!players.Any())
-                return "{}";
             return "{" + string.Join(",", players.Select(p => Player(p))) + "}";
         }
         internal string PlayerWithMonster(IEnumerable<string> strings) // used only for Baiyue
@@ -130,11 +122,7 @@ namespace PSD.ClientZero
         }
         internal string Monster(IEnumerable<ushort> mons)
         {
-            if (!mons.Any())
-                return "{}";
-            var ma = mons.Select(p => Monster(p));
-            return "{" + string.Join(",", ma) + "}";
-            //return "{" + string.Join(",", mons.Select(p => Monster(p))) + "}";
+            return "{" + string.Join(",", mons.Select(p => Monster(p))) + "}";
         }
         internal string Eve(ushort eve)
         {
@@ -142,8 +130,6 @@ namespace PSD.ClientZero
         }
         internal string Eve(IEnumerable<ushort> eves)
         {
-            if (!eves.Any())
-                return "{}";
             return "{" + string.Join(",", eves.Select(p => Eve(p))) + "}";
         }
         internal string MixedCards(string code)
@@ -158,15 +144,14 @@ namespace PSD.ClientZero
                 return Monster(ushort.Parse(code.Substring("M".Length)));
             else if (code.StartsWith("E"))
                 return Eve(ushort.Parse(code.Substring("E".Length)));
+            else if (code.StartsWith("V"))
+                return Prop(ushort.Parse(code.Substring("V".Length)));
             else
                 return null;
         }
         internal string MixedCards(IEnumerable<string> codes)
         {
-            if (!codes.Any())
-                return "{}";
-            var co = codes.Select(p => MixedCards(p));
-            return "{" + string.Join(",", co) + "}";
+            return "{" + string.Join(",", codes.Select(p => MixedCards(p))) + "}";
         }
         internal string ExspI(int code)
         {
@@ -179,8 +164,6 @@ namespace PSD.ClientZero
         }
         internal string ExspIWithCode(IEnumerable<int> codes)
         {
-            if (!codes.Any())
-                return "{}";
             return "{" + string.Join(",", codes.Select(p => ExspIWithCode(p))) + "}";
         }
         internal object Guard(ushort code)
@@ -194,8 +177,6 @@ namespace PSD.ClientZero
         }
         internal string GuardWithCode(IEnumerable<int> codes)
         {
-            if (!codes.Any())
-                return "{}";
             return "{" + string.Join(",", codes.Select(p => GuardWithCode(p))) + "}";
         }
         internal string Rune(ushort code)
@@ -204,7 +185,6 @@ namespace PSD.ClientZero
         }
         internal string Rune(IEnumerable<ushort> codes)
         {
-            if (!codes.Any()) return "{}";
             return "{" + string.Join(",", codes.Select(p => Rune(p))) + "}";
         }
         internal string RuneWithCode(ushort code)
@@ -213,7 +193,6 @@ namespace PSD.ClientZero
         }
         internal string RuneWithCode(IEnumerable<ushort> codes)
         {
-            if (!codes.Any()) return "{}";
             return "{" + string.Join(",", codes.Select(p => RuneWithCode(p))) + "}";
         }
         internal string Hero(int hero)
@@ -222,10 +201,7 @@ namespace PSD.ClientZero
         }
         internal string Hero(IEnumerable<int> heros)
         {
-            if (!heros.Any())
-                return "{}";
-            var ho = heros.Select(p => Hero(p));
-            return "{" + string.Join(",", ho) + "}";
+            return "{" + string.Join(",", heros.Select(p => Hero(p))) + "}";
         }
         internal string HeroWithCode(int hero)
         {
@@ -336,7 +312,7 @@ namespace PSD.ClientZero
         {
             return HeroPeopleAlias(heros);
         }
-        internal string Prop(ushort prop)
+        internal string PropName(int prop)
         {
             switch (prop)
             {
@@ -350,6 +326,14 @@ namespace PSD.ClientZero
                 case 7: return "阳";
                 default: return "属性" + prop;
             }
+        }
+        internal string Prop(int prop)
+        {
+            return prop + ":" + PropName(prop);
+        }
+        internal string Prop(IEnumerable<int> groups)
+        {
+            return "(" + string.Join(",", groups.Select(p => Prop(p))) + "}";
         }
         internal string AnalysisAction(string mai, string typeStr)
         {

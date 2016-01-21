@@ -85,7 +85,7 @@ namespace PSD.PSDGamepkg
             if (dict.ContainsKey(key))
                 dict[key] += delta;
             else
-                dict.Add(key, 1);
+                dict.Add(key, delta);
         }
         public static T[] TakeRange<T>(T[] blocks, int jdx, int kdx)
         {

@@ -65,7 +65,7 @@ namespace PSD.PSDGamepkg
             //17029, 10206, 17005, 17040, 17027, 19003
             //19014, 17029, 19010, 19004, 19015, 17032
             //17035, 19002, 17044, 17019, 10605, 17036
-            17026, 19002, 17044, 17019, 17036, 17001
+            17044, 19002, 17026, 17019, 17036, 17001
         };
 
         private void DebugCondition()
@@ -324,7 +324,7 @@ namespace PSD.PSDGamepkg
             // RaiseGMessage("G0HD,1,1,0,30");
             // RaiseGMessage("G0HD,1,5,0,36");
             //RaiseGMessage("G0HD,1,6,0,16");
-            RaiseGMessage("G0HD,1,2,0,2");
+            //RaiseGMessage("G0HD,1,2,0,2");
             //RaiseGMessage("G0HD,1,2,0,31");
             // RaiseGMessage("G0HD,1,3,0,7");
             //RaiseGMessage("G0HD,1,3,0,12");
@@ -337,7 +337,7 @@ namespace PSD.PSDGamepkg
             RaiseGMessage("G0HD,1,1,0,5");
             //RaiseGMessage("G0IJ,1,1,2,E1,E2");
             //RaiseGMessage("G0HD,1,5,0,3");
-            //RaiseGMessage("G0HD,1,4,0,34");
+            RaiseGMessage("G0HD,1,4,0,34");
             //RaiseGMessage("G0HD,1,2,0,35");
             //RaiseGMessage("G0HQ,1,0,1,16,5,44,50");
             //RaiseGMessage("G0HQ,4,0,1,43");

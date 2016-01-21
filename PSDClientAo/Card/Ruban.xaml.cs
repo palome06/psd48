@@ -466,6 +466,16 @@ namespace PSD.ClientAo.Card
                     rb = new Ruban(uc.TryFindResource("runeCard000") as Image, ut);
                 rb.ToolTip = Tips.IchiDisplay.GetRuneTip(tuple, ut);
             }
+            else if (str.StartsWith("V"))
+            {
+                ushort ut = ushort.Parse(str.Substring("V".Length));
+                Image image = uc.TryFindResource("fiveImg" + ut) as Image;
+                if (image != null)
+                    rb = new Ruban(image, ut);
+                else
+                    rb = new Ruban(uc.TryFindResource("diceImg000") as Image, ut);
+                rb.ToolTip = Tips.IchiDisplay.GetFiveTip(tuple, ut);
+            }
             return rb;
         }
 

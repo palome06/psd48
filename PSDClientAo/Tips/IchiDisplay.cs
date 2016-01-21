@@ -292,11 +292,11 @@ namespace PSD.ClientAo.Tips
             switch (mon.Element)
             {
                 case FiveElement.AQUA: color = Colors.DeepSkyBlue; fiveText = "水"; break;
-                case FiveElement.AGNI: color = Colors.Red;fiveText = "火";  break;
+                case FiveElement.AGNI: color = Colors.Red; fiveText = "火"; break;
                 case FiveElement.THUNDER: color = Colors.Thistle; fiveText = "雷"; break;
-                case FiveElement.AERO: color = Colors.SpringGreen;fiveText = "风";  break;
-                case FiveElement.SATURN: color = Colors.Yellow;fiveText = "土";  break;
-                default: color = Colors.White;fiveText = "无属性"; break;
+                case FiveElement.AERO: color = Colors.SpringGreen; fiveText = "风"; break;
+                case FiveElement.SATURN: color = Colors.Yellow; fiveText = "土"; break;
+                default: color = Colors.White; fiveText = "无属性"; break;
             }
             pr.Inlines.Add(new Run(mon.Name)
             {
@@ -683,6 +683,68 @@ namespace PSD.ClientAo.Tips
                     FontSize = SSIZE
                 });
             }
+            trb.Document = new FlowDocument();
+            trb.Document.Blocks.Add(pr);
+
+            Grid gd2 = new Grid() { Width = 300 };
+            gd2.Children.Add(trb);
+            mainGrid.Children.Add(gd2);
+
+            ToolTip tt = new ToolTip();
+            tt.Content = mainGrid;
+            return tt;
+        }
+        public static ToolTip GetFiveTip(LibGroup Tuple, int fiveCode)
+        {
+            FiveElement five = FiveElementHelper.Int2Elem(fiveCode);
+            Color color = Colors.Yellow; string fiveText = "", desc = "";
+            switch (five)
+            {
+                case FiveElement.AQUA:
+                    color = Colors.DeepSkyBlue; fiveText = "水"; desc = "水之润下，无孔不入。"; break;
+                case FiveElement.AGNI:
+                    color = Colors.Red; fiveText = "火"; desc = "火之炎上，无物不焚。"; break;
+                case FiveElement.THUNDER:
+                    color = Colors.Thistle; fiveText = "雷"; desc = "雷之肃敛，无坚不摧。"; break;
+                case FiveElement.AERO:
+                    color = Colors.SpringGreen; fiveText = "风"; desc = "风之肆拂，无阻不透。"; break;
+                case FiveElement.SATURN:
+                    color = Colors.Yellow; fiveText = "土"; desc = "土之养化，无物不融。"; break;
+                case FiveElement.YINN:
+                    color = Colors.Gray; fiveText = "阴"; desc = "阴之倏忽，无壁不克。"; break;
+                case FiveElement.SOLARIS:
+                    color = Colors.Orange; fiveText = "阳"; desc = "阳之庄穆，无处不存。"; break;
+            }
+
+            Grid mainGrid = new Grid();
+            Grid gd1 = new Grid()
+            {
+                Background = new SolidColorBrush(Colors.Black),
+                Opacity = 0.6
+            };
+            gd1.Margin = new Thickness(-10);
+            mainGrid.Children.Add(gd1);
+
+            RichTextBox trb = new RichTextBox()
+            {
+                Background = new SolidColorBrush(Colors.Transparent),
+                FontFamily = new FontFamily("SimSun"),
+                BorderThickness = new Thickness(0)
+            };
+            Paragraph pr = new Paragraph() { Margin = new Thickness(0.0) };
+            pr.Inlines.Add(new Run(fiveText)
+            {
+                FontWeight = FontWeights.Bold,
+                Foreground = new SolidColorBrush(color),
+                FontSize = LSIZE
+            });
+            pr.Inlines.Add(new LineBreak());
+            pr.Inlines.Add(new LineBreak());
+            pr.Inlines.Add(new Run(desc)
+            {
+                Foreground = new SolidColorBrush(Colors.White),
+                FontSize = SSIZE
+            });
             trb.Document = new FlowDocument();
             trb.Document.Blocks.Add(pr);
 

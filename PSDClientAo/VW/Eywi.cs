@@ -484,6 +484,13 @@ namespace PSD.ClientAo.VW
                     }
                     line = string.Join(",", e0h);
                 }
+                else if (line.StartsWith("E0FU"))
+                {
+                    string[] e0fu = line.Split(',');
+                    if (e0fu[1] == "2")
+                        e0fu[2] += ",C";
+                    line = string.Join(",", e0fu);
+                }
             }
         }
         #endregion Version

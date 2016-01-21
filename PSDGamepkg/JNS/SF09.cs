@@ -125,6 +125,7 @@ namespace PSD.PSDGamepkg.JNS
             int[] vals = new int[] { -2, -1, 1, 2 }.Where(p => dv + p >= 1 && dv + p <= 6).ToArray();
             int idx = int.Parse(args) - 1;
             XI.RaiseGMessage("G0T7," + player.Uid + "," + dv + "," + (dv + vals[idx]));
+            XI.InnerGMessage("G0TT" + fuse.Substring(fuse.IndexOf(',')), 130); // Reraise the point again
         }
         public string SF07Input(Player player, string fuse, string prev)
         {

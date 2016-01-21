@@ -665,9 +665,10 @@ namespace PSD.PSDGamepkg
                     else if (type == 2)
                     {
                         ushort who = ushort.Parse(args[2]);
-                        ushort[] invs = Util.TakeRange(args, 3, args.Length)
+                        string cardType = args[3];
+                        ushort[] invs = Util.TakeRange(args, 4, args.Length)
                             .Select(p => ushort.Parse(p)).ToArray();
-                        WI.BCast("E0FU,2," + who + "," + string.Join(",", invs));
+                        WI.BCast("E0FU,2," + who + "," + cardType + "," + string.Join(",", invs));
                     }
                     else if (type == 3)
                         WI.BCast("E0FU,3");
@@ -2047,7 +2048,7 @@ namespace PSD.PSDGamepkg
                                     {
                                         //string rst = "R" + Board.Rounder.Uid + "ZD";
                                         //if (sktFuse.StartsWith(rst))
-                                        if (Board.InFight)
+                                        if (Board.InFightThrough)
                                         {
                                             RaiseGMessage("G1ZK,0," + me + "," + card);
                                             RaiseGMessage("G2ZU,1," + me + "," + card);
@@ -2756,7 +2757,7 @@ namespace PSD.PSDGamepkg
                             {
                                 //string rst = "R" + Board.Rounder.Uid + "ZD";
                                 //if (sktFuse.StartsWith(rst))
-                                if (Board.InFight)
+                                if (Board.InFightThrough)
                                 {
                                     RaiseGMessage("G1HK,0," + me + "," + mons);
                                     RaiseGMessage("G2HU," + me + "," + mons);

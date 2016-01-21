@@ -386,6 +386,21 @@ namespace PSD.ClientAo.VW
             AD.yfDeal.Deal.FinishTable();
             HideTip();
         }
+        internal string CinV(ushort uid, string prevComment, int r1, int r2,
+          IEnumerable<ushort> uss, bool cancellable, bool keep)
+        {
+            ShowTip(prevComment);
+            AD.yfDeal.Deal.Show(uss.Select(p => "V" + p), null, r1, r2, cancellable, keep);
+            string result = Cin(uid);
+            if (result != CinSentinel)
+                HideTip();
+            return result;
+        }
+        internal void OCinV()
+        {
+            AD.yfDeal.Deal.FinishTable();
+            HideTip();
+        }
 
         internal void Watch(ushort uid, IEnumerable<string> enumerable, string tvTag)
         {

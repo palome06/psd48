@@ -202,13 +202,13 @@ namespace PSD.PSDGamepkg.JNS
             if (player.Guardian == 18)
             {
                 string[] g0zw = fuse.Split(',');
-                return Util.TakeRange(g0zw, 1, g0zw.Length).Select(p => ushort.Parse(p))
+                return player.IsAlive && Util.TakeRange(g0zw, 1, g0zw.Length).Select(p => ushort.Parse(p))
                     .Any(p => XI.Board.Garden[p].Team == player.Team && p != player.Uid);
             }
             else if (player.Guardian == 19)
             {
-                return !XI.Board.Garden.Values.Any(p => p.Uid != player.Uid &&
-                 p.IsAlive && p.Team == player.Team);
+                return player.IsAlive && !XI.Board.Garden.Values.Any(p => p.Uid != player.Uid &&
+                    p.IsAlive && p.Team == player.Team);
             }
             else return false;
         }
@@ -345,7 +345,7 @@ namespace PSD.PSDGamepkg.JNS
             vals.Shuffle();
             ushort randomCard = vals[0];
 
-            XI.RaiseGMessage("G2FU,2," + ut + "," + randomCard);
+            XI.RaiseGMessage("G2FU,2," + ut + ",C," + randomCard);
             Tux tux = XI.LibTuple.TL.DecodeTux(randomCard);
             if (tux.Type == Tux.TuxType.JP)
                 Harm(player, new Player[] { player, tar }, 1);

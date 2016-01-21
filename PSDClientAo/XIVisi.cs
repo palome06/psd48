@@ -830,91 +830,6 @@ namespace PSD.ClientAo
                     prevComment = ""; cancel = "";
                     roundInput = input;
                 }
-                else if (arg[0] == 'E')
-                {
-                    int idx = arg.IndexOf('~');
-                    int jdx = arg.IndexOf('(');
-                    int kdx = arg.IndexOf(')');
-                    string input;
-                    if (idx >= 1)
-                    {
-                        int r1 = int.Parse(Substring(arg, 1, idx));
-                        int r2 = int.Parse(Substring(arg, idx + 1, jdx));
-                        if (jdx >= 0)
-                        {
-                            string[] argv = Substring(arg, jdx + "(p".Length, kdx).Split('p');
-                            List<ushort> uss = argv.Select(p => ushort.Parse(p)).ToList();
-                            string inst;
-                            if (argv.Length < r1)
-                            {
-                                r1 = r2 = argv.Length;
-                                inst = string.Format("请选择{0}张事件牌为{1}目标。", r1, prevComment);
-                            }
-                            else
-                                inst = string.Format("请选择{0}至{1}张事件牌为{2}目标。", r1, r2, prevComment);
-                            input = VI.CinE(Uid, inst, r1, r2, uss, cancellable, keep);
-                            inputValid &= input.Split(',').Intersect(argv).Any();
-                        }
-                        else
-                        {
-                            string inst = string.Format("请选择{0}至{1}张事件牌为{2}目标。", r1, r2, prevComment);
-                            input = VI.CinE(Uid, inst, r1, r2, null, cancellable, keep);
-                        }
-                        inputValid &= !(CountItemFromComma(input) < r1 || CountItemFromComma(input) > r2);
-                    }
-                    else
-                    {
-                        int r = int.Parse(Substring(arg, 1, jdx));
-                        if (jdx >= 0)
-                        {
-                            string[] argv = Substring(arg, jdx + "(p".Length, kdx).Split('p');
-                            List<ushort> uss = argv.Select(p => ushort.Parse(p)).ToList();
-                            if (argv.Length < r)
-                                r = argv.Length;
-                            string inst = string.Format("请选择{0}张事件牌为{1}目标。", r, prevComment);
-                            input = VI.CinE(Uid, inst, r, r, uss, cancellable, keep);
-                            inputValid &= input.Split(',').Intersect(argv).Any();
-                        }
-                        else
-                        {
-                            string inst = string.Format("请选择{0}张事件牌为{1}目标。", r, prevComment);
-                            input = VI.CinE(Uid, inst, r, r, null, cancellable, keep);
-                        }
-                        inputValid &= (CountItemFromComma(input) == r);
-                    }
-                    prevComment = ""; cancel = "";
-                    roundInput = input;
-                }
-                else if (arg[0] == 'H')
-                {
-                    int idx = arg.IndexOf('~');
-                    int jdx = arg.IndexOf('(');
-                    int kdx = arg.IndexOf(')');
-                    string input;
-                    VI.ShowTip(prevComment);
-                    int r1, r2;
-                    if (idx >= 1)
-                    {
-                        r1 = int.Parse(Substring(arg, 1, idx));
-                        r2 = int.Parse(Substring(arg, idx + 1, jdx));
-                    }
-                    else
-                        r1 = r2 = int.Parse(Substring(arg, 1, jdx));
-
-                    if (jdx >= 0)
-                    {
-                        string[] argv = Substring(arg, jdx + "(p".Length, kdx).Split('p');
-                        List<ushort> uss = argv.Select(p => ushort.Parse(p)).ToList();
-                        input = VI.CinH(Uid, prevComment, r1, r2, uss, false, false);
-                        inputValid &= input.Split(',').Intersect(argv).Any();
-                    }
-                    else { input = ""; inputValid = false; }
-                    //else
-                    //    input = VI.Cin(uid, "请选择{0}至{1}张角色牌为{2}目标{3}.", r1, r2, prevComment, cancel);
-                    inputValid &= !(CountItemFromComma(input) < r1 || CountItemFromComma(input) > r2);
-                    prevComment = ""; cancel = "";
-                    roundInput = input;
-                }
                 else if (arg[0] == 'Y') // Yes or not selection
                 {
                     int posCan = (int)(arg[1] - '0');
@@ -1156,6 +1071,62 @@ namespace PSD.ClientAo
                     prevComment = ""; cancel = "";
                     roundInput = input;
                 }
+
+                else if (arg[0] == 'E')
+                {
+                    int idx = arg.IndexOf('~');
+                    int jdx = arg.IndexOf('(');
+                    int kdx = arg.IndexOf(')');
+                    string input;
+                    if (idx >= 1)
+                    {
+                        int r1 = int.Parse(Substring(arg, 1, idx));
+                        int r2 = int.Parse(Substring(arg, idx + 1, jdx));
+                        if (jdx >= 0)
+                        {
+                            string[] argv = Substring(arg, jdx + "(p".Length, kdx).Split('p');
+                            List<ushort> uss = argv.Select(p => ushort.Parse(p)).ToList();
+                            string inst;
+                            if (argv.Length < r1)
+                            {
+                                r1 = r2 = argv.Length;
+                                inst = string.Format("请选择{0}张事件牌为{1}目标。", r1, prevComment);
+                            }
+                            else
+                                inst = string.Format("请选择{0}至{1}张事件牌为{2}目标。", r1, r2, prevComment);
+                            input = VI.CinE(Uid, inst, r1, r2, uss, cancellable, keep);
+                            inputValid &= input.Split(',').Intersect(argv).Any();
+                        }
+                        else
+                        {
+                            string inst = string.Format("请选择{0}至{1}张事件牌为{2}目标。", r1, r2, prevComment);
+                            input = VI.CinE(Uid, inst, r1, r2, null, cancellable, keep);
+                        }
+                        inputValid &= !(CountItemFromComma(input) < r1 || CountItemFromComma(input) > r2);
+                    }
+                    else
+                    {
+                        int r = int.Parse(Substring(arg, 1, jdx));
+                        if (jdx >= 0)
+                        {
+                            string[] argv = Substring(arg, jdx + "(p".Length, kdx).Split('p');
+                            List<ushort> uss = argv.Select(p => ushort.Parse(p)).ToList();
+                            if (argv.Length < r)
+                                r = argv.Length;
+                            string inst = string.Format("请选择{0}张事件牌为{1}目标。", r, prevComment);
+                            input = VI.CinE(Uid, inst, r, r, uss, cancellable, keep);
+                            inputValid &= input.Split(',').Intersect(argv).Any();
+                        }
+                        else
+                        {
+                            string inst = string.Format("请选择{0}张事件牌为{1}目标。", r, prevComment);
+                            input = VI.CinE(Uid, inst, r, r, null, cancellable, keep);
+                        }
+                        inputValid &= (CountItemFromComma(input) == r);
+                    }
+                    prevComment = ""; cancel = "";
+                    roundInput = input;
+                }
                 else if (arg[0] == 'H')
                 {
                     int idx = arg.IndexOf('~');
@@ -1208,6 +1179,89 @@ namespace PSD.ClientAo
                     prevComment = ""; cancel = "";
                     roundInput = input;
                 }
+                // Pending: cannot cancel case, not sure where it would be called or not
+                //else if (arg[0] == 'H')
+                //{
+                //    int idx = arg.IndexOf('~');
+                //    int jdx = arg.IndexOf('(');
+                //    int kdx = arg.IndexOf(')');
+                //    string input;
+                //    VI.ShowTip(prevComment);
+                //    int r1, r2;
+                //    if (idx >= 1)
+                //    {
+                //        r1 = int.Parse(Substring(arg, 1, idx));
+                //        r2 = int.Parse(Substring(arg, idx + 1, jdx));
+                //    }
+                //    else
+                //        r1 = r2 = int.Parse(Substring(arg, 1, jdx));
+
+                //    if (jdx >= 0)
+                //    {
+                //        string[] argv = Substring(arg, jdx + "(p".Length, kdx).Split('p');
+                //        List<ushort> uss = argv.Select(p => ushort.Parse(p)).ToList();
+                //        input = VI.CinH(Uid, prevComment, r1, r2, uss, false, false);
+                //        inputValid &= input.Split(',').Intersect(argv).Any();
+                //    }
+                //    else { input = ""; inputValid = false; }
+                //    //else
+                //    //    input = VI.Cin(uid, "请选择{0}至{1}张角色牌为{2}目标{3}.", r1, r2, prevComment, cancel);
+                //    inputValid &= !(CountItemFromComma(input) < r1 || CountItemFromComma(input) > r2);
+                //    prevComment = ""; cancel = "";
+                //    roundInput = input;
+                //}
+                else if (arg[0] == 'V')
+                {
+                    int idx = arg.IndexOf('~');
+                    int jdx = arg.IndexOf('(');
+                    int kdx = arg.IndexOf(')');
+                    string input;
+                    if (idx >= 1)
+                    {
+                        int r1 = int.Parse(Substring(arg, 1, idx));
+                        int r2 = int.Parse(Substring(arg, idx + 1, jdx));
+                        string inst;
+                        if (jdx >= 0)
+                        {
+                            string[] argv = Substring(arg, jdx + "(p".Length, kdx).Split('p');
+                            ushort[] uss = argv.Select(p => ushort.Parse(p)).ToArray();
+                            if (argv.Length < r1)
+                            {
+                                r1 = r2 = argv.Length;
+                                inst = string.Format("请选择{0}种属性为{1}目标.", argv.Length, prevComment);
+                            }
+                            else
+                                inst = string.Format("请选择{0}至{1}种属性为{2}目标.", r1, r2, prevComment);
+                            input = VI.CinV(Uid, inst, r1, r2, uss, cancellable, keep);
+                            inputValid &= input.Split(',').Intersect(argv).Any();
+                        }
+                        else
+                        {
+                            inst = string.Format("请选择{0}至{1}种属性为{2}目标.", r1, r2, prevComment);
+                            input = VI.CinV(Uid, inst, r1, r2, null, cancellable, keep);
+                        }
+                        inputValid &= !(CountItemFromComma(input) < r1 || CountItemFromComma(input) > r2);
+                    }
+                    else
+                    {
+                        int r = int.Parse(Substring(arg, 1, jdx));
+                        if (jdx >= 0)
+                        {
+                            string[] argv = Substring(arg, jdx + "(p".Length, kdx).Split('p');
+                            ushort[] uss = argv.Select(p => ushort.Parse(p)).ToArray();
+                            if (argv.Length < r)
+                                r = argv.Length;
+                            string inst = string.Format("请选择{0}种属性为{1}目标.", r, prevComment);
+                            input = VI.CinV(Uid, inst, r, r, uss, cancellable, keep);
+                            inputValid &= input.Split(',').Intersect(argv).Any();
+                        }
+                        else
+                            input = VI.Cin(Uid, "请选择{0}种属性为{1}目标{2}.", r, prevComment, cancel);
+                        inputValid &= CountItemFromComma(input) == r;
+                    }
+                    prevComment = ""; cancel = "";
+                    roundInput = input;
+                }
                 else if (arg[0] == '!')
                 {
                     roundInput = arg.Substring(1);
@@ -1234,6 +1288,10 @@ namespace PSD.ClientAo
                             VI.OCinI();
                         else if (ch == 'Q')
                             VI.OCinQ();
+                        else if (ch == 'E')
+                            VI.OCinE();
+                        else if (ch == 'V')
+                            VI.OCinV();
                     }
                     keepList.Clear();
                 }
@@ -1540,8 +1598,13 @@ namespace PSD.ClientAo
                         break;
                     }
                 case "E0QZ":
-                    VI.Cout(Uid, "{0}弃置卡牌{1}.", zd.Player(ushort.Parse(args[1])),
-                        zd.Tux(Util.TakeRange(args, 2, args.Length).Select(p => ushort.Parse(p))));
+                    {
+                        ushort from = ushort.Parse(args[1]);
+                        var cards = Util.TakeRange(args, 2, args.Length).Select(p => ushort.Parse(p)).ToList();
+                        VI.Cout(Uid, "{0}弃置卡牌{1}.", zd.Player(from), zd.Tux(cards));
+                        List<string> cedcards = cards.Select(p => "C" + p).ToList();
+                        A0O.FlyingGet(cedcards, from, 0);
+                    }
                     break;
                 case "E0IH":
                 case "E0OH":
@@ -1559,7 +1622,7 @@ namespace PSD.ClientAo
                             if (isLove == 1)
                                 hpIssues.Add(string.Format(msgBase, zd.Player(from), n, "倾慕", now));
                             else
-                                hpIssues.Add(string.Format(msgBase, zd.Player(from), n, zd.Prop(prop), now));
+                                hpIssues.Add(string.Format(msgBase, zd.Player(from), n, zd.PropName(prop), now));
                             A0P[from].HP = now;
                             if (now == n && "E0IH" == args[0])
                                 revive.Add(from);
@@ -1657,6 +1720,14 @@ namespace PSD.ClientAo
                         var ravs = Util.TakeRange(args, 3, args.Length)
                             .Select(p => ushort.Parse(p)).ToList();
                         VI.Watch(Uid, ravs.Select(p => cardType + p), "E0FU");
+                        if (cardType == "C")
+                            VI.Cout(Uid, "你观看了{0}.", zd.Tux(ravs));
+                        else if (cardType == "M")
+                            VI.Cout(Uid, "你观看了{0}.", zd.Monster(ravs));
+                        else if (cardType == "E")
+                            VI.Cout(Uid, "你观看了{0}.", zd.Eve(ravs));
+                        else if (cardType == "G")
+                            VI.Cout(Uid, "你观看了{0}.", zd.TuxDbSerial(ravs));
                     }
                     else if (args[1].Equals("1"))
                     {
@@ -1667,9 +1738,22 @@ namespace PSD.ClientAo
                     else if (args[1].Equals("2"))
                     {
                         ushort who = ushort.Parse(args[2]);
-                        List<ushort> invs = Util.TakeRange(args, 3, args.Length)
+                        string cardType = args[3];
+                        List<ushort> invs = Util.TakeRange(args, 4, args.Length)
                             .Select(p => ushort.Parse(p)).ToList();
-                        A0O.FlyingGet(invs.Select(p => "C" + p).ToList(), who, who, true);
+                        A0O.FlyingGet(invs.Select(p => cardType + p).ToList(), who, who, true);
+                        if (cardType == "C")
+                            VI.Cout(Uid, "{0}展示了卡牌{1}.", who, zd.Tux(invs));
+                        if (cardType == "M")
+                            VI.Cout(Uid, "{0}展示了卡牌{1}.", who, zd.Monster(invs));
+                        if (cardType == "E")
+                            VI.Cout(Uid, "{0}展示了卡牌{1}.", who, zd.Eve(invs));
+                        if (cardType == "G")
+                            VI.Cout(Uid, "{0}展示了卡牌{1}.", who, zd.TuxDbSerial(invs));
+                        if (cardType == "F")
+                            VI.Cout(Uid, "{0}声明了标记{1}.", who, zd.Rune(invs));
+                        if (cardType == "V")
+                            VI.Cout(Uid, "{0}声明了属性{1}.", who, zd.Prop(invs.Select(p => (int)p)));
                     }
                     else if (args[1].Equals("3"))
                         VI.OWatch(Uid, "E0FU");
@@ -2855,23 +2939,6 @@ namespace PSD.ClientAo
                                 zd.GuardAlias(A0P[who].SelectHero, 0)); // TODO: set as A0P[who].Coss
                     }
                     break;
-                case "E0PH":
-                    {
-                        string result = "";
-                        for (int i = 1; i < args.Length; i += 4)
-                        {
-                            ushort from = ushort.Parse(args[i]);
-                            ushort prop = ushort.Parse(args[i + 1]);
-                            ushort n = ushort.Parse(args[i + 2]);
-                            ushort now = ushort.Parse(args[i + 3]);
-                            result += string.Format("\n{0}HP流失-{1}({2})，当前HP={3}.",
-                                zd.Player(from), n, zd.Prop(prop), now);
-                            A0P[from].HP = now;
-                        }
-                        if (result != "")
-                            VI.Cout(Uid, result.Substring(1));
-                        break;
-                    }
                 case "E0ZJ":
                     {
                         ushort ut = ushort.Parse(args[1]);
