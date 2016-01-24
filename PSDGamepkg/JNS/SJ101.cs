@@ -424,9 +424,9 @@ namespace PSD.PSDGamepkg.JNS
 
             ushort pop = XI.Board.RestNPCPiles.Dequeue();
             NPC npc = XI.LibTuple.NL.Decode(NMBLib.OriginalNPC(pop));
-            XI.RaiseGMessage("G0YM,3," + pop + ",0");
+            XI.RaiseGMessage("G0YM,3," + pop);
             XI.RaiseGMessage("G1NI," + rd.Uid + "," + pop);
-            XI.Board.Monster1 = pop;
+            XI.Board.Wang = pop;
             UEchoCode r5ed = XI.HandleWithNPCEffect(py, npc, false);
             if (r5ed == UEchoCode.NO_OPTIONS)
                 XI.AsyncInput(rd.Uid, "//", "SJT07", "1");
@@ -435,10 +435,10 @@ namespace PSD.PSDGamepkg.JNS
             
             if (XI.Board.Monster1 != 0) // In case the NPC has been taken away
             {
-                XI.Board.Monster1 = 0;
+                XI.Board.Wang = 0;
                 XI.RaiseGMessage("G0ON,0,M,1," + pop);
             }
-            XI.RaiseGMessage("G0YM,3,0,0");
+            XI.RaiseGMessage("G0YM,3,0");
         }
         public void SJT08(Player rd)
         {
@@ -473,7 +473,7 @@ namespace PSD.PSDGamepkg.JNS
             {
                 ushort pop = XI.Board.RestNPCPiles.Dequeue();
                 NPC npc = XI.LibTuple.NL.Decode(NMBLib.OriginalNPC(pop));
-                XI.RaiseGMessage("G0YM,3," + pop + ",0");
+                XI.RaiseGMessage("G0YM,3," + pop);
                 XI.RaiseGMessage("G1NI," + rd.Uid + "," + pop);
                 int sr = npc.STR < 5 ? npc.STR : 5;
                 if (rd.Tux.Count > sr)
@@ -482,7 +482,7 @@ namespace PSD.PSDGamepkg.JNS
                     XI.RaiseGMessage("G0DH," + rd.Uid + ",0," + (sr - rd.Tux.Count));
                 //XI.Board.RestNPCDises.Add(pop);
                 XI.RaiseGMessage("G0ON,0,M,1," + pop);
-                XI.RaiseGMessage("G0YM,3,0,0");
+                XI.RaiseGMessage("G0YM,3,0");
             }
         }
         #endregion Package 5#

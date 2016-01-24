@@ -358,6 +358,38 @@ namespace PSD.ClientAo.VW
                         line = "E0FI,W,0," + pair.Key;
                     }
                 }
+                else if (line.StartsWith("E0ON"))
+                {
+                    string[] args = line.Split(',');
+                    for (int idx = 1; idx < args.Length;)
+                    {
+                        ushort fromZone = ushort.Parse(args[idx]);
+                        string cardType = args[idx + 1];
+                        int n = int.Parse(args[idx + 2]);
+                        if (n > 0 && cardType == "E")
+                        {
+                            for (int i = 0; i < n; ++i)
+                            {
+                                ushort ut = ushort.Parse(args[idx + 3 + i]);
+                                if (ut >= 7 && ut <= 30)
+                                    args[idx + 3 + i] = (ut + 1).ToString();
+                            }
+                        }
+                        idx += (3 + n);
+                    }
+                    line = string.Join(",", args);
+                }
+                else if (line.StartsWith("E0YM"))
+                {
+                    string[] args = line.Split(',');
+                    if (args[1] == "2")
+                    {
+                        ushort ut = ushort.Parse(args[2]);
+                        if (ut >= 7 && ut <= 30)
+                            args[2] = (ut + 1).ToString();
+                    }
+                    line = string.Join(",", args);
+                }
             }
             if (Version <= 137)
             {
@@ -386,6 +418,49 @@ namespace PSD.ClientAo.VW
                         string pick = args[2];
                         line = "E0YM,5," + pick;
                     }
+                }
+            }
+            if (Version <= 148)
+            {
+                if (line.StartsWith("E0ON"))
+                {
+                    string[] args = line.Split(',');
+                    for (int idx = 1; idx < args.Length;)
+                    {
+                        ushort fromZone = ushort.Parse(args[idx]);
+                        string cardType = args[idx + 1];
+                        int n = int.Parse(args[idx + 2]);
+                        if (n > 0 && cardType == "E")
+                        {
+                            for (int i = idx + 3; i < idx + 3 + n; ++i)
+                            {
+                                ushort ut = ushort.Parse(args[i]);
+                                switch (ut)
+                                {
+                                    case 39: args[2] = "40"; break;
+                                    case 40: args[2] = "41"; break;
+                                    case 41: args[2] = "43"; break;
+                                }
+                            }
+                        }
+                        idx += (3 + n);
+                    }
+                    line = string.Join(",", args);
+                }
+                else if (line.StartsWith("E0YM"))
+                {
+                    string[] args = line.Split(',');
+                    if (args[1] == "2")
+                    {
+                        ushort ut = ushort.Parse(args[2]);
+                        switch (ut)
+                        {
+                            case 39: args[2] = "40"; break;
+                            case 40: args[2] = "41"; break;
+                            case 41: args[2] = "43"; break;
+                        }
+                    }
+                    line = string.Join(",", args);
                 }
             }
             if (Version <= 149)
@@ -471,6 +546,57 @@ namespace PSD.ClientAo.VW
                             args[i] = npcUpdate(ushort.Parse(args[i]));
                         line = string.Join(",", args);
                     }
+                }
+            }
+            if (Version <= 150)
+            {
+                if (line.StartsWith("E0ON"))
+                {
+                    string[] args = line.Split(',');
+                    for (int idx = 1; idx < args.Length;)
+                    {
+                        ushort fromZone = ushort.Parse(args[idx]);
+                        string cardType = args[idx + 1];
+                        int n = int.Parse(args[idx + 2]);
+                        if (n > 0 && cardType == "E")
+                        {
+                            for (int i = idx + 3; i < idx + 3 + n; ++i)
+                            {
+                                ushort ut = ushort.Parse(args[i]);
+                                switch (ut)
+                                {
+                                    case 38: args[i] = "43"; break;
+                                    case 39: args[i] = "44"; break;
+                                    case 40: args[i] = "46"; break;
+                                    case 41: args[i] = "47"; break;
+                                    case 42: args[i] = "48"; break;
+                                    case 43: args[i] = "49"; break;
+                                }
+                            }
+                        }
+                        idx += (3 + n);
+                    }
+                    line = string.Join(",", args);
+                }
+                else if (line.StartsWith("E0YM"))
+                {
+                    string[] args = line.Split(',');
+                    if (args[1] == "2")
+                    {
+                        ushort ut = ushort.Parse(args[2]);
+                        switch (ut)
+                        {
+                            case 38: args[2] = "43"; break;
+                            case 39: args[2] = "44"; break;
+                            case 40: args[2] = "46"; break;
+                            case 41: args[2] = "47"; break;
+                            case 42: args[2] = "48"; break;
+                            case 43: args[2] = "49"; break;
+                        }
+                        line = string.Join(",", args);
+                    }
+                    else if (args[1] == "3")
+                        line = line.Substring(0, line.Length - ",0".Length);
                 }
             }
         }

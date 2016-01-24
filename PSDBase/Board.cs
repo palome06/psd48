@@ -72,7 +72,7 @@ namespace PSD.Base
         public ushort Monster2 { set; get; }
         public ushort Mon1From { set; get; }
         //public bool IsTangled { set; get; }
-        public ushort Neighborhood { set; get; } // NPC card in ex-NPC actions, cover the Monster1 here
+        public ushort Wang { set; get; } // NPC card in ex-NPC actions, cover the Monster1 here
         // Battler servers as a snapshot of Monster1, nothing to with the card
         public NMB Battler { set; get; }
         public ushort Eve { get; set; }

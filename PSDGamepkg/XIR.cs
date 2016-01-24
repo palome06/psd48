@@ -564,6 +564,13 @@ namespace PSD.PSDGamepkg
                                 if (Board.MonPiles.Count <= 0)
                                     RaiseGMessage("G1WJ,0");
                                 RecycleMonster(false, false);
+                                if (Board.Wang != 0)
+                                {
+                                    int wang = Board.Wang;
+                                    Board.Wang = 0;
+                                    RaiseGMessage("G0YM,3,0,0");
+                                    RaiseGMessage("G0ON,10,M,1," + wang);
+                                }
                                 if (Board.Eve != 0)
                                 {
                                     RaiseGMessage("G0ON,10,E,1," + Board.Eve);

@@ -2653,11 +2653,10 @@ namespace PSD.ClientAo
                         ushort npc = ushort.Parse(args[2]);
                         if (npc != 0)
                         {
-                            VI.Cout(Uid, "翻出NPC为【{0}】.", zd.Monster(npc));
+                            VI.Cout(Uid, "额外翻出的NPC为【{0}】.", zd.Monster(npc));
                             A0O.FlyingGet("M" + npc, 0, 0, true);
                         }
-                        A0F.Mon1From = ushort.Parse(args[3]);
-                        A0F.Monster1 = npc;
+                        A0F.Wang = npc;
                     }
                     else if (args[1] == "4")
                     {

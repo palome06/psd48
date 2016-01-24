@@ -645,6 +645,7 @@
     <Resource Include="Resources\Card\Eve\SJT10.png" />
     <Resource Include="Resources\Card\Eve\SJT11.png" />
     <Resource Include="Resources\Card\Eve\SJT12.png" />
+    <Resource Include="Resources\Card\Eve\SJT13.png" />
     <Resource Include="Resources\Card\Eve\SJT14.png" />
     <Resource Include="Resources\Card\Eve\SJT15.png" />
     <Resource Include="Resources\Card\Eve\SJT16.png" />
@@ -658,6 +659,7 @@
     <Resource Include="Resources\Card\Eve\SJH05.png" />
     <Resource Include="Resources\Card\Eve\SJH06.png" />
     <Resource Include="Resources\Card\Eve\SJH07.png" />
+    <Resource Include="Resources\Card\Eve\SJH09.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Card\NMB\GFT3.png" />
@@ -670,21 +672,33 @@
     <Resource Include="Resources\Card\NMB\GST4.png" />
     <Resource Include="Resources\Card\NMB\GTT3.png" />
     <Resource Include="Resources\Card\NMB\GTT4.png" />
+  </ItemGroup>
+  <ItemGroup>
     <Resource Include="Resources\Card\NMB\GSH1.png" />
     <Resource Include="Resources\Card\NMB\GSH2.png" />
     <Resource Include="Resources\Card\NMB\GSH3.png" />
     <Resource Include="Resources\Card\NMB\GHH1.png" />
+    <Resource Include="Resources\Card\NMB\GHH2.png" />
+    <Resource Include="Resources\Card\NMB\GLH1.png" />
     <Resource Include="Resources\Card\NMB\GLH2.png" />
     <Resource Include="Resources\Card\NMB\GFH1.png" />
     <Resource Include="Resources\Card\NMB\GFH2.png" />
     <Resource Include="Resources\Card\NMB\GTH1.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Card\NMB\GI01.png" />
     <Resource Include="Resources\Card\NMB\GI04.png" />
     <Resource Include="Resources\Card\NMB\GI05.png" />
+    <Resource Include="Resources\Card\NMB\GI06.png" />
 	<Resource Include="Resources\Card\NMB\GI07.png" />
 	<Resource Include="Resources\Card\NMB\GI08.png" />
 	<Resource Include="Resources\Card\NMB\GY01.png" />
 	<Resource Include="Resources\Card\NMB\GY02.png" />
+	<Resource Include="Resources\Card\NMB\GY03.png" />
+	<Resource Include="Resources\Card\NMB\GY04.png" />
+	<Resource Include="Resources\Card\NMB\GY05.png" />
 	<Resource Include="Resources\Card\NMB\GY06.png" />
+	<Resource Include="Resources\Card\NMB\GY07.png" />
 	<Resource Include="Resources\Card\NMB\GY08.png" />
   </ItemGroup>
   <ItemGroup>
@@ -698,21 +712,33 @@
     <Resource Include="Resources\PetsSnap\GST4.png" />
     <Resource Include="Resources\PetsSnap\GTT3.png" />
     <Resource Include="Resources\PetsSnap\GTT4.png" />
+  </ItemGroup>
+  <ItemGroup>
     <Resource Include="Resources\PetsSnap\GSH1.png" />
     <Resource Include="Resources\PetsSnap\GSH2.png" />
     <Resource Include="Resources\PetsSnap\GSH3.png" />
     <Resource Include="Resources\PetsSnap\GHH1.png" />
+    <Resource Include="Resources\PetsSnap\GHH2.png" />
+    <Resource Include="Resources\PetsSnap\GLH1.png" />
     <Resource Include="Resources\PetsSnap\GLH2.png" />
     <Resource Include="Resources\PetsSnap\GFH1.png" />
     <Resource Include="Resources\PetsSnap\GFH2.png" />
     <Resource Include="Resources\PetsSnap\GTH1.png" />
+  </ItemGroup>
+  <ItemGroup>
+	<Resource Include="Resources\PetsSnap\GI01.png" />
     <Resource Include="Resources\PetsSnap\GI04.png" />
     <Resource Include="Resources\PetsSnap\GI05.png" />
+	<Resource Include="Resources\PetsSnap\GI06.png" />
 	<Resource Include="Resources\PetsSnap\GI07.png" />
 	<Resource Include="Resources\PetsSnap\GI08.png" />
 	<Resource Include="Resources\PetsSnap\GY01.png" />
 	<Resource Include="Resources\PetsSnap\GY02.png" />
+	<Resource Include="Resources\PetsSnap\GY03.png" />
+	<Resource Include="Resources\PetsSnap\GY04.png" />
+	<Resource Include="Resources\PetsSnap\GY05.png" />
 	<Resource Include="Resources\PetsSnap\GY06.png" />
+	<Resource Include="Resources\PetsSnap\GY07.png" />
 	<Resource Include="Resources\PetsSnap\GY08.png" />
   </ItemGroup>
   <ItemGroup>

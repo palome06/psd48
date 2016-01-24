@@ -11,7 +11,7 @@ namespace PSD.Base.Card
         // avatar = serial, (e.g.) 30502
         //public int Avatar { private set; get; }
         public string Code { private set; get; }
-        public int Count { private set; get; }
+        public ushort[] Range { private set; get; }
 
         public string Background { private set; get; }
         public string Description { private set; get; }
@@ -36,11 +36,12 @@ namespace PSD.Base.Card
             return (mSpi & 0x4) != 0;
         }
 
-        internal Evenement(string name, string code, int count, int group, int genre,
+        internal Evenement(string name, string code, string range, int group, int genre,
             string background, string description, string spis)
         {
             this.Name = name; this.Code = code;
-            this.Count = count; this.Background = background;
+            Range = range.Split(',').Select(p => ushort.Parse(p)).ToArray();
+            this.Background = background;
             this.Group = group; this.Genre = genre;
             this.Description = description;
             //this.Action += new ActionDelegate();
@@ -121,11 +122,6 @@ namespace PSD.Base.Card
         //    else
         //        return null;
         //}
-        public void ForceChange(string field, object value)
-        {
-            if (field == "Count" && value is ushort)
-                Count = (ushort)value;
-        }
     }
 
     public class EvenementLib
@@ -141,7 +137,7 @@ namespace PSD.Base.Card
             firsts = new List<Evenement>();
             sql = new Utils.ReadonlySQL("psd.db3");
             List<string> list = new string[] {
-                "CODE", "VALID", "NAME", "COUNT", "BACKGROUND", "EFFECT", "SPI", "GENRE"
+                "CODE", "VALID", "NAME", "RANGE", "BACKGROUND", "EFFECT", "SPI", "GENRE"
             }.ToList();
             System.Data.DataRowCollection datas = sql.Query(list, "Eve");
             foreach (System.Data.DataRow data in datas)
@@ -152,11 +148,11 @@ namespace PSD.Base.Card
                     string code = (string)data["CODE"];
                     string name = (string)data["NAME"];
                     int genre = (int)((long)data["GENRE"]);
-                    ushort count = (ushort)((short)data["COUNT"]);
+                    string range = (string)data["RANGE"];
                     string bg = (string)data["BACKGROUND"];
                     string effect = (string)data["EFFECT"];
                     string spis = (string)data["SPI"];
-                    firsts.Add(new Evenement(name, code, count, valid, genre, bg, effect, spis));
+                    firsts.Add(new Evenement(name, code, range, valid, genre, bg, effect, spis));
                 }
             }
             dicts = new Dictionary<ushort, Evenement>();
@@ -202,11 +198,11 @@ namespace PSD.Base.Card
         }
         public void Refresh()
         {
-            dicts.Clear(); ushort cardx = 1;
+            dicts.Clear();
             foreach (Evenement eve in firsts)
             {
-                for (int i = 0; i < eve.Count; ++i)
-                    dicts.Add(cardx++, eve);
+                for (ushort i = eve.Range[0]; i <= eve.Range[1]; ++i)
+                    dicts.Add(i, eve);
             }
         }
     }

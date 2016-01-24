@@ -2371,7 +2371,7 @@ namespace PSD.ClientZero
                         ushort npc = ushort.Parse(args[2]);
                         if (npc != 0)
                             VI.Cout(Uid, "翻出的NPC牌为【{0}】.", zd.Monster(npc));
-                        Z0F.Monster1 = npc;
+                        // Z0F.Wang = npc;
                     }
                     else if (args[1] == "4")
                     {

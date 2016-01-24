@@ -40,14 +40,6 @@ namespace PSD.ClientAo
             //}
             if (version <= 148)
             {
-                Base.Card.Evenement eve = tuple.EL.GetEveFromName("SJT12");
-                if (eve != null)
-                    eve.ForceChange("Count", (ushort)0);
-                eve = tuple.EL.GetEveFromName("SJT16");
-                if (eve != null)
-                    eve.ForceChange("Count", (ushort)0);
-                tuple.EL.Refresh();
-
                 Skill skill = tuple.SL.EncodeSkill("JNH1001");
                 if (skill != null)
                     skill.ForceChange("Name", "灵水咒");
@@ -69,10 +61,6 @@ namespace PSD.ClientAo
             }
             if (version <= 131)
             {
-                Base.Card.Evenement eve = tuple.EL.GetEveFromName("SJ104");
-                if (eve != null)
-                    eve.ForceChange("Count", (ushort)1);
-                tuple.EL.Refresh();
                 Skill skill = tuple.SL.EncodeSkill("JNH1102");
                 if (skill != null)
                 {

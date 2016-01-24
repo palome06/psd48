@@ -165,7 +165,7 @@ namespace PSD.ClientAo
             get { return mPoolAo; }
         }
 
-        private ushort mMon1, mMon2, mEve1;
+        private ushort mMon1, mMon2, mEve1, mWang;
         private void SetMonster(ushort value, int rank, ushort from)
         {
             Image boardImage = (rank == 1) ? pb.cornerMon1 : pb.cornerMon2;
@@ -205,7 +205,8 @@ namespace PSD.ClientAo
                 if (mMon1 != value)
                 {
                     mMon1 = value;
-                    SetMonster(value, 1, Mon1From);
+                    if (Wang == 0)
+                        SetMonster(value, 1, Mon1From);
                 }
             }
             get { return mMon1; }
@@ -258,6 +259,18 @@ namespace PSD.ClientAo
             get { return mEve1; }
         }
         public ushort Eve1From { set; get; }
+        public ushort Wang // Wang would overhind the monster1
+        {
+            set
+            {
+                mWang = value;
+                if (value != 0)
+                    SetMonster(value, 1, 0);
+                else
+                    SetMonster(Monster1, 1, Mon1From);
+            }
+            get { return mWang; }
+        }
 
         public ushort Supporter { set; get; }
         public ushort Hinder { set; get; }

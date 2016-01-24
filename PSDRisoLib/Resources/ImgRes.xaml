@@ -71,18 +71,26 @@
     <Image x:Key="petsnapGSH2" Source="PetsSnap/GSH2.png" ToolTip="冰煌"/>
     <Image x:Key="petsnapGSH3" Source="PetsSnap/GSH3.png" ToolTip="水菱晶"/>
     <Image x:Key="petsnapGHH1" Source="PetsSnap/GHH1.png" ToolTip="小青龙"/>
+    <Image x:Key="petsnapGHH2" Source="PetsSnap/GHH2.png" ToolTip="毕方"/>
+    <Image x:Key="petsnapGLH1" Source="PetsSnap/GLH1.png" ToolTip="雷刑"/>
     <Image x:Key="petsnapGLH2" Source="PetsSnap/GLH2.png" ToolTip="幻影戟兵"/>
     <Image x:Key="petsnapGFH1" Source="PetsSnap/GFH1.png" ToolTip="无相天妖"/>
     <Image x:Key="petsnapGFH2" Source="PetsSnap/GFH2.png" ToolTip="大眼蛙"/>
     <Image x:Key="petsnapGTH1" Source="PetsSnap/GTH1.png" ToolTip="木桩"/>
 	
+    <Image x:Key="petsnapGI01" Source="PetsSnap/GI01.png" ToolTip="TR鬼将军"/>
     <Image x:Key="petsnapGI04" Source="PetsSnap/GI04.png" ToolTip="TR魅召"/>
     <Image x:Key="petsnapGI05" Source="PetsSnap/GI05.png" ToolTip="TR淮南王"/>
+    <Image x:Key="petsnapGI06" Source="PetsSnap/GI06.png" ToolTip="TR骨蛇"/>
     <Image x:Key="petsnapGI07" Source="PetsSnap/GI07.png" ToolTip="TR戾枭"/>
     <Image x:Key="petsnapGI08" Source="PetsSnap/GI08.png" ToolTip="TR楼兰王"/>
     <Image x:Key="petsnapGY01" Source="PetsSnap/GY01.png" ToolTip="TR衔烛之龙"/>
     <Image x:Key="petsnapGY02" Source="PetsSnap/GY02.png" ToolTip="TR包子"/>
+    <Image x:Key="petsnapGY03" Source="PetsSnap/GY03.png" ToolTip="TR三皇"/>
+    <Image x:Key="petsnapGY04" Source="PetsSnap/GY04.png" ToolTip="TR噬珊鬼蛰"/>
+    <Image x:Key="petsnapGY05" Source="PetsSnap/GY05.png" ToolTip="TR虹鼯"/>
     <Image x:Key="petsnapGY06" Source="PetsSnap/GY06.png" ToolTip="TR鳄齿巨蜥"/>
+    <Image x:Key="petsnapGY07" Source="PetsSnap/GY07.png" ToolTip="TR忘尘司命"/>
     <Image x:Key="petsnapGY08" Source="PetsSnap/GY08.png" ToolTip="TR归墟界督"/>
 
     <Image x:Key="npcsnapNC101" Source="PetsSnap/NC101.png" ToolTip="NPC李逍遥"/>
@@ -480,6 +488,7 @@
     <Image x:Key="eveCardSJT10" Source="Card/Eve/SJT10.png"/>
     <Image x:Key="eveCardSJT11" Source="Card/Eve/SJT11.png"/>
     <Image x:Key="eveCardSJT12" Source="Card/Eve/SJT12.png"/>
+    <Image x:Key="eveCardSJT13" Source="Card/Eve/SJT13.png"/>
     <Image x:Key="eveCardSJT14" Source="Card/Eve/SJT14.png"/>
     <Image x:Key="eveCardSJT15" Source="Card/Eve/SJT15.png"/>
     <Image x:Key="eveCardSJT16" Source="Card/Eve/SJT16.png"/>
@@ -492,6 +501,7 @@
     <Image x:Key="eveCardSJH05" Source="Card/Eve/SJH05.png"/>
     <Image x:Key="eveCardSJH06" Source="Card/Eve/SJH06.png"/>
     <Image x:Key="eveCardSJH07" Source="Card/Eve/SJH07.png"/>
+    <Image x:Key="eveCardSJH09" Source="Card/Eve/SJH09.png"/>
 
     <BitmapImage x:Key="monCard000src" UriSource="Card/Mon00.png"/>
     <Image x:Key="monCard000" Source="Card/Mon00.png"/>
@@ -589,13 +599,19 @@
     <Image x:Key="monCardNCT17" Source="Card/NMB/NCT17.png"/>
     <Image x:Key="monCardNCT18" Source="Card/NMB/NCT18.png"/>
 	
+	<Image x:Key="monCardGI01" Source="Card/NMB/GI01.png"/>
     <Image x:Key="monCardGI04" Source="Card/NMB/GI04.png"/>
 	<Image x:Key="monCardGI05" Source="Card/NMB/GI05.png"/>
+	<Image x:Key="monCardGI06" Source="Card/NMB/GI06.png"/>
 	<Image x:Key="monCardGI07" Source="Card/NMB/GI07.png"/>
 	<Image x:Key="monCardGI08" Source="Card/NMB/GI08.png"/>
     <Image x:Key="monCardGY01" Source="Card/NMB/GY01.png"/>
 	<Image x:Key="monCardGY02" Source="Card/NMB/GY02.png"/>
+    <Image x:Key="monCardGY03" Source="Card/NMB/GY03.png"/>
+	<Image x:Key="monCardGY04" Source="Card/NMB/GY04.png"/>
+    <Image x:Key="monCardGY05" Source="Card/NMB/GY05.png"/>
 	<Image x:Key="monCardGY06" Source="Card/NMB/GY06.png"/>
+	<Image x:Key="monCardGY07" Source="Card/NMB/GY07.png"/>
 	<Image x:Key="monCardGY08" Source="Card/NMB/GY08.png"/>
     <Image x:Key="monCardNCT19" Source="Card/NMB/NCT19.png"/>
     <Image x:Key="monCardNCT20" Source="Card/NMB/NCT20.png"/>
@@ -629,6 +645,8 @@
     <Image x:Key="monCardGSH2" Source="Card/NMB/GSH2.png"/>
     <Image x:Key="monCardGSH3" Source="Card/NMB/GSH3.png"/>
     <Image x:Key="monCardGHH1" Source="Card/NMB/GHH1.png"/>
+    <Image x:Key="monCardGHH2" Source="Card/NMB/GHH2.png"/>
+    <Image x:Key="monCardGLH1" Source="Card/NMB/GLH1.png"/>
     <Image x:Key="monCardGLH2" Source="Card/NMB/GLH2.png"/>
     <Image x:Key="monCardGFH1" Source="Card/NMB/GFH1.png"/>
     <Image x:Key="monCardGFH2" Source="Card/NMB/GFH2.png"/>
