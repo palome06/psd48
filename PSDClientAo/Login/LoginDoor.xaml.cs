@@ -162,7 +162,7 @@ namespace PSD.ClientAo.Login
             {
                 string text = label.Content as string;
                 int idx = text.IndexOf(' ');
-                selectedRoom = int.Parse(Util.Substring(text, 0, idx));
+                selectedRoom = int.Parse(Base.Utils.Algo.Substring(text, 0, idx));
             }
             else
                 selectedRoom = 0;

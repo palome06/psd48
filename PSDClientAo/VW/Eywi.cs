@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
+using Algo = PSD.Base.Utils.Algo;
 
 namespace PSD.ClientAo.VW
 {
@@ -128,7 +128,7 @@ namespace PSD.ClientAo.VW
         // e.g. Target event
         public bool IsClogFreeUIEvent(string message)
         {
-            string head = Util.Substring(message, 0, message.IndexOf(','));
+            string head = Algo.Substring(message, 0, message.IndexOf(','));
             string[] clogfrees = new string[] { "E0AS", "E0YS" };
             return clogfrees.Contains(head);
         }
@@ -146,19 +146,19 @@ namespace PSD.ClientAo.VW
                         int nextIdx = idx + 18;
                         int excdsz = int.Parse(blocks[nextIdx]);
                         nextIdx += 1;
-                        //List<ushort> excards = Util.TakeRange(blocks, nextIdx,
+                        //List<ushort> excards = Algo.TakeRange(blocks, nextIdx,
                         //    nextIdx + excdsz).Select(p => ushort.Parse(p)).ToList();
                         nextIdx += excdsz;
                         int fakeqsz = int.Parse(blocks[nextIdx]);
                         nextIdx += 1;
-                        //List<ushort> fakeqs = Util.TakeRange(blocks, nextIdx,
+                        //List<ushort> fakeqs = Algo.TakeRange(blocks, nextIdx,
                         //    nextIdx + fakeqsz).Select(p => ushort.Parse(p)).ToList();
                         nextIdx += fakeqsz;
                         int token = int.Parse(blocks[nextIdx]);
                         nextIdx += 1;
                         int peoplesz = int.Parse(blocks[nextIdx]);
                         nextIdx += 1;
-                        //List<string> peoples = Util.TakeRange(blocks, nextIdx,
+                        //List<string> peoples = Algo.TakeRange(blocks, nextIdx,
                         //    nextIdx + peoplesz).ToList();
                         nextIdx += peoplesz;
 
@@ -167,7 +167,7 @@ namespace PSD.ClientAo.VW
 
                         int escuesz = int.Parse(blocks[nextIdx]);
                         nextIdx += 1;
-                        //List<ushort> escues = Util.TakeRange(blocks, nextIdx,
+                        //List<ushort> escues = Algo.TakeRange(blocks, nextIdx,
                         //    nextIdx + escuesz).Select(p => ushort.Parse(p)).ToList();
                         nextIdx += escuesz;
 
@@ -243,7 +243,7 @@ namespace PSD.ClientAo.VW
                     if (ch!= '\0')
                     {
                         line = "E0ON,10," + ch + "," + (args.Length - 2) + ","
-                            + string.Join(",", Util.TakeRange(args, 2, args.Length));
+                            + string.Join(",", Algo.TakeRange(args, 2, args.Length));
                     }
                 }
                 else if (line.StartsWith("E0CC"))
@@ -289,38 +289,6 @@ namespace PSD.ClientAo.VW
                         }
                     }
                 }
-                else if (line.StartsWith("H09G"))
-                {
-                    string[] blocks = line.Split(',');
-                    for (int idx = 1; idx < blocks.Length; )
-                    {
-                        blocks[idx + 12] = "0," + blocks[idx + 12] + ",0"; // insert trove and lug into exq;
-
-                        int nextIdx = idx + 18;
-                        int excdsz = int.Parse(blocks[nextIdx]);
-                        nextIdx += 1;
-                        nextIdx += excdsz;
-                        int fakeqsz = int.Parse(blocks[nextIdx]);
-                        nextIdx += 1;
-                        for (int i = nextIdx; i < nextIdx + fakeqsz; ++i)
-                            blocks[i] = blocks[i] + ",0";
-                        nextIdx += fakeqsz;
-                        int token = int.Parse(blocks[nextIdx]);
-                        nextIdx += 1;
-                        int peoplesz = int.Parse(blocks[nextIdx]);
-                        nextIdx += 1;
-                        nextIdx += peoplesz;
-                        int tarsz = int.Parse(blocks[nextIdx]);
-                        nextIdx += 1;
-                        nextIdx += tarsz;
-                        blocks[nextIdx] = "0,0," + blocks[nextIdx]; // insert awake and folder into escuesz
-                        int escuesz = int.Parse(blocks[nextIdx]);
-                        nextIdx += 1;
-                        nextIdx += escuesz;
-                        idx = nextIdx;
-                    }
-                    line = string.Join(",", blocks);
-                }
                 else if (line.StartsWith("H09F"))
                     line += ",0";
             }
@@ -341,56 +309,10 @@ namespace PSD.ClientAo.VW
             {
                 if (line.StartsWith("E0IE") || line.StartsWith("E0OE"))
                     line = line.Substring(0, "E0IE".Length) + ",0," + line.Substring("E0IE,".Length);
-                else if (line.StartsWith("H09G"))
-                {
-                    string[] blocks = line.Split(',');
-                    for (int idx = 1; idx < blocks.Length; )
-                    {
-                        int lugsz = int.Parse(blocks[idx + 14]);
-                        int nextIdx = idx + 15;
-                        nextIdx += lugsz;
-                        blocks[nextIdx] = "0,0," + blocks[nextIdx];
-                        nextIdx += 5;
-                        int excdsz = int.Parse(blocks[nextIdx]);
-                        nextIdx += 1;
-                        List<ushort> excards = Util.TakeRange(blocks, nextIdx,
-                            nextIdx + excdsz).Select(p => ushort.Parse(p)).ToList();
-                        nextIdx += excdsz;
-                        int fakeqsz = int.Parse(blocks[nextIdx]);
-                        nextIdx += 1;
-                        List<string> fakeqpairs = Util.TakeRange(blocks, nextIdx,
-                            nextIdx + fakeqsz * 2).ToList();
-                        nextIdx += fakeqsz * 2;
-                        int token = int.Parse(blocks[nextIdx]);
-                        nextIdx += 1;
-                        int peoplesz = int.Parse(blocks[nextIdx]);
-                        nextIdx += 1;
-                        List<string> peoples = Util.TakeRange(blocks, nextIdx,
-                            nextIdx + peoplesz).ToList();
-                        nextIdx += peoplesz;
-                        int tarsz = int.Parse(blocks[nextIdx]);
-                        nextIdx += 1;
-                        List<ushort> tars = Util.TakeRange(blocks, nextIdx,
-                            nextIdx + tarsz).Select(p => ushort.Parse(p)).ToList();
-                        nextIdx += tarsz;
-                        bool awake = blocks[nextIdx] == "1";
-                        nextIdx += 1;
-                        int foldsz = int.Parse(blocks[nextIdx]);
-                        nextIdx += 1;
-                        int escuesz = int.Parse(blocks[nextIdx]);
-                        nextIdx += 1;
-                        List<ushort> escues = Util.TakeRange(blocks, nextIdx,
-                            nextIdx + escuesz).Select(p => ushort.Parse(p)).ToList();
-                        nextIdx += escuesz;
-
-                        idx = nextIdx;
-                    }
-                    line = string.Join(",", blocks);
-                }
             }
             if (Version <= 131)
             {
-                if (line[0] == 'R' && Util.Substring(line, 2, 5) == "ZW7")
+                if (line[0] == 'R' && Algo.Substring(line, 2, 5) == "ZW7")
                 {
                     string[] args = line.Substring("R#ZW7,".Length).Split(',');
                     if (args[0] == "1")
@@ -439,7 +361,7 @@ namespace PSD.ClientAo.VW
             }
             if (Version <= 137)
             {
-                if (line[0] == 'R' && Util.Substring(line, 2, 4) == "Z3")
+                if (line[0] == 'R' && Algo.Substring(line, 2, 4) == "Z3")
                     line = "E0FI,U,0";
             }
             if (Version <= 145)
@@ -481,6 +403,8 @@ namespace PSD.ClientAo.VW
                             e0h[i + 1] = "0,0";
                         else if (elemCode == 9)
                             e0h[i + 1] = "1,0";
+                        else
+                            e0h[i + 1] = "0," + e0h[i + 1];
                     }
                     line = string.Join(",", e0h);
                 }
@@ -490,6 +414,63 @@ namespace PSD.ClientAo.VW
                     if (e0fu[1] == "2")
                         e0fu[2] += ",C";
                     line = string.Join(",", e0fu);
+                }
+
+                int[] avatarBase = new int[] { 37, 39, 40, 41, 42, 43, 44, 45 };
+                Func<int, int> offset = v => v == 45 ? 37 : (v + 1);
+                string sline = line;
+                string[] hin = { "IY", "OY", "IJ", "OJ", "IV", "OV", "YM" };
+                if (line.StartsWith("H") || hin.Any(p => sline.StartsWith("E0" + p)))
+                {
+                    foreach (int ab in avatarBase)
+                        line = line.Replace("170" + ab, "1^7^0" + ab);
+                    foreach (int ab in avatarBase)
+                        line = line.Replace("1^7^0" + ab, "170" + offset(ab));
+                }
+                string[] uis = { "IS", "OS" };
+                if (line.StartsWith("H") || line.StartsWith("U") || line.StartsWith("V") || uis.Any(p => sline.StartsWith("E0" + p)))
+                {
+                    foreach (int ab in avatarBase)
+                        line = line.Replace("JNT" + ab, "J^N^JNT" + ab);
+                    foreach (int ab in avatarBase)
+                        line = line.Replace("J^N^JNT" + ab, "JNT" + offset(ab));
+                }
+                Func<ushort, string> npcUpdate = v => v == 1079 ? "1071" : (v >= 1071 && v < 1079) ? (v + 1).ToString() : v.ToString();
+                if (line.StartsWith("E0IL") || line.StartsWith("E0OL"))
+                {
+                    string[] e0ls = line.Split(',');
+                    for (int idx = 1; idx < e0ls.Length; idx += 2)
+                        e0ls[idx + 1] = npcUpdate(ushort.Parse(e0ls[idx + 1]));
+                    line = string.Join(",", e0ls);
+                }
+                else if (line.StartsWith("E0HZ"))
+                {
+                    string[] e0hz = line.Split(',');
+                    if (e0hz[1] != "0")
+                        e0hz[3] = npcUpdate(ushort.Parse(e0hz[3]));
+                    line = string.Join(",", e0hz);
+                }
+                else if (line.StartsWith("E0YM"))
+                {
+                    string[] args = line.Split(',');
+                    ushort atype = ushort.Parse(args[1]);
+                    if (atype == 0 || atype == 1 || atype == 3)
+                    {
+                        args[2] = npcUpdate(ushort.Parse(args[2]));
+                        line = string.Join(",", args);
+                    }
+                    else if (atype == 5)
+                    {
+                        for (int i = 2; i < args.Length; ++i)
+                            args[i] = npcUpdate(ushort.Parse(args[i]));
+                        line = string.Join(",", args);
+                    }
+                    else if (args[1] == "6")
+                    {
+                        for (int i = 3; i < args.Length; ++i)
+                            args[i] = npcUpdate(ushort.Parse(args[i]));
+                        line = string.Join(",", args);
+                    }
                 }
             }
         }

@@ -51,7 +51,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Util.cs" />
     <Compile Include="VW\Ayvi.cs" />
     <Compile Include="VW\Bywi.cs" />
     <Compile Include="XIClient.cs" />

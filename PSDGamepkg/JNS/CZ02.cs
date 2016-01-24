@@ -141,7 +141,7 @@ namespace PSD.PSDGamepkg.JNS
             }
             else
             {
-                // ushort ut = ushort.Prase(Util.Substring(prev, 0, idx));
+                // ushort ut = ushort.Prase(Algo.Substring(prev, 0, idx));
                 // return XI.LibTuple.NL.Decode(NMBLib.OriginalNPC(ut)).EscueInput(player, type, prev);
                 return "";
             }

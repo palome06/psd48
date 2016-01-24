@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using PSD.Base;
 using PSD.Base.Card;
+using Algo = PSD.Base.Utils.Algo;
 
 namespace PSD.PSDGamepkg.Artiad
 {
@@ -85,7 +86,7 @@ namespace PSD.PSDGamepkg.Artiad
                 foreach (string cd in player.TokenExcl)
                 {
                     if (cd[0] != 'H')
-                        Util.AddToMultiMap(allKinds, cd[0], ushort.Parse(cd.Substring(1)));
+                        Algo.AddToMultiMap(allKinds, cd[0], ushort.Parse(cd.Substring(1)));
                 }
                 raiseG("G2TZ,0," + player.Uid + "," + string.Join(",", player.TokenExcl));
                 raiseG("G0OJ," + player.Uid + ",1," + player.TokenExcl.Count

@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using Algo = PSD.Base.Utils.Algo;
 
 namespace PSD.PSDGamepkg
 {
@@ -71,7 +72,7 @@ namespace PSD.PSDGamepkg
                     listOfThreads.Clear();
                     string jt = jumpTareget.ToString();
                     string je = jumpEnd.ToString();
-                    var thread0 = new Thread(() => Util.SafeExecute(() => RunRound(jt, je),
+                    var thread0 = new Thread(() => XI.SafeExecute(() => RunRound(jt, je),
                         delegate (Exception e)
                         {
                             if (!(e is ThreadAbortException))
@@ -103,8 +104,6 @@ namespace PSD.PSDGamepkg
                 ushort rounder = (ushort)(rstage[1] - '0');
                 Board.Rounder = Board.Garden[rounder];
                 Board.RoundIN = rstage;
-                //string sage = rstage.Substring(2);
-                //ushort[] staff = garden.Keys.ToArray();
                 //VI.Cout(0, "☆◇○" + rstage + "○◇☆");
                 Log.Logger(rstage);
                 switch (rstage.Substring(2))
@@ -581,7 +580,7 @@ namespace PSD.PSDGamepkg
                                     {
                                         ushort pendWho = ushort.Parse(pendItem.Substring(0, pendItem.IndexOf(',')));
                                         ushort pendTux = ushort.Parse(pendItem.Substring(pendItem.LastIndexOf(',') + 1));
-                                        Util.AddToMultiMap(imt, pendWho, pendTux);
+                                        Algo.AddToMultiMap(imt, pendWho, pendTux);
                                     }
                                     if (imt.Count > 0)
                                         RaiseGMessage("G0ON," + string.Join(",", imt.Select(p => p.Key + ",C," +
@@ -597,7 +596,11 @@ namespace PSD.PSDGamepkg
                         else
                             RaiseGMessage("G0WN,0");
                         foreach (Player player in Board.Garden.Values)
+                        {
                             player.ResetRAM();
+                            player.Pets.Select(p => LibTuple.ML.Decode(p)).Where(p => p != null)
+                                .ToList().ForEach(p => p.ResetRAM());
+                        }
                         break;
                 }
             }
@@ -608,10 +611,15 @@ namespace PSD.PSDGamepkg
         {
             sina |= 0x2; // seems weired, when did sina = 0 happens?
             var garden = Board.Garden;
-            if (!sk02.ContainsKey(zero))
+            if (!sk02.ContainsKey(zero)) // no special SKT registered
             {
                 foreach (Player py in Board.Garden.Values)
                     py.IsZhu = false;
+                if (silentAction != null) // still take silent action
+                {
+                    foreach (Action action in silentAction)
+                        action();
+                }
                 return false;
             }
             List<SKE> pocket = ParseFromSKTriples(sk02[zero], zero, (sina & 4) != 0);
@@ -674,7 +682,7 @@ namespace PSD.PSDGamepkg
                             int idx = msg.IndexOf(',');
                             ushort me = ushort.Parse(msg.Substring(0, idx));
                             int jdx = msg.LastIndexOf(';');
-                            string mai = Util.Substring(msg, idx + 1, jdx);
+                            string mai = Algo.Substring(msg, idx + 1, jdx);
 
                             string skName;
                             mai = DecodeSimplifiedCommand(mai, out skName);
@@ -771,7 +779,7 @@ namespace PSD.PSDGamepkg
                             int idx = msg.IndexOf(',');
                             ushort me = ushort.Parse(msg.Substring(0, idx));
                             int jdx = msg.LastIndexOf(';');
-                            string mai = Util.Substring(msg, idx + 1, jdx);
+                            string mai = Algo.Substring(msg, idx + 1, jdx);
 
                             string skName;
                             mai = DecodeSimplifiedCommand(mai, out skName);
@@ -816,7 +824,7 @@ namespace PSD.PSDGamepkg
         private UEchoCode UKEvenMessage(bool[] involved,
             List<SKE> purse, string[] pris, int sina)
         {
-            return UKEvenMessage(involved, purse, pris, Util.RepeatToArray(sina, involved.Length));
+            return UKEvenMessage(involved, purse, pris, Algo.RepeatToArray(sina, involved.Length));
         }
         // return whether actual action has been taken, otherwise all cancel.
         private UEchoCode UKEvenMessage(bool[] involved,

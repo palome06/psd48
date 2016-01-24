@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Text;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -29,7 +30,7 @@ namespace PSD.ClientAo
             this.Tuple = libGroup;
 
             Nick = "";
-            Pets = new ushort[5];
+            Pets = new List<ushort>();
 
             TuxCount = 0;
             Weapon = 0;
@@ -223,49 +224,55 @@ namespace PSD.ClientAo
         #endregion Player Property
 
         #region Cards Property
-        public ushort[] Pets { set; get; }
+        public List<ushort> Pets { private set; get; }
         [STAThread]
-        public void SetPet(int prop, ushort value)
+        public void InsPet(ushort pet) { InsPet(new ushort[] { pet }); }
+        [STAThread]
+        public void InsPet(IEnumerable<ushort> pets)
         {
-            if (prop < Pets.Length)
+            foreach (ushort pet in pets)
             {
-                if (Pets[prop] != value)
+                Base.Card.Monster mon = Tuple.ML.Decode(pet);
+                if (mon != null)
                 {
-                    if (Pets[prop] != 0)
+                    string code = mon.Code;
+                    pb.Dispatcher.BeginInvoke((Action)(() =>
                     {
-                        ushort ut = Pets[prop];
-                        Base.Card.Monster mon = Tuple.ML.Decode(ut);
-                        if (mon != null)
-                        {
-                            string code = mon.Code;
-                            pb.Dispatcher.BeginInvoke((Action)(() =>
-                            {
-                                pb.petStack.Children.Remove(pb.TryFindResource("petsnap" + code) as Image);
-                            }));
-                        }
-                    }
-                    if (value != 0)
-                    {
-                        Base.Card.Monster mon = Tuple.ML.Decode(value);
-                        if (mon != null)
-                        {
-                            string code = mon.Code;
-                            pb.Dispatcher.BeginInvoke((Action)(() =>
-                            {
-                                pb.petStack.Children.Add(pb.TryFindResource("petsnap" + code) as Image);
-                            }));
-                        }
-                    }
-                    Pets[prop] = value;
+                        pb.petStack.Children.Add(pb.TryFindResource("petsnap" + code) as Image);
+                    }));
                 }
-                pb.Dispatcher.BeginInvoke((Action)(() =>
-                {
-                    if (Pets.Where(p => p != 0).Any())
-                        pb.petButton.Visibility = System.Windows.Visibility.Visible;
-                    else
-                        pb.petButton.Visibility = System.Windows.Visibility.Collapsed;
-                }));
+                Pets.Add(pet);
             }
+            pb.Dispatcher.BeginInvoke((Action)(() =>
+            {
+                pb.petButton.Visibility = Pets.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
+            }));
+        }
+        [STAThread]
+        public void DelPet(ushort pet) { DelPet(new ushort[] { pet }); }
+        [STAThread]
+        public void DelPet(IEnumerable<ushort> pets)
+        {
+            foreach (ushort pet in pets)
+            {
+                if (Pets.Contains(pet))
+                {
+                    Base.Card.Monster mon = Tuple.ML.Decode(pet);
+                    if (mon != null)
+                    {
+                        string code = mon.Code;
+                        pb.Dispatcher.BeginInvoke((Action)(() =>
+                        {
+                            pb.petStack.Children.Remove(pb.TryFindResource("petsnap" + code) as Image);
+                        }));
+                    }
+                    Pets.Remove(pet);
+                }
+            }
+            pb.Dispatcher.BeginInvoke((Action)(() =>
+            {
+                pb.petButton.Visibility = Pets.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
+            }));
         }
 
         public List<ushort> Escue { set; get; }
@@ -564,9 +571,9 @@ namespace PSD.ClientAo
 
         private List<string> mInLuggage;
         public List<string> InLuggage { get { return mInLuggage; } }
-        public void InitToLuggage(List<string> codes)
+        public void InitToLuggage(IEnumerable<string> codes)
         {
-            if (codes.Count > 0)
+            if (codes.Any())
             {
                 pb.Dispatcher.BeginInvoke((Action)(() =>
                 {
@@ -578,7 +585,7 @@ namespace PSD.ClientAo
                 }));
             }
         }
-        public void InsIntoLuggage(ushort ut, List<string> codes)
+        public void InsIntoLuggage(ushort ut, IEnumerable<string> codes)
         {
             mInLuggage.AddRange(codes);
             if (ut == pb.troveBox.UT)
@@ -592,7 +599,7 @@ namespace PSD.ClientAo
                 }));
             }
         }
-        public void DelIntoLuggage(ushort ut, List<string> codes)
+        public void DelIntoLuggage(ushort ut, IEnumerable<string> codes)
         {
             mInLuggage.RemoveAll(p => codes.Contains(p));
             if (ut == pb.troveBox.UT)
@@ -624,6 +631,11 @@ namespace PSD.ClientAo
                 if (pb.AD != null && pb.AD.IsTVDictContains(Rank + "EC"))
                     pb.AD.yhTV.Show(GetExCardsMatList(), Rank + "EC");
             }));
+        }
+        public void InsExCards(IEnumerable<ushort> uts)
+        {
+            foreach (ushort ut in uts)
+                InsExCards(ut);
         }
         public void DelExCards(ushort ut)
         {
@@ -1114,8 +1126,8 @@ namespace PSD.ClientAo
         }
         private List<string> mExSpCards;
         public List<string> ExSpCards { get { return mExSpCards; } }
-        public void InsExSpCard(string code) { InsExSpCard(new List<string> { code }); }
-        public void InsExSpCard(List<string> codes)
+        public void InsExSpCard(string code) { InsExSpCard(new string[] { code }); }
+        public void InsExSpCard(IEnumerable<string> codes)
         {
             mExSpCards.AddRange(codes);
             if (mExSpCards.Count > 0)
@@ -1177,8 +1189,8 @@ namespace PSD.ClientAo
 
         private List<ushort> mPlayerTars;
         public List<ushort> PlayerTars { get { return mPlayerTars; } }
-        public void InsPlayerTar(ushort ut) { InsPlayerTar(new List<ushort> { ut }); }
-        public void InsPlayerTar(List<ushort> uts)
+        public void InsPlayerTar(ushort ut) { InsPlayerTar(new ushort[] { ut }); }
+        public void InsPlayerTar(IEnumerable<ushort> uts)
         {
             Base.Card.Hero hero = Tuple.HL.InstanceHero(SelectHero);
             if (hero != null && string.IsNullOrEmpty(hero.PlayerTarAlias) && Coss != 0)
@@ -1209,7 +1221,7 @@ namespace PSD.ClientAo
                     }));
             }
         }
-        public void DelPlayerTar(List<ushort> uts)
+        public void DelPlayerTar(IEnumerable<ushort> uts)
         {
             Base.Card.Hero hero = Tuple.HL.InstanceHero(SelectHero);
             if (string.IsNullOrEmpty(hero.PlayerTarAlias) && Coss != 0)

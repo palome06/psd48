@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
-using PSD.Base.Rules;
 using System.Net.Sockets;
+
+using PSD.Base.Rules;
+using Algo = PSD.Base.Utils.Algo;
 
 namespace PSD.ClientZero
 {
@@ -148,8 +150,8 @@ namespace PSD.ClientZero
                 else if (line.StartsWith("C1TK,")) // Talk case
                 {
                     int idx = line.IndexOf(',', "C1TK,".Length);
-                    string nick = Util.Substring(line, "C1TK,".Length, idx);
-                    string content = Util.Substring(line, idx + 1, -1);
+                    string nick = Algo.Substring(line, "C1TK,".Length, idx);
+                    string content = Algo.Substring(line, idx + 1, -1);
                     VI.Chat(content, nick);
                 }
             }
@@ -368,7 +370,7 @@ namespace PSD.ClientZero
                     int levelCode;
                     string level = GetValue(args, 8, "房间等级，(1:新手场/2:标准场/3:高手场/4:至尊场/5:界限突破场，后附+为特训");
                     bool isTrain = level.Contains("+");
-                    string[] trainer = isTrain ? Util.Substring(level, level.IndexOf('+') + 1, -1).Split(',') : null;
+                    string[] trainer = isTrain ? Algo.Substring(level, level.IndexOf('+') + 1, -1).Split(',') : null;
                     if (isTrain)
                         level = level.Substring(0, level.IndexOf('+'));
                     if (!int.TryParse(level, out levelCode) || levelCode < 0 || levelCode > RuleCode.LEVEL_IPV)
@@ -457,6 +459,18 @@ namespace PSD.ClientZero
                     }
                 };
             }
+        }
+        public static void SafeExecute(Action action, Action<Exception> handler)
+        {
+            //try { action(); }
+            //catch (Exception ex) { handler(ex);
+            //while (true)
+            //{
+            //    int c = 2; c += 4;
+            //    System.Threading.Thread.Sleep(1000);
+            //}
+            //}
+            action();
         }
     }
 }

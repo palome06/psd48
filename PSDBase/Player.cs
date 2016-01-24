@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PSD.Base
 {
@@ -189,7 +187,7 @@ namespace PSD.Base
             this.Armor = 0; this.Weapon = 0; this.Trove = 0;
             this.ExEquip = 0; this.ExMask = 0;
 
-            this.Pets = new ushort[] { 0, 0, 0, 0, 0 };
+            Pets = Enumerable.Repeat<ushort>(0, Card.FiveElementHelper.PropCount).ToArray();
             this.ExCards = new List<ushort>();
             Escue = new List<ushort>();
             Fakeq = new Dictionary<ushort, string>();
@@ -404,7 +402,7 @@ namespace PSD.Base
         }
         public int GetAllCardsCount()
         {
-            return Tux.Count + GetBaseEquipCount();
+            return Tux.Count + GetEquipCount();
         }
         public bool IsValidPlayer()
         {

@@ -8,7 +8,6 @@ namespace PSD.Base.Card
 {
     public class Monster : NMB
     {
-        //public enum FiveElement { GLOBAL, AQUA, AGNI, THUNDER, AERO, SATURN };
         public enum ClLevel { WOODEN, WEAK, STRONG, BOSS };
 
         public FiveElement Element { private set; get; }
@@ -41,6 +40,7 @@ namespace PSD.Base.Card
         public bool[][] EALocks { private set; get; }
         public bool[][] EAOnces { private set; get; }
         public bool[][] EAIsTermini { private set; get; }
+        public bool[][] EAHinds { private set; get; }
 
         public ushort Padrone { set; get; }
 
@@ -49,7 +49,7 @@ namespace PSD.Base.Card
         public string WinText { set; get; }
         public string LoseText { set; get; }
 
-        public ushort RAMUshort { set; get; }
+        public ushort ROMUshort { set; get; }
         public int RAMInt { set; get; }
 
         #region SPI Info
@@ -231,7 +231,7 @@ namespace PSD.Base.Card
 
         public Monster(string name, string code, int group, int genre, FiveElement element, ushort strb,
             ushort agl, ClLevel level, string[][] eaoccurs, int[][] eaprops,
-            bool[][] ealocks, bool[][] eaonces, bool[][] eaterminis, string spis)
+            bool[][] ealocks, bool[][] eaonces, bool[][] eaterminis, bool[][] eahinds, string spis)
         {
             this.Name = name; this.Code = code;
             this.Group = Math.Abs(group); this.Genre = genre;
@@ -244,6 +244,7 @@ namespace PSD.Base.Card
             this.EALocks = ealocks;
             this.EAOnces = eaonces;
             this.EAIsTermini = eaterminis;
+            this.EAHinds = eahinds;
             this.Padrone = 0;
             ParseSpi(spis);
         }
@@ -261,6 +262,11 @@ namespace PSD.Base.Card
             delegate(Player player, int consumeType, int type, string fuse) { return true; });
         private static CsInputDelegate DefCsInput = new CsInputDelegate(
             delegate(Player player, int consumeType, int type, string fuse, string prev) { return ""; });
+
+        public void ResetRAM()
+        {
+            RAMInt = 0;
+        }
     }
 
     public class MonsterLib
@@ -277,8 +283,8 @@ namespace PSD.Base.Card
             dicts = new Dictionary<ushort, Monster>();
             sql = new Utils.ReadonlySQL("psd.db3");
             List<string> list = new string[] {
-                "ID", "CODE", "NAME", "VALID", "FIVE", "STR", "AGL", "LEVEL", "OCCURS",
-                "PRIORS", "DEBUTTEXT", "PETTEXT", "WINTEXT", "LOSETEXT", "TERMINI", "SPI", "GENRE"
+                "ID", "CODE", "NAME", "VALID", "STR", "AGL", "LEVEL", "OCCURS", "PRIORS",
+                "DEBUTTEXT", "PETTEXT", "WINTEXT", "LOSETEXT", "TERMINI", "SPI", "GENRE"
             }.ToList();
             System.Data.DataRowCollection datas = sql.Query(list, "Monster");
             foreach (System.Data.DataRow data in datas)
@@ -288,8 +294,18 @@ namespace PSD.Base.Card
                 string name = (string)data["NAME"];
                 int group = (int)((short)data["VALID"]);
                 int genre = (int)((long)data["GENRE"]);
-                short five = (short)data["FIVE"];
-                FiveElement element = FiveElementHelper.Int2Elem(five);
+                FiveElement five;
+                switch (code.Substring(0, 2))
+                {
+                    case "GS": five = FiveElement.AQUA; break;
+                    case "GH": five = FiveElement.AGNI; break;
+                    case "GL": five = FiveElement.THUNDER; break;
+                    case "GF": five = FiveElement.AERO; break;
+                    case "GT": five = FiveElement.SATURN; break;
+                    case "GI": five = FiveElement.YINN; break;
+                    case "GY": five = FiveElement.SOLARIS; break;
+                    default: five = FiveElement.A; break;
+                }
                 ushort str = (ushort)((short)data["STR"]);
                 ushort agl = (ushort)((short)data["AGL"]);
                 short levelCode = (short)data["LEVEL"];
@@ -309,6 +325,7 @@ namespace PSD.Base.Card
                 bool[][] eaonces = new bool[occurs.Length][];
                 string[] eatermis = ((string)data["TERMINI"]).Split(';');
                 bool[][] eaterminies = new bool[occurs.Length][];
+                bool[][] eahinds = new bool[occurs.Length][];
                 for (int i = 0; i < occurs.Length; ++i)
                 {
                     if (occurs[i] == "^")
@@ -328,6 +345,7 @@ namespace PSD.Base.Card
                         ealocks[i] = new bool[ods.Length];
                         eaonces[i] = new bool[ods.Length];
                         eaterminies[i] = new bool[ods.Length];
+                        eahinds[i] = new bool[ods.Length];
                         for (int j = 0; j < ods.Length; ++j)
                         {
                             if (ods[j].StartsWith("!"))
@@ -350,7 +368,16 @@ namespace PSD.Base.Card
                                 eaprops[i][j] = int.Parse(opss[j]);
                                 eaonces[i][j] = false;
                             }
-                            eaterminies[i][j] = (omin[j][0] == '1');
+                            if (omin[j].StartsWith("!")) // Hind
+                            {
+                                eaterminies[i][j] = (omin[j][1] == '1');
+                                eahinds[i][j] = true;
+                            }
+                            else
+                            {
+                                eaterminies[i][j] = (omin[j][0] == '1');
+                                eahinds[i][j] = false;
+                            }
                         }
                     }
                 }
@@ -359,8 +386,8 @@ namespace PSD.Base.Card
                 string petText = data["PETTEXT"] as string;
                 string winText = data["WINTEXT"] as string;
                 string loseText = data["LOSETEXT"] as string;
-                Monster monster = new Monster(name, code, group, genre, element, str, agl,
-                    level, eaoccurs, eaprops, ealocks, eaonces, eaterminies, spis)
+                Monster monster = new Monster(name, code, group, genre, five, str, agl,
+                    level, eaoccurs, eaprops, ealocks, eaonces, eaterminies, eahinds, spis)
                     {
                         DebutText = debutText ?? "",
                         PetText = petText ?? "",

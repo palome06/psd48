@@ -128,7 +128,7 @@ namespace PSD.ClientAo.Request
                 AddContent("M", NMBLib.CodeOfNPC(npcCode), npc.Group, npc.Genre, false);
             }
 
-            genreIndex = new int[] { 1, 5, 6, 9 };
+            genreIndex = new int[] { 1, 5, 6, 7, 9 };
             foreach (int index in genreIndex)
             {
                 GroupBox gb = new GroupBox()

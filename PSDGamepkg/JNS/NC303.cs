@@ -1,10 +1,8 @@
-﻿using PSD.Base.Card;
-using System;
+﻿using PSD.Base;
+using PSD.Base.Card;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using PSD.Base;
+using Algo = PSD.Base.Utils.Algo;
 
 namespace PSD.PSDGamepkg.JNS
 {
@@ -178,7 +176,7 @@ namespace PSD.PSDGamepkg.JNS
             int idx = args.IndexOf(',');
             int jdx = args.IndexOf(',', idx + 1);
             ushort from = ushort.Parse(args.Substring(0, idx));
-            ushort to = ushort.Parse(Util.Substring(args, idx + 1, jdx));
+            ushort to = ushort.Parse(Algo.Substring(args, idx + 1, jdx));
             TargetPlayer(from, to);
             ushort pet = ushort.Parse(args.Substring(jdx + 1));
             //XI.RaiseGMessage("G0HL," + from + "," + pet);
@@ -223,7 +221,7 @@ namespace PSD.PSDGamepkg.JNS
         public void NJ08Action(Player player, string fuse, string args)
         {
             ushort who = ushort.Parse(args);
-            string c0 = Util.RepeatString("p0", XI.Board.Garden[who].Tux.Count);
+            string c0 = Algo.RepeatString("p0", XI.Board.Garden[who].Tux.Count);
             XI.AsyncInput(player.Uid, "#弃置的,C1(" + c0 + ")", "NJ08", "0");
             XI.RaiseGMessage("G0DH," + who + ",2,1");
         }

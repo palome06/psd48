@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 
 using PSD.Base;
 using PSD.Base.Rules;
+using PSD.Base.Utils;
+using Algo = PSD.Base.Utils.Algo;
 
 namespace PSD.PSDGamepkg
 {
@@ -147,11 +146,11 @@ namespace PSD.PSDGamepkg
             //    new ushort[] { 1, (ushort)LibTuple.TL.Size });
             List<ushort> tuxLst = LibTuple.TL.ListAllTuxCodes(levelCode);
             //Console.WriteLine("tuxLst = {" + string.Join(",", tuxLst) + "} (" + tuxLst.Count + ")");
-            Util.Shuffle(tuxLst);
+            Algo.Shuffle(tuxLst);
             Board.TuxPiles = new Base.Utils.Rueue<ushort>(tuxLst);
             List<ushort> eveLst = Base.Card.Card.GeneratePiles(null,
                 new ushort[] { 1, (ushort)LibTuple.EL.ListAllSeleable(levelCode).Count });
-            Util.Shuffle(eveLst);
+            Algo.Shuffle(eveLst);
             Board.EvePiles = new Base.Utils.Rueue<ushort>(eveLst);
             //List<ushort> monLst = Base.Card.Card.GeneratePiles(null, new ushort[] {
             //    Base.Card.NMBLib.CodeOfMonster(1), (ushort)(Base.Card.NMBLib.CodeOfMonster(0) + LibTuple.ML.Size) });
@@ -181,12 +180,12 @@ namespace PSD.PSDGamepkg
             Board.HeroPiles = new Base.Utils.Rueue<int>(heros);
             Board.HeroDises = new List<int>();
 
-            List<ushort> restNPC = Util.TakeRange(npcLst.ToArray(), 11, npcLst.Count).ToList();
+            List<ushort> restNPC = Algo.TakeRange(npcLst.ToArray(), 11, npcLst.Count).ToList();
             restNPC.Shuffle();
             Board.RestNPCPiles = new Base.Utils.Rueue<ushort>(restNPC);
             Board.RestNPCDises = new List<ushort>();
 
-            List<ushort> restMon = Util.TakeRange(monLst.ToArray(), 21, monLst.Count).ToList();
+            List<ushort> restMon = Algo.TakeRange(monLst.ToArray(), 21, monLst.Count).ToList();
             restMon.Shuffle();
             Board.RestMonPiles = new Base.Utils.Rueue<ushort>(restMon);
             Board.RestMonDises = new List<ushort>();
@@ -307,11 +306,11 @@ namespace PSD.PSDGamepkg
                         if (oc.Contains('#') || oc.Contains('$') || oc.Contains('*'))
                         {
                             foreach (ushort p in Board.Garden.Keys)
-                                Util.AddToMultiMap(dict, oc.Replace("#", p.ToString()).Replace(
+                                Algo.AddToMultiMap(dict, oc.Replace("#", p.ToString()).Replace(
                                     "$", p.ToString()).Replace("*", p.ToString()), skt);
                         }
                         else
-                            Util.AddToMultiMap(dict, oc, skt);
+                            Algo.AddToMultiMap(dict, oc, skt);
                     }
                 }
                 if (tux.IsTuxEqiup())
@@ -342,16 +341,16 @@ namespace PSD.PSDGamepkg
                                     if (oc.StartsWith("&"))
                                     {
                                         int nexdex = oc.IndexOf('&', 1);
-                                        int start = int.Parse(Util.Substring(oc, "&".Length, nexdex));
-                                        int end = int.Parse(Util.Substring(oc, nexdex + 1, -1));
-                                        //skt.Occur = string.Join("&", Util.TakeRange(skill.Parasitism, start, end));
+                                        int start = int.Parse(Algo.Substring(oc, "&".Length, nexdex));
+                                        int end = int.Parse(Algo.Substring(oc, nexdex + 1, -1));
+                                        //skt.Occur = string.Join("&", Algo.TakeRange(skill.Parasitism, start, end));
                                         List<string> parList = new List<string>();
                                         for (int ji = start; ji < end; ++ji)
                                         {
                                             parList.Add(tux.Parasitism[ji]);
                                             string sktKey = skt.Name + "," + skt.InType;
                                             sktKey += ("!" + skt.Consume);
-                                            Util.AddToMultiMap(links, tux.Parasitism[ji], sktKey); // myself
+                                            Algo.AddToMultiMap(links, tux.Parasitism[ji], sktKey); // myself
                                         }
                                         skt.Occur = string.Join("&", parList);
                                         parasitism.Add(skt);
@@ -359,13 +358,13 @@ namespace PSD.PSDGamepkg
                                     else if (oc.Contains('#') || oc.Contains('$') || oc.Contains('*'))
                                     {
                                         foreach (Player p in Board.Garden.Values)
-                                            Util.AddToMultiMap(dict, oc
+                                            Algo.AddToMultiMap(dict, oc
                                                 .Replace("#", p.Uid.ToString())
                                                 .Replace("$", p.Uid.ToString())
                                                 .Replace("*", p.Uid.ToString()), skt);
                                     }
                                     else
-                                        Util.AddToMultiMap(dict, oc, skt);
+                                        Algo.AddToMultiMap(dict, oc, skt);
                                 }
                             }
                         }
@@ -390,11 +389,11 @@ namespace PSD.PSDGamepkg
                 if (cz.Occur.Contains('#') || cz.Occur.Contains('$') || cz.Occur.Contains('*'))
                 {
                     foreach (ushort p in Board.Garden.Keys)
-                        Util.AddToMultiMap(dict, cz.Occur.Replace("#", p.ToString()).Replace(
+                        Algo.AddToMultiMap(dict, cz.Occur.Replace("#", p.ToString()).Replace(
                             "$", p.ToString()).Replace("*", p.ToString()), skt);
                 }
                 else
-                    Util.AddToMultiMap(dict, cz.Occur, skt);
+                    Algo.AddToMultiMap(dict, cz.Occur, skt);
             }
             foreach (Base.Rune sf in sf01.Values)
             {
@@ -414,11 +413,11 @@ namespace PSD.PSDGamepkg
                 if (sf.Occur.Contains('#') || sf.Occur.Contains('$') || sf.Occur.Contains('*'))
                 {
                     foreach (ushort p in Board.Garden.Keys)
-                        Util.AddToMultiMap(dict, sf.Occur.Replace("#", p.ToString()).Replace(
+                        Algo.AddToMultiMap(dict, sf.Occur.Replace("#", p.ToString()).Replace(
                             "$", p.ToString()).Replace("*", p.ToString()), skt);
                 }
                 else
-                    Util.AddToMultiMap(dict, sf.Occur, skt);
+                    Algo.AddToMultiMap(dict, sf.Occur, skt);
             }
             foreach (Base.Card.Monster mt in LibTuple.ML.ListAllMonster(levelCode))
             {
@@ -446,13 +445,13 @@ namespace PSD.PSDGamepkg
                                 if (oc.Contains('#') || oc.Contains('$') || oc.Contains('*'))
                                 {
                                     foreach (Player p in Board.Garden.Values)
-                                        Util.AddToMultiMap(dict, oc
+                                        Algo.AddToMultiMap(dict, oc
                                             .Replace("#", p.Uid.ToString())
                                             .Replace("$", p.Uid.ToString())
                                             .Replace("*", p.Uid.ToString()), skt);
                                 }
                                 else
-                                    Util.AddToMultiMap(dict, oc, skt);
+                                    Algo.AddToMultiMap(dict, oc, skt);
                             }
                         }
                     }
@@ -479,13 +478,13 @@ namespace PSD.PSDGamepkg
                     if (oc.Contains('#') || oc.Contains('$') || oc.Contains('*'))
                     {
                         foreach (Player p in Board.Garden.Values)
-                            Util.AddToMultiMap(dict, oc
+                            Algo.AddToMultiMap(dict, oc
                                 .Replace("#", p.Uid.ToString())
                                 .Replace("$", p.Uid.ToString())
                                 .Replace("*", p.Uid.ToString()), skt);
                     }
                     else
-                        Util.AddToMultiMap(dict, oc, skt);
+                        Algo.AddToMultiMap(dict, oc, skt);
                 }
             }
             foreach (Base.Card.Evenement eve in LibTuple.EL.ListAllEves(levelCode))
@@ -509,13 +508,13 @@ namespace PSD.PSDGamepkg
                     if (oc.Contains('#') || oc.Contains('$') || oc.Contains('*'))
                     {
                         foreach (Player p in Board.Garden.Values)
-                            Util.AddToMultiMap(dict, oc
+                            Algo.AddToMultiMap(dict, oc
                                 .Replace("#", p.Uid.ToString())
                                 .Replace("$", p.Uid.ToString())
                                 .Replace("*", p.Uid.ToString()), skt);
                     }
                     else
-                        Util.AddToMultiMap(dict, oc, skt);
+                        Algo.AddToMultiMap(dict, oc, skt);
                 }
             }
             if (parasitism.Count > 0)
@@ -532,7 +531,7 @@ namespace PSD.PSDGamepkg
                     {
                         string sktKey = skt.Name + "," + ((skt.Type == SKTType.EQ || skt.Type == SKTType.PT) ?
                             (skt.Consume + "!" + skt.InType) : skt.InType.ToString());
-                        Util.AddToMultiMap(occurTable, sktKey,
+                        Algo.AddToMultiMap(occurTable, sktKey,
                             pair.Key + "," + skt.Priorty + "," + skt.Owner + "," + skt.Occur);
                         if (skt.Lock == false)
                             occurNotLocked.Add(sktKey);
@@ -541,7 +540,7 @@ namespace PSD.PSDGamepkg
 
                 foreach (SkTriple para in parasitism)
                 {
-                    string[] paras = Util.Splits(para.Occur, "&");
+                    string[] paras = Algo.Splits(para.Occur, "&");
                     IDictionary<string, List<string>> registered =
                         new Dictionary<string, List<string>>();
                     // occurs -> link_from
@@ -552,7 +551,7 @@ namespace PSD.PSDGamepkg
                         {
                             List<string> ics = occurTable[host];
                             foreach (string ic in ics)
-                                Util.AddToMultiMap(registered, ic, host);
+                                Algo.AddToMultiMap(registered, ic, host);
                         }
                     }
                     foreach (var pair in registered)
@@ -580,7 +579,7 @@ namespace PSD.PSDGamepkg
                             LinkFrom = host, // format: TP02,0&TP03,0
                             IsTermini = para.IsTermini
                         };
-                        Util.AddToMultiMap(dict, oc, skt);
+                        Algo.AddToMultiMap(dict, oc, skt);
                     }
                 }
             }
@@ -627,7 +626,7 @@ namespace PSD.PSDGamepkg
 
         private void RegisterBasicSKTs(IDictionary<string, List<SkTriple>> dict, string name, int priorty)
         {
-            Util.AddToMultiMap(dict, name, new SkTriple() { Name = "~" + priorty, Priorty = priorty, Occur = name });
+            Algo.AddToMultiMap(dict, name, new SkTriple() { Name = "~" + priorty, Priorty = priorty, Occur = name });
         }
 
         private List<SKE> ParseSingleFromSKTriples(List<SkTriple> list,
@@ -1101,15 +1100,15 @@ namespace PSD.PSDGamepkg
                 if (occur.StartsWith("&"))
                 {
                     int nexdex = occur.IndexOf('&', 1);
-                    int start = int.Parse(Util.Substring(occur, "&".Length, nexdex));
-                    int end = int.Parse(Util.Substring(occur, nexdex + 1, -1));
-                    //skt.Occur = string.Join("&", Util.TakeRange(skill.Parasitism, start, end));
+                    int start = int.Parse(Algo.Substring(occur, "&".Length, nexdex));
+                    int end = int.Parse(Algo.Substring(occur, nexdex + 1, -1));
+                    //skt.Occur = string.Join("&", Algo.TakeRange(skill.Parasitism, start, end));
                     List<string> parList = new List<string>();
                     for (int j = start; j < end; ++j)
                     {
                         parList.Add(skill.Parasitism[j]);
                         string sktKey = skt.Name + "," + skt.InType;
-                        Util.AddToMultiMap(links, skill.Parasitism[j], sktKey); // myself
+                        Algo.AddToMultiMap(links, skill.Parasitism[j], sktKey); // myself
                     }
                     skt.Occur = string.Join("&", parList);
                     parasitism.Add(skt);
@@ -1121,7 +1120,7 @@ namespace PSD.PSDGamepkg
                     if (occur.Contains('#'))
                     {
                         string oc = occur.Replace("#", ut.ToString());
-                        Util.AddToMultiMap(dict, oc, skt);
+                        Algo.AddToMultiMap(dict, oc, skt);
                         dict[oc].Sort(SkTriple.Cmp);
                     }
                     else if (occur.Contains('$'))
@@ -1130,7 +1129,7 @@ namespace PSD.PSDGamepkg
                             if (p != ut)
                             {
                                 string oc = occur.Replace("$", p.ToString());
-                                Util.AddToMultiMap(dict, oc, skt);
+                                Algo.AddToMultiMap(dict, oc, skt);
                                 dict[oc].Sort(SkTriple.Cmp);
                             }
                     }
@@ -1139,13 +1138,13 @@ namespace PSD.PSDGamepkg
                         foreach (ushort p in Board.Garden.Keys)
                         {
                             string oc = occur.Replace("*", p.ToString());
-                            Util.AddToMultiMap(dict, oc, skt);
+                            Algo.AddToMultiMap(dict, oc, skt);
                             dict[oc].Sort(SkTriple.Cmp);
                         }
                     }
                     else
                     {
-                        Util.AddToMultiMap(dict, occur, skt);
+                        Algo.AddToMultiMap(dict, occur, skt);
                         dict[occur].Sort(SkTriple.Cmp);
                     }
                 }
@@ -1162,14 +1161,14 @@ namespace PSD.PSDGamepkg
                     {
                         string sktKey = skt.Name + "," + ((skt.Type == SKTType.EQ || skt.Type == SKTType.PT) ?
                             (skt.Consume + "!" + skt.InType) : skt.InType.ToString());
-                        Util.AddToMultiMap(occurTable, sktKey,
+                        Algo.AddToMultiMap(occurTable, sktKey,
                             pair.Key + "," + skt.Priorty + "," + skt.Owner + "," + skt.Occur);
                     }
                 }
 
                 foreach (SkTriple para in parasitism)
                 {
-                    string[] paras = Util.Splits(para.Occur, "&");
+                    string[] paras = Algo.Splits(para.Occur, "&");
                     IDictionary<string, List<string>> registered =
                         new Dictionary<string, List<string>>();
                     // occurs -> link_from
@@ -1180,7 +1179,7 @@ namespace PSD.PSDGamepkg
                         {
                             List<string> ics = occurTable[host];
                             foreach (string ic in ics)
-                                Util.AddToMultiMap(registered, ic, host);
+                                Algo.AddToMultiMap(registered, ic, host);
                         }
                     }
                     foreach (var pair in registered)
@@ -1208,7 +1207,7 @@ namespace PSD.PSDGamepkg
                             LinkFrom = host, // format: TP02,0&TP03,0
                             IsTermini = para.IsTermini
                         };
-                        Util.AddToMultiMap(dict, oc, skt);
+                        Algo.AddToMultiMap(dict, oc, skt);
                         dict[oc].Sort(SkTriple.Cmp);
                     }
                 }
@@ -1272,7 +1271,7 @@ namespace PSD.PSDGamepkg
                     {
                         string sktKey = skt.Name + "," + ((skt.Type == SKTType.EQ || skt.Type == SKTType.PT) ?
                             (skt.Consume + "!" + skt.InType) : skt.InType.ToString());
-                        Util.AddToMultiMap(occurTable, sktKey,
+                        Algo.AddToMultiMap(occurTable, sktKey,
                             pair.Key + "," + skt.Priorty + "," + skt.Owner);
                     }
                 }
@@ -1282,9 +1281,9 @@ namespace PSD.PSDGamepkg
                     if (occur.StartsWith("&"))
                     {
                         int nexdex = occur.IndexOf('&', 1);
-                        int start = int.Parse(Util.Substring(occur, "&".Length, nexdex));
-                        int end = int.Parse(Util.Substring(occur, nexdex + 1, -1));
-                        //skt.Occur = string.Join("&", Util.TakeRange(skill.Parasitism, start, end));
+                        int start = int.Parse(Algo.Substring(occur, "&".Length, nexdex));
+                        int end = int.Parse(Algo.Substring(occur, nexdex + 1, -1));
+                        //skt.Occur = string.Join("&", Algo.TakeRange(skill.Parasitism, start, end));
                         for (int j = start; j < end; ++j)
                         {
                             // WQ02,0 : JN10201,0
@@ -1301,7 +1300,7 @@ namespace PSD.PSDGamepkg
                                 List<string> invis = occurTable[skill.Parasitism[j]];
                                 foreach (string invi in invis)
                                 {
-                                    string head = Util.Substring(invi, 0, invi.IndexOf(','));
+                                    string head = Algo.Substring(invi, 0, invi.IndexOf(','));
                                     if (dict.ContainsKey(head))
                                     {
                                         List<SkTriple> skts = dict[head];
@@ -1462,7 +1461,7 @@ namespace PSD.PSDGamepkg
         {
             PCS = new PilesConstruct(LibTuple, levelCode, trainer);
             //int prpr = -1; // Params Specification Closed now. (e.g. 31->41, prpr = 4)
-            //if (!int.TryParse(Util.Substring(mode, 2, -1), out prpr))
+            //if (!int.TryParse(Algo.Substring(mode, 2, -1), out prpr))
             //    prpr = -1;
             int prpr = -1;
             var garden = Board.Garden;
@@ -1484,7 +1483,7 @@ namespace PSD.PSDGamepkg
                 Base.Card.Hero[] heros = PCS.AllocateHerosRM((prpr + 1) * garden.Count);
                 for (int i = 0; i < garden.Count; ++i)
                 {
-                    cp.Init(staff[i], Util.TakeRange(heros, i * prpr, (i + 1) * prpr).Select(p => p.Avatar).ToList(),
+                    cp.Init(staff[i], Algo.TakeRange(heros, i * prpr, (i + 1) * prpr).Select(p => p.Avatar).ToList(),
                         new int[] { heros[garden.Count * prpr + i].Avatar }.ToList());
                 }
                 WI.BCast("H0RT,0");
@@ -1537,7 +1536,7 @@ namespace PSD.PSDGamepkg
                 Base.Card.Hero[] heros = PCS.AllocateHerosRM(prpr * garden.Count);
                 for (int i = 0; i < garden.Count; ++i)
                 {
-                    cp.Init(staff[i], Util.TakeRange(heros, i * prpr,
+                    cp.Init(staff[i], Algo.TakeRange(heros, i * prpr,
                         (i + 1) * prpr).Select(p => p.Avatar).ToList());
                 }
                 WI.BCast("H0RT,0");
@@ -1586,7 +1585,7 @@ namespace PSD.PSDGamepkg
                     {
                         int selectAva = int.Parse(msgs.Msg.Substring("H0RN,".Length));
                         replied.Remove(msgs.From);
-                        Util.AddToMultiMap(table, selectAva, msgs.From);
+                        Algo.AddToMultiMap(table, selectAva, msgs.From);
                         hts.Remove(selectAva);
                         VI.Cout(0, "The selection of " + msgs.From + "# is: " + selectAva);
                         WI.Send("H0RO,1," + msgs.From + "," + selectAva, 0, msgs.From);
@@ -1719,10 +1718,10 @@ namespace PSD.PSDGamepkg
                 Casting = cp;
                 for (int i = 0; i < staff.Count; i += 2)
                 {
-                    cp.Init(staff[i], Util.TakeRange(heros, hi, hi + icr[hr])
+                    cp.Init(staff[i], Algo.TakeRange(heros, hi, hi + icr[hr])
                         .Select(p => p.Avatar).ToList());
                     hi += icr[hr];
-                    cp.Init(staff[i + 1], Util.TakeRange(heros, hi, hi + icr[hr])
+                    cp.Init(staff[i + 1], Algo.TakeRange(heros, hi, hi + icr[hr])
                         .Select(p => p.Avatar).ToList());
                     hi += icr[hr];
                     ++hr;
@@ -1777,9 +1776,9 @@ namespace PSD.PSDGamepkg
                 Base.Card.Hero[] heros = PCS.AllocateHerosRM(prpr).ToArray();
 
                 Base.Rules.CastingCongress cc = new Base.Rules.CastingCongress(
-                    Util.TakeRange(heros, 0, half).Select(p => p.Avatar).ToList(),
-                    Util.TakeRange(heros, half, prpr).Select(p => p.Avatar).ToList(),
-                    Util.TakeRange(heros, 0, prpr).Select(p => p.Avatar).ToList());
+                    Algo.TakeRange(heros, 0, half).Select(p => p.Avatar).ToList(),
+                    Algo.TakeRange(heros, half, prpr).Select(p => p.Avatar).ToList(),
+                    Algo.TakeRange(heros, 0, prpr).Select(p => p.Avatar).ToList());
                 //cc.Viewable = false;
                 Casting = cc;
                 if (WI is VW.Aywi)
@@ -1838,7 +1837,7 @@ namespace PSD.PSDGamepkg
             //    if (prpr < 0)
             //        prpr = 5;
             //    Base.Card.Hero[] heros = PCS.AllocateHerosRM(13 + prpr);
-            //    List<int> cas = Util.TakeRange(heros, 0, prpr).Select(p => p.Avatar).ToList();
+            //    List<int> cas = Algo.TakeRange(heros, 0, prpr).Select(p => p.Avatar).ToList();
             //    int next = prpr;
             //    bool randomed1 = false, randomed2 = false;
             //    for (int i = 0; i < staff.Count; i += 2)
@@ -2280,6 +2279,18 @@ namespace PSD.PSDGamepkg
         }
 
         #endregion Hero Selection
+
+        public static void SafeExecute(Action action, Action<Exception> handler)
+        {
+            try { action(); }
+            catch (Exception ex)
+            {
+                if (!(ex is System.Threading.ThreadAbortException))
+                {
+                    handler(ex); Console.WriteLine(ex.ToString());
+                }
+            }
+        }
 
         public static void Main(string[] args)
         {

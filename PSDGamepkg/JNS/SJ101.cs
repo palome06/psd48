@@ -1,10 +1,8 @@
 ﻿using PSD.Base;
 using PSD.Base.Card;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Algo = PSD.Base.Utils.Algo;
 
 namespace PSD.PSDGamepkg.JNS
 {
@@ -60,8 +58,7 @@ namespace PSD.PSDGamepkg.JNS
         }
         public void SJ102(Player rd)
         {
-            string msg = Util.SParal(XI.Board, p => p.IsAlive && p.GetPetCount() == 0,
-                p => p.Uid + ",0,1", ",");
+            string msg = AffichePlayers(p => p.IsAlive && p.GetPetCount() == 0, p => p.Uid + ",0,1");
             if (msg != null)
                 XI.RaiseGMessage("G0DH," + msg);
         }
@@ -125,8 +122,7 @@ namespace PSD.PSDGamepkg.JNS
                 ushort target = ushort.Parse(input);
                 Harm(null, XI.Board.Garden[target], 1, FiveElement.A, (int)HPEvoMask.TERMIN_AT);
             }
-            string msg = Util.SParal(XI.Board, p => p.IsAlive && p.Team.Equals(XI.Board.Rounder.Team),
-                p => p.Uid + ",0,1", ",");
+            string msg = AffichePlayers(p => p.IsAlive && p.Team == XI.Board.Rounder.Team, p => p.Uid + ",0,1");
             if (msg != null)
                 XI.RaiseGMessage("G0DH," + msg);
         }
@@ -135,10 +131,8 @@ namespace PSD.PSDGamepkg.JNS
 
         public void SJ301(Player rd)
         {
-            string msgP = Util.SParal(XI.Board, p => p.IsAlive && p.Tux.Count < 3,
-                p => p.Uid + ",0," + (3 - p.Tux.Count), ",");
-            string msgN = Util.SParal(XI.Board, p => p.IsAlive && p.Tux.Count > 3,
-                p => p.Uid + ",1," + (p.Tux.Count - 3), ",");
+            string msgP = AffichePlayers(p => p.IsAlive && p.Tux.Count < 3, p => p.Uid + ",0," + (3 - p.Tux.Count));
+            string msgN = AffichePlayers(p => p.IsAlive && p.Tux.Count > 3, p => p.Uid + ",1," + (p.Tux.Count - 3));
             string msg;
             if (msgN != null && msgP != null)
                 msg = msgP + "," + msgN;
@@ -168,12 +162,10 @@ namespace PSD.PSDGamepkg.JNS
         public void S3W01(Player rd)
         {
             int maxSTR = XI.Board.Garden.Values.Where(p => p.IsAlive).Max(p => p.STR);
-            string msgP = Util.SParal(XI.Board, p => p.IsAlive && p.STR == maxSTR,
-                p => p.Uid + ",1,2", ",");
+            string msgP = AffichePlayers(p => p.IsAlive && p.STR == maxSTR, p => p.Uid + ",1,2");
 
             int minSTR = XI.Board.Garden.Values.Where(p => p.IsAlive).Min(p => p.STR);
-            string msgN = Util.SParal(XI.Board, p => p.IsAlive && p.STR == minSTR,
-                p => p.Uid + ",0,2", ",");
+            string msgN = AffichePlayers(p => p.IsAlive && p.STR == minSTR, p => p.Uid + ",0,2");
 
             XI.RaiseGMessage("G0DH," + msgP + "," + msgN);
         }
@@ -200,7 +192,7 @@ namespace PSD.PSDGamepkg.JNS
 
         public void SJ402(Player rd)
         {
-            //string result = Util.SParal(XI.Board, p => p.IsAlive && p.GetPetCount() > 0,
+            //string result = Algo.SParal(XI.Board, p => p.IsAlive && p.GetPetCount() > 0,
             //    p => p.Uid + ",8," + p.GetPetCount(), ",");
             //if (result != null && result != "")
             //    XI.RaiseGMessage("G0OH," + result);
@@ -223,8 +215,7 @@ namespace PSD.PSDGamepkg.JNS
         #region Package 5#
         public void SJT01(Player rd)
         {
-            ushort uhd = (ushort)(((rd.Uid + 1) / 2 * 4) - 1 - rd.Uid);
-            Player hd = XI.Board.Garden[uhd];
+            Player hd = XI.Board.Facer(rd);
             if (hd != null && hd.IsAlive)
             {
                 string rtx = rd.Tux.Count > 0 ? string.Join(",", rd.Tux) : "";
@@ -278,7 +269,7 @@ namespace PSD.PSDGamepkg.JNS
                 if (!input.StartsWith("/") && input != VI.CinSentinel)
                 {
                     string[] ips = input.Split(',');
-                    List<ushort> getxs = Util.TakeRange(ips, 0, ips.Length - 1).Select(p => ushort.Parse(p))
+                    List<ushort> getxs = Algo.TakeRange(ips, 0, ips.Length - 1).Select(p => ushort.Parse(p))
                         .Where(p => XI.Board.PZone.Contains(p)).ToList();
                     ushort to = ushort.Parse(ips[ips.Length - 1]);
                     if (getxs.Count > 0)
@@ -308,7 +299,7 @@ namespace PSD.PSDGamepkg.JNS
                 if (!input.StartsWith("/") && input != VI.CinSentinel)
                 {
                     string[] ips = input.Split(',');
-                    List<ushort> getxs = Util.TakeRange(ips, 0, ips.Length - 1).Select(p => ushort.Parse(p))
+                    List<ushort> getxs = Algo.TakeRange(ips, 0, ips.Length - 1).Select(p => ushort.Parse(p))
                         .Where(p => XI.Board.PZone.Contains(p)).ToList();
                     ushort to = ushort.Parse(ips[ips.Length - 1]);
                     if (getxs.Count > 0)
@@ -399,8 +390,7 @@ namespace PSD.PSDGamepkg.JNS
         //}
         public void SJT05(Player rd)
         {
-            string result = Util.SParal(XI.Board, p => p.IsAlive &&
-                p.Tux.Count > 0, p => p.Uid + ",1,1", ",");
+            string result = AffichePlayers(p => p.IsAlive && p.Tux.Count > 0, p => p.Uid + ",1,1");
             if (!string.IsNullOrEmpty(result))
                 XI.RaiseGMessage("G0DH," + result);
 
@@ -412,11 +402,9 @@ namespace PSD.PSDGamepkg.JNS
                 .Sum(q => XI.LibTuple.ML.Decode(q).STR));
 
             if (sumTR > sumTO)
-                result = Util.SParal(XI.Board, p => p.IsAlive &&
-                    p.Team == rd.OppTeam, p => p.Uid + ",0,1", ",");
+                result = AffichePlayers(p => p.IsAlive && p.Team == rd.OppTeam, p => p.Uid + ",0,1");
             else if (sumTR < sumTO)
-                result = Util.SParal(XI.Board, p => p.IsAlive &&
-                    p.Team == rd.Team, p => p.Uid + ",0,1", ",");
+                result = AffichePlayers(p => p.IsAlive && p.Team == rd.Team, p => p.Uid + ",0,1");
             else
                 result = rd.Uid + ",0,1";
             XI.RaiseGMessage("G0DH," + result);
@@ -536,7 +524,7 @@ namespace PSD.PSDGamepkg.JNS
                     }
                     if (select == 1)
                     {
-                        string c0 = Util.RepeatString("p0", XI.Board.Garden[losser.Uid].Tux.Count);
+                        string c0 = Algo.RepeatString("p0", XI.Board.Garden[losser.Uid].Tux.Count);
                         XI.AsyncInput(winner.Uid, "#获得的,C1(" + c0 + ")", "SJT11", "1");
                         XI.RaiseGMessage("G0HQ,0," + winner.Uid + "," + losser.Uid + ",2,1");
                     }

@@ -1,8 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+
 using PSD.Base;
+using Algo = PSD.Base.Utils.Algo;
 
 namespace PSD.ClientZero
 {
@@ -27,13 +28,13 @@ namespace PSD.ClientZero
         internal string SKTXCZ(string ops, bool hind, string inType)
         {
             int idx = ops.IndexOf(',');
-            string title = Util.Substring(ops, 0, idx);
+            string title = Algo.Substring(ops, 0, idx);
             string result = "";
             if (title.StartsWith("JN"))
             {
                 int jdx = title.IndexOf('('), kdx = title.IndexOf(')');
-                string jnName = Util.Substring(title, 0, jdx);
-                string arg = jdx < 0 ? "" : "(" + Util.Substring(title, jdx + 1, kdx) + ")";
+                string jnName = Algo.Substring(title, 0, jdx);
+                string arg = jdx < 0 ? "" : "(" + Algo.Substring(title, jdx + 1, kdx) + ")";
                 var skill = tuple.SL.EncodeSkill(jnName);
                 int inTypeInt;
                 if (!int.TryParse(inType, out inTypeInt))
@@ -50,7 +51,23 @@ namespace PSD.ClientZero
             else if (title.StartsWith("NJ"))
                 result = title + ":" + tuple.NJL.EncodeNCAction(title).Name;
             else if (title.StartsWith("PT"))
-                result = title + ":" + tuple.ML.Decode(ushort.Parse(title.Substring("PT".Length))).Name;
+            {
+                int jdx = inType.IndexOf('!');
+                var monster = tuple.ML.Decode(ushort.Parse(title.Substring("PT".Length)));
+                if (jdx >= 0 && monster != null)
+                {
+                    ushort consumeType = ushort.Parse(inType.Substring(0, jdx));
+                    ushort innerType = ushort.Parse(inType.Substring(jdx + 1));
+
+                    if (!hind || Algo.Equals(monster.EAHinds, consumeType, innerType, false))
+                    {
+                        result = title + ":" + monster.Name;
+                    }
+                }
+                else if (monster != null)
+                    result = title + ":" + monster.Name;
+                else return "";
+            }
             else if (title.StartsWith("SJ"))
                 result = title + ":" + tuple.EL.GetEveFromName(title).Name;
             else if (title.StartsWith("FW"))

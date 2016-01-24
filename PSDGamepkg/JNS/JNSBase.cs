@@ -119,11 +119,17 @@ namespace PSD.PSDGamepkg.JNS
                 XI.RaiseGMessage("G2YS,T," + from + "," + string.Join(",", to.Select(p => "T," + p)));
         }
 
+        protected string AffichePlayers(Func<Player, bool> condition, Func<Player, string> output)
+        {
+            return string.Join(",", XI.Board.Garden.Values.Where(p => condition(p)).Select(p => output(p)));
+        }
         protected string FormatPlayers(Func<Player, bool> condition)
         {
-            return "(p" + string.Join("p", XI.Board.Garden.Values.Where(
-                p => condition(p)).Select(p => p.Uid)) + ")";
+            string mid = string.Join("p", XI.Board.Garden.Values.Where(
+                p => condition(p)).Select(p => p.Uid));
+            return string.IsNullOrEmpty(mid) ? "" : ("(p" + mid + ")");
         }
+
         protected string AOthers(Player py) { return FormatPlayers(p => p.IsAlive && p.Uid != py.Uid); }
         protected string AOthersTared(Player py)
         {
@@ -163,6 +169,10 @@ namespace PSD.PSDGamepkg.JNS
         protected string AnyoneAliveString()
         {
             return "T1" + AAlls(null);
+        }
+        protected string StdRunes()
+        {
+            return "(p" + string.Join("p", XI.LibTuple.RL.GetFullAppendableList()) + ")";
         }
         #endregion Skill Util
     }

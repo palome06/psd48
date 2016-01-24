@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Threading;
-using PSD.Base.Rules;
 using System.Net.Sockets;
-using PSD.Base;
+using Algo = PSD.Base.Utils.Algo;
 
 namespace PSD.ClientAo
 {
@@ -160,8 +158,8 @@ namespace PSD.ClientAo
                 else if (line.StartsWith("C1TK,"))
                 {
                     int idx = line.IndexOf(',', "C1TK,".Length);
-                    string nick = Util.Substring(line, "C1TK,".Length, idx);
-                    string content = Util.Substring(line, idx + 1, -1);
+                    string nick = Algo.Substring(line, "C1TK,".Length, idx);
+                    string content = Algo.Substring(line, idx + 1, -1);
                     VI.Chat(content, nick);
                 }
             }
@@ -319,6 +317,13 @@ namespace PSD.ClientAo
             actual.CopyTo(buf, 2);
             ns.Write(buf, 0, al + 2);
             ns.Flush();
+        }
+
+        public static void SafeExecute(Action action, Action<Exception> handler)
+        {
+            //try { action(); }
+            //catch (Exception ex) { handler(ex); throw ex; }
+            action();
         }
 
         #endregion Utils Functions

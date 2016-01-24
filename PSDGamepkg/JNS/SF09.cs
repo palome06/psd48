@@ -43,6 +43,10 @@ namespace PSD.PSDGamepkg.JNS
             return sf01;
         }
 
+        public bool SF01Valid(Player player, string fuse)
+        {
+            return XI.Board.IsAttendWar(player);
+        }
         public void SF01Action(Player player, string fuse, string args)
         {
             ushort side = ushort.Parse(args);
@@ -87,7 +91,8 @@ namespace PSD.PSDGamepkg.JNS
         {
             List<Artiad.Harm> harms = Artiad.Harm.Parse(fuse);
             bool isAvoid = false;
-            if (harms.Any(p => player.Uid == p.Who && p.N > 0 && p.Source != player.Uid && p.Element == FiveElement.A))
+            if (harms.Any(p => player.Uid == p.Who && p.N > 0 && p.Source != player.Uid && p.Element ==
+                FiveElement.A && !HPEvoMask.IMMUNE_INVAO.IsSet(p.Mask) && !HPEvoMask.DECR_INVAO.IsSet(p.Mask)))
             {
                 string select = XI.AsyncInput(player.Uid, "#是否抵御此伤害？##是##否,Y2", "SF04", "0");
                 if (select == "1")
@@ -112,7 +117,8 @@ namespace PSD.PSDGamepkg.JNS
         public bool SF06Valid(Player player, string fuse)
         {
             List<Artiad.Harm> harms = Artiad.Harm.Parse(fuse);
-            return player.IsAlive && harms.Any(p => p.Who == player.Uid && p.N > 0);
+            return player.IsAlive && harms.Any(p => p.Who == player.Uid &&
+                p.N > 0 && !HPEvoMask.CHAIN_INVAO.IsSet(p.Mask));
         }
         public void SF06Action(Player player, string fuse, string args)
         {

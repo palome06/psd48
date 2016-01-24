@@ -406,15 +406,12 @@ namespace PSD.ClientAo
             if (AD != null)
             {
                 if (enabledPets == null || enabledPets.Count == 0)
-                {
-                    AD.yhTV.Show(AoPlayer.Pets.Where(p => p != 0)
-                        .Select(p => "M" + p).ToList(), AoPlayer.Rank + "PT");
-                }
+                    AD.yhTV.Show(AoPlayer.Pets.Select(p => "M" + p).ToList(), AoPlayer.Rank + "PT");
                 else
                 {
                     AD.yhTV.ShowSelectableList(enabledPets.Select(p => "M" + p).ToList(),
-                        AoPlayer.Pets.Where(p => p != 0).Except(enabledPets)
-                        .Select(p => "M" + p).ToList(), AoPlayer.Rank + "SPT", "PT");
+                        AoPlayer.Pets.Except(enabledPets).Select(p => "M" + p).ToList(),
+                        AoPlayer.Rank + "SPT", "PT");
                 }
             }
         }

@@ -53,6 +53,17 @@ namespace PSD.Base.Card
 
         public bool IsMonster() { return false; }
         public bool IsNPC() { return true; }
+
+        /// <summary>
+        /// Force Change Attribute of a hero, used mainly for capability for older version
+        /// </summary>
+        /// <param name="field">field name, caps sensetive</param>
+        /// <param name="value">file value</param>
+        public void ForceChange(string field, object value)
+        {
+            if (field == "Code" && value is string)
+                Code = (string)value;
+        }
     }
 
     public class NPCLib
@@ -111,6 +122,17 @@ namespace PSD.Base.Card
                 return dicts.Keys.ToList();
             else
                 return dicts.Where(p => pkgs.Contains(p.Value.Group)).Select(p => p.Key).ToList();
+        }
+
+        public void ForceChange(ushort ut, Func<ushort, ushort> utChange, string newCode)
+        {
+            if (dicts.ContainsKey(ut))
+            {
+                NPC npc = dicts[ut];
+                dicts.Remove(ut);
+                dicts[utChange(ut)] = npc;
+                npc.ForceChange("Code", newCode);
+            }
         }
     }
 }

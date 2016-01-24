@@ -163,6 +163,8 @@ namespace PSD.Base
                 IsHind = value as bool[];
             else if (field == "Name" && value is string)
                 Name = value as string;
+            else if (field == "Code" && value is string)
+                Code = value as string;
         }
     }
 

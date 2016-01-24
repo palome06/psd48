@@ -178,7 +178,7 @@ namespace PSD.PSDGamepkg.VW
             }
             foreach (var pair in neayers)
             {
-                Thread rvt = new Thread(() => Util.SafeExecute(() => KeepOnListenRecv(pair.Value),
+                Thread rvt = new Thread(() => XI.SafeExecute(() => KeepOnListenRecv(pair.Value),
                         delegate(Exception e) { Log.Logger(e.ToString()); }));
                 recvThread.Add(rvt);
                 rvt.Start();
@@ -186,13 +186,13 @@ namespace PSD.PSDGamepkg.VW
             }
             foreach (var pair in netchers)
             {
-                Thread rvt = new Thread(() => Util.SafeExecute(() => KeepOnListenRecv(pair.Value),
+                Thread rvt = new Thread(() => XI.SafeExecute(() => KeepOnListenRecv(pair.Value),
                         delegate(Exception e) { Log.Logger(e.ToString()); }));
                 recvThread.Add(rvt);
                 rvt.Start();
                 SentByteLine(new NetworkStream(pair.Value.Tunnel), "C2SA,0");
             }
-            sendThread = new Thread(() => Util.SafeExecute(() => KeepOnListenSend(),
+            sendThread = new Thread(() => XI.SafeExecute(() => KeepOnListenSend(),
                         delegate(Exception e) { if (Log != null) { Log.Logger(e.ToString()); } }));
             sendThread.Start();
 
@@ -201,7 +201,7 @@ namespace PSD.PSDGamepkg.VW
             //foreach (var pair in netchers)
             //    SentByteLine(new NetworkStream(pair.Value.Tunnel), "C2AS,0");
 
-            //watchReceptionThread = new Thread(() => Util.SafeExecute(() =>
+            //watchReceptionThread = new Thread(() => Algo.SafeExecute(() =>
             //{
             //    Socket socket = listener.AcceptSocket();
             //    try { ConnectDo(socket, valids, n1); }
@@ -373,7 +373,7 @@ namespace PSD.PSDGamepkg.VW
                     };
                     neayers[ny.Uid] = ny;
                     SentByteLine(ns, "C4CS," + ny.Uid);
-                    Thread rvt = new Thread(() => Util.SafeExecute(() => KeepOnListenRecv(ny),
+                    Thread rvt = new Thread(() => XI.SafeExecute(() => KeepOnListenRecv(ny),
                         delegate(Exception e) { Log.Logger(e.ToString()); }));
                     recvThread.Add(rvt);
                     rvt.Start();
@@ -554,7 +554,7 @@ namespace PSD.PSDGamepkg.VW
                 if (updateNeayersInWaiting == null)
                     updateNeayersInWaiting = new ConcurrentQueue<string>();
                 if (waitingThread == null || !waitingThread.IsAlive) {
-                    waitingThread = new Thread(() => Util.SafeExecute(() => StartWaitingStage(),
+                    waitingThread = new Thread(() => XI.SafeExecute(() => StartWaitingStage(),
                             delegate(Exception e) { if (Log != null) { Log.Logger(e.ToString()); } }));
                     waitingThread.Start();
                 }

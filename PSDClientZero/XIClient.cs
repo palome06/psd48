@@ -3,9 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
+
 using PSD.Base;
 using PSD.Base.Card;
+using Algo = PSD.Base.Utils.Algo;
 
 namespace PSD.ClientZero
 {
@@ -175,7 +176,7 @@ namespace PSD.ClientZero
         {
             if (auid == 0) // Connection Fail, do nothing
                 return;
-            new Thread(() => Util.SafeExecute(() =>
+            new Thread(() => ZI.SafeExecute(() =>
             {
                 while (true)
                 {
@@ -185,7 +186,7 @@ namespace PSD.ClientZero
                 }
             }, delegate(Exception e) { Log.Logg(e.ToString()); })).Start();
             if (!joined)
-                new Thread(() => Util.SafeExecute(() =>
+                new Thread(() => ZI.SafeExecute(() =>
                 {
                     while (true)
                     {
@@ -196,7 +197,7 @@ namespace PSD.ClientZero
                 }, delegate(Exception e) { Log.Logg(e.ToString()); })).Start();
             SingleThreadMessageStart();
             if (!joined)
-                new Thread(() => Util.SafeExecute(() =>
+                new Thread(() => ZI.SafeExecute(() =>
                 {
                     while (true)
                     {
@@ -205,7 +206,7 @@ namespace PSD.ClientZero
                             HandleYMessage(hear);
                     }
                 }, delegate(Exception e) { Log.Logg(e.ToString()); })).Start();
-            new Thread(() => Util.SafeExecute(() => 
+            new Thread(() => ZI.SafeExecute(() => 
             {
                 while (true)
                 {
@@ -230,7 +231,7 @@ namespace PSD.ClientZero
         {
             //ParameterizedThreadStart ParStart = new ParameterizedThreadStart(SingleThreadMessage);
             //Thread myThread = new Thread(ParStart);
-            Thread myThread = new Thread(() => Util.SafeExecute(() => SingleThreadMessage(),
+            Thread myThread = new Thread(() => ZI.SafeExecute(() => SingleThreadMessage(),
                         delegate(Exception e) { Log.Logg(e.ToString()); }));
             lock (listOfThreads)
             {
@@ -421,7 +422,7 @@ namespace PSD.ClientZero
             //Log.Logger(readLine);
             // start a new thread to handle with the message
             int cdx = readLine.IndexOf(',');
-            string cop = Util.Substring(readLine, 0, cdx);
+            string cop = Algo.Substring(readLine, 0, cdx);
             if (cop.StartsWith("E0"))
             {
                 HandleE0Message(readLine);
@@ -436,7 +437,7 @@ namespace PSD.ClientZero
             else if (cop.StartsWith("U"))
             {
                 char rank = cop[1];
-                string[] blocks = Util.Splits(readLine.Substring("U1,".Length), ";;");
+                string[] blocks = Algo.Splits(readLine.Substring("U1,".Length), ";;");
                 switch (rank)
                 {
                     case '1':
@@ -487,7 +488,7 @@ namespace PSD.ClientZero
                 return "";
             string output = "";
             string prevComment = "";
-            foreach (string block in Util.Splits(line, ","))
+            foreach (string block in Algo.Splits(line, ","))
             {
             repaint:
                 bool inputValid = true;
@@ -792,7 +793,7 @@ namespace PSD.ClientZero
                         coms = Enumerable.Repeat("", posCan).ToArray();
                     else
                     {
-                        string[] prevs = Util.Splits(prevComment, "##");
+                        string[] prevs = Algo.Splits(prevComment, "##");
                         if (posCan + 1 > prevs.Length)
                         {
                             IEnumerable<string> v1 = prevs.Select(p => ":" + p);
@@ -812,8 +813,8 @@ namespace PSD.ClientZero
                     // format X(p1p3p5)
                     int jdx = arg.IndexOf('(');
                     int kdx = arg.IndexOf(')');
-                    int rest = int.Parse(Util.Substring(arg, 1, jdx));
-                    string[] argv = Util.Substring(arg, jdx + "(p".Length, kdx).Split('p');
+                    int rest = int.Parse(Algo.Substring(arg, 1, jdx));
+                    string[] argv = Algo.Substring(arg, jdx + "(p".Length, kdx).Split('p');
                     char cardType = argv[0][0];
                     List<ushort> uss = argv.Select(p => ushort.Parse(p.Substring(1))).ToList();
                     if (cardType == 'M')
@@ -829,7 +830,7 @@ namespace PSD.ClientZero
                 {
                     int jdx = arg.IndexOf('(');
                     int kdx = arg.IndexOf(')');
-                    string[] argv = Util.Substring(arg, jdx + "(p".Length, kdx).Split('p');
+                    string[] argv = Algo.Substring(arg, jdx + "(p".Length, kdx).Split('p');
                     var uss = argv.Select(p => ushort.Parse(p));
                     roundInput = VI.Cin(Uid, "请重排以下{0}卡牌{1}{2}.", prevComment, zd.Tux(uss), cancel);
                     inputValid &= roundInput.Split(',').Intersect(argv).Any();
@@ -1202,7 +1203,7 @@ namespace PSD.ClientZero
                         if (type == 0)
                         {
                             int n = int.Parse(args[idx + 2]);
-                            List<ushort> cards = Util.TakeRange(args, idx + 3, idx + 3 + n)
+                            List<ushort> cards = Algo.TakeRange(args, idx + 3, idx + 3 + n)
                                 .Select(p => ushort.Parse(p)).ToList();
                             Z0D[who].TuxCount += n;
                             if (who == Uid)
@@ -1225,7 +1226,7 @@ namespace PSD.ClientZero
                         if (type == 0)
                         {
                             int n = int.Parse(args[idx + 2]);
-                            List<ushort> cards = Util.TakeRange(args, idx + 3, idx + 3 + n)
+                            List<ushort> cards = Algo.TakeRange(args, idx + 3, idx + 3 + n)
                                 .Select(p => ushort.Parse(p)).ToList();
                             int tuxCount = 0;
                             foreach (ushort ut in cards)
@@ -1281,7 +1282,7 @@ namespace PSD.ClientZero
                         int n = int.Parse(args[idx + 2]);
                         if (n > 0)
                         {
-                            List<ushort> cds = Util.TakeRange(args, idx + 3, idx + 3 + n)
+                            List<ushort> cds = Algo.TakeRange(args, idx + 3, idx + 3 + n)
                                 .Select(p => ushort.Parse(p)).ToList();
                             string cdInfos = null;
                             if (cardType == "C")
@@ -1326,7 +1327,7 @@ namespace PSD.ClientZero
                         ushort from = ushort.Parse(args[i]);
                         ushort to = ushort.Parse(args[i + 1]);
                         int n = int.Parse(args[i + 2]);
-                        List<ushort> tuxes = Util.TakeRange(args, i + 3, i + 3 + n)
+                        List<ushort> tuxes = Algo.TakeRange(args, i + 3, i + 3 + n)
                             .Select(p => ushort.Parse(p)).ToList();
                         if (to == 0)
                             VI.Cout(Uid, "{0}展示了卡牌{1}.", zd.Player(from), zd.Tux(tuxes));
@@ -1346,7 +1347,7 @@ namespace PSD.ClientZero
                             if (utype == 0)
                             {
                                 int n = int.Parse(args[5]);
-                                List<ushort> cards = Util.TakeRange(args, 6, args.Length)
+                                List<ushort> cards = Algo.TakeRange(args, 6, args.Length)
                                     .Select(p => ushort.Parse(p)).ToList();
                                 VI.Cout(Uid, "{0}从{1}获得了{2}.", zd.Player(to), zd.Player(from), zd.Tux(cards));
                                 //foreach (ushort card in cards)
@@ -1378,7 +1379,7 @@ namespace PSD.ClientZero
                         }
                         else if (type == 2)
                         {
-                            List<ushort> cards = Util.TakeRange(args, 3, args.Length)
+                            List<ushort> cards = Algo.TakeRange(args, 3, args.Length)
                                 .Select(p => ushort.Parse(p)).ToList();
                             VI.Cout(Uid, "{0}摸取了{1}.", zd.Player(to), zd.Tux(cards));
                             //Z0P.TuxCount -= args.Length - 3;
@@ -1398,7 +1399,7 @@ namespace PSD.ClientZero
                             {
                                 ushort fromZone = ushort.Parse(args[idx]);
                                 int n = int.Parse(args[idx + 1]);
-                                ushort[] tuxes = Util.TakeRange(args, idx + 2, idx + 2 + n)
+                                ushort[] tuxes = Algo.TakeRange(args, idx + 2, idx + 2 + n)
                                     .Select(p => ushort.Parse(p)).ToArray();
                                 if (fromZone != 0)
                                     VI.Cout(Uid, "{0}从{1}的区域内获得了牌{2}.", zd.Player(to),
@@ -1412,7 +1413,7 @@ namespace PSD.ClientZero
                     }
                 case "E0QZ":
                     VI.Cout(Uid, "{0}弃置卡牌{1}.", zd.Player(ushort.Parse(args[1])),
-                        zd.Tux(Util.TakeRange(args, 2, args.Length).Select(p => ushort.Parse(p))));
+                        zd.Tux(Algo.TakeRange(args, 2, args.Length).Select(p => ushort.Parse(p))));
                     break;
                 case "E0IH":
                 case "E0OH":
@@ -1443,7 +1444,7 @@ namespace PSD.ClientZero
                     break;
                 case "E0ZH":
                     VI.Cout(Uid, "{0}处于濒死状态.", zd.Player(
-                        Util.TakeRange(args, 1, args.Length).Select(p => ushort.Parse(p))));
+                        Algo.TakeRange(args, 1, args.Length).Select(p => ushort.Parse(p))));
                     break;
                 case "E0LV":
                     for (int idx = 1; idx < args.Length;)
@@ -1451,7 +1452,7 @@ namespace PSD.ClientZero
                         ushort who = ushort.Parse(args[idx]);
                         int count = int.Parse(args[idx + 1]);
                         VI.Cout(Uid, "{0}对{1}发动了倾慕.", zd.PlayerWithMonster(
-                            Util.TakeRange(args, idx + 2, idx + 2 + count)), zd.Player(who));
+                            Algo.TakeRange(args, idx + 2, idx + 2 + count)), zd.Player(who));
                         idx += (2 + count);
                         Z0D[who].IsLoved = true;
                     }
@@ -1524,7 +1525,7 @@ namespace PSD.ClientZero
                     if (args[1].Equals("0"))
                     {
                         string cardType = args[2];
-                        ushort[] ravs = Util.TakeRange(args, 3, args.Length)
+                        ushort[] ravs = Algo.TakeRange(args, 3, args.Length)
                             .Select(p => ushort.Parse(p)).ToArray();
                         if (cardType == "C")
                             VI.Cout(Uid, "你观看了{0}.", zd.Tux(ravs));
@@ -1543,7 +1544,7 @@ namespace PSD.ClientZero
                     else if (args[1].Equals("2"))
                     {
                         ushort who = ushort.Parse(args[2]);
-                        ushort[] invs = Util.TakeRange(args, 4, args.Length)
+                        ushort[] invs = Algo.TakeRange(args, 4, args.Length)
                             .Select(p => ushort.Parse(p)).ToArray();
                         string cardType = args[3];
                         if (cardType == "C")
@@ -1564,7 +1565,7 @@ namespace PSD.ClientZero
                     else if (args[1].Equals("5"))
                     {
                         ushort who = ushort.Parse(args[2]);
-                        ushort[] invs = Util.TakeRange(args, 3, args.Length)
+                        ushort[] invs = Algo.TakeRange(args, 3, args.Length)
                             .Select(p => ushort.Parse(p)).ToArray();
                         VI.Cout(Uid, "{0}声明了{1}.", who, zd.TuxDbSerial(invs));
                     }
@@ -1572,7 +1573,7 @@ namespace PSD.ClientZero
                 case "E0QU":
                     if (args[1].Equals("0"))
                     {
-                        var ravs = Util.TakeRange(args, 2, args.Length).Select(p => ushort.Parse(p));
+                        var ravs = Algo.TakeRange(args, 2, args.Length).Select(p => ushort.Parse(p));
                         VI.Cout(Uid, "{0}被移离观看区.", zd.Tux(ravs));
                     }
                     else if (args[1].Equals("1"))
@@ -1587,7 +1588,7 @@ namespace PSD.ClientZero
                         ushort adapter = ushort.Parse(args[2]);
                         ushort pst = ushort.Parse(args[3]);
                         string txkn = args[4];
-                        List<ushort> ravs = Util.TakeRange(args, 5, args.Length)
+                        List<ushort> ravs = Algo.TakeRange(args, 5, args.Length)
                             .Select(p => ushort.Parse(p)).ToList();
                         if (pst == ust)
                             VI.Cout(Uid, "{0}将卡牌{1}当作卡牌{2}使用.", zd.Player(ust),
@@ -1604,7 +1605,7 @@ namespace PSD.ClientZero
                     {
                         // E0CD,A,JP04,3,1
                         ushort ust = ushort.Parse(args[1]);
-                        List<ushort> argst = Util.TakeRange(args, 4, args.Length)
+                        List<ushort> argst = Algo.TakeRange(args, 4, args.Length)
                             .Select(p => ushort.Parse(p)).ToList();
                         VI.Cout(Uid, "{0}{1}预定作用于{2}.", zd.Tux(args[3]),
                             (argst.Count > 0 ? ("(" + string.Join(",", argst) + ")") : ""), zd.Player(ust));
@@ -1614,7 +1615,7 @@ namespace PSD.ClientZero
                     {
                         // E0CE,A,JP04,3,1
                         ushort ust = ushort.Parse(args[1]);
-                        List<ushort> argst = Util.TakeRange(args, 4, args.Length)
+                        List<ushort> argst = Algo.TakeRange(args, 4, args.Length)
                             .Select(p => ushort.Parse(p)).ToList();
                         VI.Cout(Uid, "{0}{1}对{2}生效.", zd.Tux(args[3]),
                             (argst.Count > 0 ? ("(" + string.Join(",", argst) + ")") : ""), zd.Player(ust));
@@ -1627,8 +1628,8 @@ namespace PSD.ClientZero
                         string cardName = args[2];
                         if (args.Length > 3)
                         {
-                            ushort[] ravs = Util.TakeRange(args, 3, args.Length).Select(p => ushort.Parse(p)).ToArray();
-                            VI.Cout(Uid, "{0}的{1}({2})被抵消.", zd.Player(ust), zd.Tux(cardName), Util.SatoString(ravs));
+                            ushort[] ravs = Algo.TakeRange(args, 3, args.Length).Select(p => ushort.Parse(p)).ToArray();
+                            VI.Cout(Uid, "{0}的{1}({2})被抵消.", zd.Player(ust), zd.Tux(cardName), string.Join("p", ravs));
                         }
                         else
                             VI.Cout(Uid, "{0}的{1}被抵消.", zd.Player(ust), zd.Tux(cardName));
@@ -1664,7 +1665,7 @@ namespace PSD.ClientZero
                             ushort[] ravs = new ushort[args.Length - 4];
                             for (int i = 4; i < args.Length; ++i)
                                 ravs[i - 4] = ushort.Parse(args[i]);
-                            VI.Cout(Uid, "{0}调整{1}的新顺序为{2}.", zd.Player(py), dd[args[3]], Util.SatoString(ravs));
+                            VI.Cout(Uid, "{0}调整{1}的新顺序为{2}.", zd.Player(py), dd[args[3]], string.Join(",", ravs));
                         }
                         else if (type == 4)
                             VI.Cout(Uid, "{0}不调整牌堆顺序.", zd.Player(py));
@@ -2008,14 +2009,14 @@ namespace PSD.ClientZero
                         if (type == 0)
                         {
                             ushort from = ushort.Parse(args[3]);
-                            var cards = Util.TakeRange(args, 4, args.Length).Select(p => ushort.Parse(p));
+                            var cards = Algo.TakeRange(args, 4, args.Length).Select(p => ushort.Parse(p));
                             VI.Cout(Uid, "{0}可以获得宠物{1}.", zd.Player(who), zd.Monster(cards));
                         }
                         else if (type == 1)
                         {
                             ushort from = ushort.Parse(args[3]);
                             ushort kokan = ushort.Parse(args[4]);
-                            var cards = Util.TakeRange(args, 5, args.Length).Select(p => ushort.Parse(p));
+                            var cards = Algo.TakeRange(args, 5, args.Length).Select(p => ushort.Parse(p));
                             VI.Cout(Uid, "{0}可获得宠物{1}.", zd.Player(who), zd.Monster(cards));
                         }
                     }
@@ -2025,20 +2026,29 @@ namespace PSD.ClientZero
                         ushort me = ushort.Parse(args[1]);
                         ushort consumeType = ushort.Parse(args[2]);
                         ushort mons = ushort.Parse(args[3]);
-                        int type = int.Parse(args[4]);
+                        int innerType = int.Parse(args[4]);
+                        Monster monster = Tuple.ML.Decode(mons);
+                        if (monster != null && Algo.Equals(monster.EAHinds, consumeType, innerType, false))
+                        {
+                            string argvs = "";
+                            for (int i = 5; i < args.Length; ++i)
+                                argvs += "," + args[i];
+                            if (argvs != "")
+                                argvs = "(" + argvs.Substring(1) + ")";
 
-                        string argvs = "";
-                        for (int i = 5; i < args.Length; ++i)
-                            argvs += "," + args[i];
-                        if (argvs != "")
-                            argvs = "(" + argvs.Substring(1) + ")";
-
-                        if (consumeType == 0)
-                            VI.Cout(Uid, "{0}发动了宠物{1}[{2}]特效{3}.", zd.Player(me), zd.Monster(mons), type, argvs);
-                        else if (consumeType == 1)
-                            VI.Cout(Uid, "{0}爆发了宠物{1}[{2}]{3}.", zd.Player(me), zd.Monster(mons), type, argvs);
-                        else if (consumeType == 2)
-                            VI.Cout(Uid, "宠物{0}效果{2}被触发.", zd.Monster(mons), type, argvs);
+                            if (consumeType == 0)
+                            {
+                                VI.Cout(Uid, "{0}发动了宠物{1}[{2}]特效{3}.",
+                                    zd.Player(me), zd.Monster(mons), innerType, argvs);
+                            }
+                            else if (consumeType == 1)
+                            {
+                                VI.Cout(Uid, "{0}爆发了宠物{1}[{2}]{3}.", zd.Player(me),
+                                    zd.Monster(mons), innerType, argvs);
+                            }
+                            else if (consumeType == 2)
+                                VI.Cout(Uid, "宠物{0}效果{2}被触发.", zd.Monster(mons), innerType, argvs);
+                        }
                         break;
                     }
                 case "E0HI":
@@ -2066,9 +2076,8 @@ namespace PSD.ClientZero
                         else
                             VI.Cout(Uid, "{0}从{1}获得了宠物{2}.", zd.Player(who),
                                 zd.Player(from), zd.Monster(pet));
-                        Monster monster = Tuple.ML.Decode(pet);
-                        int five = monster.Element.Elem2Index();
-                        Z0D[who].Pets[five] = pet;
+                        if (!Z0D[who].Pets.Contains(pet))
+                            Z0D[who].Pets.Add(pet);
                     }
                     break;
                 case "E0HL":
@@ -2076,9 +2085,7 @@ namespace PSD.ClientZero
                         ushort who = ushort.Parse(args[1]);
                         ushort pet = ushort.Parse(args[2]);
                         VI.Cout(Uid, "{0}失去了宠物{1}.", zd.Player(who), zd.Monster(pet));
-                        Monster monster = Tuple.ML.Decode(pet);
-                        int five = monster.Element.Elem2Index();
-                        Z0D[who].Pets[five] = 0;
+                        Z0D[who].Pets.Remove(pet);
                     }
                     break;
                 case "E0HU":
@@ -2134,9 +2141,9 @@ namespace PSD.ClientZero
                         else if (type == 1)
                         {
                             int count1 = int.Parse(args[3]);
-                            List<string> heros1 = Util.TakeRange(args, 4, 4 + count1).ToList();
+                            List<string> heros1 = Algo.TakeRange(args, 4, 4 + count1).ToList();
                             int count2 = int.Parse(args[4 + count1]);
-                            List<string> heros2 = Util.TakeRange(args, 5 + count1,
+                            List<string> heros2 = Algo.TakeRange(args, 5 + count1,
                                 5 + count1 + count2).ToList();
                             VI.Cout(Uid, "{0}的{1}增加{2}，现在为{3}.", zd.Player(who),
                                 zd.HeroPeopleAlias(Z0D[who].SelectHero), zd.MixedCards(heros1), zd.MixedCards(heros2));
@@ -2145,10 +2152,10 @@ namespace PSD.ClientZero
                         else if (type == 2)
                         {
                             int count1 = int.Parse(args[3]);
-                            List<ushort> tars1 = Util.TakeRange(args, 4, 4 + count1)
+                            List<ushort> tars1 = Algo.TakeRange(args, 4, 4 + count1)
                                 .Select(p => ushort.Parse(p)).ToList();
                             int count2 = int.Parse(args[4 + count1]);
-                            List<ushort> tars2 = Util.TakeRange(args, 5 + count1,
+                            List<ushort> tars2 = Algo.TakeRange(args, 5 + count1,
                                 5 + count1 + count2).Select(p => ushort.Parse(p)).ToList();
                             if (count1 == count2)
                                 VI.Cout(Uid, "{0}的{1}目标指定为{2}.", zd.Player(who),
@@ -2169,10 +2176,10 @@ namespace PSD.ClientZero
                             if (!hind)
                             {
                                 int count1 = int.Parse(args[4]);
-                                List<ushort> folder1 = Util.TakeRange(args, 5, 5 + count1)
+                                List<ushort> folder1 = Algo.TakeRange(args, 5, 5 + count1)
                                     .Select(p => ushort.Parse(p)).ToList();
                                 int count2 = int.Parse(args[5 + count1]);
-                                List<ushort> folder2 = Util.TakeRange(args, 6 + count1,
+                                List<ushort> folder2 = Algo.TakeRange(args, 6 + count1,
                                     6 + count1 + count2).Select(p => ushort.Parse(p)).ToList();
                                 VI.Cout(Uid, "{0}的{1}增加{2}，现在为{3}.", zd.Player(who),
                                     zd.HeroFolderAlias(Z0D[who].SelectHero), zd.Tux(folder1), zd.Tux(folder2));
@@ -2205,9 +2212,9 @@ namespace PSD.ClientZero
                         else if (type == 1)
                         {
                             int count1 = int.Parse(args[3]);
-                            List<string> heros1 = Util.TakeRange(args, 4, 4 + count1).ToList();
+                            List<string> heros1 = Algo.TakeRange(args, 4, 4 + count1).ToList();
                             int count2 = int.Parse(args[4 + count1]);
-                            List<string> heros2 = Util.TakeRange(args, 5 + count1,
+                            List<string> heros2 = Algo.TakeRange(args, 5 + count1,
                                 5 + count1 + count2).ToList();
                             VI.Cout(Uid, "{0}的{1}减少{2}，现在为{3}.", zd.Player(who),
                                 zd.HeroPeopleAlias(Z0D[who].SelectHero), zd.MixedCards(heros1), zd.MixedCards(heros2));
@@ -2216,10 +2223,10 @@ namespace PSD.ClientZero
                         else if (type == 2)
                         {
                             int count1 = int.Parse(args[3]);
-                            List<ushort> tars1 = Util.TakeRange(args, 4, 4 + count1)
+                            List<ushort> tars1 = Algo.TakeRange(args, 4, 4 + count1)
                                 .Select(p => ushort.Parse(p)).ToList();
                             int count2 = int.Parse(args[4 + count1]);
-                            List<ushort> tars2 = Util.TakeRange(args, 5 + count1,
+                            List<ushort> tars2 = Algo.TakeRange(args, 5 + count1,
                                 5 + count1 + count2).Select(p => ushort.Parse(p)).ToList();
                             if (count2 == 0)
                                 VI.Cout(Uid, "{0}失去{1}目标.", zd.Player(who),
@@ -2240,10 +2247,10 @@ namespace PSD.ClientZero
                             if (!hind)
                             {
                                 int count1 = int.Parse(args[4]);
-                                List<ushort> folder1 = Util.TakeRange(args, 5, 5 + count1)
+                                List<ushort> folder1 = Algo.TakeRange(args, 5, 5 + count1)
                                     .Select(p => ushort.Parse(p)).ToList();
                                 int count2 = int.Parse(args[5 + count1]);
-                                List<ushort> folder2 = Util.TakeRange(args, 6 + count1,
+                                List<ushort> folder2 = Algo.TakeRange(args, 6 + count1,
                                     6 + count1 + count2).Select(p => ushort.Parse(p)).ToList();
                                 if (count2 == 0)
                                     VI.Cout(Uid, "{0}的{1}减少{2}.", zd.Player(who),
@@ -2309,7 +2316,7 @@ namespace PSD.ClientZero
                     {
                         ushort who = ushort.Parse(args[1]);
                         ushort piles = ushort.Parse(args[2]);
-                        List<ushort> cards = Util.TakeRange(args, 3,
+                        List<ushort> cards = Algo.TakeRange(args, 3,
                             args.Length).Select(p => ushort.Parse(p)).ToList();
                         if (cards.Count > 0)
                         {
@@ -2374,7 +2381,7 @@ namespace PSD.ClientZero
                     }
                     else if (args[1] == "5")
                     {
-                        ushort[] mons = Util.TakeRange(args, 2, args.Length)
+                        ushort[] mons = Algo.TakeRange(args, 2, args.Length)
                             .Select(p => ushort.Parse(p)).ToArray();
                         VI.Cout(Uid, "翻出怪物牌为【{0}】.", zd.Monster(mons));
                     }
@@ -2387,7 +2394,7 @@ namespace PSD.ClientZero
                             ++Z0P.MonCount;
                         }
                         else {
-                            List<ushort> mons = Util.TakeRange(args, 3, args.Length)
+                            List<ushort> mons = Algo.TakeRange(args, 3, args.Length)
                                 .Select(p => ushort.Parse(p)).ToList();
                             VI.Cout(Uid, "NPC牌【{0}】被插入放置于牌堆顶第{1}张.", mons, (position + 1));
                             Z0P.MonCount += mons.Count;
@@ -2401,7 +2408,7 @@ namespace PSD.ClientZero
                     }
                     else if (args[1] == "8")
                     {
-                        ushort[] tuxes = Util.TakeRange(args, 2, args.Length)
+                        ushort[] tuxes = Algo.TakeRange(args, 2, args.Length)
                             .Select(p => ushort.Parse(p)).ToArray();
                         VI.Cout(Uid, "翻出手牌为【{0}】.", zd.Tux(tuxes));
                     }
@@ -2465,7 +2472,7 @@ namespace PSD.ClientZero
                         int n = ushort.Parse(args[i + 2]);
                         if (hind == 0)
                         {
-                            List<ushort> cards = Util.TakeRange(args, i + 3, i + 3 + n)
+                            List<ushort> cards = Algo.TakeRange(args, i + 3, i + 3 + n)
                                 .Select(p => ushort.Parse(p)).ToList();
                             if (args[1] == "0")
                             {
@@ -2566,7 +2573,7 @@ namespace PSD.ClientZero
                         ushort who = ushort.Parse(args[1]);
                         ushort lugUt = ushort.Parse(args[2]);
                         bool dirIn = args[3] == "0";
-                        string[] cards = Util.TakeRange(args, 4, args.Length);
+                        string[] cards = Algo.TakeRange(args, 4, args.Length);
                         if (!Z0D[who].Treasures.ContainsKey(lugUt))
                             Z0D[who].Treasures[lugUt] = new List<string>();
                         if (dirIn)
@@ -2608,7 +2615,7 @@ namespace PSD.ClientZero
                 case "E0IF":
                     {
                         ushort who = ushort.Parse(args[1]);
-                        ushort[] sfs = Util.TakeRange(args, 2, args.Length).Select(p => ushort.Parse(p)).ToArray();
+                        ushort[] sfs = Algo.TakeRange(args, 2, args.Length).Select(p => ushort.Parse(p)).ToArray();
                         Z0D[who].Runes.AddRange(sfs);
                         VI.Cout(Uid, "{0}获得身法{1}.", zd.Player(who), zd.Rune(sfs));
                     }
@@ -2616,7 +2623,7 @@ namespace PSD.ClientZero
                 case "E0OF":
                     {
                         ushort who = ushort.Parse(args[1]);
-                        ushort[] sfs = Util.TakeRange(args, 2, args.Length).Select(p => ushort.Parse(p)).ToArray();
+                        ushort[] sfs = Algo.TakeRange(args, 2, args.Length).Select(p => ushort.Parse(p)).ToArray();
                         Z0D[who].Runes.RemoveAll(p => sfs.Contains(p));
                         VI.Cout(Uid, "{0}失去身法{1}.", zd.Player(who), zd.Rune(sfs));
                     }
@@ -2768,7 +2775,7 @@ namespace PSD.ClientZero
             ushort owner = ushort.Parse(involved);
             string action = zd.AnalysisAction(mai, inType);
             string sktxcz = zd.SKTXCZ(mai, true, inType);
-            if (sktxcz != "")
+            if (sktxcz != "" && sktxcz.Contains(":"))
             {
                 if (owner != Uid)
                     VI.Cout(Uid, "{0}{1}了{2}.", zd.Player(owner), action, sktxcz);
@@ -2810,7 +2817,7 @@ namespace PSD.ClientZero
             string[] blocks = cmdrst.Split(',');
             int invCount = int.Parse(blocks[0]);
             string input = FormattedInputWithCancelFlag(string.Join(
-                    ",", Util.TakeRange(blocks, 1 + invCount, blocks.Length)));
+                    ",", Algo.TakeRange(blocks, 1 + invCount, blocks.Length)));
             VI.CloseCinTunnel(Uid);
             WI.Send("V1," + input, Uid, 0);
             return true;
@@ -2838,7 +2845,7 @@ namespace PSD.ClientZero
         public bool HandleV3Message(string cmdrst)
         {
             string[] splits = cmdrst.Split(',');
-            List<ushort> invs = Util.TakeRange(splits, 0, splits.Length)
+            List<ushort> invs = Algo.TakeRange(splits, 0, splits.Length)
                 .Select(p => ushort.Parse(p)).ToList();
             VI.Cout(Uid, "等待{0}响应.", zd.Player(invs));
             return false;
@@ -3184,7 +3191,7 @@ namespace PSD.ClientZero
                 //    break;
                 case "H0SD":
                     {
-                        string[] blocks = Util.Splits(cmdrst, ",");
+                        string[] blocks = Algo.Splits(cmdrst, ",");
                         for (int i = 0; i < blocks.Length; i += 3)
                         {
                             ushort ut = ushort.Parse(blocks[i]);
@@ -3223,7 +3230,7 @@ namespace PSD.ClientZero
                     {
                         string[] splits = cmdrst.Split(',');
                         ushort type = ushort.Parse(splits[0]);
-                        List<ushort> pys = Util.TakeRange(splits, 1, splits.Length)
+                        List<ushort> pys = Algo.TakeRange(splits, 1, splits.Length)
                             .Select(p => ushort.Parse(p)).ToList();
                         pys.Remove(Uid);
                         if (pys.Count > 0)
@@ -3325,13 +3332,13 @@ namespace PSD.ClientZero
                     {
                         string[] args = cmdrst.Split(',');
                         int xsz = int.Parse(args[0]);
-                        List<int> x = Util.TakeRange(args, 1, 1 + xsz)
+                        List<int> x = Algo.TakeRange(args, 1, 1 + xsz)
                             .Select(p => int.Parse(p)).ToList();
                         int bsz1 = int.Parse(args[xsz + 1]);
-                        List<int> b1 = Util.TakeRange(args, 2 + xsz, 2 + xsz + bsz1)
+                        List<int> b1 = Algo.TakeRange(args, 2 + xsz, 2 + xsz + bsz1)
                             .Select(p => int.Parse(p)).ToList();
                         int bsz2 = int.Parse(args[xsz + bsz1 + 2]);
-                        List<int> b2 = Util.TakeRange(args, 3 + xsz + bsz1, 3 + xsz + bsz1 + bsz2)
+                        List<int> b2 = Algo.TakeRange(args, 3 + xsz + bsz1, 3 + xsz + bsz1 + bsz2)
                             .Select(p => int.Parse(p)).ToList();
 
                         Base.Rules.CastingTable ct = new Base.Rules.CastingTable(x, b1, b2);
@@ -3343,7 +3350,7 @@ namespace PSD.ClientZero
                     {
                         // Verify whether these lists are the same.
                         //string[] args = cmdrst.Split(',');
-                        //List<int> cands = Util.TakeRange(args, 0, args.Length)
+                        //List<int> cands = Algo.TakeRange(args, 0, args.Length)
                         //    .Select(p => int.Parse(p)).ToList();
                         //selCandidates.Clear(); selCandidates.AddRange(cands);
                         cinCalled = StartCinEtc();
@@ -3400,7 +3407,7 @@ namespace PSD.ClientZero
                     {
                         string[] args = cmdrst.Split(',');
                         ushort puid = ushort.Parse(args[0]);
-                        List<int> hrs = Util.TakeRange(args, 1, args.Length)
+                        List<int> hrs = Algo.TakeRange(args, 1, args.Length)
                             .Select(p => int.Parse(p)).ToList();
                         Base.Rules.CastingTable ct = casting as Base.Rules.CastingTable;
                         if (hrs.Count == 0 && hrs[0] == 0)
@@ -3418,7 +3425,7 @@ namespace PSD.ClientZero
                 case "H0TJ":
                     {
                         string[] args = cmdrst.Split(',');
-                        List<int> hrs = Util.TakeRange(args, 0, args.Length)
+                        List<int> hrs = Algo.TakeRange(args, 0, args.Length)
                             .Select(p => int.Parse(p)).ToList();
                         VI.Cout(Uid, "新增了角色{0}.", zd.Hero(hrs));
                         Base.Rules.CastingTable ct = casting as Base.Rules.CastingTable;
@@ -3433,23 +3440,23 @@ namespace PSD.ClientZero
                         string[] args = cmdrst.Split(',');
                         int idx = 0;
                         int xsz = int.Parse(args[idx]); ++idx;
-                        List<int> x = Util.TakeRange(args, idx, idx + xsz)
+                        List<int> x = Algo.TakeRange(args, idx, idx + xsz)
                             .Select(p => int.Parse(p)).ToList();
                         idx += xsz;
                         int drsz = int.Parse(args[idx]); ++idx;
-                        List<int> dr = Util.TakeRange(args, idx, idx + drsz)
+                        List<int> dr = Algo.TakeRange(args, idx, idx + drsz)
                             .Select(p => int.Parse(p)).ToList();
                         idx += drsz;
                         int dbsz = int.Parse(args[idx]); ++idx;
-                        List<int> db = Util.TakeRange(args, idx, idx + dbsz)
+                        List<int> db = Algo.TakeRange(args, idx, idx + dbsz)
                             .Select(p => int.Parse(p)).ToList();
                         idx += dbsz;
                         int brsz = int.Parse(args[idx]); ++idx;
-                        List<int> br = Util.TakeRange(args, idx, idx + brsz)
+                        List<int> br = Algo.TakeRange(args, idx, idx + brsz)
                             .Select(p => int.Parse(p)).ToList();
                         idx += brsz;
                         int bbsz = int.Parse(args[idx]); ++idx;
-                        List<int> bb = Util.TakeRange(args, idx, idx + bbsz)
+                        List<int> bb = Algo.TakeRange(args, idx, idx + bbsz)
                             .Select(p => int.Parse(p)).ToList();
                         idx += bbsz;
 
@@ -3532,10 +3539,10 @@ namespace PSD.ClientZero
                     {
                         string[] args = cmdrst.Split(',');
                         int xsz1 = int.Parse(args[0]);
-                        List<int> x1 = Util.TakeRange(args, 1, 1 + xsz1)
+                        List<int> x1 = Algo.TakeRange(args, 1, 1 + xsz1)
                             .Select(p => int.Parse(p)).ToList();
                         int xsz2 = int.Parse(args[xsz1 + 1]);
-                        List<int> x2 = Util.TakeRange(args, 2 + xsz1, 2 + xsz1 + xsz2)
+                        List<int> x2 = Algo.TakeRange(args, 2 + xsz1, 2 + xsz1 + xsz2)
                             .Select(p => int.Parse(p)).ToList();
                         Base.Rules.CastingCongress cc = new Base.Rules.CastingCongress(x1, x2, new List<int>());
                         casting = cc;
@@ -3570,10 +3577,10 @@ namespace PSD.ClientZero
                     {
                         string[] args = cmdrst.Split(',');
                         int xsz1 = int.Parse(args[0]);
-                        List<int> x1 = Util.TakeRange(args, 1, 1 + xsz1)
+                        List<int> x1 = Algo.TakeRange(args, 1, 1 + xsz1)
                             .Select(p => int.Parse(p)).ToList();
                         int xsz2 = int.Parse(args[xsz1 + 1]);
-                        List<int> x2 = Util.TakeRange(args, 2 + xsz1, 2 + xsz1 + xsz2)
+                        List<int> x2 = Algo.TakeRange(args, 2 + xsz1, 2 + xsz1 + xsz2)
                             .Select(p => int.Parse(p)).ToList();
                         Base.Rules.CastingCongress cc = new Base.Rules.CastingCongress(x1, x2, new List<int>());
                         casting = cc;
@@ -3750,103 +3757,55 @@ namespace PSD.ClientZero
                         break;
                     }
                 case "H09G":
-                    {
-                        string[] blocks = cmdrst.Split(',');
-                        for (int idx = 0; idx < blocks.Length; )
+                    Algo.LongMessageParse(cmdrst.Split(','), (who) => { Z0D[who].Uid = who; },
+                        (who, key, value) =>
                         {
-                            ushort who = ushort.Parse(blocks[idx]);
-                            int hero = int.Parse(blocks[idx + 1]);
-                            int state = int.Parse(blocks[idx + 2]);
-                            ushort hp = ushort.Parse(blocks[idx + 3]);
-                            ushort hpa = ushort.Parse(blocks[idx + 4]);
-                            ushort str = ushort.Parse(blocks[idx + 5]);
-                            ushort stra = ushort.Parse(blocks[idx + 6]);
-                            ushort dex = ushort.Parse(blocks[idx + 7]);
-                            ushort dexa = ushort.Parse(blocks[idx + 8]);
-                            int tuxCount = int.Parse(blocks[idx + 9]);
-                            ushort wp = ushort.Parse(blocks[idx + 10]);
-                            ushort am = ushort.Parse(blocks[idx + 11]);
-                            ushort tr = ushort.Parse(blocks[idx + 12]);
-                            ushort exq = ushort.Parse(blocks[idx + 13]);
-
-                            int lugsz = int.Parse(blocks[idx + 14]);
-                            int nextIdx = idx + 15;
-                            List<string> lugs = Util.TakeRange(blocks, nextIdx,
-                                nextIdx + lugsz).ToList();
-                            nextIdx += lugsz;
-                            ushort guard = ushort.Parse(blocks[nextIdx]);
-                            nextIdx += 1;
-                            ushort coss = ushort.Parse(blocks[nextIdx]);
-                            nextIdx += 1;
-                            ushort[] pets = Util.TakeRange(blocks, nextIdx,
-                                nextIdx + 5).Select(p => ushort.Parse(p)).ToArray();
-                            nextIdx += 5;
-                            int excdsz = int.Parse(blocks[nextIdx]);
-                            nextIdx += 1;
-                            List<ushort> excards = Util.TakeRange(blocks, nextIdx,
-                                nextIdx + excdsz).Select(p => ushort.Parse(p)).ToList();
-                            nextIdx += excdsz;
-                            int fakeqsz = int.Parse(blocks[nextIdx]);
-                            nextIdx += 1;
-                            List<string> fakeqpairs = Util.TakeRange(blocks, nextIdx,
-                                nextIdx + fakeqsz * 2).ToList();
-                            nextIdx += fakeqsz * 2;
-                            int token = int.Parse(blocks[nextIdx]);
-                            nextIdx += 1;
-                            int peoplesz = int.Parse(blocks[nextIdx]);
-                            nextIdx += 1;
-                            List<string> peoples = Util.TakeRange(blocks, nextIdx,
-                                nextIdx + peoplesz).ToList();
-                            nextIdx += peoplesz;
-                            int tarsz = int.Parse(blocks[nextIdx]);
-                            nextIdx += 1;
-                            List<ushort> tars = Util.TakeRange(blocks, nextIdx,
-                                nextIdx + tarsz).Select(p => ushort.Parse(p)).ToList();
-                            nextIdx += tarsz;
-                            bool awake = blocks[nextIdx] == "1";
-                            nextIdx += 1;
-                            int foldsz = int.Parse(blocks[nextIdx]);
-                            nextIdx += 1;
-                            int escuesz = int.Parse(blocks[nextIdx]);
-                            nextIdx += 1;
-                            List<ushort> escues = Util.TakeRange(blocks, nextIdx,
-                                nextIdx + escuesz).Select(p => ushort.Parse(p)).ToList();
-                            nextIdx += escuesz;
-
-                            idx = nextIdx;
-                            if (Z0D.ContainsKey(who))
+                            ZeroPlayer zp = Z0D[who];
+                            switch (key)
                             {
-                                ZeroPlayer zp = Z0D[who];
-                                zp.Uid = who;
-                                zp.SelectHero = hero;
-                                zp.HP = hp; zp.HPa = hpa;
-                                zp.STR = str; zp.STRa = str;
-                                zp.DEX = dex; zp.DEXa = dexa;
-                                zp.TuxCount = tuxCount;
-                                zp.Weapon = wp; zp.Armor = am; zp.Trove = tr; zp.ExEquip = exq;
-                                if (lugs.Count > 0)
-                                    zp.Treasures[tr].AddRange(lugs);
-                                zp.Guardian = guard; zp.Coss = coss;
-                                zp.Pets = pets;
-                                zp.ExCards = excards;
-                                for (int i = 0; i < fakeqpairs.Count; i += 2)
-                                    zp.Fakeq[ushort.Parse(fakeqpairs[i])] = fakeqpairs[i + 1];
-                                zp.Token = token;
-                                zp.SpecialCards.Clear();
-                                zp.SpecialCards.AddRange(peoples);
-                                zp.PlayerTars.Clear();
-                                zp.PlayerTars.AddRange(tars);
-                                zp.AwakeSignal = awake;
-                                zp.FolderCount = foldsz;
-                                zp.Escue.AddRange(escues);
-
-                                zp.IsAlive = ((state & 1) != 0);
-                                zp.IsLoved = ((state & 2) != 0);
-                                zp.Immobilized = ((state & 4) != 0);
-                                zp.PetDisabled = ((state & 8) != 0);
+                                case "hero": zp.SelectHero = (int)value; break;
+                                case "state":
+                                    zp.IsAlive = (((int)value & 1) != 0);
+                                    zp.IsLoved = (((int)value & 2) != 0);
+                                    zp.Immobilized = (((int)value & 4) != 0);
+                                    zp.PetDisabled = (((int)value & 8) != 0); break;
+                                case "hp": zp.HP = (ushort)value; break;
+                                case "hpa": zp.HPa = (ushort)value; break;
+                                case "str": zp.STR = (ushort)value; break;
+                                case "stra": zp.STRa = (ushort)value; break;
+                                case "dex": zp.DEX = (ushort)value; break;
+                                case "dexa": zp.DEXa = (ushort)value; break;
+                                case "tuxCount": zp.TuxCount = (int)value; break;
+                                case "wp": zp.Weapon = (ushort)value; break;
+                                case "am": zp.Armor = (ushort)value; break;
+                                case "tr": zp.Trove = (ushort)value; break;
+                                case "exq": zp.ExEquip = (ushort)value; break;
+                                case "lug":
+                                    zp.Treasures[zp.Trove].AddRange((string[])value); break;
+                                case "guard": zp.Guardian = (ushort)value; break;
+                                case "coss": zp.Coss = (ushort)value; break;
+                                case "pet":
+                                    zp.Pets.Clear(); zp.Pets.AddRange((ushort[])value); break;
+                                case "excard":
+                                    zp.ExCards.Clear(); zp.ExCards.AddRange((ushort[])value); break;
+                                case "token": zp.Token = (int)value; break;
+                                case "fakeq":
+                                    for (int i = 0; i < ((string[])value).Length; i += 2)
+                                        zp.Fakeq[ushort.Parse(((string[])value)[i])] = ((string[])value)[i + 1];
+                                    break;
+                                case "rune":
+                                    zp.Runes.Clear(); zp.Runes.AddRange((ushort[])value); break;
+                                case "excl":
+                                    zp.SpecialCards.Clear(); zp.SpecialCards.AddRange((string[])value); break;
+                                case "tar":
+                                    zp.PlayerTars.Clear(); zp.PlayerTars.AddRange((ushort[])value); break;
+                                case "awake":
+                                    zp.AwakeSignal = (ushort)value == 1; break;
+                                case "foldsz": zp.FolderCount = (int)value; break;
+                                case "escue":
+                                    zp.Escue.Clear(); zp.Escue.AddRange((ushort[])value); break;
                             }
-                        }
-                    }
+                        }, Board.StatusKey);
                     break;
                 case "H09P":
                     {
@@ -3932,19 +3891,19 @@ namespace PSD.ClientZero
                         int idx = 0;
                         int tuxCount = int.Parse(blocks[idx]);
                         ++idx;
-                        List<ushort> tuxes = Util.TakeRange(blocks, idx, idx + tuxCount)
+                        List<ushort> tuxes = Algo.TakeRange(blocks, idx, idx + tuxCount)
                             .Select(p => ushort.Parse(p)).ToList();
                         Z0M.Tux = tuxes;
                         idx += tuxCount;
                         int folderCount = int.Parse(blocks[idx]);
                         ++idx;
-                        List<ushort> folders = Util.TakeRange(blocks, idx, idx + folderCount)
+                        List<ushort> folders = Algo.TakeRange(blocks, idx, idx + folderCount)
                             .Select(p => ushort.Parse(p)).ToList();
                         Z0M.Folder = folders;
                         idx += folderCount;
                         int skillCount = int.Parse(blocks[idx]);
                         ++idx;
-                        //List<string> skills = Util.TakeRange(blocks, idx, idx + skillCount).ToList();
+                        //List<string> skills = Algo.TakeRange(blocks, idx, idx + skillCount).ToList();
                         //Z0M.Skills = skills;
                         idx += skillCount;
                     }

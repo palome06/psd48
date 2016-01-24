@@ -1,7 +1,9 @@
 using PSD.Base;
 using PSD.Base.Card;
+using PSD.Base.Utils;
 using System.Collections.Generic;
 using System.Linq;
+using Algo = PSD.Base.Utils.Algo;
 
 namespace PSD.PSDGamepkg.JNS
 {
@@ -202,7 +204,7 @@ namespace PSD.PSDGamepkg.JNS
             if (player.Guardian == 18)
             {
                 string[] g0zw = fuse.Split(',');
-                return player.IsAlive && Util.TakeRange(g0zw, 1, g0zw.Length).Select(p => ushort.Parse(p))
+                return player.IsAlive && Algo.TakeRange(g0zw, 1, g0zw.Length).Select(p => ushort.Parse(p))
                     .Any(p => XI.Board.Garden[p].Team == player.Team && p != player.Uid);
             }
             else if (player.Guardian == 19)
@@ -339,7 +341,7 @@ namespace PSD.PSDGamepkg.JNS
 
             Player tar = XI.Board.Garden[ut];
             TargetPlayer(player.Uid, tar.Uid);
-            string c0 = Util.RepeatString("p0", tar.Tux.Count);
+            string c0 = Algo.RepeatString("p0", tar.Tux.Count);
             XI.AsyncInput(player.Uid, "#展示的,C1(" + c0 + ")", "JNH0206", "0");
             List<ushort> vals = tar.Tux.ToList();
             vals.Shuffle();
@@ -391,7 +393,7 @@ namespace PSD.PSDGamepkg.JNS
             ushort to = ushort.Parse(blocks[0]);
             TargetPlayer(player.Uid, to);
             //int mValue = 0; 
-            XI.RaiseGMessage("G0QZ," + player.Uid + "," + string.Join(",", Util.TakeRange(blocks, 1, blocks.Length)));
+            XI.RaiseGMessage("G0QZ," + player.Uid + "," + string.Join(",", Algo.TakeRange(blocks, 1, blocks.Length)));
             Artiad.Procedure.RotateHarm(player, XI.Board.Garden[to], false, (v) => v, ref harms);
             XI.InnerGMessage(Artiad.Harm.ToMessage(harms), -54);
             if (XI.Board.Garden[to].IsAlive)
@@ -591,7 +593,7 @@ namespace PSD.PSDGamepkg.JNS
         {
             XI.RaiseGMessage("G0QZ," + player.Uid + "," + argst);
             XI.RaiseGMessage("G0OW," + XI.Board.Monster1 + ",2");
-            XI.RaiseGMessage("G0JM,R" + player.Uid + "PD");
+            XI.RaiseGMessage("G0JM,R" + XI.Board.Rounder.Uid + "PD");
         }
         public string JNH0401Input(Player player, int type, string fuse, string prev)
         {
@@ -1138,10 +1140,10 @@ namespace PSD.PSDGamepkg.JNS
                     if (cardType == "M" && cnt > 0)
                     {
                         for (int i = idx + 3; i < idx + 3 + cnt; ++i)
-                            Util.AddToMultiMap(dict, fromZone, ushort.Parse(blocks[i]));
+                            Algo.AddToMultiMap(dict, fromZone, ushort.Parse(blocks[i]));
                     }
                     else
-                        n0on += "," + string.Join(",", Util.TakeRange(blocks, idx, idx + 3 + cnt));
+                        n0on += "," + string.Join(",", Algo.TakeRange(blocks, idx, idx + 3 + cnt));
                     idx += (3 + cnt);
                 }
 
@@ -1297,15 +1299,15 @@ namespace PSD.PSDGamepkg.JNS
                 if (who == tar && XI.Board.Garden[who].IsTared && !drIn && n >= 2)
                 {
                     int neq = int.Parse(g1di[idx + 3]);
-                    List<ushort> rms = Util.TakeRange(g1di, idx + 4, idx + 4 + n - neq)
+                    List<ushort> rms = Algo.TakeRange(g1di, idx + 4, idx + 4 + n - neq)
                         .Select(p => ushort.Parse(p)).ToList();
-                    List<ushort> reqs = Util.TakeRange(g1di, idx + 4 + n - neq, idx + 4 + n)
+                    List<ushort> reqs = Algo.TakeRange(g1di, idx + 4 + n - neq, idx + 4 + n)
                         .Select(p => ushort.Parse(p)).ToList();
                     rest.AddRange(rms);
                     eqs.AddRange(reqs);
                 }
                 else
-                    n1di += "," + string.Join(",", Util.TakeRange(g1di, idx, idx + 4 + n));
+                    n1di += "," + string.Join(",", Algo.TakeRange(g1di, idx, idx + 4 + n));
                 idx += (4 + n);
             }
             TargetPlayer(player.Uid, tar);
@@ -1352,7 +1354,7 @@ namespace PSD.PSDGamepkg.JNS
                     int n = int.Parse(g1di[idx + 2]);
                     if (who == ut && !drIn && n >= 2)
                     {
-                        tuxes.AddRange(Util.TakeRange(g1di, idx + 4, idx + 4 + n)
+                        tuxes.AddRange(Algo.TakeRange(g1di, idx + 4, idx + 4 + n)
                             .Select(p => ushort.Parse(p)));
                     }
                     idx += (4 + n);
@@ -1373,7 +1375,7 @@ namespace PSD.PSDGamepkg.JNS
                     int n = int.Parse(g1di[idx + 2]);
                     if (who == ut && !drIn && n >= 2)
                     {
-                        tuxes.AddRange(Util.TakeRange(g1di, idx + 4, idx + 4 + n)
+                        tuxes.AddRange(Algo.TakeRange(g1di, idx + 4, idx + 4 + n)
                             .Select(p => ushort.Parse(p)));
                     }
                     idx += (4 + n);
@@ -1504,7 +1506,7 @@ namespace PSD.PSDGamepkg.JNS
                 int idx = fuse.IndexOf(';');
                 string[] g0cc = fuse.Substring(0, idx).Split(',');
                 string kn = g0cc[4];
-                ushort[] txs = Util.TakeRange(g0cc, 5, g0cc.Length).Select(p => ushort.Parse(p)).ToArray();
+                ushort[] txs = Algo.TakeRange(g0cc, 5, g0cc.Length).Select(p => ushort.Parse(p)).ToArray();
                 if (kn != "TP01" && kn != "TPT3" && (txs.Any(p => p != 0)))
                 {
                     Tux ktux = XI.LibTuple.TL.EncodeTuxCode(kn);
@@ -1520,9 +1522,9 @@ namespace PSD.PSDGamepkg.JNS
         {
             XI.RaiseGMessage("G0QZ," + player.Uid + "," + argst);
             int hdx = fuse.IndexOf(';');
-            string[] g0cc = Util.Substring(fuse, 0, hdx).Split(',');
+            string[] g0cc = Algo.Substring(fuse, 0, hdx).Split(',');
             // ushort ust = ushort.Parse(g0cc[1]);
-            ushort[] txs = Util.TakeRange(g0cc, 5, g0cc.Length).Select(p => ushort.Parse(p)).ToArray();
+            ushort[] txs = Algo.TakeRange(g0cc, 5, g0cc.Length).Select(p => ushort.Parse(p)).ToArray();
             // List<ushort> txis = txs.Where(p => XI.Board.TuxDises.Contains(p)).ToList();
             if (txs.Length > 0)
             {
@@ -1535,7 +1537,7 @@ namespace PSD.PSDGamepkg.JNS
             int kdx = fuse.IndexOf(',', hdx);
             if (kdx >= 0)
             {
-                string origin = Util.Substring(fuse, kdx + 1, -1);
+                string origin = Algo.Substring(fuse, kdx + 1, -1);
                 //if (origin.StartsWith("G0CC"))
                 //    XI.InnerGMessage(origin, 141);
                 //else if (origin.StartsWith("G"))
@@ -1543,7 +1545,7 @@ namespace PSD.PSDGamepkg.JNS
                 if (origin.StartsWith("G"))
                 {
                     string cardname = g0cc[4];
-                    int inType = int.Parse(Util.Substring(fuse, hdx + 1, kdx));
+                    int inType = int.Parse(Algo.Substring(fuse, hdx + 1, kdx));
                     Base.Card.Tux tux = XI.LibTuple.TL.EncodeTuxCode(cardname);
                     int prior = tux.Priorities[inType];
                     XI.InnerGMessage(origin, prior);
@@ -1565,7 +1567,7 @@ namespace PSD.PSDGamepkg.JNS
         {
             if (type == 0)
             {
-                if (Util.TryNotEmpty(player.RAM, "ZPName") &&
+                if (Algo.TryNotEmpty(player.RAM, "ZPName") &&
                     player.RAMUshort == 0 && player.Tux.Count > 0)
                 {
                     Base.Card.Tux tux = XI.LibTuple.TL.EncodeTuxCode((string)player.RAM["ZPName"]);
@@ -1586,7 +1588,7 @@ namespace PSD.PSDGamepkg.JNS
                 }
             }
             else if (type == 2)
-                return Util.TryNotEmpty(player.RAM, "ZPName") || player.RAMUshort != 0;
+                return Algo.TryNotEmpty(player.RAM, "ZPName") || player.RAMUshort != 0;
             return false;
         }
         public void JNH0902Action(Player player, int type, string fuse, string argst)
@@ -1621,7 +1623,7 @@ namespace PSD.PSDGamepkg.JNS
         {
             if (type == 0) // G0CC
             {
-                string[] g0cc = Util.Substring(fuse, 0, fuse.IndexOf(';')).Split(',');
+                string[] g0cc = Algo.Substring(fuse, 0, fuse.IndexOf(';')).Split(',');
                 int n = g0cc.Length - 5;
                 if (g0cc[5] == "0")
                     --n;
@@ -1641,6 +1643,7 @@ namespace PSD.PSDGamepkg.JNS
                 }
                 return false;
             }
+            // TODO: check whether should be replaced to G1EU
             else if (type == 2) // G0ZB
             {
                 string[] g0zb = fuse.Split(',');
@@ -1661,7 +1664,7 @@ namespace PSD.PSDGamepkg.JNS
         {
             if (type == 0)
             {
-                string[] g0cc = Util.Substring(fuse, 0, fuse.IndexOf(';')).Split(',');
+                string[] g0cc = Algo.Substring(fuse, 0, fuse.IndexOf(';')).Split(',');
                 int n = g0cc.Length - 5;
                 if (g0cc[5] == "0")
                     --n;
@@ -1709,7 +1712,7 @@ namespace PSD.PSDGamepkg.JNS
             {
                 ushort who = ushort.Parse(g1ly[idx]);
                 int n = int.Parse(g1ly[idx + 1]);
-                //List<ushort> cards = Util.TakeRange(g0ot, idx + 2, idx + 2 + n)
+                //List<ushort> cards = Algo.TakeRange(g0ot, idx + 2, idx + 2 + n)
                 //    .Select(p => ushort.Parse(p)).ToList();
                 Player py = XI.Board.Garden[who];
                 if (py.IsTared && py.Team == player.Team &&
@@ -1739,7 +1742,7 @@ namespace PSD.PSDGamepkg.JNS
                 {
                     ushort who = ushort.Parse(g0ot[idx]);
                     int n = int.Parse(g0ot[idx + 1]);
-                    //List<ushort> cards = Util.TakeRange(g0ot, idx + 2, idx + 2 + n)
+                    //List<ushort> cards = Algo.TakeRange(g0ot, idx + 2, idx + 2 + n)
                     //    .Select(p => ushort.Parse(p)).ToList();
                     Player py = XI.Board.Garden[who];
                     if (py.IsTared && py.Team == player.Team &&
@@ -1909,14 +1912,14 @@ namespace PSD.PSDGamepkg.JNS
             {
                 player.RAMUshort = 0;
                 int hdx = fuse.IndexOf(';');
-                string[] g0ce = Util.Substring(fuse, 0, hdx).Split(',');
+                string[] g0ce = Algo.Substring(fuse, 0, hdx).Split(',');
                 int kdx = fuse.IndexOf(',', hdx);
-                string origin = Util.Substring(fuse, kdx + 1, -1);
+                string origin = Algo.Substring(fuse, kdx + 1, -1);
                 XI.RaiseGMessage("G2CL," + ushort.Parse(g0ce[1]) + "," + g0ce[4]);
                 if (origin.StartsWith("G") && g0ce[2] != "2") // Avoid Double Computation on Copy
                 {
                     string cardname = g0ce[4];
-                    int inType = int.Parse(Util.Substring(fuse, hdx + 1, kdx));
+                    int inType = int.Parse(Algo.Substring(fuse, hdx + 1, kdx));
                     Base.Card.Tux tux = XI.LibTuple.TL.EncodeTuxCode(cardname);
                     int prior = tux.Priorities[inType];
                     XI.InnerGMessage(origin, prior);
@@ -1928,9 +1931,9 @@ namespace PSD.PSDGamepkg.JNS
                 int fdx = fuse.IndexOf(';');
                 int hdx = fuse.IndexOf(';', fdx + 1);
                 int idx = fuse.IndexOf(',', hdx);
-                int sktInType = int.Parse(Util.Substring(fuse, hdx + 1, idx));
-                string sktFuse = Util.Substring(fuse, idx + 1, -1);
-                string cdFuse = Util.Substring(fuse, fdx + 1, -1);
+                int sktInType = int.Parse(Algo.Substring(fuse, hdx + 1, idx));
+                string sktFuse = Algo.Substring(fuse, idx + 1, -1);
+                string cdFuse = Algo.Substring(fuse, fdx + 1, -1);
 
                 string[] g1cw = fuse.Substring(0, fdx).Split(',');
                 ushort first = ushort.Parse(g1cw[1]);
@@ -1993,7 +1996,7 @@ namespace PSD.PSDGamepkg.JNS
             foreach (Player py in pys)
             {
                 List<ushort> myTux = player.Tux.ToList();
-                string c0 = Util.RepeatString("p0", XI.Board.Garden[py.Uid].Tux.Count);
+                string c0 = Algo.RepeatString("p0", XI.Board.Garden[py.Uid].Tux.Count);
                 XI.AsyncInput(player.Uid, "#获得" + XI.LibTuple.HL.InstanceHero(py.SelectHero).Name
                     + "的,C1(" + c0 + ")", "JNH1201", "0");
                 XI.RaiseGMessage("G0HQ,0," + player.Uid + "," + py.Uid + ",2,1");
@@ -2012,7 +2015,7 @@ namespace PSD.PSDGamepkg.JNS
                 {
                     ushort[] uts = input.Split(',').Select(p => ushort.Parse(p)).ToArray();
                     ushort tar = uts[uts.Length - 1];
-                    ushort[] tuxs = Util.TakeRange(uts, 0, uts.Length - 1);
+                    ushort[] tuxs = Algo.TakeRange(uts, 0, uts.Length - 1);
                     XI.RaiseGMessage("G0HQ,0," + tar + "," + player.Uid
                             + ",1," + tuxs.Length + "," + string.Join(",", tuxs));
                     cards.RemoveAll(p => tuxs.Contains(p));
@@ -2028,8 +2031,8 @@ namespace PSD.PSDGamepkg.JNS
         {
             TargetPlayer(player.Uid, XI.Board.Garden.Values
                 .Where(p => p.IsAlive && p.Uid != player.Uid).Select(p => p.Uid));
-            string result = Util.SParal(XI.Board, p => p.IsAlive &&
-                p.Uid != player.Uid && p.Tux.Count > 0, p => p.Uid + ",1,1", ",");
+            string result = AffichePlayers(p => p.IsAlive &&
+                p.Uid != player.Uid && p.Tux.Count > 0, p => p.Uid + ",1,1");
             if (!string.IsNullOrEmpty(result))
                 XI.RaiseGMessage("G0DH," + result);
             Cure(player, XI.Board.Garden.Values.Where(p => p.IsAlive && p.Team == player.Team), 1);
@@ -2124,7 +2127,7 @@ namespace PSD.PSDGamepkg.JNS
             {
                 // :[ Mainly to solve now
                 // G0CE,A,T,0,KN,y,z;TF
-                string[] g0ce = Util.Substring(fuse, 0, fuse.IndexOf(';')).Split(',');
+                string[] g0ce = Algo.Substring(fuse, 0, fuse.IndexOf(';')).Split(',');
                 ushort who = ushort.Parse(g0ce[1]);
                 string tuxName = g0ce[4];
                 Tux tux = XI.LibTuple.TL.EncodeTuxCode(tuxName);
@@ -2148,13 +2151,13 @@ namespace PSD.PSDGamepkg.JNS
             else if (type == 2)
             {
                 int hdx = fuse.IndexOf(';');
-                string[] g0cc = Util.Substring(fuse, 0, hdx).Split(',');
+                string[] g0cc = Algo.Substring(fuse, 0, hdx).Split(',');
                 int kdx = fuse.IndexOf(',', hdx);
-                string origin = Util.Substring(fuse, kdx + 1, -1);
+                string origin = Algo.Substring(fuse, kdx + 1, -1);
                 if (origin.StartsWith("G"))
                 {
                     string cardname = g0cc[4];
-                    int inType = int.Parse(Util.Substring(fuse, hdx + 1, kdx));
+                    int inType = int.Parse(Algo.Substring(fuse, hdx + 1, kdx));
                     Base.Card.Tux tux = XI.LibTuple.TL.EncodeTuxCode(cardname);
                     int prior = tux.Priorities[inType];
                     XI.InnerGMessage(origin, prior);
@@ -2477,8 +2480,8 @@ namespace PSD.PSDGamepkg.JNS
                 {
                     XI.RaiseGMessage("G0MA," + player.Uid + ",0");
                     int ki = guardian - 10 + 3;
-                    string skillName = ki < 10 ? (",JNH160" + ki) : (",JNH16" + ki);
-                    XI.RaiseGMessage("G0OS,1," + player.Uid + skillName);
+                    string skillName = ki < 10 ? ("JNH160" + ki) : ("JNH16" + ki);
+                    XI.RaiseGMessage("G0OS," + player.Uid + ",1," + skillName);
                 }
                 if (player.TokenExcl.Count > 0)
                     XI.RaiseGMessage("G0OJ," + player.Uid + ",1," + player.TokenExcl.Count
@@ -2897,7 +2900,7 @@ namespace PSD.PSDGamepkg.JNS
                         if (py.Uid != player.Uid)
                         {
                             XI.AsyncInput(player.Uid, "#弃置的,C1(" +
-                                Util.RepeatString("p0", py.Tux.Count) + ")", "JNH1702", "1");
+                                Algo.RepeatString("p0", py.Tux.Count) + ")", "JNH1702", "1");
                             XI.RaiseGMessage("G0DH," + py.Uid + ",2,1");
                         }
                     }
@@ -3317,7 +3320,7 @@ namespace PSD.PSDGamepkg.JNS
                 ushort who = ushort.Parse(args[0]);
                 ushort card = ushort.Parse(args[1]);
                 TargetPlayer(player.Uid, who);
-                string[] tokens = Util.TakeRange(args, 2, args.Length);
+                string[] tokens = Algo.TakeRange(args, 2, args.Length);
                 XI.RaiseGMessage("G0OJ," + player.Uid + ",4,2," + string.Join(",", tokens));
                 XI.RaiseGMessage("G0ON," + player.Uid + ",C,2," + string.Join(",", tokens));
                 XI.RaiseGMessage("G2TZ,0," + player.Uid + "," + string.Join(",", tokens.Select(p => "C" + p)));
@@ -3325,7 +3328,7 @@ namespace PSD.PSDGamepkg.JNS
             }
             else if (type == 2)
             {
-                string[] tokens = Util.TakeRange(args, 1, args.Length);
+                string[] tokens = Algo.TakeRange(args, 1, args.Length);
                 XI.RaiseGMessage("G0OJ," + player.Uid + ",4,3," + string.Join(",", tokens));
                 XI.RaiseGMessage("G0ON," + player.Uid + ",C,3," + string.Join(",", tokens));
                 XI.RaiseGMessage("G2TZ,0," + player.Uid + "," + string.Join(",", tokens.Select(p => "C" + p)));
@@ -3346,7 +3349,7 @@ namespace PSD.PSDGamepkg.JNS
             {
                 bool b1 = XI.Board.Rounder.GetEquipCount() > 0;
                 bool b2 = XI.Board.Rounder.Runes.Count > 0;
-                string[] tokens = Util.TakeRange(args, 0, args.Length - 1);
+                string[] tokens = Algo.TakeRange(args, 0, args.Length - 1);
                 XI.RaiseGMessage("G0OJ," + player.Uid + ",4,5," + string.Join(",", tokens));
                 XI.RaiseGMessage("G0ON," + player.Uid + ",C,5," + string.Join(",", tokens));
                 XI.RaiseGMessage("G2TZ,0," + player.Uid + "," + string.Join(",", tokens.Select(p => "C" + p)));
@@ -3573,7 +3576,7 @@ namespace PSD.PSDGamepkg.JNS
                     int cnt = int.Parse(g0on[idx + 2]);
                     if (cnt > 0)
                     {
-                        List<ushort> cds = Util.TakeRange(g0on, idx + 3, idx + 3 + cnt)
+                        List<ushort> cds = Algo.TakeRange(g0on, idx + 3, idx + 3 + cnt)
                             .Select(p => ushort.Parse(p)).ToList();
                         if (cardType == "C" && XI.Board.TuxDises.Any(p => cds.Contains(p)))
                             return true;
@@ -3622,7 +3625,7 @@ namespace PSD.PSDGamepkg.JNS
                     int cnt = int.Parse(g0on[idx + 2]);
                     if (cnt > 0)
                     {
-                        List<ushort> cds = Util.TakeRange(g0on, idx + 3, idx + 3 + cnt)
+                        List<ushort> cds = Algo.TakeRange(g0on, idx + 3, idx + 3 + cnt)
                             .Select(p => ushort.Parse(p)).ToList();
                         if (cardType == "C")
                             player.RAMUtList.AddRange(cds);
@@ -3753,7 +3756,7 @@ namespace PSD.PSDGamepkg.JNS
                 List<ushort> vals = py.Tux.Except(XI.Board.ProtectedTux).ToList();
                 if (tar != player.Uid)
                 {
-                    string c0 = Util.RepeatString("p0", vals.Count);
+                    string c0 = Algo.RepeatString("p0", vals.Count);
                     XI.AsyncInput(player.Uid, "#作为「幻」的,C1(" + c0 + ")", "JNE0303", "1");
                     vals.Shuffle();
                     XI.RaiseGMessage("G0OT," + tar + ",1," + vals[0]);
@@ -3825,7 +3828,7 @@ namespace PSD.PSDGamepkg.JNS
             else if (prev.IndexOf(',') < 0)
             {
                 ushort from = ushort.Parse(prev);
-                string c0 = Util.RepeatString("p0", XI.Board.Garden[from].Tux.Count);
+                string c0 = Algo.RepeatString("p0", XI.Board.Garden[from].Tux.Count);
                 return "#获得的,C1(" + c0 + ")";
             }
             else
@@ -3908,7 +3911,7 @@ namespace PSD.PSDGamepkg.JNS
                     Player py = XI.Board.Garden[ut];
                     if (player.TokenTars.Contains(ut) && n > 0 && py.Tux.Count > 0 && ut != player.Uid)
                     {
-                        string c0 = Util.RepeatString("p0", py.Tux.Count);
+                        string c0 = Algo.RepeatString("p0", py.Tux.Count);
                         XI.AsyncInput(player.Uid, "#获取的,C1(" + c0 + ")", "JNE0402", "1");
                         XI.RaiseGMessage("G0HQ,0," + player.Uid + "," + ut + ",2,1");
                     }

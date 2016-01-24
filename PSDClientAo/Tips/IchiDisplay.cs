@@ -296,6 +296,8 @@ namespace PSD.ClientAo.Tips
                 case FiveElement.THUNDER: color = Colors.Thistle; fiveText = "雷"; break;
                 case FiveElement.AERO: color = Colors.SpringGreen; fiveText = "风"; break;
                 case FiveElement.SATURN: color = Colors.Yellow; fiveText = "土"; break;
+                case FiveElement.YINN: color = Colors.LightGray; fiveText = "阴"; break;
+                case FiveElement.SOLARIS: color = Colors.Orange; fiveText = "阳"; break;
                 default: color = Colors.White; fiveText = "无属性"; break;
             }
             pr.Inlines.Add(new Run(mon.Name)
@@ -711,7 +713,7 @@ namespace PSD.ClientAo.Tips
                 case FiveElement.SATURN:
                     color = Colors.Yellow; fiveText = "土"; desc = "土之养化，无物不融。"; break;
                 case FiveElement.YINN:
-                    color = Colors.Gray; fiveText = "阴"; desc = "阴之倏忽，无壁不克。"; break;
+                    color = Colors.LightGray; fiveText = "阴"; desc = "阴之倏忽，无壁不克。"; break;
                 case FiveElement.SOLARIS:
                     color = Colors.Orange; fiveText = "阳"; desc = "阳之庄穆，无处不存。"; break;
             }

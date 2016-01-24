@@ -46,7 +46,7 @@ namespace PSD.PSDGamepkg.VW
                 rqQueues[i] = new Queue<string>();
             }
             //cinListenThread = new Thread(CinListenStarts);
-            cinListenThread = new Thread(() => Util.SafeExecute(() => CinListenStarts(),
+            cinListenThread = new Thread(() => XI.SafeExecute(() => CinListenStarts(),
                 delegate(Exception e) { Log.Logger(e.ToString()); }));
         }
 
@@ -63,8 +63,8 @@ namespace PSD.PSDGamepkg.VW
                 if (match.Success)
                 {
                     int idx = line.IndexOf('>', match.Index);
-                    ushort usr = ushort.Parse(Util.Substring(line, match.Index + 1, idx));
-                    string content = Util.Substring(line, idx + 1, -1);
+                    ushort usr = ushort.Parse(Base.Utils.Algo.Substring(line, match.Index + 1, idx));
+                    string content = Base.Utils.Algo.Substring(line, idx + 1, -1);
                     if (content.StartsWith("/"))
                     {
                         lock (rqQueues[usr])

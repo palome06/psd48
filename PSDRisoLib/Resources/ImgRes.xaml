@@ -75,6 +75,15 @@
     <Image x:Key="petsnapGFH1" Source="PetsSnap/GFH1.png" ToolTip="无相天妖"/>
     <Image x:Key="petsnapGFH2" Source="PetsSnap/GFH2.png" ToolTip="大眼蛙"/>
     <Image x:Key="petsnapGTH1" Source="PetsSnap/GTH1.png" ToolTip="木桩"/>
+	
+    <Image x:Key="petsnapGI04" Source="PetsSnap/GI04.png" ToolTip="TR魅召"/>
+    <Image x:Key="petsnapGI05" Source="PetsSnap/GI05.png" ToolTip="TR淮南王"/>
+    <Image x:Key="petsnapGI07" Source="PetsSnap/GI07.png" ToolTip="TR戾枭"/>
+    <Image x:Key="petsnapGI08" Source="PetsSnap/GI08.png" ToolTip="TR楼兰王"/>
+    <Image x:Key="petsnapGY01" Source="PetsSnap/GY01.png" ToolTip="TR衔烛之龙"/>
+    <Image x:Key="petsnapGY02" Source="PetsSnap/GY02.png" ToolTip="TR包子"/>
+    <Image x:Key="petsnapGY06" Source="PetsSnap/GY06.png" ToolTip="TR鳄齿巨蜥"/>
+    <Image x:Key="petsnapGY08" Source="PetsSnap/GY08.png" ToolTip="TR归墟界督"/>
 
     <Image x:Key="npcsnapNC101" Source="PetsSnap/NC101.png" ToolTip="NPC李逍遥"/>
     <Image x:Key="npcsnapNC102" Source="PetsSnap/NC102.png" ToolTip="NPC赵灵儿"/>
@@ -95,7 +104,7 @@
     <Image x:Key="npcsnapNCT20" Source="PetsSnap/NCT20.png" ToolTip="NPC-TR雷元戈"/>
     <Image x:Key="npcsnapNCT31" Source="PetsSnap/NCT31.png" ToolTip="NPC-TR洛昭言"/>
     <Image x:Key="npcsnapNCT33" Source="PetsSnap/NCT33.png" ToolTip="NPC-TR豆包"/>
-    <Image x:Key="npcsnapNCT37" Source="PetsSnap/NCT37.png" ToolTip="NPC-TR嬴旭危"/>
+    <Image x:Key="npcsnapNCT38" Source="PetsSnap/NCT38.png" ToolTip="NPC-TR嬴旭危"/>
 
     <Image x:Key="npcsnapNCH02" Source="PetsSnap/NCH02.png" ToolTip="NPC阮英扬"/>
     <Image x:Key="npcsnapNCH04" Source="PetsSnap/NCH04.png" ToolTip="NPC柒月"/>
@@ -579,6 +588,15 @@
     <Image x:Key="monCardNCT16" Source="Card/NMB/NCT16.png"/>
     <Image x:Key="monCardNCT17" Source="Card/NMB/NCT17.png"/>
     <Image x:Key="monCardNCT18" Source="Card/NMB/NCT18.png"/>
+	
+    <Image x:Key="monCardGI04" Source="Card/NMB/GI04.png"/>
+	<Image x:Key="monCardGI05" Source="Card/NMB/GI05.png"/>
+	<Image x:Key="monCardGI07" Source="Card/NMB/GI07.png"/>
+	<Image x:Key="monCardGI08" Source="Card/NMB/GI08.png"/>
+    <Image x:Key="monCardGY01" Source="Card/NMB/GY01.png"/>
+	<Image x:Key="monCardGY02" Source="Card/NMB/GY02.png"/>
+	<Image x:Key="monCardGY06" Source="Card/NMB/GY06.png"/>
+	<Image x:Key="monCardGY08" Source="Card/NMB/GY08.png"/>
     <Image x:Key="monCardNCT19" Source="Card/NMB/NCT19.png"/>
     <Image x:Key="monCardNCT20" Source="Card/NMB/NCT20.png"/>
     <Image x:Key="monCardNCT21" Source="Card/NMB/NCT21.png"/>

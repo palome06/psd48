@@ -1,12 +1,11 @@
-﻿using System;
+﻿using PSD.Base;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
-using PSD.Base;
 using System.IO;
+using Algo = PSD.Base.Utils.Algo;
 
 namespace PSD.ClientAo.VW
 {
@@ -59,13 +58,13 @@ namespace PSD.ClientAo.VW
                 else if (line.StartsWith("C2SA,"))
                 {
                     stream = tcpStream;
-                    recvThread = new Thread(() => Util.SafeExecute(() => KeepOnListenRecv(),
+                    recvThread = new Thread(() => ZI.SafeExecute(() => KeepOnListenRecv(),
                         delegate(Exception e) { Log.Logg(e.ToString()); }));
                     recvThread.Start();
                     if (!watch)
                     {
                         //    SentByteLine(tcpStream, "C2ST," + Uid);
-                        sendThread = new Thread(() => Util.SafeExecute(() => KeepOnListenSend(),
+                        sendThread = new Thread(() => ZI.SafeExecute(() => KeepOnListenSend(),
                             delegate(Exception e) { Log.Logg(e.ToString()); }));
                         sendThread.Start();
                         Send("C2ST," + Uid, Uid, 0);
@@ -125,26 +124,26 @@ namespace PSD.ClientAo.VW
                     int jdx = line.IndexOf(',', idx + 1);
                     int kdx = line.LastIndexOf(',');
 
-                    ushort ouid = ushort.Parse(Util.Substring(line, idx + 1, jdx));
+                    ushort ouid = ushort.Parse(Algo.Substring(line, idx + 1, jdx));
                     IchiPlayer ip = new IchiPlayer()
                     {
-                        Name = Util.Substring(line, jdx + 1, kdx),
+                        Name = Algo.Substring(line, jdx + 1, kdx),
                         Avatar = int.Parse(line.Substring(kdx + 1)),
                         Uid = ouid
                     };
                     uidict.Add(ouid, ip);
                     cvi.SetNick(1 + uidict.Count, ip.Name, ip.Avatar);
-                    vi.Cout(Uid, "Newcomer: {0}", Util.Substring(line, jdx + 1, kdx));
+                    vi.Cout(Uid, "Newcomer: {0}", Algo.Substring(line, jdx + 1, kdx));
                 }
                 else if (line.StartsWith("C2SA,"))
                 {
                     stream = tcpStream;
-                    recvThread = new Thread(() => Util.SafeExecute(() => KeepOnListenRecv(),
+                    recvThread = new Thread(() => ZI.SafeExecute(() => KeepOnListenRecv(),
                         delegate(Exception e) { Log.Logg(e.ToString()); }));
                     recvThread.Start();
                     if (!watch)
                     {
-                        sendThread = new Thread(() => Util.SafeExecute(() => KeepOnListenSend(),
+                        sendThread = new Thread(() => ZI.SafeExecute(() => KeepOnListenSend(),
                             delegate(Exception e) { Log.Logg(e.ToString()); }));
                         sendThread.Start();
                     }
@@ -171,10 +170,10 @@ namespace PSD.ClientAo.VW
                     {
                         Uid = ut;
                         stream = tcpStream;
-                        recvThread = new Thread(() => Util.SafeExecute(() => KeepOnListenRecv(),
+                        recvThread = new Thread(() => ZI.SafeExecute(() => KeepOnListenRecv(),
                             delegate(Exception e) { Log.Logg(e.ToString()); }));
                         recvThread.Start();
-                        sendThread = new Thread(() => Util.SafeExecute(() => KeepOnListenSend(),
+                        sendThread = new Thread(() => ZI.SafeExecute(() => KeepOnListenSend(),
                             delegate(Exception e) { Log.Logg(e.ToString()); }));
                         sendThread.Start();
                         return true;

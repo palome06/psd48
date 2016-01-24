@@ -1,10 +1,8 @@
 ﻿using PSD.Base;
 using PSD.Base.Card;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Algo = PSD.Base.Utils.Algo;
 
 namespace PSD.PSDGamepkg.JNS
 {
@@ -79,7 +77,7 @@ namespace PSD.PSDGamepkg.JNS
         {
             TargetPlayer(player.Uid, XI.Board.Hinder.Uid);
             XI.AsyncInput(player.Uid, "#获得的,T1(p" + XI.Board.Hinder.Uid + ")", "JN10102", "0");
-            string c0 = Util.RepeatString("p0", XI.Board.Garden[XI.Board.Hinder.Uid].Tux.Count);
+            string c0 = Algo.RepeatString("p0", XI.Board.Garden[XI.Board.Hinder.Uid].Tux.Count);
             XI.AsyncInput(player.Uid, "#获得的,C1(" + c0 + ")", "JN10102", "0");
             XI.RaiseGMessage("G0HQ,0," + player.Uid + "," + XI.Board.Hinder.Uid + ",2,1");
         }
@@ -263,8 +261,7 @@ namespace PSD.PSDGamepkg.JNS
         public void JN10502Action(Player player, int type, string fuse, string argst)
         {
             VI.Cout(0, "阿奴发动「万蛊蚀天」.");
-            XI.RaiseGMessage("G0DH," + Util.SParal(XI.Board,
-                p => p.IsAlive && p.Team == player.Team, p => p.Uid + ",0,1", ","));
+            XI.RaiseGMessage("G0DH," + AffichePlayers(p => p.IsAlive && p.Team == player.Team, p => p.Uid + ",0,1"));
             Harm(player, XI.Board.Garden.Values.Where(p => p.IsAlive && p != player), 1);
         }
         #endregion XJ105 - A'Nu
@@ -720,7 +717,7 @@ namespace PSD.PSDGamepkg.JNS
         {
             if (type == 0)
             {
-                if (Util.TryNotEmpty(player.RAM, "JPName") && player.RAMUshort == 0)
+                if (Algo.TryNotEmpty(player.RAM, "JPName") && player.RAMUshort == 0)
                 {
                     Tux tux = XI.LibTuple.TL.EncodeTuxCode((string)player.RAM["JPName"]);
                     if (tux != null && tux.Valid(player, 0, fuse))
@@ -968,10 +965,10 @@ namespace PSD.PSDGamepkg.JNS
         public void JN30601Action(Player player, int type, string fuse, string args)
         {
             string[] blocks = args.Split(',');
-            List<ushort> restCards = Util.TakeRange(blocks, 0, player.RAMUshort + 1)
+            List<ushort> restCards = Algo.TakeRange(blocks, 0, player.RAMUshort + 1)
                 .Select(p => ushort.Parse(p)).ToList();
             XI.RaiseGMessage("G0QZ," + player.Uid + "," + string.Join(",", restCards));
-            List<ushort> tos = Util.TakeRange(blocks, player.RAMUshort + 1, blocks.Length)
+            List<ushort> tos = Algo.TakeRange(blocks, player.RAMUshort + 1, blocks.Length)
                 .Select(p => ushort.Parse(p)).ToList();
             TargetPlayer(player.Uid, tos);
             ++player.RAMUshort;
@@ -1308,7 +1305,7 @@ namespace PSD.PSDGamepkg.JNS
                 while (idx < blocks.Length)
                 {
                     int n = int.Parse(blocks[idx + 1]);
-                    var cards = Util.TakeRange(blocks, idx + 2, idx + 2 + n).Select(p => ushort.Parse(p));
+                    var cards = Algo.TakeRange(blocks, idx + 2, idx + 2 + n).Select(p => ushort.Parse(p));
                     count += cards.Intersect(player.ExCards).Count();
                     idx += (n + 2);
                 }
@@ -1338,7 +1335,7 @@ namespace PSD.PSDGamepkg.JNS
                     int n = int.Parse(blocks[idx + 1]);
                     if (who == player.Uid)
                     {
-                        var cards = Util.TakeRange(blocks, idx + 2, idx + 2 + n)
+                        var cards = Algo.TakeRange(blocks, idx + 2, idx + 2 + n)
                             .Select(p => ushort.Parse(p)).ToList();
                         if (cards.Intersect(player.ExCards).Any())
                             return true;
@@ -1354,12 +1351,12 @@ namespace PSD.PSDGamepkg.JNS
         #region XJ401 - YunTianhe
         public bool JN50101Valid(Player player, int type, string fuse)
         {
-            if (type == 0 || type == 1)
+            if (type == 0 || type == 1 || type == 4)
             {
                 return XI.Board.IsAttendWar(player) && XI.Board.Battler != null &&
                     player.DEX - XI.Board.Battler.AGL >= 4 && (player.RAMUshort == 0);
             }
-            else if (type == 2)
+            else if (type == 2 || type == 3)
             {
                 return XI.Board.IsAttendWar(player) && XI.Board.Battler != null &&
                     player.DEX - XI.Board.Battler.AGL < 4 && (player.RAMUshort == 1);
@@ -1368,15 +1365,13 @@ namespace PSD.PSDGamepkg.JNS
         }
         public void JN50101Action(Player player, int type, string fuse, string argst)
         {
-            if (type == 0 || type == 1)
+            if (type == 0 || type == 1 || type == 4)
             {
-                VI.Cout(0, "云天河发动「天河剑」.");
                 XI.RaiseGMessage("G0IA," + player.Uid + ",1,2");
                 player.RAMUshort = 1;
             }
-            else if (type == 2)
+            else if (type == 2 || type == 3)
             {
-                VI.Cout(0, "云天河触发「天河剑」.");
                 XI.RaiseGMessage("G0OA," + player.Uid + ",1,2");
                 player.RAMUshort = 0;
             }
@@ -1385,13 +1380,11 @@ namespace PSD.PSDGamepkg.JNS
         {
             if (type == 0)
             {
-                VI.Cout(0, "云天河发动「后羿射日弓」.");
                 XI.RaiseGMessage("G0IP," + player.Team + ",8");
                 player.ROMUshort = 1;
             }
             else if (type == 1)
             {
-                VI.Cout(0, "云天河基础命中数值变为0.");
                 if (player.DEXh > 0)
                     XI.RaiseGMessage("G0OX," + player.Uid + ",0," + player.DEXh);
                 player.ROMUshort = 2;
@@ -1581,7 +1574,7 @@ namespace PSD.PSDGamepkg.JNS
                 if (idx > 0)
                 {
                     blocks[idx] = blocks[blocks.Length - 1];
-                    XI.InnerGMessage(string.Join(",", Util.TakeRange(blocks, 0, blocks.Length - 1)), 351);
+                    XI.InnerGMessage(string.Join(",", Algo.TakeRange(blocks, 0, blocks.Length - 1)), 351);
                 }
             }
             else if (type == 1)
@@ -1833,10 +1826,10 @@ namespace PSD.PSDGamepkg.JNS
                             ushort who = ushort.Parse(blocks[jdx]);
                             ushort n = ushort.Parse(blocks[jdx + 2]);
                             if (who != player.Uid)
-                                nfuse += "," + string.Join(",", Util.TakeRange(blocks, jdx, jdx + 4 + n));
+                                nfuse += "," + string.Join(",", Algo.TakeRange(blocks, jdx, jdx + 4 + n));
                             else
                             {
-                                List<ushort> rests = Util.TakeRange(blocks, jdx + 4, jdx + 4 + n)
+                                List<ushort> rests = Algo.TakeRange(blocks, jdx + 4, jdx + 4 + n)
                                     .Select(p => ushort.Parse(p)).Where(p => p != card).ToList();
                                 if (rests.Count > 0)
                                     nfuse += "," + blocks[jdx] + "," + blocks[jdx + 1] + "," + rests.Count +
@@ -1888,7 +1881,7 @@ namespace PSD.PSDGamepkg.JNS
                         idx += (n + 4);
                     }
                     if (jdx >= 0 && kdx > jdx)
-                        return "/Q1(p" + string.Join("p", Util.TakeRange(blocks, jdx, kdx)) + ")";
+                        return "/Q1(p" + string.Join("p", Algo.TakeRange(blocks, jdx, kdx)) + ")";
                     else
                         return "";
                 }
@@ -1914,7 +1907,7 @@ namespace PSD.PSDGamepkg.JNS
         //{
         //    if (XI.Board.Garden[owner].Tux.Count > 0 && player.Team == XI.Board.Garden[owner].Team)
         //    {
-        //        string occur = Util.Substring(fuse, 0, fuse.IndexOf(','));
+        //        string occur = Algo.Substring(fuse, 0, fuse.IndexOf(','));
         //        string[] cardList = new string[] { "JP01", "JP02", "JP03", "JP04", "JP05", "JP06",
         //            "ZP01", "ZP02", "ZP03", "ZP04", "TP02", "TP03" };
         //        int[] typeList = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
@@ -1946,7 +1939,7 @@ namespace PSD.PSDGamepkg.JNS
                     if (rlink.StartsWith("JN60201"))
                         continue;
                     int rcmIdx = rlink.IndexOf(',');
-                    string rName = Util.Substring(rlink, 0, rcmIdx);
+                    string rName = Algo.Substring(rlink, 0, rcmIdx);
                     int pdIdx = rlink.IndexOf('!', rcmIdx + 1);
                     if (pdIdx < 0) // Not equip special case
                     {
@@ -1968,7 +1961,7 @@ namespace PSD.PSDGamepkg.JNS
                     }
                     else
                     {
-                        int tType = int.Parse(Util.Substring(rlink, rcmIdx + 1, pdIdx));
+                        int tType = int.Parse(Algo.Substring(rlink, rcmIdx + 1, pdIdx));
                         int tConsType = (pdIdx < 0) ? -1 : int.Parse(rlink.Substring(pdIdx + 1));
                         foreach (ushort ut in player.ListOutAllEquips())
                         {
@@ -2009,7 +2002,7 @@ namespace PSD.PSDGamepkg.JNS
                         if (rlink.StartsWith("JN60201"))
                             continue;
                         int rcmIdx = rlink.IndexOf(',');
-                        string rName = Util.Substring(rlink, 0, rcmIdx);
+                        string rName = Algo.Substring(rlink, 0, rcmIdx);
                         int pdIdx = rlink.IndexOf('!', rcmIdx + 1);
                         if (pdIdx < 0) // Not equip special case
                         {
@@ -2031,7 +2024,7 @@ namespace PSD.PSDGamepkg.JNS
                         }
                         else
                         {
-                            int tType = int.Parse(Util.Substring(rlink, rcmIdx + 1, pdIdx));
+                            int tType = int.Parse(Algo.Substring(rlink, rcmIdx + 1, pdIdx));
                             int tConsType = (pdIdx < 0) ? -1 : int.Parse(rlink.Substring(pdIdx + 1));
                             foreach (ushort ut in player.ListOutAllEquips())
                             {
@@ -2069,7 +2062,7 @@ namespace PSD.PSDGamepkg.JNS
                         if (rlink.StartsWith("JN60201"))
                             continue;
                         int rcmIdx = rlink.IndexOf(',');
-                        string rName = Util.Substring(rlink, 0, rcmIdx);
+                        string rName = Algo.Substring(rlink, 0, rcmIdx);
                         int pdIdx = rlink.IndexOf('!', rcmIdx + 1);
                         if (pdIdx < 0) // Not equip special case
                         {
@@ -2088,7 +2081,7 @@ namespace PSD.PSDGamepkg.JNS
                         }
                         else
                         {
-                            int tConsType = int.Parse(Util.Substring(rlink, rcmIdx + 1, pdIdx));
+                            int tConsType = int.Parse(Algo.Substring(rlink, rcmIdx + 1, pdIdx));
                             int tType = (pdIdx < 0) ? -1 : int.Parse(rlink.Substring(pdIdx + 1));
                             foreach (ushort ut in player.ListOutAllEquips())
                             {
@@ -2112,8 +2105,8 @@ namespace PSD.PSDGamepkg.JNS
             {
                 int ichicm = prev.IndexOf(',');
                 int nicm = prev.IndexOf(',', ichicm + 1);
-                ushort who = ushort.Parse(Util.Substring(prev, 0, ichicm));
-                ushort ut = ushort.Parse(Util.Substring(prev, ichicm + 1, nicm));
+                ushort who = ushort.Parse(Algo.Substring(prev, 0, ichicm));
+                ushort ut = ushort.Parse(Algo.Substring(prev, ichicm + 1, nicm));
                 string rest = nicm < 0 ? "" : prev.Substring(nicm + 1);
                 Base.Card.Tux tux = XI.LibTuple.TL.DecodeTux(ut);
 
@@ -2127,7 +2120,7 @@ namespace PSD.PSDGamepkg.JNS
                         if (rlink.StartsWith("JN60201"))
                             continue;
                         int rcmIdx = rlink.IndexOf(',');
-                        string rName = Util.Substring(rlink, 0, rcmIdx);
+                        string rName = Algo.Substring(rlink, 0, rcmIdx);
                         int pdIdx = rlink.IndexOf('!', rcmIdx + 1);
                         if (pdIdx < 0) // Not equip special case
                         {
@@ -2142,7 +2135,7 @@ namespace PSD.PSDGamepkg.JNS
                         }
                         else
                         {
-                            int tConsType = int.Parse(Util.Substring(rlink, rcmIdx + 1, pdIdx));
+                            int tConsType = int.Parse(Algo.Substring(rlink, rcmIdx + 1, pdIdx));
                             int tType = (pdIdx < 0) ? -1 : int.Parse(rlink.Substring(pdIdx + 1));
                             Base.Card.TuxEqiup te = tux as Base.Card.TuxEqiup;
                             if (te != null && te.Code == rName)
@@ -2161,7 +2154,7 @@ namespace PSD.PSDGamepkg.JNS
             int ichicm = argst.IndexOf(',');
             int nicm = argst.IndexOf(',', ichicm + 1);
             ushort to = ushort.Parse(argst.Substring(0, ichicm));
-            ushort ut = ushort.Parse(Util.Substring(argst, ichicm + 1, nicm));
+            ushort ut = ushort.Parse(Algo.Substring(argst, ichicm + 1, nicm));
             string crest = nicm < 0 ? "" : ("," + argst.Substring(nicm + 1));
 
             Base.Card.Tux tux = XI.LibTuple.TL.DecodeTux(ut);
@@ -2183,8 +2176,8 @@ namespace PSD.PSDGamepkg.JNS
                     if (rlink.StartsWith("JN60201"))
                         continue;
                     int rcmIdx = rlink.IndexOf(',');
-                    string rName = Util.Substring(rlink, 0, rcmIdx);
-                    string inTypeStr = Util.Substring(rlink, rcmIdx + 1, -1);
+                    string rName = Algo.Substring(rlink, 0, rcmIdx);
+                    string inTypeStr = Algo.Substring(rlink, rcmIdx + 1, -1);
                     if (tux.Code == rName)
                     {
                         TargetPlayer(player.Uid, to);
@@ -2410,7 +2403,7 @@ namespace PSD.PSDGamepkg.JNS
         public void JN60403Action(Player player, int type, string fuse, string args)
         {
             string[] blocks = args.Split(',');
-            List<ushort> cards = Util.TakeRange(blocks, 0, blocks.Length - 1).Select(p => ushort.Parse(p)).ToList();
+            List<ushort> cards = Algo.TakeRange(blocks, 0, blocks.Length - 1).Select(p => ushort.Parse(p)).ToList();
             ushort target = ushort.Parse(blocks[blocks.Length - 1]);
             XI.RaiseGMessage("G0QZ," + player.Uid + "," + string.Join(",", cards));
             XI.RaiseGMessage("G0DH," + target + ",0,1");
@@ -2584,7 +2577,7 @@ namespace PSD.PSDGamepkg.JNS
             if (type == 0)
             {
                 string[] blocks = fuse.Split(',');
-                List<int> heros = Util.TakeRange(blocks, 1, blocks.Length)
+                List<int> heros = Algo.TakeRange(blocks, 1, blocks.Length)
                     .Select(p => ushort.Parse(p)).Where(p => p != player.Uid)
                     .Select(p => XI.Board.Garden[p].SelectHero).ToList();
                 string hs = string.Join(",", heros.Select(p => "H" + p));
@@ -2600,7 +2593,7 @@ namespace PSD.PSDGamepkg.JNS
             {
                 string[] g0oj = fuse.Split(',');
                 int n = int.Parse(g0oj[3]);
-                List<int> souls = Util.TakeRange(g0oj, 4, 4 + n).Select(
+                List<int> souls = Algo.TakeRange(g0oj, 4, 4 + n).Select(
                     p => int.Parse(p.Substring("H".Length))).ToList();
                 XI.Board.BannedHero.RemoveAll(p => souls.Contains(p));
                 XI.Board.HeroDises.AddRange(souls);
@@ -3082,7 +3075,7 @@ namespace PSD.PSDGamepkg.JNS
                     {
                         if (me == player.Uid && n > 0)
                         {
-                            List<ushort> cards = Util.TakeRange(args, i + 4, i + 4 + n)
+                            List<ushort> cards = Algo.TakeRange(args, i + 4, i + 4 + n)
                                 .Select(p => ushort.Parse(p)).ToList();
                             string cardstr = XI.AsyncInput(player.Uid,
                                 "#弃置的,Q1(p" + string.Join("p", cards) + ")", "JNS0801", "0");
@@ -3094,10 +3087,10 @@ namespace PSD.PSDGamepkg.JNS
                                 g1di += "," + me + "," + lose + "," + cn + "," + cn + "," + string.Join(",", cards);
                         }
                         else
-                            g1di += "," + string.Join(",", Util.TakeRange(args, i, i + 4 + n));
+                            g1di += "," + string.Join(",", Algo.TakeRange(args, i, i + 4 + n));
                     }
                     else
-                        g1di += "," + string.Join(",", Util.TakeRange(args, i, i + 4 + n));
+                        g1di += "," + string.Join(",", Algo.TakeRange(args, i, i + 4 + n));
                     i += (4 + n);
                 }
                 if (g1di.Length > 0)

@@ -1,14 +1,15 @@
-﻿using PSD.Base;
-using PSD.ClientZero;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
-using PSD.Base.Rules;
 using System.Net;
 using System.IO.Pipes;
-using System.IO;
+
+using PSD.Base;
+using PSD.Base.Rules;
+using PSD.Base.Utils;
+using PSD.ClientZero;
 
 namespace PSD.PSDGamepkg
 {
@@ -95,7 +96,7 @@ namespace PSD.PSDGamepkg
                 bool teamMode = (teamModeStr == "YJ") ? true : false;
                 string level = GetValue(args, 4, "房间等级，(1:新手场/2:标准场/3:高手场/4:至尊场/5:界限突破场，后附+为特训");
                 bool isTrain = level.Contains("+");
-                trainer = isTrain ? Util.Substring(level, level.IndexOf('+') + 1, -1).Split(',') : null;
+                trainer = isTrain ? Base.Utils.Algo.Substring(level, level.IndexOf('+') + 1, -1).Split(',') : null;
                 if (isTrain)
                     level = level.Substring(0, level.IndexOf('+'));
                 if (!int.TryParse(level, out levelCode) || levelCode < 0 || levelCode > RuleCode.LEVEL_IPV)
@@ -226,7 +227,7 @@ namespace PSD.PSDGamepkg
                 string h09n = "H09N," + string.Join(",",
                     Board.Garden.Values.Select(p => p.Uid + "," + p.Name));
                 WI.Send(h09n, 0, wuid);
-                WI.Send("H09G," + Board.GenerateSerialGamerMessage(LibTuple), 0, wuid);
+                WI.Send(Board.ToSerialMessage(LibTuple), 0, wuid);
                 string h09p = Board.GenerateSerialFieldMessage();
                 WI.Send("H09P," + h09p + "," + string.Join(",",
                     CalculatePetsScore().Select(p => p.Key + "," + p.Value)), 0, wuid);
@@ -281,7 +282,7 @@ namespace PSD.PSDGamepkg
                 string h09n = "H09N," + string.Join(",",
                     Board.Garden.Values.Select(p => p.Uid + "," + p.Name));
                 WI.Send(h09n, 0, wuid);
-                WI.Send("H09G," + Board.GenerateSerialGamerMessage(LibTuple), 0, wuid);
+                WI.Send(Board.ToSerialMessage(LibTuple), 0, wuid);
                 string h09p = Board.GenerateSerialFieldMessage();
                 WI.Send("H09P," + h09p + "," + string.Join(",",
                     CalculatePetsScore().Select(p => p.Key + "," + p.Value)), 0, wuid);
@@ -292,7 +293,7 @@ namespace PSD.PSDGamepkg
         }
         private void HoldRoomTunnel()
         {
-            new Thread(() => Util.SafeExecute(() =>
+            new Thread(() => XI.SafeExecute(() =>
             {
                 while (true)
                 {

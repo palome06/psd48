@@ -37,7 +37,9 @@ namespace PSD.Base.Card
 
     public static class FiveElementHelper
     {
-        public const int ElementCount = 7;
+        public const int PropCount = 7;
+
+        public const int StandardPropCount = 5;
 
         public static int Elem2Index(this FiveElement element)
         {

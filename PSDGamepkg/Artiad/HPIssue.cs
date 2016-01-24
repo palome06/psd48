@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using PSD.Base.Card;
+using Algo = PSD.Base.Utils.Algo;
 
 namespace PSD.PSDGamepkg.Artiad
 {
@@ -142,7 +143,7 @@ namespace PSD.PSDGamepkg.Artiad
             {
                 ushort princess = ushort.Parse(g0lv[idx]);
                 int n = int.Parse(g0lv[idx + 1]);
-                string[] prince = Util.TakeRange(g0lv, idx + 2, idx + 2 + n);
+                string[] prince = Algo.TakeRange(g0lv, idx + 2, idx + 2 + n);
                 list.Add(new Love(princess, prince));
                 idx += (2 + n);
             }

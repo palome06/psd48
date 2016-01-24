@@ -578,23 +578,23 @@ namespace PSD.ClientAo
             if (self)
             {
                 whoes = yfPlayerR2.AoPlayer.Rank;
-                yfPlayerR2.EnablePets(wata.Pets.Where(p => p != 0).Intersect(cands).ToList());
+                yfPlayerR2.EnablePets(wata.Pets.Intersect(cands).ToList());
             }
             else
             {
-                List<ushort> pets = yfPlayerR1.AoPlayer.Pets.Where(p => p != 0).Intersect(cands).ToList();
+                List<ushort> pets = yfPlayerR1.AoPlayer.Pets.Intersect(cands).ToList();
                 if (pets.Count > 0)
                 {
                     yfPlayerR1.EnablePets(pets);
                     whoes = yfPlayerR1.AoPlayer.Rank;
                 }
-                pets = yfPlayerR2.AoPlayer.Pets.Where(p => p != 0).Intersect(cands).ToList();
+                pets = yfPlayerR2.AoPlayer.Pets.Intersect(cands).ToList();
                 if (pets.Count > 0)
                 {
                     yfPlayerR2.EnablePets(pets);
                     whoes = yfPlayerR2.AoPlayer.Rank;
                 }
-                pets = yfPlayerR3.AoPlayer.Pets.Where(p => p != 0).Intersect(cands).ToList();
+                pets = yfPlayerR3.AoPlayer.Pets.Intersect(cands).ToList();
                 if (pets.Count > 0)
                 {
                     yfPlayerR3.EnablePets(pets);

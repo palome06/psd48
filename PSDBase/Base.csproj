@@ -89,6 +89,7 @@
     <Compile Include="Rune.cs" />
     <Compile Include="SKBranch.cs" />
     <Compile Include="Skill.cs" />
+    <Compile Include="Utils\Algo.cs" />
     <Compile Include="Utils\Rueue.cs" />
     <Compile Include="Utils\ReadonlySQL.cs" />
     <Compile Include="VW\IVI.cs" />

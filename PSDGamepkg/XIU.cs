@@ -2,8 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Algo = PSD.Base.Utils.Algo;
 
 namespace PSD.PSDGamepkg
 {
@@ -175,7 +174,7 @@ namespace PSD.PSDGamepkg
         private UEchoCode HandleUMessage(string msg, List<SKE> purse,
             ushort from, bool[] involved, int sina)
         {
-            return HandleUMessage(msg, purse, from, involved, Util.RepeatToArray(sina, involved.Length));
+            return HandleUMessage(msg, purse, from, involved, Algo.RepeatToArray(sina, involved.Length));
         }
         private UEchoCode HandleUMessage(string msg, List<SKE> purse,
             ushort from, bool[] involved, int[] sina)
@@ -186,7 +185,7 @@ namespace PSD.PSDGamepkg
             {
                 int idx = msg.IndexOf(',');
                 string cop = msg.Substring(0, idx);
-                string[] rests = Util.Splits(msg.Substring(idx + 1), ";;");
+                string[] rests = Algo.Splits(msg.Substring(idx + 1), ";;");
                 UEchoCode code;
                 if (cop == "U2")
                     code = HandleU2Message(from, involved, purse, rests[0], sina);
@@ -292,7 +291,7 @@ namespace PSD.PSDGamepkg
             {
                 Base.Card.Tux tux = tx01[skName];
                 int jdx = mai.IndexOf(',', idx + 1);
-                ushort ccode = ushort.Parse(Util.Substring(mai, idx + 1, jdx));
+                ushort ccode = ushort.Parse(Algo.Substring(mai, idx + 1, jdx));
                 string args = mai.Substring(idx + 1);
                 //if (!tux.IsEq[ske.InType])
                 if (!tux.IsTuxEqiup())
@@ -440,8 +439,8 @@ namespace PSD.PSDGamepkg
                 else if (ske.Type == SKTType.YJ)
                 {
                     int jdx = mai.IndexOf(',', idx + 1);
-                    ushort mcode = ushort.Parse(Util.Substring(mai, idx + 1, jdx));
-                    args = Util.Substring(mai, jdx + 1, -1);
+                    ushort mcode = ushort.Parse(Algo.Substring(mai, idx + 1, jdx));
+                    args = Algo.Substring(mai, jdx + 1, -1);
                     string otherPara = na.EscueInput(garden[from], mcode, ske.InType, ske.Fuse, args);
                     // args include card code now.
                     if (otherPara == "")
@@ -527,7 +526,7 @@ namespace PSD.PSDGamepkg
 
         public void SendOutU1Message(bool[] invs, string[] mais, int sina)
         {
-            SendOutU1Message(invs, mais, Util.RepeatToArray(sina, invs.Length));
+            SendOutU1Message(invs, mais, Algo.RepeatToArray(sina, invs.Length));
         }
         public void SendOutU1Message(bool[] invs, string[] mais, int[] sina)
         {
@@ -549,7 +548,7 @@ namespace PSD.PSDGamepkg
         public void ResendU1Message(ushort who, bool[] invs,
             string[] mais, bool critical, int sina)
         {
-            ResendU1Message(who, invs, mais, critical, Util.RepeatToArray(sina, invs.Length));
+            ResendU1Message(who, invs, mais, critical, Algo.RepeatToArray(sina, invs.Length));
         }
         public void ResendU1Message(ushort who, bool[] invs,
             string[] mais, bool critical, int[] sina)
@@ -700,7 +699,7 @@ namespace PSD.PSDGamepkg
             if (jdx >= 0)
             {
                 int kdx = mai.IndexOf(')');
-                ushort owner = ushort.Parse(Util.Substring(skName, jdx + 1, kdx));
+                ushort owner = ushort.Parse(Algo.Substring(skName, jdx + 1, kdx));
                 skName = skName.Substring(0, jdx);
                 mai = skName + "," + owner + comrest;
             }

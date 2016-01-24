@@ -32,7 +32,7 @@ namespace PSD.ClientZero.VW
             this.cinGate = false;
             this.hpQueues = new Queue<string>();
             this.tkQueues = new Queue<string>();
-            cinListenThread = new Thread(() => Util.SafeExecute(() => CinListenStarts(),
+            cinListenThread = new Thread(() => ZI.SafeExecute(() => CinListenStarts(),
                 delegate(Exception e) { if (Log != null) Log.Logg(e.ToString()); }));
         }
 

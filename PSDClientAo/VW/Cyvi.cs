@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using PSD.Base.VW;
-using System.Text.RegularExpressions;
 using System.Threading;
+using Algo = PSD.Base.Utils.Algo;
 
 namespace PSD.ClientAo.VW
 {
@@ -35,9 +34,9 @@ namespace PSD.ClientAo.VW
             tkQueues = new Queue<string>();
             InputCommand = new Queue<string>();
             InputTalk = new Queue<string>();
-            cinListenThread = new Thread(() => Util.SafeExecute(() => CinListenStarts(),
+            cinListenThread = new Thread(() => ZI.SafeExecute(() => CinListenStarts(),
                 delegate(Exception e) { if (Log != null) { Log.Logg(e.ToString()); } }));
-            talkListenThread = new Thread(() => Util.SafeExecute(() => TalkListenStarts(),
+            talkListenThread = new Thread(() => ZI.SafeExecute(() => TalkListenStarts(),
                 delegate(Exception e) { if (Log != null) { Log.Logg(e.ToString()); } }));
         }
 
@@ -465,7 +464,7 @@ namespace PSD.ClientAo.VW
             foreach (string ops in optLst)
             {
                 int idx = ops.IndexOf(',');
-                string title = Util.Substring(ops, 0, idx);
+                string title = Algo.Substring(ops, 0, idx);
                 if (title.StartsWith("JN")) // Might contains target, JN60102(4)
                     AD.yfJoy.CEE.SetSkillHighlight(title, true);
                 else if (title.StartsWith("CZ"))

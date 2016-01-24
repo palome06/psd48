@@ -192,14 +192,14 @@ namespace PSD.ClientZero
         public ushort ExEquip { get; set; }
         public List<ushort> ExCards { set; get; }
 
-        public ushort[] Pets { set; get; }
+        public List<ushort> Pets { private set; get; }
         public List<ushort> Escue { private set; get; }
         public IDictionary<ushort, string> Fakeq { get; set; }
 
         public IDictionary<ushort, List<string>> Treasures { private set; get; }
         public int Coss { set; get; }
         public ushort Guardian { set; get; }
-        public List<ushort> Runes { set; get; }
+        public List<ushort> Runes { private set; get; }
         //public List<string> Skills { set; get; }
 
         public int Token { set; get; }
@@ -211,7 +211,7 @@ namespace PSD.ClientZero
         public ZeroPlayer(string name, XIClient xic) : base(xic)
         {
             Name = name;
-            Pets = new ushort[5];
+            Pets = new List<ushort>();
 
             TuxCount = 0;
             Weapon = 0;
@@ -278,7 +278,7 @@ namespace PSD.ClientZero
             Aps(sb, equipBase, xic.zd.Tux(Weapon), xic.zd.Tux(Armor), xic.zd.Tux(Trove),
                 xic.zd.HeroExCardAlias(SelectHero, Coss),
                 (ExCards.Count > 0 ? xic.zd.Tux(ExCards) : xic.zd.Tux(ExEquip)));
-            Aps(sb, "宠物: {0}", xic.zd.Monster(Pets.Where(p => p != 0)));
+            Aps(sb, "宠物: {0}", xic.zd.Monster(Pets));
             if (Escue.Count > 0)
                 Aps(sb, "助战NPC：{0}", xic.zd.Monster(Escue));
 

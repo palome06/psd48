@@ -74,7 +74,6 @@
     <Compile Include="XID.cs" />
     <Compile Include="XIS.cs" />
     <Compile Include="XIU.cs" />
-    <Compile Include="Util.cs" />
     <Compile Include="VW\Djvi.cs" />
     <Compile Include="VW\Djwi.cs" />
     <Compile Include="XI.cs" />

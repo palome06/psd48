@@ -91,6 +91,10 @@ namespace PSD.Base.Card
                 STR = (ushort)value;
             else if (field == "DEX" && value is ushort)
                 DEX = (ushort)value;
+            else if (field == "Avatar" && value is int)
+                Avatar = (int)value;
+            else if (field == "OfCode" && value is string)
+                Ofcode = (string)value;
         }
     }
 
@@ -247,6 +251,17 @@ namespace PSD.Base.Card
             Hero hero = null;
             dicts.TryGetValue(code, out hero);
             return hero;
+        }
+
+        public void ForceChange(Hero hero, int newAvatar, string newCode)
+        {
+            if (hero != null)
+            {
+                dicts.Remove(hero.Avatar);
+                dicts[newAvatar] = hero;
+                hero.ForceChange("Avatar", newAvatar);
+                hero.ForceChange("OfCode", newCode);
+            }
         }
     }
 }

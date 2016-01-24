@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using PSD.Base.Card;
+using PSD.Base.Utils;
 
 namespace PSD.Base
 {
@@ -72,6 +72,7 @@ namespace PSD.Base
         public ushort Monster2 { set; get; }
         public ushort Mon1From { set; get; }
         //public bool IsTangled { set; get; }
+        public ushort Neighborhood { set; get; } // NPC card in ex-NPC actions, cover the Monster1 here
         // Battler servers as a snapshot of Monster1, nothing to with the card
         public NMB Battler { set; get; }
         public ushort Eve { get; set; }
@@ -158,6 +159,12 @@ namespace PSD.Base
             return ghost;
         }
         public Player Opponent { get { return GetOpponenet(Rounder); } }
+        // get the one face to the player
+        public Player Facer(Player player)
+        {
+            ushort uhd = (ushort)(((player.Uid + 1) / 2 * 4) - 1 - player.Uid);
+            return uhd > 6 ? ghost : Garden[uhd];
+        }
         public void SortGarden()
         {
             SortedPlayerList = Garden.Keys.ToList();
@@ -271,52 +278,68 @@ namespace PSD.Base
         private readonly Player ghost = new Player("鬼", 0, 0, false);
 
         #region Serialize the Game Situation
-        public string GenerateSerialGamerMessage(LibGroup tuple)
+        public static readonly string[] StatusKey = new string[] { "I,hero", "I,state", "U,hp", "U,hpa", "U,str",
+            "U,stra", "U,dex", "U,dexa", "I,tuxCount", "U,wp", "U,am", "U,tr", "U,exq", "LA,lug", "U,guard",
+            "U,coss", "LC5,pet", "LU,excard", "LU,rune", "LD,fakeq", "I,token", "LA,excl", "LU,tar", "U,awake",
+            "I,foldsz", "LU,escue" };
+
+        public string ToSerialMessage(LibGroup tuple)
         {
-            StringBuilder h09g = new StringBuilder();
+            List<object> uList = new List<object>();
             foreach (Player py in Garden.Values)
             {
-                h09g.Append("," + py.Uid + "," + py.SelectHero);
-                int state = 0;
-                state |= !py.IsAlive ? 0 : 1;
-                state |= !py.Loved ? 0 : 2;
-                state |= !py.Immobilized ? 0 : 4;
-                state |= !py.PetDisabled ? 0 : 8;
-                h09g.Append("," + state);
-                h09g.Append("," + py.HP + "," + py.HPb + "," + py.STR + ","
-                    + (InFight ? py.STRa : py.STR) + "," + py.DEX + ","
-                    + (InFight ? py.DEXa : py.DEX) + "," + py.Tux.Count
-                    + "," + py.Weapon + "," + py.Armor + "," + py.Trove + "," + py.ExEquip);
-                Card.Luggage lug = tuple.TL.DecodeTux(py.Trove) as Card.Luggage;
-                if (lug != null && lug.Capacities.Count > 0)
-                    h09g.Append("," + lug.Capacities.Count + "," + string.Join(",", lug.Capacities));
-                else
-                    h09g.Append(",0");
-                h09g.Append("," + py.Guardian + "," + (py.Coss.Count > 0 ? py.Coss.Peek() : 0));
-                h09g.Append("," + string.Join(",", py.Pets));
-                h09g.Append("," + py.ExCards.Count);
-                if (py.ExCards.Count > 0)
-                    h09g.Append("," + string.Join(",", py.ExCards));
-                //h09g.Append("," + py.Fakeq.Count);
-                //if (py.Fakeq.Count > 0)
-                //    h09g.Append("," + string.Join(",", py.Fakeq.Select(p => p.Key + "," + p.Value)));
-                h09g.Append("," + py.Runes.Count);
-                if (py.Runes.Count > 0)
-                    h09g.Append("," + string.Join(",", py.Runes));
-                h09g.Append("," + py.TokenCount);
-                h09g.Append("," + py.TokenExcl.Count);
-                if (py.TokenExcl.Count > 0)
-                    h09g.Append("," + string.Join(",", py.TokenExcl));
-                h09g.Append("," + py.TokenTars.Count);
-                if (py.TokenTars.Count > 0)
-                    h09g.Append("," + string.Join(",", py.TokenTars));
-                h09g.Append("," + (py.TokenAwake ? "1" : "0"));
-                h09g.Append("," + py.TokenFold.Count);
-                h09g.Append("," + py.Escue.Count);
-                if (py.Escue.Count > 0)
-                    h09g.Append("," + string.Join(",", py.Escue));
+                uList.Add(py.Uid);
+                foreach (string keyPair in StatusKey)
+                {
+                    int serp = keyPair.IndexOf(',');
+                    string key = keyPair.Substring(serp + 1);
+                    switch (key)
+                    {
+                        case "hero": uList.Add(py.SelectHero); break;
+                        case "state":
+                            int state = 0;
+                            state |= !py.IsAlive ? 0 : 1;
+                            state |= !py.Loved ? 0 : 2;
+                            state |= !py.Immobilized ? 0 : 4;
+                            state |= !py.PetDisabled ? 0 : 8;
+                            uList.Add(state); break;
+                        case "hp": uList.Add(py.HP); break;
+                        case "hpa": uList.Add(py.HPb); break;
+                        case "str": uList.Add(py.STR); break;
+                        case "stra": uList.Add(InFight ? py.STRa : py.STR); break;
+                        case "dex": uList.Add(py.DEX); break;
+                        case "dexa": uList.Add(InFight ? py.DEXa : py.DEX); break;
+                        case "tuxCount": uList.Add(py.Tux.Count); break;
+                        case "wp": uList.Add(py.Weapon); break;
+                        case "am": uList.Add(py.Armor); break;
+                        case "tr": uList.Add(py.Trove); break;
+                        case "exq": uList.Add(py.ExEquip); break;
+                        case "lug":
+                            Luggage lug = tuple.TL.DecodeTux(py.Trove) as Luggage;
+                            uList.Add(lug != null ? lug.Capacities.ListToString() : "0");
+                            break;
+                        case "guard": uList.Add(py.Guardian); break;
+                        case "coss": uList.Add(py.Coss); break;
+                        case "pet":
+                            uList.Add(py.Pets.Where(p => p != 0).ToList().ListToString());
+                            break;
+                        case "excard": uList.Add(py.ExCards.ListToString()); break;
+                        case "token": uList.Add(py.TokenCount); break;
+                        case "fakeq":
+                            uList.Add(py.Fakeq.Count);
+                            if (uList.Count > 0)
+                                uList.Add(py.Fakeq.Select(p => p.Key + "," + p.Value));
+                            break;
+                        case "rune": uList.Add(py.Runes.ListToString()); break;
+                        case "excl": uList.Add(py.TokenExcl.ListToString()); break;
+                        case "tar": uList.Add(py.TokenTars.ListToString()); break;
+                        case "awake": uList.Add(py.TokenAwake ? 1 : 0); break;
+                        case "foldsz": uList.Add(py.TokenFold.Count); break;
+                        case "escue": uList.Add(py.Escue.ListToString()); break;
+                    }
+                }
             }
-            return h09g.Length > 0 ? h09g.ToString().Substring(1) : "";
+            return uList.Count > 0 ? ("H09G" + uList.ToString()) : "";
         }
         public string GenerateSerialFieldMessage()
         {
@@ -337,15 +360,9 @@ namespace PSD.Base
         {
             Player py = Garden[ut];
             List<string> h09f = new List<string>();
-            h09f.Add(py.Tux.Count.ToString());
-            if (py.Tux.Count > 0)
-                h09f.Add(string.Join(",", py.Tux));
-            h09f.Add(py.TokenFold.Count.ToString());
-            if (py.TokenFold.Count > 0)
-                h09f.Add(string.Join(",", py.TokenFold));
-            h09f.Add(py.Skills.Count.ToString());
-            if (py.Skills.Count > 0)
-                h09f.Add(string.Join(",", py.Skills));
+            h09f.Add(py.Tux.ListToString());
+            h09f.Add(py.TokenFold.ListToString());
+            h09f.Add(py.Skills.ListToString());
             return string.Join(",", h09f);
         }
         #endregion Serialize the Game Situation

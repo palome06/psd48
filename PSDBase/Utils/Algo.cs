@@ -1,13 +1,14 @@
-﻿using PSD.Base;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace PSD.PSDGamepkg
+namespace PSD.Base.Utils
 {
-    public static class Util
+    public static class Algo
     {
+        private static Random randomSeed = new Random();
+
         public static void Shuffle<Type>(this IList<Type> list)
         {
             Random random = new Random();
@@ -24,20 +25,10 @@ namespace PSD.PSDGamepkg
         public static IEnumerable<Type> PickSomeInRandomOrder<Type>(
             IEnumerable<Type> someTypes, int maxCount)
         {
-            Random random = new Random();
             Dictionary<double, Type> randomSortTable = new Dictionary<double, Type>();
             foreach (Type someType in someTypes)
-                randomSortTable[random.NextDouble()] = someType;
+                randomSortTable[randomSeed.NextDouble()] = someType;
             return randomSortTable.OrderBy(KVP => KVP.Key).Take(maxCount).Select(KVP => KVP.Value);
-        }
-        public static string SParal(Board board, Func<Player, bool> where,
-            Func<Player, string> stringize, string sepeartor)
-        {
-            string msg = string.Join(sepeartor, board.Garden.Values.Where(where).Select(stringize));
-            if (msg.Length > 0)
-                return msg;
-            else
-                return null;
         }
         public static string Substring(string content, int start, int end)
         {
@@ -113,18 +104,79 @@ namespace PSD.PSDGamepkg
                 arr[i] = value;
             return arr;
         }
+        public static bool Equals<T>(T[][] arrays, int idx, int jdx, T expected)
+        {
+            if (idx >= arrays.Length)
+                return false;
+            if (jdx >= arrays[idx].Length)
+                return false;
+            return arrays[idx][jdx].Equals(expected);
+        }
         public static bool TryNotEmpty(IDictionary<string, object> map, string key)
         {
             return map.ContainsKey(key) && (string)map[key] != "";
         }
-        public static void SafeExecute(Action action, Action<Exception> handler)
+        public static string ListToString<T>(this ICollection<T> list)
         {
-            try { action(); }
-            catch (Exception ex)
+            return list.Count != 0 ? (list.Count + "," + string.Join(",", list)) : "0";
+        }
+
+        public static void LongMessageParse(string[] lines, Action<ushort> setWho,
+            Action<ushort, string, object> assign, string[] keys)
+        {
+            int idx = 1;
+            while (idx < lines.Length)
             {
-                if (!(ex is System.Threading.ThreadAbortException))
+                ushort who = ushort.Parse(lines[idx++]);
+                setWho(who);
+                for (int i = 0; i < keys.Length; ++i)
                 {
-                    handler(ex); Console.WriteLine(ex.ToString());
+                    int serp = keys[i].IndexOf(',');
+                    string ktype = keys[i].Substring(0, serp);
+                    string kname = keys[i].Substring(serp + 1);
+                    if (ktype == "LA") // array of string
+                    {
+                        int n = int.Parse(lines[idx++]);
+                        string[] values = Algo.TakeRange(lines, idx, idx + n);
+                        assign(who, kname, values);
+                        idx += n;
+                    }
+                    else if (ktype == "LU") // array of ushort
+                    {
+                        int n = int.Parse(lines[idx++]);
+                        string[] values = Algo.TakeRange(lines, idx, idx + n);
+                        assign(who, kname, values.Select(p => ushort.Parse(p)).ToArray());
+                        idx += n;
+                    }
+                    else if (ktype.StartsWith("LC")) // array of ushort with size appended
+                    {
+                        int n = int.Parse(ktype.Substring("LC".Length));
+                        string[] values = Algo.TakeRange(lines, idx, idx + n);
+                        assign(who, kname, values.Select(p => ushort.Parse(p)).ToArray());
+                        idx += n;
+                    }
+                    else if (ktype == "LD") // array of string with double size indicator
+                    {
+                        int n = int.Parse(lines[idx++]) * 2;
+                        string[] values = Algo.TakeRange(lines, idx, idx + n);
+                        assign(who, kname, values);
+                        idx += n;
+                    }
+                    else if (ktype == "U") // single ushort
+                    {
+                        ushort value = ushort.Parse(lines[idx++]);
+                        assign(who, kname, value);
+                    }
+                    else if (ktype == "I") // single integer
+                    {
+                        int value = int.Parse(lines[idx++]);
+                        assign(who, kname, value);
+                    }
+                    else if (ktype == "A") // single string
+                    {
+                        string value = lines[idx++];
+                        assign(who, kname, value);
+                    }
                 }
             }
         }
