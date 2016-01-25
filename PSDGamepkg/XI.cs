@@ -910,7 +910,7 @@ namespace PSD.PSDGamepkg
                     isAnySet |= true;
                 }
             }
-            else if ((!ske.IsOnce || ske.Tick == 0) && ske.Type == SKTType.YJ && nj01.ContainsKey(ske.Name))
+            else if ((!ske.IsOnce || ske.Tick == 0) && ske.Type == SKTType.YJ && nj01.ContainsKey(ske.Name) && !Board.EscueBanned)
             {
                 Base.NCAction na = nj01[ske.Name];
                 Player player = Board.Garden[ske.Tg];

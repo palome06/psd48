@@ -137,28 +137,35 @@ namespace PSD.Base.Utils
                     if (ktype == "LA") // array of string
                     {
                         int n = int.Parse(lines[idx++]);
-                        string[] values = Algo.TakeRange(lines, idx, idx + n);
+                        string[] values = TakeRange(lines, idx, idx + n);
                         assign(who, kname, values);
                         idx += n;
                     }
                     else if (ktype == "LU") // array of ushort
                     {
                         int n = int.Parse(lines[idx++]);
-                        string[] values = Algo.TakeRange(lines, idx, idx + n);
+                        string[] values = TakeRange(lines, idx, idx + n);
                         assign(who, kname, values.Select(p => ushort.Parse(p)).ToArray());
+                        idx += n;
+                    }
+                    else if (ktype == "LI") // array of int
+                    {
+                        int n = int.Parse(lines[idx++]);
+                        string[] values = TakeRange(lines, idx, idx + n);
+                        assign(who, kname, values.Select(p => int.Parse(p)).ToArray());
                         idx += n;
                     }
                     else if (ktype.StartsWith("LC")) // array of ushort with size appended
                     {
                         int n = int.Parse(ktype.Substring("LC".Length));
-                        string[] values = Algo.TakeRange(lines, idx, idx + n);
+                        string[] values = TakeRange(lines, idx, idx + n);
                         assign(who, kname, values.Select(p => ushort.Parse(p)).ToArray());
                         idx += n;
                     }
                     else if (ktype == "LD") // array of string with double size indicator
                     {
                         int n = int.Parse(lines[idx++]) * 2;
-                        string[] values = Algo.TakeRange(lines, idx, idx + n);
+                        string[] values = TakeRange(lines, idx, idx + n);
                         assign(who, kname, values);
                         idx += n;
                     }

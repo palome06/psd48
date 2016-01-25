@@ -98,52 +98,50 @@ namespace PSD.PSDGamepkg.JNS
             //Board.IsTangled = true;
             ushort who = ushort.Parse(args[1]);
             ushort mon2ut = XI.Board.Monster2;
-            if (mon2ut != 0)
+            Monster mon1 = XI.LibTuple.ML.Decode(XI.Board.Monster1);
+            if (NMBLib.IsMonster(mon2ut))
             {
-                Monster mon1 = XI.LibTuple.ML.Decode(XI.Board.Monster1);
-                if (NMBLib.IsMonster(mon2ut))
+                Monster mon2 = XI.LibTuple.ML.Decode(mon2ut);
+                XI.WI.BCast("E0HZ,1," + who + "," + mon2ut);
+                XI.RaiseGMessage("G0YM,1," + mon2ut + ",0");
+                if (mon2.STR >= mon1.STR)
                 {
-                    Monster mon2 = XI.LibTuple.ML.Decode(mon2ut);
-                    XI.WI.BCast("E0HZ,1," + who + "," + mon2ut);
-                    XI.RaiseGMessage("G0YM,1," + mon2ut + ",0");
-                    if (mon2.STR >= mon1.STR)
-                    {
-                        mon1.Curtain();
-                        if (XI.Board.Mon1From != 0)
-                            XI.RaiseGMessage("G0HL," + XI.Board.Mon1From + "," + XI.Board.Monster1);
-                        XI.RaiseGMessage("G0WB," + XI.Board.Monster1);
-                        XI.RaiseGMessage("G0ON," + XI.Board.Mon1From + ",M,1," + XI.Board.Monster1);
-                        XI.RaiseGMessage("G0YM,0,0,0");
-                        XI.Board.Monster1 = 0;
+                    mon1.Curtain();
+                    if (XI.Board.Mon1From != 0)
+                        XI.RaiseGMessage("G0HL," + XI.Board.Mon1From + "," + XI.Board.Monster1);
+                    XI.RaiseGMessage("G0WB," + XI.Board.Monster1);
+                    XI.RaiseGMessage("G0ON," + XI.Board.Mon1From + ",M,1," + XI.Board.Monster1);
+                    XI.RaiseGMessage("G0YM,0,0,0");
+                    XI.Board.Monster1 = 0;
 
-                        mon2.WinEff();
-                        XI.RaiseGMessage("G0WB," + XI.Board.Monster2);
-                        XI.RaiseGMessage("G0ON,0,M,1," + XI.Board.Monster2);
-                        XI.RaiseGMessage("G0YM,1,0,0");
-                        XI.Board.Monster2 = 0;
-
-                        XI.RaiseGMessage("G0IA," + player.Uid + ",2");
-                        XI.RaiseGMessage("G0JM,R" + XI.Board.Rounder.Uid + "ZN");
-                    }
-                    else
-                        XI.RaiseGMessage("G0IP," + XI.Board.Rounder.OppTeam + "," + mon2.STR);
-                }
-                else if (NMBLib.IsNPC(mon2ut))
-                {
-                    XI.WI.BCast("E0HZ,2," + who + "," + mon2ut);
+                    mon2.WinEff();
+                    XI.RaiseGMessage("G0WB," + XI.Board.Monster2);
                     XI.RaiseGMessage("G0ON,0,M,1," + XI.Board.Monster2);
                     XI.RaiseGMessage("G0YM,1,0,0");
                     XI.Board.Monster2 = 0;
+
+                    XI.RaiseGMessage("G0IA," + player.Uid + ",2");
+                    XI.RaiseGMessage("G0JM,R" + XI.Board.Rounder.Uid + "ZN");
                 }
-                XI.InnerGMessage(fuse, 201);
+                else
+                    XI.InnerGMessage(fuse, 281);
             }
-            else
-                XI.InnerGMessage(fuse, 191);
+            else if (NMBLib.IsNPC(mon2ut))
+            {
+                XI.WI.BCast("E0HZ,2," + who + "," + mon2ut);
+                XI.RaiseGMessage("G0ON,0,M,1," + XI.Board.Monster2);
+                XI.RaiseGMessage("G0YM,1,0,0");
+                XI.Board.Monster2 = 0;
+                XI.InnerGMessage(fuse, 301);
+            }
         }
         public bool JNH0104Valid(Player player, int type, string fuse)
         {
             string[] g0hzs = fuse.Split(',');
-            return g0hzs[1] == player.Uid.ToString() && g0hzs[2] != "0";
+            ushort who = ushort.Parse(g0hzs[1]);
+            ushort target = ushort.Parse(g0hzs[2]);
+            ushort mon2ut = XI.Board.Monster2;
+            return who == player.Uid && target != 0 && XI.Board.Monster2 != 0;
         }
         #endregion HL001 - Yanfeng
         #region HL002 - YangYue
@@ -2956,7 +2954,7 @@ namespace PSD.PSDGamepkg.JNS
             if (XI.Board.Hinder.Uid != 0)
             {
                 TargetPlayer(player.Uid, XI.Board.Hinder.Uid);
-                if (player.ROMUshort != 2)
+                if (player.ROMUshort == 0)
                     XI.RaiseGMessage("G0OX," + XI.Board.Hinder.Uid + ",1,4");
                 else
                     XI.RaiseGMessage("G0IX," + XI.Board.Hinder.Uid + ",1,4");
@@ -3002,8 +3000,8 @@ namespace PSD.PSDGamepkg.JNS
                 }
                 return false;
             }
-            else if (type == 1)
-                return player.ROMUshort == 1;
+            else if (type == 1 || type == 2)
+                return player.ROMUshort == 1 || player.ROMUshort == 2;
             else
                 return false;
         }
@@ -3016,78 +3014,84 @@ namespace PSD.PSDGamepkg.JNS
                 if (monCnt > 3) monCnt = 3;
                 List<ushort> mons = XI.Board.MonPiles.Dequeue(monCnt).ToList();
                 XI.RaiseGMessage("G2IN,1," + monCnt);
-                //List<ushort> fmons = XI.Board.MonPiles.Dequeue(monCnt).ToList();
-                //int finalPoint = 0;
-                //IDictionary<ushort, ushort> bombmon = new Dictionary<ushort, ushort>();
-                //IDictionary<ushort, ushort> bombnpc = new Dictionary<ushort, ushort>();
                 // show the monsters to the trigger
                 XI.RaiseGMessage("G0YM,5," + string.Join(",", mons));
 
-                string ans1st;
+                ushort newTangle = 0, bomb = 0, owner = 0;
                 do
                 {
-                    ans1st = XI.AsyncInput(player.Uid, "#请选择『毁天一剑』执行项##更改混战##爆发宠物,/Y2", "JNH1803", "0");
-                    if (ans1st == "1")
+                    string ans1st = XI.AsyncInput(player.Uid, "#更改为混战,/M1(p" + 
+                        string.Join("p", mons) + ")", "JNH1803", "0");
+                    if (ans1st.StartsWith("/"))
+                        break;
+                    if (ans1st != VI.CinSentinel)
                     {
-                        string ans2nd = XI.AsyncInput(player.Uid,
-                            "#更改为混战,/M1(p" + string.Join("p", mons) + ")", "JNH1803", "0");
-                        if (!ans2nd.StartsWith("/") && ans2nd != VI.CinSentinel)
+                        newTangle = ushort.Parse(ans1st);
+                        if (Base.Card.NMBLib.IsMonster(newTangle))
                         {
-                            ushort newMixed = ushort.Parse(ans2nd);
-                            // Discard the current result and substitude
-                            mons.Remove(newMixed); mons.Add(XI.Board.Monster2);
-                            XI.RaiseGMessage("G0WB," + XI.Board.Monster2);
-                            XI.RaiseGMessage("G0ON,0,M," + mons.Count + "," + string.Join(",", mons));
-                            XI.Board.Monster2 = newMixed;
-                            player.ROMUshort = 1;
-                            XI.InnerGMessage("G0HZ," + g0hz[1] + "," + ans2nd, 190);
-                            break;
-                        }
-                    }
-                    else if (ans1st == "2")
-                    {
-                        List<ushort> onlyMon = mons.Where(p => NMBLib.IsMonster(p)).ToList();
-                        string input = XI.AsyncInput(player.Uid, onlyMon.Count > 0 ? ("#增加战力,/M1(p" +
-                            string.Join("p", onlyMon) + ")") : "/", "JNH1803", "1");
-                        if (!input.Contains(VI.CinSentinel) && !input.StartsWith("/"))
-                        {
-                            ushort which = ushort.Parse(input);
-                            Monster whichMon = XI.LibTuple.ML.Decode(which);
-                            int idx = whichMon.Element.Elem2Index();
-                            List<ushort> pets = new List<ushort>();
-                            foreach (Player py in XI.Board.Garden.Values)
+                            Monster tangle = XI.LibTuple.ML.Decode(newTangle);
+                            int elemIdx = tangle.Element.Elem2Index();
+                            List<ushort> bombs = XI.Board.Garden.Values.Where(p => p.Team == player.Team &&
+                                p.IsAlive).Select(p => p.Pets[elemIdx]).Where(p => p != 0).ToList();
+                            string ans2nd;
+                            if (bombs.Count > 0)
+                                ans2nd = XI.AsyncInput(player.Uid, "#爆发,/M1(p" +
+                                    string.Join("p", bombs) + ")", "JNH1803", "1");
+                            else
+                                ans2nd = XI.AsyncInput(player.Uid, "/", "JNH1803", "1");
+                            if (ans2nd.StartsWith("/"))
+                                break;
+                            else if (ans2nd != VI.CinSentinel)
                             {
-                                if (py.Team == player.Team && py.IsAlive && py.Pets[idx] != 0)
-                                    pets.Add(py.Pets[idx]);
-                            }
-                            string input2 = XI.AsyncInput(player.Uid, pets.Count > 0 ? ("#爆发的,/M1(p" +
-                                string.Join("p", pets) + ")") : "/", "JNH1803", "2");
-                            if (!input2.Contains(VI.CinSentinel) && !input2.StartsWith("/"))
-                            {
-                                ushort bomb = ushort.Parse(input2);
-                                Monster monster = XI.LibTuple.ML.Decode(which);
-                                if (monster != null)
-                                {
-                                    ushort who = XI.Board.Garden.Values.Where(p =>
-                                        p.Pets.Contains(bomb)).Select(p => p.Uid).Single();
-                                    XI.RaiseGMessage("G0HI," + who + "," + bomb);
-                                    if (monster.STR > 0)
-                                        XI.RaiseGMessage("G0IP," + player.Team + "," + monster.STR);
-                                }
-                                
-                                XI.RaiseGMessage("G0ON,0,M," + mons.Count + "," + string.Join(",", mons));
-                                player.ROMUshort = 1;
-                                XI.InnerGMessage("G0HZ," + g0hz[1] + ",0", 231);
+                                bomb = ushort.Parse(ans2nd);
+                                owner = XI.Board.Garden.Values.Single(p => p.Pets[elemIdx] == bomb).Uid;
                                 break;
                             }
-                        }
+                        } else
+                            break;
                     }
-                } while (!ans1st.StartsWith("/") && ans1st != VI.CinSentinel);
+                } while (true);
+                player.ROMUshort = 1;
+                if (bomb != 0)
+                {
+                    XI.RaiseGMessage("G0HI," + owner + "," + bomb);
+                    player.ROMUshort = 2;
+                }
+                if (newTangle != 0)
+                {
+                    mons.Remove(newTangle); mons.Add(XI.Board.Monster2);
+                    XI.RaiseGMessage("G0WB," + XI.Board.Monster2);
+                    XI.RaiseGMessage("G0ON,0,M," + mons.Count + "," + string.Join(",", mons));
+                    XI.Board.Monster2 = newTangle;
+
+                    ushort who = ushort.Parse(g0hz[1]);
+                    if (NMBLib.IsMonster(newTangle))
+                    {
+                        XI.WI.BCast("E0HZ,1," + who + "," + newTangle);
+                        XI.RaiseGMessage("G0YM,1," + newTangle + ",0");
+                    }
+                    else if (NMBLib.IsNPC(newTangle))
+                        XI.WI.BCast("E0HZ,2," + who + "," + newTangle);
+                    XI.InnerGMessage("G0HZ," + who + "," + newTangle, 221);
+                } else {
+                    XI.RaiseGMessage("G0ON,0,M," + mons.Count + "," + string.Join(",", mons));
+                    XI.InnerGMessage(fuse, 221);
+                }
             }
             else if (type == 1)
             {
+                ushort mon = XI.Board.Monster2;
+                if (NMBLib.IsMonster(mon) && player.ROMUshort == 2)
+                {
+                    XI.RaiseGMessage("G0IP," + player.Team + "," + XI.LibTuple.ML.Decode(mon).STR);
+                    XI.InnerGMessage(fuse, 301);
+                } else 
+                    XI.InnerGMessage(fuse, 291);
+            }
+            else if (type == 2)
+            {
                 XI.RaiseGMessage("G0OE,0," + player.Uid);
-                player.ROMUshort = 2;
+                player.ROMUshort = 3;
             }
         }
         #endregion HL018 - Xu'Nansong

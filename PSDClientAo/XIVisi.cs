@@ -4343,7 +4343,7 @@ namespace PSD.ClientAo
                     }
                     break;
                 case "H09G":
-                    Algo.LongMessageParse(cmdrst.Split(','), InitPlayerPositionFromLongMessage,
+                    Algo.LongMessageParse(("H09G," + cmdrst).Split(','), InitPlayerPositionFromLongMessage,
                         InitPlayerFullFromLongMessage, Board.StatusKey);
                     break;
                 case "H09P":

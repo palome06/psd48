@@ -2357,7 +2357,8 @@ namespace PSD.PSDGamepkg
                                 else if (Board.InFight)
                                 {
                                     player.DEXc = player.DEXc - n;
-                                    WI.BCast("E0OX," + me + "," + type + "," + n + "," + player.DEXa + "," + player.DEXc);
+                                    WI.BCast("E0OX," + me + "," + type + "," + n +
+                                        "," + player.DEXa + "," + player.DEXc);
                                 }
                                 else
                                     WI.BCast("E0OX," + me + "," + type + "," + n + "," + player.DEXb);

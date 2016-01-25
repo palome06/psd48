@@ -3,6 +3,7 @@ using PSD.Base.Card;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Algo = PSD.Base.Utils.Algo;
 
 namespace PSD.PSDGamepkg.Artiad
 {
@@ -150,6 +151,47 @@ namespace PSD.PSDGamepkg.Artiad
                 rotation.Who = to.Uid;
                 harms.Add(rotation);
             }
+        }
+
+        public static void ObtainAndAllocateTux(XI XI, Base.VW.IVI vi, Player py,
+            int count, string reason, string inType)
+        {
+            if (count == 0)
+                return;
+            List<ushort> rps = XI.Board.Garden.Values.Where(p => p.IsAlive
+                && p.Team == py.Team).Select(p => p.Uid).ToList();
+            ushort[] rpsa = XI.Board.Garden.Values.Where(p => p.Team == py.Team).Select(p => p.Uid).ToArray();
+            string rg = string.Join(",", rps), rf = "(p" + string.Join("p", rps) + ")";
+
+            List<ushort> pops = XI.DequeueOfPile(XI.Board.TuxPiles, count).ToList();
+            XI.RaiseGMessage("G2IN,0," + count);
+            XI.RaiseGMessage("G1IU," + string.Join(",", pops));
+            do 
+            {
+                XI.RaiseGMessage("G2FU,0," + py.Uid + "," + rps.Count + "," + rg + ",C," + string.Join(",", pops));
+                int pubSz = XI.Board.PZone.Count;
+                string pubDig = (pubSz > 1) ? ("+Z1~" + pubSz) : "+Z1";
+                string input = XI.AsyncInput(py.Uid, pubDig + "(p" +
+                    string.Join("p", XI.Board.PZone) + "),#获得卡牌的,/T1" + rf, reason, inType);
+                if (!input.StartsWith("/") && input != vi.CinSentinel)
+                {
+                    string[] ips = input.Split(',');
+                    List<ushort> getxs = Algo.TakeRange(ips, 0, ips.Length - 1).Select(p => ushort.Parse(p))
+                        .Where(p => XI.Board.PZone.Contains(p)).ToList();
+                    ushort to = ushort.Parse(ips[ips.Length - 1]);
+                    if (getxs.Count > 0)
+                    {
+                        XI.RaiseGMessage("G1OU," + string.Join(",", getxs));
+                        XI.RaiseGMessage("G2QU,0," + rpsa.Length + "," +
+                             string.Join(",", rpsa) + "," + string.Join(",", getxs));
+                        XI.RaiseGMessage("G0HQ,2," + to + ",0," + rpsa.Length + "," +
+                            string.Join(",", rpsa) + "," + string.Join(",", getxs));
+                        foreach (ushort getx in getxs)
+                            pops.Remove(getx);
+                    }
+                }
+                XI.RaiseGMessage("G2FU,3");
+            } while (pops.Count > 0);
         }
     }
 }

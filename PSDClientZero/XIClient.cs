@@ -3757,7 +3757,7 @@ namespace PSD.ClientZero
                         break;
                     }
                 case "H09G":
-                    Algo.LongMessageParse(cmdrst.Split(','), (who) => { Z0D[who].Uid = who; },
+                    Algo.LongMessageParse(("H09G," + cmdrst).Split(','), (who) => { Z0D[who].Uid = who; },
                         (who, key, value) =>
                         {
                             ZeroPlayer zp = Z0D[who];

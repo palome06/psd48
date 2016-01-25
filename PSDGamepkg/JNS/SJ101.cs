@@ -131,18 +131,10 @@ namespace PSD.PSDGamepkg.JNS
 
         public void SJ301(Player rd)
         {
-            string msgP = AffichePlayers(p => p.IsAlive && p.Tux.Count < 3, p => p.Uid + ",0," + (3 - p.Tux.Count));
-            string msgN = AffichePlayers(p => p.IsAlive && p.Tux.Count > 3, p => p.Uid + ",1," + (p.Tux.Count - 3));
-            string msg;
-            if (msgN != null && msgP != null)
-                msg = msgP + "," + msgN;
-            else if (msgN != null && msgP == null)
-                msg = msgN;
-            else if (msgN == null && msgP != null)
-                msg = msgP;
-            else
-                msg = "";
-            if (msg != "")
+            string msg = string.Join(",", XI.Board.Garden.Values.Where(p =>
+                p.IsAlive && p.Tux.Count != 3).Select(p => p.Tux.Count > 3 ?
+                (p.Uid + ",1," + (p.Tux.Count - 3)) : (p.Uid + ",0," + (3 - p.Tux.Count))));
+            if (!string.IsNullOrEmpty(msg))
                 XI.RaiseGMessage("G0DH," + msg);
         }
         public void SJ302(Player rd)
@@ -242,79 +234,11 @@ namespace PSD.PSDGamepkg.JNS
         }
         public void SJT03(Player rd)
         {
+            Artiad.Procedure.ObtainAndAllocateTux(XI, VI, rd, XI.Board.Garden.Values.Where(p =>
+                p.IsAlive && p.Team == rd.OppTeam).Sum(p => p.GetPetCount()) + 1, "SJT03", "0");
             Player od = XI.Board.GetOpponenet(rd);
-            int rn = XI.Board.Garden.Values.Where(p => p.IsAlive && p.Team == rd.OppTeam)
-                .Sum(p => p.GetPetCount()) + 1;
-            int on = XI.Board.Garden.Values.Where(p => p.IsAlive && p.Team == rd.Team)
-                .Sum(p => p.GetPetCount()) + 1;
-            List<ushort> rps = XI.Board.Garden.Values.Where(p => p.IsAlive
-                && p.Team == rd.Team).Select(p => p.Uid).ToList();
-            List<ushort> ops = XI.Board.Garden.Values.Where(p => p.IsAlive
-                && p.Team == rd.OppTeam).Select(p => p.Uid).ToList();
-            ushort[] rpsa = XI.Board.Garden.Values.Where(p => p.Team == rd.Team).Select(p => p.Uid).ToArray();
-            ushort[] opsa = XI.Board.Garden.Values.Where(p => p.Team == rd.OppTeam).Select(p => p.Uid).ToArray();
-            string rg = string.Join(",", rps), rf = "(p" + string.Join("p", rps) + ")";
-            string og = string.Join(",", ops), of = "(p" + string.Join("p", ops) + ")";
-
-            List<ushort> pops = XI.DequeueOfPile(XI.Board.TuxPiles, rn).ToList();
-            XI.RaiseGMessage("G2IN,0," + rn);
-            XI.RaiseGMessage("G1IU," + string.Join(",", pops));
-            do 
-            {
-                XI.RaiseGMessage("G2FU,0," + rd.Uid + "," + rps.Count + "," + rg + ",C," + string.Join(",", pops));
-                int pubSz = XI.Board.PZone.Count;
-                string pubDig = (pubSz > 1) ? ("+Z1~" + pubSz) : "+Z1";
-                string input = XI.AsyncInput(rd.Uid, pubDig + "(p" +
-                    string.Join("p", XI.Board.PZone) + "),#获得卡牌的,/T1" + rf, "SJT03", "0");
-                if (!input.StartsWith("/") && input != VI.CinSentinel)
-                {
-                    string[] ips = input.Split(',');
-                    List<ushort> getxs = Algo.TakeRange(ips, 0, ips.Length - 1).Select(p => ushort.Parse(p))
-                        .Where(p => XI.Board.PZone.Contains(p)).ToList();
-                    ushort to = ushort.Parse(ips[ips.Length - 1]);
-                    if (getxs.Count > 0)
-                    {
-                        XI.RaiseGMessage("G1OU," + string.Join(",", getxs));
-                        XI.RaiseGMessage("G2QU,0," + rpsa.Length + "," +
-                             string.Join(",", rpsa) + "," + string.Join(",", getxs));
-                        XI.RaiseGMessage("G0HQ,2," + to + ",0," + rpsa.Length + "," +
-                            string.Join(",", rpsa) + "," + string.Join(",", getxs));
-                        foreach (ushort getx in getxs)
-                            pops.Remove(getx);
-                    }
-                }
-                XI.RaiseGMessage("G2FU,3");
-            } while (pops.Count > 0);
-            
-            pops = XI.DequeueOfPile(XI.Board.TuxPiles, on).ToList();
-            XI.RaiseGMessage("G2IN,0," + on);
-            XI.RaiseGMessage("G1IU," + string.Join(",", pops));
-            do
-            {
-                XI.RaiseGMessage("G2FU,0," + od.Uid + "," + ops.Count + "," + og + ",C," + string.Join(",", pops));
-                int pubSz = XI.Board.PZone.Count;
-                string pubDig = (pubSz > 1) ? ("+Z1~" + pubSz) : "+Z1";
-                string input = XI.AsyncInput(od.Uid, pubDig + "(p" +
-                    string.Join("p", XI.Board.PZone) + "),#获得卡牌的,/T1" + of, "SJT03", "0");
-                if (!input.StartsWith("/") && input != VI.CinSentinel)
-                {
-                    string[] ips = input.Split(',');
-                    List<ushort> getxs = Algo.TakeRange(ips, 0, ips.Length - 1).Select(p => ushort.Parse(p))
-                        .Where(p => XI.Board.PZone.Contains(p)).ToList();
-                    ushort to = ushort.Parse(ips[ips.Length - 1]);
-                    if (getxs.Count > 0)
-                    {
-                        XI.RaiseGMessage("G1OU," + string.Join(",", getxs));
-                        XI.RaiseGMessage("G2QU,0," + opsa.Length + "," +
-                             string.Join(",", opsa) + "," + string.Join(",", getxs));
-                        XI.RaiseGMessage("G0HQ,2," + to + ",0," + opsa.Length + "," +
-                            string.Join(",", opsa) + "," + string.Join(",", getxs));
-                        foreach (ushort getx in getxs)
-                            pops.Remove(getx);
-                    }
-                }
-                XI.RaiseGMessage("G2FU,3");
-            } while (pops.Count > 0);
+            Artiad.Procedure.ObtainAndAllocateTux(XI, VI, od, XI.Board.Garden.Values.Where(p =>
+                p.IsAlive && p.Team == rd.Team).Sum(p => p.GetPetCount()) + 1, "SJT03", "1");
         }
         public void SJT04(Player rd)
         {

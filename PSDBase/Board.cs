@@ -109,6 +109,8 @@ namespace PSD.Base
         public List<ushort> PetProtecedPlayer { private set; get; }
         // List of monsters that is disabled
         public ISet<ushort> NotActionPets { private set; get; }
+        // permit the use of escue
+        public bool EscueBanned { set; get; }
 
         public IDictionary<string, string> JumpTable { private set; get; }
 
@@ -207,6 +209,7 @@ namespace PSD.Base
         {
             Supporter = null; Hinder = null;
             SupportSucc = false; HinderSucc = false;
+            EscueBanned = true;
         }
         public List<ushort> OrderedPlayer() { return OrderedPlayer(Rounder.Uid); }
         public List<ushort> OrderedPlayer(ushort start)
@@ -280,7 +283,7 @@ namespace PSD.Base
         #region Serialize the Game Situation
         public static readonly string[] StatusKey = new string[] { "I,hero", "I,state", "U,hp", "U,hpa", "U,str",
             "U,stra", "U,dex", "U,dexa", "I,tuxCount", "U,wp", "U,am", "U,tr", "U,exq", "LA,lug", "U,guard",
-            "U,coss", "LC5,pet", "LU,excard", "LU,rune", "LD,fakeq", "I,token", "LA,excl", "LU,tar", "U,awake",
+            "U,coss", "LU,pet", "LU,excard", "LU,rune", "LD,fakeq", "I,token", "LA,excl", "LU,tar", "U,awake",
             "I,foldsz", "LU,escue" };
 
         public string ToSerialMessage(LibGroup tuple)
@@ -319,16 +322,14 @@ namespace PSD.Base
                             uList.Add(lug != null ? lug.Capacities.ListToString() : "0");
                             break;
                         case "guard": uList.Add(py.Guardian); break;
-                        case "coss": uList.Add(py.Coss); break;
+                        case "coss": uList.Add(py.Coss.Count > 0 ? py.Coss.Peek() : 0); break;
                         case "pet":
                             uList.Add(py.Pets.Where(p => p != 0).ToList().ListToString());
                             break;
                         case "excard": uList.Add(py.ExCards.ListToString()); break;
                         case "token": uList.Add(py.TokenCount); break;
                         case "fakeq":
-                            uList.Add(py.Fakeq.Count);
-                            if (uList.Count > 0)
-                                uList.Add(py.Fakeq.Select(p => p.Key + "," + p.Value));
+                            uList.Add(py.Fakeq.Select(p => p.Key + "," + p.Value).ToList().ListToString());
                             break;
                         case "rune": uList.Add(py.Runes.ListToString()); break;
                         case "excl": uList.Add(py.TokenExcl.ListToString()); break;
@@ -339,7 +340,7 @@ namespace PSD.Base
                     }
                 }
             }
-            return uList.Count > 0 ? ("H09G" + uList.ToString()) : "";
+            return uList.Count > 0 ? ("H09G," + string.Join(",", uList)) : "";
         }
         public string GenerateSerialFieldMessage()
         {
