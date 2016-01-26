@@ -89,7 +89,7 @@ namespace PSD.PSDGamepkg
                 //if (!isAnySet) { SimpleGMessage(cmd); return; }
                 if (!isAnySet) { RaiseGMessage("G2AS,0"); return; }
 
-                string cop = zero.Substring(2);
+                // string cop = zero.Substring(2);
                 isAnySet = false;
                 if (locks.Count > 0)
                 {
@@ -101,7 +101,7 @@ namespace PSD.PSDGamepkg
                         ushort me = ushort.Parse(msg.Substring(0, idx));
                         int jdx = msg.LastIndexOf(';');
                         string mai = Algo.Substring(msg, idx + 1, jdx);
-                        string inType = Algo.Substring(msg, jdx + 1, -1);
+                        //string inType = Algo.Substring(msg, jdx + 1, -1);
 
                         string skName;
                         mai = DecodeSimplifiedCommand(mai, out skName);
@@ -114,8 +114,6 @@ namespace PSD.PSDGamepkg
                             else if (echo == UEchoCode.END_ACTION)
                                 isAnySet = true;
                         }
-                        //Fill(involved, false);
-                        //involved[me] |= true;
                         RaiseGMessage("G2AS,0");
                         locks.RemoveAt(0);
                     }
@@ -258,8 +256,6 @@ namespace PSD.PSDGamepkg
                             int changeType = int.Parse(args[i]);
                             ushort who = ushort.Parse(args[i + 1]);
                             Player player = Board.Garden[who];
-                            Hero hero = LibTuple.HL.InstanceHero(player.SelectHero);
-
                             if (player.Weapon != 0)
                                 g1zl += "," + player.Uid + "," + player.Weapon;
                             if (player.Armor != 0)
@@ -371,14 +367,12 @@ namespace PSD.PSDGamepkg
                     {
                         // G0CC,A,T,B,TP02,17,36
                         ushort provider = ushort.Parse(args[1]);
-                        ushort adapter = ushort.Parse(args[2]);
                         ushort trigger = ushort.Parse(args[3]);
                         string cardname = args[4];
                         int hdx = cmd.IndexOf(';');
-                        int idx = cmd.IndexOf(',', hdx);
-
-                        int sktInType = int.Parse(Algo.Substring(cmd, hdx + 1, idx));
-                        string sktFuse = Algo.Substring(cmd, idx + 1, -1);
+                        //int idx = cmd.IndexOf(',', hdx);
+                        //int sktInType = int.Parse(Algo.Substring(cmd, hdx + 1, idx));
+                        //string sktFuse = Algo.Substring(cmd, idx + 1, -1);
                         Tux tux = tx01[cardname];
                         string[] argv = cmd.Substring(0, hdx).Split(',');
 
@@ -403,76 +397,51 @@ namespace PSD.PSDGamepkg
                     }
                     else if (priority == 200)
                     {
-                        ushort ust = ushort.Parse(args[1]);
                         ushort adapter = ushort.Parse(args[2]);
-                        ushort hst = ushort.Parse(args[3]);
-                        string cardname = args[4];
-                        int hdx = cmd.IndexOf(';');
-                        int idx = cmd.IndexOf(',', hdx);
+                        ushort trigger = ushort.Parse(args[3]);
 
-                        int sktInType = int.Parse(Algo.Substring(cmd, hdx + 1, idx));
-                        string sktFuse = Algo.Substring(cmd, idx + 1, -1);
-                        Base.Card.Tux tux = tx01[cardname];
-                        string[] argv = cmd.Substring(0, hdx).Split(',');
-                        List<ushort> cards = Algo.TakeRange(argv, 5, argv.Length).Select(p =>
-                            ushort.Parse(p)).Where(p => p > 0).ToList();
-                        if (cards.Any())
+                        if (Board.Garden[trigger].IsAlive)
                         {
-                            if ((tux.IsEq[sktInType] & 3) == 0)
+                            // need adapter tp set Action/Free Action
+                            if (adapter == 1)
                             {
-                                foreach (ushort p in cards)
-                                    Board.PendingTux.Remove(hst + ",G0CC," + p);
-                                RaiseGMessage("G0ON," + ust + ",C," + cards.Count + "," + string.Join(",", cards));
+                                string cardname = args[4];
+                                int hdx = cmd.IndexOf(';');
+                                int idx = cmd.IndexOf(',', hdx);
+                                int sktInType = int.Parse(Algo.Substring(cmd, hdx + 1, idx));
+                                sktInType = Artiad.ContentRule.GetLocustFreeType(cardname, sktInType);
+                                string sktFuse = Algo.Substring(cmd, idx + 1, -1);
+                                string[] argv = cmd.Substring(0, hdx).Split(',');
+                                string[] cards = Algo.TakeRange(argv, 5, argv.Length);
+                                RaiseGMessage("G0CD," + trigger + "," + adapter + "," + cardname + "," +
+                                    string.Join(",", cards) + ";" + sktInType + "," + sktFuse);
                             }
-                            else if ((tux.IsEq[sktInType] & 1) != 0)
+                            else
                             {
-                                foreach (ushort p in cards)
-                                    Board.PendingTux.Remove(hst + ",G0CC," + p);
-                                Board.PendingTux.Enqueue(cards.Select(p => hst + ",G0ZB," + tux.Code + "," + p));
+                                RaiseGMessage("G0CD," + trigger + "," + adapter + "," +
+                                    string.Join(",", Algo.TakeRange(args, 4, args.Length)));
                             }
                         }
                     }
                     else if (priority == 300)
                     {
-                        RaiseGMessage("G0CD," + args[3] + "," + args[2] + "," +
-                            string.Join(",", Algo.TakeRange(args, 4, args.Length)));
-                    }
-                    else if (priority == 400)
-                    {
+                        ushort provider = ushort.Parse(args[1]);
+                        ushort trigger = ushort.Parse(args[3]);
+                        string cardname = args[4];
                         int hdx = cmd.IndexOf(';');
+                        //int idx = cmd.IndexOf(',', hdx);
+                        //int sktInType = int.Parse(Algo.Substring(cmd, hdx + 1, idx));
+                        //string sktFuse = Algo.Substring(cmd, idx + 1, -1);
+                        Base.Card.Tux tux = tx01[cardname];
                         string[] argv = cmd.Substring(0, hdx).Split(',');
                         List<ushort> cards = Algo.TakeRange(argv, 5, argv.Length).Select(p =>
-                            ushort.Parse(p)).ToList();
-                        List<ushort> accu = new List<ushort>();
-                        foreach (ushort card in cards)
+                            ushort.Parse(p)).Where(p => p > 0).ToList();
+                        cards.RemoveAll(p => !Board.PendingTux.Contains(trigger + ",G0CC," + p));
+                        if (cards.Count > 0)
                         {
-                            List<string> rms = new List<string>();
-                            foreach (string tuxInfo in Board.PendingTux)
-                            {
-                                string[] parts = tuxInfo.Split(',');
-                                if (parts[1] == "G0CC")
-                                {
-                                    for (int j = 2; j < parts.Length; ++j)
-                                        if (parts[j] == card.ToString())
-                                        {
-                                            rms.Add(tuxInfo);
-                                            accu.Add(card);
-                                        }
-                                }
-                                else if (parts[1] == "G0ZB")
-                                {
-                                    if (parts[3] == card.ToString())
-                                    {
-                                        rms.Add(tuxInfo);
-                                        accu.Add(card);
-                                    }
-                                }
-                            }
-                            foreach (string rm in rms)
-                                Board.PendingTux.Remove(rm);
+                            cards.ForEach(p => Board.PendingTux.Remove(trigger + ",G0CC," + p));
+                            RaiseGMessage("G0ON," + provider + ",C," + cards.Count + "," + string.Join(",", cards));
                         }
-                        if (accu.Count > 0)
-                            RaiseGMessage("G0ON,10,C," + accu.Count + "," + string.Join(",", accu));
                     }
                     break;
                 case "G0HZ":
@@ -570,8 +539,6 @@ namespace PSD.PSDGamepkg
                 case "G1EV":
                     if (priority == 100)
                     {
-                        ushort trigger = ushort.Parse(args[1]);
-                        // ushort type = ushort.Parse(args[2]);
                         ushort eveCard = DequeueOfPile(Board.EvePiles);
                         RaiseGMessage("G2IN,2,1");
                         //WI.BCast("E0EV," + eveCard);
@@ -981,7 +948,7 @@ namespace PSD.PSDGamepkg
                         {
                             for (int idx = 3; idx < args.Length;)
                             {
-                                ushort fromZone = ushort.Parse(args[idx]);
+                                //ushort fromZone = ushort.Parse(args[idx]);
                                 int n = int.Parse(args[idx + 1]);
                                 ushort[] tuxes = Algo.TakeRange(args, idx + 2, idx + 2 + n)
                                     .Select(p => ushort.Parse(p)).ToArray();
@@ -1008,7 +975,6 @@ namespace PSD.PSDGamepkg
                     {
                         IDictionary<ushort, string> discards = new Dictionary<ushort, string>();
 
-                        List<ushort> involved = new List<ushort>();
                         IDictionary<ushort, List<ushort>> gains = new Dictionary<ushort, List<ushort>>();
                         IDictionary<ushort, List<ushort>> loses = new Dictionary<ushort, List<ushort>>();
                         //List<string> losers = new List<string>();
@@ -1515,9 +1481,11 @@ namespace PSD.PSDGamepkg
                         }
                         else
                         {
+                            Base.Card.Tux tux = tx01[parts[4]];
+                            WI.BCast("E0CE," + ust + "," + taction + "," + parts[4]);
                             ushort ut = ushort.Parse(parts[5]);
                             if (taction != 2)
-                                RaiseGMessage("G0ZB," + Board.Garden[ust].Uid + ",3," + ut + "," + parts[4]);
+                                tux.Vestige(Board.Garden[ust], sktInType, sktFuse, ut);
                         }
                     }
                     break;
@@ -1532,11 +1500,12 @@ namespace PSD.PSDGamepkg
                         string cdFuse = Algo.Substring(cmd, fdx + 1, hdx);
 
                         string[] g1cw = cmd.Substring(0, fdx).Split(',');
-                        ushort first = ushort.Parse(g1cw[1]);
+                        //ushort first = ushort.Parse(g1cw[1]);
                         ushort second = ushort.Parse(g1cw[2]);
-                        ushort provider = ushort.Parse(g1cw[3]);
+                        Player provider = Board.Garden[ushort.Parse(g1cw[3])];
                         Tux tux = LibTuple.TL.EncodeTuxCode(g1cw[4]);
-                        tux.Locust(Board.Garden[provider], sktInType, sktFuse, cdFuse, Board.Garden[second], tux);
+                        ushort it = ushort.Parse(g1cw[5]);
+                        tux.Locust(provider, sktInType, sktFuse, cdFuse, Board.Garden[second], tux, it);
                     }
                     break;
                 case "G0XZ":
@@ -1969,22 +1938,22 @@ namespace PSD.PSDGamepkg
                     }
                     else if (args[2] == "3")
                     {
-                        // G0ZB,A,3,x
+                        // G0ZB,A,3,AS,x
                         ushort me = ushort.Parse(args[1]);
-                        ushort card = ushort.Parse(args[3]);
+                        string cardAs = args[3];
+                        ushort card = ushort.Parse(args[4]);
                         Player player = Board.Garden[me];
                         foreach (string tuxInfo in Board.PendingTux)
                         {
                             string[] parts = tuxInfo.Split(',');
-                            if (parts[0] == me.ToString() && parts[1] == "G0ZB")
+                            ushort who = ushort.Parse(parts[0]);
+                            string g0cc = parts[1];
+                            ushort cook = ushort.Parse(parts[2]);
+                            if (who == me && g0cc == "G0CC" && card == cook)
                             {
-                                if (parts[3] == card.ToString())
-                                {
-                                    string cardAs = parts[2];
-                                    player.Fakeq[card] = cardAs;
-                                    WI.BCast("E0ZB," + me + ",0,4," + card + "," + cardAs);
-                                    Board.PendingTux.Remove(tuxInfo); break;
-                                }
+                                player.Fakeq[card] = cardAs;
+                                WI.BCast("E0ZB," + me + ",0,4," + card + "," + cardAs);
+                                Board.PendingTux.Remove(tuxInfo); break;
                             }
                         }
                     }
@@ -2767,7 +2736,7 @@ namespace PSD.PSDGamepkg
                                     RaiseGMessage("G0ON," + me + ",M,1," + mons);
                                 }
                             }
-                            // TODO: discard pets after fight finished
+                            // discard pets after fight finished
                             WI.BCast("E0HH," + me + "," + consumeType + "," + mons + "," + sktInType + cargsv);
                             monster.ConsumeAction(player, consumeType, sktInType, sktFuse, argsv);
                         }
@@ -2784,7 +2753,6 @@ namespace PSD.PSDGamepkg
                         IDictionary<ushort, List<ushort>> imc = new Dictionary<ushort, List<ushort>>();
                         // to discard immediately
                         IDictionary<ushort, List<ushort>> jmc = new Dictionary<ushort, List<ushort>>();
-                        List<ushort> dices = new List<ushort>();
                         for (int i = 1; i < args.Length; i += 2)
                         {
                             ushort who = ushort.Parse(args[i]);
@@ -2919,7 +2887,7 @@ namespace PSD.PSDGamepkg
                 case "G0TT":
                     {
                         ushort who = ushort.Parse(args[1]);
-                        string order = AsyncInput(who, "//", "G0TT", "0");
+                        AsyncInput(who, "//", "G0TT", "0");
                         int number = randomSeed.Next(6);
                         if (number == 0) number = 6;
                         WI.BCast("E0TT," + who + "," + number);
@@ -3404,7 +3372,7 @@ namespace PSD.PSDGamepkg
                                 if (n == 0)
                                 {
                                     //rvAlls[ut] = c;
-                                    string allTux = string.Join(",", Board.Garden[ut].Tux);
+                                    //string allTux = string.Join(",", Board.Garden[ut].Tux);
                                     //g0ot += "," + ut + "," + c + "," + allTux;
                                     actual[ut] = Board.Garden[ut].Tux.ToList();
                                 }
@@ -3544,7 +3512,7 @@ namespace PSD.PSDGamepkg
                         for (int i = 1; i < args.Length; i += 3)
                         {
                             char position = args[i][0];
-                            ushort old = ushort.Parse(args[i + 1]);
+                            //ushort old = ushort.Parse(args[i + 1]);
                             ushort to = ushort.Parse(args[i + 2]);
                             Player py;
                             if (to == 0)
@@ -3577,7 +3545,7 @@ namespace PSD.PSDGamepkg
                 case "G0ON":
                     for (int idx = 1; idx < args.Length;)
                     {
-                        string fromZone = args[idx];
+                        //string fromZone = args[idx];
                         string cardType = args[idx + 1];
                         int cnt = int.Parse(args[idx + 2]);
                         if (cnt > 0)

@@ -1916,32 +1916,32 @@ namespace PSD.PSDGamepkg.JNS
         #endregion Package 5#
 
         #region Package 6# - YINN
-        public void GI01Debut()
+        public void GIT1Debut()
         {
             if (XI.Board.Supporter.IsValidPlayer())
                 XI.RaiseGMessage("G0IA," + XI.Board.Supporter.Uid + ",1,1");
         }
-        public void GI01WinEff()
+        public void GIT1WinEff()
         {
             List<ushort> friends = XI.Board.Garden.Values.Where(p => p.IsAlive && p.Team ==
                 XI.Board.Rounder.Team && p.Uid != XI.Board.Rounder.Team).Select(p => p.Uid).ToList();
             if (friends.Count > 0)
                 XI.RaiseGMessage("G0DH," + string.Join(",", friends.Select(p => p + ",0,1")));
         }
-        public void GI01LoseEff()
+        public void GIT1LoseEff()
         {
             Player rd = XI.Board.Rounder;
-            Harm("GI01", rd, 3);
+            Harm("GIT1", rd, 3);
             if (rd.HasAnyEquips())
             {
                 string input = XI.AsyncInput(rd.Uid, "#须弃置的,Q1(p" + string.Join("p",
-                    rd.ListOutAllEquips()) + ")", "GI01LoseEff", "0");
+                    rd.ListOutAllEquips()) + ")", "GIT1LoseEff", "0");
                 ushort which = ushort.Parse(input);
                 XI.RaiseGMessage("G0QZ," + rd.Uid + "," + which);
                 XI.RaiseGMessage("G0DH," + rd.Uid + ",0,1");
             }
         }
-        public bool GI01ConsumeValid(Player player, int consumeType, int type, string fuse)
+        public bool GIT1ConsumeValid(Player player, int consumeType, int type, string fuse)
         {
             if (consumeType == 0)
             {
@@ -1958,7 +1958,7 @@ namespace PSD.PSDGamepkg.JNS
             }
             return false;
         }
-        public void GI01ConsumeAction(Player player, int consumeType, int type, string fuse, string argst)
+        public void GIT1ConsumeAction(Player player, int consumeType, int type, string fuse, string argst)
         {
             if (type == 0)
             {
@@ -1975,64 +1975,100 @@ namespace PSD.PSDGamepkg.JNS
             else if (type == 1)
                 XI.RaiseGMessage("G0DH," + player.Uid + ",1,1");
         }
-        public void GI04IncrAction(Player player)
+        public void GIT2WinEff()
+        {
+            if (XI.Board.Hinder.IsValidPlayer())
+                Harm("GIT2", XI.Board.Hinder, 3);
+        }
+        public void GIT2LoseEff()
+        {
+            Harm("GIT2", XI.Board.Rounder, 3);
+        }
+        public bool GIT2ConsumeValid(Player player, int consumeType, int type, string fuse)
+        {
+            if (consumeType == 0 && player.Tux.Count >= 2)
+            {
+                Tux tp01 = XI.LibTuple.TL.EncodeTuxCode("TP01");
+                return tp01.Bribe(player, type, fuse) && tp01.Valid(player, type, fuse);
+            }
+            else return false;
+        }
+        public void GIT2ConsumeAction(Player player, int consumeType, int type, string fuse, string argst)
+        {
+            XI.RaiseGMessage("G0CC," + player.Uid + ",0," + player.Uid +
+                ",TP01," + argst + ";" + type + "," + fuse);
+        }
+        public string GIT2ConsumeInput(Player player, int consumeType, int type, string fuse, string prev)
+        {
+            if (consumeType == 0 && prev == "")
+            {
+                List<ushort> tuxes = player.Tux.Where(p => XI.LibTuple.TL.DecodeTux(p) != null &&
+                    XI.LibTuple.TL.DecodeTux(p).Type == Tux.TuxType.TP).ToList();
+                if (tuxes.Count >= 2)
+                    return "/Q2(p" + string.Join("p", tuxes) + ")";
+                else
+                    return "";
+            }
+            else return "";
+        }
+        public void GIT4IncrAction(Player player)
         {
             XI.RaiseGMessage("G0IA," + player.Uid + ",0,1");
         }
-        public void GI04DecrAction(Player player)
+        public void GIT4DecrAction(Player player)
         {
             XI.RaiseGMessage("G0OA," + player.Uid + ",0,1");
         }
-        public void GI04Debut()
+        public void GIT4Debut()
         {
             XI.RaiseGMessage("G0TT," + XI.Board.Rounder.Uid);
             int val = (XI.Board.DiceValue + 1) / 2;
-            ushort x = XI.LibTuple.ML.Encode("GI04");
+            ushort x = XI.LibTuple.ML.Encode("GIT4");
             if (x != 0)
                 XI.RaiseGMessage("G0IB," + x + "," + val);
         }
-        public void GI04WinEff()
+        public void GIT4WinEff()
         {
             if (XI.Board.Hinder.IsValidPlayer())
-                Harm("GI04", XI.Board.Hinder, 2);
+                Harm("GIT4", XI.Board.Hinder, 2);
         }
-        public void GI04LoseEff()
+        public void GIT4LoseEff()
         {
             if (XI.Board.Supporter.IsValidPlayer())
-                Harm("GI04", new Player[] { XI.Board.Rounder, XI.Board.Supporter }, 2);
+                Harm("GIT4", new Player[] { XI.Board.Rounder, XI.Board.Supporter }, 2);
             else
-                Harm("GI04", XI.Board.Rounder, 2);
+                Harm("GIT4", XI.Board.Rounder, 2);
         }
-        public void GI05Debut()
+        public void GIT5Debut()
         {
-            ushort gi05 = XI.LibTuple.ML.Encode("GI05");
+            ushort git5 = XI.LibTuple.ML.Encode("GIT5");
             int n = XI.Board.Garden.Values.Count(p => p.IsAlive);
-            if (gi05 != 0)
-                XI.RaiseGMessage("G0IB," + gi05 + "," + n);
+            if (git5 != 0)
+                XI.RaiseGMessage("G0IB," + git5 + "," + n);
         }
-        public void GI05ConsumeAction(Player player, int consumeType, int type, string fuse, string argst)
+        public void GIT5ConsumeAction(Player player, int consumeType, int type, string fuse, string argst)
         {
             if (consumeType == 0)
             {
-                ushort gi05 = XI.LibTuple.ML.Encode("GI05");
+                ushort git5 = XI.LibTuple.ML.Encode("GIT5");
                 int n = XI.Board.Garden.Values.Count(p => p.IsAlive);
-                if (gi05 != 0)
-                    XI.RaiseGMessage("G0IB," + gi05 + "," + n);
+                if (git5 != 0)
+                    XI.RaiseGMessage("G0IB," + git5 + "," + n);
             }
         }
-        public void GI05WinEff()
+        public void GIT5WinEff()
         {
-            Harm("GI05", XI.Board.Garden.Values.Where(p => p.IsAlive && p.Team == XI.Board.Rounder.OppTeam), 1);
+            Harm("GIT5", XI.Board.Garden.Values.Where(p => p.IsAlive && p.Team == XI.Board.Rounder.OppTeam), 1);
         }
-        public void GI05LoseEff()
+        public void GIT5LoseEff()
         {
-            Harm("GI05", XI.Board.Garden.Values.Where(p => p.IsAlive && p.Team == XI.Board.Rounder.Team), 1);
+            Harm("GIT5", XI.Board.Garden.Values.Where(p => p.IsAlive && p.Team == XI.Board.Rounder.Team), 1);
         }
-        public bool GI06ConsumeValid(Player player, int consumeType, int type, string fuse)
+        public bool GIT6ConsumeValid(Player player, int consumeType, int type, string fuse)
         {
             if (consumeType == 0)
             {
-                Monster mon = XI.LibTuple.ML.Decode(XI.LibTuple.ML.Encode("GI05"));
+                Monster mon = XI.LibTuple.ML.Decode(XI.LibTuple.ML.Encode("GIT5"));
                 return mon != null && XI.Board.IsAttendWar(player) && mon.RAMInt == 0;
             }
             else if (consumeType == 2)
@@ -2044,11 +2080,11 @@ namespace PSD.PSDGamepkg.JNS
             }
             return false;
         }
-        public void GI06ConsumeAction(Player player, int consumeType, int type, string fuse, string argst)
+        public void GIT6ConsumeAction(Player player, int consumeType, int type, string fuse, string argst)
         {
             if (consumeType == 0)
             {
-                Monster mon = XI.LibTuple.ML.Decode(XI.LibTuple.ML.Encode("GI05"));
+                Monster mon = XI.LibTuple.ML.Decode(XI.LibTuple.ML.Encode("GIT5"));
                 mon.RAMInt = 1;
                 XI.RaiseGMessage("G0IX," + player.Uid + ",2");
             }
@@ -2056,29 +2092,29 @@ namespace PSD.PSDGamepkg.JNS
             {
                 string[] g0cc = Algo.Substring(fuse, 0, fuse.IndexOf(';')).Split(',');
                 ushort trigger = ushort.Parse(g0cc[3]);
-                Harm("GI06", XI.Board.Garden[trigger], 2);
+                Harm("GIT6", XI.Board.Garden[trigger], 2);
             }
         }
-        public void GI06WinEff()
+        public void GIT6WinEff()
         {
             if (XI.Board.Hinder.IsValidPlayer())
             {
                 XI.RaiseGMessage("G0TT," + XI.Board.Hinder.Uid);
-                Harm("GI06", XI.Board.Hinder, XI.Board.DiceValue);
+                Harm("GIT6", XI.Board.Hinder, XI.Board.DiceValue);
             }
         }
-        public void GI06LoseEff()
+        public void GIT6LoseEff()
         {
             XI.RaiseGMessage("G0TT," + XI.Board.Rounder.Uid);
-            Harm("GI06", XI.Board.Rounder, XI.Board.DiceValue);
+            Harm("GIT6", XI.Board.Rounder, XI.Board.DiceValue);
         }
-        public bool GI07ConsumeValid(Player player, int consumeType, int type, string fuse)
+        public bool GIT7ConsumeValid(Player player, int consumeType, int type, string fuse)
         {
             if (consumeType == 0)
                 return XI.Board.IsAttendWar(player) && player.Tux.Count != player.TuxLimit;
             return false;
         }
-        public void GI07ConsumeAction(Player player, int consumeType, int type, string fuse, string argst)
+        public void GIT7ConsumeAction(Player player, int consumeType, int type, string fuse, string argst)
         {
             if (consumeType == 0)
             {
@@ -2089,7 +2125,7 @@ namespace PSD.PSDGamepkg.JNS
                     XI.RaiseGMessage("G0IA," + player.Uid + ",1," + delta);
             }
         }
-        public string GI07ConsumeInput(Player player, int consumeType, int type, string fuse, string prev)
+        public string GIT7ConsumeInput(Player player, int consumeType, int type, string fuse, string prev)
         {
             if (consumeType == 0)
             {
@@ -2103,29 +2139,29 @@ namespace PSD.PSDGamepkg.JNS
             }
             return "";
         }
-        public void GI07WinEff()
+        public void GIT7WinEff()
         {
             List<Player> invs = XI.Board.Garden.Values.Where(p => p.IsAlive &&
                 p.Tux.Count > 0 && p.Team == XI.Board.Rounder.OppTeam).ToList();
             if (invs.Count > 0)
-                Harm("GI07", invs, invs.Select(p => p.Tux.Count).ToList());
+                Harm("GIT7", invs, invs.Select(p => p.Tux.Count).ToList());
         }
-        public void GI07LoseEff()
+        public void GIT7LoseEff()
         {
             List<Player> invs = XI.Board.Garden.Values.Where(p => p.IsAlive &&
                 p.Tux.Count > 0 && p.Team == XI.Board.Rounder.Team).ToList();
             if (invs.Count > 0)
-                Harm("GI07", invs, invs.Select(p => p.Tux.Count).ToList());
+                Harm("GIT7", invs, invs.Select(p => p.Tux.Count).ToList());
         }
-        public void GI08Debut()
+        public void GIT8Debut()
         {
-            ushort gi08 = XI.LibTuple.ML.Encode("GI08");
+            ushort git8 = XI.LibTuple.ML.Encode("GIT8");
             XI.RaiseGMessage("G0TT," + XI.Board.Rounder.Uid);
             int n = XI.Board.DiceValue / 2;
-            if (gi08 != 0 && n > 0)
-                XI.RaiseGMessage("G0IW," + gi08 + "," + n);
+            if (git8 != 0 && n > 0)
+                XI.RaiseGMessage("G0IW," + git8 + "," + n);
         }
-        public bool GI08ConsumeValid(Player player, int consumeType, int type, string fuse)
+        public bool GIT8ConsumeValid(Player player, int consumeType, int type, string fuse)
         {
             if (consumeType == 0 && XI.Board.RoundIN == "R" + player.Uid + "GR")
             {
@@ -2144,7 +2180,7 @@ namespace PSD.PSDGamepkg.JNS
                 }
                 else if (type == 2)
                 {
-                    Monster mon = XI.LibTuple.ML.Decode(XI.LibTuple.ML.Encode("GI08"));
+                    Monster mon = XI.LibTuple.ML.Decode(XI.LibTuple.ML.Encode("GIT8"));
                     string[] g1ck = fuse.Split(',');
                     return mon != null && mon.RAMInt >= 2 && g1ck[1] == player.Uid.ToString() &&
                         g1ck[2] == "GT08Consume" && g1ck[3] == "0";
@@ -2153,9 +2189,9 @@ namespace PSD.PSDGamepkg.JNS
             }
             else return false;
         }
-        public void GI08ConsumeAction(Player player, int consumeType, int type, string fuse, string argst)
+        public void GIT8ConsumeAction(Player player, int consumeType, int type, string fuse, string argst)
         {
-            Monster mon = XI.LibTuple.ML.Decode(XI.LibTuple.ML.Encode("GI08"));
+            Monster mon = XI.LibTuple.ML.Decode(XI.LibTuple.ML.Encode("GIT8"));
             if (mon != null && consumeType == 0)
             {
                 if (type == 0 || type == 1)
@@ -2170,7 +2206,7 @@ namespace PSD.PSDGamepkg.JNS
                 }
             }
         }
-        public void GI08WinEff()
+        public void GIT8WinEff()
         {
             Player py = XI.Board.Rounder;
             List<ushort> invs = XI.Board.Garden.Values.Where(p => p.Team == py.OppTeam &&
@@ -2178,19 +2214,19 @@ namespace PSD.PSDGamepkg.JNS
             if (invs.Count > 0)
             {
                 string opt = XI.AsyncInput(py.Uid, "#抽取,T1(p" +
-                    string.Join("p", invs) + ")", "GI08WinEff", "0");
+                    string.Join("p", invs) + ")", "GIT8WinEff", "0");
                 if (opt != VI.CinSentinel)
                 {
                     ushort tar = ushort.Parse(opt);
                     TargetPlayer(py.Uid, tar);
                     XI.AsyncInput(py.Uid, "(" + Algo.RepeatString("p0",
-                        XI.Board.Garden[tar].Tux.Count) + ")", "GI08WinEff", "1");
+                        XI.Board.Garden[tar].Tux.Count) + ")", "GIT8WinEff", "1");
                     XI.RaiseGMessage("G0HQ,0," + py.Uid + "," + tar + ",2,1");
-                    Harm("GI08", XI.Board.Garden[tar], 2);
+                    Harm("GIT8", XI.Board.Garden[tar], 2);
                 }
             }
         }
-        public void GI08LoseEff()
+        public void GIT8LoseEff()
         {
             Player py = XI.Board.Hinder;
             if (!py.IsValidPlayer())
@@ -2200,43 +2236,43 @@ namespace PSD.PSDGamepkg.JNS
             if (invs.Count > 0)
             {
                 string opt = XI.AsyncInput(py.Uid, "#抽取,T1(p" +
-                    string.Join("p", invs) + ")", "GI08LoseEff", "0");
+                    string.Join("p", invs) + ")", "GIT8LoseEff", "0");
                 if (opt != VI.CinSentinel)
                 {
                     ushort tar = ushort.Parse(opt);
                     TargetPlayer(py.Uid, tar);
                     XI.AsyncInput(py.Uid, "(" + Algo.RepeatString("p0",
-                        XI.Board.Garden[tar].Tux.Count) + ")", "GI08LoseEff", "1");
+                        XI.Board.Garden[tar].Tux.Count) + ")", "GIT8LoseEff", "1");
                     XI.RaiseGMessage("G0HQ,0," + py.Uid + "," + tar + ",2,1");
-                    Harm("GI08", XI.Board.Garden[tar], 2);
+                    Harm("GIT8", XI.Board.Garden[tar], 2);
                 }
             }
         }
         #endregion Package 6# - YINN
         #region Package 6# - SOLARIS
-        public void GY01IncrAction(Player player)
+        public void GYT1IncrAction(Player player)
         {
             XI.RaiseGMessage("G0IA," + player.Uid + ",0,1");
             XI.RaiseGMessage("G0IX," + player.Uid + ",0,2");
         }
-        public void GY01DecrAction(Player player)
+        public void GYT1DecrAction(Player player)
         {
             XI.RaiseGMessage("G0OA," + player.Uid + ",0,1");
             XI.RaiseGMessage("G0OX," + player.Uid + ",0,2");
         }
-        public void GY01Debut()
+        public void GYT1Debut()
         {
             List<ushort> invs = XI.Board.Garden.Values.Where(p => p.IsAlive &&
                 p.Tux.Count < p.TuxLimit).Select(p => p.Uid).ToList();
             if (invs.Count > 0)
                 XI.RaiseGMessage("G0DH," + string.Join(",", invs.Select(p => p + ",0,2")));
         }
-        public void GY01WinEff()
+        public void GYT1WinEff()
         {
             Player rd = XI.Board.Rounder;
             // int n = Math.Min(3, XI.Board.Garden.Values.Count(p => p.IsAlive));
             // string opt = XI.AsyncInput(rd.Uid, "#获得,/F1" + StdRunes() + ",#获得标记,/T1" +
-            //     (n > 1 ? ("~" + n) : "") + AAlls(rd), "GY01WinEff", "0");
+            //     (n > 1 ? ("~" + n) : "") + AAlls(rd), "GYT1WinEff", "0");
             // if (opt != VI.CinSentinel && !opt.StartsWith("/"))
             // {
             //     string[] parts = opt.Split(',');
@@ -2249,22 +2285,23 @@ namespace PSD.PSDGamepkg.JNS
             while (pts > 0 && invs.Count > 0)
             {
                 string optTar = XI.AsyncInput(rd.Uid, "#获得标记,/T1(p" +
-                    string.Join("p", invs) + ")", "GY01WinEff", "0");
+                    string.Join("p", invs) + ")", "GYT1WinEff", "0");
                 if (optTar.StartsWith("/"))
                     break;
                 else if (optTar != VI.CinSentinel)
                 {
-                    string optRune = XI.AsyncInput(rd.Uid, "#获得标记,/F1" + StdRunes(), "GY01WinEff", "1");
+                    string optRune = XI.AsyncInput(rd.Uid, "#获得标记,/F1" + StdRunes(), "GYT1WinEff", "1");
                     if (optRune != VI.CinSentinel && !optRune.StartsWith("/"))
                     {
                         ushort tar = ushort.Parse(optTar);
+                        TargetPlayer(rd.Uid, tar);
                         invs.Remove(tar); --pts;
                         XI.RaiseGMessage("G0IF," + optTar + "," + optRune);
                     }
                 }
             }
         }
-        public void GY01LoseEff()
+        public void GYT1LoseEff()
         {
             if (!XI.Board.Hinder.IsValidPlayer())
                 return;
@@ -2274,22 +2311,23 @@ namespace PSD.PSDGamepkg.JNS
             while (pts > 0 && invs.Count > 0)
             {
                 string optTar = XI.AsyncInput(op.Uid, "#获得标记,/T1(p" +
-                    string.Join("p", invs) + ")", "GY01LoseEff", "0");
+                    string.Join("p", invs) + ")", "GYT1LoseEff", "0");
                 if (optTar.StartsWith("/"))
                     break;
                 else if (optTar != VI.CinSentinel)
                 {
-                    string optRune = XI.AsyncInput(op.Uid, "#获得标记,/F1" + StdRunes(), "GY01LoseEff", "1");
+                    string optRune = XI.AsyncInput(op.Uid, "#获得标记,/F1" + StdRunes(), "GYT1LoseEff", "1");
                     if (optRune != VI.CinSentinel && !optRune.StartsWith("/"))
                     {
                         ushort tar = ushort.Parse(optTar);
+                        TargetPlayer(op.Uid, tar);
                         invs.Remove(tar); --pts;
                         XI.RaiseGMessage("G0IF," + optTar + "," + optRune);
                     }
                 }
             }
         }
-        public bool GY02ConsumeValid(Player player, int consumeType, int type, string fuse)
+        public bool GYT2ConsumeValid(Player player, int consumeType, int type, string fuse)
         {
             if (consumeType == 0)
             {
@@ -2299,7 +2337,7 @@ namespace PSD.PSDGamepkg.JNS
             }
             else return false;
         }
-        public void GY02ConsumeAction(Player player, int consumeType, int type, string fuse, string argst)
+        public void GYT2ConsumeAction(Player player, int consumeType, int type, string fuse, string argst)
         {
             if (consumeType == 0)
             {
@@ -2310,28 +2348,28 @@ namespace PSD.PSDGamepkg.JNS
                 XI.RaiseGMessage("G0IF," + player.Uid + ",6");
             }
         }
-        public void GY02WinEff()
+        public void GYT2WinEff()
         {
             if (XI.Board.Hinder.IsValidPlayer())
                 XI.RaiseGMessage("G0IF," + XI.Board.Hinder.Uid + ",5");
         }
-        public void GY02LoseEff()
+        public void GYT2LoseEff()
         {
             XI.RaiseGMessage("G0IF," + XI.Board.Rounder.Uid + ",5");
         }
-        public void GY03IncrAction(Player player)
+        public void GYT3IncrAction(Player player)
         {
             XI.RaiseGMessage("G0IA," + player.Uid + ",0,1");
             XI.RaiseGMessage("G0IX," + player.Uid + ",0,1");
             ++player.TuxLimit;
         }
-        public void GY03DecrAction(Player player)
+        public void GYT3DecrAction(Player player)
         {
             XI.RaiseGMessage("G0OA," + player.Uid + ",0,1");
             XI.RaiseGMessage("G0OX," + player.Uid + ",0,1");
             --player.TuxLimit;
         }
-        public void GY03Debut()
+        public void GYT3Debut()
         {
             string msg = string.Join(",", XI.Board.Garden.Values.Where(p =>
                 p.IsAlive && p.Tux.Count != 3).Select(p => p.Tux.Count > 3 ?
@@ -2339,16 +2377,16 @@ namespace PSD.PSDGamepkg.JNS
             if (!string.IsNullOrEmpty(msg))
                 XI.RaiseGMessage("G0DH," + msg);
         }
-        public void GY03WinEff()
+        public void GYT3WinEff()
         {
-            Artiad.Procedure.ObtainAndAllocateTux(XI, VI, XI.Board.Rounder, 3, "GY03WinEff", "0");
+            Artiad.Procedure.ObtainAndAllocateTux(XI, VI, XI.Board.Rounder, 3, "GYT3WinEff", "0");
         }
-        public void GY03LoseEff()
+        public void GYT3LoseEff()
         {
             if (XI.Board.Hinder.IsValidPlayer())
-                Artiad.Procedure.ObtainAndAllocateTux(XI, VI, XI.Board.Hinder, 3, "GY03LoseEff", "0");
+                Artiad.Procedure.ObtainAndAllocateTux(XI, VI, XI.Board.Hinder, 3, "GYT3LoseEff", "0");
         }
-        public void GY04Debut()
+        public void GYT4Debut()
         {
             var pos = XI.LibTuple.RL.GetFullPositive();
             foreach (Player player in XI.Board.Garden.Values)
@@ -2361,7 +2399,7 @@ namespace PSD.PSDGamepkg.JNS
                 }
             }
         }
-        public void GY04WinEff()
+        public void GYT4WinEff()
         {
             Player rd = XI.Board.Rounder;
             List<ushort> enes = XI.Board.Garden.Values.Where(p => p.IsAlive &&
@@ -2369,23 +2407,24 @@ namespace PSD.PSDGamepkg.JNS
             if (enes.Count > 0)
             {
                 string first = XI.AsyncInput(rd.Uid, "#弃牌,T1(p" +
-                    string.Join("p", enes) + ")", "GY04WinEff", "0");
+                    string.Join("p", enes) + ")", "GYT4WinEff", "0");
                 ushort who = ushort.Parse(first);
                 Player tar = XI.Board.Garden[who];
+                TargetPlayer(rd.Uid, who);
                 string second = XI.AsyncInput(rd.Uid, string.Format("#弃置{0}的,C1(p{1})", XI.DisplayPlayer(
-                    who), string.Join("p", tar.ListOutAllCardsWithEncrypt())), "GY04WinEff", "1");
+                    who), string.Join("p", tar.ListOutAllCardsWithEncrypt())), "GYT4WinEff", "1");
                 ushort card = ushort.Parse(second);
                 if (card == 0)
                     XI.RaiseGMessage("G0DH," + who + ",2,1");
                 else
                     XI.RaiseGMessage("G0QZ," + who + "," + card);
                 string third = XI.AsyncInput(rd.Uid, string.Format("#令{0}获得的,F1(p{1})", XI.DisplayPlayer(
-                    who), string.Join("p", XI.LibTuple.RL.GetFullNegative())), "GY04WinEff", "2");
+                    who), string.Join("p", XI.LibTuple.RL.GetFullNegative())), "GYT4WinEff", "2");
                 ushort fw = ushort.Parse(third);
                 XI.RaiseGMessage("G0IF," + who + "," + fw);
             }
         }
-        public void GY04LoseEff()
+        public void GYT4LoseEff()
         {
             Player rd = XI.Board.Hinder;
             if (rd.IsValidPlayer())
@@ -2395,24 +2434,25 @@ namespace PSD.PSDGamepkg.JNS
                 if (enes.Count > 0)
                 {
                     string first = XI.AsyncInput(rd.Uid, "#弃牌,T1(p" +
-                        string.Join("p", enes) + ")", "GY04LoseEff", "0");
+                        string.Join("p", enes) + ")", "GYT4LoseEff", "0");
                     ushort who = ushort.Parse(first);
+                    TargetPlayer(rd.Uid, who);
                     Player tar = XI.Board.Garden[who];
                     string second = XI.AsyncInput(rd.Uid, string.Format("#弃置{0}的,C1(p{1})", XI.DisplayPlayer(
-                        who), string.Join("p", tar.ListOutAllCardsWithEncrypt())), "GY04LoseEff", "1");
+                        who), string.Join("p", tar.ListOutAllCardsWithEncrypt())), "GYT4LoseEff", "1");
                     ushort card = ushort.Parse(second);
                     if (card == 0)
                         XI.RaiseGMessage("G0DH," + who + ",2,1");
                     else
                         XI.RaiseGMessage("G0QZ," + who + "," + card);
                     string third = XI.AsyncInput(rd.Uid, string.Format("#您获得的,F1(p{0})",
-                        string.Join("p", XI.LibTuple.RL.GetFullPositive())), "GY04LoseEff", "2");
+                        string.Join("p", XI.LibTuple.RL.GetFullPositive())), "GYT4LoseEff", "2");
                     ushort fw = ushort.Parse(third);
                     XI.RaiseGMessage("G0IF," + rd.Uid + "," + fw);
                 }
             }
         }
-        public bool GY04ConsumeValid(Player player, int consumeType, int type, string fuse)
+        public bool GYT4ConsumeValid(Player player, int consumeType, int type, string fuse)
         {
             if (consumeType == 0)
             {
@@ -2422,33 +2462,33 @@ namespace PSD.PSDGamepkg.JNS
             }
             return false;
         }
-        public void GY04ConsumeAction(Player player, int consumeType, int type, string fuse, string argst)
+        public void GYT4ConsumeAction(Player player, int consumeType, int type, string fuse, string argst)
         {
             XI.RaiseGMessage("G0IF," + player.Uid + "," + argst);
         }
-        public string GY04ConsumeInput(Player player, int consumeType, int type, string fuse, string prev)
+        public string GYT4ConsumeInput(Player player, int consumeType, int type, string fuse, string prev)
         {
             if (consumeType == 0 && prev == "")
                 return "/F1(p" + string.Join("p", XI.LibTuple.RL.GetFullPositive()) + ")";
             else
                 return "";
         }
-        public void GY05IncrAction(Player player)
+        public void GYT5IncrAction(Player player)
         {
             XI.RaiseGMessage("G0IX," + player.Uid + ",0,1");
         }
-        public void GY05DecrAction(Player player)
+        public void GYT5DecrAction(Player player)
         {
             XI.RaiseGMessage("G0OX," + player.Uid + ",0,1");
         }
-        public void GY05Debut()
+        public void GYT5Debut()
         {
             string msg = string.Join(",", XI.Board.Garden.Values.Where(p =>
                 p.IsAlive && p.Tux.Count > 0).Select(p => p.Uid + ",2,1"));
             if (!string.IsNullOrEmpty(msg))
                 XI.RaiseGMessage("G0DH," + msg);
         }
-        public void GY05WinEff()
+        public void GYT5WinEff()
         {
             Player py = XI.Board.Rounder;
             List<ushort> invs = XI.Board.Garden.Values.Where(p => p.Team == py.OppTeam &&
@@ -2456,15 +2496,16 @@ namespace PSD.PSDGamepkg.JNS
             if (invs.Count > 0)
             {
                 string target = XI.AsyncInput(py.Uid, "#弃置手牌,T1(p" +
-                    string.Join("p", invs) + ")", "GY05WinEff", "0");
+                    string.Join("p", invs) + ")", "GYT5WinEff", "0");
                 if (target != VI.CinSentinel)
                 {
                     ushort who = ushort.Parse(target);
+                    TargetPlayer(py.Uid, who);
                     XI.RaiseGMessage("G0DH," + who + ",2,1");
                 }
             }
         }
-        public void GY05LoseEff()
+        public void GYT5LoseEff()
         {
             Player py = XI.Board.Hinder;
             if (py.IsValidPlayer())
@@ -2474,24 +2515,25 @@ namespace PSD.PSDGamepkg.JNS
                 if (invs.Count > 0)
                 {
                     string target = XI.AsyncInput(py.Uid, "#弃置手牌,T1(p" +
-                        string.Join("p", invs) + ")", "GY05LoseEff", "0");
+                        string.Join("p", invs) + ")", "GYT5LoseEff", "0");
                     if (target != VI.CinSentinel)
                     {
                         ushort who = ushort.Parse(target);
+                        TargetPlayer(py.Uid, who);
                         XI.RaiseGMessage("G0DH," + who + ",2,1");
                     }
                 }
             }
         }
-        public void GY06IncrAction(Player player)
+        public void GYT6IncrAction(Player player)
         {
             XI.RaiseGMessage("G0IA," + player.Uid + ",0,1");
         }
-        public void GY06DecrAction(Player player)
+        public void GYT6DecrAction(Player player)
         {
             XI.RaiseGMessage("G0OA," + player.Uid + ",0,1");
         }
-        public void GY06Debut()
+        public void GYT6Debut()
         {
             List<Player> pys = XI.Board.Garden.Values.Where(p => p.IsAlive &&
                 !XI.Board.IsAttendWar(p) && p.GetEquipCount() > 0).ToList();
@@ -2502,18 +2544,19 @@ namespace PSD.PSDGamepkg.JNS
             foreach (var pair in inputs)
                 XI.RaiseGMessage("G0QZ," + pair.Key + "," + pair.Value);
         }
-        public void GY06WinEff()
+        public void GYT6WinEff()
         {
             Player op = XI.Board.Opponent;
             if (XI.Board.Garden.Values.Any(p => p.Team == op.Team && p.IsAlive && p.GetEquipCount() > 0))
             {
                 string optTar = XI.AsyncInput(op.Uid, "#弃置装备,T1" + FormatPlayers(p => p.IsAlive &&
-                    p.Team == op.Team && p.GetEquipCount() > 0), "GY06WinEff", "0");
+                    p.Team == op.Team && p.GetEquipCount() > 0), "GYT6WinEff", "0");
                 if (optTar != VI.CinSentinel)
                 {
                     ushort tar = ushort.Parse(optTar);
+                    TargetPlayer(op.Uid, tar);
                     string optUt = XI.AsyncInput(op.Uid, "#弃置装备,Q1(p" + string.Join("p",
-                        XI.Board.Garden[tar].ListOutAllEquips()) + ")", "GY06WinEff", "1");
+                        XI.Board.Garden[tar].ListOutAllEquips()) + ")", "GYT6WinEff", "1");
                     if (optUt != VI.CinSentinel)
                         XI.RaiseGMessage("G0QZ," + tar + "," + optUt);
                 }
@@ -2521,18 +2564,19 @@ namespace PSD.PSDGamepkg.JNS
             else if (XI.Board.Hinder.IsValidPlayer())
                 XI.RaiseGMessage("G0IF," + XI.Board.Hinder.Uid + ",5");
         }
-        public void GY06LoseEff()
+        public void GYT6LoseEff()
         {
             Player rd = XI.Board.Rounder;
             if (XI.Board.Garden.Values.Any(p => p.Team == rd.Team && p.IsAlive && p.GetEquipCount() > 0))
             {
                 string optTar = XI.AsyncInput(rd.Uid, "#弃置装备,T1" + FormatPlayers(p => p.IsAlive &&
-                    p.Team == rd.Team && p.GetEquipCount() > 0), "GY06LoseEff", "0");
+                    p.Team == rd.Team && p.GetEquipCount() > 0), "GYT6LoseEff", "0");
                 if (optTar != VI.CinSentinel)
                 {
                     ushort tar = ushort.Parse(optTar);
+                    TargetPlayer(rd.Uid, tar);
                     string optUt = XI.AsyncInput(rd.Uid, "#弃置装备,Q1(p" + string.Join("p",
-                        XI.Board.Garden[tar].ListOutAllEquips()) + ")", "GY06LoseEff", "1");
+                        XI.Board.Garden[tar].ListOutAllEquips()) + ")", "GYT6LoseEff", "1");
                     if (optUt != VI.CinSentinel)
                         XI.RaiseGMessage("G0QZ," + tar + "," + optUt);
                 }
@@ -2540,25 +2584,25 @@ namespace PSD.PSDGamepkg.JNS
             else
                 XI.RaiseGMessage("G0IF," + rd.Uid + ",5");
         }
-        public void GY07IncrAction(Player player)
+        public void GYT7IncrAction(Player player)
         {
             XI.RaiseGMessage("G0IX," + player.Uid + ",0,1");
         }
-        public void GY07DecrAction(Player player)
+        public void GYT7DecrAction(Player player)
         {
             XI.RaiseGMessage("G0OX," + player.Uid + ",0,1");
         }
-        public void GY07Debut()
+        public void GYT7Debut()
         {
             string msg = string.Join(",", XI.Board.Garden.Values.Where(p => p.IsAlive &&
                 p.Tux.Count > p.TuxLimit).Select(p => p.Uid + ",2," + (p.Tux.Count - p.TuxLimit)));
             if (!string.IsNullOrEmpty(msg))
                 XI.RaiseGMessage("G0DH," + msg);
         }
-        public void GY07WinEff()
+        public void GYT7WinEff()
         {
             Player py = XI.Board.Rounder;
-            string target = XI.AsyncInput(py.Uid, "#补牌,T1" + ATeammates(py), "GY07WinEff", "0");
+            string target = XI.AsyncInput(py.Uid, "#补牌,T1" + ATeammates(py), "GYT7WinEff", "0");
             if (target != VI.CinSentinel)
             {
                 ushort who = ushort.Parse(target);
@@ -2567,12 +2611,12 @@ namespace PSD.PSDGamepkg.JNS
                     XI.RaiseGMessage("G0DH," + who + ",0," + delta);
             }
         }
-        public void GY07LoseEff()
+        public void GYT7LoseEff()
         {
             Player py = XI.Board.Hinder;
             if (py.IsValidPlayer())
             {
-                string target = XI.AsyncInput(py.Uid, "#补牌,T1" + ATeammates(py), "GY07LoseEff", "0");
+                string target = XI.AsyncInput(py.Uid, "#补牌,T1" + ATeammates(py), "GYT7LoseEff", "0");
                 if (target != VI.CinSentinel)
                 {
                     ushort who = ushort.Parse(target);
@@ -2582,18 +2626,19 @@ namespace PSD.PSDGamepkg.JNS
                 }
             }
         }
-        public void GY08Debut()
+        public void GYT8Debut()
         {
             XI.Board.Garden.Values.Where(p => p.IsAlive).Select(p => p.Uid).ToList()
                 .ForEach(p => XI.RaiseGMessage("G0IF," + p + ",6"));
         }
-        public void GY08WinEff()
+        public void GYT8WinEff()
         {
             string optTar = XI.AsyncInput(XI.Board.Rounder.Uid,
-                "#掷骰判定,T1" + FormatPlayers(p => p.IsAlive), "GY08WinEff", "0");
+                "#掷骰判定,T1" + FormatPlayers(p => p.IsAlive), "GYT8WinEff", "0");
             if (optTar != VI.CinSentinel)
             {
                 ushort who = ushort.Parse(optTar);
+                TargetPlayer(XI.Board.Rounder.Uid, who);
                 XI.RaiseGMessage("G0TT," + who);
                 int value = XI.Board.DiceValue;
                 if (value > 4)
@@ -2602,15 +2647,16 @@ namespace PSD.PSDGamepkg.JNS
                     XI.RaiseGMessage("G0DH," + who + ",1," + (4 - value));
             }
         }
-        public void GY08LoseEff()
+        public void GYT8LoseEff()
         {
             if (XI.Board.Hinder.IsValidPlayer())
             {
                 string optTar = XI.AsyncInput(XI.Board.Hinder.Uid,
-                    "#掷骰判定,T1" + FormatPlayers(p => p.IsAlive), "GY08LoseEff", "0");
+                    "#掷骰判定,T1" + FormatPlayers(p => p.IsAlive), "GYT8LoseEff", "0");
                 if (optTar != VI.CinSentinel)
                 {
                     ushort who = ushort.Parse(optTar);
+                    TargetPlayer(XI.Board.Hinder.Uid, who);
                     XI.RaiseGMessage("G0TT," + who);
                     int value = XI.Board.DiceValue;
                     if (value > 4)
@@ -2713,8 +2759,6 @@ namespace PSD.PSDGamepkg.JNS
                     for (int i = 1; i < g0fi.Length; i += 3)
                     {
                         char ch = g0fi[i][0];
-                        ushort old = ushort.Parse(g0fi[i + 1]);
-                        ushort to = ushort.Parse(g0fi[i + 2]);
                         if (ch == 'S' || ch == 'H')
                             return true;
                     }

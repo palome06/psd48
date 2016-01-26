@@ -1363,7 +1363,7 @@ namespace PSD.PSDGamepkg.JNS
             else if (type == 2)
             {
                 player.RAMUshort = 0;
-                // TODO:Mark the target back.
+                // Mark the target back.
                 XI.RaiseGMessage("G0JM,R" + player.Uid + "ZZ");
             }
             else if (type == 3)
@@ -4331,16 +4331,14 @@ namespace PSD.PSDGamepkg.JNS
                 ushort who = ushort.Parse(g0on[idx]);
                 string cm = g0on[idx + 1];
                 int n = int.Parse(g0on[idx + 2]);
-                if (XI.Board.Garden.ContainsKey(who) && XI.Board.Garden[who].Team == player.OppTeam && cm == "C")
+                if (XI.Board.Garden.ContainsKey(who) && 
+                    XI.Board.Garden[who].Team == player.OppTeam && cm == "C")
                 {
-                    List<ushort> tuxes = Algo.TakeRange(g0on, idx + 3, idx + 3 + n)
-                        .Select(p => ushort.Parse(p)).Where(p => XI.Board.TuxDises.Contains(p)).ToList();
-                    foreach (ushort ut in tuxes)
-                    {
-                        Tux tux = XI.LibTuple.TL.DecodeTux(ut);
-                        if (tux != null && tux.Type == Tux.TuxType.TP)
-                            return true;
-                    }
+                    List<ushort> tuxes = Algo.TakeRange(g0on, idx + 3, idx + 3 + n).Select(
+                        p => ushort.Parse(p)).Where(p => XI.Board.TuxDises.Contains(p)).ToList();
+                    if (tuxes.Any(p => XI.LibTuple.TL.DecodeTux(p) != null &&
+                            XI.LibTuple.TL.DecodeTux(p).Type == Tux.TuxType.TP))
+                        return true;
                 }
                 idx += (3 + n);
             }
@@ -4365,6 +4363,13 @@ namespace PSD.PSDGamepkg.JNS
                     {
                         XI.RaiseGMessage("G2CN,0,1");
                         //XI.RaiseGMessage("G0HQ,2," + player.Uid + ",0,0," + ut);
+                        if (player.ExCards.Count >= 8)
+                        {
+                            string input = XI.AsyncInput(player.Uid, "#「龙晶」中替换,C1(p" +
+                                string.Join("p", player.ExCards) + ")", "JNT3801", "0");
+                            ushort sub = ushort.Parse(input);
+                            XI.RaiseGMessage("G0QZ," + player.Uid + "," + sub);
+                        }
                         XI.RaiseGMessage("G0ZB," + player.Uid + ",2,0," + which);
                         XI.Board.TuxDises.Remove(which);
                         tuxes.Remove(which); break;

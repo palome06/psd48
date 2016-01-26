@@ -380,9 +380,9 @@ namespace PSD.PSDGamepkg.JNS
         #region HL003 - YangTai
         public bool JNH0301Valid(Player player, int type, string fuse)
         {
-            return Artiad.Harm.Parse(fuse).Any(p => p.Who == player.Uid && p.N <= player.GetAllCardsCount() &&
-                !HPEvoMask.DECR_INVAO.IsSet(p.Mask) && !HPEvoMask.TERMIN_AT.IsSet(p.Mask)) &&
-                XI.Board.Garden.Values.Any(p => p.Uid != player.Uid && p.IsTared);
+            return Artiad.Harm.Parse(fuse).Any(p => p.Who == player.Uid && player.GetAllCardsCount() > 0 &&
+                p.N - 1 <= player.GetAllCardsCount() && !HPEvoMask.DECR_INVAO.IsSet(p.Mask) &&
+                !HPEvoMask.TERMIN_AT.IsSet(p.Mask)) && XI.Board.Garden.Values.Any(p => p.Uid != player.Uid && p.IsTared);
         }
         public void JNH0301Action(Player player, int type, string fuse, string argst)
         {
@@ -416,6 +416,7 @@ namespace PSD.PSDGamepkg.JNS
                         !HPEvoMask.TERMIN_AT.IsSet(harm.Mask))
                         n = harm.N;
                 }
+                if (--n == 0) n = 1;
                 return "/Q" + n + "(p" + string.Join("p", player.ListOutAllCards()) + ")";
             }
             else
@@ -658,7 +659,7 @@ namespace PSD.PSDGamepkg.JNS
         {
             string target = XI.AsyncInput(player.Uid, "#月神附身,T1" + AOthersTared(player) , "JNH0403", "0");
             ushort who = ushort.Parse(target);
-            // TODO: change the player as HL005
+            // change the player as HL005
             int orgHero = XI.Board.Garden[who].SelectHero;
             XI.RaiseGMessage("G0OY,0," + who);
             XI.RaiseGMessage("G0IY,0," + who + ",19005");
@@ -1938,31 +1939,13 @@ namespace PSD.PSDGamepkg.JNS
                 ushort second = ushort.Parse(g1cw[2]);
                 ushort provider = ushort.Parse(g1cw[3]);
                 Tux tux = XI.LibTuple.TL.EncodeTuxCode(g1cw[4]);
-
-                string last = null;
-                foreach (string tuxInfo in XI.Board.PendingTux)
+                ushort it = ushort.Parse(g1cw[5]);
+                // provider, second, it
+                if (Artiad.Procedure.LocustChangePendingTux(XI, provider, second, it))
                 {
-                    string[] parts = tuxInfo.Split(',');
-                    if (parts[1] == "G0CC")
-                        last = tuxInfo;
-                }
-                if (last != null)
-                {
-                    XI.Board.PendingTux.Remove(last);
-                    Player locuster = XI.Board.Garden[provider];
-                    ushort locustee = ushort.Parse(last.Split(',')[2]);
-                    bool b1 = locuster.IsAlive && player.IsAlive && tux.Valid(player, type, sktFuse);
-                    if (!b1)
-                        XI.RaiseGMessage("G0ON,10,C,1," + locustee);
-                    else
-                    {
-                        if ((tux.IsEq[sktInType] & 3) == 0)
-                            XI.RaiseGMessage("G0ON,10,C,1," + locustee);
-                        XI.Board.PendingTux.Enqueue(locuster.Uid + ",G0CC," + locustee);
-                    }
                     XI.RaiseGMessage("G2CL," + first + "," + g1cw[4]);
                     XI.InnerGMessage("G0CC," + provider + ",1," + second +
-                        "," + tux.Code + "," + locustee + ";" + sktInType + "," + sktFuse, 101);
+                        "," + tux.Code + "," + it + ";" + sktInType + "," + sktFuse, 101);
                 }
                 XI.InnerGMessage(cdFuse, 106);
             }

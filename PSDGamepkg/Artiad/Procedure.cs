@@ -193,5 +193,17 @@ namespace PSD.PSDGamepkg.Artiad
                 XI.RaiseGMessage("G2FU,3");
             } while (pops.Count > 0);
         }
+
+        public static bool LocustChangePendingTux(XI XI, ushort provider, ushort locuster, ushort locustee)
+        {
+            if (XI.Board.PendingTux.Contains(provider + ",G0CC," + locustee))
+            {
+                XI.Board.PendingTux.Remove(provider + ",G0CC," + locustee);
+                XI.Board.PendingTux.Enqueue(locuster + ",G0CC," + locustee);
+                return true;
+            }
+            else
+                return false;
+        }
     }
 }

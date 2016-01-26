@@ -305,7 +305,7 @@ namespace PSD.ClientZero
                     xic.zd.HeroAwakeAlias(SelectHero, Coss),
                     xic.zd.HeroFolderAlias(SelectHero, Coss), FolderCount);
             if (Fakeq.Count > 0)
-                Aps(sb, "其它配饰：{0}", xic.zd.TuxAs(Fakeq));
+                Aps(sb, "配饰：{0}", xic.zd.TuxAs(Fakeq));
             Aps(sb, "{0}", "***************");
             return sb.ToString();
         }

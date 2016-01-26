@@ -650,6 +650,7 @@
     <Resource Include="Resources\Card\Eve\SJT15.png" />
     <Resource Include="Resources\Card\Eve\SJT16.png" />
     <Resource Include="Resources\Card\Eve\SJT17.png" />
+    <Resource Include="Resources\Card\Eve\SJT19.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Card\Eve\SJH01.png" />
@@ -686,20 +687,21 @@
     <Resource Include="Resources\Card\NMB\GTH1.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Resources\Card\NMB\GI01.png" />
-    <Resource Include="Resources\Card\NMB\GI04.png" />
-    <Resource Include="Resources\Card\NMB\GI05.png" />
-    <Resource Include="Resources\Card\NMB\GI06.png" />
-	<Resource Include="Resources\Card\NMB\GI07.png" />
-	<Resource Include="Resources\Card\NMB\GI08.png" />
-	<Resource Include="Resources\Card\NMB\GY01.png" />
-	<Resource Include="Resources\Card\NMB\GY02.png" />
-	<Resource Include="Resources\Card\NMB\GY03.png" />
-	<Resource Include="Resources\Card\NMB\GY04.png" />
-	<Resource Include="Resources\Card\NMB\GY05.png" />
-	<Resource Include="Resources\Card\NMB\GY06.png" />
-	<Resource Include="Resources\Card\NMB\GY07.png" />
-	<Resource Include="Resources\Card\NMB\GY08.png" />
+    <Resource Include="Resources\Card\NMB\GIT1.png" />
+    <Resource Include="Resources\Card\NMB\GIT2.png" />
+    <Resource Include="Resources\Card\NMB\GIT4.png" />
+    <Resource Include="Resources\Card\NMB\GIT5.png" />
+    <Resource Include="Resources\Card\NMB\GIT6.png" />
+    <Resource Include="Resources\Card\NMB\GIT7.png" />
+    <Resource Include="Resources\Card\NMB\GIT8.png" />
+    <Resource Include="Resources\Card\NMB\GYT1.png" />
+    <Resource Include="Resources\Card\NMB\GYT2.png" />
+    <Resource Include="Resources\Card\NMB\GYT3.png" />
+    <Resource Include="Resources\Card\NMB\GYT4.png" />
+    <Resource Include="Resources\Card\NMB\GYT5.png" />
+    <Resource Include="Resources\Card\NMB\GYT6.png" />
+    <Resource Include="Resources\Card\NMB\GYT7.png" />
+    <Resource Include="Resources\Card\NMB\GYT8.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\PetsSnap\GFT3.png" />
@@ -726,20 +728,20 @@
     <Resource Include="Resources\PetsSnap\GTH1.png" />
   </ItemGroup>
   <ItemGroup>
-	<Resource Include="Resources\PetsSnap\GI01.png" />
-    <Resource Include="Resources\PetsSnap\GI04.png" />
-    <Resource Include="Resources\PetsSnap\GI05.png" />
-	<Resource Include="Resources\PetsSnap\GI06.png" />
-	<Resource Include="Resources\PetsSnap\GI07.png" />
-	<Resource Include="Resources\PetsSnap\GI08.png" />
-	<Resource Include="Resources\PetsSnap\GY01.png" />
-	<Resource Include="Resources\PetsSnap\GY02.png" />
-	<Resource Include="Resources\PetsSnap\GY03.png" />
-	<Resource Include="Resources\PetsSnap\GY04.png" />
-	<Resource Include="Resources\PetsSnap\GY05.png" />
-	<Resource Include="Resources\PetsSnap\GY06.png" />
-	<Resource Include="Resources\PetsSnap\GY07.png" />
-	<Resource Include="Resources\PetsSnap\GY08.png" />
+    <Resource Include="Resources\PetsSnap\GIT1.png" />
+    <Resource Include="Resources\PetsSnap\GIT4.png" />
+    <Resource Include="Resources\PetsSnap\GIT5.png" />
+    <Resource Include="Resources\PetsSnap\GIT6.png" />
+    <Resource Include="Resources\PetsSnap\GIT7.png" />
+    <Resource Include="Resources\PetsSnap\GIT8.png" />
+    <Resource Include="Resources\PetsSnap\GYT1.png" />
+    <Resource Include="Resources\PetsSnap\GYT2.png" />
+    <Resource Include="Resources\PetsSnap\GYT3.png" />
+    <Resource Include="Resources\PetsSnap\GYT4.png" />
+    <Resource Include="Resources\PetsSnap\GYT5.png" />
+    <Resource Include="Resources\PetsSnap\GYT6.png" />
+    <Resource Include="Resources\PetsSnap\GYT7.png" />
+    <Resource Include="Resources\PetsSnap\GYT8.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Card\Tux\JPT3.png" />

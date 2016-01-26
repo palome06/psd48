@@ -280,7 +280,7 @@ namespace PSD.ClientAo
         public AoField(PilesBar pb, Base.LibGroup libGroup)
         {
             this.pb = pb;
-            // TODO: Tuple only initialize once.
+            // Tuple only initialize once.
             Tuple = libGroup;
 
             TuxCount = 0; MonCount = 0; EveCount = 0;

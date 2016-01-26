@@ -41,18 +41,25 @@ namespace PSD.Base.Card
         //public bool IsSelfType { private set; get; }
 
         public delegate void ActionDelegate(Player player, int type, string fuse, string argst);
+        public delegate void VestigeDelegate(Player player, int type, string fuse, ushort it);
         public delegate bool ValidDelegate(Player player, int type, string fuse);
         public delegate string InputDelegate(Player player, int type, string fuse, string prev);
         public delegate string InputHolderDelegate(Player provider, Player user, int type, string fuse, string prev);
         public delegate string EncryptDelegate(string args);
         public delegate void LocustActionDelegate(Player player, int type, string fuse,
-            string cdFuse, Player locuster, Tux locust);
+            string cdFuse, Player locuster, Tux locust, ushort it);
 
         private ActionDelegate mAction;
         public ActionDelegate Action
         {
             set { mAction = value; }
             get { return mAction ?? DefAction; }
+        }
+        private VestigeDelegate mVestige;
+        public VestigeDelegate Vestige
+        {
+            set { mVestige = value; }
+            get { return mVestige ?? DefVestige; }
         }
 
         private InputDelegate mInput;
@@ -95,11 +102,12 @@ namespace PSD.Base.Card
         }
 
         protected static ActionDelegate DefAction = (p, t, f, a) => { };
+        protected static VestigeDelegate DefVestige = (p, t, f, i) => { };
         protected static ValidDelegate DefValid = (p, t, f) => { return true; };
         protected static InputDelegate DefInput = (p, t, f, pr) => { return ""; };
         protected static InputHolderDelegate DefInputHolder = (p, u, t, f, pr) => { return ""; };
         protected static EncryptDelegate DefEncrypt = (a) => { return a; };
-        protected static LocustActionDelegate DefLocust = (p, t, f, cd, lr, l) => { };
+        protected static LocustActionDelegate DefLocust = (p, t, f, cd, lr, l, it) => { };
 
         // public Delegate Type of Handling events
         internal Tux(string name, string code, int genre, TuxType type, string description,

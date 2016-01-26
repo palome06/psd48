@@ -66,7 +66,7 @@
     <Image x:Key="petsnapGFT4" Source="PetsSnap/GFT4.png" ToolTip="TR岚翼"/>
     <Image x:Key="petsnapGTT3" Source="PetsSnap/GTT3.png" ToolTip="TR槐妖"/>
     <Image x:Key="petsnapGTT4" Source="PetsSnap/GTT4.png" ToolTip="TR峰龟"/>
-	
+
     <Image x:Key="petsnapGSH1" Source="PetsSnap/GSH1.png" ToolTip="浮游神"/>
     <Image x:Key="petsnapGSH2" Source="PetsSnap/GSH2.png" ToolTip="冰煌"/>
     <Image x:Key="petsnapGSH3" Source="PetsSnap/GSH3.png" ToolTip="水菱晶"/>
@@ -77,21 +77,22 @@
     <Image x:Key="petsnapGFH1" Source="PetsSnap/GFH1.png" ToolTip="无相天妖"/>
     <Image x:Key="petsnapGFH2" Source="PetsSnap/GFH2.png" ToolTip="大眼蛙"/>
     <Image x:Key="petsnapGTH1" Source="PetsSnap/GTH1.png" ToolTip="木桩"/>
-	
-    <Image x:Key="petsnapGI01" Source="PetsSnap/GI01.png" ToolTip="TR鬼将军"/>
-    <Image x:Key="petsnapGI04" Source="PetsSnap/GI04.png" ToolTip="TR魅召"/>
-    <Image x:Key="petsnapGI05" Source="PetsSnap/GI05.png" ToolTip="TR淮南王"/>
-    <Image x:Key="petsnapGI06" Source="PetsSnap/GI06.png" ToolTip="TR骨蛇"/>
-    <Image x:Key="petsnapGI07" Source="PetsSnap/GI07.png" ToolTip="TR戾枭"/>
-    <Image x:Key="petsnapGI08" Source="PetsSnap/GI08.png" ToolTip="TR楼兰王"/>
-    <Image x:Key="petsnapGY01" Source="PetsSnap/GY01.png" ToolTip="TR衔烛之龙"/>
-    <Image x:Key="petsnapGY02" Source="PetsSnap/GY02.png" ToolTip="TR包子"/>
-    <Image x:Key="petsnapGY03" Source="PetsSnap/GY03.png" ToolTip="TR三皇"/>
-    <Image x:Key="petsnapGY04" Source="PetsSnap/GY04.png" ToolTip="TR噬珊鬼蛰"/>
-    <Image x:Key="petsnapGY05" Source="PetsSnap/GY05.png" ToolTip="TR虹鼯"/>
-    <Image x:Key="petsnapGY06" Source="PetsSnap/GY06.png" ToolTip="TR鳄齿巨蜥"/>
-    <Image x:Key="petsnapGY07" Source="PetsSnap/GY07.png" ToolTip="TR忘尘司命"/>
-    <Image x:Key="petsnapGY08" Source="PetsSnap/GY08.png" ToolTip="TR归墟界督"/>
+
+    <Image x:Key="petsnapGIT1" Source="PetsSnap/GIT1.png" ToolTip="TR鬼将军"/>
+    <Image x:Key="petsnapGIT2" Source="PetsSnap/GIT2.png" ToolTip="TR虞蛇"/>
+    <Image x:Key="petsnapGIT4" Source="PetsSnap/GIT4.png" ToolTip="TR魅召"/>
+    <Image x:Key="petsnapGIT5" Source="PetsSnap/GIT5.png" ToolTip="TR淮南王"/>
+    <Image x:Key="petsnapGIT6" Source="PetsSnap/GIT6.png" ToolTip="TR骨蛇"/>
+    <Image x:Key="petsnapGIT7" Source="PetsSnap/GIT7.png" ToolTip="TR戾枭"/>
+    <Image x:Key="petsnapGIT8" Source="PetsSnap/GIT8.png" ToolTip="TR楼兰王"/>
+    <Image x:Key="petsnapGYT1" Source="PetsSnap/GYT1.png" ToolTip="TR衔烛之龙"/>
+    <Image x:Key="petsnapGYT2" Source="PetsSnap/GYT2.png" ToolTip="TR包子"/>
+    <Image x:Key="petsnapGYT3" Source="PetsSnap/GYT3.png" ToolTip="TR三皇"/>
+    <Image x:Key="petsnapGYT4" Source="PetsSnap/GYT4.png" ToolTip="TR噬珊鬼蛰"/>
+    <Image x:Key="petsnapGYT5" Source="PetsSnap/GYT5.png" ToolTip="TR虹鼯"/>
+    <Image x:Key="petsnapGYT6" Source="PetsSnap/GYT6.png" ToolTip="TR鳄齿巨蜥"/>
+    <Image x:Key="petsnapGYT7" Source="PetsSnap/GYT7.png" ToolTip="TR忘尘司命"/>
+    <Image x:Key="petsnapGYT8" Source="PetsSnap/GYT8.png" ToolTip="TR归墟界督"/>
 
     <Image x:Key="npcsnapNC101" Source="PetsSnap/NC101.png" ToolTip="NPC李逍遥"/>
     <Image x:Key="npcsnapNC102" Source="PetsSnap/NC102.png" ToolTip="NPC赵灵儿"/>
@@ -493,6 +494,7 @@
     <Image x:Key="eveCardSJT15" Source="Card/Eve/SJT15.png"/>
     <Image x:Key="eveCardSJT16" Source="Card/Eve/SJT16.png"/>
     <Image x:Key="eveCardSJT17" Source="Card/Eve/SJT17.png"/>
+    <Image x:Key="eveCardSJT19" Source="Card/Eve/SJT19.png"/>
 
     <Image x:Key="eveCardSJH01" Source="Card/Eve/SJH01.png"/>
     <Image x:Key="eveCardSJH02" Source="Card/Eve/SJH02.png"/>
@@ -598,21 +600,22 @@
     <Image x:Key="monCardNCT16" Source="Card/NMB/NCT16.png"/>
     <Image x:Key="monCardNCT17" Source="Card/NMB/NCT17.png"/>
     <Image x:Key="monCardNCT18" Source="Card/NMB/NCT18.png"/>
-	
-	<Image x:Key="monCardGI01" Source="Card/NMB/GI01.png"/>
-    <Image x:Key="monCardGI04" Source="Card/NMB/GI04.png"/>
-	<Image x:Key="monCardGI05" Source="Card/NMB/GI05.png"/>
-	<Image x:Key="monCardGI06" Source="Card/NMB/GI06.png"/>
-	<Image x:Key="monCardGI07" Source="Card/NMB/GI07.png"/>
-	<Image x:Key="monCardGI08" Source="Card/NMB/GI08.png"/>
-    <Image x:Key="monCardGY01" Source="Card/NMB/GY01.png"/>
-	<Image x:Key="monCardGY02" Source="Card/NMB/GY02.png"/>
-    <Image x:Key="monCardGY03" Source="Card/NMB/GY03.png"/>
-	<Image x:Key="monCardGY04" Source="Card/NMB/GY04.png"/>
-    <Image x:Key="monCardGY05" Source="Card/NMB/GY05.png"/>
-	<Image x:Key="monCardGY06" Source="Card/NMB/GY06.png"/>
-	<Image x:Key="monCardGY07" Source="Card/NMB/GY07.png"/>
-	<Image x:Key="monCardGY08" Source="Card/NMB/GY08.png"/>
+
+    <Image x:Key="monCardGIT1" Source="Card/NMB/GIT1.png"/>
+    <Image x:Key="monCardGIT2" Source="Card/NMB/GIT2.png"/>
+    <Image x:Key="monCardGIT4" Source="Card/NMB/GIT4.png"/>
+    <Image x:Key="monCardGIT5" Source="Card/NMB/GIT5.png"/>
+    <Image x:Key="monCardGIT6" Source="Card/NMB/GIT6.png"/>
+    <Image x:Key="monCardGIT7" Source="Card/NMB/GIT7.png"/>
+    <Image x:Key="monCardGIT8" Source="Card/NMB/GIT8.png"/>
+    <Image x:Key="monCardGYT1" Source="Card/NMB/GYT1.png"/>
+    <Image x:Key="monCardGYT2" Source="Card/NMB/GYT2.png"/>
+    <Image x:Key="monCardGYT3" Source="Card/NMB/GYT3.png"/>
+    <Image x:Key="monCardGYT4" Source="Card/NMB/GYT4.png"/>
+    <Image x:Key="monCardGYT5" Source="Card/NMB/GYT5.png"/>
+    <Image x:Key="monCardGYT6" Source="Card/NMB/GYT6.png"/>
+    <Image x:Key="monCardGYT7" Source="Card/NMB/GYT7.png"/>
+    <Image x:Key="monCardGYT8" Source="Card/NMB/GYT8.png"/>
     <Image x:Key="monCardNCT19" Source="Card/NMB/NCT19.png"/>
     <Image x:Key="monCardNCT20" Source="Card/NMB/NCT20.png"/>
     <Image x:Key="monCardNCT21" Source="Card/NMB/NCT21.png"/>
@@ -739,7 +742,7 @@
     <Image x:Key="diceImg5" Source="Card/Dices/Dice5.png"/>
     <Image x:Key="diceImg6" Source="Card/Dices/Dice6.png"/>
     <Image x:Key="diceImg7" Source="Card/Dices/Dice6Plus.png"/>
-	
+
     <Image x:Key="fiveImg1" Source="Card/Five/WL01.png"/>
     <Image x:Key="fiveImg2" Source="Card/Five/WL02.png"/>
     <Image x:Key="fiveImg3" Source="Card/Five/WL03.png"/>

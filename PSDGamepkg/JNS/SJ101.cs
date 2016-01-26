@@ -550,6 +550,13 @@ namespace PSD.PSDGamepkg.JNS
                 XI.RaiseGMessage("G0IF," + ut + "," + fuseMap[result]);
             }
         }
+        public void SJT19(Player rd)
+        {
+            var lst = XI.Board.Garden.Values.Where(p => p.IsAlive && p.Tux.Count > 0).ToList();
+            if (lst.Any())
+                XI.RaiseGMessage(Artiad.Harm.ToMessage(lst.Select(
+                    p => new Artiad.Harm(p.Uid, 0, FiveElement.YINN, p.Tux.Count, 0))));
+        }
         #endregion Package 6#
         #region Holiday
         public void SJH01(Player rd)

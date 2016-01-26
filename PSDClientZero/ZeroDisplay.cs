@@ -113,7 +113,7 @@ namespace PSD.ClientZero
         {
             return "{" + string.Join(",", cards.Select(p => Tux(p.Key) +
                 ((p.Value == "0" || tuple.TL.DecodeTux(p.Key).Code == p.Value) ?
-                "" : "(" + tuple.TL.DecodeTux(p.Key).Name + ")"))) + "}";
+                "" : "(" + tuple.TL.EncodeTuxCode(p.Value).Name + ")"))) + "}";
         }
         internal string Player(ushort player)
         {

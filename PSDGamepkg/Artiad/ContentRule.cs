@@ -164,5 +164,15 @@ namespace PSD.PSDGamepkg.Artiad
             return tux.Type != Tux.TuxType.ZP && !new string[] {
                 "TP01", "TP03", "TPT1", "TPT3", "TPH2", "TPH3", "TPH4" }.Contains(tux.Code);
         }
+
+        public static int GetLocustFreeType(string tuxCode, int oldType)
+        {
+            if (tuxCode == "TP02" && oldType == 1)
+                return 0;
+            else if (tuxCode == "TPT4" && oldType == 1)
+                return 2;
+            else
+                return oldType;
+        }
     }
 }

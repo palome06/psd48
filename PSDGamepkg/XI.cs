@@ -147,11 +147,10 @@ namespace PSD.PSDGamepkg
             List<ushort> tuxLst = LibTuple.TL.ListAllTuxCodes(levelCode);
             //Console.WriteLine("tuxLst = {" + string.Join(",", tuxLst) + "} (" + tuxLst.Count + ")");
             Algo.Shuffle(tuxLst);
-            Board.TuxPiles = new Base.Utils.Rueue<ushort>(tuxLst);
-            List<ushort> eveLst = Base.Card.Card.GeneratePiles(null,
-                new ushort[] { 1, (ushort)LibTuple.EL.ListAllSeleable(levelCode).Count });
+            Board.TuxPiles = new Rueue<ushort>(tuxLst);
+            List<ushort> eveLst = LibTuple.EL.ListAllSeleable(levelCode);
             Algo.Shuffle(eveLst);
-            Board.EvePiles = new Base.Utils.Rueue<ushort>(eveLst);
+            Board.EvePiles = new Rueue<ushort>(eveLst);
             //List<ushort> monLst = Base.Card.Card.GeneratePiles(null, new ushort[] {
             //    Base.Card.NMBLib.CodeOfMonster(1), (ushort)(Base.Card.NMBLib.CodeOfMonster(0) + LibTuple.ML.Size) });
             List<ushort> monLst = LibTuple.ML.ListAllSeleable(levelCode)

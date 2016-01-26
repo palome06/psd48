@@ -23,10 +23,16 @@ namespace PSD.PSDGamepkg.JNS
                 string cardCode = tux.Code;
                 var methodAction = tc.GetType().GetMethod(cardCode + "Action");
                 if (methodAction != null)
-                {
                     tux.Action += delegate(Player player, int type, string fuse, string argst)
                     {
                         methodAction.Invoke(tc, new object[] { player, type, fuse, argst });
+                    };
+                var methodVestige = tc.GetType().GetMethod(cardCode + "Vestige");
+                if (methodVestige != null)
+                {
+                    tux.Vestige += delegate(Player player, int type, string fuse, ushort it)
+                    {
+                        methodVestige.Invoke(tc, new object[] { player, type, fuse, it });
                     };
                 }
                 var methodBribe = tc.GetType().GetMethod(cardCode + "Bribe");
@@ -264,19 +270,15 @@ namespace PSD.PSDGamepkg.JNS
                             methodDelAction.Invoke(tc, new object[] { player });
                         });
                 }
-                var methodLocust = tc.GetType().GetMethod(cardCode + "Locust");
-                if (methodLocust != null)
-                    tux.Locust += new Tux.LocustActionDelegate(delegate(Player player, int type, string fuse,
-                        string cdFuse, Player locuster, Tux locus)
-                    {
-                        methodLocust.Invoke(tc, new object[] { player, type, fuse, cdFuse, locuster, locus });
-                    });
-                else
-                    tux.Locust += new Tux.LocustActionDelegate(delegate(Player player, int type, string fuse,
-                        string cdFuse, Player locuster, Tux locus)
-                    {
-                        GeneralLocustAction(player, type, fuse, cdFuse, locuster, locus);
-                    });
+                tux.Locust += new Tux.LocustActionDelegate(delegate(Player player, int type, string fuse,
+                    string cdFuse, Player locuster, Tux locus, ushort it)
+                {
+                    var methodLocust = tc.GetType().GetMethod(cardCode + "Locust");
+                    if (methodLocust != null)
+                        methodLocust.Invoke(tc, new object[] { player, type, fuse, cdFuse, locuster, locus, it });
+                    else
+                        GeneralLocust(player, type, fuse, cdFuse, locuster, locus, it);
+                });
             }
             return tx01;
         }
@@ -353,10 +355,10 @@ namespace PSD.PSDGamepkg.JNS
                     FiveElement.THUNDER, 2, (long)HPEvoMask.FROM_JP)));
             }
         }
-        public void JP05Locust(Player player, int type, string fuse, string cdFuse, Player locuster, Tux locust)
+        public void JP05Locust(Player player, int type, string fuse, string cdFuse, Player locuster, Tux locust, ushort it)
         {
             if (type == 0 || type == 1)
-                GeneralLocustAction(player, 0, fuse, cdFuse, locuster, locust);
+                GeneralLocust(player, 0, fuse, cdFuse, locuster, locust, it);
         }
         public void JP06Action(Player player, int type, string fuse, string argst)
         {
@@ -468,7 +470,7 @@ namespace PSD.PSDGamepkg.JNS
                 if (invs.Contains(tg))
                 {
                     TargetPlayer(player.Uid, tg);
-                    Cure(XI.Board.Garden[tg], player, 2);
+                    Cure(player, XI.Board.Garden[tg], 2);
                 }
                 XI.InnerGMessage("G0ZH,0", 0);
             }
@@ -482,10 +484,10 @@ namespace PSD.PSDGamepkg.JNS
             else
                 return false;
         }
-        public void TP02Locust(Player player, int type, string fuse, string cdFuse, Player locuster, Tux locust)
+        public void TP02Locust(Player player, int type, string fuse, string cdFuse, Player locuster, Tux locust, ushort locustee)
         {
             if (type == 0)
-                GeneralLocustAction(player, 0, fuse, cdFuse, locuster, locust);
+                GeneralLocust(player, 0, fuse, cdFuse, locuster, locust, locustee);
             else if (type == 1)
             {
                 string[] argv = cdFuse.Split(',');
@@ -498,21 +500,11 @@ namespace PSD.PSDGamepkg.JNS
                 {
                     TargetPlayer(player.Uid, tg);
                     VI.Cout(0, "{0}对{1}使用「灵葫仙丹」.", XI.DisplayPlayer(host), XI.DisplayPlayer(tg));
-                    Cure(XI.Board.Garden[tg], XI.Board.Garden[host], 2);
+                    Cure(XI.Board.Garden[host], XI.Board.Garden[tg], 2);
                 }
-                string last = null; bool locusSucc = false;
-                foreach (string tuxInfo in XI.Board.PendingTux)
+                bool locusSucc = false;
+                if (Artiad.Procedure.LocustChangePendingTux(XI, player.Uid, locuster.Uid, locustee))
                 {
-                    string[] parts = tuxInfo.Split(',');
-                    if (parts[1] == "G0CC")
-                        last = tuxInfo;
-                }
-                if (last != null)
-                {
-                    // XI.Board.PendingTux.Remove(last);
-                    ushort locustee = ushort.Parse(last.Split(',')[2]);
-                    // XI.RaiseGMessage("G0ON,10,C,1," + locustee);
-
                     string newFuse = "G0ZH,0";
                     if (player.IsAlive && locuster.IsAlive && locust.Valid(locuster, 0, newFuse))
                     {
@@ -538,7 +530,7 @@ namespace PSD.PSDGamepkg.JNS
             if (harms.Count > 0)
                 XI.InnerGMessage(Artiad.Harm.ToMessage(harms), 0);
         }
-        public void TP03Locust(Player player, int type, string fuse, string cdFuse, Player locuster, Tux locust)
+        public void TP03Locust(Player player, int type, string fuse, string cdFuse, Player locuster, Tux locust, ushort locustee)
         {
             string[] argv = cdFuse.Split(',');
             ushort host = ushort.Parse(argv[1]);
@@ -547,19 +539,8 @@ namespace PSD.PSDGamepkg.JNS
             harms.RemoveAll(p => p.Who == player.Uid && !HPEvoMask.TUX_INAVO.IsSet(p.Mask));
 
             bool locusSucc = false;
-            ushort owner = locuster.Uid;
-            string last = null;
-            foreach (string tuxInfo in XI.Board.PendingTux)
+            if (Artiad.Procedure.LocustChangePendingTux(XI, player.Uid, locuster.Uid, locustee))
             {
-                string[] parts = tuxInfo.Split(',');
-                if (parts[1] == "G0CC")
-                    last = tuxInfo;
-            }
-            if (last != null)
-            {
-                // XI.Board.PendingTux.Remove(last);
-                ushort locustee = ushort.Parse(last.Split(',')[2]);
-                // XI.RaiseGMessage("G0ON,10,C,1," + locustee);
                 if (harms.Count > 0)
                 {
                     string newFuse = Artiad.Harm.ToMessage(harms);
@@ -961,7 +942,7 @@ namespace PSD.PSDGamepkg.JNS
                     XI.InnerGMessage(Artiad.Harm.ToMessage(harms), 85);
             }
         }
-        public void TPT1Locust(Player player, int type, string fuse, string cdFuse, Player locuster, Tux locust)
+        public void TPT1Locust(Player player, int type, string fuse, string cdFuse, Player locuster, Tux locust, ushort locustee)
         {
             if (type == 1)
             {
@@ -988,20 +969,9 @@ namespace PSD.PSDGamepkg.JNS
                 }
                 if (harms.Count > 0)
                     XI.InnerGMessage(Artiad.Harm.ToMessage(harms), 85);
-                
-                ushort owner = locuster.Uid;
-                string last = null; bool locusSucc = false;
-                foreach (string tuxInfo in XI.Board.PendingTux)
+                bool locusSucc = false;
+                if (Artiad.Procedure.LocustChangePendingTux(XI, player.Uid, locuster.Uid, locustee))
                 {
-                    string[] parts = tuxInfo.Split(',');
-                    if (parts[1] == "G0CC")
-                        last = tuxInfo;
-                }
-                if (last != null)
-                {
-                    // XI.Board.PendingTux.Remove(last);
-                    ushort locustee = ushort.Parse(last.Split(',')[2]);
-                    // XI.RaiseGMessage("G0ON,10,C,1," + locustee);
                     if (harms.Any(p => yes(p)))
                     {
                         string newFuse = Artiad.Harm.ToMessage(harms);
@@ -1027,12 +997,20 @@ namespace PSD.PSDGamepkg.JNS
             else
                 return !player.DrTuxDisabled;
         }
+        public void TPT2Vestige(Player player, int type, string fuse, ushort it)
+        {
+            if (type == 0 && it != 0)
+                XI.RaiseGMessage("G0ZB," + player.Uid + ",3,TPT2," + it);
+        }
         public void TPT2Action(Player player, int type, string fuse, string argst)
         {
-            string whoStr = XI.AsyncInput(player.Uid, "#获得补牌的,T1(p" + string.Join("p",
-                XI.Board.Garden.Values.Where(p => p.IsTared).Select(p => p.Uid)) + ")", "TPT2Action", "0");
-            ushort who = ushort.Parse(whoStr);
-            XI.RaiseGMessage("G0DH," + who + ",0,1");
+            if (type == 1)
+            {
+                string whoStr = XI.AsyncInput(player.Uid,
+                    "#获得补牌的,T1" + AAllTareds(player), "TPT2Action", "0");
+                ushort who = ushort.Parse(whoStr);
+                XI.RaiseGMessage("G0DH," + who + ",0,1");
+            }
         }
         public bool TPT2Valid(Player player, int type, string fuse)
         {
@@ -1296,7 +1274,7 @@ namespace PSD.PSDGamepkg.JNS
             else
                 return false;
         }
-        public void TPT3Action(Player player, int type, string fuse, string argst)
+        public void TPT3Vestige(Player player, int type, string fuse, ushort it)
         {
             if (type == 0)
             {
@@ -1312,7 +1290,8 @@ namespace PSD.PSDGamepkg.JNS
                 string[] g0cd = cdFuse.Split(',');
                 // Warning: self might be more than two tuxes
                 // G1CW,A[1st:Org],B[2nd:Target],C[2nd:Provider],JP04;cdFuse;TF
-                XI.RaiseGMessage("G1CW," + g0cd[1] + "," + tar + "," + player.Uid + "," + g0cd[3] + ";" + fuse);
+                XI.RaiseGMessage("G1CW," + g0cd[1] + "," + tar + "," +
+                    player.Uid + "," + g0cd[3] + "," + it + ";" + fuse);
             }
             else if (type == 1)
                 TP01Action(player, 0, fuse, "");
@@ -1983,47 +1962,14 @@ namespace PSD.PSDGamepkg.JNS
                             return true;
                     }
                 }
-                //else if (type == 1 && XI.Board.InFight)
-                //{
-                //    string[] g1di = fuse.Split(',');
-                //    for (int idx = 1; idx < g1di.Length; )
-                //    {
-                //        ushort who = ushort.Parse(g1di[idx]);
-                //        bool drIn = g1di[idx + 1] == "0";
-                //        int n = int.Parse(g1di[idx + 2]);
-                //        if (XI.Board.Garden[who].Team == player.Team && !drIn && n > 0)
-                //        {
-                //            List<Base.Card.Tux> cards = Algo.TakeRange(g1di, idx + 3, idx + 3 + n)
-                //                .Select(p => XI.LibTuple.TL.DecodeTux(ushort.Parse(p))).ToList();
-                //            if (cards.Count > 0 && !cards.Any(p => p.Type != Tux.TuxType.ZP))
-                //                return true;
-                //        }
-                //        idx += (3 + n);
-                //    }
-                //}
                 else if (type == 1)
                 {
                     bool meLose = (player.Team == XI.Board.Rounder.Team && !XI.Board.IsBattleWin)
                         || (player.Team == XI.Board.Rounder.OppTeam && XI.Board.IsBattleWin);
-                    if (meLose)
-                    {
-                        foreach (string tuxInfo in XI.Board.PendingTux)
-                        {
-                            string[] parts = tuxInfo.Split(',');
-                            if (parts[1] == "XBT4Consume")
-                                return true;
-                        }
-                    }
+                    return meLose && XI.Board.PendingTux.Any(p => p.Split(',')[1] == "XBT4Consume");
                 }
                 else if (type == 2)
-                {
-                    foreach (string tuxInfo in XI.Board.PendingTux)
-                    {
-                        string[] parts = tuxInfo.Split(',');
-                        if (parts[1] == "XBT4Consume")
-                            return true;
-                    }
-                }
+                    return XI.Board.PendingTux.Any(p => p.Split(',')[1] == "XBT4Consume");
                 else if (type == 3)
                     return lug.Capacities.Count > 0;
             }
@@ -2038,15 +1984,17 @@ namespace PSD.PSDGamepkg.JNS
                 string[] args = fuse.Split(',');
                 // G0CC,A,0,B,TP02,17,36
                 string[] argv = Algo.Substring(fuse, 0, fuse.IndexOf(';')).Split(',');
+                ushort hst = ushort.Parse(args[3]);
                 List<ushort> cards = Algo.TakeRange(argv, 5, argv.Length).Select(p =>
                     ushort.Parse(p)).Where(p => p > 0).ToList();
 
-                ushort hst = ushort.Parse(args[3]);
-                foreach (ushort p in cards)
-                    XI.Board.PendingTux.Remove(hst + ",G0CC," + p);
-                XI.Board.PendingTux.Enqueue(player.Uid + ",XBT4Consume," + string.Join(",", cards));
-                XI.RaiseGMessage("G2TZ," + player.Uid + ",0," + string.Join(",", cards.Select(p => "C" + p)));
-                XI.InnerGMessage(fuse, 201);
+                cards.RemoveAll(p => !XI.Board.PendingTux.Contains(hst + ",G0CC," + p));
+                if (cards.Count > 0)
+                {
+                    cards.ForEach(p => XI.Board.PendingTux.Remove(hst + ",G0CC," + p));
+                    XI.Board.PendingTux.Enqueue(player.Uid + ",XBT4Consume," + string.Join(",", cards));
+                    XI.RaiseGMessage("G2TZ," + player.Uid + ",0," + string.Join(",", cards.Select(p => "C" + p)));
+                }
             }
             else if (lug != null && (type == 1 || type == 2))
             {
@@ -2168,10 +2116,10 @@ namespace PSD.PSDGamepkg.JNS
                 }
             }
         }
-        public void TPT4Locust(Player player, int type, string fuse, string cdFuse, Player locuster, Tux locust)
+        public void TPT4Locust(Player player, int type, string fuse, string cdFuse, Player locuster, Tux locust, ushort locustee)
         {
             if (type == 0)
-                GeneralLocustAction(player, 0, fuse, cdFuse, locuster, locust);
+                GeneralLocust(player, 0, fuse, cdFuse, locuster, locust, locustee);
             else if (type == 1)
             {
                 string[] argv = cdFuse.Split(',');
@@ -2188,19 +2136,9 @@ namespace PSD.PSDGamepkg.JNS
                     int value = XI.Board.DiceValue;
                     Cure(XI.Board.Garden[host], XI.Board.Garden[who], value);
                 }
-                string last = null; bool locusSucc = false;
-                foreach (string tuxInfo in XI.Board.PendingTux)
+                bool locusSucc = false;
+                if (Artiad.Procedure.LocustChangePendingTux(XI, player.Uid, locuster.Uid, locustee))
                 {
-                    string[] parts = tuxInfo.Split(',');
-                    if (parts[1] == "G0CC")
-                        last = tuxInfo;
-                }
-                if (last != null)
-                {
-                    // XI.Board.PendingTux.Remove(last);
-                    ushort locustee = ushort.Parse(last.Split(',')[2]);
-                    // XI.RaiseGMessage("G0ON,10,C,1," + locustee);
-                    
                     if (player.IsAlive && locuster.IsAlive && locust.Valid(locuster, 2, fuse))
                     {
                         XI.InnerGMessage("G0CC," + player.Uid + ",1," + locuster.Uid +
@@ -2557,8 +2495,8 @@ namespace PSD.PSDGamepkg.JNS
         {
             return player.RestZP > 0 && !player.ZPDisabled && !player.DrTuxDisabled;
         }
-        private void GeneralLocustAction(Player player, int type, string fuse,
-            string cdFuse, Player locuster, Tux locus)
+        private void GeneralLocust(Player player, int type, string fuse, string cdFuse,
+            Player locuster, Tux locus, ushort locustee)
         {
             // G0CD,A,T,JP02,17,36;1,G0OH,...
             string[] argv = cdFuse.Split(',');
@@ -2568,31 +2506,9 @@ namespace PSD.PSDGamepkg.JNS
             else
                 XI.RaiseGMessage("G0CE," + argv[1] + "," + argv[2] + ",1," + argv[3] +
                     "," + argv[4] + ";" + type + "," + fuse);
-            ushort owner = locuster.Uid;
-            string last = null;
-            foreach (string tuxInfo in XI.Board.PendingTux)
+
+            if (Artiad.Procedure.LocustChangePendingTux(XI, player.Uid, locuster.Uid, locustee))
             {
-                string[] parts = tuxInfo.Split(',');
-                if (parts[1] == "G0CC")
-                    last = tuxInfo;
-            }
-            if (last != null)
-            {
-                XI.Board.PendingTux.Remove(last);
-                ushort locustee = ushort.Parse(last.Split(',')[2]);
-                bool b1 = locuster.IsAlive && player.IsAlive && locus.Valid(player, type, fuse);
-                if (!b1)
-                    XI.RaiseGMessage("G0ON,10,C,1," + locustee);
-                else
-                {
-                    if ((locus.IsEq[type] & 3) == 0)
-                        XI.RaiseGMessage("G0ON,10,C,1," + locustee);
-                    //else if ((locus.IsEq[type] & 1) != 0)
-                    //    XI.Board.PendingTux.Enqueue(locuster.Uid + ",G0ZB," + locus.Code + "," + locustee);
-                    //else
-                    //    XI.Board.PendingTux.Enqueue(locuster.Uid + ",G0CC," + locustee);
-                    XI.Board.PendingTux.Enqueue(locuster.Uid + ",G0CC," + locustee);
-                }
                 XI.InnerGMessage("G0CC," + player.Uid + ",1," + locuster.Uid +
                     "," + locus.Code + "," + locustee + ";" + type + "," + fuse, 101);
             }

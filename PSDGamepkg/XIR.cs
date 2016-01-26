@@ -182,7 +182,7 @@ namespace PSD.PSDGamepkg
                         rstage = "R" + rounder + "ZW"; break;
                     case "ZW":
                         {
-                            // TODO: to substitute old ZW event on considering the capability
+                            // to substitute old ZW event on considering the capability
                             Board.PosHinders.Clear();
                             ushort[] hMember = Board.Garden.Values.Where(p => p.IsAlive &&
                                 p.Team == Board.Rounder.OppTeam).Select(p => p.Uid).ToArray();
@@ -585,9 +585,10 @@ namespace PSD.PSDGamepkg
                                     IDictionary<ushort, List<ushort>> imt = new Dictionary<ushort, List<ushort>>();
                                     foreach (string pendItem in Board.PendingTux)
                                     {
-                                        ushort pendWho = ushort.Parse(pendItem.Substring(0, pendItem.IndexOf(',')));
-                                        ushort pendTux = ushort.Parse(pendItem.Substring(pendItem.LastIndexOf(',') + 1));
-                                        Algo.AddToMultiMap(imt, pendWho, pendTux);
+                                        string[] pends = pendItem.Split(',');
+                                        ushort pendWho = ushort.Parse(pends[0]);
+                                        for (int i = 2; i < pends.Length; ++i)
+                                            Algo.AddToMultiMap(imt, pendWho, ushort.Parse(pends[i]));
                                     }
                                     if (imt.Count > 0)
                                         RaiseGMessage("G0ON," + string.Join(",", imt.Select(p => p.Key + ",C," +

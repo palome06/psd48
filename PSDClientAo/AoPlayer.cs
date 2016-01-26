@@ -1051,7 +1051,6 @@ namespace PSD.ClientAo
             get { return mbPetDisabled; }
         }
 
-        // TODO: Left params (token, peoples, target)
         private int mToken;
         public int Token
         {

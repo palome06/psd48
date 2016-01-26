@@ -209,7 +209,7 @@ namespace PSD.Base
         {
             Supporter = null; Hinder = null;
             SupportSucc = false; HinderSucc = false;
-            EscueBanned = true;
+            EscueBanned = false;
         }
         public List<ushort> OrderedPlayer() { return OrderedPlayer(Rounder.Uid); }
         public List<ushort> OrderedPlayer(ushort start)
