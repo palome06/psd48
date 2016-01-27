@@ -55,6 +55,7 @@ namespace PSD.Base.Card
         #region SPI Info
         private int mSpiHW, mSpiHL, mSpiHw, mSpiHl, mSpiHC, mSpiHc;
         private int mSpiTW, mSpiTL, mSpiTw, mSpiTl, mSpiTC, mSpiTc;
+        private bool mSpiS;
 
         // whether self/attend, whether debut result
         // whether win or not or rounder, whether teammates of rounder
@@ -109,13 +110,19 @@ namespace PSD.Base.Card
             else if ((value & 0x4) != 0 && self) return true;
             else return false;
         }
+        public bool IsSilence() { return mSpiS; }
         public void ParseSpi(string spis)
         {
             mSpiHW = mSpiHL = mSpiHw = mSpiHl = mSpiHC = mSpiHc = 0;
             mSpiTW = mSpiTL = mSpiTw = mSpiTl = mSpiTC = mSpiTc = 0;
+            mSpiS = false;
             for (int i = 0; i < spis.Length; )
             {
-                if (i + 2 < spis.Length && spis[i + 2] == '#')
+                if (spis[i] == 'S')
+                {
+                    mSpiS = true; ++i;
+                }
+                else if (i + 2 < spis.Length && spis[i + 2] == '#')
                 {
                     BitOr(spis[i], spis[i + 1], 0x4);
                     i += 3;

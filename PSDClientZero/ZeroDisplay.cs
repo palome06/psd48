@@ -400,7 +400,8 @@ namespace PSD.ClientZero
             if (mon != null)
             {
                 Aps(sb, "*******************");
-                Aps(sb, "  {0} {1} 战力：{2} 闪避：{3}", mon.Name, mon.Code, mon.STR, mon.AGL);
+                Aps(sb, "  {0} {1} 战力：{2} 闪避：{3}{4}", mon.Name, mon.Code,
+                    mon.STR, mon.AGL, mon.IsSilence() ? " [禁咒]" : "");
                 if (!string.IsNullOrEmpty(mon.DebutText))
                     Aps(sb, "  出场：{0}", mon.DebutText);
                 if (!string.IsNullOrEmpty(mon.PetText))
@@ -420,6 +421,8 @@ namespace PSD.ClientZero
             {
                 Aps(sb, "*******************");
                 Aps(sb, " {0} {1} 战力：{2}", npc.Name, npc.Code, npc.STR);
+                if (!string.IsNullOrEmpty(npc.DebutText))
+                    Aps(sb, "  出场效果：{0}", npc.DebutText);
                 if (npc.Skills.Length > 0)
                     Aps(sb, "  NPC效果：{0}", string.Join(" ", npc.Skills.Select(p => SKTXCZ(p))));
                 Aps(sb, "*******************");
@@ -432,7 +435,7 @@ namespace PSD.ClientZero
             if (eve != null)
             {
                 Aps(sb, "*******************");
-                Aps(sb, "  {0} {1}", eve.Name, eve.Code);
+                Aps(sb, "  {0} {1}{2}", eve.Name, eve.Code, eve.IsSilence() ? " [禁咒]" : "");
                 if (eve.Description.Length > 0)
                     Aps(sb, "  {0}", eve.Description);
                 Aps(sb, "*******************");

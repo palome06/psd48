@@ -69,7 +69,6 @@ namespace PSD.PSDGamepkg
                     };
                     Board.Garden.Add(player.Uid, player);
                 }
-                Board.SortGarden();
                 Log.Start();
 
                 IDictionary<ushort, PSD.ClientZero.XIClient> xiclients =
@@ -141,7 +140,6 @@ namespace PSD.PSDGamepkg
                 aywi.TcpListenerStart();
                 aywi.OnReconstructRoom = ResumeLostInputEvent;
                 Board.Garden = aywi.Connect(VI, teamMode, null);
-                Board.SortGarden();
 
                 WI.RecvInfStart();
                 int count = Board.Garden.Count;
@@ -195,9 +193,7 @@ namespace PSD.PSDGamepkg
             //    }
             //} // :[
             Board.Garden = aywi.Connect(VI, teamMode, invs.ToList());
-            Board.SortGarden();
 
-            WI.RecvInfStart();
             int count = Board.Garden.Count;
             while (count > 0)
             {

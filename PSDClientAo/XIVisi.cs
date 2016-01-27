@@ -2438,7 +2438,7 @@ namespace PSD.ClientAo
                                 List<ushort> folder2 = Algo.TakeRange(args, 6 + count1,
                                     6 + count1 + count2).Select(p => ushort.Parse(p)).ToList();
                                 VI.Cout(Uid, "{0}的{1}增加{2}，现在为{3}.", zd.Player(who),
-                                    zd.HeroFolderAlias(A0P[who].SelectHero), zd.Tux(folder1), zd.Tux(folder2));
+                                    zd.HeroFolderAlias(A0P[who].SelectHero, A0P[who].Coss), zd.Tux(folder1), zd.Tux(folder2));
                                 A0P[who].InsMyFolder(folder1);
                             }
                             else
@@ -2446,7 +2446,7 @@ namespace PSD.ClientAo
                                 int count1 = int.Parse(args[4]);
                                 int count2 = int.Parse(args[5]);
                                 VI.Cout(Uid, "{0}的{1}数增加{2}，现在为{3}.", zd.Player(who),
-                                    zd.HeroFolderAlias(A0P[who].SelectHero), count1, count2);
+                                    zd.HeroFolderAlias(A0P[who].SelectHero, A0P[who].Coss), count1, count2);
                                 A0P[who].FolderCount += count1;
                             }
                         }
@@ -2513,10 +2513,10 @@ namespace PSD.ClientAo
                                     6 + count1 + count2).Select(p => ushort.Parse(p)).ToList();
                                 if (count2 == 0)
                                     VI.Cout(Uid, "{0}的{1}减少{2}.", zd.Player(who),
-                                        zd.HeroFolderAlias(A0P[who].SelectHero), zd.Tux(folder1));
+                                        zd.HeroFolderAlias(A0P[who].SelectHero, A0P[who].Coss), zd.Tux(folder1));
                                 else
                                     VI.Cout(Uid, "{0}的{1}减少{2}，现在为{3}.", zd.Player(who),
-                                        zd.HeroFolderAlias(A0P[who].SelectHero), zd.Tux(folder1), zd.Tux(folder2));
+                                        zd.HeroFolderAlias(A0P[who].SelectHero, A0P[who].Coss), zd.Tux(folder1), zd.Tux(folder2));
                                 A0P[who].DelMyFolder(folder1);
                             }
                             else
@@ -2524,7 +2524,7 @@ namespace PSD.ClientAo
                                 int count1 = int.Parse(args[4]);
                                 int count2 = int.Parse(args[5]);
                                 VI.Cout(Uid, "{0}的{1}数减少{2}，现在为{3}.", zd.Player(who),
-                                    zd.HeroFolderAlias(A0P[who].SelectHero), count1, count2);
+                                    zd.HeroFolderAlias(A0P[who].SelectHero, A0P[who].Coss), count1, count2);
                                 A0P[who].FolderCount -= count1;
                             }
                         }
@@ -2984,6 +2984,25 @@ namespace PSD.ClientAo
                         sfs.ForEach(p => A0P[who].DelRune(p));
                         VI.Cout(Uid, "{0}失去身法{1}.", zd.Player(who), zd.Rune(sfs));
                         A0O.FlyingGet(sfs.Select(p => "R" + p).ToList(), who, 0);
+                    }
+                    break;
+                case "E0PQ":
+                    {
+                        ushort type = ushort.Parse(args[0]);
+                        ushort who = ushort.Parse(args[1]);
+                        if (type == 0)
+                        {
+                            List<ushort> tuxes = Algo.TakeRange(args, 2, args.Length)
+                                .Select(p => ushort.Parse(p)).ToList();
+                            VI.Cout(Uid, "{0}失去卡牌{1}.", zd.Player(who), zd.Tux(tuxes));
+                            A0O.FlyingGet(tuxes.Select(p => "C" + p).ToList(), who, 0);
+                        }
+                        else if (type == 1)
+                        {
+                            int n = ushort.Parse(args[2]);
+                            VI.Cout(Uid, "{0}失去{1}张卡牌.", zd.Player(who), n);
+                            A0O.FlyingGet(Algo.RepeatString("C0", n).ToList(), who, 0);
+                        }
                     }
                     break;
             }

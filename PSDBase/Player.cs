@@ -320,8 +320,6 @@ namespace PSD.Base
                 HP = HPb = hero.HP;
                 Loved = false;
                 TuxLimit = 3;
-
-                LoadDefaultPrice();
             }
         }
         public bool RemoveCard(ushort card, List<ushort> discards)
@@ -409,13 +407,9 @@ namespace PSD.Base
             return Uid != 0 && IsAlive && IsReal;
         }
         #region TuxPrice
-        private void LoadDefaultPrice()
+        public void ClearPrice()
         {
             cz01PriceDict.Clear();
-            AddToPrice("JP03", false, "0", '=', 1);
-            AddToPrice("WQ04", false, "0", '=', 2);
-            AddToPrice("WQ04", true, "0", '=', 2);
-            AddToPrice("JPH4", false, "0", '=', 2);
         }
         public void AddToPrice(string tuxCode, bool inEq, string reason, char type, int price)
         {

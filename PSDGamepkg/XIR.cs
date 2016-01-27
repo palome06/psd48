@@ -41,6 +41,7 @@ namespace PSD.PSDGamepkg
             {
                 Base.Card.Hero hero = LibTuple.HL.InstanceHero(player.SelectHero);
                 player.InitFromHero(hero, true, false, false);
+                Artiad.ContentRule.LoadDefaultPrice(player);
             }
             foreach (Player player in garden.Values)
             {
@@ -360,11 +361,16 @@ namespace PSD.PSDGamepkg
                             }
                             break;
                         }
+                    // Monster's Silence happens here.
                     case "Z1":
                         WI.BCast(rstage + ",0");
                         RunQuadMixedStage(rstage, 0,
-                            new int[] { -300, -100, 300 },
+                            new int[] { -400, -300, -100, 300 },
                             new Action[] { () => {
+                                Monster monster = Board.Battler as Monster;
+                                if (monster != null && monster.IsSilence())
+                                    Board.Silence.Add(Board.Battler.Code);
+                            }, () => {
                                 Board.InFightThrough = true;
                                 Board.FightTangled = false;
                                 AwakeABCValue(false);
@@ -512,6 +518,8 @@ namespace PSD.PSDGamepkg
                         RecycleMonster(false, false);
                         //WI.BCast(rstage + ",0");
                         //RaiseGMessage("G0FI,U," + rounder);
+                        if (Board.Battler as Monster != null && (Board.Battler as Monster).IsSilence())
+                            Board.Silence.Add(Board.Battler.Code);
                         RunQuadStage(rstage);
                         Board.CleanBattler();
                         rstage = "R" + rounder + "ZZ"; break;

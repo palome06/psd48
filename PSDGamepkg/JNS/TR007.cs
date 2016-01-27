@@ -2544,10 +2544,6 @@ namespace PSD.PSDGamepkg.JNS
                     if (tux.Code == pureName && tux.Bribe(player, pureType, pureFuse)
                                 && tux.Valid(player, pureType, pureFuse))
                     {
-                        //if ((tux.IsEq[pureType] & 3) == 0)
-                        //    XI.RaiseGMessage("G0ON," + player.Uid + ",C,1," + ut);
-                        //else
-                        //    XI.Board.PendingTux.Enqueue(player.Uid + ",G0CC," + ut);
                         if (tux.Type == Tux.TuxType.ZP)
                             XI.RaiseGMessage("G0CZ,0," + player.Uid);
                         XI.RaiseGMessage("G0CC," + player.Uid + ",0," + player.Uid + "," +
@@ -4809,7 +4805,7 @@ namespace PSD.PSDGamepkg.JNS
                                 {
                                     XI.RaiseGMessage("G0OJ," + player.Uid + ",1,1,C" + ut);
                                     XI.RaiseGMessage("G2TZ,0," + player.Uid + ",C" + ut);
-                                    if ((tux.IsEq[pureType] & 3) == 0)
+                                    if (!Artiad.ContentRule.IsTuxVestige(tux.Code, pureType))
                                         XI.RaiseGMessage("G0ON," + player.Uid + ",C,1," + ut);
                                     else
                                         XI.Board.PendingTux.Enqueue(player.Uid + ",G0CC," + ut);

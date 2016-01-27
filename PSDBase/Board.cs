@@ -10,13 +10,15 @@ namespace PSD.Base
     public class Board
     {
         public IDictionary<ushort, Player> Garden { set; get; }
-        private List<ushort> SortedPlayerList { set; get; }
 
         public Player Rounder
         {
             set { mRounder = value ?? ghost; }
             get { return mRounder ?? ghost; }
         }
+        public string RoundIN { set; get; }
+
+        #region battle related
         public Player Hinder
         {
             set { mHinder = value ?? ghost; }
@@ -33,8 +35,6 @@ namespace PSD.Base
             set { mHorn = value ?? ghost; }
             get { return mHorn ?? ghost; }
         }
-        public string RoundIN { set; get; }
-
         public bool SupportSucc { set; get; }
         public bool HinderSucc { set; get; }
 
@@ -44,6 +44,7 @@ namespace PSD.Base
         public bool AllowNoSupport { set; get; }
         public bool AllowNoHinder { set; get; }
         // 0. fight; 1. Skip fight; 2. not enter the stage.
+        #endregion battle related
         //public int IsFight { set; get; }
         public bool ClockWised { set; get; }
 
@@ -81,11 +82,11 @@ namespace PSD.Base
         // Whether the fight is tangled or not
         public bool FightTangled { set; get; }
 
+        public int DiceValue { get; set; }
         public List<ushort> PZone { private set; get; }
         // Consumed Pets list, to be removed later in ZD
         public List<string> CsPets { get; private set; }
         public List<string> CsEqiups { get; private set; }
-        public int DiceValue { get; set; }
 
         public Utils.Rueue<ushort> TuxPiles { set; get; }
         public Utils.Rueue<ushort> EvePiles { set; get; }
@@ -109,8 +110,10 @@ namespace PSD.Base
         public List<ushort> PetProtecedPlayer { private set; get; }
         // List of monsters that is disabled
         public ISet<ushort> NotActionPets { private set; get; }
-        // permit the use of escue
-        public bool EscueBanned { set; get; }
+        // permit the use of escue, set of reasons
+        public ISet<string> EscueBanned { private set; get; }
+        // silence the board so that active skills are banned, set of reasons
+        public ISet<string> Silence { private set; get; }
 
         public IDictionary<string, string> JumpTable { private set; get; }
 
@@ -121,7 +124,8 @@ namespace PSD.Base
         public Player GetOpponenet(Player player)
         {
             int mycount = 0, opcount = 0;
-            List<ushort> list = SortedPlayerList.ToList();
+            List<ushort> list = Garden.Keys.ToList();
+            list.Sort();
             if (!ClockWised)
                 list.Reverse();
             foreach (ushort ut in list)
@@ -167,11 +171,6 @@ namespace PSD.Base
             ushort uhd = (ushort)(((player.Uid + 1) / 2 * 4) - 1 - player.Uid);
             return uhd > 6 ? ghost : Garden[uhd];
         }
-        public void SortGarden()
-        {
-            SortedPlayerList = Garden.Keys.ToList();
-            SortedPlayerList.Sort();
-        }
 
         public bool IsAttendWar(Player player)
         {
@@ -209,7 +208,7 @@ namespace PSD.Base
         {
             Supporter = null; Hinder = null;
             SupportSucc = false; HinderSucc = false;
-            EscueBanned = false;
+            EscueBanned.Clear(); Silence.Clear();
         }
         public List<ushort> OrderedPlayer() { return OrderedPlayer(Rounder.Uid); }
         public List<ushort> OrderedPlayer(ushort start)
@@ -263,6 +262,8 @@ namespace PSD.Base
             OPoolGain = new Dictionary<string, int>();
             IsMonsterDebut = false;
             FightTangled = false;
+            EscueBanned = new HashSet<string>();
+            Silence = new HashSet<string>();
         }
         // Create a lumberjack of monster/NPC, act as normal humans
         public static Player Lumberjack(Card.NMB nmb, ushort orgCode, int team)

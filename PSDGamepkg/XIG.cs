@@ -313,7 +313,7 @@ namespace PSD.PSDGamepkg
                             //if (changeType == 2)
                             //    player.HP = 0;
                             if (changeType == 0 || changeType == 2)
-                                Artiad.ContentRule.ErasePlayerToken(player, Board, RaiseGMessage);
+                                Artiad.Procedure.ErasePlayerToken(player, Board, RaiseGMessage);
                             if (!Board.BannedHero.Contains(player.SelectHero))
                                 Board.HeroDises.Add(player.SelectHero);
                             player.SelectHero = 0;
@@ -550,12 +550,17 @@ namespace PSD.PSDGamepkg
                         }
                         Board.Eve = eveCard;
                         RaiseGMessage("G0YM,2," + Board.Eve + ",0");
+                        Base.Card.Evenement eve = LibTuple.EL.DecodeEvenement(Board.Eve);
+                        if (eve != null && eve.IsSilence())
+                            Board.Silence.Add(eve.Code);
                     }
                     else if (priority == 200)
                     {
                         ushort trigger = ushort.Parse(args[1]);
                         Base.Card.Evenement eve = LibTuple.EL.DecodeEvenement(Board.Eve);
                         eve.Action(Board.Garden[trigger]);
+                        if (eve != null && eve.IsSilence())
+                            Board.Silence.Remove(eve.Code);
                     }
                     break;
                 default:
@@ -937,8 +942,16 @@ namespace PSD.PSDGamepkg
                                 int n = int.Parse(args[4]);
                                 RaiseGMessage("G2IN,0," + n);
                                 ushort[] tuxs = DequeueOfPile(Board.TuxPiles, n);
-                                VI.Cout(0, "{0}摸取手牌{1}.", DisplayPlayer(me), DisplayTux(tuxs));
                                 RaiseGMessage("G0IT," + me + "," + n + "," + string.Join(",", tuxs));
+                                WI.Send("E0HQ,2," + me + "," + string.Join(",", tuxs), 0, me);
+                                WI.Send("E0HQ,3," + me + "," + tuxs.Length, ExceptStaff(me));
+                                WI.Live("E0HQ,3," + me + "," + tuxs.Length);
+                            }
+                            else if (utype == 2)
+                            {
+                                ushort[] tuxs = Algo.TakeRange(args, 4, args.Length)
+                                    .Select(p => ushort.Parse(p)).ToArray();
+                                RaiseGMessage("G0IT," + me + "," + tuxs.Length + "," + string.Join(",", tuxs));
                                 WI.Send("E0HQ,2," + me + "," + string.Join(",", tuxs), 0, me);
                                 WI.Send("E0HQ,3," + me + "," + tuxs.Length, ExceptStaff(me));
                                 WI.Live("E0HQ,3," + me + "," + tuxs.Length);
@@ -1321,6 +1334,7 @@ namespace PSD.PSDGamepkg
                         {
                             player.ResetROM(Board);
                             player.InitFromHero(hero, true, Board.InFightThrough, Board.InFight);
+                            Artiad.ContentRule.LoadDefaultPrice(player);
                         }
                         else
                             player.InitFromHero(hero, false, Board.InFightThrough, Board.InFight);
@@ -1434,24 +1448,13 @@ namespace PSD.PSDGamepkg
 
                         string[] argv = cmd.Substring(0, hdx).Split(',');
                         ushort ust = ushort.Parse(argv[1]);
-                        Base.Card.Tux tux = LibTuple.TL.EncodeTuxCode(argv[3]);
+                        string cardName = argv[3];
                         WI.BCast("E0CD," + argv[1] + "," + argv[2] + "," + argv[3]);
-                        //if (!tux.IsEq[sktInType])
-                        //string input = "";
-                        //while (true)
-                        //{
-                        //    string ipt = tux.Input(Board.Garden[ust], sktInType, sktFuse, input);
-                        //    if (ipt != null && ipt != "")
-                        //        input += (input == "" ? "" : ",") + AsyncInput(ust, ipt, argv[2], "0");
-                        //    else break;
-                        //}
-                        //if (input.Length > 0)
-                        //    argv[3] += "," + input;
-                        if ((tux.IsEq[sktInType] & 1) == 0)
-                            RaiseGMessage("G0CE," + ust + "," + argv[2] + ",0," + argv[3] +
+                        if (!Artiad.ContentRule.IsTuxVestige(cardName, sktInType))
+                            RaiseGMessage("G0CE," + ust + "," + argv[2] + ",0," + cardName +
                                 ";" + sktInType + "," + sktFuse);
                         else
-                            RaiseGMessage("G0CE," + ust + "," + argv[2] + ",1," + argv[3] +
+                            RaiseGMessage("G0CE," + ust + "," + argv[2] + ",1," + cardName +
                                 "," + argv[4] + ";" + sktInType + "," + sktFuse);
                         break;
                     }
@@ -3737,6 +3740,23 @@ namespace PSD.PSDGamepkg
                         ushort cardUt = ushort.Parse(args[3]);
                         TuxEqiup te = LibTuple.TL.DecodeTux(cardUt) as TuxEqiup;
                         te.UseAction(cardUt, Board.Garden[who], provider != who);
+                    }
+                    break;
+                case "G0PQ":
+                    {
+                        RaiseGMessage("G0OT," + cmdrst);
+                        int idx = 1;
+                        while (idx < args.Length)
+                        {
+                            ushort who = ushort.Parse(args[idx++]);
+                            int n = int.Parse(args[idx++]);
+                            ushort[] tuxes = Algo.TakeRange(args, idx, idx + n)
+                                .Select(p => ushort.Parse(p)).ToArray();
+                            WI.Send("E0PQ,0," + who + "," + string.Join(",", tuxes), 0, who);
+                            WI.Send("E0PQ,1," + who + "," + n, ExceptStaff(who));
+                            WI.Live("E0PQ,1," + who + "," + n);
+                            idx += n;
+                        }
                     }
                     break;
             }

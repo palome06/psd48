@@ -88,7 +88,8 @@ namespace PSD.Base.Card
                 int genre = (int)((long)data["GENRE"]);
                 string name = (string)data["NAME"];
                 ushort str = (ushort)((short)data["STR"]);
-                string[] npcskills = ((string)data["ACTION"]).Split(',');
+                string action = (string)data["ACTION"];
+                string[] npcskills = !string.IsNullOrEmpty(action) ? action.Split(',') : new string[0];
                 int org = (int)((long)data["ORG"]);
                 string debutText = data["DEBUTTEXT"] as string;
                 dicts.Add(id, new NPC(code, valid, genre, name, str, npcskills, org) { DebutText = debutText ?? "" });
@@ -122,17 +123,6 @@ namespace PSD.Base.Card
                 return dicts.Keys.ToList();
             else
                 return dicts.Where(p => pkgs.Contains(p.Value.Group)).Select(p => p.Key).ToList();
-        }
-
-        public void ForceChange(ushort ut, Func<ushort, ushort> utChange, string newCode)
-        {
-            if (dicts.ContainsKey(ut))
-            {
-                NPC npc = dicts[ut];
-                dicts.Remove(ut);
-                dicts[utChange(ut)] = npc;
-                npc.ForceChange("Code", newCode);
-            }
         }
     }
 }

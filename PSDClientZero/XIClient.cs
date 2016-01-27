@@ -813,7 +813,6 @@ namespace PSD.ClientZero
                     // format X(p1p3p5)
                     int jdx = arg.IndexOf('(');
                     int kdx = arg.IndexOf(')');
-                    int rest = int.Parse(Algo.Substring(arg, 1, jdx));
                     string[] argv = Algo.Substring(arg, jdx + "(p".Length, kdx).Split('p');
                     char cardType = argv[0][0];
                     List<ushort> uss = argv.Select(p => ushort.Parse(p.Substring(1))).ToList();
@@ -846,7 +845,6 @@ namespace PSD.ClientZero
                 {
                     int idx = arg.IndexOf('~');
                     int jdx = arg.IndexOf('(');
-                    int kdx = arg.IndexOf(')');
                     if (idx >= 1)
                     {
                         int r1 = int.Parse(Substring(arg, 1, idx));
@@ -1231,7 +1229,6 @@ namespace PSD.ClientZero
                             int tuxCount = 0;
                             foreach (ushort ut in cards)
                             {
-                                Tux tux = Tuple.TL.DecodeTux(ut);
                                 if (Z0D[who].Weapon == ut)
                                     Z0D[who].Weapon = 0;
                                 else if (Z0D[who].Armor == ut)
@@ -1346,35 +1343,14 @@ namespace PSD.ClientZero
                             int utype = int.Parse(args[4]);
                             if (utype == 0)
                             {
-                                int n = int.Parse(args[5]);
                                 List<ushort> cards = Algo.TakeRange(args, 6, args.Length)
                                     .Select(p => ushort.Parse(p)).ToList();
                                 VI.Cout(Uid, "{0}从{1}获得了{2}.", zd.Player(to), zd.Player(from), zd.Tux(cards));
-                                //foreach (ushort card in cards)
-                                //{
-                                //    if (Z0D[from].Weapon == card)
-                                //        Z0D[from].Weapon = 0;
-                                //    else if (Z0D[from].Armor == card)
-                                //        Z0D[from].Armor = 0;
-                                //    else if (Z0D[from].ExCards.Contains(card))
-                                //        Z0D[from].ExCards.Remove(card);
-                                //    else
-                                //    {
-                                //        --Z0D[from].TuxCount;
-                                //        if (uid == from)
-                                //            Z0M.Tux.Remove(card);
-                                //    }
-                                //}
-                                //Z0D[to].TuxCount += (args.Length - 6);
-                                //if (uid == to)
-                                //    Z0M.Tux.AddRange(cards);
                             }
                             else if (utype == 1)
                             {
                                 int n = int.Parse(args[5]);
                                 VI.Cout(Uid, "{0}从{1}获得了{2}张牌.", zd.Player(to), zd.Player(from), n);
-                                //Z0D[from].TuxCount -= n;
-                                //Z0D[to].TuxCount += n;
                             }
                         }
                         else if (type == 2)
@@ -1382,16 +1358,11 @@ namespace PSD.ClientZero
                             List<ushort> cards = Algo.TakeRange(args, 3, args.Length)
                                 .Select(p => ushort.Parse(p)).ToList();
                             VI.Cout(Uid, "{0}摸取了{1}.", zd.Player(to), zd.Tux(cards));
-                            //Z0P.TuxCount -= args.Length - 3;
-                            //Z0D[to].TuxCount += cards.Count;
-                            //if (uid == to)
-                            //    Z0M.Tux.AddRange(cards);
                         }
                         else if (type == 3)
                         {
                             int n = int.Parse(args[3]);
                             VI.Cout(Uid, "{0}摸取了{1}张牌.", zd.Player(to), n);
-                            //Z0D[to].TuxCount += n;
                         }
                         else if (type == 4)
                         {
@@ -1473,25 +1444,27 @@ namespace PSD.ClientZero
                     }
                 case "E0IY":
                     {
-                        bool changed = (args[1] == "0");
+                        ushort changed = ushort.Parse(args[1]);
                         ushort who = ushort.Parse(args[2]);
                         int hero = int.Parse(args[3]);
                         if (Z0D.ContainsKey(who))
                         {
                             Z0D[who].SelectHero = hero;
                             Z0D[who].IsAlive = true;
-                            if (args[1] == "0")
+                            if (changed == 0)
                             {
                                 Z0D[who].ParseFromHeroLib();
                                 VI.Cout(Uid, "{0}#玩家转化为{1}角色.", who, zd.Hero(hero));
                             }
-                            else if (args[1] == "1")
+                            else if (changed == 1)
                                 VI.Cout(Uid, "{0}#玩家变身为{1}角色.", who, zd.Hero(hero));
-                            else if (args[1] == "2")
+                            else if (changed == 2)
                             {
                                 Z0D[who].ClearStatus();
                                 VI.Cout(Uid, "{1}加入到{0}#位置.", who, zd.Hero(hero));
                             }
+                            if (who == Uid)
+                                Z0M.SelectHero = hero;
                         }
                     }
                     break;
@@ -1585,7 +1558,6 @@ namespace PSD.ClientZero
                     {
                         // E0CC,A,0,TP02,17,36
                         ushort ust = ushort.Parse(args[1]);
-                        ushort adapter = ushort.Parse(args[2]);
                         ushort pst = ushort.Parse(args[3]);
                         string txkn = args[4];
                         List<ushort> ravs = Algo.TakeRange(args, 5, args.Length)
@@ -2008,14 +1980,14 @@ namespace PSD.ClientZero
                         ushort who = ushort.Parse(args[2]);
                         if (type == 0)
                         {
-                            ushort from = ushort.Parse(args[3]);
+                            //ushort from = ushort.Parse(args[3]);
                             var cards = Algo.TakeRange(args, 4, args.Length).Select(p => ushort.Parse(p));
                             VI.Cout(Uid, "{0}可以获得宠物{1}.", zd.Player(who), zd.Monster(cards));
                         }
                         else if (type == 1)
                         {
-                            ushort from = ushort.Parse(args[3]);
-                            ushort kokan = ushort.Parse(args[4]);
+                            //ushort from = ushort.Parse(args[3]);
+                            //ushort kokan = ushort.Parse(args[4]);
                             var cards = Algo.TakeRange(args, 5, args.Length).Select(p => ushort.Parse(p));
                             VI.Cout(Uid, "{0}可获得宠物{1}.", zd.Player(who), zd.Monster(cards));
                         }
@@ -2086,17 +2058,6 @@ namespace PSD.ClientZero
                         ushort pet = ushort.Parse(args[2]);
                         VI.Cout(Uid, "{0}失去了宠物{1}.", zd.Player(who), zd.Monster(pet));
                         Z0D[who].Pets.Remove(pet);
-                    }
-                    break;
-                case "E0HU":
-                    {
-                        ushort who = ushort.Parse(args[1]);
-                        List<ushort> cedcards = new List<ushort>();
-                        for (int i = 2; i < args.Length; ++i)
-                        {
-                            ushort mon = ushort.Parse(args[i]);
-                            cedcards.Add(mon);
-                        }
                     }
                     break;
                 case "E0HZ":
@@ -2182,7 +2143,7 @@ namespace PSD.ClientZero
                                 List<ushort> folder2 = Algo.TakeRange(args, 6 + count1,
                                     6 + count1 + count2).Select(p => ushort.Parse(p)).ToList();
                                 VI.Cout(Uid, "{0}的{1}增加{2}，现在为{3}.", zd.Player(who),
-                                    zd.HeroFolderAlias(Z0D[who].SelectHero), zd.Tux(folder1), zd.Tux(folder2));
+                                    zd.HeroFolderAlias(Z0D[who].SelectHero, Z0D[who].Coss), zd.Tux(folder1), zd.Tux(folder2));
                                 Z0D[who].FolderCount += count1;
                                 Z0M.Folder.AddRange(folder1);
                             }
@@ -2191,7 +2152,7 @@ namespace PSD.ClientZero
                                 int count1 = int.Parse(args[4]);
                                 int count2 = int.Parse(args[5]);
                                 VI.Cout(Uid, "{0}的{1}数增加{2}，现在为{3}.", zd.Player(who),
-                                    zd.HeroFolderAlias(Z0D[who].SelectHero), count1, count2);
+                                    zd.HeroFolderAlias(Z0D[who].SelectHero, Z0D[who].Coss), count1, count2);
                                 Z0D[who].FolderCount += count1;
                             }
                         }
@@ -2254,10 +2215,10 @@ namespace PSD.ClientZero
                                     6 + count1 + count2).Select(p => ushort.Parse(p)).ToList();
                                 if (count2 == 0)
                                     VI.Cout(Uid, "{0}的{1}减少{2}.", zd.Player(who),
-                                        zd.HeroFolderAlias(Z0D[who].SelectHero), zd.Tux(folder1));
+                                        zd.HeroFolderAlias(Z0D[who].SelectHero, Z0D[who].Coss), zd.Tux(folder1));
                                 else
                                     VI.Cout(Uid, "{0}的{1}减少{2}，现在为{3}.", zd.Player(who),
-                                        zd.HeroFolderAlias(Z0D[who].SelectHero), zd.Tux(folder1), zd.Tux(folder2));
+                                        zd.HeroFolderAlias(Z0D[who].SelectHero, Z0D[who].Coss), zd.Tux(folder1), zd.Tux(folder2));
                                 Z0D[who].FolderCount -= count1;
                                 Z0M.Folder.RemoveAll(p => folder1.Contains(p));
                             }
@@ -2266,7 +2227,7 @@ namespace PSD.ClientZero
                                 int count1 = int.Parse(args[4]);
                                 int count2 = int.Parse(args[5]);
                                 VI.Cout(Uid, "{0}的{1}数减少{2}，现在为{3}.", zd.Player(who),
-                                    zd.HeroFolderAlias(Z0D[who].SelectHero), count1, count2);
+                                    zd.HeroFolderAlias(Z0D[who].SelectHero, Z0D[who].Coss), count1, count2);
                                 Z0D[who].FolderCount -= count1;
                             }
                         }
@@ -2449,6 +2410,8 @@ namespace PSD.ClientZero
                             guestName = hero.GuestAlias;
                         VI.Cout(Uid, "{0}迎来了{1}「{2}」.", zd.Player(ut), guestName, zd.Hero(hro));
                         Z0D[ut].Coss = hro;
+                        if (ut == Uid)
+                            Z0M.Coss = hro;
                     }
                     break;
                 case "E0OV":
@@ -2462,6 +2425,8 @@ namespace PSD.ClientZero
                             guestName = hero.GuestAlias;
                         VI.Cout(Uid, "{0}送走了{1}「{2}」.", zd.Player(ut), guestName, zd.Hero(hro));
                         Z0D[ut].Coss = next;
+                        if (ut == Uid)
+                            Z0M.Coss = 0;
                     }
                     break;
                 case "E0PB":
@@ -2826,7 +2791,7 @@ namespace PSD.ClientZero
         {
             StartCinEtc();
             int idx = cmdrst.IndexOf(',');
-            ushort major = ushort.Parse(cmdrst.Substring(0, idx));
+            //ushort major = ushort.Parse(cmdrst.Substring(0, idx));
             bool decided = false;
             while (!decided)
             {
@@ -3101,32 +3066,14 @@ namespace PSD.ClientZero
                         VI.Cout(Uid, "{0}NPC响应结束.", zd.Player(rounder));
                     break;
                 case "NP2":
-                    {
-                        ushort mons = ushort.Parse(para);
-                        //VI.Cout(Uid, "{0}跳过NPC，继续翻看怪物牌，结果为【{1}】.", zd.Player(rounder),
-                        //    zd.Monster(mons));
-                        VI.Cout(Uid, "{0}跳过NPC，继续翻看怪物牌.", zd.Player(rounder));
-                        //Z0F.Monster1 = mons;
-                        break;
-                    }
+                    VI.Cout(Uid, "{0}跳过NPC，继续翻看怪物牌.", zd.Player(rounder));
+                    break;
                 case "Z1":
                     if (para == "0")
                         VI.Cout(Uid, "{0}战斗开始阶段开始.", zd.Player(rounder));
                     else if (para == "1")
                         VI.Cout(Uid, "{0}战斗开始阶段结束.", zd.Player(rounder));
                     break;
-                //case "ZC1":
-                //    {
-                //        string[] args = para.Split(',');
-                //        ushort s = ushort.Parse(args[0]);
-                //        bool sy = args[1].Equals("1");
-                //        ushort h = ushort.Parse(args[2]);
-                //        bool hy = args[3].Equals("1");
-                //        string comp1 = (s != 0) ? "{0}支援" + (sy ? "成功" : "失败") : "无支援";
-                //        string comp2 = (h != 0) ? "{1}妨碍" + (hy ? "成功" : "失败") : "无妨碍";
-                //        VI.Cout(uid, comp1 + "，" + comp2 + "。", zd.Player(s), zd.Player(h));
-                //        break;
-                //    }
                 case "ZD":
                     if (para == "0")
                         VI.Cout(Uid, "{0}战牌阶段开始.", zd.Player(rounder));
@@ -3596,12 +3543,12 @@ namespace PSD.ClientZero
                             bool isAka = (Uid % 2 == 1);
                             while ((isAka && !cc.DecidedAka) || (!isAka && !cc.DecidedAo))
                             {
-                                List<int> xuanR = (Uid % 2 == 0) ? cc.XuanAo : cc.XuanAka;
+                                //List<int> xuanR = (Uid % 2 == 0) ? cc.XuanAo : cc.XuanAka;
                                 if (VI is ClientZero.VW.Ayvi)
                                 {
                                     string op = (VI as ClientZero.VW.Ayvi).Cin48(Uid);
                                     op = op.Trim().ToUpper();
-                                    bool has = cc.Ding[Uid] != 0;
+                                    //bool has = cc.Ding[Uid] != 0;
                                     if (op == "X")
                                         WI.Send("H0CD,0", Uid, 0);
                                     else
@@ -3649,7 +3596,7 @@ namespace PSD.ClientZero
                 case "H0CC":
                     {
                         string[] args = cmdrst.Split(',');
-                        ushort puid = ushort.Parse(args[0]);
+                        //ushort puid = ushort.Parse(args[0]);
                         int heroCode = int.Parse(args[1]);
                         VI.Cout(Uid, "{0}被放回选将池中.", zd.Hero(heroCode));
                         Base.Rules.CastingCongress cc = casting as Base.Rules.CastingCongress;
@@ -3711,7 +3658,7 @@ namespace PSD.ClientZero
                             .Where(p => p.SelectHero != 0)
                             .Select(p => p.Uid + ":" + zd.Hero(p.SelectHero))));
                         Z0F = new ZeroField(this);
-                        Z0M = new ZeroMe(this);
+                        Z0M = new ZeroMe(this) { SelectHero = Z0D[Uid].SelectHero };
                     }
                     break;
                 case "H0DP":
@@ -3872,7 +3819,7 @@ namespace PSD.ClientZero
                 case "H0WD":
                     if (!GameGraceEnd) {
                         int secLeft = int.Parse(cmdrst);
-                        VI.Cout(Uid, "房间将在{0}秒后彻底关闭。");
+                        VI.Cout(Uid, "房间将在{0}秒后彻底关闭。", secLeft);
                     }
                     break;
                 case "H0BK":

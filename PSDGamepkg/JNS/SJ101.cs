@@ -1,8 +1,8 @@
 ﻿using PSD.Base;
 using PSD.Base.Card;
+using PSD.Base.Utils;
 using System.Collections.Generic;
 using System.Linq;
-using Algo = PSD.Base.Utils.Algo;
 
 namespace PSD.PSDGamepkg.JNS
 {
@@ -550,12 +550,62 @@ namespace PSD.PSDGamepkg.JNS
                 XI.RaiseGMessage("G0IF," + ut + "," + fuseMap[result]);
             }
         }
+        public void SJT18(Player rd)
+        {
+            List<ushort> pops = new List<ushort>();
+            string g0ot = "";
+            foreach (Player player in XI.Board.Garden.Values)
+            {
+                if (player.IsAlive && player.HasAnyCards())
+                {
+                    pops.AddRange(player.ListOutAllCards());
+                    g0ot += "," + player.Uid + "," + player.GetAllCardsCount() + "," +
+                        string.Join(",", player.ListOutAllCards());
+                }
+            }
+            if (pops.Count > 0)
+            {
+                XI.RaiseGMessage("G0OT" + g0ot);
+                pops.Shuffle();
+                int rx = XI.Board.Garden.Values.Count(p => p.IsAlive && p.Team == rd.Team);
+                int ox = XI.Board.Garden.Values.Count(p => p.IsAlive && p.Team == rd.OppTeam);
+                int idx = 0;
+                while (idx < pops.Count)
+                {
+                    foreach (ushort pyu in XI.Board.OrderedPlayer(rd.Uid))
+                    {
+                        Player player = XI.Board.Garden[pyu];
+                        if (player.IsAlive)
+                        {
+                            bool less = (player.Team == rd.Team && rx < ox) || (player.Team == rd.OppTeam && rx > ox);
+                            if (less && idx + 1 < pops.Count)
+                                XI.RaiseGMessage("G0HQ,2," + pyu + ",2," + pops[idx++] + "," + pops[idx++]);
+                            else
+                                XI.RaiseGMessage("G0HQ,2," + pyu + ",2," + pops[idx++]);
+                        }
+                        if (idx >= pops.Count)
+                            break;
+                    }
+                }
+            }
+            // TODO: substitide IT with HQ, OT with new guy (PQ indicates anomoys flying and OT)
+        }
         public void SJT19(Player rd)
         {
             var lst = XI.Board.Garden.Values.Where(p => p.IsAlive && p.Tux.Count > 0).ToList();
             if (lst.Any())
                 XI.RaiseGMessage(Artiad.Harm.ToMessage(lst.Select(
                     p => new Artiad.Harm(p.Uid, 0, FiveElement.YINN, p.Tux.Count, 0))));
+        }
+        public void SJT20(Player rd)
+        {
+            List<Player> zeros = XI.Board.Garden.Values.Where(p => p.IsAlive && p.Tux.Count == 0).ToList();
+            List<Player> ones = XI.Board.Garden.Values.Where(p => p.IsAlive && p.Tux.Count > 0).ToList();
+            List<Player> fours = XI.Board.Garden.Values.Where(p => p.IsAlive && p.Tux.Count >= 4).ToList();
+            if (ones.Count > 0)
+                XI.RaiseGMessage("G0DH," + string.Join(",", ones.Select(p => p.Uid + ",2," + (p.Tux.Count - 1))));
+            fours.ForEach(p => XI.RaiseGMessage("G0IF," + p.Uid + ",0,6"));
+            zeros.ForEach(p => XI.RaiseGMessage("G0IF," + p.Uid + ",0,4"));
         }
         #endregion Package 6#
         #region Holiday

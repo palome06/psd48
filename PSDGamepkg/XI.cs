@@ -588,7 +588,7 @@ namespace PSD.PSDGamepkg
                  "IX", "OX", "AX", "IB", "OB", "IW", "OW", "WB", "9P", "IP", "OP", "CZ", "HC", "HD",
                  "HH", "HI", "HL", "IC", "OC", "HT", "HG", "QR", "HZ", "TT", "T7", "JM", "WN", "IJ",
                  "OJ", "IE", "OE", "IS", "OS", "LH", "IV", "OV", "PB", "YM", "HR", "FI", "ON", "SN",
-                 "MA", "ZJ", "IF", "OF" };
+                 "MA", "ZJ", "IF", "OF", "PQ" };
             string[] g1 = new string[] { "DI", "IU", "OU", "TH", "CW", "ZK", "IZ", "OZ", "WP", "SG",
                  "HK", "WJ", "JG", "XR", "EV", "CK", "7F", "YP", "NI", "GE", "LY", "UE" };
             string[] g2 = new string[] { "IN", "RN", "CN", "QC", "FU", "QU", "CL", "ZU", "HU", "WK",
@@ -736,7 +736,8 @@ namespace PSD.PSDGamepkg
 
             bool isAnySet = false;
             ske.Fuse = zero;
-            if (ske.Type == SKTType.SK && sk01.ContainsKey(ske.Name))
+            bool sheid = (ske.Lock != true && Board.Silence.Count > 0);
+            if (ske.Type == SKTType.SK && sk01.ContainsKey(ske.Name) && !sheid)
             {
                 //skt.CardCode = 0;
                 Skill skill = sk01[ske.Name];
@@ -759,7 +760,7 @@ namespace PSD.PSDGamepkg
                     isAnySet |= true;
                 }
             }
-            else if (ske.Type == SKTType.BK && sk01.ContainsKey(ske.Name))
+            else if (ske.Type == SKTType.BK && sk01.ContainsKey(ske.Name) && !sheid)
             {
                 //skt.CardCode = 0;
                 Bless skill = (Bless)sk01[ske.Name];
@@ -909,7 +910,8 @@ namespace PSD.PSDGamepkg
                     isAnySet |= true;
                 }
             }
-            else if ((!ske.IsOnce || ske.Tick == 0) && ske.Type == SKTType.YJ && nj01.ContainsKey(ske.Name) && !Board.EscueBanned)
+            else if ((!ske.IsOnce || ske.Tick == 0) && ske.Type == SKTType.YJ &&
+                nj01.ContainsKey(ske.Name) && Board.EscueBanned.Count == 0)
             {
                 Base.NCAction na = nj01[ske.Name];
                 Player player = Board.Garden[ske.Tg];

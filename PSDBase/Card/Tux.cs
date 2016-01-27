@@ -32,13 +32,9 @@ namespace PSD.Base.Card
         public string[] Occurs { protected set; get; }
         public string[] Parasitism { get; protected set; }
 
+        // whether only can work for the owner himself
         public char[] Targets { protected set; get; }
         public bool[] IsTermini { protected set; get; }
-        // whether is equipped or used directly
-        // 1-set-eqiup, 2-set-pending
-        public ushort[] IsEq { protected set; get; }
-        // whether only can work for the owner himself
-        //public bool IsSelfType { private set; get; }
 
         public delegate void ActionDelegate(Player player, int type, string fuse, string argst);
         public delegate void VestigeDelegate(Player player, int type, string fuse, ushort it);
@@ -110,8 +106,8 @@ namespace PSD.Base.Card
         protected static LocustActionDelegate DefLocust = (p, t, f, cd, lr, l, it) => { };
 
         // public Delegate Type of Handling events
-        internal Tux(string name, string code, int genre, TuxType type, string description,
-            IDictionary<string, string> special)
+        internal Tux(string name, string code, int genre, TuxType type,
+            string description, IDictionary<string, string> special)
         {
             this.Name = name; this.Code = code;
             this.Genre = genre;
@@ -122,7 +118,7 @@ namespace PSD.Base.Card
 
         public virtual bool IsTuxEqiup() { return false; }
         internal virtual void Parse(string countStr, string occurStr, string parasitismStr,
-            string priorStr, string isEqStr, string tarStr, string terminiStr, long dbSerial)
+            string priorStr, string tarStr, string terminiStr, long dbSerial)
         {
             if (countStr != "")
             {
@@ -157,13 +153,6 @@ namespace PSD.Base.Card
                 Priorities = new int[sz];
                 for (int i = 0; i < sz; ++i)
                     Priorities[i] = int.Parse(priors[i]);
-            }
-            if (isEqStr != "" && isEqStr != "^")
-            {
-                string[] eqs = isEqStr.Split(',');
-                IsEq = new ushort[sz];
-                for (int i = 0; i < sz; ++i)
-                    IsEq[i] = ushort.Parse(eqs[i]);
             }
             if (tarStr != "")
             {
@@ -220,7 +209,7 @@ namespace PSD.Base.Card
             sql = new Utils.ReadonlySQL("psd.db3");
             List<string> list = new string[] {
                 "ID", "CODE", "NAME", "COUNT", "OCCURS", "PRIORS", "PARASITISM",
-                "DESCRIPTION", "SPECIAL", "ISEQ", "TARGET", "GROWUP", "TERMHIND", "GENRE"
+                "DESCRIPTION", "SPECIAL", "TARGET", "GROWUP", "TERMHIND", "GENRE"
             }.ToList();
             System.Data.DataRowCollection datas = sql.Query(list, "Tux");
             foreach (System.Data.DataRow data in datas)
@@ -252,31 +241,25 @@ namespace PSD.Base.Card
                         new string[] { } : descstr.Split('|');
                 for (int i = 1; i < descSpt.Length; i += 2)
                     special.Add(descSpt[i], descSpt[i + 1]);
-                string isEqs = (string)data["ISEQ"];
                 string targets = (string)data["TARGET"];
                 string terministr = (string)data["TERMHIND"];
-                if (type == Tux.TuxType.XB && isEqs == "5")
+                string growup = (string)data["GROWUP"];
+                if (type == Tux.TuxType.XB && growup.Contains("L"))
                 {
-                    string growup = (string)data["GROWUP"];
-                    isEqs = "1";
                     var tux = new Luggage(name, code, genre, type, description, special, growup);
-                    tux.Parse(countStr, occur, parasitismStr,
-                        priority, isEqs, targets, terministr, (ushort)lid);
+                    tux.Parse(countStr, occur, parasitismStr, priority, targets, terministr, (ushort)lid);
                     Firsts.Add(tux);
                 }
                 else if (type == Tux.TuxType.WQ || type == Tux.TuxType.FJ || type == Tux.TuxType.XB)
                 {
-                    string growup = (string)data["GROWUP"];
                     var tux = new TuxEqiup(name, code, genre, type, description, special, growup);
-                    tux.Parse(countStr, occur, parasitismStr,
-                        priority, isEqs, targets, terministr, (ushort)lid);
+                    tux.Parse(countStr, occur, parasitismStr, priority, targets, terministr, (ushort)lid);
                     Firsts.Add(tux);
                 }
                 else
                 {
                     var tux = new Tux(name, code, genre, type, description, special);
-                    tux.Parse(countStr, occur, parasitismStr,
-                        priority, isEqs, targets, terministr, (ushort)lid);
+                    tux.Parse(countStr, occur, parasitismStr, priority, targets, terministr, (ushort)lid);
                     Firsts.Add(tux);
                 }
             }
@@ -385,6 +368,7 @@ namespace PSD.Base.Card
     {
         public int IncrOfSTR { set; get; }
         public int IncrOfDEX { set; get; }
+        //public int IncrOfHP { set; get; }
 
         public ushort SingleEntry { set; get; }
 
@@ -498,7 +482,7 @@ namespace PSD.Base.Card
         public virtual bool IsLuggage() { return false; }
 
         internal override void Parse(string countStr, string occurStr, string parasitismStr,
-            string priorStr, string isEqStr, string tarStr, string tmhdstr, long dbSerial)
+            string priorStr, string tarStr, string tmhdstr, long dbSerial)
         {
             if (countStr != "")
             {
@@ -581,10 +565,6 @@ namespace PSD.Base.Card
             Targets = new char[tars.Length];
             for (int i = 0; i < tars.Length; ++i)
                 Targets[i] = tars[i][0];
-            string[] isEqs = isEqStr.Split(',');
-            IsEq = new ushort[isEqs.Length];
-            for (int i = 0; i < isEqs.Length; ++i)
-                IsEq[i] = ushort.Parse(isEqs[i]);
 
             string[] tmhd = tmhdstr.Split(';');
             if (tmhd.Length > 1)
@@ -644,11 +624,19 @@ namespace PSD.Base.Card
                 string description, IDictionary<string, string> special, string growup) :
             base(name, code, genre, type, description, special)
         {
-            //int idxh = growup.IndexOf('H');
-            int idxa = growup.IndexOf('A');
-            int idxx = growup.IndexOf('X');
-            IncrOfSTR = idxa < 0 ? 0 : int.Parse(Substring(growup, idxa + 1, idxx));
-            IncrOfDEX = idxx < 0 ? 0 : int.Parse(Substring(growup, idxx + 1, -1));
+            Func<char, int> getValue = (ch) =>
+            {
+                int index = growup.IndexOf(ch);
+                if (index < 0)
+                    return 0;
+                else if (growup[index + 1] == '-')
+                    return int.Parse(Substring(growup, index + 1, index + 3));
+                else
+                    return int.Parse(Substring(growup, index + 1, index + 2));
+            };
+            IncrOfSTR = getValue('A');
+            IncrOfDEX = getValue('X');
+            //IncrOfHP = getValue(growup.IndexOf('H'));
         }
 
         private static string Substring(string @string, int idx, int jdx)

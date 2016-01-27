@@ -2806,7 +2806,7 @@ namespace PSD.PSDGamepkg.JNS
                 int hero = (int)player.RIM["15001.Hero"];
                 Hero heroin = XI.LibTuple.HL.InstanceHero(hero);
                 if (heroin != null)
-                    Artiad.ContentRule.DecrGuestPlayer(player, heroin, XI, 0x1);
+                    Artiad.Procedure.DecrGuestPlayer(player, heroin, XI, 0x1);
                 int peek = player.Coss.Peek();
                 XI.RaiseGMessage("G0OV," + player.Uid + "," + peek);
                 Hero peekHero = XI.LibTuple.HL.InstanceHero(peek);
@@ -2822,7 +2822,7 @@ namespace PSD.PSDGamepkg.JNS
                 player.RIM["15001.Hero"] = next;
                 Hero nextHero = XI.LibTuple.HL.InstanceHero(next);
                 if (nextHero != null)
-                    Artiad.ContentRule.IncrGuestPlayer(player, nextHero, XI, 0x1);
+                    Artiad.Procedure.IncrGuestPlayer(player, nextHero, XI, 0x1);
             }
         }
         public void JNS0103Action(Player player, int type, string fuse, string argst)
@@ -2869,7 +2869,7 @@ namespace PSD.PSDGamepkg.JNS
                 int hero = (int)player.RIM["15002.Hero"];
                 Hero heroin = XI.LibTuple.HL.InstanceHero(hero);
                 if (heroin != null)
-                    Artiad.ContentRule.DecrGuestPlayer(player, heroin, XI, 0x3);
+                    Artiad.Procedure.DecrGuestPlayer(player, heroin, XI, 0x3);
                 int peek = player.Coss.Peek();
                 XI.RaiseGMessage("G0OV," + player.Uid + "," + peek);
             }
@@ -2888,7 +2888,7 @@ namespace PSD.PSDGamepkg.JNS
                 player.RTM["15002.Invs"] = invs;
                 Hero nextHero = XI.LibTuple.HL.InstanceHero(py.SelectHero);
                 if (nextHero != null)
-                    Artiad.ContentRule.IncrGuestPlayer(player, nextHero, XI, 0x3);
+                    Artiad.Procedure.IncrGuestPlayer(player, nextHero, XI, 0x3);
             }
         }
         public string JNS0201Input(Player player, int type, string fuse, string prev)

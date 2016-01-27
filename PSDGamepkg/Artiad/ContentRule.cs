@@ -75,89 +75,8 @@ namespace PSD.PSDGamepkg.Artiad
             }
             return heros;
         }
-        // remove hero-spec RIM/RTM Diva, hero = 0 means removing all
-        public static void ErasePlayerToken(Player player, Board board, Action<string> raiseG, int hero = 0)
-        {
-            if (player.TokenCount != 0)
-                raiseG("G0OJ," + player.Uid + ",0," + player.TokenCount);
-            if (player.TokenExcl.Count > 0)
-            {
-                IDictionary<char, List<ushort>> allKinds = new Dictionary<char, List<ushort>>();
-                foreach (string cd in player.TokenExcl)
-                {
-                    if (cd[0] != 'H')
-                        Algo.AddToMultiMap(allKinds, cd[0], ushort.Parse(cd.Substring(1)));
-                }
-                raiseG("G2TZ,0," + player.Uid + "," + string.Join(",", player.TokenExcl));
-                raiseG("G0OJ," + player.Uid + ",1," + player.TokenExcl.Count
-                    + "," + string.Join(",", player.TokenExcl));
-                if (allKinds.Count > 0)
-                    raiseG("G0ON," + string.Join(",", allKinds.Select(p => player.Uid +
-                        "," + p.Key + "," + p.Value.Count + "," + string.Join(",", p.Value))));
-            }
-            if (player.TokenTars.Count > 0)
-                raiseG("G0OJ," + player.Uid + ",2," + player.TokenTars.Count
-                    + "," + string.Join(",", player.TokenTars));
-            if (player.TokenAwake)
-                raiseG("G0OJ," + player.Uid + ",3");
-            if (player.TokenFold.Count > 0)
-            {
-                List<ushort> folds = player.TokenFold.ToList();
-                raiseG("G2TZ,0," + player.Uid + "," + string.Join(",", folds.Select(p => "C" + p)));
-                raiseG("G0OJ," + player.Uid + ",4," + folds.Count + "," + string.Join(",", folds));
-                raiseG("G0ON," + player.Uid + ",C," + folds.Count + "," + string.Join(",", folds));
-            }
-            player.ResetROM(board, hero);
-            // Remove others' tar token on the player
-            foreach (Player py in board.Garden.Values)
-            {
-                if (py.IsAlive && py != player && py.TokenTars.Contains(player.Uid))
-                    raiseG("G0OJ," + py.Uid + ",2,1," + player.Uid);
-            }
-        }
 
-        public static List<string> IncrGuestPlayer(Player player, Hero guest, XI xi, int limit)
-        {
-            List<string> skills = new List<string>();
-            List<string> source = guest.Skills.ToList();
-            foreach (string skstr in source)
-            {
-                Skill skill = xi.LibTuple.SL.EncodeSkill(skstr);
-                if (skill.IsChange && (limit & 0x1) != 0)
-                    continue;
-                if (skill.IsRestrict && (limit & 0x2) != 0)
-                    continue;
-                skills.Add(skill.Code);
-            }
-            if (skills.Count > 0)
-                xi.RaiseGMessage("G0IS," + player.Uid + ",1," + string.Join(",", skills));
-            return skills;
-        }
-
-        public static void DecrGuestPlayer(Player player, Hero guest, XI xi, int limit)
-        {
-            List<ushort> excds = new List<ushort>();
-            if (player.ExEquip != 0)
-                excds.Add(player.ExEquip);
-            excds.AddRange(player.ExCards);
-            if (excds.Count > 0)
-                xi.RaiseGMessage("G0QZ," + player.Uid + "," + string.Join(",", excds));
-            ErasePlayerToken(player, xi.Board, xi.RaiseGMessage, guest.Avatar);
-
-            List<string> skills = new List<string>();
-            List<string> source = guest.Skills.ToList(); source.AddRange(guest.RelatedSkills);
-            foreach (string skstr in source)
-            {
-                Skill skill = xi.LibTuple.SL.EncodeSkill(skstr);
-                if (skill.IsChange && (limit & 0x1) != 0)
-                    continue;
-                if (skill.IsRestrict && (limit & 0x2) != 0)
-                    continue;
-                skills.Add(skill.Code);
-            }
-            if (skills.Count > 0)
-                xi.RaiseGMessage("G0OS," + player.Uid + ",1," + string.Join(",", skills));
-        }
+        #region Sparse Base Rules
 
         public static bool IsTuxUsableEveryWhere(Tux tux)
         {
@@ -167,12 +86,35 @@ namespace PSD.PSDGamepkg.Artiad
 
         public static int GetLocustFreeType(string tuxCode, int oldType)
         {
-            if (tuxCode == "TP02" && oldType == 1)
+            if (tuxCode == "JP05" && oldType == 1)
+                return 0;
+            else if (tuxCode == "TP02" && oldType == 1)
                 return 0;
             else if (tuxCode == "TPT4" && oldType == 1)
                 return 2;
             else
                 return oldType;
         }
+
+        public static void LoadDefaultPrice(Player player)
+        {
+            player.ClearPrice();
+            player.AddToPrice("JP03", false, "0", '=', 1);
+            player.AddToPrice("WQ04", false, "0", '=', 2);
+            player.AddToPrice("WQ04", true, "0", '=', 2);
+            player.AddToPrice("JPH4", false, "0", '=', 2);
+        }
+
+        public static bool IsTuxVestige(string tuxCode, int type)
+        {
+            if (tuxCode == "TPT2" && type == 0)
+                return true;
+            else if (tuxCode == "TPT3" && type == 0)
+                return true;
+            else
+                return false;
+        }
+
+        #endregion Sparse Base Rules
     }
 }

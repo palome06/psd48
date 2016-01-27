@@ -35,6 +35,7 @@ namespace PSD.Base.Card
             if ((mSpi & 0x2) != 0) return true;
             return (mSpi & 0x4) != 0;
         }
+        public bool IsSilence() { return (mSpi & 0x8) != 0; }
 
         internal Evenement(string name, string code, string range, int group, int genre,
             string background, string description, string spis)
@@ -60,6 +61,8 @@ namespace PSD.Base.Card
                     else
                         mSpi |= 0x2;
                 }
+                else if (spis[i] == 'S')
+                    mSpi |= 0x8;
             }
             Occurs = new string[] { }; Priorties = new int[] { };
             IsOnce = new bool[] { }; IsTermini = new bool[] { };
@@ -187,7 +190,6 @@ namespace PSD.Base.Card
             else
                 return dicts.Where(p => pkgs.Contains(p.Value.Group)).Select(p => p.Key).ToList();
         }
-
         public List<Evenement> ListAllEves(int groups)
         {
             int[] pkgs = Card.Level2Pkg(groups);

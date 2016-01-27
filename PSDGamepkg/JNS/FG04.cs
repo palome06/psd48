@@ -2007,7 +2007,7 @@ namespace PSD.PSDGamepkg.JNS
                 if (tuxes.Count >= 2)
                     return "/Q2(p" + string.Join("p", tuxes) + ")";
                 else
-                    return "";
+                    return "/";
             }
             else return "";
         }
@@ -2728,7 +2728,7 @@ namespace PSD.PSDGamepkg.JNS
                 if (player.IsAlive && !XI.Board.IsAttendWar(player))
                     player.DrTuxDisabled = true;
             }
-            XI.Board.EscueBanned = true;
+            XI.Board.EscueBanned.Add("GSH2Debut");
         }
         public void GSH2Curtain()
         {
@@ -2737,7 +2737,7 @@ namespace PSD.PSDGamepkg.JNS
                 if (player.IsAlive && !XI.Board.IsAttendWar(player))
                     player.DrTuxDisabled = false;
             }
-            XI.Board.EscueBanned = false;
+            XI.Board.EscueBanned.Remove("GSH2Debut");
         }
         public bool GSH2ConsumeValid(Player player, int consumeType, int type, string fuse)
         {

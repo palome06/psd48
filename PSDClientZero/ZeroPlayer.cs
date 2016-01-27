@@ -137,6 +137,7 @@ namespace PSD.ClientZero
     public class ZeroMe : ZeroBase
     {
         public int SelectHero { set; get; }
+        public int Coss { set; get; }
 
         public List<ushort> Tux { set; get; }
         public List<ushort> Folder { set; get; }
@@ -155,7 +156,7 @@ namespace PSD.ClientZero
             if (Folder.Count > 0)
             {
                 Aps(sb, "    {0}: {1}",
-                 xic.zd.HeroFolderAlias(SelectHero), xic.zd.Tux(Tux));
+                 xic.zd.HeroFolderAlias(SelectHero, Coss), xic.zd.Tux(Folder));
             }
             Aps(sb, "***************");
             return sb.ToString();

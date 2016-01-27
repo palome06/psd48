@@ -355,11 +355,6 @@ namespace PSD.PSDGamepkg.JNS
                     FiveElement.THUNDER, 2, (long)HPEvoMask.FROM_JP)));
             }
         }
-        public void JP05Locust(Player player, int type, string fuse, string cdFuse, Player locuster, Tux locust, ushort it)
-        {
-            if (type == 0 || type == 1)
-                GeneralLocust(player, 0, fuse, cdFuse, locuster, locust, it);
-        }
         public void JP06Action(Player player, int type, string fuse, string argst)
         {
             List<ushort> targets = XI.Board.Garden.Values.Where(p => p.IsTared &&
@@ -1780,7 +1775,7 @@ namespace PSD.PSDGamepkg.JNS
                                 {
                                     XI.RaiseGMessage("G0SN," + player.Uid + "," + lugCode + ",1,C" + ut);
                                     XI.RaiseGMessage("G2TZ,0," + player.Uid + ",C" + ut);
-                                    if ((tux.IsEq[pureType] & 3) == 0)
+                                    if (!Artiad.ContentRule.IsTuxVestige(tux.Code, pureType))
                                         XI.RaiseGMessage("G0ON," + player.Uid + ",C,1," + ut);
                                     else
                                         XI.Board.PendingTux.Enqueue(player.Uid + ",G0CC," + ut);
@@ -2500,11 +2495,12 @@ namespace PSD.PSDGamepkg.JNS
         {
             // G0CD,A,T,JP02,17,36;1,G0OH,...
             string[] argv = cdFuse.Split(',');
-            if ((locus.IsEq[type] & 1) == 0)
-                XI.RaiseGMessage("G0CE," + argv[1] + "," + argv[2] + ",0," + argv[3] +
+            string cardName = argv[3];
+            if (!Artiad.ContentRule.IsTuxVestige(cardName, type))
+                XI.RaiseGMessage("G0CE," + argv[1] + "," + argv[2] + ",0," + cardName +
                     ";" + type + "," + fuse);
             else
-                XI.RaiseGMessage("G0CE," + argv[1] + "," + argv[2] + ",1," + argv[3] +
+                XI.RaiseGMessage("G0CE," + argv[1] + "," + argv[2] + ",1," + cardName +
                     "," + argv[4] + ";" + type + "," + fuse);
 
             if (Artiad.Procedure.LocustChangePendingTux(XI, player.Uid, locuster.Uid, locustee))
