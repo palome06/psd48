@@ -1914,12 +1914,13 @@ namespace PSD.PSDGamepkg.JNS
                 string[] g0ce = Algo.Substring(fuse, 0, hdx).Split(',');
                 int kdx = fuse.IndexOf(',', hdx);
                 string origin = Algo.Substring(fuse, kdx + 1, -1);
+                TargetPlayer(player.Uid, ushort.Parse(g0ce[1]));
                 XI.RaiseGMessage("G2CL," + ushort.Parse(g0ce[1]) + "," + g0ce[4]);
                 if (origin.StartsWith("G") && g0ce[2] != "2") // Avoid Double Computation on Copy
                 {
                     string cardname = g0ce[4];
                     int inType = int.Parse(Algo.Substring(fuse, hdx + 1, kdx));
-                    Base.Card.Tux tux = XI.LibTuple.TL.EncodeTuxCode(cardname);
+                    Tux tux = XI.LibTuple.TL.EncodeTuxCode(cardname);
                     int prior = tux.Priorities[inType];
                     XI.InnerGMessage(origin, prior);
                 }
@@ -2106,14 +2107,13 @@ namespace PSD.PSDGamepkg.JNS
                 return IsMathISOS("JNH1401", player, fuse);
             else if (type == 2)
             {
-                // :[ Mainly to solve now
                 // G0CE,A,T,0,KN,y,z;TF
                 string[] g0ce = Algo.Substring(fuse, 0, fuse.IndexOf(';')).Split(',');
                 ushort who = ushort.Parse(g0ce[1]);
                 string tuxName = g0ce[4];
                 Tux tux = XI.LibTuple.TL.EncodeTuxCode(tuxName);
                 return who == player.Uid && tux.Type == Tux.TuxType.ZP;
-            }
+            } // only shield ZP which is of general locust, so ignore special log for G1CW
             else
                 return false;
         }
@@ -2169,13 +2169,7 @@ namespace PSD.PSDGamepkg.JNS
         public bool JNH1403Valid(Player player, int type, string fuse)
         {
             if (type == 0)
-            {
-                IDictionary<int, int> dicts = XI.CalculatePetsScore();
-                if (dicts[player.Team] >= 30)
-                    return true;
-                else
-                    return false;
-            }
+                return XI.CalculatePetsScore()[player.Team] >= 30;
             else if (type == 1)
                 return player.TokenAwake;
             else

@@ -134,9 +134,9 @@ namespace PSD.PSDGamepkg
             ////Board.EvePiles.PushBack(1);
             //Board.EvePiles.PushBack(31);
             //Board.EvePiles.PushBack(42);
-            Board.EveDises.Add(Board.EvePiles.Dequeue());
-            Board.EveDises.Add(Board.EvePiles.Dequeue());
-            Board.EvePiles.PushBack(50);
+            //Board.EveDises.Add(Board.EvePiles.Dequeue());
+            //Board.EveDises.Add(Board.EvePiles.Dequeue());
+            Board.EvePiles.PushBack(52);
             //Board.EvePiles.PushBack(34);
             //Board.EvePiles.PushBack(30);
             //Board.EvePiles.PushBack(9);
@@ -261,10 +261,10 @@ namespace PSD.PSDGamepkg
             //RaiseGMessage("G0HQ,2,1,0,0,71,37,95");
             //RaiseGMessage("G0HQ,2,1,0,0,71,133");
             //RaiseGMessage("G0HQ,2,1,0,0,55,73,95,1,5");
-            //RaiseGMessage("G0HQ,2,2,0,0,110");
+            //RaiseGMessage("G0HQ,2,2,0,0,39,40,41,42");
             //RaiseGMessage("G0HQ,2,3,0,0,48,53");
             //RaiseGMessage("G0HQ,2,4,0,0,89,90");
-            //RaiseGMessage("G0HQ,2,2,0,0,89");
+            //RaiseGMessage("G0HQ,2,5,0,0,89");
             //RaiseGMessage("G0HQ,2,2,0,0,90,34,89,88,95");
             //RaiseGMessage("G0HQ,2,1,0,0,95,88,10");
             //RaiseGMessage("G0HQ,2,1,0,0,10,11,12");
@@ -367,14 +367,14 @@ namespace PSD.PSDGamepkg
             //RaiseGMessage("G0IF,6,3,4,6");
             //RaiseGMessage("G0IF,2,4");
             //RaiseGMessage("G0IF,4,4");
-            foreach (Player player in Board.Garden.Values)
-               RaiseGMessage("G0HQ,2," + player.Uid + ",1,3");
-            //RaiseGMessage("G0HQ,2,4,1,8");
-            //RaiseGMessage("G0HQ,2,6,1,2");
-            //RaiseGMessage("G0HQ,2,1,1,1");
-            //RaiseGMessage("G0HQ,2,2,1,3");
-            //RaiseGMessage("G0HQ,2,3,1,3");
-            //RaiseGMessage("G0HQ,2,4,1,3");
+            //foreach (Player player in Board.Garden.Values)
+            //   RaiseGMessage("G0HQ,2," + player.Uid + ",1,3");
+            RaiseGMessage("G0HQ,2,4,1,8");
+            RaiseGMessage("G0HQ,2,6,1,2");
+            RaiseGMessage("G0HQ,2,1,1,1");
+            RaiseGMessage("G0HQ,2,2,1,3");
+            RaiseGMessage("G0HQ,2,3,1,4");
+            //RaiseGMessage("G0HQ,2,4,1,6");
             //RaiseGMessage("G0HQ,2,5,1,3");
             //RaiseGMessage("G0HQ,2,6,1,3");
             //while (true)

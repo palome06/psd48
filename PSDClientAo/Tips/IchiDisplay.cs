@@ -8,7 +8,7 @@ using System.Collections.Generic;
 
 namespace PSD.ClientAo.Tips
 {
-    public class IchiDisplay
+    public static class IchiDisplay
     {
         private const int LSIZE = 18, SSIZE = 12, XSSIZE = 9;
 
@@ -244,10 +244,31 @@ namespace PSD.ClientAo.Tips
                 Foreground = new SolidColorBrush(Colors.Yellow),
                 FontSize = LSIZE
             });
-            pr.Inlines.Add(new LineBreak());
-            pr.Inlines.Add(new LineBreak());
+            if (eve.IsSilence())
+            {
+                pr.Inlines.Add("  ");
+                pr.Inlines.Add(new Run("[禁咒]")
+                {
+                    FontWeight = FontWeights.Bold,
+                    Foreground = new SolidColorBrush(Colors.IndianRed),
+                    FontSize = SSIZE
+                });
+            }
+            if (!string.IsNullOrEmpty(eve.Background))
+            {
+                pr.Inlines.Add(new LineBreak());
+                pr.Inlines.Add(new LineBreak());
+                pr.Inlines.Add(new Run(eve.Background)
+                {
+                    FontFamily = new System.Windows.Media.FontFamily("KaiTi"),
+                    Foreground = new SolidColorBrush(Colors.LightGreen),
+                    FontSize = SSIZE
+                });
+            }
             if (!string.IsNullOrEmpty(eve.Description))
             {
+                pr.Inlines.Add(new LineBreak());
+                pr.Inlines.Add(new LineBreak());
                 pr.Inlines.Add(new Run(eve.Description)
                 {
                     Foreground = new SolidColorBrush(Colors.White),
@@ -327,6 +348,16 @@ namespace PSD.ClientAo.Tips
                 Foreground = new SolidColorBrush(color),
                 FontSize = SSIZE
             });
+            if (mon.IsSilence())
+            {
+                pr.Inlines.Add("  ");
+                pr.Inlines.Add(new Run("[禁咒]")
+                {
+                    FontWeight = FontWeights.Bold,
+                    Foreground = new SolidColorBrush(Colors.IndianRed),
+                    FontSize = SSIZE
+                });
+            }
             string[] des = new string[] { mon.PetText, mon.DebutText, mon.WinText, mon.LoseText };
             string[] dis = new string[] { "宠物效果", "出场效果", "胜利效果", "失败效果" };
             for (int i = 0; i < 4; ++i)

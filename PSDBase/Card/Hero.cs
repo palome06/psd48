@@ -233,7 +233,8 @@ namespace PSD.Base.Card
         //}
         public List<Hero> ListHeroesInTest(int level)
         {
-            return dicts.Values.Where(p => p.Group != 0 && p.AvailableTestPkg == (level >> 1)
+            int[] lv = Card.Level2Pkg(level) ?? new int[0];
+            return dicts.Values.Where(p => p.Group != 0 && lv.Contains(p.AvailableTestPkg)
                 && p.AvailableDay.Contains(DateTime.Now.DayOfWeek)).ToList();
         }
         public List<Hero> PurgeHeroesWithGivenTrainer(int level, string[] codes)

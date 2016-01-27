@@ -87,7 +87,10 @@ namespace PSD.ClientAo.Request
                 heroStackPanel.Children.Add(gb);
             }
             foreach (Hero hero in lg.HL.ListAllHeros(0))
-                AddContent("H", hero.Avatar, hero.Group, hero.Genre, hero.AvailableTestPkg != 0);
+            {
+                AddContent("H", hero.Avatar, hero.Group, hero.Genre, hero.AvailableTestPkg != 0 &&
+                    !IsGenreNotAvailable(hero.AvailableTestPkg) && hero.AvailableDay.Contains(DateTime.Now.DayOfWeek));
+            }
 
             genreIndex = new int[] { 1, 5, 6, 7, 9 };
             foreach (int index in genreIndex)

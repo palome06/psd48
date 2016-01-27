@@ -120,7 +120,8 @@ namespace PSD.PSDGamepkg.JNS
             {
                 string input = XI.AsyncInput(rd.Uid,"#HP将为1的,T1(p" + string.Join("p", invs) + ")", "SJ202", "0");
                 ushort target = ushort.Parse(input);
-                Harm(null, XI.Board.Garden[target], 1, FiveElement.A, (int)HPEvoMask.TERMIN_AT);
+                Player leifeng = XI.Board.Garden[target];
+                Harm(null, leifeng, leifeng.HP - 1, FiveElement.A, (int)HPEvoMask.TERMIN_AT);
             }
             string msg = AffichePlayers(p => p.IsAlive && p.Team == XI.Board.Rounder.Team, p => p.Uid + ",0,1");
             if (msg != null)
@@ -553,19 +554,19 @@ namespace PSD.PSDGamepkg.JNS
         public void SJT18(Player rd)
         {
             List<ushort> pops = new List<ushort>();
-            string g0ot = "";
+            string g0pq = "";
             foreach (Player player in XI.Board.Garden.Values)
             {
-                if (player.IsAlive && player.HasAnyCards())
+                if (player.IsAlive && (player.Tux.Count > 0 || player.GetBaseEquipCount() > 0))
                 {
-                    pops.AddRange(player.ListOutAllCards());
-                    g0ot += "," + player.Uid + "," + player.GetAllCardsCount() + "," +
-                        string.Join(",", player.ListOutAllCards());
+                    List<ushort> ts = player.Tux.Union(player.ListOutAllBaseEquip()).ToList();
+                    pops.AddRange(ts);
+                    g0pq += "," + player.Uid + "," + ts.Count + "," + string.Join(",", ts);
                 }
             }
             if (pops.Count > 0)
             {
-                XI.RaiseGMessage("G0OT" + g0ot);
+                XI.RaiseGMessage("G0PQ" + g0pq);
                 pops.Shuffle();
                 int rx = XI.Board.Garden.Values.Count(p => p.IsAlive && p.Team == rd.Team);
                 int ox = XI.Board.Garden.Values.Count(p => p.IsAlive && p.Team == rd.OppTeam);
@@ -599,13 +600,13 @@ namespace PSD.PSDGamepkg.JNS
         }
         public void SJT20(Player rd)
         {
-            List<Player> zeros = XI.Board.Garden.Values.Where(p => p.IsAlive && p.Tux.Count == 0).ToList();
-            List<Player> ones = XI.Board.Garden.Values.Where(p => p.IsAlive && p.Tux.Count > 0).ToList();
+            List<Player> zeros = XI.Board.Garden.Values.Where(p => p.IsAlive && p.Tux.Count <= 1).ToList();
+            List<Player> ones = XI.Board.Garden.Values.Where(p => p.IsAlive && p.Tux.Count > 1).ToList();
             List<Player> fours = XI.Board.Garden.Values.Where(p => p.IsAlive && p.Tux.Count >= 4).ToList();
             if (ones.Count > 0)
                 XI.RaiseGMessage("G0DH," + string.Join(",", ones.Select(p => p.Uid + ",2," + (p.Tux.Count - 1))));
-            fours.ForEach(p => XI.RaiseGMessage("G0IF," + p.Uid + ",0,6"));
-            zeros.ForEach(p => XI.RaiseGMessage("G0IF," + p.Uid + ",0,4"));
+            fours.ForEach(p => XI.RaiseGMessage("G0IF," + p.Uid + ",6"));
+            zeros.ForEach(p => XI.RaiseGMessage("G0IF," + p.Uid + ",4"));
         }
         #endregion Package 6#
         #region Holiday

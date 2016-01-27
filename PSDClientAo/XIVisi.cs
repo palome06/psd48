@@ -2988,20 +2988,20 @@ namespace PSD.ClientAo
                     break;
                 case "E0PQ":
                     {
-                        ushort type = ushort.Parse(args[0]);
-                        ushort who = ushort.Parse(args[1]);
+                        ushort type = ushort.Parse(args[1]);
+                        ushort who = ushort.Parse(args[2]);
                         if (type == 0)
                         {
-                            List<ushort> tuxes = Algo.TakeRange(args, 2, args.Length)
+                            List<ushort> tuxes = Algo.TakeRange(args, 3, args.Length)
                                 .Select(p => ushort.Parse(p)).ToList();
                             VI.Cout(Uid, "{0}失去卡牌{1}.", zd.Player(who), zd.Tux(tuxes));
                             A0O.FlyingGet(tuxes.Select(p => "C" + p).ToList(), who, 0);
                         }
                         else if (type == 1)
                         {
-                            int n = ushort.Parse(args[2]);
+                            int n = ushort.Parse(args[3]);
                             VI.Cout(Uid, "{0}失去{1}张卡牌.", zd.Player(who), n);
-                            A0O.FlyingGet(Algo.RepeatString("C0", n).ToList(), who, 0);
+                            A0O.FlyingGet(Enumerable.Repeat("C0", n).ToList(), who, 0);
                         }
                     }
                     break;

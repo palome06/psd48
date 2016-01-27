@@ -1603,7 +1603,7 @@ namespace PSD.PSDGamepkg
                         break;
                     }
                 case "G0ZB":
-                    if (args[2] == "0" || args[2] == "4")
+                    if (args[2] == "0" || args[2] == "4") // Tux to eq; 4 means from sky
                     {
                         // G0ZB,A,0,x...
                         bool fromSky = (args[2] == "4");
@@ -1924,7 +1924,7 @@ namespace PSD.PSDGamepkg
                             }
                         }
                     }
-                    else if (args[2] == "2")
+                    else if (args[2] == "2") // Excard
                     {
                         // G0ZB,A,2,from,x
                         ushort me = ushort.Parse(args[1]);
@@ -1939,7 +1939,7 @@ namespace PSD.PSDGamepkg
                             WI.BCast("E0ZB," + me + ",0,3," + card);
                         }
                     }
-                    else if (args[2] == "3")
+                    else if (args[2] == "3") // Fakeq
                     {
                         // G0ZB,A,3,AS,x
                         ushort me = ushort.Parse(args[1]);

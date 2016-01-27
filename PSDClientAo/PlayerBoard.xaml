@@ -120,7 +120,7 @@
             <Button x:Name="excardBar" Canvas.Left="-82" Canvas.Top="75" Width="98" Height="23"
                     BorderThickness="0" Visibility="Hidden" Click="excardBarClick">
                 <Button.Background>
-                    <SolidColorBrush Color="YellowGreen"/>
+                    <SolidColorBrush Color="#38ACEC"/> <!--ButterflyBlue-->
                 </Button.Background>
                 <TextBlock x:Name="excardText" TextAlignment="Center" Background="Transparent"/>
             </Button>

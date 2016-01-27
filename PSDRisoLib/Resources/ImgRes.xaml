@@ -494,7 +494,9 @@
     <Image x:Key="eveCardSJT15" Source="Card/Eve/SJT15.png"/>
     <Image x:Key="eveCardSJT16" Source="Card/Eve/SJT16.png"/>
     <Image x:Key="eveCardSJT17" Source="Card/Eve/SJT17.png"/>
+    <Image x:Key="eveCardSJT18" Source="Card/Eve/SJT18.png"/>
     <Image x:Key="eveCardSJT19" Source="Card/Eve/SJT19.png"/>
+    <Image x:Key="eveCardSJT20" Source="Card/Eve/SJT20.png"/>
 
     <Image x:Key="eveCardSJH01" Source="Card/Eve/SJH01.png"/>
     <Image x:Key="eveCardSJH02" Source="Card/Eve/SJH02.png"/>

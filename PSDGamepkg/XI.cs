@@ -33,27 +33,34 @@ namespace PSD.PSDGamepkg
         public Base.Card.Hero[] AllocateHerosRM(int sz)
         {
             List<Base.Card.Hero> list = libTuple.HL.PurgeHeroesWithGivenTrainer(Level, Trainer);
+            //var test = libTuple.HL.ListHeroesInTest(Level).Except(list).ToList();
+            //var sels = ListAllSeleableHeros().Except(list).ToArray();
+            //double probablity = (IsTrain ? 0.48 : Math.Max(0.04, test.Count * 1.0 / (test.Count + sels.Length)));
 
-            var test = libTuple.HL.ListHeroesInTest(Level).Except(list).ToList();
-            var sels = ListAllSeleableHeros().Except(list).ToArray();
-            double probablity = (IsTrain ? 0.48 : Math.Max(0.04, test.Count * 1.0 / (test.Count + sels.Length)));
-
-            list.AddRange(Base.Card.Card.PickSomeInGivenProbability(
-                libTuple.HL.ListHeroesInTest(Level), probablity).ToList());
-            if (list.Count >= sz)
-                return Base.Card.Card.PickSomeInRandomOrder(list, sz).ToArray();
-            else
+            //list.AddRange(Base.Card.Card.PickSomeInGivenProbability(
+            //    libTuple.HL.ListHeroesInTest(Level), probablity).ToList());
+            //if (list.Count >= sz)
+            //    return Base.Card.Card.PickSomeInRandomOrder(list, sz).ToArray();
+            //else
+            //{
+            //    list.AddRange(Base.Card.Card.PickSomeInRandomOrder(sels, sz - list.Count));
+            //    list.Shuffle();
+            //    return list.ToArray();
+            //}
+            if (list.Count < sz)
             {
-                list.AddRange(Base.Card.Card.PickSomeInRandomOrder(sels, sz - list.Count));
+                list.AddRange(Base.Card.Card.PickSomeInRandomOrder(
+                    ListAllSeleableAndTestedHeros().Except(list).ToList(), sz - list.Count));
                 list.Shuffle();
                 return list.ToArray();
             }
+            else
+                return Base.Card.Card.PickSomeInRandomOrder(list, sz).ToArray();
         }
         public List<Base.Card.Hero> ListAllSeleableAndTestedHeros()
         {
-            List<Base.Card.Hero> list = libTuple.HL.ListAllSeleable(Level).ToList();
-            list.AddRange(libTuple.HL.ListHeroesInTest(Level));
-            return list;
+            return libTuple.HL.ListAllSeleable(Level).ToList().Union(
+                libTuple.HL.ListHeroesInTest(Level)).ToList();
         }
         // List out all heros that can be in the selection pool directly
         public Base.Card.Hero[] ListAllSeleableHeros()
