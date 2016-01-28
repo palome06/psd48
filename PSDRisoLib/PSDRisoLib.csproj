@@ -437,6 +437,7 @@
     <Resource Include="Resources\Card\ExSp\EP022.png" />
     <Resource Include="Resources\Card\ExSp\EP023.png" />
     <Resource Include="Resources\Card\ExSp\EP024.png" />
+    <Resource Include="Resources\Card\ExSp\EP025.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Card\NMB\NC303.jpg" />
@@ -691,6 +692,7 @@
   <ItemGroup>
     <Resource Include="Resources\Card\NMB\GIT1.png" />
     <Resource Include="Resources\Card\NMB\GIT2.png" />
+    <Resource Include="Resources\Card\NMB\GIT3.png" />
     <Resource Include="Resources\Card\NMB\GIT4.png" />
     <Resource Include="Resources\Card\NMB\GIT5.png" />
     <Resource Include="Resources\Card\NMB\GIT6.png" />
@@ -732,6 +734,7 @@
   <ItemGroup>
     <Resource Include="Resources\PetsSnap\GIT1.png" />
     <Resource Include="Resources\PetsSnap\GIT2.png" />
+    <Resource Include="Resources\PetsSnap\GIT3.png" />
     <Resource Include="Resources\PetsSnap\GIT4.png" />
     <Resource Include="Resources\PetsSnap\GIT5.png" />
     <Resource Include="Resources\PetsSnap\GIT6.png" />

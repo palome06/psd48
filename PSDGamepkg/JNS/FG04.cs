@@ -81,15 +81,11 @@ namespace PSD.PSDGamepkg.JNS
         public void GS01Debut()
         {
             Player rd = XI.Board.Rounder, hd = XI.Board.Hinder;
-            if (hd.IsAlive && hd.Uid != 0)
+            if (hd != null && hd.IsAlive)
             {
-                string rtx = rd.Tux.Count > 0 ? string.Join(",", rd.Tux) : "";
-                string htx = hd.Tux.Count > 0 ? string.Join(",", hd.Tux) : "";
-                int rtxn = rd.Tux.Count, htxn = hd.Tux.Count;
-                if (rtx != "")
-                    XI.RaiseGMessage("G0HQ,0," + hd.Uid + "," + rd.Uid + ",1," + rtxn + "," + rtx);
-                if (htx != "")
-                    XI.RaiseGMessage("G0HQ,0," + rd.Uid + "," + hd.Uid + ",1," + htxn + "," + htx);
+                XI.RaiseGMessage("G0HQ,4," + rd.Uid + "," + hd.Uid + "," + rd.Tux.Count + "," + hd.Tux.Count +
+                    (rd.Tux.Count > 0 ? ("," + string.Join(",", rd.Tux)) : "") +
+                    (hd.Tux.Count > 0 ? ("," + string.Join(",", hd.Tux)) : ""));
             }
         }
         public void GS01LoseEff()
@@ -1904,13 +1900,9 @@ namespace PSD.PSDGamepkg.JNS
                 ushort opc = ushort.Parse(opcs);
                 Player o = XI.Board.Garden[opc];
 
-                string rtx = o.Tux.Count > 0 ? string.Join(",", o.Tux) : "";
-                string htx = h.Tux.Count > 0 ? string.Join(",", h.Tux) : "";
-                int rtxn = o.Tux.Count, htxn = h.Tux.Count;
-                if (rtx != "")
-                    XI.RaiseGMessage("G0HQ,0," + h.Uid + "," + o.Uid + ",1," + rtxn + "," + rtx);
-                if (htx != "")
-                    XI.RaiseGMessage("G0HQ,0," + o.Uid + "," + h.Uid + ",1," + htxn + "," + htx);
+                XI.RaiseGMessage("G0HQ,4," + h.Uid + "," + o.Uid + "," + h.Tux.Count + "," + o.Tux.Count +
+                    (h.Tux.Count > 0 ? ("," + string.Join(",", h.Tux)) : "") +
+                    (o.Tux.Count > 0 ? ("," + string.Join(",", o.Tux)) : ""));
             }
         }
         #endregion Package 5#

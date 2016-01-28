@@ -904,14 +904,14 @@ namespace PSD.PSDGamepkg.JNS
                         int n = int.Parse(blocks[5]);
                         return from == player.Uid && XI.Board.Garden[to].Team == player.OppTeam && n > 0;
                     }
-                    //else if (blocks[1] == "1" && blocks[3] == player.Uid.ToString())
-                    //{
-                    //    ushort to = ushort.Parse(blocks[2]);
-                    //    System.Func<Base.Card.Tux, bool> isEq = p => p.Type == Tux.TuxType.WQ ||
-                    //        p.Type == Tux.TuxType.FJ || p.Type == Tux.TuxType.XB;
-                    //    if (XI.Board.Garden[to].Team == player.OppTeam)
-                    //        return player.ListOutAllEquips().Any(p => isEq(XI.LibTuple.TL.DecodeTux(p)));
-                    //}
+                    else if (blocks[1] == "4")
+                    {
+                        string me = player.Uid.ToString();
+                        if (blocks[2] == me && blocks[4] != "0")
+                            return XI.Board.Garden[ushort.Parse(blocks[3])].Team == player.OppTeam; 
+                        if (blocks[3] == me && blocks[5] != "0")
+                            return XI.Board.Garden[ushort.Parse(blocks[2])].Team == player.OppTeam;
+                    }
                 }
                 return false;
             }
@@ -1011,12 +1011,10 @@ namespace PSD.PSDGamepkg.JNS
                 List<Artiad.Harm> nHarms = new List<Artiad.Harm>();
                 foreach (Artiad.Harm harm in harms)
                 {
-                    if (!HPEvoMask.DECR_INVAO.IsSet(harm.N) && !HPEvoMask.TERMIN_AT.IsSet(harm.N))
-                    {
-                        if (--harm.N > 0)
-                            nHarms.Add(harm);
-                    }
+                    if (!HPEvoMask.DECR_INVAO.IsSet(harm.Mask) && !HPEvoMask.TERMIN_AT.IsSet(harm.Mask))
+                        --harm.N;
                 }
+                harms.RemoveAll(p => p.N == 0);
                 if (nHarms.Count > 0)
                     XI.InnerGMessage(Artiad.Harm.ToMessage(nHarms), -149);
             }
@@ -3790,6 +3788,14 @@ namespace PSD.PSDGamepkg.JNS
                 ushort from = ushort.Parse(blocks[3]);
                 int n = int.Parse(blocks[5]);
                 return from != player.Uid && to != player.Uid && XI.Board.Garden[from].Tux.Count > 0 && n > 0;
+            }
+            else if (blocks[1] == "4")
+            {
+                string me = player.Uid.ToString();
+                if (blocks[2] == me && blocks[4] != "0")
+                    return XI.Board.Garden[ushort.Parse(blocks[3])].Team == player.OppTeam;
+                if (blocks[3] == me && blocks[5] != "0")
+                    return XI.Board.Garden[ushort.Parse(blocks[2])].Team == player.OppTeam;
             }
             return false;
         }

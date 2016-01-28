@@ -198,22 +198,25 @@ namespace PSD.ClientAo.Request
                 if (!codes.Any(p => p.StartsWith("I")))
                     continue;
                 Hero hero = lg.HL.InstanceHero(exsp.Hero);
-                string code = codes.First(p => p.StartsWith("I"));
-                if (!iCardDict.ContainsKey(exsp.Hero))
+                if (hero != null)
                 {
-                    GroupBox gb = new GroupBox()
+                    string code = codes.First(p => p.StartsWith("I"));
+                    if (!iCardDict.ContainsKey(exsp.Hero))
                     {
-                        Header = new TextBlock()
+                        GroupBox gb = new GroupBox()
                         {
-                            FontSize = 24,
-                            FontFamily = new FontFamily("Lisu"),
-                            Text = hero.Name
-                        }
-                    };
-                    gb.Content = iCardDict[exsp.Hero] = new WrapPanel();
-                    iCardStackPanel.Children.Add(gb);
+                            Header = new TextBlock()
+                            {
+                                FontSize = 24,
+                                FontFamily = new FontFamily("Lisu"),
+                                Text = hero == null ? "" : hero.Name
+                            }
+                        };
+                        gb.Content = iCardDict[exsp.Hero] = new WrapPanel();
+                        iCardStackPanel.Children.Add(gb);
+                    }
+                    AddContent(code, hero.Group, iCardDict[exsp.Hero], false);
                 }
-                AddContent(code, hero.Group, iCardDict[exsp.Hero], false);
             }
         }
     }

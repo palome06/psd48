@@ -970,6 +970,47 @@ namespace PSD.PSDGamepkg
                             }
                             WI.BCast("E0HQ,4," + cmdrst.Substring("3,".Length));
                         }
+                        else if (type == 4) // Tux Exchange
+                        {
+                            List<string> msg = new List<string>();
+                            List<string> nsg = new List<string>();
+                            int idx = 2;
+                            ushort u1 = ushort.Parse(args[idx++]);
+                            ushort u2 = ushort.Parse(args[idx++]);
+                            int n1 = ushort.Parse(args[idx++]);
+                            int n2 = ushort.Parse(args[idx++]);
+                            string t1 = string.Join(",", Algo.TakeRange(args, idx, idx + n1));
+                            if (n1 > 0)
+                            {
+                                msg.Add(u1 + "," + n1 + "," + t1);
+                                nsg.Add(u2 + "," + n1 + "," + t1);
+                            }
+                            idx += n1;
+                            string t2 = string.Join(",", Algo.TakeRange(args, idx, idx + n2));
+                            if (n2 > 0)
+                            {
+                                msg.Add(u2 + "," + n2 + "," + t2);
+                                nsg.Add(u1 + "," + n2 + "," + t2);
+                            }
+                            if (msg.Count > 0)
+                            {
+                                RaiseGMessage("G0OT," + string.Join(",", msg));
+                                RaiseGMessage("G0IT," + string.Join(",", nsg));
+                                ushort[] invs = new ushort[] { u1, u2 };
+                                if (n2 > 0)
+                                {
+                                    WI.Send("E0HQ,0," + u1 + "," + u2 + ",0," + n2 + "," + t2, invs);
+                                    WI.Send("E0HQ,0," + u1 + "," + u2 + ",1," + n2, ExceptStaff(invs));
+                                    WI.Live("E0HQ,0," + u1 + "," + u2 + ",1," + n2);
+                                }
+                                if (n1 > 0)
+                                {
+                                    WI.Send("E0HQ,0," + u2 + "," + u1 + ",0," + n1 + "," + t1, invs);
+                                    WI.Send("E0HQ,0," + u2 + "," + u1 + ",1," + n1, ExceptStaff(invs));
+                                    WI.Live("E0HQ,0," + u2 + "," + u1 + ",1," + n1);
+                                }
+                            }
+                        }
                     }
                     break;
                 case "G0QZ":

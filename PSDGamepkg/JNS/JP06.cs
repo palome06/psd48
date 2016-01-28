@@ -1288,7 +1288,10 @@ namespace PSD.PSDGamepkg.JNS
                 XI.RaiseGMessage("G1CW," + g0cd[1] + "," + tar + "," +
                     player.Uid + "," + g0cd[3] + "," + it + ";" + fuse);
             }
-            else if (type == 1)
+        }
+        public void TPT3Action(Player player, int type, string fuse, string argst)
+        {
+            if (type == 1)
                 TP01Action(player, 0, fuse, "");
         }
         #endregion Package of 5 - Others
@@ -2253,13 +2256,9 @@ namespace PSD.PSDGamepkg.JNS
         public void TPH3Action(Player player, int type, string fuse, string argst)
         {
             Player rd = XI.Board.Rounder;
-            string rtx = rd.Tux.Count > 0 ? string.Join(",", rd.Tux) : "";
-            string ptx = player.Tux.Count > 0 ? string.Join(",", player.Tux) : "";
-            int rtxn = rd.Tux.Count, ptxn = player.Tux.Count;
-            if (rtx != "")
-                XI.RaiseGMessage("G0HQ,0," + player.Uid + "," + rd.Uid + ",1," + rtxn + "," + rtx);
-            if (ptx != "")
-                XI.RaiseGMessage("G0HQ,0," + rd.Uid + "," + player.Uid + ",1," + ptxn + "," + ptx);
+            XI.RaiseGMessage("G0HQ,4," + player.Uid + "," + rd.Uid + "," + player.Tux.Count + "," + rd.Tux.Count +
+                (player.Tux.Count > 0 ? ("," + string.Join(",", player.Tux)) : "") +
+                (rd.Tux.Count > 0 ? ("," + string.Join(",", rd.Tux)) : ""));
             if (rd.Tux.Count < rd.TuxLimit && player.Tux.Count > 0)
             {
                 int delta = Math.Min(rd.TuxLimit - rd.Tux.Count, player.Tux.Count);

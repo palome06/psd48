@@ -211,13 +211,9 @@ namespace PSD.PSDGamepkg.JNS
             Player hd = XI.Board.Facer(rd);
             if (hd != null && hd.IsAlive)
             {
-                string rtx = rd.Tux.Count > 0 ? string.Join(",", rd.Tux) : "";
-                string htx = hd.Tux.Count > 0 ? string.Join(",", hd.Tux) : "";
-                int rtxn = rd.Tux.Count, htxn = hd.Tux.Count;
-                if (rtx != "")
-                    XI.RaiseGMessage("G0HQ,0," + hd.Uid + "," + rd.Uid + ",1," + rtxn + "," + rtx);
-                if (htx != "")
-                    XI.RaiseGMessage("G0HQ,0," + rd.Uid + "," + hd.Uid + ",1," + htxn + "," + htx);
+                XI.RaiseGMessage("G0HQ,4," + rd.Uid + "," + hd.Uid + "," + rd.Tux.Count + "," + hd.Tux.Count +
+                    (rd.Tux.Count > 0 ? ("," + string.Join(",", rd.Tux)) : "") +
+                    (hd.Tux.Count > 0 ? ("," + string.Join(",", hd.Tux)) : ""));
             }
         }
         public void SJT02(Player rd)

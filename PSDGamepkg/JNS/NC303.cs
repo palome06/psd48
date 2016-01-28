@@ -540,11 +540,11 @@ namespace PSD.PSDGamepkg.JNS
             if (tval < 5)
                 XI.RaiseGMessage("G0IB," + me + "," + (5 - tval));
         }
-        public void NCT41Debut(Player trigger)
+        public void NCT42Debut(Player trigger)
         {
             int incr = XI.Board.Garden.Values.Where(p => p.IsAlive &&
                 p.Team == trigger.OppTeam).Max(p => p.Tux.Count) - 1;
-            ushort me = NMBLib.CodeOfNPC(XI.LibTuple.NL.Encode("NCT41"));
+            ushort me = NMBLib.CodeOfNPC(XI.LibTuple.NL.Encode("NCT42"));
             if (incr >= 0)
                 XI.RaiseGMessage("G0IB," + me + "," + incr);
         }
