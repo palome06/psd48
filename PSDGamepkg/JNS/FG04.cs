@@ -2961,6 +2961,28 @@ namespace PSD.PSDGamepkg.JNS
             }
             return "";
         }
+        public void GHH2WinEff()
+        {
+            if (XI.Board.Rounder.Tux.Count > 0)
+                XI.RaiseGMessage("G0QZ," + XI.Board.Rounder.Uid + "," + string.Join(",", XI.Board.Rounder.Tux));
+            if (XI.Board.Hinder.IsValidPlayer())
+                Harm("GHH2", XI.Board.Hinder, 2);
+        }
+        public void GHH2LoseEff()
+        {
+            Harm("GHH2", XI.Board.Garden.Values.Where(p => p.IsAlive), 1);
+        }
+        public void GHH2ConsumeAction(Player player, int consumeType, int type, string fuse, string argst)
+        {
+            if (consumeType == 1)
+                Harm("GHH2", XI.Board.Garden.Values.Where(p => p.IsAlive && p.Team == player.OppTeam), 2);
+        }
+        public bool GHH2ConsumeValid(Player player, int consumeType, int type, string fuse)
+        {
+            if (consumeType == 1)
+                return Artiad.Harm.Parse(fuse).Any(p => p.Who == player.Uid && p.N > 0 && p.Element == FiveElement.AGNI);
+            return false;
+        }
         public void GLH2WinEff()
         {
             var rd = XI.Board.Rounder;

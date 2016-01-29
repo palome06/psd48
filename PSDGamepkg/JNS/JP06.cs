@@ -290,13 +290,12 @@ namespace PSD.PSDGamepkg.JNS
         {
             List<ushort> invs = XI.Board.Garden.Values.Where(p => p.Uid != player.Uid &&
                 p.IsTared && p.Tux.Except(XI.Board.ProtectedTux).Any()).Select(p => p.Uid).ToList();
-            string inputFormat = (invs.Count > 0) ? "#获得其1张手牌,T1(p" + string.Join("p", invs) + ")" : "/";
+            string inputFormat = (invs.Count > 0) ? "#获得其手牌,T1(p" + string.Join("p", invs) + ")" : "/";
             var ai = XI.AsyncInput(player.Uid, inputFormat, "JP01", "0");
             if (!ai.StartsWith("/"))
             {
                 ushort from = ushort.Parse(ai);
                 TargetPlayer(player.Uid, from);
-                VI.Cout(0, "{0}对{1}使用「偷盗」.", XI.DisplayPlayer(player.Uid), XI.DisplayPlayer(from));
                 string c0 = Algo.RepeatString("p0",
                     XI.Board.Garden[from].Tux.Except(XI.Board.ProtectedTux).Count());
                 XI.AsyncInput(player.Uid, "#获得的,C1(" + c0 + ")", "JP01," + from, "0");
@@ -313,7 +312,6 @@ namespace PSD.PSDGamepkg.JNS
         // Kui Ce Tian Ji
         public void JP02Action(Player player, int type, string fuse, string argst)
         {
-            VI.Cout(0, "{0}使用「窥测天机」.", XI.DisplayPlayer(player.Uid));
             XI.RaiseGMessage("G0XZ," + player.Uid + ",2,1,2");
         }
         public bool JP02Valid(Player player, int type, string fuse)
@@ -341,7 +339,8 @@ namespace PSD.PSDGamepkg.JNS
         {
             if (type == 0)
             {
-                ushort to = ushort.Parse(XI.AsyncInput(player.Uid, "T1" + FormatPlayers(p => p.IsTared), "JP05", "0"));
+                ushort to = ushort.Parse(XI.AsyncInput(player.Uid, 
+                    "#攻击,T1" + FormatPlayers(p => p.IsTared), "JP05", "0"));
                 TargetPlayer(player.Uid, to);
                 XI.RaiseGMessage(Artiad.Harm.ToMessage(new Artiad.Harm(to, player.Uid,
                     FiveElement.THUNDER, 2, (long)HPEvoMask.FROM_JP)));

@@ -4118,9 +4118,10 @@ namespace PSD.PSDGamepkg.JNS
                 ushort ut = ushort.Parse(argst);
                 XI.RaiseGMessage("G0YM,2,0,0");
                 XI.RaiseGMessage("G0IJ," + player.Uid + ",1,1,E" + XI.Board.Eve);
+                XI.RaiseGMessage("G2TZ," + player.Uid + ",0,E" + XI.Board.Eve);
 
                 XI.Board.EveDises.Remove(ut);
-                XI.RaiseGMessage("G2CN,1,1");
+                XI.RaiseGMessage("G2CN,2,1");
                 XI.Board.Eve = ut;
 
                 XI.RaiseGMessage("G0YM,2," + ut + ",0");
@@ -4131,6 +4132,7 @@ namespace PSD.PSDGamepkg.JNS
                 XI.AsyncInput(player.Uid, "#收入「改命」,E1(p" + XI.Board.Eve + ")", "JNT3501", "0");
                 XI.RaiseGMessage("G0YM,2,0,0");
                 XI.RaiseGMessage("G0IJ," + player.Uid + ",1,1,E" + XI.Board.Eve);
+                XI.RaiseGMessage("G2TZ," + player.Uid + ",0,E" + XI.Board.Eve);
                 XI.Board.Eve = 0;
                 player.RAMUshort = 0;
             }
@@ -4484,13 +4486,18 @@ namespace PSD.PSDGamepkg.JNS
                 for (int i = 0; i < linkHeads.Length; ++i)
                 {
                     int idx = linkHeads[i].IndexOf(',');
+                    string pureName = linkHeads[i].Substring(0, idx);
                     string pureTypeStr = linkHeads[i].Substring(idx + 1);
                     if (!pureTypeStr.Contains("!"))
                     {
                         ushort pureType = ushort.Parse(pureTypeStr);
-                        XI.RaiseGMessage("G0CC," + player.Uid + ",0," + player.Uid + "," + tux.Code +
-                            "," + argst + ";" + pureType + "," + pureFuse); // argst contains ut and won't be null
-                        break;
+                        if (tux.Code == pureName && tux.Bribe(player, pureType, pureFuse)
+                                        && tux.Valid(player, pureType, pureFuse))
+                        {
+                            XI.RaiseGMessage("G0CC," + player.Uid + ",0," + player.Uid + "," + tux.Code +
+                                "," + argst + ";" + pureType + "," + pureFuse); // argst contains ut and won't be null
+                            break;
+                        }
                     }
                 }
             }

@@ -1008,15 +1008,14 @@ namespace PSD.PSDGamepkg.JNS
             else if (type == 1)
             {
                 List<Artiad.Harm> harms = Artiad.Harm.Parse(fuse);
-                List<Artiad.Harm> nHarms = new List<Artiad.Harm>();
                 foreach (Artiad.Harm harm in harms)
                 {
                     if (!HPEvoMask.DECR_INVAO.IsSet(harm.Mask) && !HPEvoMask.TERMIN_AT.IsSet(harm.Mask))
                         --harm.N;
                 }
                 harms.RemoveAll(p => p.N == 0);
-                if (nHarms.Count > 0)
-                    XI.InnerGMessage(Artiad.Harm.ToMessage(nHarms), -149);
+                if (harms.Count > 0)
+                    XI.InnerGMessage(Artiad.Harm.ToMessage(harms), -149);
             }
             else if (type == 2)
                 XI.RaiseGMessage("G0OJ," + player.Uid + ",3");
