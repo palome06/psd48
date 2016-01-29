@@ -160,9 +160,9 @@ namespace PSD.PSDGamepkg
             //Board.MonPiles.PushBack(1002);
             //Board.MonPiles.PushBack(1012);
             //Board.MonPiles.PushBack(40);
-            Board.MonPiles.PushBack(43);
+            //Board.MonPiles.PushBack(43);
             //Board.MonPiles.PushBack(1001);
-            //Board.MonPiles.PushBack(15);
+            Board.MonPiles.PushBack(18);
             //Board.MonPiles.PushBack(62);
             //Board.MonPiles.PushBack(1003);
             //Board.MonPiles.PushBack(7);
@@ -255,7 +255,7 @@ namespace PSD.PSDGamepkg
             //RaiseGMessage("G0HQ,2,1,0,0,30,33");
             //RaiseGMessage("G0HQ,2,1,0,0,10,37,50");
             //RaiseGMessage("G0HQ,2,4,0,0,33,35");
-            //RaiseGMessage("G0HQ,2,3,0,0,92");
+            RaiseGMessage("G0HQ,2,1,0,0,90");
             //RaiseGMessage("G0HQ,2,2,0,0,90,89");
             //RaiseGMessage("G0HQ,2,2,0,0,96,59");
             //RaiseGMessage("G0HQ,2,1,0,0,96,18");
@@ -266,7 +266,7 @@ namespace PSD.PSDGamepkg
             //RaiseGMessage("G0HQ,2,2,0,0,39,40,41,42");
             //RaiseGMessage("G0HQ,2,3,0,0,48,53");
             //RaiseGMessage("G0HQ,2,4,0,0,60,90");
-            //RaiseGMessage("G0HQ,2,5,0,0,89");
+            RaiseGMessage("G0HQ,2,4,0,0,40,70");
             //RaiseGMessage("G0HQ,2,2,0,0,90,34,89,88,95");
             //RaiseGMessage("G0HQ,2,1,0,0,95,88,10");
             //RaiseGMessage("G0HQ,2,1,0,0,10,11");
@@ -371,8 +371,8 @@ namespace PSD.PSDGamepkg
             //RaiseGMessage("G0IF,4,1,2,3,4");
             //RaiseGMessage("G0IF,1,2");
             //RaiseGMessage("G0IF,4,4");
-            //foreach (Player player in Board.Garden.Values)
-            //   RaiseGMessage("G0HQ,2," + player.Uid + ",1,3");
+            foreach (Player player in Board.Garden.Values)
+                RaiseGMessage("G0HQ,2," + player.Uid + ",1,3");
             //RaiseGMessage("G0HQ,2,4,1,8");
             //RaiseGMessage("G0HQ,2,6,1,2");
             //RaiseGMessage("G0HQ,2,1,1,1");

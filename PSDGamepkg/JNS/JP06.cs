@@ -530,7 +530,7 @@ namespace PSD.PSDGamepkg.JNS
             ushort host = ushort.Parse(argv[1]);
             XI.RaiseGMessage("G0CE," + host + ",2,0," + argv[3] + ";" + type + "," + fuse);
             List<Artiad.Harm> harms = Artiad.Harm.Parse(fuse);
-            harms.RemoveAll(p => p.Who == player.Uid && !HPEvoMask.TUX_INAVO.IsSet(p.Mask));
+            harms.RemoveAll(p => p.Who == host && !HPEvoMask.TUX_INAVO.IsSet(p.Mask));
 
             bool locusSucc = false;
             if (Artiad.Procedure.LocustChangePendingTux(XI, player.Uid, locuster.Uid, locustee))
@@ -925,7 +925,7 @@ namespace PSD.PSDGamepkg.JNS
 
                 foreach (Artiad.Harm harm in harms)
                 {
-                    if (yes(harm))
+                    if (yes(harm) && harm.Who == who)
                     {
                         harm.N = 1;
                         if (HPEvoMask.TERMIN_AT.IsSet(harm.Mask))
@@ -948,21 +948,19 @@ namespace PSD.PSDGamepkg.JNS
                     !HPEvoMask.TUX_INAVO.IsSet(p.Mask) && !HPEvoMask.DECR_INVAO.IsSet(p.Mask);
                 List<ushort> invs = harms.Where(p => yes(p)).Select(p => p.Who).Distinct().ToList();
 
-                string whoStr = XI.AsyncInput(player.Uid, "T1(p" + string.Join("p", invs) + ")", "TPT1", "0");
+                string whoStr = XI.AsyncInput(host, "T1(p" + string.Join("p", invs) + ")", "TPT1", "0");
                 ushort who = ushort.Parse(whoStr);
                 TargetPlayer(player.Uid, who);
 
                 foreach (Artiad.Harm harm in harms)
                 {
-                    if (yes(harm))
+                    if (yes(harm) && harm.Who == who)
                     {
                         harm.N = 1;
                         if (HPEvoMask.TERMIN_AT.IsSet(harm.Mask))
                             harm.Mask = HPEvoMask.FINAL_MASK.Reset(harm.Mask);
                     }
                 }
-                if (harms.Count > 0)
-                    XI.InnerGMessage(Artiad.Harm.ToMessage(harms), 85);
                 bool locusSucc = false;
                 if (Artiad.Procedure.LocustChangePendingTux(XI, player.Uid, locuster.Uid, locustee))
                 {
