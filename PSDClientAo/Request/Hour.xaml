@@ -47,15 +47,11 @@
             </ScrollViewer>
         </TabItem>
 
-        <TabItem Header="危机牌" IsEnabled="False">
-            <TextBlock>Help tab</TextBlock>
-        </TabItem>
-        
-        <TabItem Header="场景牌" IsEnabled="False">
+        <TabItem Header="场景/危机" IsEnabled="False">
             <TextBlock>Help tab</TextBlock>
         </TabItem>
 
-        <TabItem Header="祈愿牌" IsEnabled="False">
+        <TabItem Header="魔主牌" IsEnabled="False">
             <TextBlock>Help tab</TextBlock>
         </TabItem>
     </TabControl>

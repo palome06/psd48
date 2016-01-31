@@ -152,7 +152,7 @@ namespace PSD.PSDGamepkg.JNS
             Player rd = XI.Board.Rounder, hd = XI.Board.Hinder;
             var vl = XI.Board.Garden.Values;
             Harm("GS04", vl.Where(p => p.IsAlive && p.Team == rd.OppTeam), 1);
-            if (hd.IsAlive && hd.Uid != 0 && hd.HasAnyCards())
+            if (hd.IsValidPlayer() && hd.HasAnyCards())
             {
                 string second = XI.AsyncInput(rd.Uid, string.Format("#获得{0}的,C1(p{1})",
                     XI.DisplayPlayer(hd.Uid), string.Join("p", hd.ListOutAllCardsWithEncrypt())),
@@ -168,7 +168,7 @@ namespace PSD.PSDGamepkg.JNS
         {
             Player rd = XI.Board.Rounder, hd = XI.Board.Hinder;
             Harm("GS04", rd, 2);
-            if (hd.IsAlive && hd.Uid != 0 && rd.IsAlive && rd.Uid != 0 && rd.HasAnyCards())
+            if (hd.IsValidPlayer() && rd.IsAlive && rd.Uid != 0 && rd.HasAnyCards())
             {
                 string second = XI.AsyncInput(hd.Uid, string.Format("#获得{0}的,C1(p{1})",
                     XI.DisplayPlayer(rd.Uid), string.Join("p", rd.ListOutAllCardsWithEncrypt())),
@@ -1540,12 +1540,15 @@ namespace PSD.PSDGamepkg.JNS
         {
             Player r = XI.Board.Rounder, h = XI.Board.Hinder;
             Harm("GST4", r, 3);
-            string ques = XI.AsyncInput(h.Uid, "#您是否弃掉所有手牌解除定身？##是##否,Y2", "GST4LoseEff", "0");
-            if (ques == "1")
+            if (h.IsValidPlayer())
             {
-                if (h.Tux.Count > 0)
-                    XI.RaiseGMessage("G0DH," + h.Uid + ",2," + h.Tux.Count);
-                XI.RaiseGMessage("G0DS," + h.Uid + ",1");
+                string ques = XI.AsyncInput(h.Uid, "#您是否弃掉所有手牌解除定身？##是##否,Y2", "GST4LoseEff", "0");
+                if (ques == "1")
+                {
+                    if (h.Tux.Count > 0)
+                        XI.RaiseGMessage("G0DH," + h.Uid + ",2," + h.Tux.Count);
+                    XI.RaiseGMessage("G0DS," + h.Uid + ",1");
+                }
             }
         }
         public void GST4ConsumeAction(Player player, int consumeType, int type, string fuse, string argst)
@@ -2903,7 +2906,7 @@ namespace PSD.PSDGamepkg.JNS
         public void GHH1WinEff()
         {
             Harm("GHH1", XI.Board.Garden.Values.Where(p => p.Team == XI.Board.Rounder.OppTeam && p.IsAlive), 2);
-            if (XI.Board.Hinder != null && XI.Board.Hinder.IsAlive && XI.Board.Hinder.Tux.Count > 0)
+            if (XI.Board.Hinder.IsValidPlayer() && XI.Board.Hinder.Tux.Count > 0)
             {
                 string ns = XI.Board.Hinder.Tux.Count > 1 ? ("1~" + XI.Board.Hinder.Tux.Count) : "1";
                 string sel = XI.AsyncInput(XI.Board.Hinder.Uid, "#弃置以回复HP,/Q" + ns +

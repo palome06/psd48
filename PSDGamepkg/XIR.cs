@@ -587,6 +587,8 @@ namespace PSD.PSDGamepkg
                                 }
                                 foreach (Player player in Board.Garden.Values)
                                     RaiseGMessage("G0AX," + player.Uid);
+                                if (Board.Silence.Count > 0)
+                                    Board.Silence.Clear();
                             }, () => {
                                 if (Board.PendingTux.Count > 0)
                                 {

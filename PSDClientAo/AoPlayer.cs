@@ -325,7 +325,12 @@ namespace PSD.ClientAo
                 string code = rune.Code;
                 pb.Dispatcher.BeginInvoke((Action)(() =>
                 {
-                    pb.runeStack.Children.Add(pb.TryFindResource("bufferIcon" + code) as Image);
+                    Image bsimg = pb.TryFindResource("bufferIcon" + code) as Image;
+                    if (bsimg != null)
+                    {
+                        Image nImg = new Image() { Source = bsimg.Source, ToolTip = bsimg.ToolTip };
+                        pb.runeStack.Children.Add(nImg);
+                    }
                 }));
                 Runes.Add(runeCd);
                 pb.Dispatcher.BeginInvoke((Action)(() =>
@@ -343,7 +348,16 @@ namespace PSD.ClientAo
                 string code = rune.Code;
                 pb.Dispatcher.BeginInvoke((Action)(() =>
                 {
-                    pb.runeStack.Children.Remove(pb.TryFindResource("bufferIcon" + code) as Image);
+                    Image bsimg = pb.TryFindResource("bufferIcon" + code) as Image;
+                    foreach (var elem in pb.runeStack.Children)
+                    {
+                        Image img = elem as Image;
+                        if (img != null || img.Source == bsimg.Source)
+                        {
+                            pb.runeStack.Children.Remove(img);
+                            break;
+                        }
+                    }
                 }));
                 Runes.Remove(runeCd);
                 pb.Dispatcher.BeginInvoke((Action)(() =>

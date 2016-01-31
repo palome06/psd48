@@ -3584,7 +3584,7 @@ namespace PSD.PSDGamepkg.JNS
                 }
                 else
                 {
-                    string second = XI.AsyncInput(player.Uid, "#请选择获得「神算」,T1" + 
+                    string second = XI.AsyncInput(player.Uid, "#请选择获得「神算」,T1(p" + 
                            string.Join("p", uts) + ")", "JNE0202", "1");
                     if (second != VI.CinSentinel)
                     {

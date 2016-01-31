@@ -22,7 +22,7 @@
     <Image x:Key="HeroInTestStamp" Source="Logo/HeroInTest.png"/>
 
     <Image x:Key="petsnapGS01" Source="PetsSnap/GS01.png" ToolTip="千杯不醉"/>
-    <Image x:Key="petsnapGS02" Source="PetsSnap/GS02.png" ToolTip="五毒兽"/>
+    <Image x:Key="petsnapGS02" Source="PetsSnap/GS02.png" ToolTip="勇气"/>
     <Image x:Key="petsnapGS03" Source="PetsSnap/GS03.png" ToolTip="蛇妖男"/>
     <Image x:Key="petsnapGS04" Source="PetsSnap/GS04.png" ToolTip="水魔兽"/>
 
@@ -388,6 +388,8 @@
     <ImageBrush x:Key="staEpXBT3" ImageSource="EquipSnap/XBT3.png"/>
     <ImageBrush x:Key="staEpXBT4" ImageSource="EquipSnap/XBT4.png"/>
     <ImageBrush x:Key="staEpXBT5" ImageSource="EquipSnap/XBT5.png"/>
+    <ImageBrush x:Key="staEpXBT6" ImageSource="EquipSnap/XBT6.png"/>
+    <ImageBrush x:Key="staEpXBT7" ImageSource="EquipSnap/XBT7.png"/>
     <ImageBrush x:Key="staEpXBR1" ImageSource="EquipSnap/XBR1.png"/>
 
     <ImageBrush x:Key="staEpWQH1" ImageSource="EquipSnap/WQH1.png"/>
@@ -723,18 +725,23 @@
     <Image x:Key="tuxCardZPT4" Source="Card/Tux/ZPT4.png"/>
     <Image x:Key="tuxCardZPT5" Source="Card/Tux/ZPT5.png"/>
     <Image x:Key="tuxCardXBT5" Source="Card/Tux/XBT5.png"/>
+    <Image x:Key="tuxCardXBT6" Source="Card/Tux/XBT6.png"/>
+    <Image x:Key="tuxCardXBT7" Source="Card/Tux/XBT7.png"/>
     <Image x:Key="tuxCardJPR1" Source="Card/Tux/JPR1.png"/>
     <Image x:Key="tuxCardJPR2" Source="Card/Tux/JPR2.png"/>
     <Image x:Key="tuxCardTPR1" Source="Card/Tux/TPR1.png"/>
     <Image x:Key="tuxCardXBR1" Source="Card/Tux/XBR1.png"/>
 
+    <Image x:Key="tuxCardJPH1" Source="Card/Tux/JPH1.png"/>
     <Image x:Key="tuxCardJPH2" Source="Card/Tux/JPH2.png"/>
+    <Image x:Key="tuxCardJPH3" Source="Card/Tux/JPH3.png"/>
     <Image x:Key="tuxCardJPH4" Source="Card/Tux/JPH4.png"/>
     <Image x:Key="tuxCardTPH1" Source="Card/Tux/TPH1.png"/>
     <Image x:Key="tuxCardTPH3" Source="Card/Tux/TPH3.png"/>
     <Image x:Key="tuxCardTPH4" Source="Card/Tux/TPH4.png"/>
     <Image x:Key="tuxCardZPH1" Source="Card/Tux/ZPH1.png"/>
     <Image x:Key="tuxCardZPH2" Source="Card/Tux/ZPH2.png"/>
+    <Image x:Key="tuxCardZPH3" Source="Card/Tux/ZPH3.png"/>
     <Image x:Key="tuxCardWQH1" Source="Card/Tux/WQH1.png"/>
     <Image x:Key="tuxCardFJH1" Source="Card/Tux/FJH1.png"/>
     <Image x:Key="tuxCardXBH1" Source="Card/Tux/XBH1.png"/>
@@ -927,13 +934,13 @@
     <ImageBrush x:Key="loadGuard19" ImageSource="Guard/L19.png"/>
 
     <Image x:Key="bufferIconSF01" Source="Buffer/SF01.png" ToolTip="强袭"/>
-    <Image x:Key="bufferIconSF02" Source="Buffer/SF02.png"/>
+    <Image x:Key="bufferIconSF02" Source="Buffer/SF02.png" ToolTip="神行"/>
     <Image x:Key="bufferIconSF03" Source="Buffer/SF03.png" ToolTip="法障"/>
     <Image x:Key="bufferIconSF04" Source="Buffer/SF04.png" ToolTip="坚盾"/>
-    <Image x:Key="bufferIconSF05" Source="Buffer/SF05.png"/>
-    <Image x:Key="bufferIconSF06" Source="Buffer/SF06.png" ToolTip="神算"/>
-    <Image x:Key="bufferIconSF07" Source="Buffer/SF07.png"/>
-    <Image x:Key="bufferIconSF08" Source="Buffer/SF08.png"/>
+    <Image x:Key="bufferIconSF05" Source="Buffer/SF05.png" ToolTip="脱力"/>
+    <Image x:Key="bufferIconSF06" Source="Buffer/SF06.png" ToolTip="虚弱"/>
+    <Image x:Key="bufferIconSF07" Source="Buffer/SF07.png" ToolTip="神算"/>
+    <Image x:Key="bufferIconSF08" Source="Buffer/SF08.png" ToolTip="水屏"/>
     <Image x:Key="bufferIconSF09" Source="Buffer/SF09.png"/>
     <Image x:Key="bufferIconSF10" Source="Buffer/SF10.png"/>
     <Image x:Key="bufferIconSF11" Source="Buffer/SF11.png"/>

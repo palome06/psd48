@@ -241,7 +241,6 @@ namespace PSD.Base
             PetDisabled = false;
             Loved = false;
             DEXi = 0; STRi = 0;
-            Runes.Clear();
         }
 
         public void ResetRAM(int hero = 0)
