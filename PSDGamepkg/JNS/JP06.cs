@@ -248,14 +248,14 @@ namespace PSD.PSDGamepkg.JNS
                     }
                     var methodUseAction = tc.GetType().GetMethod(cardCode + "UseAction");
                     if (methodUseAction != null)
-                        tue.UseAction += delegate(ushort cardUt, Player player, bool fromSky)
+                        tue.UseAction += delegate(ushort cardUt, Player player, ushort source)
                         {
-                            methodUseAction.Invoke(tc, new object[] { cardUt, player, fromSky });
+                            methodUseAction.Invoke(tc, new object[] { cardUt, player, source });
                         };
                     else
-                        tue.UseAction += delegate (ushort cardUt, Player player, bool fromSky)
+                        tue.UseAction += delegate (ushort cardUt, Player player, ushort source)
                         {
-                            EquipGeneralUseAction(cardUt, player, fromSky);
+                            EquipGeneralUseAction(cardUt, player, source);
                         };
                     var methodInsAction = tc.GetType().GetMethod(cardCode + "InsAction");
                     if (methodInsAction != null)
@@ -992,7 +992,12 @@ namespace PSD.PSDGamepkg.JNS
         public void TPT2Vestige(Player player, int type, string fuse, ushort it)
         {
             if (type == 0 && it != 0)
-                XI.RaiseGMessage("G0ZB," + player.Uid + ",3,TPT2," + it);
+            {
+                XI.RaiseGMessage(new Artiad.EquipFakeq()
+                {
+                    Who = player.Uid, Source = player.Uid, Card = it, CardAs = "TPT2"
+                }.ToMessage());
+            }
         }
         public void TPT2Action(Player player, int type, string fuse, string argst)
         {
@@ -1096,20 +1101,17 @@ namespace PSD.PSDGamepkg.JNS
                 XI.RaiseGMessage("G0DH," + player.Uid + ",0,1");
             }
         }
-        public void FJT2UseAction(ushort cardUt, Player player, bool fromSky)
+        public void FJT2UseAction(ushort cardUt, Player player, ushort source)
         {
             string tarStr = XI.AsyncInput(player.Uid, "#装备的,T1(p" + string.Join("p",
                 XI.Board.Garden.Values.Where(p => p.IsTared).Select(p => p.Uid)) + ")", "FJT2", "0");
             if (tarStr != VI.CinSentinel)
             {
                 ushort tar = ushort.Parse(tarStr);
-                if (tar != player.Uid)
-                    XI.RaiseGMessage("G0ZB," + tar + ",1," + player.Uid +
-                        ",0," + player.Uid + "," + cardUt);
-                else if (fromSky)
-                    XI.RaiseGMessage("G0ZB," + player.Uid + ",4," + cardUt);
-                else
-                    XI.RaiseGMessage("G0ZB," + player.Uid + ",0," + cardUt);
+                XI.RaiseGMessage(new Artiad.EquipStandard()
+                {
+                    Who = tar, Source = source, SingleCard = cardUt
+                }.ToMessage());
             }
         }
         public void FJT2InsAction(Player player)
@@ -1790,7 +1792,7 @@ namespace PSD.PSDGamepkg.JNS
                     else if (tux != null)
                     {
                         XI.RaiseGMessage("G0SN," + player.Uid + "," + lugCode + ",1,C" + ut);
-                        XI.RaiseGMessage("G0ZB," + player.Uid + ",1," + player.Uid + ",0,0," + ut);
+                        XI.RaiseGMessage("G1UE," + player.Uid + ",0," + ut);
                     }
                 }
             }
@@ -2335,20 +2337,17 @@ namespace PSD.PSDGamepkg.JNS
                 }
             }
         }
-        public void FJH1UseAction(ushort cardUt, Player player, bool fromSky)
+        public void FJH1UseAction(ushort cardUt, Player player, ushort source)
         {
             string tarStr = XI.AsyncInput(player.Uid, "#装备的,T1(p" + string.Join("p",
                 XI.Board.Garden.Values.Where(p => p.IsTared).Select(p => p.Uid)) + ")", "FJH1", "0");
             if (tarStr != VI.CinSentinel)
             {
                 ushort tar = ushort.Parse(tarStr);
-                if (tar != player.Uid)
-                    XI.RaiseGMessage("G0ZB," + tar + ",1," + player.Uid +
-                        ",0," + player.Uid + "," + cardUt);
-                else if (fromSky)
-                    XI.RaiseGMessage("G0ZB," + player.Uid + ",4," + cardUt);
-                else
-                    XI.RaiseGMessage("G0ZB," + player.Uid + ",0," + cardUt);
+                XI.RaiseGMessage(new Artiad.EquipStandard()
+                {
+                    Who = tar, Source = source, SingleCard = cardUt
+                }.ToMessage());
             }
         }
         public void FJH1DelAction(Player player)
@@ -2468,12 +2467,12 @@ namespace PSD.PSDGamepkg.JNS
             else if (te.IncrOfDEX < 0)
                 XI.RaiseGMessage("G0IA," + player.Uid + ",0," + (-te.IncrOfDEX));
         }
-        private void EquipGeneralUseAction(ushort cardUt, Player player, bool fromSky)
+        private void EquipGeneralUseAction(ushort cardUt, Player player, ushort source)
         {
-            if (fromSky)
-                XI.RaiseGMessage("G0ZB," + player.Uid + ",4," + cardUt);
-            else
-                XI.RaiseGMessage("G0ZB," + player.Uid + ",0," + cardUt);
+            XI.RaiseGMessage(new Artiad.EquipStandard()
+            {
+                Who = player.Uid, Source = source, SingleCard = cardUt
+            }.ToMessage());
         }
         #endregion Equip Util
 

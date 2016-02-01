@@ -599,6 +599,32 @@ namespace PSD.ClientAo.VW
                         line = line.Substring(0, line.Length - ",0".Length);
                 }
             }
+            if (Version <= 151)
+            {
+                if (line.StartsWith("E0ZB"))
+                {
+                    // old where map to new slot
+                    ushort[] slotMap = { 0, 1, 2, 5, 6, 4, 3 };
+                    string[] e0zb = line.Split(',');
+                    if (e0zb[2] == "0")
+                    {
+                        int where = int.Parse(e0zb[3]);
+                        if (where == 4)
+                            line = "E0ZB," + e0zb[1] + "," + e0zb[1] + ",6," + e0zb[4] + "," + e0zb[5];
+                        else
+                            line = "E0ZB," + e0zb[1] + "," + e0zb[1] + "," + slotMap[where] + "," + e0zb[4];
+                    }
+                    else if (e0zb[2] == "1")
+                    {
+                        ushort from = ushort.Parse(e0zb[3]);
+                        int where = int.Parse(e0zb[4]);
+                        if (where == 4)
+                            line = "E0ZB," + e0zb[1] + "," + from + ",6," + e0zb[5] + "," + e0zb[6];
+                        else
+                            line = "E0ZB," + e0zb[1] + "," + from + "," + slotMap[where] + "," + e0zb[5];
+                    }
+                }
+            }
         }
         #endregion Version
     }

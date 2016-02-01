@@ -391,7 +391,7 @@ namespace PSD.Base.Card
             int consumeType, int type, string fuse, string prev);
         public delegate string CsInputHolderDelegate(Player provider, Player user,
             int consumeType, int type, string fuse, string prev);
-        public delegate void CsUseActionDelegate(ushort cardUt, Player player, bool fromSky);
+        public delegate void CsUseActionDelegate(ushort cardUt, Player player, ushort source);
 
         private CrActionDelegate mIncrAction, mDecrAction;
         private CsActionDelegate mConsumeAction;
@@ -475,7 +475,7 @@ namespace PSD.Base.Card
             delegate(Player player, int consumeType, int type, string fuse, string prev) { return ""; });
         protected static CsInputHolderDelegate DefCsInputHolder = new CsInputHolderDelegate(
             delegate(Player provider, Player user, int consumeType, int type, string fuse, string prev) { return ""; });
-        protected static CsUseActionDelegate DefCsUseAction = (c, p, f) => { };
+        protected static CsUseActionDelegate DefCsUseAction = (c, p, s) => { };
 
         public override bool IsTuxEqiup() { return true; }
 

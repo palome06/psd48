@@ -1644,360 +1644,152 @@ namespace PSD.PSDGamepkg
                         break;
                     }
                 case "G0ZB":
-                    if (args[2] == "0" || args[2] == "4") // Tux to eq; 4 means from sky
+                    if (Artiad.ClothingHelper.IsStandard(cmd))
                     {
-                        // G0ZB,A,0,x...
-                        bool fromSky = (args[2] == "4");
-                        ushort me = ushort.Parse(args[1]);
-                        for (int i = 3; i < args.Length; ++i)
+                        Artiad.EquipStandard eis = Artiad.EquipStandard.Parse(cmd);
+                        foreach (ushort card in eis.Cards)
                         {
-                            ushort card = ushort.Parse(args[i]);
-                            Player player = Board.Garden[me];
                             Tux tux = LibTuple.TL.DecodeTux(card);
-                            if ((fromSky || player.Tux.Contains(card)) && tux.IsTuxEqiup())
-                            {
-                                TuxEqiup te = tux as TuxEqiup;
-                                if (!fromSky)
-                                    RaiseGMessage("G0OT," + me + ",1," + card);
-                                if (tux.Type == Tux.TuxType.WQ)
-                                {
-                                    if (player.Weapon == 0 && player.ExEquip == 0)
-                                    {
-                                        player.Weapon = card;
-                                        WI.BCast("E0ZB," + me + ",0,1," + card);
-                                    }
-                                    else if ((player.ExMask & 0x1) == 0)
-                                    {
-                                        if (player.Weapon != card && player.Weapon != 0)
-                                            RaiseGMessage("G0QZ," + me + "," + player.Weapon);
-                                        player.Weapon = card;
-                                        WI.BCast("E0ZB," + me + ",0,1," + card);
-                                    }
-                                    else
-                                    {
-                                        string mai = "#替换的,C1(p" + player.Weapon
-                                             + "p" + player.ExEquip + ")";
-                                        ushort sel = ushort.Parse(AsyncInput(me, mai, cmd, "0"));
-                                        if (player.ExEquip == sel)
-                                        {
-                                            if (player.ExEquip != 0)
-                                                RaiseGMessage("G0QZ," + me + "," + player.ExEquip);
-                                            player.ExEquip = card;
-                                            WI.BCast("E0ZB," + me + ",0,5," + card);
-                                        }
-                                        else
-                                        { // player.Weapon == sel
-                                            if (player.Weapon != 0)
-                                                RaiseGMessage("G0QZ," + me + "," + player.Weapon);
-                                            player.Weapon = card;
-                                            WI.BCast("E0ZB," + me + ",0,1," + card);
-                                        }
-                                    }
-                                    RaiseGMessage("G1IZ," + me + "," + card);
-                                    if (!player.WeaponDisabled)
-                                        te.InsAction(player);
-                                }
-                                else if (tux.Type == Tux.TuxType.FJ)
-                                {
-                                    if (player.Armor == 0 && player.ExEquip == 0)
-                                    {
-                                        player.Armor = card;
-                                        WI.BCast("E0ZB," + me + ",0,2," + card);
-                                    }
-                                    else if ((player.ExMask & 0x2) == 0)
-                                    {
-                                        if (player.Armor != card && player.Armor != 0)
-                                            RaiseGMessage("G0QZ," + me + "," + player.Armor);
-                                        player.Armor = card;
-                                        WI.BCast("E0ZB," + me + ",0,2," + card);
-                                    }
-                                    else
-                                    {
-                                        string mai = "#替换的,C1(p" + player.Armor
-                                             + "p" + player.ExEquip + ")";
-                                        ushort sel = ushort.Parse(AsyncInput(me, mai, cmd, "0"));
-                                        if (player.ExEquip == sel)
-                                        {
-                                            if (player.ExEquip != 0)
-                                                RaiseGMessage("G0QZ," + me + "," + player.ExEquip);
-                                            player.ExEquip = card;
-                                            WI.BCast("E0ZB," + me + ",0,5," + card);
-                                        }
-                                        else
-                                        { // player.Armor == sel
-                                            if (player.Armor != 0)
-                                                RaiseGMessage("G0QZ," + me + "," + player.Armor);
-                                            player.Armor = card;
-                                            WI.BCast("E0ZB," + me + ",0,2," + card);
-                                        }
-                                    }
-                                    RaiseGMessage("G1IZ," + me + "," + card);
-                                    if (!player.ArmorDisabled)
-                                        te.InsAction(player);
-                                }
-                                if (tux.Type == Tux.TuxType.XB)
-                                {
-                                    if (player.Trove == 0 && player.ExEquip == 0)
-                                    {
-                                        player.Trove = card;
-                                        WI.BCast("E0ZB," + me + ",0,6," + card);
-                                    }
-                                    else if ((player.ExMask & 0x4) == 0)
-                                    {
-                                        if (player.Trove != card && player.Trove != 0)
-                                            RaiseGMessage("G0QZ," + me + "," + player.Trove);
-                                        player.Trove = card;
-                                        WI.BCast("E0ZB," + me + ",0,6," + card);
-                                    }
-                                    else
-                                    {
-                                        string mai = "#替换的,C1(p" + player.Trove
-                                             + "p" + player.ExEquip + ")";
-                                        ushort sel = ushort.Parse(AsyncInput(me, mai, cmd, "0"));
-                                        if (player.ExEquip == sel)
-                                        {
-                                            if (player.ExEquip != 0)
-                                                RaiseGMessage("G0QZ," + me + "," + player.ExEquip);
-                                            player.ExEquip = card;
-                                            WI.BCast("E0ZB," + me + ",0,5," + card);
-                                        }
-                                        else
-                                        { // player.Trove == sel
-                                            if (player.Trove != 0)
-                                                RaiseGMessage("G0QZ," + me + "," + player.Trove);
-                                            player.Trove = card;
-                                            WI.BCast("E0ZB," + me + ",0,6," + card);
-                                        }
-                                    }
-                                    RaiseGMessage("G1IZ," + me + "," + card);
-                                    if (!player.LuggageDisabled)
-                                        te.InsAction(player);
-                                }
-                            }
-                        }
-                    }
-                    else if (args[2] == "1") // G0ZB,to,1,master,0:normal;1:force-fill,from,[tux]*
-                    {
-                        ushort me = ushort.Parse(args[1]);
-                        ushort master = ushort.Parse(args[3]);
-                        bool fillForce = args[4] == "1";
-                        ushort from = ushort.Parse(args[5]);
-                        for (int i = 6; i < args.Length; ++i)
-                        {
-                            ushort card = ushort.Parse(args[i]);
-                            Tux tux = LibTuple.TL.DecodeTux(card);
+                            if (!tux.IsTuxEqiup() || (eis.Source != 0 && !Board.Garden[eis.Source].HasCard(card)))
+                                continue;
+                            TuxEqiup te = tux as TuxEqiup;
+                            if (eis.Source != 0)
+                                RaiseGMessage("G0OT," + eis.Source + ",1," + card);
+                            Player player = Board.Garden[eis.Who];
+                            Artiad.EquipSemaphore.SlotType slot = Artiad.EquipSemaphore.SlotType.NL;
 
-                            bool cardCheck = (from == 0 || Board.Garden[from].ListOutAllCards().Contains(card));
-                            if (from == 0 && !tux.IsTuxEqiup())
+                            int replacer = Artiad.ClothingHelper.GetSubstitude(player, te.Type,
+                                eis.SlotAssign, p => AsyncInput(eis.Coach, p, cmd, "0"));
+                            if (replacer == 0)
                             {
-                                Board.Garden[me].Fakeq[card] = tux.Code;
-                                WI.BCast("E0ZB," + me + ",1," + from + ",4," + card + "," + tux.Code);
-                            }
-                            else if (from != 0 && !tux.IsTuxEqiup())
-                            {
-                                if (cardCheck)
+                                if (te.Type == Tux.TuxType.WQ && player.Weapon == 0)
                                 {
-                                    string ccode = Board.Garden[from].Fakeq[card];
-                                    Board.Garden[me].Fakeq[card] = ccode;
-                                    RaiseGMessage("G0OT," + from + ",1," + card);
-                                    WI.BCast("E0ZB," + me + ",1," + from + ",4," + card + "," + ccode);
+                                    player.Weapon = card;
+                                    slot = Artiad.EquipSemaphore.SlotType.WQ;
                                 }
-                            }
-                            else if (cardCheck)
-                            {
-                                if (from != 0)
-                                    RaiseGMessage("G0OT," + from + ",1," + card);
-                                TuxEqiup te = tux as TuxEqiup;
-                                Player player = Board.Garden[me];
-                                if (tux.Type == Tux.TuxType.WQ)
+                                else if (te.Type == Tux.TuxType.FJ && player.Armor == 0)
                                 {
-                                    if (fillForce)
-                                    {
-                                        if (player.Weapon == 0)
-                                        {
-                                            player.Weapon = card;
-                                            WI.BCast("E0ZB," + me + ",1," + from + ",1," + card);
-                                        }
-                                        else if ((player.ExMask & 0x1) != 0 && player.ExEquip == 0)
-                                        {
-                                            player.ExEquip = card;
-                                            WI.BCast("E0ZB," + me + ",1," + from + ",5," + card);
-                                        }
-                                    }
-                                    else if (player.Weapon == 0 && player.ExEquip == 0)
-                                    {
-                                        player.Weapon = card;
-                                        WI.BCast("E0ZB," + me + ",1," + from + ",1," + card);
-                                    }
-                                    else if ((player.ExMask & 0x1) == 0)
-                                    {
-                                        if (player.Weapon != card && player.Weapon != 0)
-                                            RaiseGMessage("G0QZ," + me + "," + player.Weapon);
-                                        player.Weapon = card;
-                                        WI.BCast("E0ZB," + me + ",1," + from + ",1," + card);
-                                    }
-                                    else
-                                    {
-                                        string mai = "#替换的,C1(p" + player.Weapon
-                                             + "p" + player.ExEquip + ")";
-                                        ushort sel = ushort.Parse(AsyncInput(master, mai, cmd, "0"));
-                                        if (player.ExEquip == sel)
-                                        {
-                                            if (player.ExEquip != 0)
-                                                RaiseGMessage("G0QZ," + me + "," + player.ExEquip);
-                                            player.ExEquip = card;
-                                            WI.BCast("E0ZB," + me + ",1," + from + ",5," + card);
-                                        }
-                                        else
-                                        { // player.Weapon == sel
-                                            if (player.Weapon != 0)
-                                                RaiseGMessage("G0QZ," + me + "," + player.Weapon);
-                                            player.Weapon = card;
-                                            WI.BCast("E0ZB," + me + ",1," + from + ",1," + card);
-                                        }
-                                    }
-                                    RaiseGMessage("G1IZ," + me + "," + card);
-                                    if (!player.WeaponDisabled)
-                                        te.InsAction(player);
+                                    player.Armor = card;
+                                    slot = Artiad.EquipSemaphore.SlotType.FJ;
                                 }
-                                else if (tux.Type == Tux.TuxType.FJ)
+                                else if (te.Type == Tux.TuxType.XB && player.Trove == 0)
                                 {
-                                    if (fillForce)
-                                    {
-                                        if (player.Armor == 0)
-                                        {
-                                            player.Armor = card;
-                                            WI.BCast("E0ZB," + me + ",1," + from + ",2," + card);
-                                        }
-                                        else if ((player.ExMask & 0x2) != 0 && player.ExEquip == 0)
-                                        {
-                                            player.ExEquip = card;
-                                            WI.BCast("E0ZB," + me + ",1," + from + ",5," + card);
-                                        }
-                                    }
-                                    else if (player.Armor == 0 && player.ExEquip == 0)
-                                    {
-                                        player.Armor = card;
-                                        WI.BCast("E0ZB," + me + ",1," + from + ",2," + card);
-                                    }
-                                    else if ((player.ExMask & 0x2) == 0)
-                                    {
-                                        if (player.Armor != card && player.Armor != 0)
-                                            RaiseGMessage("G0QZ," + me + "," + player.Armor);
-                                        player.Armor = card;
-                                        WI.BCast("E0ZB," + me + ",1," + from + ",2," + card);
-                                    }
-                                    else
-                                    {
-                                        string mai = "#替换的,C1(p" + player.Armor
-                                             + "p" + player.ExEquip + ")";
-                                        ushort sel = ushort.Parse(AsyncInput(master, mai, cmd, "0"));
-                                        if (player.ExEquip == sel)
-                                        {
-                                            if (player.ExEquip != 0)
-                                                RaiseGMessage("G0QZ," + me + "," + player.ExEquip);
-                                            player.ExEquip = card;
-                                            WI.BCast("E0ZB," + me + ",1," + from + ",5," + card);
-                                        }
-                                        else
-                                        { // player.Armor == sel
-                                            if (player.Armor != 0)
-                                                RaiseGMessage("G0QZ," + me + "," + player.Armor);
-                                            player.Armor = card;
-                                            WI.BCast("E0ZB," + me + ",1," + from + ",2," + card);
-                                        }
-                                    }
-                                    RaiseGMessage("G1IZ," + me + "," + card);
-                                    if (!player.ArmorDisabled)
-                                        te.InsAction(player);
+                                    player.Trove = card;
+                                    slot = Artiad.EquipSemaphore.SlotType.XB;
                                 }
-                                else if (tux.Type == Tux.TuxType.XB)
+                                else if (player.ExEquip == 0)
                                 {
-                                    if (fillForce)
-                                    {
-                                        if (player.Trove == 0)
-                                        {
-                                            player.Trove = card;
-                                            WI.BCast("E0ZB," + me + ",1," + from + ",6," + card);
-                                        }
-                                        else if ((player.ExMask & 0x1) != 0 && player.ExEquip == 0)
-                                        {
-                                            player.ExEquip = card;
-                                            WI.BCast("E0ZB," + me + ",1," + from + ",5," + card);
-                                        }
-                                    }
-                                    else if (player.Trove == 0 && player.ExEquip == 0)
-                                    {
-                                        player.Trove = card;
-                                        WI.BCast("E0ZB," + me + ",1," + from + ",6," + card);
-                                    }
-                                    else if ((player.ExMask & 0x4) == 0)
-                                    {
-                                        if (player.Trove != card && player.Trove != 0)
-                                            RaiseGMessage("G0QZ," + me + "," + player.Trove);
-                                        player.Trove = card;
-                                        WI.BCast("E0ZB," + me + ",1," + from + ",6," + card);
-                                    }
-                                    else
-                                    {
-                                        string mai = "#替换的,C1(p" + player.Trove
-                                             + "p" + player.ExEquip + ")";
-                                        ushort sel = ushort.Parse(AsyncInput(master, mai, cmd, "0"));
-                                        if (player.ExEquip == sel)
-                                        {
-                                            if (player.ExEquip != 0)
-                                                RaiseGMessage("G0QZ," + me + "," + player.ExEquip);
-                                            player.ExEquip = card;
-                                            WI.BCast("E0ZB," + me + ",1," + from + ",5," + card);
-                                        }
-                                        else
-                                        { // player.Trove == sel
-                                            if (player.Trove != 0)
-                                                RaiseGMessage("G0QZ," + me + "," + player.Trove);
-                                            player.Trove = card;
-                                            WI.BCast("E0ZB," + me + ",1," + from + ",6," + card);
-                                        }
-                                    }
-                                    RaiseGMessage("G1IZ," + me + "," + card);
-                                    if (!player.LuggageDisabled)
-                                        te.InsAction(player);
+                                    player.ExEquip = card;
+                                    slot = Artiad.EquipSemaphore.SlotType.EE;
                                 }
                             }
+                            else if (replacer > 0)
+                            {
+                                if (player.Weapon == replacer)
+                                {
+                                    RaiseGMessage("G0QZ," + eis.Who + "," + replacer);
+                                    player.Weapon = card;
+                                    slot = Artiad.EquipSemaphore.SlotType.WQ;
+                                }
+                                else if (player.Armor == replacer)
+                                {
+                                    RaiseGMessage("G0QZ," + eis.Who + "," + replacer);
+                                    player.Armor = card;
+                                    slot = Artiad.EquipSemaphore.SlotType.FJ;
+                                }
+                                else if (player.Trove == replacer)
+                                {
+                                    RaiseGMessage("G0QZ," + eis.Who + "," + replacer);
+                                    player.Trove = card;
+                                    slot = Artiad.EquipSemaphore.SlotType.XB;
+                                }
+                                else if (player.ExEquip == replacer)
+                                {
+                                    RaiseGMessage("G0QZ," + eis.Who + "," + replacer);
+                                    player.ExEquip = card;
+                                    slot = Artiad.EquipSemaphore.SlotType.EE;
+                                }
+                            }
+                            if (slot != Artiad.EquipSemaphore.SlotType.NL)
+                            {
+                                new Artiad.EquipSemaphore()
+                                {
+                                    Who = eis.Who,
+                                    Source = eis.Source,
+                                    Slot = slot,
+                                    SingleCard = card
+                                }.Telegraph(WI.BCast);
+
+                                RaiseGMessage("G1IZ," + eis.Who + "," + card);
+                                if (te.Type == Tux.TuxType.WQ && !player.WeaponDisabled)
+                                    te.InsAction(player);
+                                else if (te.Type == Tux.TuxType.FJ && !player.ArmorDisabled)
+                                    te.InsAction(player);
+                                else if (te.Type == Tux.TuxType.XB && !player.LuggageDisabled)
+                                    te.InsAction(player);   
+                            }
+                            else if (eis.Source != eis.Who)
+                                RaiseGMessage("G0ON," + eis.Source + ",C,1," + card);
+                            // else, leave it in eis.Who's hand
                         }
                     }
-                    else if (args[2] == "2") // Excard
+                    else if (Artiad.ClothingHelper.IsEx(cmd))
                     {
-                        // G0ZB,A,2,from,x
-                        ushort me = ushort.Parse(args[1]);
-                        ushort from = ushort.Parse(args[3]);
-                        for (int i = 4; i < args.Length; ++i)
+                        Artiad.EquipExCards eec = Artiad.EquipExCards.Parse(cmd);
+                        if (eec.Source != 0 && !Board.Garden[eec.Source].HasCards(eec.Cards))
+                            break;
+                        if (eec.Source != 0)
                         {
-                            ushort card = ushort.Parse(args[i]);
-                            Player player = Board.Garden[me];
-                            if (from != 0 && Board.Garden[from].Tux.Contains(card))
-                                RaiseGMessage("G0OT," + me + ",1," + card);
-                            player.ExCards.Add(card);
-                            WI.BCast("E0ZB," + me + ",0,3," + card);
+                            RaiseGMessage("G0OT," + eec.Source + "," + eec.Cards.Length + 
+                                "," + string.Join(",", eec.Cards));
                         }
-                    }
-                    else if (args[2] == "3") // Fakeq
-                    {
-                        // G0ZB,A,3,AS,x
-                        ushort me = ushort.Parse(args[1]);
-                        string cardAs = args[3];
-                        ushort card = ushort.Parse(args[4]);
-                        Player player = Board.Garden[me];
-                        foreach (string tuxInfo in Board.PendingTux)
+                        Board.Garden[eec.Who].ExCards.AddRange(eec.Cards);
+                        new Artiad.EquipSemaphore()
                         {
-                            string[] parts = tuxInfo.Split(',');
-                            ushort who = ushort.Parse(parts[0]);
-                            string g0cc = parts[1];
-                            ushort cook = ushort.Parse(parts[2]);
-                            if (who == me && g0cc == "G0CC" && card == cook)
+                            Who = eec.Who,
+                            Source = eec.Source,
+                            Slot = Artiad.EquipSemaphore.SlotType.EX,
+                            Cards = eec.Cards
+                        }.Telegraph(WI.BCast);
+                    }
+                    else if (Artiad.ClothingHelper.IsFakeq(cmd))
+                    {
+                        Artiad.EquipFakeq ef = Artiad.EquipFakeq.Parse(cmd);
+                        if (ef.Source != 0 && Board.Garden[ef.Source].Fakeq.ContainsKey(ef.Card))
+                        {
+                            RaiseGMessage("G0OT," + ef.Source + ",1," + ef.Card);
+                            Board.Garden[ef.Who].Fakeq[ef.Card] = ef.CardAs;
+                            new Artiad.EquipSemaphore()
                             {
-                                player.Fakeq[card] = cardAs;
-                                WI.BCast("E0ZB," + me + ",0,4," + card + "," + cardAs);
-                                Board.PendingTux.Remove(tuxInfo); break;
+                                Who = ef.Who,
+                                Source = ef.Source,
+                                Slot = Artiad.EquipSemaphore.SlotType.FQ,
+                                SingleCard = ef.Card,
+                                CardAs = ef.CardAs
+                            }.Telegraph(WI.BCast);
+                        }
+                        else
+                        {
+                            foreach (string tuxInfo in Board.PendingTux)
+                            {
+                                string[] parts = tuxInfo.Split(',');
+                                ushort who = ushort.Parse(parts[0]);
+                                string g0cc = parts[1];
+                                ushort cook = ushort.Parse(parts[2]);
+                                if (who == ef.Who && g0cc == "G0CC" && ef.Card == cook)
+                                {
+                                    Board.Garden[ef.Who].Fakeq[ef.Card] = ef.CardAs;
+                                    Board.PendingTux.Remove(tuxInfo);
+                                    new Artiad.EquipSemaphore()
+                                    {
+                                        Who = ef.Who,
+                                        Source = ef.Source,
+                                        Slot = Artiad.EquipSemaphore.SlotType.FQ,
+                                        SingleCard = ef.Card,
+                                        CardAs = ef.CardAs
+                                    }.Telegraph(WI.BCast);
+                                    break;
+                                }
                             }
                         }
                     }
@@ -3786,7 +3578,7 @@ namespace PSD.PSDGamepkg
                         ushort provider = ushort.Parse(args[2]);
                         ushort cardUt = ushort.Parse(args[3]);
                         TuxEqiup te = LibTuple.TL.DecodeTux(cardUt) as TuxEqiup;
-                        te.UseAction(cardUt, Board.Garden[who], provider != who);
+                        te.UseAction(cardUt, Board.Garden[who], provider);
                     }
                     break;
                 case "G0PQ":

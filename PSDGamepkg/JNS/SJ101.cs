@@ -286,7 +286,10 @@ namespace PSD.PSDGamepkg.JNS
                             XI.Board.TuxDises.Remove(cd);
                             string os = XI.AsyncInput(ut, "#您是否要立即装备？##是##否,Y2", "SJT04", "0");
                             if (os == "1")
-                                XI.RaiseGMessage("G0ZB," + ut + ",0," + cd);
+                            XI.RaiseGMessage(new Artiad.EquipStandard()
+                            {
+                                Who = ut, Source = ut, SingleCard = cd
+                            }.ToMessage());
                             break;
                         }
                     }
@@ -742,29 +745,23 @@ namespace PSD.PSDGamepkg.JNS
                     Tux tux = XI.LibTuple.TL.DecodeTux(ut);
                     if (!Artiad.ContentRule.IsTuxUsableEveryWhere(tux))
                         XI.RaiseGMessage("G0QZ," + rd.Uid + "," + ut);
-                    else if (tux.IsTuxEqiup())
-                    {
-                        string tarStr = XI.AsyncInput(nx.Uid, "#装备的,T1(p" + string.Join("p",
-                            XI.Board.Garden.Values.Where(p => p.IsTared).Select(p => p.Uid)) + ")", "SJH05", "1");
-                        if (tarStr != VI.CinSentinel)
-                        {
-                            ushort tar = ushort.Parse(tarStr);
-                            if (tar != rd.Uid)
-                                XI.RaiseGMessage("G0ZB," + tar + ",1," + rd.Uid +
-                                    ",0," + rd.Uid + "," + ut);
-                            else
-                                XI.RaiseGMessage("G0ZB," + rd.Uid + ",0," + ut);
-                        }
-                    }
                     else
                     {
-                        string tarStr = XI.AsyncInput(nx.Uid, "#成为此牌使用者的,T1(p" + string.Join("p",
-                            XI.Board.Garden.Values.Where(p => p.IsTared).Select(p => p.Uid)) + ")", "SJH05", "1");
-                        ushort tar = ushort.Parse(tarStr);
-                        if (tux.Valid(XI.Board.Garden[tar], 0, "G1EV," + rd.Uid))
-                            XI.RaiseGMessage("G0CC," + rd.Uid + ",0," + tarStr + "," + tux.Code + "," + ut + ";0,G1EV," + rd.Uid);
+                        string hint = string.Format("#成为【{0}】使用者的,T1{1}", tux.Name, AAllTareds(nx));
+                        string tarStr = XI.AsyncInput(nx.Uid, hint, "SJH05", "1");
+                        if (tux.IsTuxEqiup())
+                            XI.RaiseGMessage("G1UE," + tarStr + "," + rd.Uid + "," + ut);
                         else
-                            XI.RaiseGMessage("G0QZ," + rd.Uid + "," + ut);
+                        {
+                            ushort tar = ushort.Parse(tarStr);
+                            if (tux.Valid(XI.Board.Garden[tar], 0, "G1EV," + rd.Uid))
+                            {
+                                XI.RaiseGMessage("G0CC," + rd.Uid + ",0," + tarStr +
+                                    "," + tux.Code + "," + ut + ";0,G1EV," + rd.Uid);
+                            }
+                            else
+                                XI.RaiseGMessage("G0QZ," + rd.Uid + "," + ut);
+                        }
                     }
                 }
             }

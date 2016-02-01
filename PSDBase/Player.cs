@@ -341,6 +341,15 @@ namespace PSD.Base
             return Weapon != 0 || Armor != 0 || Trove != 0 || ExEquip != 0 ||
                 ExCards.Count > 0 || Fakeq.Count > 0;
         }
+        public bool HasCard(ushort ut)
+        {
+            return Tux.Contains(ut) || Weapon == ut || Armor == ut || Trove == ut ||
+                ExEquip == ut || ExCards.Contains(ut) || Fakeq.ContainsKey(ut);
+        }
+        public bool HasCards(IEnumerable<ushort> uts)
+        {
+            return !uts.Any(p => !HasCard(p));
+        }
         public List<ushort> ListOutAllCards()
         {
             List<ushort> result = new List<ushort>();

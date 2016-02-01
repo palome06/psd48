@@ -1202,11 +1202,11 @@ namespace PSD.PSDGamepkg.JNS
         }
         public void JN40402Action(Player player, int type, string fuse, string args)
         {
-            List<ushort> cards = args.Split(',').Select(p => ushort.Parse(p)).ToList();
-            XI.RaiseGMessage("G0ZB," + player.Uid + ",2," + player.Uid + "," + string.Join(",", cards));
-            //foreach (ushort ut in cards)
-            //    XI.RaiseGMessage("G0ZB," + player.Uid + ",2," + ut);
-            //XI.RaiseGMessage("G0IA," + player.Uid + ",0," + cards.Count);
+            ushort[] cards = args.Split(',').Select(p => ushort.Parse(p)).ToArray();
+            XI.RaiseGMessage(new Artiad.EquipExCards()
+            {
+                Who = player.Uid, Source = player.Uid, Cards = cards
+            }.ToMessage());
             if (type == 6)
                 XI.InnerGMessage(fuse, 50);
         }
@@ -1290,13 +1290,8 @@ namespace PSD.PSDGamepkg.JNS
         {
             if (type == 0)
             {
-                // G0ZB,A,2/3/4,from,x
-                string[] blocks = fuse.Split(',');
-                if (blocks[1] == player.Uid.ToString() && blocks[2] == "2")
-                {
-                    int n = blocks.Length - 4;
-                    XI.RaiseGMessage("G0IA," + player.Uid + ",0," + n);
-                }
+                Artiad.EquipExCards eec = Artiad.EquipExCards.Parse(fuse);
+                XI.RaiseGMessage("G0IA," + player.Uid + ",0," + eec.Cards.Length);
             }
             else if (type == 1)
             {
@@ -1316,14 +1311,10 @@ namespace PSD.PSDGamepkg.JNS
         }
         public bool JN40403Valid(Player player, int type, string fuse)
         {
-            if (type == 0)
+            if (type == 0 && Artiad.ClothingHelper.IsEx(fuse))
             {
-                // G0ZB,A,2/3/4,x
-                string[] blocks = fuse.Split(',');
-                if (blocks[1] == player.Uid.ToString() && blocks[2] == "2")
-                    return blocks.Length > 4;
-                else
-                    return false;
+                Artiad.EquipExCards eec = Artiad.EquipExCards.Parse(fuse);
+                return eec.Who == player.Uid && eec.Cards.Length > 0;
             }
             else if (type == 1)
             {
@@ -1641,15 +1632,21 @@ namespace PSD.PSDGamepkg.JNS
         }
         public void JN50401Action(Player player, int type, string fuse, string argst)
         {
-            if (argst != "0" && !argst.EndsWith(",0"))
-            {
-                int idx = argst.IndexOf(',');
-                ushort card = ushort.Parse(argst.Substring(0, idx));
-                ushort who = ushort.Parse(argst.Substring(idx + 1));
-                XI.RaiseGMessage("G0ZB," + who + ",1," + player.Uid + ",0," + player.Uid + "," + card);
-                XI.RaiseGMessage("G0DH," + player.Uid + ",0,2");
-                player.RAMUtList.Add(who);
-            }
+            int idx = argst.IndexOf(',');
+            ushort card = ushort.Parse(argst.Substring(0, idx));
+            ushort who = ushort.Parse(argst.Substring(idx + 1));
+            if (player.Fakeq.ContainsKey(card))
+                XI.RaiseGMessage(new Artiad.EquipFakeq()
+                {
+                    Who = who, Source = player.Uid, Card = card, CardAs = player.Fakeq[card]
+                }.ToMessage());
+            else
+                XI.RaiseGMessage(new Artiad.EquipStandard()
+                {
+                    Who = who, Source = player.Uid, SingleCard = card, Coach = player.Uid
+                }.ToMessage());
+            XI.RaiseGMessage("G0DH," + player.Uid + ",0,2");
+            player.RAMUtList.Add(who);
         }
         public string JN50401Input(Player player, int type, string fuse, string prev)
         {

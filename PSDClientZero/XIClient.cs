@@ -1656,58 +1656,45 @@ namespace PSD.ClientZero
                 case "E0ZB":
                     {
                         ushort me = ushort.Parse(args[1]);
-                        ushort type = ushort.Parse(args[2]);
-                        string[] words = { "武器区", "防具区", "特殊区", "佩戴区", "额外装备区", "秘宝区" };
-                        if (type == 0)
+                        ushort source = ushort.Parse(args[2]);
+                        int slot = int.Parse(args[3]);
+                        string tuxText = "", zoneText = "";
+                        if (slot == 6)
                         {
-                            ushort where = ushort.Parse(args[3]);
                             ushort card = ushort.Parse(args[4]);
-                            if (where == 1)
-                                Z0D[me].Weapon = card;
-                            else if (where == 2)
-                                Z0D[me].Armor = card;
-                            else if (where == 3)
-                                Z0D[me].ExCards.Add(card);
-                            else if (where == 4)
-                            {
-                                string asCode = args[5] == "0" ? Tuple.TL.DecodeTux(card).Code : args[5];
-                                Z0D[me].Fakeq[card] = asCode;
-                            }
-                            else if (where == 5)
-                                Z0D[me].ExEquip = card;
-                            else if (where == 6)
-                                Z0D[me].Trove = card;
-                            VI.Cout(Uid, "{0}装备了{1}到{2}.", zd.Player(me), zd.Tux(card), words[where - 1]);
-                            //--Z0D[me].TuxCount;
-                            //if (me == uid)
-                            //    Z0M.Tux.Remove(card);
+                            string cardAs = args[5];
+                            if (cardAs == "0")
+                                cardAs = Tuple.TL.DecodeTux(card).Code;
+                            Z0D[me].Fakeq[card] = cardAs;
+                            tuxText = zd.Tux(card); zoneText = "配饰区";
                         }
-                        else if (type == 1)
+                        else if (slot == 5)
                         {
-                            ushort where = ushort.Parse(args[4]);
-                            ushort from = ushort.Parse(args[3]);
-                            ushort card = ushort.Parse(args[5]);
-                            if (where == 1)
-                                Z0D[me].Weapon = card;
-                            else if (where == 2)
-                                Z0D[me].Armor = card;
-                            else if (where == 3)
-                                Z0D[me].ExCards.Add(card);
-                            else if (where == 4)
+                            ushort[] cards = Algo.TakeRange(args, 4, args.Length)
+                                .Select(p => ushort.Parse(p)).ToArray();
+                            Z0D[me].ExCards.AddRange(cards);
+                            tuxText = zd.Tux(cards);
+                            zoneText = zd.HeroExCardAlias(Z0D[me].SelectHero, Z0D[me].Coss);
+                        }
+                        else
+                        {
+                            ushort card = ushort.Parse(args[4]);
+                            tuxText = zd.Tux(card);
+                            if (slot == 1) { Z0D[me].Weapon = card; zoneText = "武器区"; }
+                            else if (slot == 2) { Z0D[me].Armor = card; zoneText = "防具区"; }
+                            else if (slot == 3) { Z0D[me].Trove = card; zoneText = "秘宝区"; }
+                            else if (slot == 4)
                             {
-                                string asCode = args[6] == "0" ? Tuple.TL.DecodeTux(card).Code : args[6];
-                                Z0D[me].Fakeq[card] = asCode;
-                            }
-                            else if (where == 5)
                                 Z0D[me].ExEquip = card;
-                            else if (where == 6)
-                                Z0D[me].Trove = card;
-                            if (from != 0)
-                                VI.Cout(Uid, "{0}的装备{2}进入{1}的{3}.",
-                                    zd.Player(from), zd.Player(me), zd.Tux(card), words[where - 1]);
-                            else
-                                VI.Cout(Uid, "{0}装备了卡牌{1}到{2}.",
-                                    zd.Player(me), zd.Tux(card), words[where - 1]);
+                                zoneText = zd.HeroExCardAlias(Z0D[me].SelectHero, Z0D[me].Coss);;
+                            }
+                        }
+                        if (source == 0 || source == me)
+                            VI.Cout(Uid, "{0}装备了{1}到{2}.", zd.Player(me), tuxText, zoneText);
+                        else
+                        {
+                            VI.Cout(Uid, "{0}的装备{1}进入{2}的{3}.", zd.Player(source),
+                                tuxText, zd.Player(me), zoneText);
                         }
                         break;
                     }

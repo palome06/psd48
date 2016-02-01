@@ -355,7 +355,10 @@ namespace PSD.PSDGamepkg.JNS
                 tar.DrTuxDisabled = true;
             else if (tux.IsTuxEqiup())
             {
-                XI.RaiseGMessage("G0ZB," + ut + ",0," + randomCard);
+                XI.RaiseGMessage(new Artiad.EquipStandard()
+                {
+                    Who = ut, Source = ut, SingleCard = randomCard
+                }.ToMessage());
                 XI.RaiseGMessage("G0DH," + ut + ",0,1");
             }
             string willDiscard = XI.AsyncInput(ut, "#弃置的,/Q1(p" + randomCard + ")", "JNH0206", "1");
@@ -941,7 +944,12 @@ namespace PSD.PSDGamepkg.JNS
                         if (tux != null)
                         {
                             if (!tux.IsTuxEqiup())
-                                XI.RaiseGMessage("G0ZB," + player.Uid + ",2,0," + ut);
+                            {
+                                XI.RaiseGMessage(new Artiad.EquipExCards()
+                                {
+                                    Who = player.Uid, FromSky = true, SingleCard = ut
+                                }.ToMessage());
+                            }
                             else
                                 XI.RaiseGMessage("G0ON,0,C,1," + ut);
                         }
@@ -958,7 +966,12 @@ namespace PSD.PSDGamepkg.JNS
                 if (tux != null)
                 {
                     if (!tux.IsTuxEqiup())
-                        XI.RaiseGMessage("G0ZB," + player.Uid + ",2,0," + ut);
+                    {
+                        XI.RaiseGMessage(new Artiad.EquipExCards()
+                        {
+                            Who = player.Uid, FromSky = true, SingleCard = ut
+                        }.ToMessage());
+                    }
                     else
                         XI.RaiseGMessage("G0ON,0,C,1," + ut);
                 }
@@ -1639,18 +1652,11 @@ namespace PSD.PSDGamepkg.JNS
                 }
                 return false;
             }
-            // TODO: check whether should be replaced to G1EU
-            else if (type == 2) // G0ZB
+            else if (type == 2) // G1UE
             {
-                string[] g0zb = fuse.Split(',');
-                if (g0zb[2] == "0" && g0zb[1] == player.Uid.ToString())
-                    return true;
-                else if (g0zb[2] == "1" && g0zb[3] == player.Uid.ToString())
-                    return true;
-                else if (g0zb[2] == "4" && g0zb[1] == player.Uid.ToString())
-                    return true;
-                else
-                    return false;
+                string[] g1ue = fuse.Split(',');
+                ushort who = ushort.Parse(g1ue[1]);
+                return who == player.Uid;
             }
             else if (type == 3) // R*TM
                 return player.RAMInt > player.HP;
@@ -1680,15 +1686,7 @@ namespace PSD.PSDGamepkg.JNS
                 }
             }
             else if (type == 2)
-            {
-                string[] g0zb = fuse.Split(',');
-                if (g0zb[2] == "0" && g0zb[1] == player.Uid.ToString())
-                    player.RAMInt += (g0zb.Length - 3);
-                else if (g0zb[2] == "1" && g0zb[3] == player.Uid.ToString())
-                    player.RAMInt += (g0zb.Length - 4);
-                else if (g0zb[2] == "4" && g0zb[1] == player.Uid.ToString())
-                    player.RAMInt += (g0zb.Length - 3);
-            }
+                ++player.RAMInt;
             else if (type == 3)
             {
                 XI.RaiseGMessage("G0OY,1," + player.Uid);
@@ -3210,15 +3208,15 @@ namespace PSD.PSDGamepkg.JNS
         #region HL020 - Mojianke
         public bool JNH2001Valid(Player player, int type, string fuse)
         {
-            if (type == 0)
-                return true;
-            else if (type == 1)
+            if (type == 0) // ZB
+                return Artiad.ClothingHelper.GetWho(fuse) != 0;
+            else if (type == 1) // HD
             {
                 string[] blocks = fuse.Split(',');
                 if (blocks[1] == "0" || blocks[1] == "1")
                     return true;
             }
-            else if (type == 2)
+            else if (type == 2) // IF
                 return true;
             return false;
         }
@@ -3227,8 +3225,7 @@ namespace PSD.PSDGamepkg.JNS
             bool self = true; int n = 0;
             if (type == 0)
             {
-                string[] g0zbs = fuse.Split(',');
-                ushort who = ushort.Parse(g0zbs[1]);
+                ushort who = Artiad.ClothingHelper.GetWho(fuse);
                 self = XI.Board.Garden[who].Team == player.Team;
                 n = 1;
             }
@@ -3625,7 +3622,13 @@ namespace PSD.PSDGamepkg.JNS
         public void JNE0203Action(Player player, int type, string fuse, string argst)
         {
             if (type == 0)
-                XI.RaiseGMessage("G0ZB," + player.Uid + ",2," + player.Uid + "," + argst);
+            {
+                ushort[] cards = argst.Split(',').Select(p => ushort.Parse(p)).ToArray();
+                XI.RaiseGMessage(new Artiad.EquipExCards()
+                {
+                    Who = player.Uid, Source = player.Uid, Cards = cards
+                }.ToMessage());
+            }
             else if (type == 1)
             {
                 ushort[] cards = argst.Split(',').Select(p => ushort.Parse(p)).ToArray();

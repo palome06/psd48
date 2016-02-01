@@ -755,30 +755,11 @@ namespace PSD.PSDGamepkg.JNS
                 return IsMathISOS("JNT0703", player, fuse) && player.Armor == 0;
             else if (type == 2)
                 return player.IsAlive && player.HP == 0 && player.Armor == 0;
-            else if (type == 3) // ZB
+            else if (type == 3 && Artiad.ClothingHelper.IsStandard(fuse)) // ZB
             {
-                string[] g0zb = fuse.Split(',');
-                if (g0zb[1] == player.Uid.ToString() && g0zb[2] == "0")
-                {
-                    for (int i = 3; i < g0zb.Length; ++i)
-                    {
-                        ushort ut = ushort.Parse(g0zb[i]);
-                        Tux tux = XI.LibTuple.TL.DecodeTux(ut);
-                        if (tux != null && tux.Type == Tux.TuxType.FJ)
-                            return true;
-                    }
-                }
-                else if (g0zb[1] == player.Uid.ToString() && g0zb[2] == "1")
-                {
-                    for (int i = 6; i < g0zb.Length; ++i)
-                    {
-                        ushort ut = ushort.Parse(g0zb[i]);
-                        Tux tux = XI.LibTuple.TL.DecodeTux(ut);
-                        if (tux != null && tux.Type == Tux.TuxType.FJ)
-                            return true;
-                    }
-                }
-                return false;
+                Artiad.EquipStandard eis = Artiad.EquipStandard.Parse(fuse);
+                return eis.Who == player.Uid && eis.Cards.Any(p => XI.LibTuple.TL.DecodeTux(p) != null &&
+                    XI.LibTuple.TL.DecodeTux(p).Type == Tux.TuxType.FJ);
             }
             else if (type == 4) // OT
             {
@@ -829,7 +810,10 @@ namespace PSD.PSDGamepkg.JNS
             ushort[] uts = argst.Split(',').Select(p => ushort.Parse(p)).ToArray();
             XI.RaiseGMessage("G0QZ," + player.Uid + "," + uts[0] + "," + uts[1]);
             ushort from = uts[2], tux = uts[3], to = uts[4];
-            XI.RaiseGMessage("G0ZB," + to + ",1," + player.Uid + ",1," + from + "," + tux);
+            XI.RaiseGMessage(new Artiad.EquipStandard()
+            {
+                Who = to, Source = from, SingleCard = tux, SlotAssign = true
+            }.ToMessage());
         }
         public string JNT0704Input(Player player, int type, string fuse, string prev)
         {
@@ -2096,9 +2080,8 @@ namespace PSD.PSDGamepkg.JNS
         #region TR016 - Xuanji
         public void JNT1601Action(Player player, int type, string fuse, string argst)
         {
-            string input = XI.AsyncInput(player.Uid, "#获得2张补牌,T1(p" + string.Join("p",
-                XI.Board.Garden.Values.Where(p => p.IsAlive && !player.RAMUtList.Contains(p.Uid))
-                .Select(p => p.Uid)) + ")", "JNT1601", "0");
+            string input = XI.AsyncInput(player.Uid, "#获得2张补牌,T1" + FormatPlayers(p => p.IsAlive &&
+                !player.RAMUtList.Contains(p.Uid)), "JNT1601", "0");
             ushort who = ushort.Parse(input);
             player.RAMUtList.Add(who);
             if (who != 0)
@@ -2106,8 +2089,7 @@ namespace PSD.PSDGamepkg.JNS
         }
         public bool JNT1601Valid(Player player, int type, string fuse)
         {
-            string[] g0zbs = fuse.Split(',');
-            return g0zbs[1] == player.Uid.ToString() && XI.Board.Garden.Values
+            return Artiad.ClothingHelper.GetWho(fuse) == player.Uid && XI.Board.Garden.Values
                 .Where(p => p.IsAlive).Select(p => p.Uid).Except(player.RAMUtList).Any();
         }
         public void JNT1602Action(Player player, int type, string fuse, string argst)
@@ -2961,7 +2943,10 @@ namespace PSD.PSDGamepkg.JNS
             if (type == 0)
             {
                 ushort ut = ushort.Parse(argst);
-                XI.RaiseGMessage("G0ZB," + player.Uid + ",2," + player.Uid + "," + ut);
+                XI.RaiseGMessage(new Artiad.EquipExCards()
+                {
+                    Who = player.Uid, Source = player.Uid, SingleCard = ut
+                }.ToMessage());
                 if (XI.Board.InFight)
                     XI.RaiseGMessage("G0IP," + player.Team + ",1");
             }
@@ -3011,7 +2996,12 @@ namespace PSD.PSDGamepkg.JNS
             if (!eqed)
                 XI.RaiseGMessage("G0HQ,0," + to + "," + who + ",0,1," + eq);
             else
-                XI.RaiseGMessage("G0ZB," + to + ",1," + player.Uid + ",0," + who + "," + eq);
+            {
+                XI.RaiseGMessage(new Artiad.EquipStandard()
+                {
+                    Who = to, Source = who, SingleCard = eq
+                }.ToMessage());
+            }
 
             Tux tux = XI.LibTuple.TL.DecodeTux(eq);
             foreach (Player py in XI.Board.Garden.Values)
@@ -3636,7 +3626,8 @@ namespace PSD.PSDGamepkg.JNS
             }
             else if (type == 3)
             {
-                string target = XI.AsyncInput(player.Uid, "#获得【天蛇杖】的,/T1" + ATeammatesTared(player), "JNT2802", "1");
+                string target = XI.AsyncInput(player.Uid, "#获得【天蛇杖】的,/T1" +
+                    ATeammatesTared(player), "JNT2802", "1");
                 if (target.StartsWith("/")) return;
                 ushort to = ushort.Parse(target);
                 TargetPlayer(player.Uid, to);
@@ -3675,7 +3666,12 @@ namespace PSD.PSDGamepkg.JNS
                 }
                 string os = XI.AsyncInput(to, "#您是否要立即装备？##是##否,Y2", "JNT2802", "0");
                 if (os == "1")
-                    XI.RaiseGMessage("G0ZB," + to + ",0," + cardId);
+                {
+                    XI.RaiseGMessage(new Artiad.EquipStandard()
+                    {
+                        Who = to, Source = to, SingleCard = cardId
+                    }.ToMessage());
+                }
             }
         }
         #endregion TR028 - Wuhou
@@ -4366,7 +4362,10 @@ namespace PSD.PSDGamepkg.JNS
                             ushort sub = ushort.Parse(input);
                             XI.RaiseGMessage("G0QZ," + player.Uid + "," + sub);
                         }
-                        XI.RaiseGMessage("G0ZB," + player.Uid + ",2,0," + which);
+                        XI.RaiseGMessage(new Artiad.EquipExCards()
+                        {
+                            Who = player.Uid, FromSky = true, SingleCard = which
+                        }.ToMessage());
                         XI.RaiseGMessage("G2CN,0,1");
                         XI.Board.TuxDises.Remove(which);
                         tuxes.Remove(which);
@@ -4415,13 +4414,8 @@ namespace PSD.PSDGamepkg.JNS
         {
             if (type == 0)
             {
-                // G0ZB,A,2/3/4,from,x
-                string[] blocks = fuse.Split(',');
-                if (blocks[1] == player.Uid.ToString() && blocks[2] == "2")
-                {
-                    int n = blocks.Length - 4;
-                    XI.RaiseGMessage("G0IA," + player.Uid + ",0," + n);
-                }
+                Artiad.EquipExCards eec = Artiad.EquipExCards.Parse(fuse);
+                XI.RaiseGMessage("G0IA," + player.Uid + ",0," + eec.Cards.Length);
             }
             else if (type == 1)
             {
@@ -4442,12 +4436,8 @@ namespace PSD.PSDGamepkg.JNS
         {
             if (type == 0)
             {
-                // G0ZB,A,2/3/4,x
-                string[] blocks = fuse.Split(',');
-                if (blocks[1] == player.Uid.ToString() && blocks[2] == "2")
-                    return blocks.Length > 4;
-                else
-                    return false;
+                Artiad.EquipExCards eec = Artiad.EquipExCards.Parse(fuse);
+                return eec.Who == player.Uid && eec.Cards.Length > 0;
             }
             else if (type == 1)
             {
@@ -4879,7 +4869,7 @@ namespace PSD.PSDGamepkg.JNS
                     else if (tux != null)
                     {
                         XI.RaiseGMessage("G0OJ," + player.Uid + ",1,1,C" + ut);
-                        XI.RaiseGMessage("G0ZB," + player.Uid + ",1," + player.Uid + ",0,0," + ut);
+                        XI.RaiseGMessage("G1UE," + player.Uid + ",0," + ut);
                         break;
                     }
                 }

@@ -319,7 +319,6 @@ namespace PSD.PSDGamepkg
                 else if (ske.Type == SKTType.TX)
                 {
                     WI.BCast("U5," + from + ";;" + skName + "," + args + ";;" + ske.InType);
-                    //RaiseGMessage("G0ZB," + from + ",0," + ccode);
                     if (tux.IsTuxEqiup())
                     {
                         RaiseGMessage("G1UE," + from + "," + from + "," + ccode);
