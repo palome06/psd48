@@ -667,6 +667,7 @@ namespace PSD.PSDGamepkg.JNS
             XI.RaiseGMessage("G0OY,0," + who);
             XI.RaiseGMessage("G0IY,0," + who + ",19005");
             XI.RaiseGMessage("G0IV," + who + "," + orgHero);
+            XI.Board.BannedHero.Add(orgHero);
         }
         #endregion HL004 - YeFengling
         #region HL005 - Lunar Deity
@@ -693,6 +694,7 @@ namespace PSD.PSDGamepkg.JNS
             else if (type == 1)
             {
                 int orgHero = player.Coss.Peek();
+                XI.Board.BannedHero.Remove(orgHero);
                 XI.RaiseGMessage("G0OV," + player.Uid + "," + orgHero);
                 XI.RaiseGMessage("G0OY,0," + player.Uid);
                 XI.RaiseGMessage("G0IY,0," + player.Uid + "," + orgHero);
@@ -707,6 +709,7 @@ namespace PSD.PSDGamepkg.JNS
                         zw += "," + blocks[i];
                 }
                 int orgHero = player.Coss.Peek();
+                XI.Board.BannedHero.Remove(orgHero);
                 XI.RaiseGMessage("G0OV," + player.Uid + "," + orgHero);
                 XI.RaiseGMessage("G0OY,0," + player.Uid);
                 XI.RaiseGMessage("G0IY,0," + player.Uid + "," + orgHero);

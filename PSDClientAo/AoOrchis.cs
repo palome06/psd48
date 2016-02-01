@@ -112,10 +112,9 @@ namespace PSD.ClientAo
 
         public void FlyingGet(string card, ushort from, ushort to, bool isLong = false)
         {
-            List<string> l = new List<string>(); l.Add(card);
-            FlyingGet(l, from, to, isLong);
+            FlyingGet(new string[] { card }, from, to, isLong);
         }
-        public void FlyingGet(List<string> cards, ushort from, ushort to, bool isLong = false)
+        public void FlyingGet(IEnumerable<string> cards, ushort from, ushort to, bool isLong = false)
         {
             if (orchis40 == null)
                 return;

@@ -100,6 +100,8 @@ namespace PSD.Base
         public bool DrTuxDisabled { set; get; }
         // Extend Equip Mask, 0 = disabled, 1 = weapon, 2 = armor, 4 = trove
         public int ExMask { set; get; }
+        // Lost Basic Equip Mask, 0 = full, 1 = weapon, 2 = armor, 4 = trove
+        public int FyMask { set; get; }
         public List<ushort> Runes { private set; get; }
         public List<string> ExSpouses { private set; get; }
 
@@ -185,7 +187,7 @@ namespace PSD.Base
 
             this.Tux = new List<ushort>();
             this.Armor = 0; this.Weapon = 0; this.Trove = 0;
-            this.ExEquip = 0; this.ExMask = 0;
+            this.ExEquip = 0; this.ExMask = 0; this.FyMask = 0;
 
             Pets = Enumerable.Repeat<ushort>(0, Card.FiveElementHelper.PropCount).ToArray();
             this.ExCards = new List<ushort>();

@@ -1928,14 +1928,14 @@ namespace PSD.ClientAo
                             }
                         }
                         if (source == 0 || source == me)
-                            VI.Cout(Uid, "{0}装备了{1}到{2}.", zd.Player(me), tuxText, zoneText);
+                            VI.Cout(Uid, "{0}装备了{1}到{2}.", zd.Player(me), zd.Tux(tuxes), zoneText);
                         else
                         {
                             VI.Cout(Uid, "{0}的装备{1}进入{2}的{3}.", zd.Player(source),
-                                tuxText, zd.Player(me), zoneText);
+                                zd.Tux(tuxes), zd.Player(me), zoneText);
                         }
                         if (tuxes.Count > 0)
-                            A0O.FlyingGet(tuxes.Select(p => "C" + p), from, me);
+                            A0O.FlyingGet(tuxes.Select(p => "C" + p), source, me);
                         break;
                     }
                 case "E0ZC":

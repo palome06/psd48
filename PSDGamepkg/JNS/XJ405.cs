@@ -89,10 +89,12 @@ namespace PSD.PSDGamepkg.JNS
         }
         public void JN10201Action(Player player, int type, string fuse, string argst)
         {
-            if (type == 0)
-                player.ExMask |= 0x1;
-            else if (type == 1)
-                XI.RaiseGMessage("G0ZJ," + player.Uid);
+            XI.RaiseGMessage(new Artiad.EqSlotVariation()
+            {
+                Who = player.Uid,
+                Slot = Artiad.ClothingHelper.SlotType.WQ,
+                Increase = (type == 0) ? true : false
+            }.ToMessage());
         }
         public bool JN10202Valid(Player player, int type, string fuse)
         {

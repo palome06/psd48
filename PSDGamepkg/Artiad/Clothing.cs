@@ -128,8 +128,86 @@ namespace PSD.PSDGamepkg.Artiad
         }
     }
 
+    public class EquipSemaphore
+    {
+        public ushort Who { set; get; }
+
+        public ushort Source { set; get; }
+
+        public ClothingHelper.SlotType Slot { set; get; }
+
+        public ushort[] Cards { set; get; }
+
+        public ushort SingleCard
+        {
+            set { Cards = new ushort[] { value }; }
+            get { return Cards == null || Cards.Length != 1 ? (ushort)0 : Cards[0]; }
+        }
+        // Optional, only called when Slot = FQ
+        public string CardAs { set; get; }
+
+        public void Telegraph(Action<string> send)
+        {
+            if (Slot != ClothingHelper.SlotType.FQ)
+                send("E0ZB," + Who + "," + Source + "," + (long)Slot + "," + string.Join(",", Cards));
+            else
+                send("E0ZB," + Who + "," + Source + "," + (long)Slot + "," + Cards.Single() + "," + CardAs);
+        }
+    }
+
+    public class EqSlotVariation
+    {
+        public ushort Who { set; get; }
+
+        public ClothingHelper.SlotType Slot { set; get; }
+
+        public bool Increase { set; get; }
+
+        public string ToMessage()
+        {
+            return "G0ZJ," + Who + "," + (int)Slot + "," + (Increase ? 1 : 0);
+        }
+        public static EqSlotVariation Parse(string line)
+        {
+            string[] g0zj = line.Split(',');
+            return new EqSlotVariation()
+            {
+                Who = ushort.Parse(g0zj[1]),
+                Increase = g0zj[3] == "1",
+                Slot = ClothingHelper.ParseSlot(ushort.Parse(g0zj[2]))
+            };
+        }
+    }
+
+    public class EqSlotMoveSemaphore
+    {
+        public ushort Who { set; get; }
+        public ClothingHelper.SlotType Slot { set; get; }
+        public ushort Card { set; get; }
+        public void Telegraph(Action<string> send)
+        {
+            send("E0ZJ," + Who + "," + (int)Slot + "," + Card);
+        }
+    }
+
     public static class ClothingHelper
     {
+        public enum SlotType { NL = 0, WQ = 1, FJ = 2, XB = 3, EE = 4, EX = 5, FQ = 6 };
+
+        public static SlotType ParseSlot(ushort value)
+        {
+            switch (value)
+            {
+                case 1: return SlotType.WQ;
+                case 2: return SlotType.FJ;
+                case 3: return SlotType.XB;
+                case 4: return SlotType.EE;
+                case 5: return SlotType.EX;
+                case 6: return SlotType.FQ;
+                default: return SlotType.NL;
+            }
+        }
+
         public static bool IsStandard(string line) { return line.StartsWith("G0ZB,0"); }
 
         public static bool IsEx(string line) { return line.StartsWith("G0ZB,1"); }
@@ -167,7 +245,7 @@ namespace PSD.PSDGamepkg.Artiad
         {
             if (!isExMaskSet)
                 return baseSlot;
-            
+
             if (isSlotAssign)
             {
                 if (baseSlot != 0 || exSlot != 0)
@@ -196,35 +274,6 @@ namespace PSD.PSDGamepkg.Artiad
                         return baseSlot;
                 }
             }
-        }
-    }
-
-    public class EquipSemaphore
-    {
-        public enum SlotType { NL = 0, WQ = 1, FJ = 2, XB = 3, EE = 4, EX = 5, FQ = 6 };
-
-        public ushort Who { set; get; }
-
-        public ushort Source { set; get; }
-
-        public SlotType Slot { set; get; }
-
-        public ushort[] Cards { set; get; }
-
-        public ushort SingleCard
-        {
-            set { Cards = new ushort[] { value }; }
-            get { return Cards == null || Cards.Length != 1 ? (ushort)0 : Cards[0]; }
-        }
-        // Optional, only called when Slot = FQ
-        public string CardAs { set; get; }
-
-        public void Telegraph(Action<string> send)
-        {
-            if (Slot != SlotType.FQ)
-                send("E0ZB," + Who + "," + Source + "," + (long)Slot + "," + string.Join(",", Cards));
-            else
-                send("E0ZB," + Who + "," + Source + "," + (long)Slot + "," + Cards.Single() + "," + CardAs);
         }
     }
 }

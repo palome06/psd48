@@ -1235,6 +1235,8 @@ namespace PSD.ClientZero
                                     Z0D[who].Armor = 0;
                                 else if (Z0D[who].Trove == ut)
                                     Z0D[who].Trove = 0;
+                                else if (Z0D[who].ExEquip == ut)
+                                    Z0D[who].ExEquip = 0;
                                 else if (Z0D[who].ExCards.Contains(ut))
                                     Z0D[who].ExCards.Remove(ut);
                                 else if (Z0D[who].Fakeq.ContainsKey(ut))

@@ -278,8 +278,6 @@ namespace PSD.PSDGamepkg
                             if (changeType == 0 || changeType == 2)
                             {
                                 List<ushort> excds = new List<ushort>();
-                                if (player.ExEquip != 0)
-                                    excds.Add(player.ExEquip);
                                 excds.AddRange(player.ExCards);
                                 if (excds.Count > 0)
                                     g0qzs.Add("G0QZ," + player.Uid + "," + string.Join(",", excds));
@@ -1656,7 +1654,7 @@ namespace PSD.PSDGamepkg
                             if (eis.Source != 0)
                                 RaiseGMessage("G0OT," + eis.Source + ",1," + card);
                             Player player = Board.Garden[eis.Who];
-                            Artiad.EquipSemaphore.SlotType slot = Artiad.EquipSemaphore.SlotType.NL;
+                            Artiad.ClothingHelper.SlotType slot = Artiad.ClothingHelper.SlotType.NL;
 
                             int replacer = Artiad.ClothingHelper.GetSubstitude(player, te.Type,
                                 eis.SlotAssign, p => AsyncInput(eis.Coach, p, cmd, "0"));
@@ -1665,22 +1663,22 @@ namespace PSD.PSDGamepkg
                                 if (te.Type == Tux.TuxType.WQ && player.Weapon == 0)
                                 {
                                     player.Weapon = card;
-                                    slot = Artiad.EquipSemaphore.SlotType.WQ;
+                                    slot = Artiad.ClothingHelper.SlotType.WQ;
                                 }
                                 else if (te.Type == Tux.TuxType.FJ && player.Armor == 0)
                                 {
                                     player.Armor = card;
-                                    slot = Artiad.EquipSemaphore.SlotType.FJ;
+                                    slot = Artiad.ClothingHelper.SlotType.FJ;
                                 }
                                 else if (te.Type == Tux.TuxType.XB && player.Trove == 0)
                                 {
                                     player.Trove = card;
-                                    slot = Artiad.EquipSemaphore.SlotType.XB;
+                                    slot = Artiad.ClothingHelper.SlotType.XB;
                                 }
                                 else if (player.ExEquip == 0)
                                 {
                                     player.ExEquip = card;
-                                    slot = Artiad.EquipSemaphore.SlotType.EE;
+                                    slot = Artiad.ClothingHelper.SlotType.EE;
                                 }
                             }
                             else if (replacer > 0)
@@ -1689,28 +1687,28 @@ namespace PSD.PSDGamepkg
                                 {
                                     RaiseGMessage("G0QZ," + eis.Who + "," + replacer);
                                     player.Weapon = card;
-                                    slot = Artiad.EquipSemaphore.SlotType.WQ;
+                                    slot = Artiad.ClothingHelper.SlotType.WQ;
                                 }
                                 else if (player.Armor == replacer)
                                 {
                                     RaiseGMessage("G0QZ," + eis.Who + "," + replacer);
                                     player.Armor = card;
-                                    slot = Artiad.EquipSemaphore.SlotType.FJ;
+                                    slot = Artiad.ClothingHelper.SlotType.FJ;
                                 }
                                 else if (player.Trove == replacer)
                                 {
                                     RaiseGMessage("G0QZ," + eis.Who + "," + replacer);
                                     player.Trove = card;
-                                    slot = Artiad.EquipSemaphore.SlotType.XB;
+                                    slot = Artiad.ClothingHelper.SlotType.XB;
                                 }
                                 else if (player.ExEquip == replacer)
                                 {
                                     RaiseGMessage("G0QZ," + eis.Who + "," + replacer);
                                     player.ExEquip = card;
-                                    slot = Artiad.EquipSemaphore.SlotType.EE;
+                                    slot = Artiad.ClothingHelper.SlotType.EE;
                                 }
                             }
-                            if (slot != Artiad.EquipSemaphore.SlotType.NL)
+                            if (slot != Artiad.ClothingHelper.SlotType.NL)
                             {
                                 new Artiad.EquipSemaphore()
                                 {
@@ -1748,7 +1746,7 @@ namespace PSD.PSDGamepkg
                         {
                             Who = eec.Who,
                             Source = eec.Source,
-                            Slot = Artiad.EquipSemaphore.SlotType.EX,
+                            Slot = Artiad.ClothingHelper.SlotType.EX,
                             Cards = eec.Cards
                         }.Telegraph(WI.BCast);
                     }
@@ -1763,7 +1761,7 @@ namespace PSD.PSDGamepkg
                             {
                                 Who = ef.Who,
                                 Source = ef.Source,
-                                Slot = Artiad.EquipSemaphore.SlotType.FQ,
+                                Slot = Artiad.ClothingHelper.SlotType.FQ,
                                 SingleCard = ef.Card,
                                 CardAs = ef.CardAs
                             }.Telegraph(WI.BCast);
@@ -1784,7 +1782,7 @@ namespace PSD.PSDGamepkg
                                     {
                                         Who = ef.Who,
                                         Source = ef.Source,
-                                        Slot = Artiad.EquipSemaphore.SlotType.FQ,
+                                        Slot = Artiad.ClothingHelper.SlotType.FQ,
                                         SingleCard = ef.Card,
                                         CardAs = ef.CardAs
                                     }.Telegraph(WI.BCast);
@@ -3438,73 +3436,79 @@ namespace PSD.PSDGamepkg
                     break;
                 case "G0ZJ":
                     {
-                        ushort ut = ushort.Parse(cmdrst);
-                        Player py = Board.Garden[ut];
-                        if ((py.ExMask & 0x1) != 0 && py.ExEquip != 0)
+                        Artiad.EqSlotVariation esv = Artiad.EqSlotVariation.Parse(cmd);
+                        Player py = Board.Garden[esv.Who];
+                        if (esv.Increase)
                         {
-                            if (py.Weapon == 0)
+                            Action<int> action = (mask) =>
                             {
-                                py.Weapon = py.ExEquip; py.ExEquip = 0;
-                                WI.BCast("E0ZJ," + ut + ",1," + py.ExEquip);
-                            }
-                            else
-                            {
-                                ushort choose = ushort.Parse(AsyncInput(ut, "#保留的,C1(p"
-                                    + py.Weapon + "p" + py.ExEquip + ")", "G0ZJ", "0"));
-                                if (choose == py.Weapon)
-                                    RaiseGMessage("G0QZ," + ut + "," + py.ExEquip);
+                                if ((py.FyMask & mask) != 0)
+                                    py.FyMask &= ~mask;
                                 else
-                                {
-                                    RaiseGMessage("G0QZ," + ut + "," + py.Weapon);
-                                    py.Weapon = py.ExEquip; py.ExEquip = 0;
-                                    WI.BCast("E0ZJ," + ut + ",1," + py.ExEquip);
-                                }
-                            }
-                            py.ExMask &= (~0x1);
+                                    py.ExMask |= 0x1;
+                            };
+                            if (esv.Slot == Artiad.ClothingHelper.SlotType.WQ)
+                                action(0x1);
+                            else if (esv.Slot == Artiad.ClothingHelper.SlotType.WQ)
+                                action(0x2);
+                            else if (esv.Slot == Artiad.ClothingHelper.SlotType.WQ)
+                                action(0x4);
                         }
-                        else if ((py.ExMask & 0x2) != 0 && py.ExEquip != 0)
+                        else
                         {
-                            if (py.Armor == 0)
+                            Action<int, ushort, Artiad.ClothingHelper.SlotType, Action<ushort>> action =
+                                (mask, org, slot, setOrg) =>
                             {
-                                py.Armor = py.ExEquip; py.ExEquip = 0;
-                                WI.BCast("E0ZJ," + ut + ",2," + py.ExEquip);
-                            }
-                            else
-                            {
-                                ushort choose = ushort.Parse(AsyncInput(ut, "#保留的,C1(p"
-                                    + py.Armor + "p" + py.ExEquip + ")", "G0ZJ", "0"));
-                                if (choose == py.Armor)
-                                    RaiseGMessage("G0QZ," + ut + "," + py.ExEquip);
+                                if ((py.ExMask & mask) != 0)
+                                {
+                                    if (py.ExEquip != 0) // only consider when exequip is not empty
+                                    {
+                                        if (org == 0) // OK, move it.
+                                        {
+                                            ushort now = py.ExEquip;
+                                            setOrg(now); py.ExEquip = 0;
+                                            new Artiad.EqSlotMoveSemaphore()
+                                            {
+                                                Who = esv.Who,
+                                                Slot = slot,
+                                                Card = now
+                                            }.Telegraph(WI.BCast);
+                                        }
+                                        else
+                                        {
+                                            ushort choose = ushort.Parse(AsyncInput(esv.Who, "#保留的,C1(p"
+                                                + org + "p" + py.ExEquip + ")", "G0ZJ", "0"));
+                                            if (choose == org)
+                                                RaiseGMessage("G0QZ," + esv.Who + "," + py.ExEquip);
+                                            else
+                                            {
+                                                RaiseGMessage("G0QZ," + esv.Who + "," + org);
+                                                ushort now = py.ExEquip;
+                                                setOrg(now); py.ExEquip = 0;
+                                                new Artiad.EqSlotMoveSemaphore()
+                                                {
+                                                    Who = esv.Who,
+                                                    Slot = slot,
+                                                    Card = now
+                                                }.Telegraph(WI.BCast);
+                                            }
+                                        }
+                                    }
+                                    py.ExMask &= ~mask;
+                                }
                                 else
                                 {
-                                    RaiseGMessage("G0QZ," + ut + "," + py.Armor);
-                                    py.Armor = py.ExEquip; py.ExEquip = 0;
-                                    WI.BCast("E0ZJ," + ut + ",2," + py.ExEquip);
+                                    if (org != 0)
+                                        RaiseGMessage("G0QZ," + esv.Who + "," + org);
+                                    py.FyMask |= mask;
                                 }
-                            }
-                            py.ExMask &= (~0x2);
-                        }
-                        else if ((py.ExMask & 0x4) != 0 && py.ExEquip != 0)
-                        {
-                            if (py.Trove == 0)
-                            {
-                                py.Trove = py.ExEquip; py.ExEquip = 0;
-                                WI.BCast("E0ZJ," + ut + ",3," + py.ExEquip);
-                            }
-                            else
-                            {
-                                ushort choose = ushort.Parse(AsyncInput(ut, "#保留的,C1(p"
-                                    + py.Trove + "p" + py.ExEquip + ")", "G0ZJ", "0"));
-                                if (choose == py.Trove)
-                                    RaiseGMessage("G0QZ," + ut + "," + py.ExEquip);
-                                else
-                                {
-                                    RaiseGMessage("G0QZ," + ut + "," + py.Trove);
-                                    py.Trove = py.ExEquip; py.ExEquip = 0;
-                                    WI.BCast("E0ZJ," + ut + ",3," + py.ExEquip);
-                                }
-                            }
-                            py.ExMask &= (~0x4);
+                            };
+                            if (esv.Slot == Artiad.ClothingHelper.SlotType.WQ)
+                                action(0x1, py.Weapon, esv.Slot, p => py.Weapon = p);
+                            else if (esv.Slot == Artiad.ClothingHelper.SlotType.FJ)
+                                action(0x2, py.Armor, esv.Slot, p => py.Armor = p);
+                            else if (esv.Slot == Artiad.ClothingHelper.SlotType.XB)
+                                action(0x4, py.Trove, esv.Slot, p => py.Trove = p);
                         }
                     }
                     break;
@@ -3514,7 +3518,7 @@ namespace PSD.PSDGamepkg
                         ushort ut = ushort.Parse(args[2]);
                         if (ut > 0)
                         {
-                            NPC npc = LibTuple.NL.Decode(Base.Card.NMBLib.OriginalNPC(ut));
+                            NPC npc = LibTuple.NL.Decode(NMBLib.OriginalNPC(ut));
                             npc.Debut(Board.Garden[who]);
                         }
                     }

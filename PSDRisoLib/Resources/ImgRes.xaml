@@ -737,6 +737,7 @@
     <Image x:Key="tuxCardJPH3" Source="Card/Tux/JPH3.png"/>
     <Image x:Key="tuxCardJPH4" Source="Card/Tux/JPH4.png"/>
     <Image x:Key="tuxCardTPH1" Source="Card/Tux/TPH1.png"/>
+    <Image x:Key="tuxCardTPH2" Source="Card/Tux/TPH2.png"/>
     <Image x:Key="tuxCardTPH3" Source="Card/Tux/TPH3.png"/>
     <Image x:Key="tuxCardTPH4" Source="Card/Tux/TPH4.png"/>
     <Image x:Key="tuxCardZPH1" Source="Card/Tux/ZPH1.png"/>

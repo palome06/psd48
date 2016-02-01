@@ -3046,12 +3046,6 @@ namespace PSD.PSDGamepkg.JNS
         }
         private void GFH1GeneralEffAction(Player decider)
         {
-            Monster mon1 = XI.LibTuple.ML.Decode(XI.Board.Monster1);
-            if (mon1 != null && mon1.Code == "GFH1")
-                XI.Board.Mon1Catchable = false;
-            Monster mon2 = XI.LibTuple.ML.Decode(XI.Board.Monster2);
-            if (mon2 != null && mon2.Code == "GFH1")
-                XI.Board.Mon2Catchable = false;
             IDictionary<ushort, List<ushort>> ans = new Dictionary<ushort, List<ushort>>();
             foreach (Player py in XI.Board.Garden.Values)
             {
@@ -3108,6 +3102,12 @@ namespace PSD.PSDGamepkg.JNS
         }
         public void GFH1WinEff()
         {
+            Monster mon1 = XI.LibTuple.ML.Decode(XI.Board.Monster1);
+            if (mon1 != null && mon1.Code == "GFH1")
+                XI.Board.Mon1Catchable = false;
+            Monster mon2 = XI.LibTuple.ML.Decode(XI.Board.Monster2);
+            if (mon2 != null && mon2.Code == "GFH1")
+                XI.Board.Mon2Catchable = false;
             GFH1GeneralEffAction(XI.Board.Rounder);
         }
         public void GFH1LoseEff()
