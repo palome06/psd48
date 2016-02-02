@@ -226,6 +226,11 @@ namespace PSD.PSDGamepkg
                                 ushort cdCode = ushort.Parse(decision.Substring("PT".Length));
                                 isFight = true; sprUid = (ushort)(cdCode + 1000);
                             }
+                            else if (decision.StartsWith("I"))
+                            {
+                                ushort cdCode = ushort.Parse(decision.Substring("I".Length));
+                                isFight = true; sprUid = (ushort)(cdCode + 3000);
+                            }
                             else if (decision.StartsWith("/"))
                             {
                                 isFight = false; sprUid = 0;
@@ -275,6 +280,11 @@ namespace PSD.PSDGamepkg
                                 {
                                     ushort cdCode = ushort.Parse(decision.Substring("PT".Length));
                                     hndUid = (ushort)(cdCode + 1000);
+                                }
+                                else if (decision.StartsWith("I"))
+                                {
+                                    ushort cdCode = ushort.Parse(decision.Substring("I".Length));
+                                    hndUid = (ushort)(cdCode + 3000);
                                 }
                                 else if (decision.StartsWith("/"))
                                     hndUid = 0;

@@ -726,6 +726,67 @@ namespace PSD.ClientAo
             yfPlayerR2.ResumeEscue();
             RmvTVDict(yfPlayerR2.AoPlayer.Rank + "SYJ");
         }
+        
+        private ObservableCollection<ushort> selectedExsp;
+        internal void InsSelectedExsp(ushort ut) { if (selectedExsp != null) selectedExsp.Add(ut); }
+        internal void DelSelectedExsp(ushort ut) { if (selectedExsp != null) selectedExsp.Remove(ut); }
+        internal void StartSelectExsp(List<ushort> cands)
+        {
+            AoPlayer wata = yfPlayerR2.AoPlayer;
+            //List<ushort> pets = wata.Pets.Where(p => p != 0).Intersect(cands).ToList();
+            //List<ushort> opts = wata.Pets.Where(p => p != 0).Except(pets).ToList();
+            selectedExsp = new ObservableCollection<ushort>();
+            ushort whoes = 0;
+            Action<PlayerBoard> findOwner = (yp) =>
+            {
+                List<ushort> exsp = yp.AoPlayer.ExSpCards.Where(p => p.StartsWith("I"))
+                    .Select(p => ushort.Parse(p.Substring("I".Length))).Intersect(cands).ToList();
+                if (exsp.Count > 0)
+                {
+                    yp.EnableExspCards(exsp);
+                    whoes = yp.AoPlayer.Rank;
+                }
+            };
+            findOwner(yfPlayerR1);
+            findOwner(yfPlayerR2);
+            findOwner(yfPlayerR3);
+
+            selectedExsp.CollectionChanged += delegate (object sender, NotifyCollectionChangedEventArgs e)
+            {
+                if (selectedExsp != null)
+                {
+                    if (selectedExsp.Count == 1)
+                        EnableJoyDecide("I" + selectedExsp[0]);
+                    else if (selectedExsp.Count > 1)
+                    {
+                        ushort first = selectedExsp[0];
+                        if (tvDict.ContainsKey(whoes + "SES"))
+                        {
+                            OI.Television tv = tvDict[whoes + "SES"];
+                            Card.Ruban ruban = tv.GetRuban(selectedExsp[0]);
+                            if (ruban != null)
+                            {
+                                ruban.cardBody.IsChecked = false;
+                                return;
+                            }
+                        }
+                    }
+                    else
+                        DisableJoyDecide();
+                }
+            };
+        }
+
+        internal void FinishSelectExsp()
+        {
+            PlayerBoard[] pbs = new PlayerBoard[] { yfPlayerR1, yfPlayerR2,
+                yfPlayerR3, yfPlayerO1, yfPlayerO2, yfPlayerO3 };
+            foreach (PlayerBoard pb in pbs)
+            {
+                pb.ResumeExsp();
+                RmvTVDict(pb.AoPlayer.Rank + "SES");
+            }
+        }
         #endregion Cards Selection and Control Panel
 
         public ushort Player2Position(ushort ut)

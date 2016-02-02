@@ -1466,6 +1466,8 @@ namespace PSD.PSDGamepkg.JNS
                 who = ushort.Parse(argst.Substring("T".Length));
             else if (argst.StartsWith("P"))
                 who = (ushort)(ushort.Parse(argst.Substring("PT".Length)) + 1000);
+            else if (argst.StartsWith("I"))
+                who = (ushort)(ushort.Parse(argst.Substring("I".Length)) + 3000);
             if (who != 0)
             {
                 if (XI.Board.Supporter == player)
@@ -1852,7 +1854,7 @@ namespace PSD.PSDGamepkg.JNS
             {
                 bool b1 = XI.Board.Garden.Values.Any(p => p.IsAlive && p.Uid != player.Uid
                     && XI.Board.IsAttendWar(p) && !XI.Board.IsAttendWarSucc(p) && p.ListOutAllCards().Count > 0);
-                bool b2 = !XI.Board.Garden.Values.Any(p => p.Team == player.OppTeam && XI.Board.IsAttendWar(p));
+                bool b2 = XI.Board.Rounder.Team == player.Team && XI.Board.Hinder.Uid == 0;
                 return b1 || b2;
             }
             else

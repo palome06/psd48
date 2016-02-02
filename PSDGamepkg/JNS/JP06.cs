@@ -46,6 +46,11 @@ namespace PSD.PSDGamepkg.JNS
                     {
                         return (bool)GeneralZPBribe(player);
                     });
+                else if (tux.IsTuxEqiup())
+                    tux.Bribe += delegate(Player player, int type, string fuse)
+                    {
+                        return (bool)GeneralEquipmentBribe(player, tux.Type);
+                    };
                 else
                     tux.Bribe += new Tux.ValidDelegate(delegate (Player player, int type, string fuse)
                     {
@@ -829,7 +834,7 @@ namespace PSD.PSDGamepkg.JNS
                         {
                             ushort ut = ushort.Parse(ips[1]);
                             XI.RaiseGMessage("G1OU," + cd);
-                            XI.RaiseGMessage("G2QU,0,0," + cd);
+                            XI.RaiseGMessage("G2QU,0,C,0," + cd);
                             XI.RaiseGMessage("G0HQ,2," + ut + ",0,0," + cd);
                             pops.Remove(cd);
                             idxs = (idxs + 1) % 2;
@@ -2257,8 +2262,8 @@ namespace PSD.PSDGamepkg.JNS
         }
         public void JPH3Action(Player player, int type, string fuse, string argst)
         {
-            string whoStr = XI.AsyncInput(player.Uid, "V1(p" + string.Join("p", FiveElementHelper
-                .GetPropedElements().Select(p => p.Elem2Int())) + "),#请响应【七光御阵】##受伤##补牌,Y2", "JPH3", "0");
+            string whoStr = XI.AsyncInput(player.Uid, "V1(p" + string.Join("p", FiveElementHelper.GetPropedElements()
+                .Select(p => p.Elem2Int())) + "),#请选择【七光御阵】执行项##受伤##补牌,Y2", "JPH3", "0");
             int idx = whoStr.IndexOf(',');
             FiveElement five = FiveElementHelper.Int2Elem(int.Parse(whoStr.Substring(0, idx)));
             int elemIdx = five.Elem2Index();
@@ -2308,14 +2313,14 @@ namespace PSD.PSDGamepkg.JNS
                     {
                         ushort ut = ushort.Parse(ips[1]);
                         XI.RaiseGMessage("G1OU," + cd);
-                        //XI.RaiseGMessage("G2QU,0,0," + cd); // TODO: build monster remove event
+                        XI.RaiseGMessage("G2QU,0,M,0," + cd);
                         XI.RaiseGMessage("G0HD,1," + ut + ",0," + cd);
                         pops.Remove(cd);
                     }
                 }
                 XI.RaiseGMessage("G2FU,3");
             }
-            while (popCount < 3 || !XI.Board.Garden.Values.Any(p => p.Team == player.Team && p.GetPetCount() > 0))
+            while (popCount < 3)
             {
                 List<ushort> pys = XI.Board.Garden.Values.Where(p =>
                     p.Team == player.Team && p.GetPetCount() > 0).Select(p => p.Uid).ToList();
@@ -2360,7 +2365,7 @@ namespace PSD.PSDGamepkg.JNS
         public bool TPH1Valid(Player player, int type, string fuse)
         {
             if (type == 0)
-                return XI.Board.Garden.Values.Any(p => p.IsTared && !p.Runes.Contains(6));
+                return XI.Board.Garden.Values.Any(p => p.IsTared);
             else if (type == 1)
                 return true;
             return false;
@@ -2368,17 +2373,20 @@ namespace PSD.PSDGamepkg.JNS
         public void TPH3Action(Player player, int type, string fuse, string argst)
         {
             Player rd = XI.Board.Rounder;
-            TargetPlayer(player.Uid, rd.Uid);
-            XI.RaiseGMessage("G0HQ,4," + player.Uid + "," + rd.Uid + "," + player.Tux.Count + "," + rd.Tux.Count +
-                (player.Tux.Count > 0 ? ("," + string.Join(",", player.Tux)) : "") +
-                (rd.Tux.Count > 0 ? ("," + string.Join(",", rd.Tux)) : ""));
-            if (rd.Tux.Count < rd.TuxLimit && player.Tux.Count > 0)
+            if (player.Uid != rd.Uid)
             {
-                int delta = Math.Min(rd.TuxLimit - rd.Tux.Count, player.Tux.Count);
-                string giveBack = XI.AsyncInput(player.Uid, "#交还的,Q" + delta +
-                    "(p" + string.Join("p", player.Tux) + ")", "TPH3", "0");
-                if (!giveBack.Contains(VI.CinSentinel))
-                    XI.RaiseGMessage("G0HQ,0," + rd.Uid + "," + player.Uid + ",1," + delta + "," + giveBack);
+                TargetPlayer(player.Uid, rd.Uid);
+                XI.RaiseGMessage("G0HQ,4," + player.Uid + "," + rd.Uid + "," + player.Tux.Count + "," +
+                    rd.Tux.Count + (player.Tux.Count > 0 ? ("," + string.Join(",", player.Tux)) : "") +
+                    (rd.Tux.Count > 0 ? ("," + string.Join(",", rd.Tux)) : ""));
+                if (rd.Tux.Count < rd.TuxLimit && player.Tux.Count > 0)
+                {
+                    int delta = Math.Min(rd.TuxLimit - rd.Tux.Count, player.Tux.Count);
+                    string giveBack = XI.AsyncInput(player.Uid, "#交还的,Q" + delta +
+                        "(p" + string.Join("p", player.Tux) + ")", "TPH3", "0");
+                    if (!giveBack.Contains(VI.CinSentinel))
+                        XI.RaiseGMessage("G0HQ,0," + rd.Uid + "," + player.Uid + ",1," + delta + "," + giveBack);
+                }
             }
         }
         public void TPH4Action(Player player, int type, string fuse, string argst)
@@ -2392,9 +2400,9 @@ namespace PSD.PSDGamepkg.JNS
         public void ZPH1Action(Player player, int type, string fuse, string argst)
         {
             var ai = XI.AsyncInput(player.Uid, "#命中-2,T1" + AAllTareds(player), "ZPH1", "0");
-            ushort from = ushort.Parse(ai);
-            TargetPlayer(player.Uid, from);
-            XI.RaiseGMessage("G0OX," + from + ",1,2");
+            ushort to = ushort.Parse(ai);
+            TargetPlayer(player.Uid, to);
+            XI.RaiseGMessage("G0OX," + to + ",1,2");
         }
         public bool ZPH1Valid(Player player, int type, string fuse)
         {
@@ -2595,9 +2603,13 @@ namespace PSD.PSDGamepkg.JNS
         {
             return !player.DrTuxDisabled;
         }
-        public bool GeneralZPBribe(Player player)
+        private bool GeneralZPBribe(Player player)
         {
             return player.RestZP > 0 && !player.ZPDisabled && !player.DrTuxDisabled;
+        }
+        private bool GeneralEquipmentBribe(Player player, Tux.TuxType tuxType)
+        {
+            return Artiad.ClothingHelper.IsEquipable(player, tuxType);
         }
         private void GeneralLocust(Player player, int type, string fuse, string cdFuse,
             Player locuster, Tux locus, ushort locustee)

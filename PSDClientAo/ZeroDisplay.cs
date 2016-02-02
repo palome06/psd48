@@ -100,22 +100,48 @@ namespace PSD.ClientAo
             return player == 0 ? "取消" : (player < 1000 ? tuple.HL.InstanceHero(
                 xiv.A0P[player].SelectHero).Name : Monster((ushort)(player - 1000)));
         }
+
         internal string Player(ushort player)
         {
-            return player == 0 ? "0:天上" : (player < 1000 ? player + ":" + tuple.HL
-                .InstanceHero(xiv.A0P[player].SelectHero).Name : Monster((ushort)(player - 1000)));
+            return player == 0 ? "0:天上" : (player + ":" + tuple.HL
+                .InstanceHero(xiv.A0P[player].SelectHero).Name);
         }
         internal string Player(IEnumerable<ushort> players)
         {
             return "{" + string.Join(",", players.Select(p => Player(p))) + "}";
         }
-        internal string PlayerWithMonster(IEnumerable<string> strings) // used only for XJ107 and GT03
+        internal string Warrior(ushort extUid)
         {
-            if (!strings.Any())
-                return "{}";
-            return "{" + string.Join(",", strings.Select(p => p.StartsWith("!") ?
-                (p.Substring(1) + ":" + tuple.ML.Decode(ushort.Parse(p.Substring("!PT".Length))).Name)
-                : Player(ushort.Parse(p)))) + "}";
+            if (extUid == 0)
+                return "无人";
+            else if (extUid < 1000)
+                return Player(extUid);
+            else if (extUid < 3000)
+                return Monster((ushort)(extUid - 1000));
+            else if (extUid < 4000)
+                return ExspI((ushort)(extUid - 3000));
+            else
+                return "0:天使";
+        }
+        internal string Warriors(IEnumerable<string> strings) // mix results of entites
+        {
+            // !PT19,!I25,1,3,5
+            System.Func<string, string> format = (jname) =>
+            {
+                if (jname.StartsWith("!PT"))
+                {
+                    ushort ut = ushort.Parse(jname.Substring("!PT".Length));
+                    return ("PT" + ut) + ":" + tuple.ML.Decode(ut).Name;
+                }
+                else if (jname.StartsWith("!I"))
+                {
+                    ushort ut = ushort.Parse(jname.Substring("!I".Length));
+                    return ("I" + ut) + ":" + tuple.ESL.Encode("I" + ut).Name;
+                }
+                else
+                    return Player(ushort.Parse(jname));
+            };
+            return "{" + string.Join(",", strings.Select(p => format(p))) + "}";
         }
         internal string Monster(ushort p)
         {

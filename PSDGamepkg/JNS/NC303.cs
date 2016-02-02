@@ -357,7 +357,7 @@ namespace PSD.PSDGamepkg.JNS
                 if (ushort.TryParse(input, out cd) && XI.Board.PZone.Contains(cd))
                 {
                     XI.RaiseGMessage("G1OU," + cd);
-                    XI.RaiseGMessage("G2QU,0,0," + cd);
+                    XI.RaiseGMessage("G2QU,0,C,0," + cd);
                     XI.RaiseGMessage("G0HQ,2," + ut + ",0,0," + cd);
                     pops.Remove(cd);
                 }
@@ -366,7 +366,7 @@ namespace PSD.PSDGamepkg.JNS
             if (pops.Count > 0)
             {
                 XI.RaiseGMessage("G1OU," + string.Join(",", pops));
-                XI.RaiseGMessage("G2QU,0,0," + string.Join(",", pops));
+                XI.RaiseGMessage("G2QU,0,C,0," + string.Join(",", pops));
                 XI.RaiseGMessage("G0ON,0,C," + pops.Count + "," + string.Join(",", pops));
             }
         }

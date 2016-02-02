@@ -71,8 +71,6 @@ namespace PSD.PSDGamepkg.Artiad
         public static void DecrGuestPlayer(Player player, Hero guest, XI xi, int limit)
         {
             List<ushort> excds = new List<ushort>();
-            if (player.ExEquip != 0)
-                excds.Add(player.ExEquip);
             excds.AddRange(player.ExCards);
             if (excds.Count > 0)
                 xi.RaiseGMessage("G0QZ," + player.Uid + "," + string.Join(",", excds));
@@ -266,7 +264,7 @@ namespace PSD.PSDGamepkg.Artiad
                     if (getxs.Count > 0)
                     {
                         XI.RaiseGMessage("G1OU," + string.Join(",", getxs));
-                        XI.RaiseGMessage("G2QU,0," + rpsa.Length + "," +
+                        XI.RaiseGMessage("G2QU,0,C," + rpsa.Length + "," +
                              string.Join(",", rpsa) + "," + string.Join(",", getxs));
                         XI.RaiseGMessage("G0HQ,2," + to + ",0," + rpsa.Length + "," +
                             string.Join(",", rpsa) + "," + string.Join(",", getxs));

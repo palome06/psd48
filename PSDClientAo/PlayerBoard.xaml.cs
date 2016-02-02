@@ -145,6 +145,7 @@ namespace PSD.ClientAo
             enabledFakeq = new List<ushort>();
             enabledEscue = new List<ushort>();
             enabledRune = new List<ushort>();
+            enabledExsp = new List<ushort>();
             //enabledExEquip = false;
             troveBox.padClickHandler += inLuggageClick;
         }
@@ -359,6 +360,19 @@ namespace PSD.ClientAo
             enabledEscue.Clear();
             npcBorder.BorderBrush = new SolidColorBrush(Colors.Transparent);
         }
+        public void EnableExspCards(IEnumerable<ushort> vset)
+        {
+            enabledExsp = vset.ToList();
+            if (enabledExsp.Count > 0)
+                excardBorder.Visibility = Visibility.Visible;
+            else
+                excardBorder.Visibility = Visibility.Collapsed;
+        }
+        public void ResumeExsp()
+        {
+            enabledExsp.Clear();
+            excardBorder.Visibility = Visibility.Collapsed;
+        }
         internal AoDisplay AD { set; get; }
 
         private List<ushort> enabledExcard;
@@ -366,6 +380,7 @@ namespace PSD.ClientAo
         private List<ushort> enabledFakeq;
         private List<ushort> enabledEscue;
         private List<ushort> enabledRune;
+        private List<ushort> enabledExsp;
         //private bool enabledExEquip;
 
         private void excardBarClick(object sender, RoutedEventArgs e)
@@ -393,7 +408,16 @@ namespace PSD.ClientAo
         private void expeopleBarClick(object sender, RoutedEventArgs e)
         {
             if (AD != null)
-                AD.yhTV.Show(AoPlayer.ExSpCards, AoPlayer.Rank + "EP");
+            {
+                if (enabledExsp == null || enabledExsp.Count == 0)
+                    AD.yhTV.Show(AoPlayer.ExSpCards, AoPlayer.Rank + "EP");
+                else
+                {
+                    AD.yhTV.ShowSelectableList(enabledExsp.Select(p => "I" + p).ToList(),
+                        AoPlayer.ExSpCards.Except(enabledExsp.Select(p => "I" + p)).ToList(),
+                        AoPlayer.Rank + "SES", "I");
+                }
+            }
         }
         private void folderBarClick(object sender, RoutedEventArgs e)
         {

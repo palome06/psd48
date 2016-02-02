@@ -1642,7 +1642,7 @@ namespace PSD.ClientAo
                     {
                         ushort who = ushort.Parse(args[idx]);
                         int count = int.Parse(args[idx + 1]);
-                        VI.Cout(Uid, "{0}对{1}发动了倾慕.", zd.PlayerWithMonster(
+                        VI.Cout(Uid, "{0}对{1}发动了倾慕.", zd.Warriors(
                             Algo.TakeRange(args, idx + 2, idx + 2 + count)), zd.Player(who));
                         idx += (2 + count);
                         A0P[who].IsLoved = true;
@@ -1778,8 +1778,15 @@ namespace PSD.ClientAo
                 case "E0QU":
                     if (args[1].Equals("0"))
                     {
-                        var ravs = Algo.TakeRange(args, 2, args.Length).Select(p => ushort.Parse(p));
-                        VI.Cout(Uid, "{0}被移离观看区.", zd.Tux(ravs));
+                        ushort[] ravs = Algo.TakeRange(args, 3, args.Length)
+                            .Select(p => ushort.Parse(p)).ToArray();
+                        string msgBase = "{0}被移离观看区.";
+                        if (args[2] == "C")
+                            VI.Cout(Uid, msgBase, zd.Tux(ravs));
+                        else if (args[2] == "M")
+                            VI.Cout(Uid, msgBase, zd.Monster(ravs));
+                        else if (args[2] == "E")
+                            VI.Cout(Uid, msgBase, zd.Eve(ravs));
                     }
                     else if (args[1].Equals("1"))
                         VI.Cout(Uid, "{0}张牌被移离观看区.", args[2]);
@@ -2173,7 +2180,7 @@ namespace PSD.ClientAo
                         bool hy = args[5].Equals("1");
                         string comp1 = (s != 0) ? "{0}支援" + (sy ? "成功" : "失败") : "无支援";
                         string comp2 = (h != 0) ? "{1}妨碍" + (hy ? "成功" : "失败") : "无妨碍";
-                        VI.Cout(Uid, comp1 + "，" + comp2 + "。", zd.Player(s), zd.Player(h));
+                        VI.Cout(Uid, comp1 + "，" + comp2 + "。", zd.Warrior(s), zd.Warrior(h));
 
                         if (s != 0 && s < 1000)
                         {
@@ -2835,8 +2842,6 @@ namespace PSD.ClientAo
                             char position = args[i][0];
                             ushort old = ushort.Parse(args[i + 1]);
                             ushort s = ushort.Parse(args[i + 2]);
-                            string name = (s == 0 ? "无人" :
-                                (s < 1000 ? zd.Player(s) : zd.Monster((ushort)(s - 1000))));
                             if (old != 0)
                                 leavers.Add(old);
                             if (s != 0)
@@ -2844,28 +2849,28 @@ namespace PSD.ClientAo
                                 joiners.Add(s);
                                 if (position == 'T')
                                 {
-                                    msgs.Add(string.Format("{0}触发战斗", name));
+                                    msgs.Add(string.Format("{0}触发战斗", zd.Warrior(s)));
                                     //A0F.Trigger = s;
                                     if (s != 0 && s < 1000)
                                         A0P[s].SetAsRounder();
                                 }
                                 else if (position == 'S')
                                 {
-                                    msgs.Add(string.Format("{0}支援", name));
+                                    msgs.Add(string.Format("{0}支援", zd.Warrior(s)));
                                     A0F.Supporter = s;
                                     if (s != 0 && s < 1000)
                                         A0P[s].SetAsSpSucc();
                                 }
                                 else if (position == 'H')
                                 {
-                                    msgs.Add(string.Format("{0}妨碍", name));
+                                    msgs.Add(string.Format("{0}妨碍", zd.Warrior(s)));
                                     A0F.Hinder = s;
                                     if (s != 0 && s < 1000)
                                         A0P[s].SetAsSpSucc();
                                 }
                                 else if (position == 'W')
                                 {
-                                    msgs.Add(string.Format("{0}代为触发战斗", name));
+                                    msgs.Add(string.Format("{0}代为触发战斗", zd.Warrior(s)));
                                     //A0F.Horn = s;
                                     if (s != 0 && s < 1000)
                                     {
@@ -2878,9 +2883,7 @@ namespace PSD.ClientAo
                         leavers.RemoveAll(p => joiners.Contains(p));
                         if (leavers.Count > 0)
                         {
-                            msgs.AddRange(leavers.Select(p => string.Format("{0}退出战斗",
-                                (p == 0 ? "无人" : (p < 1000 ? zd.Player(p) :
-                                zd.Monster((ushort)(p - 1000)))))));
+                            msgs.AddRange(leavers.Select(p => string.Format("{0}退出战斗", zd.Warrior(p))));
                             leavers.ForEach(p => { if (p < 1000) A0P[p].SetAsClear(); });
                         }
                         if (msgs.Count > 0)
@@ -3500,6 +3503,12 @@ namespace PSD.ClientAo
                                 ushort monCode = Tuple.ML.Encode(advice);
                                 if (monCode > 0)
                                     VI.Cout(Uid, "{0}{1}{2}参与战斗.", zd.Player(from), suggest, zd.Monster(monCode));
+                            }
+                            else if (advice.StartsWith("I"))
+                            {
+                                ushort exspCode = ushort.Parse(advice.Substring("I".Length));
+                                if (exspCode > 0)
+                                    VI.Cout(Uid, "{0}{1}{2}参与战斗.", zd.Player(from), suggest, zd.ExspI(exspCode));
                             }
                             else if (advice.StartsWith("/"))
                                 VI.Cout(Uid, "{0}{1}不打怪.", zd.Player(from), suggest);

@@ -94,7 +94,7 @@ namespace PSD.PSDGamepkg.JNS
                     {
                         ushort ut = ushort.Parse(ips[1]);
                         XI.RaiseGMessage("G1OU," + cd);
-                        XI.RaiseGMessage("G2QU,0,0," + cd);
+                        XI.RaiseGMessage("G2QU,0,C,0," + cd);
                         XI.RaiseGMessage("G0HQ,2," + ut + ",0,0," + cd);
                         pops.Remove(cd);
                         idxs = (idxs + 1) % 2;
@@ -278,7 +278,7 @@ namespace PSD.PSDGamepkg.JNS
                             ushort ut = ushort.Parse(ips[1]);
                             XI.RaiseGMessage("G1OU," + cd);
                             uts.Remove(cd);
-                            XI.RaiseGMessage("G2QU,0,0," + cd);
+                            XI.RaiseGMessage("G2QU,0,C,0," + cd);
                             // CongQIPaiDuiLiQiDiao
                             XI.RaiseGMessage("G2FU,3");
                             XI.RaiseGMessage("G2CN,0,1");

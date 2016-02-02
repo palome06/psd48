@@ -416,6 +416,31 @@ namespace PSD.Base
         {
             return Uid != 0 && IsAlive && IsReal;
         }
+        public int GetSlotCapacity(Card.Tux.TuxType tuxType)
+        {
+            int mask = 0;
+            if (tuxType == Card.Tux.TuxType.WQ)
+                mask = 0x1;
+            else if (tuxType == Card.Tux.TuxType.FJ)
+                mask = 0x2;
+            else if (tuxType == Card.Tux.TuxType.XB)
+                mask = 0x4;
+            return 1 + ((ExMask & mask) == 0 ? 0 : 1) + ((FyMask & mask) == 0 ? 0 : -1);
+        }
+        public int GetCurrentEquipCount(Card.Tux.TuxType tuxType)
+        {
+            int cap = GetSlotCapacity(tuxType);
+            if (cap == 0)
+                return 0;
+            int ext = (cap == 2 && ExEquip != 0) ? 1 : 0;
+            if (tuxType == Card.Tux.TuxType.WQ)
+                return (Weapon != 0 ? 1 : 0) + ext;
+            else if (tuxType == Card.Tux.TuxType.FJ)
+                return (Armor != 0 ? 1 : 0) + ext;
+            else if (tuxType == Card.Tux.TuxType.XB)
+                return (Trove != 0 ? 1 : 0) + ext;
+            else return 0;
+        }
         #region TuxPrice
         public void ClearPrice()
         {
@@ -461,5 +486,16 @@ namespace PSD.Base
             return zero < 0 ? 0 : zero;
         }
         #endregion TuxPrice
+        // Create a ext warriors, act as normal battle attenders
+        public static Player Warriors(string name, int extUid, int team, int str, int agl)
+        {
+            return new Player(name, 0, (ushort)extUid, false)
+            {
+                STRb = str,
+                DEXb = agl,
+                IsAlive = false,
+                Team = team
+            };
+        }
     }
 }

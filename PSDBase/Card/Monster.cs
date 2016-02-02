@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PSD.Base.Card
 {
@@ -51,6 +49,7 @@ namespace PSD.Base.Card
 
         public ushort ROMUshort { set; get; }
         public int RAMInt { set; get; }
+        public List<ushort> RAMUtList { private set; get; }
 
         #region SPI Info
         private int mSpiHW, mSpiHL, mSpiHw, mSpiHl, mSpiHC, mSpiHc;
@@ -254,6 +253,7 @@ namespace PSD.Base.Card
             this.EAHinds = eahinds;
             this.Padrone = 0;
             ParseSpi(spis);
+            RAMUtList = new List<ushort>();
         }
 
         public bool IsMonster() { return true; }
@@ -273,6 +273,7 @@ namespace PSD.Base.Card
         public void ResetRAM()
         {
             RAMInt = 0;
+            RAMUtList.Clear();
         }
     }
 

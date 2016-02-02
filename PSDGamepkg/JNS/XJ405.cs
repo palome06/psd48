@@ -1040,31 +1040,23 @@ namespace PSD.PSDGamepkg.JNS
         }
         public void JN40102Action(Player player, int type, string fuse, string args)
         {
-            int idx = args.IndexOf(',');
-            ushort who = ushort.Parse(args.Substring(0, idx));
-            ushort pet = ushort.Parse(args.Substring(idx + 1));
-            TargetPlayer(player.Uid, who);
-            XI.RaiseGMessage("G0HL," + who + "," + pet);
-            XI.RaiseGMessage("G0ON," + who + ",M,1," + pet);
-            //XI.InnerGMessage(fuse, 141);
-        }
-        public string JN40102Input(Player player, int type, string fuse, string prev)
-        {
             string[] blocks = fuse.Split(',');
             ushort card = ushort.Parse(blocks[4]);
             Base.Card.Monster monster = XI.LibTuple.ML.Decode(card);
             int element = monster.Element.Elem2Index();
-            if (prev == "")
-                return "#弃置宠物的,/T1(p" + string.Join("p", XI.Board.Garden.Values.Where(
-                    p => p.IsAlive && p.Team == player.OppTeam && p.Pets[element] != 0)
-                    .Select(p => p.Uid)) + ")";
-            else if (prev.IndexOf(',') < 0)
+
+            List<ushort> mons = XI.Board.Garden.Values.Where(p => p.IsAlive && p.Team == player.OppTeam
+                && p.Pets[element] != 0).Select(p => p.Pets[element]).ToList();
+            string input = XI.AsyncInput(player.Uid, "#弃置的,/M1(p" +
+                string.Join("p", mons) + ")", "JN40102", "0");
+            if (!input.StartsWith("/") && input != VI.CinSentinel)
             {
-                ushort who = ushort.Parse(prev);
-                return "#弃置的,/M1(p" + XI.Board.Garden[who].Pets[element] + ")";
+                ushort pet = ushort.Parse(input);
+                ushort who = XI.Board.Garden.Values.Where(p => p.Pets[element] == pet).Single().Uid;
+                TargetPlayer(player.Uid, who);
+                XI.RaiseGMessage("G0HL," + who + "," + pet);
+                XI.RaiseGMessage("G0ON," + who + ",M,1," + pet);
             }
-            else
-                return "";
         }
         #endregion X3W01 - Nan'gongHuang
         #region X3W02 - WenHui

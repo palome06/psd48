@@ -73,6 +73,7 @@ namespace PSD.ClientAo.OI
         internal void ShowTableMonster(List<Ruban> hi) { ShowTable(hi, AD.InsSelectedMon, AD.DelSelectedMon); }
         internal void ShowTableRune(List<Ruban> hi) { ShowTable(hi, AD.InsSelectedRune, AD.DelSelectedRune); }
         internal void ShowTableEscue(List<Ruban> hi) { ShowTable(hi, AD.InsSelectedEscue, AD.DelSelectedEscue); }
+        internal void ShowTableExsp(List<Ruban> hi) { ShowTable(hi, AD.InsSelectedExsp, AD.DelSelectedExsp); }
 
         private void closeButtonClick(object sender, RoutedEventArgs e)
         {

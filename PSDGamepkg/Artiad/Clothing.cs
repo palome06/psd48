@@ -25,7 +25,8 @@ namespace PSD.PSDGamepkg.Artiad
             set { mCoach = value; }
             get { return mCoach == 0 ? Who : mCoach; }
         }
-        // whether it's assigned directly from others slot for exchange, e.g. JNT0704
+        // slot assign mode:
+        // if empty slot exists, assign it; otherwise, remove the redundants to fullfill it
         public bool SlotAssign { set; get; }
         // Exquipments List
         public ushort[] Cards { set; get; }
@@ -229,26 +230,41 @@ namespace PSD.PSDGamepkg.Artiad
             else return 0;
         }
 
+        public static bool IsEquipable(Player player, Tux.TuxType tuxType)
+        {
+            if (!player.DrTuxDisabled)
+            {
+                if (tuxType == Tux.TuxType.WQ)
+                    return (player.FyMask & 0x1) == 0;
+                else if (tuxType == Tux.TuxType.FJ)
+                    return (player.FyMask & 0x2) == 0;
+                else if (tuxType == Tux.TuxType.XB)
+                    return (player.FyMask & 0x4) == 0;
+            }
+            return false;
+        }
         public static int GetSubstitude(Player player, Tux.TuxType tuxType,
             bool isSlotAssign, Func<string, string> input)
         {
             if (tuxType == Tux.TuxType.WQ)
-                return GetSubstitude(player.Weapon, player.ExEquip, (player.ExMask & 0x1) != 0, isSlotAssign, input);
+                return GetSubstitude(player.Weapon, player.ExEquip, player.ExMask, player.FyMask, 0x1, isSlotAssign, input);
             else if (tuxType == Tux.TuxType.FJ)
-                return GetSubstitude(player.Armor, player.ExEquip, (player.ExMask & 0x2) != 0, isSlotAssign, input);
+                return GetSubstitude(player.Armor, player.ExEquip, player.ExMask, player.FyMask, 0x2, isSlotAssign, input);
             else if (tuxType == Tux.TuxType.XB)
-                return GetSubstitude(player.Trove, player.ExEquip, (player.ExMask & 0x4) != 0, isSlotAssign, input);
+                return GetSubstitude(player.Trove, player.ExEquip, player.ExMask, player.FyMask, 0x4, isSlotAssign, input);
             else return -1;
         }
-        private static int GetSubstitude(ushort baseSlot, ushort exSlot, bool isExMaskSet,
-            bool isSlotAssign, Func<string, string> input)
+        private static int GetSubstitude(ushort baseSlot, ushort exSlot, int exMask, int fyMask,
+            int windowMask, bool isSlotAssign, Func<string, string> input)
         {
-            if (!isExMaskSet)
+            if ((fyMask & windowMask) != 0)
+                return -1;
+            if ((exMask & windowMask) == 0)
                 return baseSlot;
 
             if (isSlotAssign)
             {
-                if (baseSlot != 0 || exSlot != 0)
+                if (baseSlot == 0 || exSlot == 0)
                     return 0;
                 else
                     return -1;

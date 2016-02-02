@@ -51,6 +51,10 @@ namespace PSD.ClientAo
         {
             AD.Dispatcher.BeginInvoke((Action)(() => { AD.StartSelectPT(cands, self); }));
         }
+        public void StartSelectExsp(List<ushort> cands)
+        {
+            AD.Dispatcher.BeginInvoke((Action)(() => { AD.StartSelectExsp(cands); }));
+        }
         public void StartSelectSF(List<ushort> cands)
         {
             AD.Dispatcher.BeginInvoke((Action)(() => { AD.StartSelectSF(cands); }));
@@ -70,6 +74,10 @@ namespace PSD.ClientAo
         public void FinishSelectYJ()
         {
             AD.Dispatcher.BeginInvoke((Action)(() => { AD.FinishSelectYJ(); }));
+        }
+        public void FinishSelectExsp()
+        {
+            AD.Dispatcher.BeginInvoke((Action)(() => { AD.FinishSelectExsp(); }));
         }
     }
 }

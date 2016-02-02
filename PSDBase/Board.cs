@@ -265,17 +265,6 @@ namespace PSD.Base
             EscueBanned = new HashSet<string>();
             Silence = new HashSet<string>();
         }
-        // Create a lumberjack of monster/NPC, act as normal humans
-        public static Player Lumberjack(Card.NMB nmb, ushort orgCode, int team)
-        {
-            return new Player(nmb.Name, 0, (ushort)(orgCode + 1000), false)
-            {
-                STRb = nmb.STR,
-                DEXb = nmb.AGL,
-                IsAlive = false,
-                Team = team
-            };
-        }
 
         private Player mRounder, mHinder, mSupporter;
         private Player mHorn;

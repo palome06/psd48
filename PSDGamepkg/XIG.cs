@@ -647,16 +647,17 @@ namespace PSD.PSDGamepkg
                 {
                     if (args[1] == "0")
                     {
-                        ushort nofp = ushort.Parse(args[2]);
+                        string pile = args[2];
+                        ushort nofp = ushort.Parse(args[3]);
                         if (nofp != 0)
                         {
-                            ushort[] invs = Algo.TakeRange(args, 3, 3 + nofp).Select(p => ushort.Parse(p)).ToArray();
-                            WI.Send("E0QU,0," + string.Join(",", Algo.TakeRange(args, 3 + nofp, args.Length)), invs);
-                            WI.Send("E0QU,1," + (args.Length - 3 - nofp), ExceptStaff(invs));
-                            WI.Live("E0QU,1," + (args.Length - 3 - nofp));
+                            ushort[] invs = Algo.TakeRange(args, 4, 4 + nofp).Select(p => ushort.Parse(p)).ToArray();
+                            WI.Send("E0QU,0," + pile + "," + string.Join(",", Algo.TakeRange(args, 4 + nofp, args.Length)), invs);
+                            WI.Send("E0QU,1," + pile + "," + (args.Length - 4 - nofp), ExceptStaff(invs));
+                            WI.Live("E0QU,1," + pile + "," + (args.Length - 4 - nofp));
                         }
                         else
-                            WI.BCast("E0QU,0," + string.Join(",", Algo.TakeRange(args, 3, args.Length)));
+                            WI.BCast("E0QU,0," + pile + "," + string.Join(",", Algo.TakeRange(args, 4, args.Length)));
                     }
                     else if (args[1] == "1")
                         WI.BCast("E0QU,2");
@@ -1645,89 +1646,154 @@ namespace PSD.PSDGamepkg
                     if (Artiad.ClothingHelper.IsStandard(cmd))
                     {
                         Artiad.EquipStandard eis = Artiad.EquipStandard.Parse(cmd);
+                        Player player = Board.Garden[eis.Who];
+                        if (eis.SlotAssign)
+                        {
+                            IDictionary<Tux.TuxType, List<ushort>> adict = new Dictionary<Tux.TuxType, List<ushort>>();
+                            foreach (ushort card in eis.Cards)
+                            {
+                                Tux tux = LibTuple.TL.DecodeTux(card);
+                                Algo.AddToMultiMap(adict, tux.Type, card);
+                            }
+                            List<ushort> eisRemoves = new List<ushort>();
+                            foreach (var pair in adict)
+                            {
+                                int cap = player.GetSlotCapacity(pair.Key);
+                                int cur = player.GetCurrentEquipCount(pair.Key);
+                                int nin = pair.Value.Count;
+                                // Don't ask for substitude now
+                                if (cur == cap)
+                                {
+                                    pair.Value.ForEach((card) => 
+                                    {
+                                        if (Board.Garden[eis.Source].HasCard(card))
+                                            RaiseGMessage("G0QZ," + eis.Source + "," + card);
+                                        else
+                                        {
+                                            Board.PendingTux.Remove(eis.Source + ",G0ZB," + card);
+                                            RaiseGMessage("G0ON,0,C,1," + card);
+                                        }
+                                        eisRemoves.Add(card);
+                                    });
+                                }
+                                else if (nin > cap - cur)
+                                {
+                                    string askSel = AsyncInput(eis.Coach, "#保留装备的,C" + (cap - cur) + "(p"
+                                        + string.Join("p", pair.Value), "G0ZB", "0");
+                                    ushort[] keeps = askSel.Split(',').Select(p => ushort.Parse(p)).ToArray();
+                                    pair.Value.Except(keeps).ToList().ForEach((card) =>
+                                    {
+                                        if (Board.Garden[eis.Source].HasCard(card))
+                                            RaiseGMessage("G0QZ," + eis.Source + "," + card);
+                                        else
+                                        {
+                                            Board.PendingTux.Remove(eis.Source + ",G0ZB," + card);
+                                            RaiseGMessage("G0ON,0,C,1," + card);
+                                        }
+                                        eisRemoves.Add(card);
+                                    });
+                                }
+                            }
+                            eis.Cards = eis.Cards.Except(eisRemoves).ToArray();
+                        }
                         foreach (ushort card in eis.Cards)
                         {
                             Tux tux = LibTuple.TL.DecodeTux(card);
-                            if (!tux.IsTuxEqiup() || (eis.Source != 0 && !Board.Garden[eis.Source].HasCard(card)))
+                            if (!tux.IsTuxEqiup())
                                 continue;
+                            if (eis.Source != 0 && !Board.Garden[eis.Source].HasCard(card) &&
+                                 !Board.PendingTux.Contains(eis.Source + ",G0ZB," + card)) { continue; }
                             TuxEqiup te = tux as TuxEqiup;
-                            if (eis.Source != 0)
-                                RaiseGMessage("G0OT," + eis.Source + ",1," + card);
-                            Player player = Board.Garden[eis.Who];
-                            Artiad.ClothingHelper.SlotType slot = Artiad.ClothingHelper.SlotType.NL;
+                            // Put it back here, thus not trigger G0OT
+                            if (Artiad.ClothingHelper.IsEquipable(player, te.Type))
+                            {
+                                if (eis.Source != 0)
+                                {
+                                    if (Board.Garden[eis.Source].HasCard(card))
+                                        RaiseGMessage("G0OT," + eis.Source + ",1," + card);
+                                    else
+                                        Board.PendingTux.Remove(eis.Source + ",G0ZB," + card);
+                                }
+                                Artiad.ClothingHelper.SlotType slot = Artiad.ClothingHelper.SlotType.NL;
 
-                            int replacer = Artiad.ClothingHelper.GetSubstitude(player, te.Type,
-                                eis.SlotAssign, p => AsyncInput(eis.Coach, p, cmd, "0"));
-                            if (replacer == 0)
-                            {
-                                if (te.Type == Tux.TuxType.WQ && player.Weapon == 0)
+                                int replacer = Artiad.ClothingHelper.GetSubstitude(player, te.Type,
+                                    eis.SlotAssign, p => AsyncInput(eis.Coach, p, cmd, "1"));
+                                if (replacer == 0)
                                 {
-                                    player.Weapon = card;
-                                    slot = Artiad.ClothingHelper.SlotType.WQ;
+                                    if (te.Type == Tux.TuxType.WQ && player.Weapon == 0)
+                                    {
+                                        player.Weapon = card;
+                                        slot = Artiad.ClothingHelper.SlotType.WQ;
+                                    }
+                                    else if (te.Type == Tux.TuxType.FJ && player.Armor == 0)
+                                    {
+                                        player.Armor = card;
+                                        slot = Artiad.ClothingHelper.SlotType.FJ;
+                                    }
+                                    else if (te.Type == Tux.TuxType.XB && player.Trove == 0)
+                                    {
+                                        player.Trove = card;
+                                        slot = Artiad.ClothingHelper.SlotType.XB;
+                                    }
+                                    else if (player.ExEquip == 0)
+                                    {
+                                        player.ExEquip = card;
+                                        slot = Artiad.ClothingHelper.SlotType.EE;
+                                    }
                                 }
-                                else if (te.Type == Tux.TuxType.FJ && player.Armor == 0)
+                                else if (replacer > 0)
                                 {
-                                    player.Armor = card;
-                                    slot = Artiad.ClothingHelper.SlotType.FJ;
+                                    if (player.Weapon == replacer)
+                                    {
+                                        RaiseGMessage("G0QZ," + eis.Who + "," + replacer);
+                                        player.Weapon = card;
+                                        slot = Artiad.ClothingHelper.SlotType.WQ;
+                                    }
+                                    else if (player.Armor == replacer)
+                                    {
+                                        RaiseGMessage("G0QZ," + eis.Who + "," + replacer);
+                                        player.Armor = card;
+                                        slot = Artiad.ClothingHelper.SlotType.FJ;
+                                    }
+                                    else if (player.Trove == replacer)
+                                    {
+                                        RaiseGMessage("G0QZ," + eis.Who + "," + replacer);
+                                        player.Trove = card;
+                                        slot = Artiad.ClothingHelper.SlotType.XB;
+                                    }
+                                    else if (player.ExEquip == replacer)
+                                    {
+                                        RaiseGMessage("G0QZ," + eis.Who + "," + replacer);
+                                        player.ExEquip = card;
+                                        slot = Artiad.ClothingHelper.SlotType.EE;
+                                    }
                                 }
-                                else if (te.Type == Tux.TuxType.XB && player.Trove == 0)
+                                if (slot != Artiad.ClothingHelper.SlotType.NL)
                                 {
-                                    player.Trove = card;
-                                    slot = Artiad.ClothingHelper.SlotType.XB;
-                                }
-                                else if (player.ExEquip == 0)
-                                {
-                                    player.ExEquip = card;
-                                    slot = Artiad.ClothingHelper.SlotType.EE;
-                                }
-                            }
-                            else if (replacer > 0)
-                            {
-                                if (player.Weapon == replacer)
-                                {
-                                    RaiseGMessage("G0QZ," + eis.Who + "," + replacer);
-                                    player.Weapon = card;
-                                    slot = Artiad.ClothingHelper.SlotType.WQ;
-                                }
-                                else if (player.Armor == replacer)
-                                {
-                                    RaiseGMessage("G0QZ," + eis.Who + "," + replacer);
-                                    player.Armor = card;
-                                    slot = Artiad.ClothingHelper.SlotType.FJ;
-                                }
-                                else if (player.Trove == replacer)
-                                {
-                                    RaiseGMessage("G0QZ," + eis.Who + "," + replacer);
-                                    player.Trove = card;
-                                    slot = Artiad.ClothingHelper.SlotType.XB;
-                                }
-                                else if (player.ExEquip == replacer)
-                                {
-                                    RaiseGMessage("G0QZ," + eis.Who + "," + replacer);
-                                    player.ExEquip = card;
-                                    slot = Artiad.ClothingHelper.SlotType.EE;
-                                }
-                            }
-                            if (slot != Artiad.ClothingHelper.SlotType.NL)
-                            {
-                                new Artiad.EquipSemaphore()
-                                {
-                                    Who = eis.Who,
-                                    Source = eis.Source,
-                                    Slot = slot,
-                                    SingleCard = card
-                                }.Telegraph(WI.BCast);
+                                    new Artiad.EquipSemaphore()
+                                    {
+                                        Who = eis.Who,
+                                        Source = eis.Source,
+                                        Slot = slot,
+                                        SingleCard = card
+                                    }.Telegraph(WI.BCast);
 
-                                RaiseGMessage("G1IZ," + eis.Who + "," + card);
-                                if (te.Type == Tux.TuxType.WQ && !player.WeaponDisabled)
-                                    te.InsAction(player);
-                                else if (te.Type == Tux.TuxType.FJ && !player.ArmorDisabled)
-                                    te.InsAction(player);
-                                else if (te.Type == Tux.TuxType.XB && !player.LuggageDisabled)
-                                    te.InsAction(player);   
+                                    RaiseGMessage("G1IZ," + eis.Who + "," + card);
+                                    if (te.Type == Tux.TuxType.WQ && !player.WeaponDisabled)
+                                        te.InsAction(player);
+                                    else if (te.Type == Tux.TuxType.FJ && !player.ArmorDisabled)
+                                        te.InsAction(player);
+                                    else if (te.Type == Tux.TuxType.XB && !player.LuggageDisabled)
+                                        te.InsAction(player);   
+                                }
                             }
                             else if (eis.Source != eis.Who)
-                                RaiseGMessage("G0ON," + eis.Source + ",C,1," + card);
+                            {
+                                if (eis.Source != 0)
+                                    RaiseGMessage("G0QZ," + eis.Source + "," + card);
+                                else
+                                    RaiseGMessage("G0ON,0,C,1," + card);
+                            }
                             // else, leave it in eis.Who's hand
                         }
                     }
@@ -3353,14 +3419,28 @@ namespace PSD.PSDGamepkg
                                 py = null;
                             else if (to > 0 && to < 1000)
                                 py = Board.Garden[to];
-                            else
+                            else if (to < 2000) // Monster
                             {
                                 ushort mut = (ushort)(to - 1000);
                                 NMB nmb = NMBLib.Decode(mut, LibTuple.ML, LibTuple.NL);
                                 if (nmb != null)
                                 {
                                     Player owner = Board.Garden.Values.Single(p => p.Pets.Contains(mut));
-                                    py = Board.Lumberjack(nmb, mut, owner.Team);
+                                    py = Artiad.ContentRule.Lumberjack(nmb, mut, owner.Team);
+                                }
+                                else
+                                    py = null;
+                            }
+                            else if (to < 3000) { py = null; } // Npc
+                            else // Exsp
+                            {
+                                ushort esut = (ushort)(to - 3000);
+                                string escode = "I" + esut;
+                                Exsp exsp = LibTuple.ESL.Encode(escode);
+                                if (exsp != null)
+                                {
+                                    Player owner = Board.Garden.Values.Single(p => p.TokenExcl.Contains(escode));
+                                    py = Artiad.ContentRule.RobinHood(exsp.Name, esut, owner.Team);
                                 }
                                 else
                                     py = null;

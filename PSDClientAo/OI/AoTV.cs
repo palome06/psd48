@@ -71,6 +71,8 @@ namespace PSD.ClientAo.OI
                     tv.ShowTableRune(vals);
                 else if (prefix == "YJ")
                     tv.ShowTableEscue(vals);
+                else if (prefix == "I")
+                    tv.ShowTableExsp(vals);
                 //else if (prefix == "TX") { }
                 else
                     tv.ShowTableCard(vals);

@@ -114,6 +114,18 @@ namespace PSD.PSDGamepkg.Artiad
             else
                 return false;
         }
+        // convert nmb to a virtual battle attender
+        public static Player Lumberjack(NMB nmb, ushort orgCode, int team)
+        {
+            return Player.Warriors(nmb.Name, orgCode + 1000, team, nmb.STR, nmb.AGL);
+        }
+        // convert exsp to a virtual battle attender
+        public static Player RobinHood(string exspName, ushort exspUt, int team)
+        {
+            int str = 0, dex = 0;
+            if (exspUt == 25) { str = 2; dex = 4; }
+            return Player.Warriors(exspName, exspUt + 3000, team, str, dex);
+        }
 
         #endregion Sparse Base Rules
     }

@@ -420,24 +420,29 @@ namespace PSD.ClientAo.VW
                 p => ushort.Parse(p.Substring("PT".Length))).ToList();
             List<ushort> tars = uss.Where(p => p.StartsWith("T")).Select(
                 p => ushort.Parse(p.Substring("T".Length))).ToList();
+            List<ushort> exsps = uss.Where(p => p.StartsWith("I")).Select(
+                p => ushort.Parse(p.Substring("I".Length))).ToList();
             if (tars.Count > 0)
                 AD.Mix.StartSelectTarget(tars, 1, 1);
             if (pets.Count > 0)
                 AD.Mix.StartSelectPT(pets, false);
+            if (exsps.Count > 0)
+                AD.Mix.StartSelectExsp(exsps);
             if (cancellable)
                 AD.yfJoy.CEE.CancelValid = true;
             string result = Cin(uid);
-            if (result != CinSentinel)
+            //if (result != CinSentinel)
+            //{
+            if (!keep)
             {
-                if (!keep)
-                {
-                    AD.Mix.FinishSelectTarget();
-                    AD.Mix.FinishSelectPT();
-                }
-                else
-                    AD.Mix.LockSelectTarget();
-                HideTip();
+                AD.Mix.FinishSelectTarget();
+                AD.Mix.FinishSelectPT();
+                AD.Mix.FinishSelectExsp();
             }
+            else
+                AD.Mix.LockSelectTarget();
+            HideTip();
+            //}
             return result;
         }
 

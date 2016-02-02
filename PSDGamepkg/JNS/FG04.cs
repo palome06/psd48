@@ -687,9 +687,7 @@ namespace PSD.PSDGamepkg.JNS
         {
             if (consumeType == 0)
             {
-                ushort ut = (ushort)(fuse[1] - '0');
-                Player rp = XI.Board.Garden[ut];
-                if (rp.Team == player.Team)
+                if (XI.Board.Rounder.Team == player.Team)
                     XI.Board.PosSupporters.Add("PT19");
                 else
                     XI.Board.PosHinders.Add("PT19");
@@ -1899,7 +1897,7 @@ namespace PSD.PSDGamepkg.JNS
                 if (XI.Board.Supporter.IsValidPlayer())
                     invs.Add(XI.Board.Supporter);
                 string opcs = XI.AsyncInput(h.Uid, "#交换手牌的,T1(p" +
-                    string.Join("p", invs.Select(p => p.Uid)) + ")", "GTT4Win", "0");
+                    string.Join("p", invs.Select(p => p.Uid)) + ")", "GTT4WinEff", "0");
                 ushort opc = ushort.Parse(opcs);
                 Player o = XI.Board.Garden[opc];
 
@@ -2005,6 +2003,81 @@ namespace PSD.PSDGamepkg.JNS
                     return "/";
             }
             else return "";
+        }
+        public void GIT3IncrAction(Player player)
+        {
+            Base.Card.Monster mon = XI.LibTuple.ML.Decode(XI.LibTuple.ML.Encode("GIT3"));
+            if (mon != null)
+            {
+                if (mon.ROMUshort == 0)
+                {
+                    string hint = "#请选择「魔骨」宠物效果。##战力+1##命中+1,Y2";
+                    string option = XI.AsyncInput(player.Uid, hint, "GIT3IncrAction", "0");
+                    if (option == "1")
+                        mon.ROMUshort = 1;
+                    else if (option == "2")
+                        mon.ROMUshort = 2;
+                }
+                if (mon.ROMUshort == 1)
+                    XI.RaiseGMessage("G0IA," + player.Uid + ",0,1");
+                else if (mon.ROMUshort == 2)
+                    XI.RaiseGMessage("G0IX," + player.Uid + ",0,1");
+            }
+        }
+        public void GIT3DecrAction(Player player)
+        {
+            Base.Card.Monster mon = XI.LibTuple.ML.Decode(XI.LibTuple.ML.Encode("GIT3"));
+            if (mon != null)
+            {
+                if (mon.ROMUshort == 1)
+                    XI.RaiseGMessage("G0OA," + player.Uid + ",0,1");
+                else if (mon.ROMUshort == 2)
+                    XI.RaiseGMessage("G0OX," + player.Uid + ",0,1");
+            }
+        }
+        public void GIT3Debut()
+        {
+            Player rd = XI.Board.Rounder, hd = XI.Board.Hinder;
+            if (hd.IsValidPlayer())
+            {
+                List<ushort> rl = rd.ListOutAllBaseEquip();
+                List<ushort> hl = hd.ListOutAllBaseEquip();
+                if (rl.Count > 0)
+                {
+                    XI.RaiseGMessage("G0OT," + rd.Uid + "," + rl.Count + "," + string.Join(",", rl));
+                    rl.ForEach(p => XI.Board.PendingTux.Enqueue(rd.Uid + ",G0ZB," + p));
+                }
+                if (hl.Count > 0)
+                {
+                    XI.RaiseGMessage("G0OT," + hd.Uid + "," + hl.Count + "," + string.Join(",", hl));
+                    hl.ForEach(p => XI.Board.PendingTux.Enqueue(hd.Uid + ",G0ZB," + p));
+                    XI.RaiseGMessage(new Artiad.EquipStandard()
+                    {
+                        Who = rd.Uid, Source = hd.Uid, SlotAssign = true, Cards = hl.ToArray()
+                    }.ToMessage());
+                }
+                if (rl.Count > 0)
+                {
+                    XI.RaiseGMessage(new Artiad.EquipStandard()
+                    {
+                        Who = hd.Uid, Source = rd.Uid, SlotAssign = true, Cards = rl.ToArray()
+                    }.ToMessage());
+                }
+            }
+        }
+        public void GIT3WinEff()
+        {
+            List<Player> invs = XI.Board.Garden.Values.Where(p => p.IsAlive &&
+                p.Team == XI.Board.Rounder.OppTeam && p.GetBaseEquipCount() > 0).ToList();
+            if (invs.Count > 0)
+                Harm("GIT3", invs, invs.Select(p => p.GetBaseEquipCount()).ToList());
+        }
+        public void GIT3LoseEff()
+        {
+            List<Player> invs = XI.Board.Garden.Values.Where(p => p.IsAlive &&
+                p.Team == XI.Board.Rounder.Team && p.GetBaseEquipCount() > 0).ToList();
+            if (invs.Count > 0)
+                Harm("GIT3", invs, invs.Select(p => p.GetBaseEquipCount()).ToList());
         }
         public void GIT4IncrAction(Player player)
         {
@@ -2979,11 +3052,43 @@ namespace PSD.PSDGamepkg.JNS
         {
             if (consumeType == 1)
                 Harm("GHH2", XI.Board.Garden.Values.Where(p => p.IsAlive && p.Team == player.OppTeam), 2);
+            else if (consumeType == 2)
+            {
+                Monster ghh2 = XI.LibTuple.ML.Decode(XI.LibTuple.ML.Encode("GHH2"));
+                if (type == 0) // G09P,95;Hack the round result?
+                {
+                    // if (args[1] == "0")
+                    // {
+                    //     Board.HinderSucc = Board.Hinder.DEXi > 0 ||
+                    //         (Board.Hinder.DEXi == 0 && (Board.Hinder.DEX >= Board.Battler.AGL));
+                    //     Board.SupportSucc = Board.Supporter.DEXi > 0 ||
+                    //         (Board.Supporter.DEXi == 0 && (Board.Supporter.DEX >= Board.Battler.AGL));
+                    //     WI.BCast("E09P,0," + Board.Supporter.Uid + (Board.SupportSucc ? ",1," : ",0,")
+                    //             + Board.Hinder.Uid + (Board.HinderSucc ? ",1" : ",0"));
+                    // }
+                    // if (args[1] == "0" || args[1] == "1")
+                    // {
+                    //     int rpool = RPool;
+                    //     if (XI.Board.Rounder.STR)
+                    //     int rpool = Math.Max(Rounder.STR + RPool + (SupportSucc ? Supporter.STR : 0), 0)
+                    //     WI.BCast("E09P,1," + Board.Rounder.Team + "," + Board.CalculateRPool()
+                    //             + "," + Board.Rounder.OppTeam + "," + Board.CalculateOPool());
+                    // }
+                }
+                else if (type == 1) // G0CC,110
+                {
+                    string[] g0cc = Algo.Substring(fuse, 0, fuse.IndexOf(';')).Split(',');
+                    ushort who = ushort.Parse(g0cc[1]);
+                    // return !ghh2.RAMUtList.Contains(who);
+                }
+            }
         }
         public bool GHH2ConsumeValid(Player player, int consumeType, int type, string fuse)
         {
             if (consumeType == 1)
                 return Artiad.Harm.Parse(fuse).Any(p => p.Who == player.Uid && p.N > 0 && p.Element == FiveElement.AGNI);
+            else if (consumeType == 2)
+                return true;
             return false;
         }
         public void GLH2WinEff()

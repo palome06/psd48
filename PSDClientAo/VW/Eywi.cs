@@ -624,6 +624,15 @@ namespace PSD.ClientAo.VW
                             line = "E0ZB," + e0zb[1] + "," + from + "," + slotMap[where] + "," + e0zb[5];
                     }
                 }
+                else if (line.StartsWith("E0QU"))
+                {
+                    string[] e0qu = line.Split(',');
+                    if (e0qu[1] == "0")
+                    {
+                        e0qu[1] = "0,C";
+                        line = string.Join(",", e0qu);
+                    }
+                }
             }
         }
         #endregion Version

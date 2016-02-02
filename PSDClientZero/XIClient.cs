@@ -931,11 +931,11 @@ namespace PSD.ClientZero
                             {
                                 r1 = r2 = argv.Length;
                                 input = VI.Cin(Uid, "请以{0}人{1}，可选{2}{3}.", argv.Length, prevComment,
-                                    zd.PlayerWithMonster(uss), cancel);
+                                    zd.Warriors(uss), cancel);
                             }
                             else
                                 input = VI.Cin(Uid, "请以{0}至{1}人{2}，可选{3}{4}.", r1, r2,
-                                    prevComment, zd.PlayerWithMonster(uss), cancel);
+                                    prevComment, zd.Warriors(uss), cancel);
                             inputValid &= input.Split(',').Intersect(judgeArgv).Any();
                         }
                         else
@@ -952,7 +952,7 @@ namespace PSD.ClientZero
                             List<string> uss = argv.Select(p => p.StartsWith("T") ? p.Substring("T".Length) : ("!" + p)).ToList();
                             if (argv.Length < r)
                                 r = argv.Length;
-                            input = VI.Cin(Uid, "请以{0}人{1}，可选{2}{3}.", r, prevComment, zd.PlayerWithMonster(uss), cancel);
+                            input = VI.Cin(Uid, "请以{0}人{1}，可选{2}{3}.", r, prevComment, zd.Warriors(uss), cancel);
                             inputValid &= input.Split(',').Intersect(judgeArgv).Any();
                         }
                         else
@@ -1424,7 +1424,7 @@ namespace PSD.ClientZero
                     {
                         ushort who = ushort.Parse(args[idx]);
                         int count = int.Parse(args[idx + 1]);
-                        VI.Cout(Uid, "{0}对{1}发动了倾慕.", zd.PlayerWithMonster(
+                        VI.Cout(Uid, "{0}对{1}发动了倾慕.", zd.Warriors(
                             Algo.TakeRange(args, idx + 2, idx + 2 + count)), zd.Player(who));
                         idx += (2 + count);
                         Z0D[who].IsLoved = true;
@@ -1548,8 +1548,15 @@ namespace PSD.ClientZero
                 case "E0QU":
                     if (args[1].Equals("0"))
                     {
-                        var ravs = Algo.TakeRange(args, 2, args.Length).Select(p => ushort.Parse(p));
-                        VI.Cout(Uid, "{0}被移离观看区.", zd.Tux(ravs));
+                        ushort[] ravs = Algo.TakeRange(args, 3, args.Length)
+                            .Select(p => ushort.Parse(p)).ToArray();
+                        string msgBase = "{0}被移离观看区.";
+                        if (args[2] == "C")
+                            VI.Cout(Uid, msgBase, zd.Tux(ravs));
+                        else if (args[2] == "M")
+                            VI.Cout(Uid, msgBase, zd.Monster(ravs));
+                        else if (args[2] == "E")
+                            VI.Cout(Uid, msgBase, zd.Eve(ravs));
                     }
                     else if (args[1].Equals("1"))
                         VI.Cout(Uid, "{0}张牌被移离观看区.", args[2]);
@@ -1929,7 +1936,7 @@ namespace PSD.ClientZero
                         bool hy = args[5].Equals("1");
                         string comp1 = (s != 0) ? "{0}支援" + (sy ? "成功" : "失败") : "无支援";
                         string comp2 = (h != 0) ? "{1}妨碍" + (hy ? "成功" : "失败") : "无妨碍";
-                        VI.Cout(Uid, comp1 + "，" + comp2 + "。", zd.Player(s), zd.Player(h));
+                        VI.Cout(Uid, comp1 + "，" + comp2 + "。", zd.Warrior(s), zd.Warrior(h));
                     }
                     else if (args[1] == "1")
                     {
@@ -2490,34 +2497,28 @@ namespace PSD.ClientZero
                             char position = args[i][0];
                             ushort old = ushort.Parse(args[i + 1]);
                             ushort s = ushort.Parse(args[i + 2]);
-                            string name = (s == 0 ? "无人" :
-                                (s < 1000 ? zd.Player(s) : zd.Monster((ushort)(s - 1000))));
                             if (old != 0)
                                 leavers.Add(old);
                             if (s != 0) {
                                 joiners.Add(s);
                                 if (position == 'T') {
-                                    msgs.Add(string.Format("{0}触发战斗", name));
+                                    msgs.Add(string.Format("{0}触发战斗", zd.Warrior(s)));
                                     //A0F.Trigger = s;
                                 } else if (position == 'S') {
-                                    msgs.Add(string.Format("{0}支援", name));
+                                    msgs.Add(string.Format("{0}支援", zd.Warrior(s)));
                                     Z0F.Supporter = s;
                                 } else if (position == 'H') {
-                                    msgs.Add(string.Format("{0}妨碍", name));
+                                    msgs.Add(string.Format("{0}妨碍", zd.Warrior(s)));
                                     Z0F.Hinder = s;
                                 } else if (position == 'W') {
-                                    msgs.Add(string.Format("{0}代为触发战斗", name));
+                                    msgs.Add(string.Format("{0}代为触发战斗", zd.Warrior(s)));
                                     //A0F.Horn = s;
                                 }
                             }
                         }
                         leavers.RemoveAll(p => joiners.Contains(p));
                         if (leavers.Count > 0)
-                        {
-                            msgs.AddRange(leavers.Select(p => string.Format("{0}退出战斗", 
-                                (p == 0 ? "无人" : (p < 1000 ? zd.Player(p) :
-                                zd.Monster((ushort)(p - 1000)))))));
-                        }
+                            msgs.AddRange(leavers.Select(p => string.Format("{0}退出战斗", zd.Warrior(p))));
                         if (msgs.Count > 0)
                             VI.Cout(Uid, string.Join(",", msgs) + ".");
                     }
@@ -3002,6 +3003,12 @@ namespace PSD.ClientZero
                                 ushort monCode = Tuple.ML.Encode(advice);
                                 if (monCode > 0)
                                     VI.Cout(Uid, "{0}{1}{2}参与战斗.", zd.Player(from), suggest, zd.Monster(monCode));
+                            }
+                            else if (advice.StartsWith("I"))
+                            {
+                                ushort exspCode = ushort.Parse(advice.Substring("I".Length));
+                                if (exspCode > 0)
+                                    VI.Cout(Uid, "{0}{1}{2}参与战斗.", zd.Player(from), suggest, zd.ExspI(exspCode));
                             }
                             else if (advice.StartsWith("/"))
                                 VI.Cout(Uid, "{0}{1}不打怪.", zd.Player(from), suggest);
