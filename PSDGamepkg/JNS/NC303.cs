@@ -179,8 +179,16 @@ namespace PSD.PSDGamepkg.JNS
             ushort to = ushort.Parse(Algo.Substring(args, idx + 1, jdx));
             TargetPlayer(from, to);
             ushort pet = ushort.Parse(args.Substring(jdx + 1));
-            //XI.RaiseGMessage("G0HL," + from + "," + pet);
-            XI.RaiseGMessage("G0HC,1," + to + "," + from + ",0," + pet);
+            XI.RaiseGMessage(new Artiad.HarvestPet()
+            {
+                Farmer = to,
+                Farmland = from,
+                SinglePet = pet,
+                Reposit = true,
+                Plot = true,
+                Trophy = false,
+                TreatyAct = Artiad.HarvestPet.Treaty.KOKAN
+            }.ToMessage());
         }
         public string NJ07Input(Player player, string fuse, string prev)
         {

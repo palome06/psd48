@@ -118,7 +118,7 @@ namespace PSD.PSDGamepkg
             ////Board.MonPiles.PushBack(24);
             ////Board.MonPiles.PushBack(23);
             ////Board.MonPiles.PushBack(22);
-            Board.MonPiles.PushBack(63);
+            Board.MonPiles.PushBack(47);
             //Board.MonPiles.PushBack(1001);
             //Board.MonPiles.PushBack(32);
             //Board.MonPiles.PushBack(1103);
@@ -226,22 +226,22 @@ namespace PSD.PSDGamepkg
             //RaiseGMessage("G0HQ,2,3,0,20,26");
             //RaiseGMessage("G0HQ,2,1,0,0,5,100,81,3");
             //Board.RestNPCPiles.PushBack(1057);
-            RaiseGMessage("G0HQ,2,1,0,0,49,60");
+            //RaiseGMessage("G0HQ,2,1,0,0,49,60");
             //RaiseGMessage("G0HQ,2,1,0,0,50,110,71,2,96");
             //RaiseGMessage("G0HQ,2,1,0,0,110,100");
-            RaiseGMessage(new Artiad.EquipStandard()
-            {
-                Who = 2,
-                FromSky = true,
-                SlotAssign = true,
-                Cards = new ushort[] { 50, 51, 111, 110 }
-            }.ToMessage());
-            RaiseGMessage(new Artiad.EquipStandard()
-            {
-                Who = 1,
-                FromSky = true,
-                Cards = new ushort[] { 48 }
-            }.ToMessage());
+            // RaiseGMessage(new Artiad.EquipStandard()
+            // {
+            //     Who = 2,
+            //     FromSky = true,
+            //     SlotAssign = true,
+            //     Cards = new ushort[] { 50, 51, 111, 110 }
+            // }.ToMessage());
+            // RaiseGMessage(new Artiad.EquipStandard()
+            // {
+            //     Who = 1,
+            //     FromSky = true,
+            //     Cards = new ushort[] { 48 }
+            // }.ToMessage());
             //RaiseGMessage("G0HQ,2,3,0,0,84");
             //RaiseGMessage("G0HQ,2,1,0,0,49,107");
             //RaiseGMessage("G0HQ,2,1,0,0,123,101");
@@ -346,20 +346,20 @@ namespace PSD.PSDGamepkg
             //Board.Garden[4].Escue.Add(1003);
             //RaiseGMessage("G2IL,1,1001,3,1002,4,1003");
             //RaiseGMessage("G0ZB,4,0,52");
-            // RaiseGMessage("G0HD,1,5,0,5");
-            // RaiseGMessage("G0HD,1,5,0,17");
-            //RaiseGMessage("G0HD,1,2,0,19");
+            RaiseGMessage("G0HD,1,5,0,5");
+            RaiseGMessage("G0HD,1,5,0,17");
+            RaiseGMessage("G0HD,1,2,0,19");
             // RaiseGMessage("G0HD,1,1,0,30");
             // RaiseGMessage("G0HD,1,5,0,36");
-            //RaiseGMessage("G0HD,1,6,0,16");
-            //RaiseGMessage("G0HD,1,2,0,2");
-            //RaiseGMessage("G0HD,1,2,0,31");
+            RaiseGMessage("G0HD,1,6,0,16");
+            RaiseGMessage("G0HD,1,2,0,2");
+            //RaiseGMessage("G0HD,1,2,0,33");
             // RaiseGMessage("G0HD,1,3,0,7");
             //RaiseGMessage("G0HD,1,3,0,14");
-            // RaiseGMessage("G0HD,1,5,0,22");
+            RaiseGMessage("G0HD,1,5,0,22");
             //RaiseGMessage("G0HD,1,4,0,19");
             //RaiseGMessage("G0HD,1,6,0,9");
-            // RaiseGMessage("G0HD,1,5,0,15");
+            RaiseGMessage("G0HD,1,1,0,48");
             //RaiseGMessage("G0HD,1,5,0,68");
             //RaiseGMessage("G0HD,1,3,0,70");
             //RaiseGMessage("G0HD,1,6,0,19");

@@ -1971,23 +1971,8 @@ namespace PSD.ClientZero
                         VI.Cout(Uid, "全体恢复使用战牌权.");
                     break;
                 case "E0HC":
-                    {
-                        int type = int.Parse(args[1]);
-                        ushort who = ushort.Parse(args[2]);
-                        if (type == 0)
-                        {
-                            //ushort from = ushort.Parse(args[3]);
-                            var cards = Algo.TakeRange(args, 4, args.Length).Select(p => ushort.Parse(p));
-                            VI.Cout(Uid, "{0}可以获得宠物{1}.", zd.Player(who), zd.Monster(cards));
-                        }
-                        else if (type == 1)
-                        {
-                            //ushort from = ushort.Parse(args[3]);
-                            //ushort kokan = ushort.Parse(args[4]);
-                            var cards = Algo.TakeRange(args, 5, args.Length).Select(p => ushort.Parse(p));
-                            VI.Cout(Uid, "{0}可获得宠物{1}.", zd.Player(who), zd.Monster(cards));
-                        }
-                    }
+                    VI.Cout(Uid, "{0}可获得宠物{1}.", zd.Player(ushort.Parse(args[1])), zd.Monster(
+                        Algo.TakeRange(args, 2, args.Length).Select(p => ushort.Parse(p))));
                     break;
                 case "E0HH":
                     {
@@ -2038,14 +2023,14 @@ namespace PSD.ClientZero
                     {
                         ushort who = ushort.Parse(args[1]);
                         ushort from = ushort.Parse(args[2]);
-                        ushort pet = ushort.Parse(args[3]);
+                        List<ushort> pets = Algo.TakeRange(args, 3, args.Length)
+                            .Select(p => ushort.Parse(p)).ToList();
                         if (from == 0)
-                            VI.Cout(Uid, "{0}获得了宠物{1}.", zd.Player(who), zd.Monster(pet));
+                            VI.Cout(Uid, "{0}获得了宠物{1}.", zd.Player(who), zd.Monster(pets));
                         else
                             VI.Cout(Uid, "{0}从{1}获得了宠物{2}.", zd.Player(who),
-                                zd.Player(from), zd.Monster(pet));
-                        if (!Z0D[who].Pets.Contains(pet))
-                            Z0D[who].Pets.Add(pet);
+                                zd.Player(from), zd.Monster(pets));
+                        pets.ForEach((p) => { if (!Z0D[who].Pets.Contains(p)) Z0D[who].Pets.Add(p); } );
                     }
                     break;
                 case "E0HL":

@@ -90,6 +90,12 @@ namespace PSD.Base.Utils
             else
                 return new T[0];
         }
+        public static ushort[] TakeArrayWithSize(ushort[] blocks, int start, out int next)
+        {
+            int n = (int)blocks[start];
+            next = n + 1;
+            return TakeRange(blocks, start + 1, start + 1 + n);
+        }
         public static string RepeatString(string @string, int times)
         {
             StringBuilder sb = new StringBuilder();

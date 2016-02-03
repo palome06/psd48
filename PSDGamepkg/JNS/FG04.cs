@@ -3149,16 +3149,19 @@ namespace PSD.PSDGamepkg.JNS
         {
             XI.Board.FightTangled = true;
         }
-        private void GFH1GeneralEffAction(Player decider)
+        private void GFH1GeneralEffAction(Player decider, string prev)
         {
             IDictionary<ushort, List<ushort>> ans = new Dictionary<ushort, List<ushort>>();
-            foreach (Player py in XI.Board.Garden.Values)
+            List<Player> opps = XI.Board.Garden.Values.Where(p => p.Team == decider.OppTeam && p.IsAlive).ToList();
+            List<ushort> allEnemy = opps.SelectMany(p => p.Pets).Where(p => p != 0).ToList();
+            foreach (Player py in XI.Board.Garden.Values.Where(p => p.IsAlive && p.Team == decider.Team))
             {
-                if (py.IsAlive && py.Team == decider.Team)
+                for (int i = 0; i < py.Pets.Length; ++i)
                 {
-                    for (int i = 0; i < py.Pets.Length; ++i)
+                    if (py.Pets[i] != 0)
                     {
-                        if (py.Pets[i] != 0 && XI.Board.Garden.Values.Any(p => p.Team == py.OppTeam && p.IsAlive && p.Pets[i] != 0))
+                        int str = XI.LibTuple.ML.Decode(py.Pets[i]).STR;
+                        if (opps.Any(p => p.Pets[i] != 0) || allEnemy.Any(p => XI.LibTuple.ML.Decode(p).STR == str))
                             Algo.AddToMultiMap(ans, py.Uid, py.Pets[i]);
                     }
                 }
@@ -3168,11 +3171,13 @@ namespace PSD.PSDGamepkg.JNS
             {
                 do
                 {
-                    string opt1 = XI.AsyncInput(decider.Uid, "#我方交换宠物,/T1(p" + string.Join("p", ans.Keys) + ")", "GFH1WinEff", "0");
+                    string opt1 = XI.AsyncInput(decider.Uid, "#我方交换宠物,/T1(p" +
+                        string.Join("p", ans.Keys) + ")", prev, "0");
                     if (opt1 != VI.CinSentinel && !opt1.StartsWith("/"))
                     {
                         mySide = ushort.Parse(opt1);
-                        string opt2 = XI.AsyncInput(decider.Uid, "#我方交换宠物,/M1(p" + string.Join("p", ans[mySide]) + ")", "GFH1WinEff", "1");
+                        string opt2 = XI.AsyncInput(decider.Uid, "#我方交换宠物,/M1(p" +
+                            string.Join("p", ans[mySide]) + ")", prev, "1");
                         if (opt2 != VI.CinSentinel && !opt2.StartsWith("/"))
                             myChange = ushort.Parse(opt2);
                     }
@@ -3184,24 +3189,41 @@ namespace PSD.PSDGamepkg.JNS
             {
                 ushort aySide = 0, ayChange = 0;
                 Monster pet = XI.LibTuple.ML.Decode(myChange);
+                int elemIdx = pet.Element.Elem2Index();
+                IDictionary<ushort, List<ushort>> bns = new Dictionary<ushort, List<ushort>>();
+                foreach (Player py in XI.Board.Garden.Values.Where(p => p.IsAlive && p.Team == decider.OppTeam))
+                {
+                    if (py.Pets[elemIdx] != 0)
+                        Algo.AddToMultiMap(bns, py.Uid, py.Pets[elemIdx]);
+                    foreach (ushort pt in py.Pets)
+                    {
+                        if (pt != 0 && XI.LibTuple.ML.Decode(pt).STR == pet.STR)
+                            Algo.AddToMultiMap(bns, py.Uid, pt);
+                    }
+                }
                 do
                 {
-                    int eidx = pet.Element.Elem2Index();
-                    string opt3 = XI.AsyncInput(decider.Uid, "#交换对方宠物,T1" + FormatPlayers(p => p.IsAlive && p.Team == decider.OppTeam && p.Pets[eidx] != 0), "GFH1WinEff", "2");
+                    string opt3 = XI.AsyncInput(decider.Uid, "#交换对方宠物,T1(p" +
+                        string.Join("p", bns.Keys) + ")", prev, "2");
                     if (opt3 != VI.CinSentinel)
                     {
                         aySide = ushort.Parse(opt3);
-                        string opt4 = XI.AsyncInput(decider.Uid, "#交换对方宠物,/M1(p" + XI.Board.Garden[aySide].Pets[eidx] + ")", "GFH1WinEff", "3");
+                        string opt4 = XI.AsyncInput(decider.Uid, "#交换对方宠物,/M1(p" +
+                            string.Join("p", bns[aySide].Distinct()) + ")", prev, "3");
                         if (opt4 != VI.CinSentinel && !opt4.StartsWith("/"))
                             ayChange = ushort.Parse(opt4);
                     }
                 } while (ayChange == 0);
                 if (aySide != 0 && ayChange != 0)
                 {
+                    VI.Cout(0, "->->SB!!" + mySide + "," + myChange + "," + aySide + "," + ayChange);
                     XI.RaiseGMessage("G0HL," + mySide + "," + myChange);
                     XI.RaiseGMessage("G0HL," + aySide + "," + ayChange);
-                    XI.RaiseGMessage("G0HD,1," + aySide + "," + mySide + "," + myChange);
-                    XI.RaiseGMessage("G0HD,1," + mySide + "," + aySide + "," + ayChange);
+
+                    // XI.RaiseGMessage("G0HD,1," + aySide + "," + mySide + "," + myChange);
+                    // XI.RaiseGMessage("G0HD,1," + mySide + "," + aySide + "," + ayChange);
+                    XI.RaiseGMessage("G0HC,1," + aySide + "," + mySide + ",1," + myChange);
+                    XI.RaiseGMessage("G0HC,1," + mySide + "," + aySide + ",1," + ayChange);
                 }
             }
         }
@@ -3213,11 +3235,11 @@ namespace PSD.PSDGamepkg.JNS
             Monster mon2 = XI.LibTuple.ML.Decode(XI.Board.Monster2);
             if (mon2 != null && mon2.Code == "GFH1")
                 XI.Board.Mon2Catchable = false;
-            GFH1GeneralEffAction(XI.Board.Rounder);
+            GFH1GeneralEffAction(XI.Board.Rounder, "GFH1WinEff");
         }
         public void GFH1LoseEff()
         {
-            GFH1GeneralEffAction(XI.Board.Opponent);
+            GFH1GeneralEffAction(XI.Board.Opponent, "GFH1LoseEff");
         }
         public void GFH2WinEff()
         {
@@ -3260,8 +3282,6 @@ namespace PSD.PSDGamepkg.JNS
                 }
                 else if (type == 1 || type == 2)
                 {
-                    if (player.STR > 0)
-                        XI.RaiseGMessage("G0OA," + player.Uid + ",1," + player.STR);
                     if (player.DEX > 0)
                         XI.RaiseGMessage("G0OX," + player.Uid + ",1," + player.DEX);
                 }
@@ -3273,14 +3293,9 @@ namespace PSD.PSDGamepkg.JNS
             {
                 if (type == 0)
                     return XI.Board.IsAttendWar(player);
-                else if (type == 1)
+                else if (type == 1 || type == 2)
                 {
-                    Monster mon = XI.LibTuple.ML.Decode(XI.Board.Monster1);
-                    return mon != null && mon.Level == Monster.ClLevel.BOSS;
-                }
-                else if (type == 2)
-                {
-                    Monster mon = XI.LibTuple.ML.Decode(XI.Board.Monster2);
+                    Monster mon = XI.LibTuple.ML.Decode(type == 1 ? XI.Board.Monster1 : XI.Board.Monster2);
                     return mon != null && mon.Level == Monster.ClLevel.BOSS;
                 }
             }

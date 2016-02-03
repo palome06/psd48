@@ -442,65 +442,59 @@ namespace PSD.PSDGamepkg
                         RunQuadStage(rstage);
                         rstage = "R" + rounder + "VS"; break;
                     case "VT":
-                        {
-                            Board.InFight = false;
-                            //WI.BCast(rstage + "1,0");
-                            //Board.IsBattleWin = Board.IsRounderBattleWin();
-                            bool mon1zero = false, mon2zero = false;
-                            if (Board.IsBattleWin) // OK, win
-                            {
-                                bool hasMonster2 = Board.Monster2 != 0 && NMBLib.IsMonster(Board.Monster2);
-                                RaiseGMessage("G0HC,0," + Board.Rounder.Uid +
-                                    "," + Board.Mon1From + "," + Board.Monster1);
-                                mon1zero = true;
-                                if (hasMonster2)
-                                {
-                                    RaiseGMessage("G0HC,0," + Board.Rounder.Uid + ",0," + Board.Monster2);
-                                    mon2zero = true;
-                                }
-                            }
-                            //WI.BCast(rstage + "2," + (Board.IsBattleWin ? "0" : "1"));
-                            RunQuadStage(rstage);
-
-                            RecycleMonster(mon1zero, mon2zero);
-                            Board.InFightThrough = false;
-                            RaiseGMessage("G1ZK,1");
-                            RaiseGMessage("G1HK,1");
-                            WI.BCast(rstage + "3");
-                            rstage = "R" + rounder + "Z2"; break;
-                        }
                     case "VS":
                         {
                             Board.InFight = false;
+                            bool skip = rstage.Substring("R#".Length) == "VT";
                             //WI.BCast(rstage + "1,0");
                             //Board.IsBattleWin = Board.IsRounderBattleWin();
                             bool mon1zero = false, mon2zero = false;
                             Board.Mon1Catchable = true; Board.Mon2Catchable = true;
                             if (Board.IsBattleWin) // OK, win
                             {
-                                if (Board.Monster1 != 0)
+                                if (Board.Monster1 != 0 && !skip)
                                     RaiseGMessage("G1GE,W," + Board.Monster1);
                                 bool hasMonster2 = Board.Monster2 != 0 && NMBLib.IsMonster(Board.Monster2);
-                                if (hasMonster2)
+                                if (hasMonster2 && !skip)
                                     RaiseGMessage("G1GE,W," + Board.Monster2);
-                                if (Board.Monster1 != 0 && Board.Mon1Catchable)
+                                if (Board.Monster1 != 0 && (Board.Mon1Catchable || skip)) // skip will get
                                 {
-                                    RaiseGMessage("G0HC,0," + Board.Rounder.Uid +
-                                        "," + Board.Mon1From + "," + Board.Monster1);
+                                    RaiseGMessage(new Artiad.HarvestPet()
+                                    {
+                                        Farmer = Board.Rounder.Uid,
+                                        Farmland = Board.Mon1From,
+                                        SinglePet = Board.Monster1,
+                                        Trophy = true,
+                                        Reposit = true,
+                                        Plow = false,
+                                        TreatyAct = Artiad.HarvestPet.Treaty.ACTIVE
+                                    }.ToMessage());
                                     mon1zero = true;
                                 }
-                                if (hasMonster2 && Board.Mon2Catchable)
+                                if (hasMonster2 && (Board.Mon2Catchable || skip))
                                 {
-                                    RaiseGMessage("G0HC,0," + Board.Rounder.Uid + ",0," + Board.Monster2);
+                                    RaiseGMessage(new Artiad.HarvestPet()
+                                    {
+                                        Farmer = Board.Rounder.Uid,
+                                        Farmland = 0,
+                                        SinglePet = Board.Monster2,
+                                        Trophy = true,
+                                        Reposit = true,
+                                        Plow = false,
+                                        TreatyAct = Artiad.HarvestPet.Treaty.ACTIVE
+                                    }.ToMessage());
                                     mon2zero = true;
                                 }
                             }
                             else
                             {
-                                if (Board.Monster1 != 0)
-                                    RaiseGMessage("G1GE,L," + Board.Monster1);
-                                if (Board.Monster2 != 0 && NMBLib.IsMonster(Board.Monster2))
-                                    RaiseGMessage("G1GE,L," + Board.Monster2);
+                                if (!skip)
+                                {
+                                    if (Board.Monster1 != 0)
+                                        RaiseGMessage("G1GE,L," + Board.Monster1);
+                                    if (Board.Monster2 != 0 && NMBLib.IsMonster(Board.Monster2))
+                                        RaiseGMessage("G1GE,L," + Board.Monster2);
+                                }
                             }
                             //WI.BCast(rstage + "2," + (Board.IsBattleWin ? "0" : "1"));
                             RunQuadStage(rstage);

@@ -791,7 +791,16 @@ namespace PSD.PSDGamepkg.JNS
                             string[] tos = toStr.Split(',');
                             ushort to = ushort.Parse(tos[0]);
                             ushort pet = ushort.Parse(tos[1]);
-                            XI.RaiseGMessage("G0HC,1," + to + "," + from.Uid + ",0," + pet);
+                            XI.RaiseGMessage(new Artiad.HarvestPet()
+                            {
+                                Farmer = to,
+                                Farmland = from,
+                                SinglePet = pet,
+                                Reposit = true,
+                                Plot = true,
+                                Trophy = false,
+                                TreatyAct = Artiad.HarvestPet.Treaty.KOKAN
+                            }.ToMessage());
                             break;
                         }
                     } while (true);
@@ -1141,9 +1150,9 @@ namespace PSD.PSDGamepkg.JNS
             string input = XI.AsyncInput(player.Uid, hint + ",Y" + cnt, "JPT3", "0");
             if (input == "2")
             {
-                string targets = XI.AsyncInput(player.Uid, "T2(p" + string.Join("p", v.Where(
+                string targets = XI.AsyncInput(player.Uid, "#交换手牌,T2(p" + string.Join("p", v.Where(
                     p => p.IsTared && p.Team == player.Team && p.Tux.Count > 0).Select(p => p.Uid))
-                    + ")", "JPT3", "0");
+                    + ")", "JPT3", "1");
                 int cmidx = targets.IndexOf(',');
                 ushort iv = ushort.Parse(targets.Substring(0, cmidx));
                 ushort jv = ushort.Parse(targets.Substring(cmidx + 1));
@@ -1153,7 +1162,7 @@ namespace PSD.PSDGamepkg.JNS
             }
             else if (input == "3")
             {
-                string targets = XI.AsyncInput(player.Uid, "T2(p" + string.Join("p", v.Where(
+                string targets = XI.AsyncInput(player.Uid, "#交换宠物,T2(p" + string.Join("p", v.Where(
                     p => p.IsTared && p.Team == player.Team && p.GetPetCount() > 0).Select(p => p.Uid))
                     + ")", "JPT3", "0");
                 int cmidx = targets.IndexOf(',');
@@ -1161,15 +1170,17 @@ namespace PSD.PSDGamepkg.JNS
                 ushort jv = ushort.Parse(targets.Substring(cmidx + 1));
 
                 List<ushort> imon = g[iv].Pets.Where(p => p != 0).ToList();
-                string iipt = XI.AsyncInput(iv, "M1(p" + string.Join("p", imon), "JPT3", "0");
-                XI.RaiseGMessage("G0HC,1," + jv + "," + iv + ",1," + iipt);
-                List<ushort> vdMons = g[jv].Pets.Where(p => p != 0 && !imon.Contains(p)).ToList();
-                if (vdMons.Count() > 0)
+                string ipt = XI.AsyncInput(player.Uid, "M1(p" + string.Join("p", imon) + ")," +
+                    "M1(p" + string.Join("p", vdMons) + ")", "JPT3", "2");
+                ushort[] uipt = ipt.Split(',').Select(p => ushort.Parse(p)).ToArray();
+                XI.RaiseGMessage(new Artiad.TradePet()
                 {
-                    string jipt = XI.AsyncInput(jv, "M1(p" + string.Join("p", vdMons), "JPT3", "0");
-                    XI.RaiseGMessage("G0HC,1," + iv + "," + jv + ",1," + jipt);
-                }
-                Harm(null, player, 1);
+                    A = iv,
+                    AGoods = new ushort[] { uipt[0] },
+                    B = jv,
+                    BGoods = new ushort[] { uipt[1] }
+                }.ToMessage());
+                Harm(player, player, 1, FiveElement.A, (long)HPEvoMask.FROM_JP);
             }
             else // if input == "1"
                 XI.RaiseGMessage("G1EV," + player.Uid + ",1");
@@ -1178,8 +1189,8 @@ namespace PSD.PSDGamepkg.JNS
         {
             ushort to = ushort.Parse(XI.AsyncInput(player.Uid, "T1" + FormatPlayers(p => p.IsTared), "JPT4", "0"));
             TargetPlayer(player.Uid, to);
-            XI.RaiseGMessage(Artiad.Harm.ToMessage(new Artiad.Harm(to, player.Uid,
-                FiveElement.A, harmValue(XI.Board.Garden[to]), (long)HPEvoMask.FROM_JP)));
+            Player py = XI.Board.Garden[to];
+            Harm(player, py, harmValue(py), FiveElement.A, (long)HPEvoMask.FROM_JP);
         }
         public void JPT4Action(Player player, int type, string fuse, string argst)
         {
@@ -2263,7 +2274,7 @@ namespace PSD.PSDGamepkg.JNS
         public void JPH3Action(Player player, int type, string fuse, string argst)
         {
             string whoStr = XI.AsyncInput(player.Uid, "V1(p" + string.Join("p", FiveElementHelper.GetPropedElements()
-                .Select(p => p.Elem2Int())) + "),#请选择【七光御阵】执行项##受伤##补牌,Y2", "JPH3", "0");
+                .Select(p => p.Elem2Int())) + "),#请选择【七光御阵】执行项##造成伤害##回复补牌,Y2", "JPH3", "0");
             int idx = whoStr.IndexOf(',');
             FiveElement five = FiveElementHelper.Int2Elem(int.Parse(whoStr.Substring(0, idx)));
             int elemIdx = five.Elem2Index();
@@ -2272,16 +2283,16 @@ namespace PSD.PSDGamepkg.JNS
             {
                 List<Player> invs = XI.Board.Garden.Values.Where(p => p.IsAlive && p.Pets[elemIdx] == 0).ToList();
                 if (invs.Count > 0)
-                    XI.RaiseGMessage("G0DH," + string.Join(",", invs.Select(p => p.Uid + ",0,2")));
+                {
+                    Cure(player, invs, 1, five, (long)HPEvoMask.FROM_JP);
+                    XI.RaiseGMessage("G0DH," + string.Join(",", invs.Select(p => p.Uid + ",0,1")));
+                }
             }
             else
             {
                 List<Player> invs = XI.Board.Garden.Values.Where(p => p.IsAlive && p.Pets[elemIdx] != 0).ToList();
                 if (invs.Count > 0)
-                {
-                    XI.RaiseGMessage(Artiad.Harm.ToMessage(invs.Select(p =>
-                       new Artiad.Harm(p.Uid, player.Uid, five, p.GetPetCount(), (long)HPEvoMask.FROM_JP))));
-                }
+                    Harm(player, invs, invs.Select(p => p.GetPetCount()), five, (long)HPEvoMask.FROM_JP);
             }
         }
         public void JPH4Action(Player player, int type, string fuse, string argst)

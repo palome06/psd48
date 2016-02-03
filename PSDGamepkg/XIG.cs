@@ -2458,12 +2458,10 @@ namespace PSD.PSDGamepkg
                 case "G1SG":
                     break;
                 case "G0HC":
-                    WI.BCast("E0HC," + cmdrst);
-                    if (args[1] == "0")
+                    if (Artiad.KittyHelper.IsHarvest(cmd))
                     {
-                        ushort who = ushort.Parse(args[2]);
-                        ushort from = ushort.Parse(args[3]);
-                        Player player = Board.Garden[who];
+                        Artiad.HarvestPet hvp = Artiad.HarvestPet.Parse(cmd);
+                        Player player = Board.Garden[hvp.Farmer];
                         int fivepc = FiveElementHelper.PropCount;
                         List<ushort>[] cpets = new List<ushort>[fivepc];
                         for (int i = 0; i < fivepc; ++i)
@@ -2472,129 +2470,158 @@ namespace PSD.PSDGamepkg
                             if (player.Pets[i] != 0)
                                 cpets[i].Add(player.Pets[i]);
                         }
-                        for (int i = 4; i < args.Length; ++i)
+                        foreach (ushort petUt in hvp.Pets)
                         {
-                            ushort mons = ushort.Parse(args[i]);
-                            Monster pet = LibTuple.ML.Decode(mons);
+                            Monster pet = LibTuple.ML.Decode(petUt);
                             int pe = pet.Element.Elem2Index();
-                            if (!cpets[pe].Contains(mons))
-                                cpets[pe].Add(mons);
-                            if (from != 0)
-                                RaiseGMessage("G0HL," + from + "," + mons);
+                            if (!cpets[pe].Contains(petUt))
+                                cpets[pe].Add(petUt);
                         }
+                        List<ushort> result = new List<ushort>();
+                        List<ushort> giveBack = new List<ushort>();
                         for (int i = 0; i < fivepc; ++i)
                         {
-                            if (cpets[i].Count == 1 && player.Pets[i] == 0)
-                                RaiseGMessage("G0HD,0," + who + "," + from + "," + cpets[i].First());
-                            else if (cpets[i].Count > 1)
+                            if (cpets[i].Count == 0)
+                                continue;
+                            else if (cpets[i].Count == 1)
                             {
-                                string mai = "#保留的,M1(p" + string.Join("p", cpets[i]) + ")";
-                                ushort sel = ushort.Parse(AsyncInput(who, mai, cmd, "0"));
-                                ushort old = player.Pets[i];
-                                if (old != 0 && sel != old)
-                                {
-                                    RaiseGMessage("G0HL," + who + "," + old);
-                                    RaiseGMessage("G0ON," + who + ",M,1," + old);
-                                }
-                                if (sel != old)
-                                    RaiseGMessage("G0HD,0," + who + "," + from + "," + sel);
-                                foreach (ushort ut in cpets[i])
-                                {
-                                    if (ut != old && ut != sel)
-                                        RaiseGMessage("G0ON," + who + ",M,1," + ut);
-                                }
+                                ushort pt = cpets[i].First();
+                                result.Add(pt);
+                                if (hvp.Farmland != 0 && hvp.Plow)
+                                    RaiseGMessage("G0HL," + hvp.Farmland + "," + pt);
+                                continue;
                             }
-                        }
-                    }
-                    else if (args[1] == "1")
-                    {
-                        ushort who = ushort.Parse(args[2]);
-                        ushort from = ushort.Parse(args[3]);
-                        ushort kokan = ushort.Parse(args[4]);
-                        ushort which = ushort.Parse(args[5]);
-
-                        Monster pet = LibTuple.ML.Decode(which);
-                        int pe = pet.Element.Elem2Index();
-                        Player player = Board.Garden[who];
-                        if (player.Pets[pe] == 0)
-                        {
-                            if (from != 0)
-                                RaiseGMessage("G0HL," + from + "," + which);
-                            RaiseGMessage("G0HD,1," + who + "," + from + "," + which);
-                        }
-                        else
-                        {
-                            ushort pt = player.Pets[pe];
-                            if (kokan == 0) // Switch
+                            Artiad.HarvestPet.Treaty treaty = hvp.TreatyAct;
+                            if (cpets[i].Count > 2)
+                                treaty = Artiad.HarvestPet.Treaty.ACTIVE; // more than two selection
+                            if (hvp.Farmland == 0 && treaty == Artiad.HarvestPet.Treaty.KOKAN)
+                                treaty = Artiad.HarvestPet.Treaty.ACTIVE;
+                            ushort myPt = player.Pets[i];
+                            if (treaty == Artiad.HarvestPet.Treaty.KOKAN) // KOKAN always recycle
+                            {   
+                                ushort ayPt = hvp.SinglePet;
+                                if (hvp.Farmland != 0 && hvp.Plow)
+                                    RaiseGMessage("G0HL," + hvp.Farmland + "," + ayPt);
+                                RaiseGMessage("G0HL," + hvp.Farmer + "," + myPt);
+                                result.Add(ayPt);
+                                giveBack.Add(myPt);
+                            }
+                            else if (treaty == Artiad.HarvestPet.Treaty.PASSIVE)
                             {
-                                if (from != 0)
+                                ushort ayPt = hvp.SinglePet;
+                                RaiseGMessage("G0HL," + hvp.Farmer + "," + myPt);
+                                RaiseGMessage("G0ON," + hvp.Farmer + ",M,1," + myPt);
+                                if (hvp.Farmland != 0 && hvp.Plow)
+                                    RaiseGMessage("G0HL," + hvp.Farmland + "," + ayPt);
+                                result.Add(ayPt);
+                            }
+                            else // ACTIVE
+                            {
+                                List<ushort> others = cpets[i].ToList(); others.Remove(myPt);
+                                string mai = "#保留的,M1(p" + string.Join("p", cpets[i]) + ")";
+                                ushort sel = ushort.Parse(AsyncInput(hvp.Farmer, mai, cmd, "0"));
+                                if (sel == myPt) // Keep the old one
                                 {
-                                    RaiseGMessage("G0HL," + from + "," + which);
-                                    RaiseGMessage("G0HL," + who + "," + pt);
-                                    RaiseGMessage("G0HD,1," + who + "," + from + "," + which);
-                                    RaiseGMessage("G0HD,1," + from + "," + who + "," + pt);
+                                    if (!hvp.Reposit && hvp.Plow)
+                                    {
+                                        if (hvp.Farmland != 0)
+                                            others.ForEach(p => RaiseGMessage("G0HL," + hvp.Farmland + "," + p));
+                                        RaiseGMessage("G0ON," + hvp.Farmland + ",M," +
+                                            others.Count + "," + string.Join(",", others));
+                                    }
                                 }
                                 else
                                 {
-                                    RaiseGMessage("G0HL," + who + "," + pt);
-                                    RaiseGMessage("G0HD,1," + who + ",0," + which);
+                                    RaiseGMessage("G0HL," + hvp.Farmer + "," + myPt);
+                                    others.Remove(sel);
+                                    if (!hvp.Reposit && hvp.Plow && others.Count > 0)
+                                    {
+                                        if (hvp.Farmland != 0)
+                                            others.ForEach(p => RaiseGMessage("G0HL," + hvp.Farmland + "," + p));
+                                        RaiseGMessage("G0ON," + hvp.Farmer + ",M,1," + myPt + "," +
+                                            hvp.Farmland + ",M," + others.Count + "," + string.Join(",", others));
+                                    }
+                                    else
+                                        RaiseGMessage("G0ON," + hvp.Farmer + ",M,1," + myPt);
+                                    result.Add(sel);
                                 }
-                            }
-                            else if (kokan == 1) // Positive-Choose
-                            {
-                                string choose = AsyncInput(who, "#保留,M1(p" + pt + "p" + which + ")", "G0HC,1", "1");
-                                ushort left = ushort.Parse(choose);
-                                if (from != 0)
-                                    RaiseGMessage("G0HL," + from + "," + which);
-                                if (left == which)
-                                {
-                                    RaiseGMessage("G0HL," + who + "," + pt);
-                                    RaiseGMessage("G0HD,1," + who + "," + from + "," + which);
-                                }
-                            }
-                            else if (kokan == 2) // Negative-Choose
-                            {
-                                if (from != 0)
-                                    RaiseGMessage("G0HL," + from + "," + which);
-                                RaiseGMessage("G0HL," + who + "," + pt);
-                                RaiseGMessage("G0HD,1," + who + "," + from + "," + which);
                             }
                         }
+                        if (result.Count > 0)
+                        {
+                            RaiseGMessage(new Artiad.ObtainPet()
+                            {
+                                Farmer = hvp.Farmer,
+                                Farmland = hvp.Farmland,
+                                Trophy = hvp.Trophy,
+                                Pets = result.ToArray()
+                            }.ToMessage());
+                        }
+                        if (giveBack.Count > 0)
+                        {
+                            RaiseGMessage(new Artiad.ObtainPet()
+                            {
+                                Farmer = hvp.Farmland,
+                                Farmland = hvp.Farmer,
+                                Trophy = hvp.Trophy,
+                                Pets = giveBack.ToArray()
+                            }.ToMessage());
+                        }
+                        new Artiad.HarvestPetSemaphore()
+                        {
+                            Farmer = hvp.Farmland,
+                            Pets = hvp.Pets
+                        }.Telegraph(WI.BCast);
                     }
-                    else if (args[1] == "2")
+                    else if (Artiad.KittyHelper.IsTrade(cmd))
                     {
-                        ushort t1 = ushort.Parse(args[2]), t2 = ushort.Parse(args[3]);
-                        Player py1 = Board.Garden[t1], py2 = Board.Garden[t2];
-                        List<ushort> pt1s = py1.Pets.Where(p => p != 0).ToList();
-                        List<ushort> pt2s = py2.Pets.Where(p => p != 0).ToList();
-                        foreach (ushort ut in pt1s)
-                            RaiseGMessage("G0HL," + t1 + "," + ut);
-                        foreach (ushort ut in pt2s)
-                            RaiseGMessage("G0HL," + t2 + "," + ut);
-                        foreach (ushort ut in pt1s)
-                            RaiseGMessage("G0HD,1," + t2 + "," + t1 + "," + ut);
-                        foreach (ushort ut in pt2s)
-                            RaiseGMessage("G0HD,1," + t1 + "," + t2 + "," + ut);
+                        Artiad.TradePet tdp = Artiad.TradePet.Parse(cmd);
+                        tdp.AGoods.ToList().ForEach(p => RaiseGMessage("G0HL," + tdp.A + "," + p));
+                        tdp.BGoods.ToList().ForEach(p => RaiseGMessage("G0HL," + tdp.B + "," + p));
+                        RaiseGMessage(new Artiad.HarvestPet()
+                        {
+                            Farmer = tdp.A,
+                            Farmland = tdp.B,
+                            Pets = tdp.BGoods.ToArray(),
+                            Trophy = false,
+                            Reposit = false,
+                            Plow = false,
+                            TreatyAct = Artiad.HarvestPet.Treaty.ACTIVE
+                        }.ToMessage());
+                        RaiseGMessage(new Artiad.HarvestPet()
+                        {
+                            Farmer = tdp.B,
+                            Farmland = tdp.A,
+                            Pets = tdp.AGoods.ToArray(),
+                            Trophy = false,
+                            Reposit = false,
+                            Plow = false,
+                            TreatyAct = Artiad.HarvestPet.Treaty.ACTIVE
+                        }.ToMessage());
                     }
                     break;
                 case "G0HD":
                     {
-                        //ushort type = ushort.Parse(args[1]);
-                        ushort who = ushort.Parse(args[2]);
-                        ushort from = ushort.Parse(args[3]);
-                        ushort which = ushort.Parse(args[4]);
-                        Monster mon = LibTuple.ML.Decode(which);
-                        int pe = mon.Element.Elem2Index();
-                        Player player = Board.Garden[who];
-                        player.Pets[pe] = which;
-                        RaiseGMessage("G0WB," + which);
-                        if (!player.PetDisabled && !Board.NotActionPets.Contains(which))
-                            RaiseGMessage("G0IC,0," + who + "," + which);
-                        WI.BCast("E0HD," + who + "," + from + "," + which);
+                        Artiad.ObtainPet op = Artiad.ObtainPet.Parse(cmd);
+                        foreach (ushort which in op.Pets)
+                        {
+                            Monster pet = LibTuple.ML.Decode(which);
+                            Player player = Board.Garden[op.Farmer];
+                            player.Pets[pet.Element.Elem2Index()] = which;
+                            RaiseGMessage("G0WB," + which);
+                            if (!player.PetDisabled && !Board.NotActionPets.Contains(which))
+                                RaiseGMessage("G0IC,0," + op.Farmer + "," + which);
+                        }
+                        new Artiad.ObtainPetSemaphore()
+                        {
+                            Farmer = op.Farmer,
+                            Farmland = op.Farmland,
+                            Pets = op.Pets
+                        }.Telegraph(WI.BCast);
                         RaiseGMessage("G2WK," + string.Join(",",
-                                CalculatePetsScore().Select(p => p.Key + "," + p.Value)));
-                        break;
+                            CalculatePetsScore().Select(p => p.Key + "," + p.Value)));
                     }
+                    break;
                 case "G0HH":
                     {
                         // G0HH,A,0/1,x,y..;T,F

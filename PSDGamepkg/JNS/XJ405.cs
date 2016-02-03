@@ -3515,8 +3515,8 @@ namespace PSD.PSDGamepkg.JNS
         {
             base.Harm(src, invs, n, five, HPEvoMask.FROM_SK.Set(mask));
         }
-        protected new void Harm(Player src, List<Player> invs,
-            List<int> ns, FiveElement five = FiveElement.A, long mask = 0)
+        protected new void Harm(Player src, IEnumerable<Player> invs,
+            IEnumerable<int> ns, FiveElement five = FiveElement.A, long mask = 0)
         {
             base.Harm(src, invs, ns, five, HPEvoMask.FROM_SK.Set(mask));
         }
@@ -3529,8 +3529,8 @@ namespace PSD.PSDGamepkg.JNS
         {
             base.Cure(src, invs, n, five, HPEvoMask.FROM_SK.Set(mask));
         }
-        protected new void Cure(Player src, List<Player> invs,
-            List<int> ns, FiveElement five = FiveElement.A, long mask = 0)
+        protected new void Cure(Player src, IEnumerable<Player> invs,
+            IEnumerable<int> ns, FiveElement five = FiveElement.A, long mask = 0)
         {
             base.Cure(src, invs, ns, five, HPEvoMask.FROM_SK.Set(mask));
         }

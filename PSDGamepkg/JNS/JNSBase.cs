@@ -63,16 +63,18 @@ namespace PSD.PSDGamepkg.JNS
             }
         }
 
-        protected void Harm(Player src, List<Player> invs,
-            List<int> ns, FiveElement five = FiveElement.A, long mask = 0)
+        protected void Harm(Player src, IEnumerable<Player> invs,
+            IEnumerable<int> ns, FiveElement five = FiveElement.A, long mask = 0)
         {
             if (invs.Any())
             {
                 if (src != null)
                     TargetPlayer(src.Uid, invs.Select(p => p.Uid));
-                int sz = invs.Count;
+                List<Player> linvs = invs.ToList();
+                List<int> lns = ns.ToList();
+                int sz = linvs.Count;
                 XI.RaiseGMessage(Artiad.Harm.ToMessage(Enumerable.Range(0, sz).Select(p =>
-                    new Artiad.Harm(invs[p].Uid, src == null ? 0 : src.Uid, five, ns[p], mask))));
+                    new Artiad.Harm(linvs[p].Uid, src == null ? 0 : src.Uid, five, lns[p], mask))));
             }
         }
 
@@ -95,16 +97,18 @@ namespace PSD.PSDGamepkg.JNS
             }
         }
 
-        protected void Cure(Player src, List<Player> invs,
-            List<int> ns, FiveElement five = FiveElement.A, long mask = 0)
+        protected void Cure(Player src, IEnumerable<Player> invs,
+            IEnumerable<int> ns, FiveElement five = FiveElement.A, long mask = 0)
         {
             if (invs.Any())
             {
                 if (src != null)
                     TargetPlayer(src.Uid, invs.Select(p => p.Uid));
-                int sz = invs.Count;
-                XI.RaiseGMessage(Artiad.Cure.ToMessage(Enumerable.Range(0, sz).Select
-                    (p => new Artiad.Cure(invs[p].Uid, src == null ? 0 : src.Uid, five, ns[p], mask))));
+                List<Player> linvs = invs.ToList();
+                List<int> lns = ns.ToList();
+                int sz = linvs.Count;
+                XI.RaiseGMessage(Artiad.Cure.ToMessage(Enumerable.Range(0, sz).Select(p =>
+                    new Artiad.Cure(linvs[p].Uid, src == null ? 0 : src.Uid, five, lns[p], mask))));
             }
         }
         protected void TargetPlayer(ushort from, ushort to)
