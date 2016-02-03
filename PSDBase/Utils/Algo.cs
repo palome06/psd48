@@ -93,7 +93,7 @@ namespace PSD.Base.Utils
         public static ushort[] TakeArrayWithSize(ushort[] blocks, int start, out int next)
         {
             int n = (int)blocks[start];
-            next = n + 1;
+            next = start + n + 1;
             return TakeRange(blocks, start + 1, start + 1 + n);
         }
         public static string RepeatString(string @string, int times)

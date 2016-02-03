@@ -794,11 +794,10 @@ namespace PSD.PSDGamepkg.JNS
                             XI.RaiseGMessage(new Artiad.HarvestPet()
                             {
                                 Farmer = to,
-                                Farmland = from,
+                                Farmland = from.Uid,
                                 SinglePet = pet,
                                 Reposit = true,
-                                Plot = true,
-                                Trophy = false,
+                                Plow = true,
                                 TreatyAct = Artiad.HarvestPet.Treaty.KOKAN
                             }.ToMessage());
                             break;
@@ -1168,17 +1167,13 @@ namespace PSD.PSDGamepkg.JNS
                 int cmidx = targets.IndexOf(',');
                 ushort iv = ushort.Parse(targets.Substring(0, cmidx));
                 ushort jv = ushort.Parse(targets.Substring(cmidx + 1));
-
-                List<ushort> imon = g[iv].Pets.Where(p => p != 0).ToList();
-                string ipt = XI.AsyncInput(player.Uid, "M1(p" + string.Join("p", imon) + ")," +
-                    "M1(p" + string.Join("p", vdMons) + ")", "JPT3", "2");
+                
+                string ipt = XI.AsyncInput(player.Uid, "M1(p" + string.Join("p", g[iv].Pets.Where(p => p != 0)) + ")," +
+                    "M1(p" + string.Join("p", g[jv].Pets.Where(p => p != 0)) + ")", "JPT3", "2");
                 ushort[] uipt = ipt.Split(',').Select(p => ushort.Parse(p)).ToArray();
                 XI.RaiseGMessage(new Artiad.TradePet()
                 {
-                    A = iv,
-                    AGoods = new ushort[] { uipt[0] },
-                    B = jv,
-                    BGoods = new ushort[] { uipt[1] }
+                    A = iv, ASinglePet = uipt[0], B = jv, BSinglePet = uipt[1]
                 }.ToMessage());
                 Harm(player, player, 1, FiveElement.A, (long)HPEvoMask.FROM_JP);
             }
@@ -2311,9 +2306,9 @@ namespace PSD.PSDGamepkg.JNS
             if (popCount > 0)
                 XI.RaiseGMessage("G1IU," + string.Join(",", pops));
             Player nx = XI.Board.GetOpponenet(player);
-            while (pops.Count > 0)
+            while (XI.Board.PZone.Count > 0)
             {
-                XI.RaiseGMessage("G2FU,0," + nx.Uid + ",0,M," + string.Join(",", pops));
+                XI.RaiseGMessage("G2FU,0," + nx.Uid + ",0,M," + string.Join(",", XI.Board.PZone));
                 string input = XI.AsyncInput(nx.Uid, "+M1(p" + string.Join("p", XI.Board.PZone) +
                     "),#获得宠物的,/T1" + ATeammates(nx), "JPH4", "0");
                 if (!input.Contains(VI.CinSentinel) && !input.StartsWith("/"))
@@ -2325,8 +2320,16 @@ namespace PSD.PSDGamepkg.JNS
                         ushort ut = ushort.Parse(ips[1]);
                         XI.RaiseGMessage("G1OU," + cd);
                         XI.RaiseGMessage("G2QU,0,M,0," + cd);
-                        XI.RaiseGMessage("G0HD,1," + ut + ",0," + cd);
-                        pops.Remove(cd);
+                        XI.RaiseGMessage(new Artiad.HarvestPet()
+                        {
+                            Farmer = ut,
+                            Farmland = 0,
+                            SinglePet = cd,
+                            Reposit = false,
+                            Plow = true,
+                            Trophy = false,
+                            TreatyAct = Artiad.HarvestPet.Treaty.ACTIVE
+                        }.ToMessage());
                     }
                 }
                 XI.RaiseGMessage("G2FU,3");

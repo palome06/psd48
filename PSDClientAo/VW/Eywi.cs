@@ -633,6 +633,16 @@ namespace PSD.ClientAo.VW
                         line = string.Join(",", e0qu);
                     }
                 }
+                else if (line.StartsWith("E0HC"))
+                {
+                    string[] e0hc = line.Split(',');
+                    int type = int.Parse(e0hc[1]);
+                    ushort who = ushort.Parse(e0hc[2]);
+                    if (type == 0)
+                        line = "E0HC," + who + "," + string.Join(",", Algo.TakeRange(e0hc, 4, e0hc.Length));
+                    else if (type == 1)
+                        line = "E0HC," + who + "," + string.Join(",", Algo.TakeRange(e0hc, 5, e0hc.Length));
+                }
             }
         }
         #endregion Version

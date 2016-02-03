@@ -825,9 +825,9 @@ namespace PSD.PSDGamepkg.JNS
 
         public void SJ003(Player rd)
         {
-            XI.RaiseGMessage("G0HD,1,2,0,15");
-            XI.RaiseGMessage("G0HD,1,4,0,6");
-            XI.RaiseGMessage("G0HD,1,6,0,17");
+            XI.RaiseGMessage(new Artiad.ObtainPet() { Farmer = 2, SinglePet = 15 }.ToMessage());
+            XI.RaiseGMessage(new Artiad.ObtainPet() { Farmer = 4, SinglePet = 6 }.ToMessage());
+            XI.RaiseGMessage(new Artiad.ObtainPet() { Farmer = 6, SinglePet = 7 }.ToMessage());
         }
     }
 }

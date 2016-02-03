@@ -352,7 +352,7 @@ namespace PSD.ClientAo
                     foreach (var elem in pb.runeStack.Children)
                     {
                         Image img = elem as Image;
-                        if (img != null || img.Source == bsimg.Source)
+                        if (img != null && img.Source == bsimg.Source)
                         {
                             pb.runeStack.Children.Remove(img);
                             break;
@@ -409,7 +409,7 @@ namespace PSD.ClientAo
                     foreach (var elem in pb.werspStack.Children)
                     {
                         Image img = elem as Image;
-                        if (img != null || img.Source == bsimg.Source)
+                        if (img != null && img.Source == bsimg.Source)
                         {
                             pb.werspStack.Children.Remove(img);
                             break;

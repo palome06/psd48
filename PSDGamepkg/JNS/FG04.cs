@@ -2,7 +2,6 @@
 using System.Linq;
 using PSD.Base.Card;
 using PSD.Base;
-using PSD.PSDGamepkg.Artiad;
 using Algo = PSD.Base.Utils.Algo;
 
 namespace PSD.PSDGamepkg.JNS
@@ -713,22 +712,22 @@ namespace PSD.PSDGamepkg.JNS
             {
                 string input = XI.AsyncInput(XI.Board.Opponent.Uid, "#要替换的,/M1(p" + string.Join("p",
                     others.Select(p => p.Pets[saturnElem])) + ")", "GT04LoseEff", "0");
-                if (input != "0" && input != "" && !input.StartsWith("/"))
+                if (input != VI.CinSentinel && !input.StartsWith("/"))
                 {
                     ushort mons = ushort.Parse(input);
-                    var sg = others.Where(p => p.Pets[saturnElem] == mons);
-                    if (sg.Any())
+                    ushort gt04code = XI.LibTuple.ML.Encode("GT04");
+                    Player py = others.Single(p => p.Pets[saturnElem] == mons);
+                    XI.RaiseGMessage(new Artiad.HarvestPet()
                     {
-                        Player py = sg.Single();
-                        XI.RaiseGMessage("G0HL," + py.Uid + "," + mons);
-                        XI.RaiseGMessage("G0ON," + py.Uid + ",M,1," + mons);
-                        ushort gt04code = XI.LibTuple.ML.Encode("GT04");
-                        XI.RaiseGMessage("G0HD,1," + py.Uid + ",0," + gt04code);
-                        if (XI.Board.Monster1 == gt04code)
-                            XI.Board.Monster1 = 0;
-                        else if (XI.Board.Monster2 == gt04code)
-                            XI.Board.Monster2 = 0;
-                    }
+                        Farmer = py.Uid,
+                        SinglePet = gt04code,
+                        Trophy = true,
+                        TreatyAct = Artiad.HarvestPet.Treaty.PASSIVE
+                    }.ToMessage());
+                    if (XI.Board.Monster1 == gt04code)
+                        XI.Board.Monster1 = 0;
+                    else if (XI.Board.Monster2 == gt04code)
+                        XI.Board.Monster2 = 0;
                 }
             }
         }
@@ -1773,12 +1772,12 @@ namespace PSD.PSDGamepkg.JNS
         }
         public void GFT3WinEff()
         {
-            Procedure.AssignCurePointToTeam(XI, XI.Board.Rounder, 4, "GFT3WinEff",
+            Artiad.Procedure.AssignCurePointToTeam(XI, XI.Board.Rounder, 4, "GFT3WinEff",
                 p => Cure("GFT3", p.Keys.ToList(), p.Values.ToList()));
         }
         public void GFT3LoseEff()
         {
-            Procedure.AssignCurePointToTeam(XI, XI.Board.Opponent, 4, "GFT3LoseEff",
+            Artiad.Procedure.AssignCurePointToTeam(XI, XI.Board.Opponent, 4, "GFT3LoseEff",
                 p => Cure("GFT3", p.Keys.ToList(), p.Values.ToList()));
         }
         public bool GFT3ConsumeValid(Player player, int consumeType, int type, string fuse)
@@ -3216,14 +3215,10 @@ namespace PSD.PSDGamepkg.JNS
                 } while (ayChange == 0);
                 if (aySide != 0 && ayChange != 0)
                 {
-                    VI.Cout(0, "->->SB!!" + mySide + "," + myChange + "," + aySide + "," + ayChange);
-                    XI.RaiseGMessage("G0HL," + mySide + "," + myChange);
-                    XI.RaiseGMessage("G0HL," + aySide + "," + ayChange);
-
-                    // XI.RaiseGMessage("G0HD,1," + aySide + "," + mySide + "," + myChange);
-                    // XI.RaiseGMessage("G0HD,1," + mySide + "," + aySide + "," + ayChange);
-                    XI.RaiseGMessage("G0HC,1," + aySide + "," + mySide + ",1," + myChange);
-                    XI.RaiseGMessage("G0HC,1," + mySide + "," + aySide + ",1," + ayChange);
+                    XI.RaiseGMessage(new Artiad.TradePet()
+                    {
+                        A = mySide, ASinglePet = myChange, B = aySide, BSinglePet = ayChange
+                    }.ToMessage());
                 }
             }
         }
@@ -3318,10 +3313,14 @@ namespace PSD.PSDGamepkg.JNS
             int saturn = FiveElement.SATURN.Elem2Index();
             if (rd.Pets[saturn] != 0)
             {
-                XI.RaiseGMessage("G0HL," + rd.Uid + "," + rd.Pets[saturn]);
-                XI.RaiseGMessage("G0ON," + rd.Uid + ",M,1," + rd.Pets[saturn]);
                 ushort gth1code = XI.LibTuple.ML.Encode("GTH1");
-                XI.RaiseGMessage("G0HD,1," + rd.Uid + ",0," + gth1code);
+                XI.RaiseGMessage(new Artiad.HarvestPet()
+                {
+                    Farmer = rd.Uid,
+                    SinglePet = gth1code,
+                    Trophy = true,
+                    TreatyAct = Artiad.HarvestPet.Treaty.PASSIVE
+                }.ToMessage());
                 if (XI.Board.Monster1 == gth1code)
                     XI.Board.Monster1 = 0;
                 else if (XI.Board.Monster2 == gth1code)
@@ -3340,22 +3339,22 @@ namespace PSD.PSDGamepkg.JNS
             {
                 string input = XI.AsyncInput(XI.Board.Opponent.Uid, "#要替换的,/M1(p" + string.Join("p",
                     others.Select(p => p.Pets[saturn])) + ")", "GTH1LoseEff", "0");
-                if (input != "0" && input != "" && !input.StartsWith("/"))
+                if (input != VI.CinSentinel && !input.StartsWith("/"))
                 {
                     ushort mons = ushort.Parse(input);
-                    var sg = others.Where(p => p.Pets[saturn] == mons);
-                    if (sg.Any())
+                    ushort gth1code = XI.LibTuple.ML.Encode("GTH1");
+                    Player py = others.Single(p => p.Pets[saturn] == mons);
+                    XI.RaiseGMessage(new Artiad.HarvestPet()
                     {
-                        Player py = sg.Single();
-                        XI.RaiseGMessage("G0HL," + py.Uid + "," + mons);
-                        XI.RaiseGMessage("G0ON," + py.Uid + ",M,1," + mons);
-                        ushort gth1code = XI.LibTuple.ML.Encode("GTH1");
-                        XI.RaiseGMessage("G0HD,1," + py.Uid + ",0," + gth1code);
-                        if (XI.Board.Monster1 == gth1code)
-                            XI.Board.Monster1 = 0;
-                        else if (XI.Board.Monster2 == gth1code)
-                            XI.Board.Monster2 = 0;
-                    }
+                        Farmer = py.Uid,
+                        SinglePet = gth1code,
+                        Trophy = true,
+                        TreatyAct = Artiad.HarvestPet.Treaty.PASSIVE
+                    }.ToMessage());
+                    if (XI.Board.Monster1 == gth1code)
+                        XI.Board.Monster1 = 0;
+                    else if (XI.Board.Monster2 == gth1code)
+                        XI.Board.Monster2 = 0;
                 }
             }
         }
@@ -3407,11 +3406,9 @@ namespace PSD.PSDGamepkg.JNS
                 bool anyOther = player.Pets.Any(p => p != 0 && p != me);
                 if (type == 0) // HD, case 1: obtain others then eliminate gth1; case 2: obtain gth1
                 {
-                    bool b1 = anyOther && monster.ROMUshort != 0;
-                    string[] g0hd = fuse.Split(',');
-                    bool b2 = g0hd[2] == player.Uid.ToString() && g0hd[4] == me.ToString()
-                        && !anyOther && player.STR > 0;
-                    return b1 || b2;
+                    Artiad.ObtainPet otp = Artiad.ObtainPet.Parse(fuse);
+                    return (anyOther && monster.ROMUshort != 0) || (!anyOther && player.STR > 0 &&
+                        otp.Farmer == player.Uid && otp.SinglePet == me);
                 }
                 else if (type == 1 && monster.ROMUshort == 0 && player.STR > 0)
                     return !anyOther && player.STR > 0;
@@ -3430,7 +3427,7 @@ namespace PSD.PSDGamepkg.JNS
             ushort monValue = XI.LibTuple.ML.Encode(monCode);
             Monster mon = XI.LibTuple.ML.Decode(monValue);
             XI.RaiseGMessage(Artiad.Harm.ToMessage(
-                new Harm(py.Uid, (monValue + 1000), mon.Element, n, mask)));
+                new Artiad.Harm(py.Uid, (monValue + 1000), mon.Element, n, mask)));
         }
 
         private void Harm(string monCode, IEnumerable<Player> invs, int n, long mask = 0)
@@ -3438,8 +3435,8 @@ namespace PSD.PSDGamepkg.JNS
             mask = HPEvoMask.FROM_NMB.Set(mask);
             ushort monValue = XI.LibTuple.ML.Encode(monCode);
             Monster mon = XI.LibTuple.ML.Decode(monValue);
-            XI.RaiseGMessage(Artiad.Harm.ToMessage(invs.Select(p => new Harm(
-                p.Uid, (monValue + 1000), mon.Element, n, mask))));
+            XI.RaiseGMessage(Artiad.Harm.ToMessage(invs.Select(p =>
+                new Artiad.Harm(p.Uid, (monValue + 1000), mon.Element, n, mask))));
         }
 
         private void Harm(string monCode, List<Player> invs, List<int> ns, long mask = 0)
@@ -3449,7 +3446,7 @@ namespace PSD.PSDGamepkg.JNS
             int sz = invs.Count;
             Monster mon = XI.LibTuple.ML.Decode(monValue);
             XI.RaiseGMessage(Artiad.Harm.ToMessage(Enumerable.Range(0, sz).Select
-                (p => new Harm(invs[p].Uid, (monValue + 1000), mon.Element, ns[p], mask))));
+                (p => new Artiad.Harm(invs[p].Uid, (monValue + 1000), mon.Element, ns[p], mask))));
         }
 
         private void Cure(string monCode, Player py, int n, long mask = 0)
@@ -3458,15 +3455,15 @@ namespace PSD.PSDGamepkg.JNS
             ushort monValue = XI.LibTuple.ML.Encode(monCode);
             Monster mon = XI.LibTuple.ML.Decode(monValue);
             XI.RaiseGMessage(Artiad.Cure.ToMessage(
-                new Cure(py.Uid, (monValue + 1000), mon.Element, n, mask)));
+                new Artiad.Cure(py.Uid, (monValue + 1000), mon.Element, n, mask)));
         }
         private void Cure(string monCode, IEnumerable<Player> invs, int n, long mask = 0)
         {
             mask = HPEvoMask.FROM_NMB.Set(mask);
             ushort monValue = XI.LibTuple.ML.Encode(monCode);
             Monster mon = XI.LibTuple.ML.Decode(monValue);
-            XI.RaiseGMessage(Artiad.Cure.ToMessage(invs.Select(p => new Cure(
-                p.Uid, (monValue + 1000), mon.Element, n, mask))));
+            XI.RaiseGMessage(Artiad.Cure.ToMessage(invs.Select(p =>
+                new Artiad.Cure(p.Uid, (monValue + 1000), mon.Element, n, mask))));
         }
 
         private void Cure(string monCode, List<Player> invs, List<int> ns, long mask = 0)
@@ -3476,7 +3473,7 @@ namespace PSD.PSDGamepkg.JNS
             int sz = invs.Count;
             Monster mon = XI.LibTuple.ML.Decode(monValue);
             XI.RaiseGMessage(Artiad.Cure.ToMessage(Enumerable.Range(0, sz).Select
-                (p => new Cure(invs[p].Uid, (monValue + 1000), mon.Element, ns[p], mask))));
+                (p => new Artiad.Cure(invs[p].Uid, (monValue + 1000), mon.Element, ns[p], mask))));
         }
 
         #endregion Monster Effect Util

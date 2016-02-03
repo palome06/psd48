@@ -20,19 +20,19 @@ namespace PSD.PSDGamepkg.JNS
                 string njCode = nj.Code;
                 var methodAction = njc.GetType().GetMethod(njCode + "Action");
                 if (methodAction != null)
-                    nj.Action += new NCAction.ActionDelegate(delegate(Player player, string fuse, string argst)
+                    nj.Action += new NCAction.ActionDelegate(delegate (Player player, string fuse, string argst)
                     {
                         methodAction.Invoke(njc, new object[] { player, fuse, argst });
                     });
                 var methodValid = njc.GetType().GetMethod(njCode + "Valid");
                 if (methodValid != null)
-                    nj.Valid += new NCAction.ValidDelegate(delegate(Player player, string fuse)
+                    nj.Valid += new NCAction.ValidDelegate(delegate (Player player, string fuse)
                     {
                         return (bool)methodValid.Invoke(njc, new object[] { player, fuse });
                     });
                 var methodInput = njc.GetType().GetMethod(njCode + "Input");
                 if (methodInput != null)
-                    nj.Input += new NCAction.InputDelegate(delegate(Player player, string fuse, string prev)
+                    nj.Input += new NCAction.InputDelegate(delegate (Player player, string fuse, string prev)
                     {
                         return (string)methodInput.Invoke(njc, new object[] { player, fuse, prev });
                     });
@@ -80,7 +80,7 @@ namespace PSD.PSDGamepkg.JNS
             XI.RaiseGMessage("G0DH," + who + ",2," + tuxCount);
             if (tp.SelectHero != 0)
                 XI.RaiseGMessage("G0OY,0," + to);
-            
+
             int hp = 2 * tuxCount;
             if (fuse != "R" + XI.Board.Rounder.Uid + "NP" && hp > 3)
                 hp = 3;
@@ -109,7 +109,8 @@ namespace PSD.PSDGamepkg.JNS
                 && p.Team == player.Team && p.Tux.Count > 0).Any();
             return anyFriends && Artiad.ContentRule.IsNPCJoinable(npc, XI);
         }
-        public void NJ02Action(Player player, string fuse, string args) {
+        public void NJ02Action(Player player, string fuse, string args)
+        {
             ushort who = ushort.Parse(args);
             Cure(XI.Board.Garden[who], 1);
         }
@@ -185,7 +186,7 @@ namespace PSD.PSDGamepkg.JNS
                 Farmland = from,
                 SinglePet = pet,
                 Reposit = true,
-                Plot = true,
+                Plow = true,
                 Trophy = false,
                 TreatyAct = Artiad.HarvestPet.Treaty.KOKAN
             }.ToMessage());
@@ -426,12 +427,8 @@ namespace PSD.PSDGamepkg.JNS
         {
             if (type == 0)
                 return true;
-            else if (type == 1) // G0HD,0/1,A,B,x
-            {
-                string[] g0hd = fuse.Split(',');
-                ushort who = ushort.Parse(g0hd[2]);
-                return who == player.Uid;
-            }
+            else if (type == 1)
+                return Artiad.ObtainPet.Parse(fuse).Farmer == player.Uid;
             else
                 return false;
         }

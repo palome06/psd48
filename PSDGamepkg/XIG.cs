@@ -2461,6 +2461,17 @@ namespace PSD.PSDGamepkg
                     if (Artiad.KittyHelper.IsHarvest(cmd))
                     {
                         Artiad.HarvestPet hvp = Artiad.HarvestPet.Parse(cmd);
+                        new Artiad.HarvestPetSemaphore()
+                        {
+                            Farmer = hvp.Farmer,
+                            Pets = hvp.Pets
+                        }.Telegraph(WI.BCast);
+                        //Farmland = 0: Always no HL, Alway has ON
+                        //Reposit = True: no HL, no ON
+                        //Plow = False: no HL
+                        bool bhl = hvp.Farmland == 0 || (!hvp.Reposit && !hvp.Plow);
+                        bool bon = hvp.Farmland == 0 || !hvp.Reposit;
+
                         Player player = Board.Garden[hvp.Farmer];
                         int fivepc = FiveElementHelper.PropCount;
                         List<ushort>[] cpets = new List<ushort>[fivepc];
@@ -2486,9 +2497,12 @@ namespace PSD.PSDGamepkg
                             else if (cpets[i].Count == 1)
                             {
                                 ushort pt = cpets[i].First();
-                                result.Add(pt);
-                                if (hvp.Farmland != 0 && hvp.Plow)
-                                    RaiseGMessage("G0HL," + hvp.Farmland + "," + pt);
+                                if (hvp.Pets.Contains(pt))
+                                {
+                                    result.Add(pt);
+                                    if (bhl)
+                                        RaiseGMessage("G0HL," + hvp.Farmland + "," + pt);
+                                }
                                 continue;
                             }
                             Artiad.HarvestPet.Treaty treaty = hvp.TreatyAct;
@@ -2500,7 +2514,7 @@ namespace PSD.PSDGamepkg
                             if (treaty == Artiad.HarvestPet.Treaty.KOKAN) // KOKAN always recycle
                             {   
                                 ushort ayPt = hvp.SinglePet;
-                                if (hvp.Farmland != 0 && hvp.Plow)
+                                if (bhl)
                                     RaiseGMessage("G0HL," + hvp.Farmland + "," + ayPt);
                                 RaiseGMessage("G0HL," + hvp.Farmer + "," + myPt);
                                 result.Add(ayPt);
@@ -2511,7 +2525,7 @@ namespace PSD.PSDGamepkg
                                 ushort ayPt = hvp.SinglePet;
                                 RaiseGMessage("G0HL," + hvp.Farmer + "," + myPt);
                                 RaiseGMessage("G0ON," + hvp.Farmer + ",M,1," + myPt);
-                                if (hvp.Farmland != 0 && hvp.Plow)
+                                if (bhl)
                                     RaiseGMessage("G0HL," + hvp.Farmland + "," + ayPt);
                                 result.Add(ayPt);
                             }
@@ -2522,26 +2536,31 @@ namespace PSD.PSDGamepkg
                                 ushort sel = ushort.Parse(AsyncInput(hvp.Farmer, mai, cmd, "0"));
                                 if (sel == myPt) // Keep the old one
                                 {
-                                    if (!hvp.Reposit && hvp.Plow)
+                                    if (hvp.Plow)
                                     {
-                                        if (hvp.Farmland != 0)
+                                        if (bhl)
                                             others.ForEach(p => RaiseGMessage("G0HL," + hvp.Farmland + "," + p));
-                                        RaiseGMessage("G0ON," + hvp.Farmland + ",M," +
-                                            others.Count + "," + string.Join(",", others));
+                                        if (bon)
+                                            RaiseGMessage("G0ON," + hvp.Farmland + ",M," + Algo.ListToString(others));
                                     }
                                 }
                                 else
                                 {
                                     RaiseGMessage("G0HL," + hvp.Farmer + "," + myPt);
                                     others.Remove(sel);
-                                    if (!hvp.Reposit && hvp.Plow && others.Count > 0)
+                                    bool removeMe = false;
+                                    if (hvp.Plow && others.Count > 0)
                                     {
-                                        if (hvp.Farmland != 0)
+                                        if (bhl)
                                             others.ForEach(p => RaiseGMessage("G0HL," + hvp.Farmland + "," + p));
-                                        RaiseGMessage("G0ON," + hvp.Farmer + ",M,1," + myPt + "," +
-                                            hvp.Farmland + ",M," + others.Count + "," + string.Join(",", others));
+                                        if (bon)
+                                        {
+                                            RaiseGMessage("G0ON," + hvp.Farmer + ",M,1," + myPt + "," +
+                                               hvp.Farmland + ",M," + Algo.ListToString(others));
+                                            removeMe = true;
+                                        }
                                     }
-                                    else
+                                    if (!removeMe)
                                         RaiseGMessage("G0ON," + hvp.Farmer + ",M,1," + myPt);
                                     result.Add(sel);
                                 }
@@ -2567,11 +2586,6 @@ namespace PSD.PSDGamepkg
                                 Pets = giveBack.ToArray()
                             }.ToMessage());
                         }
-                        new Artiad.HarvestPetSemaphore()
-                        {
-                            Farmer = hvp.Farmland,
-                            Pets = hvp.Pets
-                        }.Telegraph(WI.BCast);
                     }
                     else if (Artiad.KittyHelper.IsTrade(cmd))
                     {

@@ -62,38 +62,25 @@ namespace PSD.PSDGamepkg.JNS
         #region TR002 - XuChangqing
         public bool JNT0201Valid(Player player, int type, string fuse)
         {
-            // G0HD,0,A,B,x
-            string[] blocks = fuse.Split(',');
-            if (player.ROMUshort == 1) // Not valid in JNT0202
-                return false;
-            if (blocks[1] == "0")
-            {
-                ushort who = ushort.Parse(blocks[2]);
-                if (XI.Board.Garden[who].Team == player.OppTeam)
-                    return true;
+            if (Artiad.KittyHelper.IsHarvest(fuse) && player.ROMUshort == 0)
+            { // Not valid in JNT0202
+                Artiad.HarvestPet hvp = Artiad.HarvestPet.Parse(fuse);
+                Func<ushort, bool> enemy = p => XI.Board.Garden[p].Team == player.OppTeam;
+                return enemy(hvp.Farmer) && (hvp.Farmland == 0 || !enemy(hvp.Farmland));
             }
-            else if (blocks[1] == "1")
-            {
-                ushort who = ushort.Parse(blocks[2]);
-                ushort where = ushort.Parse(blocks[3]);
-                if (XI.Board.Garden[who].Team != player.OppTeam)
-                    return false;
-                else if (where != 0 && XI.Board.Garden[who].Team == XI.Board.Garden[where].Team)
-                    return false;
-                else
-                    return true;
-            }
-            return false;
+            else return false;
         }
         public void JNT0201Action(Player player, int type, string fuse, string argst)
         {
-            string input = XI.AsyncInput(player.Uid, "#获得2张补牌,T1(p" + string.Join("p", XI.Board.Garden.Values.Where(
-                p => p.IsTared && p.Team == player.Team).Select(p => p.Uid)) + ")", "JNT0201", "0");
-            ushort who = ushort.Parse(input);
-            VI.Cout(0, "TR徐长卿发动「侠义」，指定我方补牌2张.");
-            if (who != 0)
-                XI.RaiseGMessage("G0DH," + who + ",0,2");
-            //XI.InnerGMessage(fuse, 136);
+            Artiad.HarvestPet hvp = Artiad.HarvestPet.Parse(fuse);
+            for (int i = 0; i < hvp.Pets.Length; ++i)
+            {
+                string input = XI.AsyncInput(player.Uid, "#获得2张补牌,T1" +
+                ATeammatesTared(player), "JNT0201", "0");
+                ushort who = ushort.Parse(input);
+                if (who != 0)
+                    XI.RaiseGMessage("G0DH," + who + ",0,2");
+            }
         }
         public bool JNT0202Valid(Player player, int type, string fuse)
         {
@@ -101,15 +88,15 @@ namespace PSD.PSDGamepkg.JNS
             {
                 bool self = XI.Board.Rounder.Uid == player.Uid;
                 bool isWin = XI.Board.IsBattleWin;
-                Base.Card.Monster m1 = XI.LibTuple.ML.Decode(XI.Board.Monster1);
-                Base.Card.Monster m2 = XI.LibTuple.ML.Decode(XI.Board.Monster2);
-                return self && !isWin && ((m2 != null && m2.Level != Base.Card.Monster.ClLevel.BOSS) ||
-                    (m1 != null && XI.Board.Mon1From == 0 && m1.Level != Base.Card.Monster.ClLevel.BOSS));
+                Monster m1 = XI.LibTuple.ML.Decode(XI.Board.Monster1);
+                Monster m2 = XI.LibTuple.ML.Decode(XI.Board.Monster2);
+                return self && !isWin && ((m2 != null && m2.Level != Monster.ClLevel.BOSS) ||
+                    (m1 != null && XI.Board.Mon1From == 0 && m1.Level != Monster.ClLevel.BOSS));
             }
             else if (type == 1)
             {
-                string[] args = fuse.Split(',');
-                return args[1] == player.Uid.ToString();
+                string[] g1ck = fuse.Split(',');
+                return g1ck[1] == player.Uid.ToString() && g1ck[2] == "JNT0202";
             }
             else
                 return false;
@@ -118,19 +105,19 @@ namespace PSD.PSDGamepkg.JNS
         {
             if (type == 0)
             {
-                //string res = "G1JG," + player.Uid;
-                Base.Card.Monster m1 = XI.LibTuple.ML.Decode(XI.Board.Monster1);
-                Base.Card.Monster m2 = XI.LibTuple.ML.Decode(XI.Board.Monster2);
-                if (m1 != null && m1.Level != Base.Card.Monster.ClLevel.BOSS)
-                    XI.RaiseGMessage("G1JG," + player.Uid + "," + XI.Board.Mon1From + "," + XI.Board.Monster1);
-                if (m2 != null && m2.Level != Base.Card.Monster.ClLevel.BOSS)
-                    XI.RaiseGMessage("G1JG," + player.Uid + ",0," + XI.Board.Monster2);
+                Monster m1 = XI.LibTuple.ML.Decode(XI.Board.Monster1);
+                Monster m2 = XI.LibTuple.ML.Decode(XI.Board.Monster2);
+                if (m1 != null && m1.Level != Monster.ClLevel.BOSS)
+                    XI.RaiseGMessage("G1CK," + player.Uid + ",JNT0202,0");
+                if (m2 != null && m2.Level != Monster.ClLevel.BOSS)
+                    XI.RaiseGMessage("G1CK," + player.Uid + ",JNT0202,1");
             }
             else if (type == 1)
             {
-                string[] fuseargs = fuse.Split(',');
-                ushort monFrom = ushort.Parse(fuseargs[2]);
-                List<ushort> monGet = Algo.TakeRange(fuseargs, 3, fuseargs.Length).Select(p => ushort.Parse(p)).ToList();
+                string[] g1ck = fuse.Split(',');
+                bool first = g1ck[3] == "0";
+                ushort monFrom = first ? XI.Board.Mon1From : (ushort)0;
+                ushort monIt = first ? XI.Board.Monster1 : XI.Board.Monster2;
 
                 if (argst != "")
                 {
@@ -139,14 +126,29 @@ namespace PSD.PSDGamepkg.JNS
                     ushort from = ushort.Parse(argst.Substring(0, idx));
                     ushort pet = ushort.Parse(argst.Substring(idx + 1));
 
-                    string input = XI.AsyncInput(XI.Board.Opponent.Uid, "#获得宠物,T1(p" + string.Join(
-                        "p", XI.Board.Garden.Values.Where(p => p.IsAlive && p.Team == player.OppTeam)
-                        .Select(p => p.Uid)) + ")", "JNT0202", "0");
+                    string input = XI.AsyncInput(XI.Board.Opponent.Uid, "#获得宠物,T1" + FormatPlayers(
+                        p => p.IsAlive && p.Team == player.OppTeam), "JNT0202", "0");
                     ushort to = ushort.Parse(input);
-                    XI.RaiseGMessage("G0HC,1," + to + "," + from + ",1," + pet);
+                    XI.RaiseGMessage(new Artiad.HarvestPet()
+                    {
+                        Farmer = to,
+                        Farmland = from,
+                        SinglePet = pet,
+                        Reposit = true,
+                        Plow = true
+                    }.ToMessage());
                     player.ROMUshort = 0;
                 }
-                XI.RaiseGMessage("G0HC,1," + player.Uid + "," + monFrom + ",1," + string.Join(",", monGet));
+                XI.RaiseGMessage(new Artiad.HarvestPet()
+                {
+                    Farmer = player.Uid,
+                    Farmland = monFrom,
+                    SinglePet = monIt,
+                    Reposit = false,
+                    Plow = true,
+                    Trophy = true,
+                    TreatyAct = Artiad.HarvestPet.Treaty.PASSIVE
+                }.ToMessage());
             }
         }
         public string JNT0202Input(Player player, int type, string fuse, string prev)
@@ -192,12 +194,19 @@ namespace PSD.PSDGamepkg.JNS
         }
         public void JNT0302Action(Player player, int type, string fuse, string argst)
         {
-            VI.Cout(0, "TR云天青发动「转轮镜台」将宠物交给队友.");
-            string[] args = argst.Split(',');
-            ushort pt = ushort.Parse(args[0]);
-            ushort to = ushort.Parse(args[1]);
-            XI.RaiseGMessage("G0HC,1," + to + "," + player.Uid + ",1," + pt);
-            XI.RaiseGMessage("G0DH," + player.Uid + ",0,2");
+            int idx = argst.IndexOf(',');
+            ushort pt = ushort.Parse(argst.Substring(0, idx));
+            ushort to = ushort.Parse(argst.Substring(idx + 1));
+            XI.RaiseGMessage(new Artiad.HarvestPet()
+            {
+                Farmer = to,
+                Farmland = player.Uid,
+                SinglePet = pt,
+                Trophy = false,
+                Reposit = false,
+                Plow = true,
+                TreatyAct = Artiad.HarvestPet.Treaty.PASSIVE
+            }.ToMessage());
         }
         public string JNT0302Input(Player player, int type, string fuse, string prev)
         {
@@ -3505,27 +3514,45 @@ namespace PSD.PSDGamepkg.JNS
         }
         #endregion TR027 - Qianye
         #region TR028 - Wuhou
+        //public bool JNT0201Valid(Player player, int type, string fuse)
+        //{
+        //    if (Artiad.KittyHelper.IsHarvest(fuse) && player.ROMUshort == 0)
+        //    { // Not valid in JNT0202
+        //        Artiad.HarvestPet hvp = Artiad.HarvestPet.Parse(fuse);
+        //        Func<ushort, bool> enemy = p => XI.Board.Garden[p].Team == player.OppTeam;
+        //        return enemy(hvp.Farmer) && (hvp.Farmland == 0 || !enemy(hvp.Farmland));
+        //    }
+        //    else return false;
+        //}
+        //public void JNT0201Action(Player player, int type, string fuse, string argst)
+        //{
+        //    string input = XI.AsyncInput(player.Uid, "#获得2张补牌,T1" +
+        //        ATeammatesTared(player), "JNT0201", "0");
+        //    ushort who = ushort.Parse(input);
+        //    if (who != 0)
+        //        XI.RaiseGMessage("G0DH," + who + ",0,2");
+        //}
         public bool JNT2801Valid(Player player, int type, string fuse)
         {
-            string[] blocks = fuse.Split(',');
-            if (blocks[1] == "0")
-                return true;
-            else if (blocks[1] == "1")
-            {
-                ushort who = ushort.Parse(blocks[2]);
-                ushort where = ushort.Parse(blocks[3]);
-                return !(where != 0 && XI.Board.Garden[who].Team == XI.Board.Garden[where].Team);
+            if (Artiad.KittyHelper.IsHarvest(fuse) && player.ROMUshort == 0)
+            { // Not valid in JNT0202
+                Artiad.HarvestPet hvp = Artiad.HarvestPet.Parse(fuse);
+                return hvp.Farmland == 0 || XI.Board.Garden[hvp.Farmer].Team
+                    == XI.Board.Garden[hvp.Farmland].OppTeam;
             }
-            return false;
+            else return false;
         }
         public void JNT2801Action(Player player, int type, string fuse, string argst)
         {
-            string input = XI.AsyncInput(player.Uid, "#获得1张补牌,T1(p" + string.Join(
-                "p", XI.Board.Garden.Values.Where(p => p.IsTared && p.Team == player.Team)
-                .Select(p => p.Uid)) + ")", "JNT2801", "0");
-            ushort who = ushort.Parse(input);
-            if (who != 0)
-                XI.RaiseGMessage("G0DH," + who + ",0,1");
+            Artiad.HarvestPet hvp = Artiad.HarvestPet.Parse(fuse);
+            for (int i = 0; i < hvp.Pets.Length; ++i)
+            {
+                string input = XI.AsyncInput(player.Uid, "#获得补牌,T1" +
+                    ATeammatesTared(player), "JNT2801", "0");
+                ushort who = ushort.Parse(input);
+                if (who != 0)
+                    XI.RaiseGMessage("G0DH," + who + ",0,1");
+            }
         }
         public bool JNT2802Valid(Player player, int type, string fuse)
         {

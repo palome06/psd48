@@ -597,7 +597,7 @@ namespace PSD.PSDGamepkg
                  "OJ", "IE", "OE", "IS", "OS", "LH", "IV", "OV", "PB", "YM", "HR", "FI", "ON", "SN",
                  "MA", "ZJ", "IF", "OF", "PQ" };
             string[] g1 = new string[] { "DI", "IU", "OU", "TH", "CW", "ZK", "IZ", "OZ", "WP", "SG",
-                 "HK", "WJ", "JG", "XR", "EV", "CK", "7F", "YP", "NI", "GE", "LY", "UE" };
+                 "HK", "WJ", "XR", "EV", "CK", "7F", "YP", "NI", "GE", "LY", "UE" };
             string[] g2 = new string[] { "IN", "RN", "CN", "QC", "FU", "QU", "CL", "ZU", "HU", "WK",
                  "AK", "IL", "OL", "SW", "AS", "SY" };
             foreach (string g0event in g0)

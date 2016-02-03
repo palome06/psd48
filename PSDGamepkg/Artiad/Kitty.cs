@@ -32,6 +32,11 @@ namespace PSD.PSDGamepkg.Artiad
         // Treaty
         public Treaty TreatyAct { set; get; }
 
+        public HarvestPet()
+        {
+            Trophy = false; TreatyAct = Treaty.ACTIVE;
+            Farmland = 0; Reposit = false; Plow = true;
+        }
         public string ToMessage()
         {
             int mask = (int)TreatyAct;
@@ -61,8 +66,10 @@ namespace PSD.PSDGamepkg.Artiad
     {
         public ushort A { set; get; }
         public ushort[] AGoods { set; get; }
+        public ushort ASinglePet { set { AGoods = new ushort[] { value }; } }
         public ushort B { set; get; }
         public ushort[] BGoods { set; get; }
+        public ushort BSinglePet { set { BGoods = new ushort[] { value }; } }
         public string ToMessage()
         {
             return "G0HC,1," + A + "," + Algo.ListToString(AGoods.ToList()) +
@@ -98,9 +105,11 @@ namespace PSD.PSDGamepkg.Artiad
             set { Pets = new ushort[] { value }; }
             get { return (Pets != null && Pets.Length == 1) ? Pets[0] : (ushort)0; }
         }
+        public ObtainPet() { Farmland = 0; Trophy = false; }
         public string ToMessage()
         {
-            return "G0HD," + Farmer + "," + Farmland + "," + (Trophy ? 1 : 0) + string.Join(",", Pets);
+            return "G0HD," + Farmer + "," + Farmland + "," +
+                (Trophy ? 1 : 0) + "," + string.Join(",", Pets);
         }
         public static ObtainPet Parse(string line)
         {
