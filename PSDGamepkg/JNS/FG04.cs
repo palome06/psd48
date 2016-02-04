@@ -1380,18 +1380,17 @@ namespace PSD.PSDGamepkg.JNS
                 int sum = pick.Sum(p => XI.LibTuple.ML.Decode(p).STR);
                 if (sum >= 4 || pick.Count == na)
                 {
-                    foreach (ushort ut in pick)
+                    Artiad.ContentRule.GetPetOwnershipTable(pick, XI).ToList().ForEach(p =>
                     {
-                        foreach (Player py in XI.Board.Garden.Values)
+                        if (p.Key != 0)
                         {
-                            if (py.Pets.Contains(ut))
+                            XI.RaiseGMessage(new Artiad.LosePet()
                             {
-                                XI.RaiseGMessage("G0HL," + py.Uid + "," + ut);
-                                XI.RaiseGMessage("G0ON," + py.Uid + ",M,1," + ut);
-                                break;
-                            }
+                                Owner = p.Key,
+                                Pets = p.ToArray()
+                            }.ToMessage());
                         }
-                    }
+                    });
                     done = true;
                 }
             }
@@ -3416,6 +3415,10 @@ namespace PSD.PSDGamepkg.JNS
                     return !anyOther && monster.ROMUshort != player.STR;
             }
             return false;
+        }
+        public void GTH2Debut()
+        {
+            // 5 -> 3 -> 1 -> 2 -> 4 -> 6
         }
         #endregion Package HL
 

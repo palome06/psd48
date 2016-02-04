@@ -203,26 +203,17 @@ namespace PSD.PSDGamepkg
                         foreach (ushort ut in players)
                         {
                             Player player = Board.Garden[ut];
-                            List<ushort> g2onuts = new List<ushort>();
-                            foreach (ushort pt in player.Pets)
-                            {
-                                if (pt != 0)
-                                {
-                                    RaiseGMessage("G0HL," + ut + "," + pt);
-                                    g2onuts.Add(pt);
-                                }
-                            }
+                            ushort[] pets = player.Pets.Where(p => p != 0).ToArray();
+                            if (pets.Length > 0)
+                                RaiseGMessage(new Artiad.LosePet() { Owner = ut, Pets = pets }.ToMessage());
                             if (player.Escue.Count > 0)
                             {
                                 List<ushort> esc = player.Escue.ToList();
                                 player.Escue.Clear();
                                 RaiseGMessage("G2OL," + string.Join(",", esc.Select(
                                     p => (player.Uid + "," + p))));
-                                g2onuts.AddRange(esc);
+                                RaiseGMessage("G0ON," + ut + ",M," + Algo.ListToString(esc));
                             }
-                            if (g2onuts.Count > 0)
-                                RaiseGMessage("G0ON," + ut + ",M," + g2onuts.Count
-                                     + "," + string.Join(",", g2onuts));
                             if (player.Runes.Count > 0)
                                 RaiseGMessage("G0OF," + player.Uid + "," + string.Join(",", player.Runes));
                         }
@@ -2466,12 +2457,13 @@ namespace PSD.PSDGamepkg
                             Farmer = hvp.Farmer,
                             Pets = hvp.Pets
                         }.Telegraph(WI.BCast);
-                        //Farmland = 0: Always no HL, Alway has ON
-                        //Reposit = True: no HL, no ON
-                        //Plow = False: no HL
-                        bool bhl = hvp.Farmland == 0 || (!hvp.Reposit && !hvp.Plow);
-                        bool bon = hvp.Farmland == 0 || !hvp.Reposit;
-
+                        // Item,         HL, ON
+                        // Farmland = 0  Y   -
+                        //          / 0  -   -
+                        // Reposite = T  N   N
+                        //          = F  -   -
+                        // Plow     = T  Y   Y
+                        //          = F  N   Y
                         Player player = Board.Garden[hvp.Farmer];
                         int fivepc = FiveElementHelper.PropCount;
                         List<ushort>[] cpets = new List<ushort>[fivepc];
@@ -2500,8 +2492,15 @@ namespace PSD.PSDGamepkg
                                 if (hvp.Pets.Contains(pt))
                                 {
                                     result.Add(pt);
-                                    if (bhl)
-                                        RaiseGMessage("G0HL," + hvp.Farmland + "," + pt);
+                                    if (hvp.Farmland != 0 && hvp.Plow)
+                                    {
+                                        RaiseGMessage(new Artiad.LosePet()
+                                        {
+                                            Owner = hvp.Farmland,
+                                            SinglePet = pt,
+                                            Recycle = false
+                                        }.ToMessage());
+                                    }
                                 }
                                 continue;
                             }
@@ -2512,21 +2511,43 @@ namespace PSD.PSDGamepkg
                                 treaty = Artiad.HarvestPet.Treaty.ACTIVE;
                             ushort myPt = player.Pets[i];
                             if (treaty == Artiad.HarvestPet.Treaty.KOKAN) // KOKAN always recycle
-                            {   
+                            {
                                 ushort ayPt = hvp.SinglePet;
-                                if (bhl)
-                                    RaiseGMessage("G0HL," + hvp.Farmland + "," + ayPt);
-                                RaiseGMessage("G0HL," + hvp.Farmer + "," + myPt);
+                                if (hvp.Farmland != 0 && hvp.Plow)
+                                {
+                                    RaiseGMessage(new Artiad.LosePet()
+                                    {
+                                        Owner = hvp.Farmland,
+                                        SinglePet = ayPt,
+                                        Recycle = false
+                                    }.ToMessage());
+                                }
+                                RaiseGMessage(new Artiad.LosePet()
+                                {
+                                    Owner = hvp.Farmer,
+                                    SinglePet = myPt,
+                                    Recycle = false
+                                }.ToMessage());
                                 result.Add(ayPt);
                                 giveBack.Add(myPt);
                             }
                             else if (treaty == Artiad.HarvestPet.Treaty.PASSIVE)
                             {
                                 ushort ayPt = hvp.SinglePet;
-                                RaiseGMessage("G0HL," + hvp.Farmer + "," + myPt);
-                                RaiseGMessage("G0ON," + hvp.Farmer + ",M,1," + myPt);
-                                if (bhl)
-                                    RaiseGMessage("G0HL," + hvp.Farmland + "," + ayPt);
+                                RaiseGMessage(new Artiad.LosePet()
+                                {
+                                    Owner = hvp.Farmer,
+                                    SinglePet = myPt
+                                }.ToMessage());
+                                if (hvp.Farmland != 0 && hvp.Plow)
+                                {
+                                    RaiseGMessage(new Artiad.LosePet()
+                                    {
+                                        Owner = hvp.Farmland,
+                                        SinglePet = ayPt,
+                                        Recycle = false
+                                    }.ToMessage());
+                                }
                                 result.Add(ayPt);
                             }
                             else // ACTIVE
@@ -2536,32 +2557,40 @@ namespace PSD.PSDGamepkg
                                 ushort sel = ushort.Parse(AsyncInput(hvp.Farmer, mai, cmd, "0"));
                                 if (sel == myPt) // Keep the old one
                                 {
-                                    if (hvp.Plow)
+                                    if (hvp.Farmland != 0 && !hvp.Reposit && hvp.Plow)
                                     {
-                                        if (bhl)
-                                            others.ForEach(p => RaiseGMessage("G0HL," + hvp.Farmland + "," + p));
-                                        if (bon)
-                                            RaiseGMessage("G0ON," + hvp.Farmland + ",M," + Algo.ListToString(others));
+                                        RaiseGMessage(new Artiad.LosePet()
+                                        {
+                                            Owner = hvp.Farmland,
+                                            Pets = others.ToArray(),
+                                            Recycle = false
+                                        }.ToMessage());
                                     }
+                                    if (!hvp.Reposit)
+                                        RaiseGMessage("G0ON," + hvp.Farmland + ",M," + Algo.ListToString(others));
                                 }
                                 else
                                 {
-                                    RaiseGMessage("G0HL," + hvp.Farmer + "," + myPt);
                                     others.Remove(sel);
-                                    bool removeMe = false;
+                                    RaiseGMessage(new Artiad.LosePet()
+                                    {
+                                        Owner = hvp.Farmer,
+                                        SinglePet = myPt
+                                    }.ToMessage());
                                     if (hvp.Plow && others.Count > 0)
                                     {
-                                        if (bhl)
-                                            others.ForEach(p => RaiseGMessage("G0HL," + hvp.Farmland + "," + p));
-                                        if (bon)
+                                        if (hvp.Farmland != 0 && !hvp.Reposit && hvp.Plow)
                                         {
-                                            RaiseGMessage("G0ON," + hvp.Farmer + ",M,1," + myPt + "," +
-                                               hvp.Farmland + ",M," + Algo.ListToString(others));
-                                            removeMe = true;
+                                            RaiseGMessage(new Artiad.LosePet()
+                                            {
+                                                Owner = hvp.Farmland,
+                                                Pets = others.ToArray(),
+                                                Recycle = false
+                                            }.ToMessage());
                                         }
+                                        if (!hvp.Reposit)
+                                            RaiseGMessage("G0ON," + hvp.Farmland + ",M," + Algo.ListToString(others));
                                     }
-                                    if (!removeMe)
-                                        RaiseGMessage("G0ON," + hvp.Farmer + ",M,1," + myPt);
                                     result.Add(sel);
                                 }
                             }
@@ -2590,28 +2619,38 @@ namespace PSD.PSDGamepkg
                     else if (Artiad.KittyHelper.IsTrade(cmd))
                     {
                         Artiad.TradePet tdp = Artiad.TradePet.Parse(cmd);
-                        tdp.AGoods.ToList().ForEach(p => RaiseGMessage("G0HL," + tdp.A + "," + p));
-                        tdp.BGoods.ToList().ForEach(p => RaiseGMessage("G0HL," + tdp.B + "," + p));
-                        RaiseGMessage(new Artiad.HarvestPet()
-                        {
-                            Farmer = tdp.A,
-                            Farmland = tdp.B,
-                            Pets = tdp.BGoods.ToArray(),
-                            Trophy = false,
-                            Reposit = false,
-                            Plow = false,
-                            TreatyAct = Artiad.HarvestPet.Treaty.ACTIVE
-                        }.ToMessage());
-                        RaiseGMessage(new Artiad.HarvestPet()
-                        {
-                            Farmer = tdp.B,
-                            Farmland = tdp.A,
-                            Pets = tdp.AGoods.ToArray(),
-                            Trophy = false,
-                            Reposit = false,
-                            Plow = false,
-                            TreatyAct = Artiad.HarvestPet.Treaty.ACTIVE
-                        }.ToMessage());
+                        if (tdp.AGoods.Length > 0)
+                            RaiseGMessage(new Artiad.LosePet()
+                            {
+                                Owner = tdp.A,
+                                Pets = tdp.AGoods,
+                                Recycle = false
+                            }.ToMessage());
+                        if (tdp.BGoods.Length > 0)
+                            RaiseGMessage(new Artiad.LosePet()
+                            {
+                                Owner = tdp.B,
+                                Pets = tdp.BGoods,
+                                Recycle = false
+                            }.ToMessage());
+                        if (tdp.BGoods.Length > 0)
+                            RaiseGMessage(new Artiad.HarvestPet()
+                            {
+                                Farmer = tdp.A,
+                                Farmland = tdp.B,
+                                Pets = tdp.BGoods.ToArray(),
+                                Reposit = false,
+                                Plow = false
+                            }.ToMessage());
+                        if (tdp.AGoods.Length > 0)
+                            RaiseGMessage(new Artiad.HarvestPet()
+                            {
+                                Farmer = tdp.B,
+                                Farmland = tdp.A,
+                                Pets = tdp.AGoods.ToArray(),
+                                Reposit = false,
+                                Plow = false
+                            }.ToMessage());
                     }
                     break;
                 case "G0HD":
@@ -2672,10 +2711,7 @@ namespace PSD.PSDGamepkg
                                     RaiseGMessage("G2HU," + me + "," + mons);
                                 }
                                 else
-                                {
-                                    RaiseGMessage("G0HL," + me + "," + mons);
-                                    RaiseGMessage("G0ON," + me + ",M,1," + mons);
-                                }
+                                    RaiseGMessage(new Artiad.LosePet() { Owner = me, SinglePet = mons }.ToMessage());
                             }
                             // discard pets after fight finished
                             WI.BCast("E0HH," + me + "," + consumeType + "," + mons + "," + sktInType + cargsv);
@@ -2690,30 +2726,29 @@ namespace PSD.PSDGamepkg
                     }
                 case "G0HI":
                     {
-                        // to mark as to be discard
-                        IDictionary<ushort, List<ushort>> imc = new Dictionary<ushort, List<ushort>>();
-                        // to discard immediately
                         IDictionary<ushort, List<ushort>> jmc = new Dictionary<ushort, List<ushort>>();
                         for (int i = 1; i < args.Length; i += 2)
                         {
                             ushort who = ushort.Parse(args[i]);
                             ushort pet = ushort.Parse(args[i + 1]);
-                            if (Board.InFight)
-                            {
-                                RaiseGMessage("G1HK,0," + who + "," + pet);
-                                Algo.AddToMultiMap(imc, who, pet);
-                            }
-                            else
-                            {
-                                RaiseGMessage("G0HL," + who + "," + pet);
-                                Algo.AddToMultiMap(jmc, who, pet);
-                            }
+                            Algo.AddToMultiMap(jmc, who, pet);
                         }
-                        foreach (var pair in imc)
-                            RaiseGMessage("G2HU," + pair.Key + "," + string.Join(",", pair.Value));
-                        if (jmc.Count > 0)
-                            RaiseGMessage("G0ON," + string.Join(",", jmc.Select(p => p.Key + ",M," +
-                                 p.Value.Count + "," + string.Join(",", p.Value))));
+                        if (Board.InFight) // to mark as to be discard
+                        {
+                            jmc.Keys.ToList().ForEach(p =>
+                            {
+                                jmc[p].ForEach(q => RaiseGMessage("G1HK,0," + p + "," + q));
+                                RaiseGMessage("G2HU," + p + "," + string.Join(",", jmc[p]));
+                            });
+                        }
+                        else // to discard immediately
+                        {
+                            jmc.Keys.ToList().ForEach(p => RaiseGMessage(new Artiad.LosePet()
+                            {
+                                Owner = p,
+                                Pets = jmc[p].ToArray()
+                            }.ToMessage()));
+                        }
                         WI.BCast("E0HI," + cmdrst);
                     }
                     break;
@@ -2733,33 +2768,34 @@ namespace PSD.PSDGamepkg
                             Player py = Board.Garden[who];
                             ushort mons = ushort.Parse(line.Substring(idx + 1));
                             if (py.Pets.Contains(mons))
-                            {
-                                RaiseGMessage("G0HL," + who + "," + mons);
-                                RaiseGMessage("G0ON," + who + ",M,1," + mons);
-                            }
+                                RaiseGMessage(new Artiad.LosePet() { Owner = who, SinglePet = mons }.ToMessage());
                         }
                         Board.CsPets.Clear();
                     }
                     break;
                 case "G0HL":
                     {
-                        ushort who = ushort.Parse(args[1]);
-                        ushort which = ushort.Parse(args[2]);
-                        Monster pet = LibTuple.ML.Decode(which);
-                        int pe = pet.Element.Elem2Index();
-                        Player player = Board.Garden[who];
-                        if (player.Pets[pe] == which)
+                        Artiad.LosePet lp = Artiad.LosePet.Parse(cmd);
+                        Player player = Board.Garden[lp.Owner];
+                        ushort[] pets = lp.Pets.Where(p => player.Pets[
+                            LibTuple.ML.Decode(p).Element.Elem2Index()] == p).ToArray();
+                        if (pets.Length > 0)
                         {
-                            if (!player.PetDisabled && !Board.NotActionPets.Contains(which))
-                                RaiseGMessage("G0OC,0," + who + "," + which);
-                            WI.BCast("E0HL," + who + "," + which);
-                            Board.Garden[who].Pets[pe] = 0;
-                            RaiseGMessage("G0WB," + which);
+                            foreach (ushort pet in lp.Pets)
+                            {
+                                if (!player.PetDisabled && !Board.NotActionPets.Contains(pet))
+                                    RaiseGMessage("G0OC,0," + lp.Owner + "," + pet);
+                                player.Pets[LibTuple.ML.Decode(pet).Element.Elem2Index()] = 0;
+                                RaiseGMessage("G0WB," + pet);
+                            }
+                            new Artiad.LosePetSemaphore() { Owner = lp.Owner, Pets = pets }.Telegraph(WI.BCast);
                             RaiseGMessage("G2WK," + string.Join(",",
                                 CalculatePetsScore().Select(p => p.Key + "," + p.Value)));
+                            if (lp.Recycle)
+                                RaiseGMessage("G0ON," + lp.Owner + ",M," + Algo.ListToString(pets.ToList()));
                         }
-                        break;
                     }
+                    break;
                 case "G0IC":
                     {
                         for (int i = 1; i < args.Length; i += 3)

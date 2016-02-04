@@ -713,10 +713,16 @@ namespace PSD.PSDGamepkg.JNS
                         ushort sm = ushort.Parse(selM);
                         Monster pet = XI.LibTuple.ML.Decode(sm);
                         XI.RaiseGMessage("G0TT," + rd.Uid);
-                        if (XI.Board.DiceValue + rd.STR > pet.STR) {
-                            XI.RaiseGMessage("G0HL," + st + "," + sm);
-                            XI.RaiseGMessage("G0ON," + st + ",M,1," + sm);
-                        } else {
+                        if (XI.Board.DiceValue + rd.STR > pet.STR)
+                        {
+                            XI.RaiseGMessage(new Artiad.LosePet()
+                            {
+                                Owner = st,
+                                SinglePet = sm
+                            }.ToMessage());
+                        }
+                        else
+                        {
                             XI.RaiseGMessage(Artiad.Harm.ToMessage(
                                 new Artiad.Harm(rd.Uid, (sm + 1000), pet.Element, n + 2, 0)));
                         }

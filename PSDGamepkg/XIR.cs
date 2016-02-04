@@ -466,8 +466,7 @@ namespace PSD.PSDGamepkg
                                         SinglePet = Board.Monster1,
                                         Trophy = true,
                                         Reposit = true,
-                                        Plow = false,
-                                        TreatyAct = Artiad.HarvestPet.Treaty.ACTIVE
+                                        Plow = false
                                     }.ToMessage());
                                     mon1zero = true;
                                 }
@@ -480,8 +479,7 @@ namespace PSD.PSDGamepkg
                                         SinglePet = Board.Monster2,
                                         Trophy = true,
                                         Reposit = true,
-                                        Plow = false,
-                                        TreatyAct = Artiad.HarvestPet.Treaty.ACTIVE
+                                        Plow = false
                                     }.ToMessage());
                                     mon2zero = true;
                                 }
@@ -611,7 +609,7 @@ namespace PSD.PSDGamepkg
                                 if (!Board.Rounder.IsAlive && Board.Garden.Values.Any(p => p.IsAlive && p.HP == 0))
                                     RaiseGMessage("G0ZH,1");
                             } });
-                        if (Board.GetNextPlayer(rounder) != null)
+                        if (Board.GetNextPlayer(rounder) != 0)
                             rstage = "R" + Board.GetNextPlayer(rounder) + "00";
                         else if (Board.Rounder.IsAlive)
                             RaiseGMessage("G0WN," + Board.Rounder.Team);

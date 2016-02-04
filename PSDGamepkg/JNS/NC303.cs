@@ -185,9 +185,6 @@ namespace PSD.PSDGamepkg.JNS
                 Farmer = to,
                 Farmland = from,
                 SinglePet = pet,
-                Reposit = true,
-                Plow = true,
-                Trophy = false,
                 TreatyAct = Artiad.HarvestPet.Treaty.KOKAN
             }.ToMessage());
         }

@@ -202,9 +202,6 @@ namespace PSD.PSDGamepkg.JNS
                 Farmer = to,
                 Farmland = player.Uid,
                 SinglePet = pt,
-                Trophy = false,
-                Reposit = false,
-                Plow = true,
                 TreatyAct = Artiad.HarvestPet.Treaty.PASSIVE
             }.ToMessage());
         }
@@ -213,9 +210,7 @@ namespace PSD.PSDGamepkg.JNS
             if (prev == "")
                 return "/M1(p" + string.Join("p", player.Pets.Where(p => p != 0)) + ")";
             else if (prev.IndexOf(',') < 0)
-                return "#交给宠物,/T1(p" + string.Join("p", XI.Board.Garden.Values
-                    .Where(p => p.IsTared && p.Uid != player.Uid && p.Team == player.Team)
-                    .Select(q => q.Uid)) + ")";
+                return "#交给宠物,/T1" + AFriendsTared(player);
             else
                 return "";
         }
@@ -1834,17 +1829,17 @@ namespace PSD.PSDGamepkg.JNS
                 int sum = pick.Sum(p => XI.LibTuple.ML.Decode(p).STR);
                 if (sum >= total || pick.Count == na)
                 {
-                    foreach (ushort ut in pick)
+                    Artiad.ContentRule.GetPetOwnershipTable(pick, XI).ToList().ForEach(p =>
                     {
-                        foreach (Player py in XI.Board.Garden.Values)
+                        if (p.Key != 0)
                         {
-                            if (py.Pets.Contains(ut))
+                            XI.RaiseGMessage(new Artiad.LosePet()
                             {
-                                XI.RaiseGMessage("G0HL," + py.Uid + "," + ut);
-                                break;
-                            }
+                                Owner = p.Key,
+                                Pets = p.ToArray()
+                            }.ToMessage());
                         }
-                    }
+                    });
                     done = true;
                 }
             }
@@ -3366,8 +3361,11 @@ namespace PSD.PSDGamepkg.JNS
             ushort meFrom = ushort.Parse(argst.Substring(0, idx));
             ushort petUt = ushort.Parse(argst.Substring(idx + 1));
             TargetPlayer(player.Uid, meFrom);
-            XI.RaiseGMessage("G0HL," + meFrom + "," + petUt);
-            XI.RaiseGMessage("G0ON," + meFrom + ",M,1," + petUt);
+            XI.RaiseGMessage(new Artiad.LosePet()
+            {
+                Owner = meFrom,
+                SinglePet = petUt
+            }.ToMessage());
             Monster pet = XI.LibTuple.ML.Decode(petUt);
             int fiveIdx = pet.Element.Elem2Index();
             if (XI.Board.Garden.Values.Any(p => p.Team == player.OppTeam && p.Pets[fiveIdx] != 0))
@@ -3380,8 +3378,11 @@ namespace PSD.PSDGamepkg.JNS
                 {
                     ushort monUt = ushort.Parse(monStr);
                     ushort opFrom = XI.Board.Garden.Values.First(p => p.Pets[fiveIdx] == monUt).Uid;
-                    XI.RaiseGMessage("G0HL," + opFrom + "," + monUt);
-                    XI.RaiseGMessage("G0ON," + opFrom + ",M,1," + monUt);
+                    XI.RaiseGMessage(new Artiad.LosePet()
+                    {
+                        Owner = opFrom,
+                        SinglePet = monUt
+                    }.ToMessage());
 
                     Monster mon = XI.LibTuple.ML.Decode(monUt);
                     if (mon.Level == Monster.ClLevel.WEAK)
@@ -3514,24 +3515,6 @@ namespace PSD.PSDGamepkg.JNS
         }
         #endregion TR027 - Qianye
         #region TR028 - Wuhou
-        //public bool JNT0201Valid(Player player, int type, string fuse)
-        //{
-        //    if (Artiad.KittyHelper.IsHarvest(fuse) && player.ROMUshort == 0)
-        //    { // Not valid in JNT0202
-        //        Artiad.HarvestPet hvp = Artiad.HarvestPet.Parse(fuse);
-        //        Func<ushort, bool> enemy = p => XI.Board.Garden[p].Team == player.OppTeam;
-        //        return enemy(hvp.Farmer) && (hvp.Farmland == 0 || !enemy(hvp.Farmland));
-        //    }
-        //    else return false;
-        //}
-        //public void JNT0201Action(Player player, int type, string fuse, string argst)
-        //{
-        //    string input = XI.AsyncInput(player.Uid, "#获得2张补牌,T1" +
-        //        ATeammatesTared(player), "JNT0201", "0");
-        //    ushort who = ushort.Parse(input);
-        //    if (who != 0)
-        //        XI.RaiseGMessage("G0DH," + who + ",0,2");
-        //}
         public bool JNT2801Valid(Player player, int type, string fuse)
         {
             if (Artiad.KittyHelper.IsHarvest(fuse) && player.ROMUshort == 0)
@@ -4067,8 +4050,11 @@ namespace PSD.PSDGamepkg.JNS
             ushort who = ushort.Parse(argst.Substring(0, idx));
             ushort pet = ushort.Parse(argst.Substring(idx + 1));
             TargetPlayer(player.Uid, who);
-            XI.RaiseGMessage("G0HL," + who + "," + pet);
-            XI.RaiseGMessage("G0ON," + who + ",M,1," + pet);
+            XI.RaiseGMessage(new Artiad.LosePet()
+            {
+                Owner = who,
+                SinglePet = pet
+            }.ToMessage());
             player.ROMUshort = 1;
             if (player.DEXh > 0)
                 XI.RaiseGMessage("G0OX," + player.Uid + ",0," + player.DEXh);

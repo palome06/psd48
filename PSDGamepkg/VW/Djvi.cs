@@ -33,12 +33,12 @@ namespace PSD.PSDGamepkg.VW
         public Djvi(int count, Log log)
         {
             this.count = count;
-            this.cvQueues = new Queue<string>[count + 1];
-            this.cinReqCount = new LockableInteger[count + 1];
-            this.cinGate = new bool[count + 1];
-            rqQueues = new Queue<string>[count + 1];
+            this.cvQueues = new Queue<string>[this.count + 1];
+            this.cinReqCount = new LockableInteger[this.count + 1];
+            this.cinGate = new bool[this.count + 1];
+            rqQueues = new Queue<string>[this.count + 1];
             this.Log = log;
-            for (int i = 0; i < count + 1; ++i)
+            for (int i = 0; i < this.count + 1; ++i)
             {
                 cvQueues[i] = new Queue<string>();
                 cinReqCount[i] = new LockableInteger(0);

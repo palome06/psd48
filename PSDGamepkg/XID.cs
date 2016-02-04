@@ -58,16 +58,15 @@ namespace PSD.PSDGamepkg
             //17008, 15008, 10201, 17037, 19021, 19006
             //15002, 17007, 10105, 17021, 19018, 10502
             //17039, 19018, 17027, 17022, 17034, 17042
-            //17023, 17036, 17027, 10305, 17034, 17025
             //17029, 17036, 17027, 17045, 17043, 17040
             //17024, 17036, 19007, 17045, 19013, 17040
-            //17029, 10305, 15002, 19016, 15001, 17004
+            //17023, 10305, 15002, 19016, 15001, 17004
             //17029, 10206, 17005, 17040, 17027, 19003
             //19014, 17029, 19010, 19004, 19015, 17032
             //17035, 19002, 17044, 17019, 10605, 17036
             //17044, 19002, 17026, 10404, 17036, 10502
             //19014, 19006, 19018, 19011, 17035, 19010
-            15002, 10102, 17008, 17039, 19011, 19010
+            17013, 15005, 17008, 17039, 19011, 19010
         };
 
         private void DebugCondition()
@@ -113,12 +112,13 @@ namespace PSD.PSDGamepkg
             //Board.MonPiles.PushBack(41);
             //Board.MonPiles.PushBack(13);
             //Board.MonPiles.PushBack(49);
-            ////Board.MonPiles.PushBack(24);
-            ////Board.MonPiles.PushBack(25);
-            ////Board.MonPiles.PushBack(24);
-            ////Board.MonPiles.PushBack(23);
-            ////Board.MonPiles.PushBack(22);
+            //Board.MonPiles.PushBack(24);
+            //Board.MonPiles.PushBack(25);
+            //Board.MonPiles.PushBack(24);
+            //Board.MonPiles.PushBack(23);
+            //Board.MonPiles.PushBack(22);
             Board.MonPiles.PushBack(47);
+            Board.MonPiles.PushBack(49);
             //Board.MonPiles.PushBack(1001);
             //Board.MonPiles.PushBack(32);
             //Board.MonPiles.PushBack(1103);
@@ -139,7 +139,7 @@ namespace PSD.PSDGamepkg
             //Board.EveDises.Add(Board.EvePiles.Dequeue());
             //Board.EvePiles.PushBack(52);
             //Board.EvePiles.PushBack(29);
-            //Board.EvePiles.PushBack(31);
+            Board.EvePiles.PushBack(31);
             //Board.EvePiles.PushBack(9);
             //Board.RestNPCPiles.PushBack(1067);
             // Board.HeroPiles.PushBack(19003);
@@ -248,7 +248,7 @@ namespace PSD.PSDGamepkg
             //RaiseGMessage("G0HQ,2,1,0,0,90,92");
             //RaiseGMessage("G0HQ,2,1,0,0,101,127");
             //RaiseGMessage("G0HQ,2,4,0,0,104");
-            //RaiseGMessage("G0HQ,2,5,0,0,76");
+            RaiseGMessage("G0HQ,2,1,0,0,77,99");
             //RaiseGMessage("G0HQ,2,6,0,0,101");
             //RaiseGMessage("G0HQ,2,1,0,47,50,49,5,63,8,69");
             //RaiseGMessage("G0HQ,2,3,0,0,37");
@@ -377,9 +377,9 @@ namespace PSD.PSDGamepkg
             //     .Select(p => new Artiad.Harm(p, 1, FiveElement.YINN, 5, 0))));
             //RaiseGMessage(Artiad.Harm.ToMessage(new ushort[] { 1, 4, 5, 6 }
             //    .Select(p => new Artiad.Harm(p, 1, FiveElement.YIN, 6, 0))));
-            //RaiseGMessage(Artiad.Harm.ToMessage(new Artiad.Harm(1, 1, FiveElement.AQUA, 7, 0)));
+            RaiseGMessage(Artiad.Harm.ToMessage(new Artiad.Harm(1, 1, FiveElement.AQUA, 8, 0)));
             //RaiseGMessage(Artiad.Harm.ToMessage(new Artiad.Harm(5, 5, FiveElement.AQUA, 4, 0)));
-            //RaiseGMessage(Artiad.Harm.ToMessage(new Artiad.Harm(4, 4, FiveElement.AQUA, 4, 0)));
+            RaiseGMessage(Artiad.Harm.ToMessage(new Artiad.Harm(2, 2, FiveElement.AQUA, 5, 0)));
             //Board.Garden[3].Escue.Add(1112);
             //RaiseGMessage("G2IL,3,1112");
             //RaiseGMessage("G0IF,6,3,4,6");

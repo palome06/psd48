@@ -232,15 +232,15 @@ namespace PSD.Base
             }
             return list;
         }
-        public ushort? GetNextPlayer(ushort rounder)
+        public ushort GetNextPlayer(ushort rounder)
         {
-            List<ushort> ordered = OrderedPlayer();
-            foreach (ushort ut in ordered)
-            {
-                if (ut != rounder && Garden[ut].IsAlive)
-                    return ut;
-            }
-            return null;
+            return OrderedPlayer().FirstOrDefault(p => p != rounder && Garden[p].IsAlive);
+        }
+        public ushort GetPrevPlayer(ushort rounder)
+        {
+            List<ushort> op = OrderedPlayer().ToList();
+            op.Reverse();
+            return op.FirstOrDefault(p => p != rounder && Garden[p].IsAlive);
         }
 
         public Board()

@@ -77,6 +77,7 @@
     <Image x:Key="petsnapGFH1" Source="PetsSnap/GFH1.png" ToolTip="无相天妖"/>
     <Image x:Key="petsnapGFH2" Source="PetsSnap/GFH2.png" ToolTip="大眼蛙"/>
     <Image x:Key="petsnapGTH1" Source="PetsSnap/GTH1.png" ToolTip="木桩"/>
+    <Image x:Key="petsnapGTH2" Source="PetsSnap/GTH2.png" ToolTip="蚩尤魂"/>
 
     <Image x:Key="petsnapGIT1" Source="PetsSnap/GIT1.png" ToolTip="TR鬼将军"/>
     <Image x:Key="petsnapGIT2" Source="PetsSnap/GIT2.png" ToolTip="TR虞蛇"/>
@@ -661,6 +662,7 @@
     <Image x:Key="monCardGFH1" Source="Card/NMB/GFH1.png"/>
     <Image x:Key="monCardGFH2" Source="Card/NMB/GFH2.png"/>
     <Image x:Key="monCardGTH1" Source="Card/NMB/GTH1.png"/>
+    <Image x:Key="monCardGTH2" Source="Card/NMB/GTH2.png"/>
 
     <Image x:Key="monCardNCH01" Source="Card/NMB/NCH01.png"/>
     <Image x:Key="monCardNCH02" Source="Card/NMB/NCH02.png"/>

@@ -123,6 +123,32 @@ namespace PSD.PSDGamepkg.Artiad
             };
         }
     }
+    // lose pet
+    public class LosePet
+    {
+        public ushort Owner { set; get; }
+        // pets
+        public ushort[] Pets { set; get; }
+        // single pet case
+        public ushort SinglePet { set { Pets = new ushort[] { value }; } }
+        // whether need to put it into piles
+        public bool Recycle { set; get; }
+        public LosePet() { Recycle = true; }
+        public string ToMessage()
+        {
+            return "G0HL," + (Recycle ? 1 : 0) + "," + Owner + "," + string.Join(",", Pets);
+        }
+        public static LosePet Parse(string line)
+        {
+            ushort[] g0hl = line.Substring("G0HL,".Length).Split(',').Select(p => ushort.Parse(p)).ToArray();
+            return new LosePet()
+            {
+                Owner = g0hl[1],
+                Pets = Algo.TakeRange(g0hl, 2, g0hl.Length),
+                Recycle = (g0hl[0] == 1)
+            };
+        }
+    }
 
     public class HarvestPetSemaphore
     {
@@ -154,6 +180,18 @@ namespace PSD.PSDGamepkg.Artiad
         public void Telegraph(Action<string> send)
         {
             send("E0HD," + Farmer + "," + Farmland + "," + string.Join(",", Pets));
+        }
+    }
+
+    public class LosePetSemaphore
+    {
+        public ushort Owner { set; get; }
+        public ushort[] Pets { set; get; }
+        // single pet case
+        public ushort SinglePet { set { Pets = new ushort[] { value }; } }
+        public void Telegraph(Action<string> send)
+        {
+            send("E0HL," + Owner + "," + string.Join(",", Pets));
         }
     }
 

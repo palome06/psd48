@@ -2296,12 +2296,11 @@ namespace PSD.ClientAo
                 case "E0HL":
                     {
                         ushort who = ushort.Parse(args[1]);
-                        ushort pet = ushort.Parse(args[2]);
-                        VI.Cout(Uid, "{0}失去了宠物{1}.", zd.Player(who), zd.Monster(pet));
-                        Monster monster = Tuple.ML.Decode(pet);
-                        int five = monster.Element.Elem2Index();
-                        A0P[who].DelPet(pet);
-                        A0O.FlyingGet("M" + pet, who, 0);
+                        List<ushort> pets = Algo.TakeRange(args, 2, args.Length)
+                             .Select(p => ushort.Parse(p)).ToList();
+                        VI.Cout(Uid, "{0}失去了宠物{1}.", zd.Player(who), zd.Monster(pets));
+                        A0P[who].DelPet(pets);
+                        A0O.FlyingGet(pets.Select(p => "M" + p), who, 0);
                     }
                     break;
                 case "E0HU":

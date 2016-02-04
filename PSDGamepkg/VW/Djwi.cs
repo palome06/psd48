@@ -114,7 +114,6 @@ namespace PSD.PSDGamepkg.VW
                 {
                     if (queue.Count > 0)
                     {
-                        List<Base.VW.Msgs> dels = new List<Base.VW.Msgs>();
                         foreach (Base.VW.Msgs msg in queue)
                         {
                             if (!msg.Direct)

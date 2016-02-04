@@ -117,14 +117,6 @@ namespace PSD.PSDGamepkg.JNS
         }
         #endregion XJ102 - ZhaoLing'er
         #region XJ103 - Mengshe
-        //public bool JN10301Valid(Player player, int type, string fuse)
-        //{
-        //    return JN10201Valid(player, type, fuse);
-        //}
-        //public void JN10301Action(Player player, int type, string fuse, string argst)
-        //{
-        //    JN10201Action(player, type, fuse, argst);
-        //}
         public bool JN10302Valid(Player player, int type, string fuse)
         {
             if (player.IsAlive && XI.Board.Garden.Values.Where(p => p.IsAlive &&
@@ -1009,10 +1001,13 @@ namespace PSD.PSDGamepkg.JNS
                 if (!input.StartsWith("/") && input != VI.CinSentinel)
                 {
                     ushort pet = ushort.Parse(input);
-                    ushort who = XI.Board.Garden.Values.Where(p => p.Pets[elem] == pet).Single().Uid;
+                    ushort who = Artiad.ContentRule.GetPetOwnership(pet, XI);
                     TargetPlayer(player.Uid, who);
-                    XI.RaiseGMessage("G0HL," + who + "," + pet);
-                    XI.RaiseGMessage("G0ON," + who + ",M,1," + pet);
+                    XI.RaiseGMessage(new Artiad.LosePet()
+                    {
+                        Owner = who,
+                        SinglePet = pet
+                    }.ToMessage());
                 }
             }
         }
@@ -2166,12 +2161,8 @@ namespace PSD.PSDGamepkg.JNS
                         XI.RaiseGMessage(new Artiad.HarvestPet()
                         {
                             Farmer = who,
-                            Farmland = 0,
                             SinglePet = mon,
-                            Reposit = false,
-                            Plow = true,
-                            Trophy = false,
-                            TreatyAct = Artiad.HarvestPet.Treaty.ACTIVE
+                            Plow = false,
                         }.ToMessage());
                     }
                     else
@@ -2564,11 +2555,9 @@ namespace PSD.PSDGamepkg.JNS
         public void JN60602Action(Player player, int type, string fuse, string argst)
         {
             XI.RaiseGMessage("G0DH," + player.Uid + ",3");
-            List<ushort> pets = player.Pets.Where(p => p != 0).ToList();
-            foreach (ushort ut in pets)
-                XI.RaiseGMessage("G0HL," + player.Uid + "," + ut);
-            if (pets.Count > 0)
-                XI.RaiseGMessage("G0ON," + player.Uid + ",M," + pets.Count + "," + string.Join(",", pets));
+            ushort[] pets = player.Pets.Where(p => p != 0).ToArray();
+            if (pets.Length > 0)
+                XI.RaiseGMessage(new Artiad.LosePet() { Owner = player.Uid, Pets = pets }.ToMessage());
             List<int> souls = player.TokenExcl.Where(p => p.StartsWith("H"))
                 .Select(p => int.Parse(p.Substring("H".Length))).ToList();
             if (souls.Count > 0)
@@ -3407,9 +3396,7 @@ namespace PSD.PSDGamepkg.JNS
             ushort who = ushort.Parse(argst.Substring(0, idx));
             ushort pet = ushort.Parse(argst.Substring(idx + 1));
             TargetPlayer(player.Uid, who);
-            XI.RaiseGMessage("G0HL," + who + "," + pet);
-            XI.RaiseGMessage("G0ON," + who + ",M,1," + pet);
-            //XI.InnerGMessage("G1WJ,0", 91);
+            XI.RaiseGMessage(new Artiad.LosePet() { Owner = who, SinglePet = pet }.ToMessage());
         }
         public bool JNS0702Valid(Player player, int type, string fuse)
         {

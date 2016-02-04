@@ -796,8 +796,6 @@ namespace PSD.PSDGamepkg.JNS
                                 Farmer = to,
                                 Farmland = from.Uid,
                                 SinglePet = pet,
-                                Reposit = true,
-                                Plow = true,
                                 TreatyAct = Artiad.HarvestPet.Treaty.KOKAN
                             }.ToMessage());
                             break;
@@ -1147,7 +1145,7 @@ namespace PSD.PSDGamepkg.JNS
                 hint += "##交换宠物";
             int cnt = 1 + (xgTuxValid ? 1 : 0) + (xgPetValid ? 1 : 0);
             string input = XI.AsyncInput(player.Uid, hint + ",Y" + cnt, "JPT3", "0");
-            if (input == "2")
+            if (input == "2" && xgTuxValid)
             {
                 string targets = XI.AsyncInput(player.Uid, "#交换手牌,T2(p" + string.Join("p", v.Where(
                     p => p.IsTared && p.Team == player.Team && p.Tux.Count > 0).Select(p => p.Uid))
@@ -1159,7 +1157,7 @@ namespace PSD.PSDGamepkg.JNS
                 TargetPlayer(player.Uid, new ushort[] { iv, jv });
                 XI.RaiseGMessage("G1XR,2," + iv + "," + jv + ",0," + mn);
             }
-            else if (input == "3")
+            else if (input == "2" || input == "3")
             {
                 string targets = XI.AsyncInput(player.Uid, "#交换宠物,T2(p" + string.Join("p", v.Where(
                     p => p.IsTared && p.Team == player.Team && p.GetPetCount() > 0).Select(p => p.Uid))
@@ -1249,7 +1247,7 @@ namespace PSD.PSDGamepkg.JNS
         }
         public bool TPT3Valid(Player player, int type, string fuse)
         {
-            string[] kekkaiA = new string[] { "TP01,0", "TPT3,0", "TPT3,1", "ZPT4,0" };
+            string[] kekkaiA = new string[] { "TP01,0", "TPT3,0", "TPT3,1", "ZPT4,0", "TPH2,0" };
             string[] kekkaiB = new string[] { "ZP01,0", "TPT1,0" };
             // G0CD,A,T,KN,x..;TF
             if (type == 0)
@@ -2323,12 +2321,8 @@ namespace PSD.PSDGamepkg.JNS
                         XI.RaiseGMessage(new Artiad.HarvestPet()
                         {
                             Farmer = ut,
-                            Farmland = 0,
                             SinglePet = cd,
-                            Reposit = false,
-                            Plow = true,
-                            Trophy = false,
-                            TreatyAct = Artiad.HarvestPet.Treaty.ACTIVE
+                            Plow = false,
                         }.ToMessage());
                     }
                 }
@@ -2344,14 +2338,18 @@ namespace PSD.PSDGamepkg.JNS
                 if (!inputWho.Contains(VI.CinSentinel))
                 {
                     ushort who = ushort.Parse(inputWho);
-                    string inputMon = XI.AsyncInput(player.Uid, "#弃置宠物,/M1(p" + string.Join("p",
-                        XI.Board.Garden[who].Pets.Where(p => p != 0)), "JPH4", "2");
+                    List<ushort> pts = XI.Board.Garden[who].Pets.Where(p => p != 0).ToList();
+                    string inputMon = XI.AsyncInput(player.Uid, "#弃置宠物,/M1" + (pts.Count > 1 ?
+                        ("~" + pts.Count) : "") + "(p" + string.Join("p", pts) + ")", "JPH4", "2");
                     if (!inputMon.Contains(VI.CinSentinel) && !inputMon.StartsWith("/"))
                     {
-                        ushort pet = ushort.Parse(inputMon);
-                        XI.RaiseGMessage("G0HL," + who + "," + pet);
-                        XI.RaiseGMessage("G0ON," + who + ",M,1," + pet);
-                        ++popCount;
+                        ushort[] pets = inputMon.Split(',').Select(p => ushort.Parse(p)).ToArray();
+                        XI.RaiseGMessage(new Artiad.LosePet()
+                        {
+                            Owner = who,
+                            Pets = pets
+                        }.ToMessage());
+                        popCount += pets.Length;
                     }
                 }
             }

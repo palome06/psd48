@@ -76,6 +76,18 @@ namespace PSD.PSDGamepkg.Artiad
             return heros;
         }
 
+        public static ILookup<ushort, ushort> GetPetOwnershipTable(IEnumerable<ushort> pets, XI xi)
+        {
+            return pets.ToList().ToLookup(p => GetPetOwnership(p, xi), p => p);
+        }
+        public static ushort GetPetOwnership(ushort pet, XI xi)
+        {
+            Monster mon = xi.LibTuple.ML.Decode(pet);
+            int idx = mon.Element.Elem2Index();
+            Player py = xi.Board.Garden.Values.SingleOrDefault(p => p.Pets[idx] == pet);
+            return py != null ? py.Uid : (ushort)0;
+        }
+
         #region Sparse Base Rules
 
         public static bool IsTuxUsableEveryWhere(Tux tux)

@@ -107,14 +107,16 @@ namespace PSD.PSDGamepkg.JNS
                 if (mon2.STR >= mon1.STR)
                 {
                     mon1.Curtain();
-                    if (XI.Board.Mon1From != 0)
-                        XI.RaiseGMessage("G0HL," + XI.Board.Mon1From + "," + XI.Board.Monster1);
-                    XI.RaiseGMessage("G0WB," + XI.Board.Monster1);
-                    XI.RaiseGMessage("G0ON," + XI.Board.Mon1From + ",M,1," + XI.Board.Monster1);
+                    XI.RaiseGMessage(new Artiad.LosePet()
+                    {
+                        Owner = XI.Board.Mon1From,
+                        SinglePet = XI.Board.Monster1,
+                        Recycle = true
+                    }.ToMessage());
                     XI.RaiseGMessage("G0YM,0,0,0");
                     XI.Board.Monster1 = 0;
 
-                    mon2.WinEff();
+                    XI.RaiseGMessage("G1GE,W," + mon2);
                     XI.RaiseGMessage("G0WB," + XI.Board.Monster2);
                     XI.RaiseGMessage("G0ON,0,M,1," + XI.Board.Monster2);
                     XI.RaiseGMessage("G0YM,1,0,0");
@@ -231,7 +233,8 @@ namespace PSD.PSDGamepkg.JNS
                         XI.RaiseGMessage(new Artiad.HarvestPet()
                         {
                             Farmer = player.Uid,
-                            SinglePet = mon
+                            SinglePet = mon,
+                            Plow = false
                         }.ToMessage());
                     }
                 }
@@ -1843,8 +1846,9 @@ namespace PSD.PSDGamepkg.JNS
             {
                 XI.RaiseGMessage(new Artiad.HarvestPet()
                 {
-                    Farmer = player.Uid,
-                    SinglePet = mon
+                    Farmer = tar,
+                    SinglePet = mon,
+                    Plow = false
                 }.ToMessage());
                 XI.RaiseGMessage("G0ZW," + player.Uid);
             }
@@ -2327,8 +2331,6 @@ namespace PSD.PSDGamepkg.JNS
                 Farmer = to,
                 Farmland = from,
                 SinglePet = pet,
-                Reposit = true,
-                Plow = true,
                 TreatyAct = type == 0 ? Artiad.HarvestPet.Treaty.KOKAN : Artiad.HarvestPet.Treaty.ACTIVE
             }.ToMessage());
         }
@@ -2546,10 +2548,8 @@ namespace PSD.PSDGamepkg.JNS
             }
             else if (type == 6)
             {
-                string[] g0hl = fuse.Split(',');
-                ushort card = ushort.Parse(g0hl[2]);
-                Monster monster = XI.LibTuple.ML.Decode(card);
-                return monster != null && monster.Element == adv;
+                Artiad.LosePet lpt = Artiad.LosePet.Parse(fuse);
+                return lpt.Pets.Any(p => XI.LibTuple.ML.Decode(p).Element == adv);
             }
             else
                 return false;
@@ -2618,11 +2618,9 @@ namespace PSD.PSDGamepkg.JNS
             }
             else if (type == 6)
             {
-                string[] g0hl = fuse.Split(',');
-                ushort card = ushort.Parse(g0hl[2]);
-                Monster monster = XI.LibTuple.ML.Decode(card);
-                if (monster.Element == adv)
-                    XI.Board.NotActionPets.Remove(card);
+                Artiad.LosePet lpt = Artiad.LosePet.Parse(fuse);
+                lpt.Pets.Where(p => XI.LibTuple.ML.Decode(p).Element == adv)
+                    .ToList().ForEach(p => XI.Board.NotActionPets.Add(p));
             }
         }
         public bool JNH1603Valid(Player player, int type, string fuse)

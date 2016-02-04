@@ -152,13 +152,15 @@ namespace PSD.PSDGamepkg.JNS
         }
         protected string ATeammates(Player py)
         {
-            return "(p" + string.Join("p", XI.Board.Garden.Values.Where(
-                p => p.IsAlive && p.Team == py.Team).Select(p => p.Uid)) + ")";
+            return FormatPlayers(p => p.IsAlive & p.Team == py.Team);
         }
         protected string ATeammatesTared(Player py)
         {
-            return "(p" + string.Join("p", XI.Board.Garden.Values.Where(
-                p => p.IsTared && p.Team == py.Team).Select(p => p.Uid)) + ")";
+            return FormatPlayers(p => p.IsTared & p.Team == py.Team);
+        }
+        protected string AFriendsTared(Player py)
+        {
+            return FormatPlayers(p => p.IsTared & p.Team == py.Team && p.Uid != py.Uid);
         }
         protected string AEnemy(Player py)
         {

@@ -2036,9 +2036,10 @@ namespace PSD.ClientZero
                 case "E0HL":
                     {
                         ushort who = ushort.Parse(args[1]);
-                        ushort pet = ushort.Parse(args[2]);
-                        VI.Cout(Uid, "{0}失去了宠物{1}.", zd.Player(who), zd.Monster(pet));
-                        Z0D[who].Pets.Remove(pet);
+                        List<ushort> pets = Algo.TakeRange(args, 2, args.Length)
+                            .Select(p => ushort.Parse(p)).ToList();
+                        VI.Cout(Uid, "{0}失去了宠物{1}.", zd.Player(who), zd.Monster(pets));
+                        Z0D[who].Pets.RemoveAll(p => pets.Contains(p));
                     }
                     break;
                 case "E0HZ":

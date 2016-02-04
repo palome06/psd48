@@ -252,7 +252,7 @@ namespace PSD.PSDGamepkg.VW
                         dictCount[name].Add(ny.Uid);
                     }
                 }
-                List<List<ushort>> rests = dictCount.Values.Where(p => p.Count > 1).ToList();
+                //List<List<ushort>> rests = dictCount.Values.Where(p => p.Count > 1).ToList();
                 var pq = new DS.PriorityQueue<List<ushort>>(new DS.ListSizeComparer<ushort>());
                 foreach (var list in dictCount.Values)
                 {
@@ -689,7 +689,6 @@ namespace PSD.PSDGamepkg.VW
                 {
                     if (queue.Count > 0)
                     {
-                        List<Base.VW.Msgs> dels = new List<Base.VW.Msgs>();
                         foreach (Base.VW.Msgs msg in queue)
                         {
                             if (!msg.Direct)
