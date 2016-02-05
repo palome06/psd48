@@ -87,6 +87,11 @@ namespace PSD.PSDGamepkg.Artiad
             Player py = xi.Board.Garden.Values.SingleOrDefault(p => p.Pets[idx] == pet);
             return py != null ? py.Uid : (ushort)0;
         }
+        public static ushort GetExspOwnership(ushort exsp, XI xi)
+        {
+            Player py = xi.Board.Garden.Values.SingleOrDefault(p => p.TokenExcl.Contains("I" + exsp));
+            return py != null ? py.Uid : (ushort)0;
+        }
 
         #region Sparse Base Rules
 

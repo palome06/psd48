@@ -1633,8 +1633,15 @@ namespace PSD.PSDGamepkg.JNS
             {
                 string opt = XI.AsyncInput(player.Uid, "#免疫伤害,V1(p" + string.Join("p",
                     FiveElementHelper.GetPropedElements().Select(p => p.Elem2Int())) + ")", "GHT4IncrAction", "0");
-                mon.ROMUshort = ushort.Parse(opt);
-                XI.RaiseGMessage("G2FU,2," + player.Uid + ",V," + opt);
+                ushort five = ushort.Parse(opt);
+                mon.ROMUshort = five;
+                XI.RaiseGMessage(new Artiad.AnnouceCard()
+                {
+                    Action = Artiad.AnnouceCard.Type.DECLARE,
+                    Officer = player.Uid,
+                    Genre = Card.Genre.Five,
+                    SingleCard = five
+                }.ToMessage());
             }
         }
         public void GHT4DecrAction(Player player)
@@ -2747,14 +2754,14 @@ namespace PSD.PSDGamepkg.JNS
         }
         public void GSH1Debut()
         {
-            ushort x = XI.LibTuple.ML.Encode("GSH1");
-            Player rd = XI.Board.Rounder;
-            if (x != 0 && XI.Board.Rounder.Pets.Contains(x))
+            ushort gsh1 = XI.LibTuple.ML.Encode("GSH1");
+            ushort owner = Artiad.ContentRule.GetPetOwnership(gsh1, XI);
+            if (owner != 0)
             {
                 int inc = XI.Board.Garden.Values.Where(p => p.IsAlive &&
-                    p.Team == rd.Team).Sum(p => p.GetPetCount());
+                    p.Team == XI.Board.Garden[owner].Team).Sum(p => p.GetPetCount());
                 if (inc > 0)
-                    XI.RaiseGMessage("G0IB," + x + "," + (inc * 2));
+                    XI.RaiseGMessage("G0IB," + gsh1 + "," + (inc * 2));
             }
         }
         public void GSH1WinEff()
@@ -2763,8 +2770,8 @@ namespace PSD.PSDGamepkg.JNS
             if (rd.GetAllCardsCount() > 0)
             {
                 int n = rd.GetAllCardsCount();
-                string dises = XI.AsyncInput(rd.Uid, "#弃置的,/Q1" + (n > 1 ? ("~" + n) : "") + "(p" + 
-                    string.Join("p", rd.ListOutAllCards()) + "),#补牌的,/T1" + AOthers(rd), "GSH1WinEff", "0");
+                string dises = XI.AsyncInput(rd.Uid, "#弃置以补牌,/Q1" + (n > 1 ? ("~" + n) : "") + "(p" + 
+                    string.Join("p", rd.ListOutAllCards()) + "),#补牌,/T1" + AOthers(rd), "GSH1WinEff", "0");
                 if (!dises.StartsWith("/") && !dises.Contains(VI.CinSentinel))
                 {
                     ushort[] uts = dises.Split(',').Select(p => ushort.Parse(p)).ToArray();
@@ -3088,6 +3095,32 @@ namespace PSD.PSDGamepkg.JNS
             else if (consumeType == 2)
                 return true;
             return false;
+        }
+        public void GLH1Debut()
+        {
+            ushort glh1 = XI.LibTuple.ML.Encode("GLH1");
+            int cnt = XI.Board.Garden.Values.Count(p => !p.IsAlive || p.HP < p.HPb);
+            if (cnt > 0)
+                XI.RaiseGMessage("G0OW," + glh1 + "," + cnt);
+        }
+        public void GLH1WinEff()
+        {
+            List<Player> invs = XI.Board.Garden.Values.Where(p => p.IsAlive &&
+                p.Team == XI.Board.Rounder.Team && p.GetPetCount() > 0).ToList();
+            if (invs.Any())
+                XI.RaiseGMessage("G0DH," + string.Join(",", invs.Select(p => p.Uid + ",0," + p.GetPetCount())));
+        }
+        public void GLH1LoseEff()
+        {
+            List<Player> invs = XI.Board.Garden.Values.Where(p => p.IsAlive &&
+                p.Team == XI.Board.Rounder.Team && p.Tux.Count > 0 && XI.Board.Facer(p).IsAlive).ToList();
+            if (invs.Any())
+            {
+                IDictionary<ushort, string> ans = XI.MultiAsyncInput(invs.ToDictionary(p => p.Uid,
+                    p => "#交给对面的,Q1(p" + string.Join("p", p.Tux) + ")"));
+                ans.ToList().ForEach(p => XI.RaiseGMessage("G0HQ,0," + XI.Board.Facer(XI.Board.Garden[p.Key]).Uid +
+                    "," + string.Join(",", p.Key + ",1,1," + p.Value)));
+            }
         }
         public void GLH2WinEff()
         {
@@ -3419,6 +3452,30 @@ namespace PSD.PSDGamepkg.JNS
         public void GTH2Debut()
         {
             // 5 -> 3 -> 1 -> 2 -> 4 -> 6
+        }
+        public void GTH2WinEff()
+        {
+            List<Player> pys = XI.Board.Garden.Values.Where(p => p.IsAlive && p.Tux.Count > 0).ToList();
+            if (pys.Any())
+                XI.RaiseGMessage("G1XR,1,0,0," + string.Join(",", pys.Select(p => p.Uid)));
+            pys = XI.Board.Garden.Values.Where(p => p.IsAlive && p.Tux.Count != 3).ToList();
+            if (pys.Any())
+            {
+                XI.RaiseGMessage("G0DH," + string.Join(",", pys.Select(p => p.Tux.Count > 3 ? (
+                    p.Uid + ",1," + (p.Tux.Count - 3)) : (p.Uid + ",0," + (3 - p.Tux.Count)))));
+            }
+        }
+        public void GTH2LoseEff()
+        {
+            List<Player> pys = XI.Board.Garden.Values.Where(p => p.IsAlive && p.Tux.Count != 3).ToList();
+            if (pys.Any())
+            {
+                XI.RaiseGMessage("G0DH," + string.Join(",", pys.Select(p => p.Tux.Count > 3 ? (
+                    p.Uid + ",1," + (p.Tux.Count - 3)) : (p.Uid + ",0," + (3 - p.Tux.Count)))));
+            }
+            pys = XI.Board.Garden.Values.Where(p => p.IsAlive && p.Tux.Count > 0).ToList();
+            if (pys.Any())
+                XI.RaiseGMessage("G1XR,1,0,0," + string.Join(",", pys.Select(p => p.Uid)));
         }
         #endregion Package HL
 

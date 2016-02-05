@@ -770,7 +770,7 @@ namespace PSD.PSDGamepkg.JNS
             ushort card = ushort.Parse(argst);
             if (card != 0)
             {
-                XI.RaiseGMessage("G0ZC," + player.Uid + ",2," + card + ";" + fuse);
+                XI.RaiseGMessage("G0ZI," + player.Uid + "," + card);
                 XI.RaiseGMessage("G0IA," + player.Uid + ",1,3");
             }
         }
@@ -843,7 +843,7 @@ namespace PSD.PSDGamepkg.JNS
             ushort to = ushort.Parse(argst.Substring(idx + 1));
             if (card != 0)
             {
-                XI.RaiseGMessage("G0ZC," + player.Uid + ",2," + card + ";" + fuse);
+                XI.RaiseGMessage("G0ZI," + player.Uid + "," + card);
                 Harm(player, XI.Board.Garden[to], 3);
             }
         }
@@ -2155,7 +2155,13 @@ namespace PSD.PSDGamepkg.JNS
                     XI.RaiseGMessage("G2IN,1,1");
                     if (mon == 0)
                         break;
-                    XI.RaiseGMessage("G2SW," + py.Uid + ",1," + mon);
+                    XI.RaiseGMessage(new Artiad.AnnouceCard()
+                    {
+                        Action = Artiad.AnnouceCard.Type.DISCOVERY,
+                        Officer = py.Uid,
+                        Genre = Card.Genre.NMB,
+                        SingleCard = mon
+                    }.ToMessage());
                     if (NMBLib.IsMonster(mon))
                     {
                         XI.RaiseGMessage(new Artiad.HarvestPet()
@@ -3099,16 +3105,20 @@ namespace PSD.PSDGamepkg.JNS
                 ushort who = ushort.Parse(argst.Substring(0, idx));
                 ushort card = ushort.Parse(argst.Substring(idx + 1));
                 XI.Board.ProtectedTux.Add(card);
-                XI.RaiseGMessage("G2FU,2," + who + ",C," + card);
+                XI.RaiseGMessage(new Artiad.AnnouceCard()
+                {
+                    Action = Artiad.AnnouceCard.Type.SHOW,
+                    Officer = who,
+                    Genre = Card.Genre.Five,
+                    SingleCard = card
+                }.ToMessage());
                 player.RAMUshort = card;
-                //XI.InnerGMessage(fuse, 91);
             }
             else if (type == 1)
             {
                 if (player.RAMUshort != 0)
                     XI.Board.ProtectedTux.Remove(player.RAMUshort);
                 player.RAMUshort = 0;
-                //XI.InnerGMessage(fuse, 141);
             }
         }
         public bool JNS0802Valid(Player player, int type, string fuse)

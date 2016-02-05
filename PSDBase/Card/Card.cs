@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace PSD.Base.Card
 {
-    public class Card
+    public static class Card
     {
         private static Random randomSeed = new Random();
         /// <summary>
@@ -76,6 +76,26 @@ namespace PSD.Base.Card
             else if (pkgCode == 5)
                 pkgs = new int[] { 1, 2, 3, 4, 5, 6, 7 };
             return pkgs;
+        }
+
+        public enum Genre { NIL, Tux, NMB, Eve, TuxSerial, Rune, Five, Exsp }
+        public static char Genre2Char(this Genre genre)
+        {
+            return new char[] { ' ', 'C', 'M', 'E', 'G', 'R', 'F', 'I' }[(int)genre];
+        }
+        public static Genre Char2Genre(this char @char)
+        {
+            switch (@char)
+            {
+                case 'C': return Genre.Tux;
+                case 'M': return Genre.NMB;
+                case 'E': return Genre.Eve;
+                case 'G': return Genre.TuxSerial;
+                case 'F': return Genre.Rune;
+                case 'V': return Genre.Five;
+                case 'I': return Genre.Exsp;
+                default: return Genre.NIL;
+            }
         }
     }
 }

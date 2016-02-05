@@ -643,6 +643,56 @@ namespace PSD.ClientAo.VW
                     else if (type == 1)
                         line = "E0HC," + who + "," + string.Join(",", Algo.TakeRange(e0hc, 5, e0hc.Length));
                 }
+                else if (line.StartsWith("E0SW"))
+                {
+                    string[] e0sw = line.Split(',');
+                    e0sw[0] += ",3";
+                    if (e0sw[2] == "0")
+                        e0sw[2] = "C";
+                    else if (e0sw[2] == "1")
+                        e0sw[2] = "M";
+                    else if (e0sw[2] == "2")
+                        e0sw[2] = "E";
+                    line = string.Join(",", e0sw);
+                }
+                else if (line.StartsWith("E0FU"))
+                {
+                    string[] e0fu = line.Split(',');
+                    if (e0fu[1] == "2")
+                        line = "E0SW" + line.Substring("E0FU".Length);
+                    else if (e0fu[1] == "5")
+                    {
+                        ushort who = ushort.Parse(e0fu[2]);
+                        string[] cards = Algo.TakeRange(e0fu, 3, e0fu.Length);
+                        line = "E0SW,2," + who + ",G," + cards;
+                    }
+                }
+                else if (line.StartsWith("E0HH"))
+                {
+                    string[] e0hh = line.Split(',');
+                    ushort consumeType = ushort.Parse(e0hh[2]);
+                    if (consumeType == 1)
+                    {
+                        ushort me = ushort.Parse(e0hh[1]);
+                        ushort mons = ushort.Parse(e0hh[3]);
+                        line = "E0HI," + me + "," + mons;
+                    }
+                }
+                else if (line.StartsWith("E0ZC"))
+                {
+                    string[] e0zc = line.Split(',');
+                    ushort me = ushort.Parse(e0zc[1]);
+                    ushort consumeType = ushort.Parse(e0zc[2]);
+                    // ushort where = ushort.Parse(args[3]);
+                    ushort card = ushort.Parse(e0zc[4]);
+                    if (consumeType == 2)
+                        line = "E0ZI," + me + "," + card;
+                    else
+                    {
+                        string rest = string.Join(",", Algo.TakeRange(e0zc, 4, e0zc.Length));
+                        line = "E0ZC," + me + "," + consumeType + "," + rest;
+                    }
+                }
             }
         }
         #endregion Version

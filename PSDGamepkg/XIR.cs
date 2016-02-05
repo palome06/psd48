@@ -225,11 +225,25 @@ namespace PSD.PSDGamepkg
                             {
                                 ushort cdCode = ushort.Parse(decision.Substring("PT".Length));
                                 isFight = true; sprUid = (ushort)(cdCode + 1000);
+                                RaiseGMessage(new Artiad.AnnouceCard()
+                                {
+                                    Action = Artiad.AnnouceCard.Type.FLASH,
+                                    Officer = Artiad.ContentRule.GetPetOwnership(cdCode, this),
+                                    Genre = Card.Genre.NMB,
+                                    SingleCard = cdCode
+                                }.ToMessage());
                             }
                             else if (decision.StartsWith("I"))
                             {
                                 ushort cdCode = ushort.Parse(decision.Substring("I".Length));
                                 isFight = true; sprUid = (ushort)(cdCode + 3000);
+                                RaiseGMessage(new Artiad.AnnouceCard()
+                                {
+                                    Action = Artiad.AnnouceCard.Type.FLASH,
+                                    Officer = Artiad.ContentRule.GetExspOwnership(cdCode, this),
+                                    Genre = Card.Genre.Exsp,
+                                    SingleCard = cdCode
+                                }.ToMessage());
                             }
                             else if (decision.StartsWith("/"))
                             {
@@ -280,11 +294,25 @@ namespace PSD.PSDGamepkg
                                 {
                                     ushort cdCode = ushort.Parse(decision.Substring("PT".Length));
                                     hndUid = (ushort)(cdCode + 1000);
+                                    RaiseGMessage(new Artiad.AnnouceCard()
+                                    {
+                                        Action = Artiad.AnnouceCard.Type.FLASH,
+                                        Officer = Artiad.ContentRule.GetPetOwnership(cdCode, this),
+                                        Genre = Card.Genre.NMB,
+                                        SingleCard = cdCode
+                                    }.ToMessage());
                                 }
                                 else if (decision.StartsWith("I"))
                                 {
                                     ushort cdCode = ushort.Parse(decision.Substring("I".Length));
                                     hndUid = (ushort)(cdCode + 3000);
+                                    RaiseGMessage(new Artiad.AnnouceCard()
+                                    {
+                                        Action = Artiad.AnnouceCard.Type.FLASH,
+                                        Officer = Artiad.ContentRule.GetExspOwnership(cdCode, this),
+                                        Genre = Card.Genre.Exsp,
+                                        SingleCard = cdCode
+                                    }.ToMessage());
                                 }
                                 else if (decision.StartsWith("/"))
                                     hndUid = 0;
@@ -466,10 +494,11 @@ namespace PSD.PSDGamepkg
                                         SinglePet = Board.Monster1,
                                         Trophy = true,
                                         Reposit = true,
-                                        Plow = false
+                                        Plow = true
                                     }.ToMessage());
                                     mon1zero = true;
                                 }
+                                hasMonster2 = Board.Monster2 != 0 && NMBLib.IsMonster(Board.Monster2);
                                 if (hasMonster2 && (Board.Mon2Catchable || skip))
                                 {
                                     RaiseGMessage(new Artiad.HarvestPet()
@@ -479,7 +508,7 @@ namespace PSD.PSDGamepkg
                                         SinglePet = Board.Monster2,
                                         Trophy = true,
                                         Reposit = true,
-                                        Plow = false
+                                        Plow = true
                                     }.ToMessage());
                                     mon2zero = true;
                                 }

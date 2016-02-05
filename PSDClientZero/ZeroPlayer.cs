@@ -119,10 +119,7 @@ namespace PSD.ClientZero
             if (Eve1 > 0)
                 Aps(sb, "本回合响应事件牌：{0}", xic.zd.Eve(Eve1));
             Aps(sb, "触发方灵力池：{0} 妨碍方灵力池：{1}", RPool, OPool);
-            Aps(sb, "支援者: {0} 妨碍者: {1}", (Supporter == 0 ? "无" : (Supporter < 1000 ?
-                xic.zd.Player(Supporter) : xic.zd.Monster((ushort)(Supporter - 1000)))),
-                (Hinder == 0 ? "无" : (Hinder < 1000 ? xic.zd.Player(Hinder) :
-                xic.zd.Monster((ushort)(Hinder - 1000)))));
+            Aps(sb, "支援者: {0} 妨碍者: {1}", xic.zd.Warrior(Supporter), xic.zd.Warrior(Hinder));
             Base.Card.NMB nmb1 = Base.Card.NMBLib.Decode(Monster1, xic.Tuple.ML, xic.Tuple.NL);
             Aps(sb, "当前第一怪物/NPC: {0}. 战力：{1} 闪避：{2}", xic.zd.Monster(Monster1),
                 nmb1 == null ? 0 : nmb1.STR, nmb1 == null ? 0 : nmb1.AGL);

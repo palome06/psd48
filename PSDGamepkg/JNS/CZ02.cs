@@ -57,7 +57,6 @@ namespace PSD.PSDGamepkg.JNS
             if (player.Tux.Contains(card))
             {
                 int price = player.GetPrice(tux.Code, false);
-                XI.RaiseGMessage("G2ZU,0," + player.Uid + "," + card);
                 XI.RaiseGMessage("G0QZ," + player.Uid + "," + card);
                 if (price > 0)
                     XI.RaiseGMessage("G0DH," + player.Uid + ",0," + price);
@@ -65,7 +64,6 @@ namespace PSD.PSDGamepkg.JNS
             else if (player.Weapon == card || player.ExEquip == card)
             {
                 int price = player.GetPrice(tux.Code, true);
-                XI.RaiseGMessage("G2ZU,0," + player.Uid + "," + card);
                 XI.RaiseGMessage("G0QZ," + player.Uid + "," + card);
                 if (price > 0)
                     XI.RaiseGMessage("G0DH," + player.Uid + ",0," + price);
@@ -114,7 +112,7 @@ namespace PSD.PSDGamepkg.JNS
             else
                 return false;
         }
-
+        // Legecy code
         public void CZ03Action(Player player, string fuse, string args)
         {
             // string[] argblock = args.Split(',');
@@ -162,11 +160,8 @@ namespace PSD.PSDGamepkg.JNS
             {
                 if (player.Fakeq[card] == "TPT2" || (player.Fakeq[card] == "0" && tux.Code.Equals("TPT2")))
                 {
-                    //XI.RaiseGMessage("G0OT," + player.Uid + ",1," + card);
-                    XI.RaiseGMessage("G2ZU,0," + player.Uid + "," + card);
-                    //XI.RaiseGMessage("G0ON," + player.Uid + ",C,1," + card);
                     XI.RaiseGMessage("G0QZ," + player.Uid + "," + card);
-                    ushort side = ushort.Parse(XI.AsyncInput(player.Uid, "S", "TPT2", "0"));
+                    ushort side = ushort.Parse(XI.AsyncInput(player.Uid, "#战力增加,S", "CZ05", "0"));
                     XI.RaiseGMessage("G0IP," + side + ",2");
                 }
             }

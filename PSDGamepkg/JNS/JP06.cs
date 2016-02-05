@@ -905,15 +905,16 @@ namespace PSD.PSDGamepkg.JNS
                     List<ushort> targets = XI.Board.Garden.Values.Where(
                         p => p.IsTared && p.Team == player.OppTeam && p.GetPetCount() > 0)
                         .Select(p => p.Uid).Except(XI.Board.PetProtecedPlayer).ToList();
-                    string whoStr = XI.AsyncInput(player.Uid, "T1(p" +
+                    string whoStr = XI.AsyncInput(player.Uid, "#夺宠,T1(p" +
                         string.Join("p", targets) + ")", "TPT1", "0");
                     ushort who = ushort.Parse(whoStr);
-                    string monStr = XI.AsyncInput(player.Uid, "/M1(p" + string.Join("p", XI.Board.Garden[who]
-                        .Pets.Where(p => p != 0)) + ")", "TPT1", "0");
+                    string monStr = XI.AsyncInput(player.Uid, "#夺宠,/M1(p" + string.Join("p",
+                        XI.Board.Garden[who] .Pets.Where(p => p != 0)) + ")", "TPT1", "0");
                     if (monStr == VI.CinSentinel)
                         break;
                     if (!monStr.StartsWith("/"))
                     {
+                        TargetPlayer(player.Uid, who);
                         ushort mon = ushort.Parse(monStr);
                         XI.Board.Mon1From = who;
                         XI.Board.Monster1 = mon;
@@ -2381,6 +2382,53 @@ namespace PSD.PSDGamepkg.JNS
             else if (type == 1)
                 return true;
             return false;
+        }
+        public void TPH2Action(Player player, int type, string fuse, string argst)
+        {
+            Artiad.ObtainPet opt = Artiad.ObtainPet.Parse(fuse);
+            ushort which;
+            if (opt.Pets.Length > 1)
+            {
+                string whichSel = XI.AsyncInput(player.Uid, "#弃置,M1(p" +
+                    string.Join("p", opt.Pets) + ")", "TPH2", "0");
+                which = ushort.Parse(whichSel);
+            }
+            else
+                which = opt.Pets[0];
+            TargetPlayer(player.Uid, opt.Farmer);
+            Monster monster = XI.LibTuple.ML.Decode(which);
+            int pts = 0;
+            if (monster.Level == Monster.ClLevel.WEAK) pts = 2;
+            else if (monster.Level == Monster.ClLevel.STRONG) pts = 4;
+            else if (monster.Level == Monster.ClLevel.BOSS) pts = 6;
+            XI.RaiseGMessage(new Artiad.LosePet() { Owner = opt.Farmer, SinglePet = which }.ToMessage());
+            while (pts > 0)
+            {
+                string incrSel = XI.AsyncInput(opt.Farmer, "#获得标记(剩余" + pts + "枚),/T1" +
+                    AAlls(player) + "),#获得标记(剩余" + pts + "枚),/F1" + StdRunes(), "TPH2", "1");
+                if (incrSel.StartsWith("/"))
+                    break;
+                else if (incrSel != VI.CinSentinel)
+                {
+                    int idx = incrSel.IndexOf(',');
+                    ushort optTar = ushort.Parse(incrSel.Substring(0, idx));
+                    ushort optRune = ushort.Parse(incrSel.Substring(idx + 1));
+                    TargetPlayer(opt.Farmer, optTar);
+                    XI.RaiseGMessage("G0IF," + optTar + "," + optRune);
+                    --pts;
+                }
+            }
+            List<ushort> rests = opt.Pets.Where(p => p != which).ToList();
+            if (rests.Count > 0)
+            {
+                opt.Pets = rests.ToArray();
+                XI.InnerGMessage(opt.ToMessage(), 190);
+            }
+        }
+        public bool TPH2Valid(Player player, int type, string fuse)
+        {
+            Artiad.ObtainPet opt = Artiad.ObtainPet.Parse(fuse);
+            return XI.Board.Garden[opt.Farmer].IsTared && opt.Trophy;
         }
         public void TPH3Action(Player player, int type, string fuse, string argst)
         {

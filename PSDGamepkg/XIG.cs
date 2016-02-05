@@ -607,32 +607,8 @@ namespace PSD.PSDGamepkg
                             }
                         }
                     }
-                    //else if (type == 1)
-                    //{
-                    //    ushort nofp = ushort.Parse(args[2]);
-                    //    ushort[] invs = Algo.TakeRange(args, 3, 3 + nofp).Select(p => ushort.Parse(p)).ToArray();
-                    //    //ushort nocp = ushort.Parse(args[3 + nofp]);
-                    //    //ushort[] jnvs = Algo.TakeRange(args, 4 + nofp, 4 + nofp + nocp)
-                    //    //    .Select(p => ushort.Parse(p)).ToArray();
-                    //    //WI.Send("E0FU,0," + string.Join(",", Algo.TakeRange(args, 4 + nofp + nocp, args.Length)), invs);
-                    //    //WI.Send("E0FU,1," + (args.Length - 4 - nofp - nocp), jnvs);
-                    //    //WI.Live("E0FU,1," + (args.Length - 4 - nofp - nocp));
-                    //    WI.Send("E0FU,0," + string.Join(",",
-                    //        Algo.TakeRange(args, 3 + nofp, args.Length)), ExceptStaff(invs));
-                    //    WI.Live("E0FU,0," + string.Join(",", Algo.TakeRange(args, 3 + nofp, args.Length)));
-                    //}
-                    else if (type == 2)
-                    {
-                        ushort who = ushort.Parse(args[2]);
-                        string cardType = args[3];
-                        ushort[] invs = Algo.TakeRange(args, 4, args.Length)
-                            .Select(p => ushort.Parse(p)).ToArray();
-                        WI.BCast("E0FU,2," + who + "," + cardType + "," + string.Join(",", invs));
-                    }
                     else if (type == 3)
                         WI.BCast("E0FU,3");
-                    else if (type == 4)
-                        WI.BCast("E0FU,5," + string.Join(",", Algo.TakeRange(args, 2, args.Length)));
                 }
                 else if (args[0].StartsWith("G2QU"))
                 {
@@ -1860,120 +1836,69 @@ namespace PSD.PSDGamepkg
                         ushort consumeType = ushort.Parse(mainParts[2]);
                         ushort card = ushort.Parse(mainParts[3]);
 
-                        if (consumeType == 2)
+                        ushort target; int jdx;
+                        if (consumeType < 3)
                         {
-                            //string sktFuse = Algo.Substring(cmd, hdx + 1, -1);
-                            //string rst = "R" + Board.Rounder.Uid + "ZD";
-                            //if (sktFuse.StartsWith(rst))
-                            if (Board.InFight)
-                            {
-                                RaiseGMessage("G1ZK,0," + me + "," + card);
-                                RaiseGMessage("G2ZU,1," + me + "," + card);
-                            }
-                            else
-                            {
-                                RaiseGMessage("G2ZU,0," + me + "," + card);
-                                RaiseGMessage("G0QZ," + me + "," + card);
-                            }
-                        }
-                        else if (consumeType == 0 || consumeType == 1)
-                        {
-                            int jdx = mainParts[0].Length + mainParts[1].Length +
+                            target = 0;
+                            jdx = mainParts[0].Length + mainParts[1].Length +
                                 mainParts[2].Length + mainParts[3].Length + 4;
-
-                            string argsv = Algo.Substring(cmd, jdx, hdx);
-                            string cargsv = argsv != "" ? "," + argsv : "";
-
-                            int idx = cmd.IndexOf(',', hdx);
-                            int sktInType = int.Parse(Algo.Substring(cmd, hdx + 1, idx));
-                            string sktFuse = Algo.Substring(cmd, idx + 1, -1);
-
-                            Player player = Board.Garden[me];
-                            Tux tux = LibTuple.TL.DecodeTux(card);
-                            if (tux.IsTuxEqiup())
-                            {
-                                TuxEqiup tue = (TuxEqiup)tux;
-                                int equipType = 0;
-                                if (tue.Type == Tux.TuxType.WQ)
-                                    equipType = 1;
-                                else if (tue.Type == Tux.TuxType.FJ)
-                                    equipType = 2;
-                                else if (tue.Type == Tux.TuxType.XB)
-                                    equipType = 6;
-                                if (equipType > 0)
-                                {
-                                    if (consumeType == 1)
-                                    {
-                                        //string rst = "R" + Board.Rounder.Uid + "ZD";
-                                        //if (sktFuse.StartsWith(rst))
-                                        if (Board.InFightThrough)
-                                        {
-                                            RaiseGMessage("G1ZK,0," + me + "," + card);
-                                            RaiseGMessage("G2ZU,1," + me + "," + card);
-                                        }
-                                        else
-                                        {
-                                            RaiseGMessage("G2ZU,0," + me + "," + card);
-                                            RaiseGMessage("G0QZ," + me + "," + card);
-                                        }
-                                    }
-                                    WI.BCast("E0ZC," + me + "," + consumeType + "," + equipType +
-                                        "," + card + "," + sktInType + cargsv);
-                                }
-                                tue.ConsumeAction(player, consumeType, sktInType, sktFuse, argsv);
-                            }
                         }
-                        else if (consumeType == 3 || consumeType == 4)
+                        else // consumeType == 3 means ActionHolder, 4 will burst; 2 is empty now
                         {
-                            ushort target = ushort.Parse(mainParts[4]);
-                            int jdx = mainParts[0].Length + mainParts[1].Length +
+                            target = ushort.Parse(mainParts[4]);
+                            jdx = mainParts[0].Length + mainParts[1].Length +
                                 mainParts[2].Length + mainParts[3].Length + mainParts[4].Length + 5;
-
-                            string argsv = Algo.Substring(cmd, jdx, hdx);
-                            string cargsv = argsv != "" ? "," + argsv : "";
-
-                            int idx = cmd.IndexOf(',', hdx);
-                            int sktInType = int.Parse(Algo.Substring(cmd, hdx + 1, idx));
-                            string sktFuse = Algo.Substring(cmd, idx + 1, -1);
-
-                            Player player = Board.Garden[me];
-                            Tux tux = LibTuple.TL.DecodeTux(card);
-                            if (tux.IsTuxEqiup())
-                            {
-                                TuxEqiup tue = (TuxEqiup)tux;
-                                int equipType = 0;
-                                if (tue.Type == Tux.TuxType.WQ)
-                                    equipType = 1;
-                                else if (tue.Type == Tux.TuxType.FJ)
-                                    equipType = 2;
-                                else if (tue.Type == Tux.TuxType.XB)
-                                    equipType = 6;
-                                if (equipType > 0)
-                                {
-                                    if (consumeType == 4)
-                                    {
-                                        //string rst = "R" + Board.Rounder.Uid + "ZD";
-                                        //if (sktFuse.StartsWith(rst))
-                                        if (Board.InFight)
-                                        {
-                                            RaiseGMessage("G1ZK,0," + me + "," + card);
-                                            RaiseGMessage("G2ZU,1," + me + "," + card);
-                                        }
-                                        else
-                                        {
-                                            RaiseGMessage("G2ZU,0," + me + "," + card);
-                                            RaiseGMessage("G0QZ," + me + "," + card);
-                                        }
-                                    }
-                                    WI.BCast("E0ZC," + me + "," + consumeType + "," + equipType +
-                                        "," + card + "," + target + "," + sktInType + cargsv);
-                                }
-                                tue.ConsumeActionHolder(player, Board.Garden[target],
-                                    consumeType - 3, sktInType, sktFuse, argsv);
-                            }
                         }
-                        break;
+                        string argsv = Algo.Substring(cmd, jdx, hdx);
+                        string cargsv = argsv != "" ? "," + argsv : "";
+
+                        int idx = cmd.IndexOf(',', hdx);
+                        int sktInType = int.Parse(Algo.Substring(cmd, hdx + 1, idx));
+                        string sktFuse = Algo.Substring(cmd, idx + 1, -1);
+
+                        Player player = Board.Garden[me];
+                        TuxEqiup tux = LibTuple.TL.DecodeTux(card) as TuxEqiup;
+                        if (consumeType % 3 == 1)
+                            RaiseGMessage("G0ZI," + me + "," + card);
+                        WI.BCast("E0ZC," + me + "," + consumeType + "," + card + "," + sktInType + cargsv);
+                        if (consumeType < 3)
+                            tux.ConsumeAction(player, consumeType, sktInType, sktFuse, argsv);
+                        else
+                            tux.ConsumeActionHolder(player, Board.Garden[target],
+                                consumeType - 3, sktInType, sktFuse, argsv);
                     }
+                    break;
+                case "G0ZI":
+                    {
+                        IDictionary<ushort, List<ushort>> jmc = new Dictionary<ushort, List<ushort>>();
+                        for (int i = 1; i < args.Length; i += 2)
+                        {
+                            ushort who = ushort.Parse(args[i]);
+                            ushort pet = ushort.Parse(args[i + 1]);
+                            Algo.AddToMultiMap(jmc, who, pet);
+                        }
+                        if (Board.InFightThrough) // to mark as to be discard
+                        {
+                            jmc.Keys.ToList().ForEach(p =>
+                            {
+                                jmc[p].ForEach(q => RaiseGMessage("G1ZK,0," + p + "," + q));
+                                RaiseGMessage(new Artiad.AnnouceCard()
+                                {
+                                    Action = Artiad.AnnouceCard.Type.FLASH,
+                                    Officer = p,
+                                    Genre = Card.Genre.Tux,
+                                    Cards = jmc[p].ToArray()
+                                }.ToMessage());
+                            });
+                        }
+                        else // to discard immediately
+                        {
+                            jmc.Keys.ToList().ForEach(p => 
+                                RaiseGMessage("G0QZ," + p + "," + string.Join(",", jmc[p])));
+                        }
+                        WI.BCast("E0ZI," + cmdrst);
+                    }
+                    break;
                 case "G1ZK":
                     if (args[1].Equals("0"))
                     {
@@ -1990,10 +1915,7 @@ namespace PSD.PSDGamepkg
                             ushort ep = ushort.Parse(line.Substring(idx + 1));
                             Player py = Board.Garden[who];
                             if (py.ListOutAllCards().Contains(ep))
-                            {
-                                RaiseGMessage("G2ZU,0," + who + "," + ep);
                                 RaiseGMessage("G0QZ," + who + "," + ep);
-                            }
                         }
                         Board.CsEqiups.Clear();
                     }
@@ -2482,6 +2404,7 @@ namespace PSD.PSDGamepkg
                         }
                         List<ushort> result = new List<ushort>();
                         List<ushort> giveBack = new List<ushort>();
+                        bool needHL = hvp.Farmland != 0 && hvp.Plow;
                         for (int i = 0; i < fivepc; ++i)
                         {
                             if (cpets[i].Count == 0)
@@ -2491,8 +2414,7 @@ namespace PSD.PSDGamepkg
                                 ushort pt = cpets[i].First();
                                 if (hvp.Pets.Contains(pt))
                                 {
-                                    result.Add(pt);
-                                    if (hvp.Farmland != 0 && hvp.Plow)
+                                    if (needHL)
                                     {
                                         RaiseGMessage(new Artiad.LosePet()
                                         {
@@ -2501,6 +2423,7 @@ namespace PSD.PSDGamepkg
                                             Recycle = false
                                         }.ToMessage());
                                     }
+                                    result.Add(pt);
                                 }
                                 continue;
                             }
@@ -2513,7 +2436,7 @@ namespace PSD.PSDGamepkg
                             if (treaty == Artiad.HarvestPet.Treaty.KOKAN) // KOKAN always recycle
                             {
                                 ushort ayPt = hvp.SinglePet;
-                                if (hvp.Farmland != 0 && hvp.Plow)
+                                if (needHL)
                                 {
                                     RaiseGMessage(new Artiad.LosePet()
                                     {
@@ -2522,13 +2445,13 @@ namespace PSD.PSDGamepkg
                                         Recycle = false
                                     }.ToMessage());
                                 }
+                                result.Add(ayPt);
                                 RaiseGMessage(new Artiad.LosePet()
                                 {
                                     Owner = hvp.Farmer,
                                     SinglePet = myPt,
                                     Recycle = false
                                 }.ToMessage());
-                                result.Add(ayPt);
                                 giveBack.Add(myPt);
                             }
                             else if (treaty == Artiad.HarvestPet.Treaty.PASSIVE)
@@ -2539,7 +2462,7 @@ namespace PSD.PSDGamepkg
                                     Owner = hvp.Farmer,
                                     SinglePet = myPt
                                 }.ToMessage());
-                                if (hvp.Farmland != 0 && hvp.Plow)
+                                if (needHL)
                                 {
                                     RaiseGMessage(new Artiad.LosePet()
                                     {
@@ -2557,29 +2480,9 @@ namespace PSD.PSDGamepkg
                                 ushort sel = ushort.Parse(AsyncInput(hvp.Farmer, mai, cmd, "0"));
                                 if (sel == myPt) // Keep the old one
                                 {
-                                    if (hvp.Farmland != 0 && !hvp.Reposit && hvp.Plow)
+                                    if (!hvp.Reposit) // if reposit, then leave it where it was
                                     {
-                                        RaiseGMessage(new Artiad.LosePet()
-                                        {
-                                            Owner = hvp.Farmland,
-                                            Pets = others.ToArray(),
-                                            Recycle = false
-                                        }.ToMessage());
-                                    }
-                                    if (!hvp.Reposit)
-                                        RaiseGMessage("G0ON," + hvp.Farmland + ",M," + Algo.ListToString(others));
-                                }
-                                else
-                                {
-                                    others.Remove(sel);
-                                    RaiseGMessage(new Artiad.LosePet()
-                                    {
-                                        Owner = hvp.Farmer,
-                                        SinglePet = myPt
-                                    }.ToMessage());
-                                    if (hvp.Plow && others.Count > 0)
-                                    {
-                                        if (hvp.Farmland != 0 && !hvp.Reposit && hvp.Plow)
+                                        if (needHL)
                                         {
                                             RaiseGMessage(new Artiad.LosePet()
                                             {
@@ -2588,10 +2491,43 @@ namespace PSD.PSDGamepkg
                                                 Recycle = false
                                             }.ToMessage());
                                         }
-                                        if (!hvp.Reposit)
-                                            RaiseGMessage("G0ON," + hvp.Farmland + ",M," + Algo.ListToString(others));
+                                        RaiseGMessage("G0ON," + hvp.Farmland + ",M," + Algo.ListToString(others));
+                                    }
+                                }
+                                else
+                                {
+                                    others.Remove(sel);
+                                    // lose old myself
+                                    RaiseGMessage(new Artiad.LosePet()
+                                    {
+                                        Owner = hvp.Farmer,
+                                        SinglePet = myPt
+                                    }.ToMessage());
+                                    // lose the selection
+                                    if (needHL)
+                                    {
+                                        RaiseGMessage(new Artiad.LosePet()
+                                        {
+                                            Owner = hvp.Farmland,
+                                            SinglePet = sel,
+                                            Recycle = false
+                                        }.ToMessage());
                                     }
                                     result.Add(sel);
+                                    // remove if reposit is not set, otherwise put it back
+                                    if (others.Count > 0 && !hvp.Reposit)
+                                    {
+                                        if (needHL)
+                                        {
+                                            RaiseGMessage(new Artiad.LosePet()
+                                            {
+                                                Owner = hvp.Farmland,
+                                                Pets = others.ToArray(),
+                                                Recycle = false
+                                            }.ToMessage());
+                                        }
+                                        RaiseGMessage("G0ON," + hvp.Farmland + ",M," + Algo.ListToString(others));
+                                    }
                                 }
                             }
                         }
@@ -2699,29 +2635,10 @@ namespace PSD.PSDGamepkg
                         Player player = Board.Garden[me];
                         Monster monster = LibTuple.ML.Decode(mons);
                         int pe = monster.Element.Elem2Index();
-                        if (player.Pets[pe] == mons)
-                        {
-                            if (consumeType == 1)
-                            {
-                                //string rst = "R" + Board.Rounder.Uid + "ZD";
-                                //if (sktFuse.StartsWith(rst))
-                                if (Board.InFightThrough)
-                                {
-                                    RaiseGMessage("G1HK,0," + me + "," + mons);
-                                    RaiseGMessage("G2HU," + me + "," + mons);
-                                }
-                                else
-                                    RaiseGMessage(new Artiad.LosePet() { Owner = me, SinglePet = mons }.ToMessage());
-                            }
-                            // discard pets after fight finished
-                            WI.BCast("E0HH," + me + "," + consumeType + "," + mons + "," + sktInType + cargsv);
-                            monster.ConsumeAction(player, consumeType, sktInType, sktFuse, argsv);
-                        }
-                        else if (consumeType == 2)
-                        {
-                            WI.BCast("E0HH," + me + "," + consumeType + "," + mons + "," + sktInType + cargsv);
-                            monster.ConsumeAction(player, consumeType, sktInType, sktFuse, argsv);
-                        }
+                        if (player.Pets[pe] == mons && consumeType == 1)
+                            RaiseGMessage("G0HI," + me + "," + mons);
+                        WI.BCast("E0HH," + me + "," + consumeType + "," + mons + "," + sktInType + cargsv);
+                        monster.ConsumeAction(player, consumeType, sktInType, sktFuse, argsv);
                         break;
                     }
                 case "G0HI":
@@ -2733,12 +2650,18 @@ namespace PSD.PSDGamepkg
                             ushort pet = ushort.Parse(args[i + 1]);
                             Algo.AddToMultiMap(jmc, who, pet);
                         }
-                        if (Board.InFight) // to mark as to be discard
+                        if (Board.InFightThrough) // to mark as to be discard
                         {
                             jmc.Keys.ToList().ForEach(p =>
                             {
                                 jmc[p].ForEach(q => RaiseGMessage("G1HK,0," + p + "," + q));
-                                RaiseGMessage("G2HU," + p + "," + string.Join(",", jmc[p]));
+                                RaiseGMessage(new Artiad.AnnouceCard()
+                                {
+                                    Action = Artiad.AnnouceCard.Type.FLASH,
+                                    Officer = p,
+                                    Genre = Card.Genre.NMB,
+                                    Cards = jmc[p].ToArray()
+                                }.ToMessage());
                             });
                         }
                         else // to discard immediately

@@ -233,7 +233,7 @@ namespace PSD.ClientAo
             foreach (ushort pet in pets)
             {
                 Base.Card.Monster mon = Tuple.ML.Decode(pet);
-                if (mon != null)
+                if (mon != null && !Pets.Contains(pet))
                 {
                     string code = mon.Code;
                     pb.Dispatcher.BeginInvoke((Action)(() =>

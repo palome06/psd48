@@ -1714,7 +1714,7 @@ namespace PSD.ClientAo
                         break;
                     }
                 case "E0FU":
-                    if (args[1].Equals("0"))
+                    if (args[1].Equals("0")) // 0:Watch
                     {
                         string cardType = args[2];
                         var ravs = Algo.TakeRange(args, 3, args.Length)
@@ -1729,13 +1729,13 @@ namespace PSD.ClientAo
                         else if (cardType == "G")
                             VI.Cout(Uid, "你观看了{0}.", zd.TuxDbSerial(ravs));
                     }
-                    else if (args[1].Equals("1"))
+                    else if (args[1].Equals("1")) // 1:Encry-Watch
                     {
                         string cardType = args[2];
                         ushort n = ushort.Parse(args[3]);
                         VI.Watch(Uid, Enumerable.Repeat(cardType + "0", n), "E0FU");
                     }
-                    else if (args[1].Equals("2"))
+                    else if (args[1].Equals("2")) // 2:Show/Declare
                     {
                         ushort who = ushort.Parse(args[2]);
                         string cardType = args[3];
@@ -1743,21 +1743,21 @@ namespace PSD.ClientAo
                             .Select(p => ushort.Parse(p)).ToList();
                         A0O.FlyingGet(invs.Select(p => cardType + p).ToList(), who, who, true);
                         if (cardType == "C")
-                            VI.Cout(Uid, "{0}展示了卡牌{1}.", who, zd.Tux(invs));
+                            VI.Cout(Uid, "{0}展示了{1}.", who, zd.Tux(invs));
                         if (cardType == "M")
-                            VI.Cout(Uid, "{0}展示了卡牌{1}.", who, zd.Monster(invs));
+                            VI.Cout(Uid, "{0}展示了{1}.", who, zd.Monster(invs));
                         if (cardType == "E")
-                            VI.Cout(Uid, "{0}展示了卡牌{1}.", who, zd.Eve(invs));
+                            VI.Cout(Uid, "{0}展示了{1}.", who, zd.Eve(invs));
                         if (cardType == "G")
-                            VI.Cout(Uid, "{0}展示了卡牌{1}.", who, zd.TuxDbSerial(invs));
+                            VI.Cout(Uid, "{0}声明了{1}.", who, zd.TuxDbSerial(invs));
                         if (cardType == "F")
                             VI.Cout(Uid, "{0}声明了标记{1}.", who, zd.Rune(invs));
                         if (cardType == "V")
                             VI.Cout(Uid, "{0}声明了属性{1}.", who, zd.Prop(invs.Select(p => (int)p)));
                     }
-                    else if (args[1].Equals("3"))
+                    else if (args[1].Equals("3")) // 3:Close
                         VI.OWatch(Uid, "E0FU");
-                    else if (args[1].Equals("4"))
+                    else if (args[1].Equals("4")) // 4:Used only in replay to replace E0XZ
                     {
                         if (WI is VW.Eywi)
                         {
@@ -1767,7 +1767,7 @@ namespace PSD.ClientAo
                             VI.Watch(Uid, ravs.Select(p => cardType + p), "E0FU");
                         }
                     }
-                    else if (args[1].Equals("5"))
+                    else if (args[1].Equals("5")) // 5:Show G, legacy, should combined with 2
                     {
                         ushort who = ushort.Parse(args[2]);
                         ushort[] invs = Algo.TakeRange(args, 3, args.Length)
@@ -1947,85 +1947,74 @@ namespace PSD.ClientAo
                     }
                 case "E0ZC":
                     {
-                        ushort me = ushort.Parse(args[1]);
-                        ushort consumeType = ushort.Parse(args[2]);
-                        ushort where = ushort.Parse(args[3]);
-                        ushort card = ushort.Parse(args[4]);
-                        ushort target; int type; int argvIdx;
+                        int argvIdx = 1;
+                        ushort me = ushort.Parse(args[argvIdx++]);
+                        ushort consumeType = ushort.Parse(args[argvIdx++]);
+                        ushort card = ushort.Parse(args[argvIdx++]);
+                        ushort target;
                         if (consumeType == 0 || consumeType == 1)
-                        {
                             target = 0;
-                            type = int.Parse(args[5]);
-                            argvIdx = 6;
-                        }
                         else
-                        {
-                            target = ushort.Parse(args[5]);
-                            type = int.Parse(args[6]);
-                            argvIdx = 7;
-                        }
-                        string argvs = "";
-                        for (int i = argvIdx; i < args.Length; ++i)
-                            argvs += "," + args[i];
-                        if (argvs != "")
-                            argvs = "(" + argvs.Substring(1) + ")";
+                            target = ushort.Parse(args[argvIdx++]);
+                        int type = int.Parse(args[argvIdx++]);
+                        string argvs = string.Join(",", Algo.TakeRange(args, argvIdx, args.Length));
+                        if (!string.IsNullOrEmpty(argvs))
+                            argvs = "(" + argvs + ")";
 
-                        bool hind = false; int acType = consumeType % 2;
+                        bool hind = false; int acType = consumeType % 3;
                         TuxEqiup tuxeq = Tuple.TL.DecodeTux(card) as TuxEqiup;
                         if (tuxeq != null && tuxeq.CsHind[acType][type])
                             hind = true;
                         if (!hind)
                         {
-                            string[] wherestr = new string[] { "", "武器区", "防具区", "特殊区",
-                                "佩戴区", "额外装备区", "秘宝区" };
-                            string[] patstr = new string[] {
-                                "{0}发动了{1}卡牌{2}[{3}]特效{4}.",
-                                "{0}爆发了{1}卡牌{2}[{3}]{4}.", "",
-                                "{0}发动了{1}卡牌{2}[{3}]特效{4},作用于{5}.",
-                                "{0}爆发了{1}卡牌{2}[{3}]{4},作用于{5}."
+                            string[] patstr = new string[]
+                            {
+                                "{0}发动了{1}[{2}]特效{3}.",
+                                "",
+                                "",
+                                "{0}发动了{1}[{2}]特效{3},作用于{4}.",
+                                "{0}爆发了{1}[{2}]{3},作用于{4}."
                             };
-                            VI.Cout(Uid, patstr[consumeType], zd.Player(me), wherestr[where],
+                            VI.Cout(Uid, patstr[consumeType], zd.Player(me),
                                 zd.Tux(card), type, argvs, zd.Player(target));
                         }
                         break;
                     }
-                //case "E0ZU":
-                //    {
-                //        ushort type = ushort.Parse(args[1]);
-                //        ushort who = ushort.Parse(args[2]);
-                //        ushort card = ushort.Parse(args[3]);
-                //        List<string> cedcards = new List<string>();
-                //        cedcards.Add("C" + card);
-                //        if (type == 0)
-                //            A0O.FlyingGet(cedcards, who, 0);
-                //        else if (type == 1)
-                //            A0O.FlyingGet(cedcards, who, who);
-                //    }
-                //    break;
+                case "E0ZI":
+                    {
+                        IDictionary<ushort, List<ushort>> imc = new Dictionary<ushort, List<ushort>>();
+                        for (int i = 1; i < args.Length; i += 2)
+                        {
+                            ushort who = ushort.Parse(args[i]);
+                            ushort pet = ushort.Parse(args[i + 1]);
+                            Algo.AddToMultiMap(imc, who, pet);
+                        }
+                        foreach (var pair in imc)
+                            VI.Cout(Uid, "{0}爆发了{1}.", zd.Player(pair.Key), zd.Tux(pair.Value));
+                    }
+                    break;
                 case "E0ZL":
                     {
-                        string result = "";
+                        List<string> result = new List<string>();
                         for (int i = 1; i < args.Length; i += 2)
                         {
                             ushort who = ushort.Parse(args[i]);
                             ushort card = ushort.Parse(args[i + 1]);
-                            result += string.Format(",{0}的{1}", zd.Player(who), zd.Tux(card));
+                            result.Add(string.Format("{0}的{1}", zd.Player(who), zd.Tux(card)));
                         }
-                        if (result != "")
-                            VI.Cout(Uid, "{0}装备特效无效化.", result.Substring(1));
+                        VI.Cout(Uid, "{0}装备特效无效化.", string.Join(",", result));
                     }
                     break;
                 case "E0ZS":
                     {
-                        string result = "";
+                        List<string> result = new List<string>();
                         for (int i = 1; i < args.Length; i += 2)
                         {
                             ushort who = ushort.Parse(args[i]);
                             ushort card = ushort.Parse(args[i + 1]);
-                            result += string.Format(",{0}的{1}", zd.Player(who), zd.Tux(card));
+                            result.Add(string.Format("{0}的{1}", zd.Player(who), zd.Tux(card)));
                         }
-                        if (result != "")
-                            VI.Cout(Uid, "{0}装备特效开始生效.", result.Substring(1));
+                        VI.Cout(Uid, "{0}装备特效开始生效.", string.Join(",", result));
                     }
                     break;
                 case "E0IA":
@@ -2249,15 +2238,11 @@ namespace PSD.ClientAo
                             if (argvs != "")
                                 argvs = "(" + argvs.Substring(1) + ")";
 
+                            // consumeType == 1 trigger E0HI
                             if (consumeType == 0)
                             {
                                 VI.Cout(Uid, "{0}发动了宠物{1}[{2}]特效{3}.",
                                     zd.Player(me), zd.Monster(mons), innerType, argvs);
-                            }
-                            else if (consumeType == 1)
-                            {
-                                VI.Cout(Uid, "{0}爆发了宠物{1}[{2}]{3}.", zd.Player(me),
-                                    zd.Monster(mons), innerType, argvs);
                             }
                             else if (consumeType == 2)
                                 VI.Cout(Uid, "宠物{0}效果{2}被触发.", zd.Monster(mons), innerType, argvs);
@@ -2271,12 +2256,10 @@ namespace PSD.ClientAo
                         {
                             ushort who = ushort.Parse(args[i]);
                             ushort pet = ushort.Parse(args[i + 1]);
-                            if (!imc.ContainsKey(who))
-                                imc[who] = new List<ushort>();
-                            imc[who].Add(pet);
+                            Algo.AddToMultiMap(imc, who, pet);
                         }
                         foreach (var pair in imc)
-                            VI.Cout(Uid, "{0}的宠物{1}被爆发.", zd.Player(pair.Key), zd.Monster(pair.Value));
+                            VI.Cout(Uid, "{0}爆发了{1}.", zd.Player(pair.Key), zd.Monster(pair.Value));
                     }
                     break;
                 case "E0HD":
@@ -2301,18 +2284,6 @@ namespace PSD.ClientAo
                         VI.Cout(Uid, "{0}失去了宠物{1}.", zd.Player(who), zd.Monster(pets));
                         A0P[who].DelPet(pets);
                         A0O.FlyingGet(pets.Select(p => "M" + p), who, 0);
-                    }
-                    break;
-                case "E0HU":
-                    {
-                        ushort who = ushort.Parse(args[1]);
-                        List<string> cedcards = new List<string>();
-                        for (int i = 2; i < args.Length; ++i)
-                        {
-                            ushort mon = ushort.Parse(args[i]);
-                            cedcards.Add("M" + mon);
-                        }
-                        A0O.FlyingGet(cedcards, who, who);
                     }
                     break;
                 case "E0HZ":
@@ -2553,18 +2524,35 @@ namespace PSD.ClientAo
                     break;
                 case "E0SW":
                     {
-                        ushort who = ushort.Parse(args[1]);
-                        ushort piles = ushort.Parse(args[2]);
-                        List<ushort> cards = Algo.TakeRange(args, 3,
+                        ushort actionType = ushort.Parse(args[1]);
+                        ushort who = ushort.Parse(args[2]);
+                        string piles = args[3];
+                        Base.Card.Card.Genre pile = piles[0].Char2Genre();
+
+                        List<ushort> invs = Algo.TakeRange(args, 4,
                             args.Length).Select(p => ushort.Parse(p)).ToList();
-                        if (cards.Count > 0)
+                        if (invs.Count > 0)
                         {
-                            if (piles == 0)
-                                VI.Cout(Uid, "{0}展示了{1}.", zd.Player(who), zd.Tux(cards));
-                            else if (piles == 1)
-                                VI.Cout(Uid, "{0}展示了{1}.", zd.Player(who), zd.Monster(cards));
-                            else if (piles == 2)
-                                VI.Cout(Uid, "{0}展示了{1}.", zd.Player(who), zd.Eve(cards));
+                            if (actionType != 4)
+                            {
+                                string actionText = actionType == 2 ? "声明" : "展示";
+                                string text = "";
+                                switch (pile)
+                                {
+                                    case Base.Card.Card.Genre.Tux: text = zd.Tux(invs); break;
+                                    case Base.Card.Card.Genre.NMB: text = zd.Monster(invs); break;
+                                    case Base.Card.Card.Genre.Eve: text = zd.Eve(invs); break;
+                                    case Base.Card.Card.Genre.TuxSerial: text = zd.TuxDbSerial(invs); break;
+                                    case Base.Card.Card.Genre.Rune: text = "标记" + zd.Rune(invs); break;
+                                    case Base.Card.Card.Genre.Five: text = "属性" + zd.Prop(invs.Select(p => (int)p)); break;
+                                    case Base.Card.Card.Genre.Exsp: text = zd.ExspIWithCode(invs.Select(p => (int)p)); break;
+                                }
+                                VI.Cout(Uid, "{0}{1}了{2}.", zd.Player(who), actionText, text);
+                            }
+                            if (actionType == 1 || actionType == 4)
+                                A0O.FlyingGet(invs.Select(p => piles + p), who, who, false);
+                            else if (actionType == 2)
+                                A0O.FlyingGet(invs.Select(p => piles + p), who, who, true);
                         }
                     }
                     break;

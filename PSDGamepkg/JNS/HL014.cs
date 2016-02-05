@@ -352,7 +352,13 @@ namespace PSD.PSDGamepkg.JNS
             vals.Shuffle();
             ushort randomCard = vals[0];
 
-            XI.RaiseGMessage("G2FU,2," + ut + ",C," + randomCard);
+            XI.RaiseGMessage(new Artiad.AnnouceCard()
+            {
+                Action = Artiad.AnnouceCard.Type.DECLARE,
+                Officer = ut,
+                Genre = Card.Genre.Tux,
+                SingleCard = randomCard
+            }.ToMessage());
             Tux tux = XI.LibTuple.TL.DecodeTux(randomCard);
             if (tux.Type == Tux.TuxType.JP)
                 Harm(player, new Player[] { player, tar }, 1);
@@ -750,7 +756,7 @@ namespace PSD.PSDGamepkg.JNS
                 if (args[0] == "1") // Discard Pets
                     XI.RaiseGMessage("G0HI," + args[1] + "," + args[2]);
                 else if (args[0] == "2") // Discard Equips
-                    XI.RaiseGMessage("G0ZC," + args[1] + ",2," + args[2] + ";" + fuse);
+                    XI.RaiseGMessage("G0ZI," + args[1] + "," + args[2]);
                 XI.RaiseGMessage("G0IJ," + player.Uid + ",3");
             }
             else if (type == 1)
@@ -1883,10 +1889,8 @@ namespace PSD.PSDGamepkg.JNS
             List<Player> losses = XI.Board.Garden.Values.Where(p => p.IsAlive && p.Uid != player.Uid &&
                 XI.Board.IsAttendWar(p) && !XI.Board.IsAttendWarSucc(p) && p.ListOutAllCards().Count > 0).ToList();
             TargetPlayer(player.Uid, losses.Select(p => p.Uid));
-            IDictionary<ushort, string> dict = new Dictionary<ushort, string>();
-            foreach (Player py in losses)
-                dict.Add(py.Uid, "#交出的,Q1(p" + string.Join("p", py.ListOutAllCards()) + ")");
-            IDictionary<ushort, string> result = XI.MultiAsyncInput(dict);
+            IDictionary<ushort, string> result = XI.MultiAsyncInput(losses.ToDictionary(p => p.Uid,
+                p => "#交出的,Q1(p" + string.Join("p", p.ListOutAllCards()) + ")"));
             foreach (var pair in result)
                 XI.RaiseGMessage("G0HQ,0," + player.Uid + "," + string.Join(",", pair.Key + ",1,1," + pair.Value));
             if (!XI.Board.Garden.Values.Any(p => p.Team == player.OppTeam && XI.Board.IsAttendWar(p)))
@@ -2463,9 +2467,12 @@ namespace PSD.PSDGamepkg.JNS
                     XI.RaiseGMessage("G0OS," + player.Uid + ",1," + skillName);
                 }
                 if (player.TokenExcl.Count > 0)
+                {
                     XI.RaiseGMessage("G0OJ," + player.Uid + ",1," + player.TokenExcl.Count
                         + "," + string.Join(",", player.TokenExcl));
-                Base.Card.Hero hero = XI.LibTuple.HL.InstanceHero(player.SelectHero);
+                    XI.RaiseGMessage("G2TZ,0," + player.Uid + "," + string.Join(",", player.TokenExcl));
+                }
+                Hero hero = XI.LibTuple.HL.InstanceHero(player.SelectHero);
                 if (hero != null)
                 {
                     if (hero.DEX < 4)
