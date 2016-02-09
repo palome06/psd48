@@ -107,12 +107,20 @@ namespace PSD.PSDGamepkg.JNS
                 if (mon2.STR >= mon1.STR)
                 {
                     mon1.Curtain();
-                    XI.RaiseGMessage(new Artiad.LosePet()
+                    if (XI.Board.Mon1From != 0)
                     {
-                        Owner = XI.Board.Mon1From,
-                        SinglePet = XI.Board.Monster1,
-                        Recycle = true
-                    }.ToMessage());
+                        XI.RaiseGMessage(new Artiad.LosePet()
+                        {
+                            Owner = XI.Board.Mon1From,
+                            SinglePet = XI.Board.Monster1,
+                            Recycle = true
+                        }.ToMessage());
+                    }
+                    else
+                    {
+                        XI.RaiseGMessage("G0WB," + XI.Board.Monster1);
+                        XI.RaiseGMessage("G0ON,0,M,1," + XI.Board.Monster1);
+                    }
                     XI.RaiseGMessage("G0YM,0,0,0");
                     XI.Board.Monster1 = 0;
 
@@ -442,113 +450,86 @@ namespace PSD.PSDGamepkg.JNS
         }
         public void JNH0302Action(Player player, int type, string fuse, string argst)
         {
+            System.Action<Player> rotation = (p) =>
+            {
+                int delta = p.STRh - p.DEXh;
+                if (delta > 0)
+                {
+                    XI.RaiseGMessage("G0IX," + p.Uid + ",0," + delta);
+                    XI.RaiseGMessage("G0OA," + p.Uid + ",0," + delta);
+                }
+                else if (delta < 0)
+                {
+                    XI.RaiseGMessage("G0OX," + p.Uid + ",0," + (-delta));
+                    XI.RaiseGMessage("G0IA," + p.Uid + ",0," + (-delta));
+                }
+            };
             if (type == 0)
             {
                 if (player.TokenTars.Count == 0)
                 {
-                    Base.Card.Hero hero = XI.LibTuple.HL.InstanceHero(player.SelectHero);
-                    if (hero != null)
-                    {
-                        if (hero.STR > hero.DEX)
-                        {
-                            XI.RaiseGMessage("G0IX," + player.Uid + ",0," + (hero.STR - hero.DEX));
-                            XI.RaiseGMessage("G0OA," + player.Uid + ",0," + (hero.STR - hero.DEX));
-                        }
-                        else if (hero.STR < hero.DEX)
-                        {
-                            XI.RaiseGMessage("G0OX," + player.Uid + ",0," + (hero.DEX - hero.STR));
-                            XI.RaiseGMessage("G0IA," + player.Uid + ",0," + (hero.DEX - hero.STR));
-                        }
-                    }
+                    rotation(player);
                     // Reverse Ordered Player
                     XI.RaiseGMessage("G0HR,0,1");
-                    string another = XI.AsyncInput(player.Uid, "#另一名,/T1" + AOthersTared(player), "JNH0302Action", "0");
+                    string another = XI.AsyncInput(player.Uid, "#另一名,/T1" +
+                        AOthersTared(player), "JNH0302Action", "0");
                     if (!another.StartsWith("/") && another != VI.CinSentinel)
                     {
                         ushort to = ushort.Parse(another);
                         XI.RaiseGMessage("G0IJ," + player.Uid + ",2,1," + to);
                         Player py = XI.Board.Garden[to];
-                        Base.Card.Hero pyHero = XI.LibTuple.HL.InstanceHero(py.SelectHero);
-                        if (pyHero != null)
-                        {
-                            if (pyHero.STR > pyHero.DEX)
-                            {
-                                XI.RaiseGMessage("G0IX," + py.Uid + ",0," + (pyHero.STR - pyHero.DEX));
-                                XI.RaiseGMessage("G0OA," + py.Uid + ",0," + (pyHero.STR - pyHero.DEX));
-                            }
-                            else if (pyHero.STR < pyHero.DEX)
-                            {
-                                XI.RaiseGMessage("G0OX," + py.Uid + ",0," + (pyHero.DEX - pyHero.STR));
-                                XI.RaiseGMessage("G0IA," + py.Uid + ",0," + (pyHero.DEX - pyHero.STR));
-                            }
-                        }
+                        rotation(py);
                     }
                     else
                         XI.RaiseGMessage("G0IJ," + player.Uid + ",2,1," + player.Uid);
                 }
                 else
                 {
-                    Base.Card.Hero hero = XI.LibTuple.HL.InstanceHero(player.SelectHero);
-                    if (hero != null)
-                    {
-                        if (hero.STR > hero.DEX)
-                        {
-                            XI.RaiseGMessage("G0OX," + player.Uid + ",0," + (hero.STR - hero.DEX));
-                            XI.RaiseGMessage("G0IA," + player.Uid + ",0," + (hero.STR - hero.DEX));
-                        }
-                        else if (hero.STR < hero.DEX)
-                        {
-                            XI.RaiseGMessage("G0IX," + player.Uid + ",0," + (hero.DEX - hero.STR));
-                            XI.RaiseGMessage("G0OA," + player.Uid + ",0," + (hero.DEX - hero.STR));
-                        }
-                    }
+                    rotation(player);
                     // Reverse Ordered Player
                     XI.RaiseGMessage("G0HR,0,1");
                     if (player.SingleTokenTar != player.Uid)
                     {
                         Player py = XI.Board.Garden[player.SingleTokenTar];
-                        Base.Card.Hero pyHero = XI.LibTuple.HL.InstanceHero(py.SelectHero);
-                        if (pyHero != null)
-                        {
-                            if (pyHero.STR > pyHero.DEX)
-                            {
-                                XI.RaiseGMessage("G0OX," + py.Uid + ",0," + (pyHero.STR - pyHero.DEX));
-                                XI.RaiseGMessage("G0IA," + py.Uid + ",0," + (pyHero.STR - pyHero.DEX));
-                            }
-                            else if (pyHero.STR < pyHero.DEX)
-                            {
-                                XI.RaiseGMessage("G0IX," + py.Uid + ",0," + (pyHero.DEX - pyHero.STR));
-                                XI.RaiseGMessage("G0OA," + py.Uid + ",0," + (pyHero.DEX - pyHero.STR));
-                            }
-                        }
+                        rotation(py);
                     }
                     XI.RaiseGMessage("G0OJ," + player.Uid + ",2,1," + player.SingleTokenTar);
                 }
             }
-            else if (type == 1)
+            else if (type == 1) // Leave of myself
                 XI.RaiseGMessage("G0HR,0,1");
-            else if (type == 2)
+            else if (type == 2) // Leave of the target
             {
                 XI.RaiseGMessage("G0OJ," + player.Uid + ",2,1," + player.SingleTokenTar);
                 XI.RaiseGMessage("G0IJ," + player.Uid + ",2,1," + player.Uid);
             }
-            else if (type == 3)
+            else if (type == 3) // still fold the one taking same change
+                rotation(XI.Board.Garden[player.SingleTokenTar]);
+            else if (type == 4)
             {
-                Player py = XI.Board.Garden[player.SingleTokenTar];
-                Base.Card.Hero pyHero = XI.LibTuple.HL.InstanceHero(py.SelectHero);
-                if (pyHero != null)
+                Artiad.InnateChange ic = Artiad.InnateChange.Parse(fuse);
+                if (ic.NewValue <= 0)
+                    ic.NewValue = 0;
+                Player py = XI.Board.Garden[ic.Who];
+                if (ic.Item == Artiad.InnateChange.Prop.STR)
                 {
-                    if (pyHero.STR > pyHero.DEX)
-                    {
-                        XI.RaiseGMessage("G0IX," + py.Uid + ",0," + (pyHero.STR - pyHero.DEX));
-                        XI.RaiseGMessage("G0OA," + py.Uid + ",0," + (pyHero.STR - pyHero.DEX));
-                    }
-                    else if (pyHero.STR < pyHero.DEX)
-                    {
-                        XI.RaiseGMessage("G0OX," + py.Uid + ",0," + (pyHero.DEX - pyHero.STR));
-                        XI.RaiseGMessage("G0IA," + py.Uid + ",0," + (pyHero.DEX - pyHero.STR));
-                    }
+                    int oldValue = py.STRh;
+                    py.STRh = ic.NewValue;
+                    if (oldValue > ic.NewValue)
+                        XI.RaiseGMessage("G0OX," + ic.Who + ",0," + (oldValue - ic.NewValue));
+                    else if (oldValue < ic.NewValue)
+                        XI.RaiseGMessage("G0IX," + ic.Who + ",0," + (ic.NewValue - oldValue));
                 }
+                else if (ic.Item == Artiad.InnateChange.Prop.DEX)
+                {
+                    int oldValue = py.DEXh;
+                    py.DEXh = ic.NewValue;
+                    if (oldValue > ic.NewValue)
+                        XI.RaiseGMessage("G0OA," + ic.Who + ",0," + (oldValue - ic.NewValue));
+                    else if (oldValue < ic.NewValue)
+                        XI.RaiseGMessage("G0IA," + ic.Who + ",0," + (ic.NewValue - oldValue));
+                }
+                XI.InnerGMessage(fuse, 101);
             }
         }
         public bool JNH0302Valid(Player player, int type, string fuse)
@@ -572,6 +553,12 @@ namespace PSD.PSDGamepkg.JNS
                 ushort who = ushort.Parse(parts[2]);
                 if (player.SingleTokenTar != player.Uid && who == player.SingleTokenTar && thype == 1)
                     return true;
+            }
+            else if (type == 4 && player.SingleTokenTar != 0)
+            {
+                Artiad.InnateChange ic = Artiad.InnateChange.Parse(fuse);
+                return (ic.Who == player.Uid || ic.Who == player.SingleTokenTar) &&
+                    (ic.Item == Artiad.InnateChange.Prop.STR || ic.Item == Artiad.InnateChange.Prop.DEX);
             }
             return false;
         }
@@ -2472,16 +2459,16 @@ namespace PSD.PSDGamepkg.JNS
                         + "," + string.Join(",", player.TokenExcl));
                     XI.RaiseGMessage("G2TZ,0," + player.Uid + "," + string.Join(",", player.TokenExcl));
                 }
-                Hero hero = XI.LibTuple.HL.InstanceHero(player.SelectHero);
-                if (hero != null)
+                XI.RaiseGMessage(new Artiad.InnateChange()
                 {
-                    if (hero.DEX < 4)
-                        XI.RaiseGMessage("G0IX," + player.Uid + ",0," + (4 - hero.DEX));
-                    else if (hero.DEX > 4)
-                        XI.RaiseGMessage("G0OX," + player.Uid + ",0," + (hero.DEX - 4));
-                }
-                else
-                    XI.RaiseGMessage("G0IX," + player.Uid + ",0,2");
+                    Item = Artiad.InnateChange.Prop.DEX,
+                    Who = player.Uid,
+                    NewValue = 4
+                }.ToMessage());
+                if (player.DEXh < 4)
+                    XI.RaiseGMessage("G0IX," + player.Uid + ",3," + (4 - player.DEXh));
+                else if (player.DEXh > 4)
+                    XI.RaiseGMessage("G0OX," + player.Uid + ",3," + (player.DEXh - 4));
                 player.ROMUshort = 2;
                 if (XI.Board.Garden.Values.Where(p => p.IsAlive &&
                     p.Team == player.OppTeam).Sum(p => p.GetPetCount()) >= 3)
@@ -3588,15 +3575,7 @@ namespace PSD.PSDGamepkg.JNS
                     }
                 }
                 else
-                {
-                    string second = XI.AsyncInput(player.Uid, "#请选择获得「神算」,T1(p" +
-                           string.Join("p", uts) + ")", "JNE0202", "1");
-                    if (second != VI.CinSentinel)
-                    {
-                        ushort tar = ushort.Parse(second);
-                        XI.RaiseGMessage("G0IF," + tar + ",7");
-                    }
-                }
+                    XI.RaiseGMessage("G0DH," + player.Uid + ",0,1");
             }
             else if (type == 1)
             {
@@ -3739,7 +3718,14 @@ namespace PSD.PSDGamepkg.JNS
             if (!survive)
             {
                 if (player.IsAlive)
-                    XI.RaiseGMessage("G0LH,0," + player.Uid + "," + (player.HPb - 2));
+                {
+                    XI.RaiseGMessage(new Artiad.InnateChange()
+                    {
+                        Item = Artiad.InnateChange.Prop.HP,
+                        Who = player.Uid,
+                        NewValue = player.HPb - 2
+                    }.ToMessage());
+                }
                 XI.RaiseGMessage("G0ZW," + tar);
             }
             else
@@ -3764,7 +3750,12 @@ namespace PSD.PSDGamepkg.JNS
                         XI.RaiseGMessage("G0IJ," + player.Uid + ",1,1,C" + card);
                     }
                 }
-                XI.RaiseGMessage("G0LH,0," + py.Uid + "," + (py.HPb - 2));
+                XI.RaiseGMessage(new Artiad.InnateChange()
+                {
+                    Item = Artiad.InnateChange.Prop.HP,
+                    Who = py.Uid,
+                    NewValue = py.HPb - 2
+                }.ToMessage());
                 if (py.IsAlive)
                 {
                     if (py.HP < player.HPb)

@@ -201,6 +201,8 @@ namespace PSD.Base.Card
             List<Hero> first = ListAllJoinableHeroes(groups);
             if (first.Any(p => p.Ofcode == "XJ505") && first.Any(p => p.Ofcode == "TR011"))
                 first.RemoveAll(p => p.Ofcode == "XJ505");
+            if (first.Any(p => p.Ofcode == "RE001"))
+                first.RemoveAll(p => p.Ofcode == "TR012");
             return first;
         }
         public List<Hero> ListAllHeros(int groups)
@@ -211,26 +213,6 @@ namespace PSD.Base.Card
             else
                 return dicts.Values.Where(p => p.Group != 0).ToList();
         }
-        //public Hero[,] SRPickList(int cand, int people)
-        //{
-        //    int possi = dicts.Count / people;
-        //    if (possi < cand)
-        //        cand = possi;
-        //    int total = cand * people;
-        //    List<Hero> possibles = dicts.Values.Where(p => p.Avatar != 10103 &&
-        //        p.Avatar != 10207 && p.Avatar != 10304 && p.Avatar != 10607).ToList();
-        //    IEnumerable<Hero> selects = possibles.Take(total);
-        //    int idx = 0, jdx = 0;
-        //    Hero[,] heros = new Hero[people, cand];
-        //    foreach (Hero hero in selects)
-        //    {
-        //        heros[idx, jdx] = hero;
-        //        ++jdx;
-        //        if (jdx >= cand) { ++idx; jdx = 0; }
-        //    }
-        //    //heros[0, 0] = dicts[10505];
-        //    return heros;
-        //}
         public List<Hero> ListHeroesInTest(int level)
         {
             int[] lv = Card.Level2Pkg(level) ?? new int[0];

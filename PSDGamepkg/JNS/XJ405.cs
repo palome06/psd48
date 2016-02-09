@@ -1323,8 +1323,12 @@ namespace PSD.PSDGamepkg.JNS
             }
             else if (type == 1)
             {
-                if (player.DEXh > 0)
-                    XI.RaiseGMessage("G0OX," + player.Uid + ",0," + player.DEXh);
+                XI.RaiseGMessage(new Artiad.InnateChange()
+                {
+                    Item = Artiad.InnateChange.Prop.DEX,
+                    Who = player.Uid,
+                    NewValue = 0
+                }.ToMessage());
                 player.ROMUshort = 2;
             }
         }
@@ -2724,14 +2728,24 @@ namespace PSD.PSDGamepkg.JNS
             if (type == 0)
             {
                 player.RIM["15001.Incr"] = 12 - player.HPb;
-                XI.RaiseGMessage("G0LH,1," + player.Uid + ",12");
+                XI.RaiseGMessage(new Artiad.InnateChange()
+                {
+                    Item = Artiad.InnateChange.Prop.HP,
+                    Who = player.Uid,
+                    NewValue = 12
+                }.ToMessage());
             }
             else if (type == 1)
             {
                 int incr = (int)player.RIM["15001.Incr"];
                 if (incr != 0)
                 {
-                    XI.RaiseGMessage("G0LH,1," + player.Uid + "," + (12 - incr));
+                    XI.RaiseGMessage(new Artiad.InnateChange()
+                    {
+                        Item = Artiad.InnateChange.Prop.HP,
+                        Who = player.Uid,
+                        NewValue = 12 - incr
+                    }.ToMessage());
                 }
                 player.RIM.Remove("15001.Incr");
             }

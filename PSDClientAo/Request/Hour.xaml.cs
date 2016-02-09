@@ -125,7 +125,7 @@ namespace PSD.ClientAo.Request
                 gb.Content = wrapPanels[index] = new WrapPanel();
                 npcStackPanel.Children.Add(gb);
             }
-            foreach (ushort npcCode in lg.NL.ListAllSeleable(0))
+            foreach (ushort npcCode in lg.NL.ListAllNPC(0))
             {
                 NPC npc = lg.NL.Decode(npcCode);
                 AddContent("M", NMBLib.CodeOfNPC(npcCode), npc.Group, npc.Genre, false);

@@ -594,7 +594,7 @@ namespace PSD.PSDGamepkg
                  "ZW", "IY", "OY", "DS", "CC", "CD", "CE", "XZ", "ZB", "ZC", "ZI", "ZS", "ZL", "IA",
                  "OA", "IX", "OX", "AX", "IB", "OB", "IW", "OW", "WB", "9P", "IP", "OP", "CZ", "HC",
                  "HD", "HH", "HI", "HL", "IC", "OC", "HT", "HG", "QR", "HZ", "TT", "T7", "JM", "WN",
-                 "IJ", "OJ", "IE", "OE", "IS", "OS", "LH", "IV", "OV", "PB", "YM", "HR", "FI", "ON",
+                 "IJ", "OJ", "IE", "OE", "IS", "OS", "LA", "IV", "OV", "PB", "YM", "HR", "FI", "ON",
                  "SN", "MA", "ZJ", "IF", "OF", "PQ" };
             string[] g1 = new string[] { "DI", "IU", "OU", "TH", "CW", "ZK", "IZ", "OZ", "WP", "SG",
                  "HK", "WJ", "XR", "EV", "CK", "7F", "YP", "NI", "GE", "LY", "UE" };

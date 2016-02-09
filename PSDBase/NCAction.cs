@@ -104,10 +104,7 @@ namespace PSD.Base
 
         public NCAction EncodeNCAction(string code)
         {
-            foreach (NCAction nj in Firsts)
-                if (nj.Code == code)
-                    return nj;
-            return null;
+            return Firsts.FirstOrDefault(p => p.Code == code);
         }
     }
 }

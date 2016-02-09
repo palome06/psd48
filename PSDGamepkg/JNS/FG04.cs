@@ -1818,11 +1818,21 @@ namespace PSD.PSDGamepkg.JNS
         }
         public void GFT4IncrAction(Player player)
         {
-            XI.RaiseGMessage("G0LH,1," + player.Uid + "," + (player.HPb + 2));
+            XI.RaiseGMessage(new Artiad.InnateChange()
+            {
+                Item = Artiad.InnateChange.Prop.HP,
+                Who = player.Uid,
+                NewValue = player.HPb + 2
+            }.ToMessage());
         }
         public void GFT4DecrAction(Player player)
         {
-            XI.RaiseGMessage("G0LH,0," + player.Uid + "," + (player.HPb - 2));
+            XI.RaiseGMessage(new Artiad.InnateChange()
+            {
+                Item = Artiad.InnateChange.Prop.HP,
+                Who = player.Uid,
+                NewValue = player.HPb - 2
+            }.ToMessage());
         }
         public void GFT4WinEff()
         {

@@ -53,6 +53,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Artiad\BHW.cs" />
     <Compile Include="Artiad\HPIssue.cs" />
     <Compile Include="Artiad\ContentRule.cs" />
     <Compile Include="Artiad\Clothing.cs" />

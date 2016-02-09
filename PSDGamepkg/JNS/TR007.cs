@@ -1785,7 +1785,7 @@ namespace PSD.PSDGamepkg.JNS
         }
         public void JNT1202Action(Player player, int type, string fuse, string argst)
         {
-            XI.RaiseGMessage("G0IA," + XI.Board.Rounder.Uid + ",1,3");
+            XI.RaiseGMessage("G0IA," + player.Uid + ",1,3");
         }
         #endregion TR012 - HuangfuZhuo
         #region TR013 - XieCangxing
@@ -3109,7 +3109,12 @@ namespace PSD.PSDGamepkg.JNS
             }
             else if (type == 1)
             {
-                XI.RaiseGMessage("G0LH,0," + player.Uid + "," + (player.HPb - 2));
+                XI.RaiseGMessage(new Artiad.InnateChange()
+                {
+                    Item = Artiad.InnateChange.Prop.HP,
+                    Who = player.Uid,
+                    NewValue = player.HPb - 2
+                }.ToMessage());
                 player.RAMUshort = 0;
             }
         }
@@ -4056,8 +4061,12 @@ namespace PSD.PSDGamepkg.JNS
                 SinglePet = pet
             }.ToMessage());
             player.ROMUshort = 1;
-            if (player.DEXh > 0)
-                XI.RaiseGMessage("G0OX," + player.Uid + ",0," + player.DEXh);
+            XI.RaiseGMessage(new Artiad.InnateChange()
+            {
+                Item = Artiad.InnateChange.Prop.DEX,
+                Who = player.Uid,
+                NewValue = 0
+            }.ToMessage());
         }
         public string JNT3403Input(Player player, int type, string fuse, string prev)
         {
@@ -5147,5 +5156,98 @@ namespace PSD.PSDGamepkg.JNS
                 XI.RaiseGMessage("G0IA," + player.Uid + ",0,1");
         }
         #endregion TR044 - Suhe
+
+        #region RE001 - HuangfuZhuo (R.TR012)
+        public bool JNR0101Valid(Player player, int type, string fuse)
+        {
+            Tux tp04 = XI.LibTuple.TL.EncodeTuxCode("TP04");
+            return player.Tux.Count > 0 && tp04 != null &&
+                tp04.Bribe(player, type, fuse) && tp04.Valid(player, type, fuse);
+        }
+        public void JNR0101Action(Player player, int type, string fuse, string argst)
+        {
+            XI.RaiseGMessage("G0CC," + player.Uid + ",0," + player.Uid + ",TP04," + argst + ";0," + fuse);
+            XI.RaiseGMessage("G1CK," + player.Uid + ",JNR0101,0");
+        }
+        public string JNR0101Input(Player player, int type, string fuse, string prev)
+        {
+            if (prev == "")
+                return "/Q1(p" + string.Join("p", player.Tux) + ")";
+            else
+                return "";
+        }
+        public bool JNR0102Valid(Player player, int type, string fuse)
+        {
+            return XI.Board.Garden.Values.Any(p => p.IsTared && 
+                p.Runes.Intersect(XI.LibTuple.RL.GetFullNegative()).Any());
+        }
+        public void JNR0102Action(Player player, int type, string fuse, string argst)
+        {
+            ushort[] parts = argst.Split(',').Select(p => ushort.Parse(p)).ToArray();
+            XI.RaiseGMessage("G0OF," + parts[0] + "," + parts[1]);
+            XI.RaiseGMessage("G0IF," + parts[0] + "," + parts[2]);
+            XI.RaiseGMessage("G1CK," + player.Uid + ",JNR0102,0");
+        }
+        public string JNR0102Input(Player player, int type, string fise, string prev)
+        {
+            if (prev == "")
+            {
+                return "/T1" + FormatPlayers(p => p.IsTared && p.Runes.Intersect(
+                    XI.LibTuple.RL.GetFullNegative()).Any());
+            }
+            else if (prev.IndexOf(',') < 0)
+            {
+                Player py = XI.Board.Garden[ushort.Parse(prev)];
+                return "#消除,/F1(p" + string.Join("p", XI.LibTuple.RL.GetFullNegative().Intersect(
+                    py.Runes)) + "),#更改,/F1(p" + string.Join("p", XI.LibTuple.RL.GetFullPositive()) + ")";
+            }
+            else return "";
+        }
+        public bool JNR0103Valid(Player player, int type, string fuse)
+        {
+            if (type == 0)
+                return JNT1202Valid(player, 0, fuse);
+            else if (type == 1)
+            {
+                string[] g1ck = fuse.Split(',');
+                ushort who = ushort.Parse(g1ck[1]);
+                string skill = g1ck[2];
+                if (who == player.Uid)
+                {
+                    if (skill == "JNR0101")
+                        return (player.RAMUshort & 0x1) == 0;
+                    else if (skill == "JNR0102")
+                        return (player.RAMUshort & 0x2) == 0;
+                }
+                return false;
+            }
+            else if (type == 2)
+                return player.RAMUshort > 0;
+            else return false;
+        }
+        public void JNR0103Action(Player player, int type, string fuse, string argst)
+        {
+            if (type == 0)
+                JNT1202Action(player, 0, fuse, argst);
+            else if (type == 1)
+            {
+                if (XI.Board.InFight)
+                    XI.RaiseGMessage("G0IA," + player.Uid + ",1,2");
+                string[] g1ck = fuse.Split(',');
+                string skill = g1ck[2];
+                if (skill == "JNR0101")
+                    player.RAMUshort |= 0x1;
+                else if (skill == "JNR0102")
+                    player.RAMUshort |= 0x2;
+            }
+            else if (type == 2)
+            {
+                if (player.RAMUshort == 0x3)
+                    XI.RaiseGMessage("G0IA," + player.Uid + ",1,4");
+                else
+                    XI.RaiseGMessage("G0IA," + player.Uid + ",1,2");
+            }
+        }
+        #endregion RE001 - HuangfuZhuo (R.TR012)
     }
 }

@@ -278,6 +278,15 @@ namespace PSD.ClientAo
                         A0F.Supporter = 0; A0F.Hinder = 0;
                     }
                     break;
+                case "E0LH":
+                    if (version <= 152)
+                    {
+                        string[] e0lh = readLine.Split(',');
+                        ushort ut = ushort.Parse(e0lh[2]);
+                        ushort to = ushort.Parse(e0lh[3]);
+                        readLine = "E0LA,H," + ut + "," + A0P[ut].HPa + "," + to;
+                    }
+                    break;
             }
             return false;
         }

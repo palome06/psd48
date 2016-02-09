@@ -2692,14 +2692,14 @@ namespace PSD.ClientAo
                         }
                     }
                     break;
-                case "E0LH":
-                    for (int i = 1; i < args.Length; i += 3)
+                case "E0LA":
+                    if (args[1] == "H")
                     {
-                        ushort incr = ushort.Parse(args[i]);
-                        ushort ut = ushort.Parse(args[i + 1]);
-                        ushort to = ushort.Parse(args[i + 2]);
-                        VI.Cout(Uid, "{0}HP上限{1}为{2}点.",
-                            zd.Player(ut), (incr == 0 ? "减少" : "增加"), to);
+                        ushort ut = ushort.Parse(args[2]);
+                        ushort from = ushort.Parse(args[3]);
+                        ushort to = ushort.Parse(args[4]);
+                        string direction = from < to ? "增加" : "减少";
+                        VI.Cout(Uid, "{0}HP上限{1}为{2}点.", zd.Player(ut), direction, to);
                         A0P[ut].HPa = to;
                         if (A0P[ut].HP > A0P[ut].HPa)
                             A0P[ut].HP = A0P[ut].HPa;

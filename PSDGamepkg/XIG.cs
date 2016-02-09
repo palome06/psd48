@@ -2006,10 +2006,12 @@ namespace PSD.PSDGamepkg
                         else if (Board.Supporter.Uid == me)
                             player = Board.Supporter;
 
-                        if (type == 0 || type == 1)
+                        if (type == 0 || type == 1 || type == 3)
                         {
                             int n = int.Parse(args[3]);
-                            if (type == 0)
+                            if (type == 3)
+                                player.STRh += n;
+                            if (type == 0 || type == 3)
                                 player.STRb = player.mSTRb + n;
                             if (Board.InFightThrough && !Board.InFight)
                             {
@@ -2045,10 +2047,12 @@ namespace PSD.PSDGamepkg
                         else if (Board.Supporter.Uid == me)
                             player = Board.Supporter;
 
-                        if (type == 0 || type == 1)
+                        if (type == 0 || type == 1 || type == 3)
                         {
                             int n = int.Parse(args[3]);
-                            if (type == 0)
+                            if (type == 3)
+                                player.STRh -= n;
+                            if (type == 0 || type == 3)
                                 player.STRb = player.mSTRb - n;
                             if (Board.InFightThrough && !Board.InFight)
                             {
@@ -2085,10 +2089,12 @@ namespace PSD.PSDGamepkg
                             player = Board.Supporter;
                         if (player.Uid != 0)
                         {
-                            if (type == 0 || type == 1)
+                            if (type == 0 || type == 1 || type == 3)
                             {
                                 int n = int.Parse(args[3]);
-                                if (type == 0)
+                                if (type == 3)
+                                    player.DEXh += n;
+                                if (type == 0 || type == 3)
                                     player.DEXb = player.mDEXb + n;
                                 if (Board.InFightThrough && !Board.InFight)
                                 {
@@ -2126,10 +2132,12 @@ namespace PSD.PSDGamepkg
                             player = Board.Supporter;
                         if (player.Uid != 0)
                         {
-                            if (type == 0 || type == 1)
+                            if (type == 0 || type == 1 || type == 3)
                             {
                                 int n = int.Parse(args[3]);
-                                if (type == 0)
+                                if (type == 3)
+                                    player.DEXh -= n;
+                                if (type == 0 || type == 3)
                                     player.DEXb = player.mDEXb - n;
                                 if (Board.InFightThrough && !Board.InFight)
                                 {
@@ -2156,22 +2164,7 @@ namespace PSD.PSDGamepkg
                     }
                     break;
                 case "G0AX":
-                    {
-                        ushort me = ushort.Parse(args[1]);
-                        Player player = Board.Garden[me];
-                        if (player.IsAlive)
-                        {
-                            if (player.DEXc != player.DEXb || player.DEXa != player.DEXb
-                                || player.STRc != player.STRb || player.STRa != player.STRb)
-                            {
-                                WI.BCast("E0AX," + me + "," + player.STRb + "," + player.DEXb);
-                            }
-                            player.SDaSet = player.SDcSet = false;
-                            player.DEXi = 0; player.STRi = 0;
-                            player.RestZP = 1;
-                        } // JN50302 to override the G0AX events
-                        break;
-                    }
+                    Artiad.ResetAX.Parse(cmd).Handle(this); break;
                 case "G0IB":
                     {
                         ushort x = ushort.Parse(args[1]);
@@ -3108,29 +3101,8 @@ namespace PSD.PSDGamepkg
                             WI.BCast("E0OS," + who + e0os);
                     }
                     break;
-                case "G0LH":
-                    {
-                        ISet<Player> fullBye = new HashSet<Player>();
-                        for (int i = 1; i < args.Length; i += 3)
-                        {
-                            ushort incr = ushort.Parse(args[i]);
-                            ushort ut = ushort.Parse(args[i + 1]);
-                            ushort to = ushort.Parse(args[i + 2]);
-                            if (incr == 0 || incr == 1)
-                            {
-                                if (to <= 0) { to = 0; args[i + 2] = "0"; }
-                                Board.Garden[ut].HPb = to;
-                                if (Board.Garden[ut].HP > Board.Garden[ut].HPb)
-                                    Board.Garden[ut].HP = Board.Garden[ut].HPb;
-                                if (Board.Garden[ut].HPb == 0)
-                                    fullBye.Add(Board.Garden[ut]);
-                            }
-                        }
-                        WI.BCast("E0LH," + string.Join(",", Algo.TakeRange(args, 1, args.Length)));
-                        if (fullBye.Count > 0)
-                            RaiseGMessage("G0ZW," + string.Join(",", fullBye.Select(p => p.Uid)));
-                    }
-                    break;
+                case "G0LA":
+                    Artiad.InnateChange.Parse(cmd).Handle(this); break;
                 case "G0IV":
                     {
                         ushort ut = ushort.Parse(args[1]);
