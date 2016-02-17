@@ -110,7 +110,7 @@ namespace PSD.PSDGamepkg
                 switch (rstage.Substring(2))
                 {
                     case "00":
-                        Board.Garden[rounder].ResetRAM();
+                        Board.Garden[rounder].ResetRFM();
                         if (!Board.Garden[rounder].Immobilized)
                         {
                             WI.BCast(rstage + "1,0");
@@ -459,7 +459,7 @@ namespace PSD.PSDGamepkg
                         //}
                         //else
                         //    RunQuadStage(rstage, 1);
-                        RunSeperateStage(rstage, 1, delegate (Board bd)
+                        RunSeperateStage(rstage, 1, delegate(Board bd)
                             { return bd.IsRounderBattleWin(); });
                         WI.BCast(rstage + ",1");
                         rstage = "R" + rounder + "ZN"; break;
@@ -646,12 +646,14 @@ namespace PSD.PSDGamepkg
                             RaiseGMessage("G0WN,0");
                         foreach (Player player in Board.Garden.Values)
                         {
-                            player.ResetRAM();
+                            player.ResetRFM();
                             player.Pets.Select(p => LibTuple.ML.Decode(p)).Where(p => p != null)
                                 .ToList().ForEach(p => p.ResetRAM());
                         }
                         break;
                 }
+                foreach (Player player in Board.Garden.Values)
+                    player.ResetRAM();
             }
         }
         private void RunQuadStage(string zero) { RunQuadMixedStage(zero, 0, null, null); }

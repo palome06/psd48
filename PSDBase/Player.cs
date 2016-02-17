@@ -156,15 +156,20 @@ namespace PSD.Base
 
         public ushort SingleTokenTar { get { return TokenTars.Count > 0 ? TokenTars[0] : (ushort)0; } }
 
-        public IDictionary<string, object> ROM { private set; get; }
-        public IDictionary<string, object> RIM { private set; get; } // check hero, to be substituded by first-class Diva
-        public IDictionary<string, object> RAM { private set; get; }
-        public IDictionary<string, object> RTM { private set; get; } // check hero, to be substituded by first-class Diva
-        public ushort ROMUshort { set; get; }
-        public int ROMInt { set; get; }
-        public ushort RAMUshort { set; get; }
-        public int RAMInt { set; get; }
-        public List<ushort> RAMUtList { private set; get; }
+        public Utils.Diva ROM { private set; get; } // Alive during the entire game
+        public Utils.Diva RFM { private set; get; } // Alive in a round
+        public Utils.Diva RAM { private set; get; } // Alive in a period
+
+        //public List<ushort> RAMUtList { set; get; }
+        //public IDictionary<string, object> ROM { private set; get; }
+        //public IDictionary<string, object> RIM { private set; get; } // check hero, to be substituded by first-class Diva
+        //public IDictionary<string, object> RAM { private set; get; }
+        //public IDictionary<string, object> RTM { private set; get; } // check hero, to be substituded by first-class Diva
+        //public ushort ROMUshort { set; get; }
+        //public int ROMInt { set; get; }
+        //public ushort RAMUshort { set; get; }
+        //public int RAMInt { set; get; }
+        //public List<ushort> RAMUtList { private set; get; }
 
         // Cos players Stack, e.g. SP101-SP102-XJ404
         public Stack<int> Coss { private set; get; }
@@ -202,11 +207,9 @@ namespace PSD.Base
             TokenTars = new List<ushort>();
             TokenFold = new List<ushort>();
 
-            ROM = new Dictionary<string, object>();
-            RIM = new Dictionary<string, object>();
-            RAM = new Dictionary<string, object>();
-            RTM = new Dictionary<string, object>();
-            RAMUtList = new List<ushort>();
+            ROM = new Utils.Diva();
+            RFM = new Utils.Diva();
+            RAM = new Utils.Diva();
 
             Coss = new Stack<int>();
             Guardian = 0;
@@ -247,24 +250,37 @@ namespace PSD.Base
 
         public void ResetRAM(int hero = 0)
         {
-            RAM.Clear();
-            RAMUshort = 0;
-            RAMInt = 0;
-            RAMUtList.Clear();
             ZPDisabled = false;
             DrTuxDisabled = false;
-            IDictionary<string, object> newRtm = new Dictionary<string, object>();
+            Utils.Diva newDiva = new Utils.Diva();
             if (hero != 0)
             {
-                foreach (var pair in RTM)
+                foreach (string key in RAM.GetKeys())
                 {
-                    if (!pair.Key.StartsWith(SelectHero + "."))
-                        newRtm.Add(pair.Key, pair.Value);
+                    if (key.StartsWith("@") && !key.StartsWith(hero + "@"))
+                        newDiva.Set(key, RAM.GetObject(key));
                 }
-                RTM = newRtm;
+                RAM = newDiva;
             }
             else
-                RTM.Clear();
+                RAM.Clear();
+        }
+
+        public void ResetRFM(int hero = 0)
+        {
+            ResetRAM(hero);
+            Utils.Diva newDiva = new Utils.Diva();
+            if (hero != 0)
+            {
+                foreach (string key in RFM.GetKeys())
+                {
+                    if (key.StartsWith("@") && !key.StartsWith(hero + "@"))
+                        newDiva.Set(key, RFM.GetObject(key));
+                }
+                RFM = newDiva;
+            }
+            else
+                RFM.Clear();
         }
 
         public void ResetTokens()
@@ -287,21 +303,19 @@ namespace PSD.Base
                     board.BannedHero.Remove(heroSwal);
                 }
             }
-            ROM.Clear();
-            ROMUshort = 0;
-            ROMInt = 0;
-            IDictionary<string, object> newRim = new Dictionary<string, object>();
+            ResetRFM(hero);
+            Utils.Diva newDiva = new Utils.Diva();
             if (hero != 0)
             {
-                foreach (var pair in RIM)
+                foreach (string key in ROM.GetKeys())
                 {
-                    if (!pair.Key.StartsWith(hero + "."))
-                        newRim.Add(pair.Key, pair.Value);
+                    if (key.StartsWith("@") && !key.StartsWith(hero + "@"))
+                        newDiva.Set(key, ROM.GetObject(key));
                 }
-                RIM = newRim;
-            } else
-                RIM.Clear();
-            ResetRAM(hero);
+                ROM = newDiva;
+            }
+            else
+                ROM.Clear();
         }
 
         public void InitFromHero(Base.Card.Hero hero, bool reset, bool sdaset, bool sdcset)
