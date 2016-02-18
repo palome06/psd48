@@ -863,21 +863,17 @@ namespace PSD.PSDGamepkg.JNS
         #region XJ305 - ZiXuan
         public bool JN30501Valid(Player player, int type, string fuse)
         {
-            if (Artiad.KittyHelper.IsHarvest(fuse))
-            {
-                Artiad.HarvestPet hvp = Artiad.HarvestPet.Parse(fuse);
-                System.Func<ushort, bool> teammate = p => XI.Board.Garden[p].Team == player.Team;
-                return teammate(hvp.Farmer) && (hvp.Farmland == 0 || !teammate(hvp.Farmland));
-            }
-            else return false;
+            Artiad.ObtainPet opt = Artiad.ObtainPet.Parse(fuse);
+            System.Func<ushort, bool> teammate = p => XI.Board.Garden[p].Team == player.Team;
+            return teammate(opt.Farmer) && (opt.Farmland == 0 || !teammate(opt.Farmland));
         }
         public void JN30501Action(Player player, int type, string fuse, string argst)
         {
-            Artiad.HarvestPet hvp = Artiad.HarvestPet.Parse(fuse);
-            for (int i = 0; i < hvp.Pets.Length; ++i)
+            Artiad.ObtainPet opt = Artiad.ObtainPet.Parse(fuse);
+            for (int i = 0; i < opt.Pets.Length; ++i)
             {
                 string input = XI.AsyncInput(player.Uid,
-                "#获得2张补牌,T1" + ATeammatesTared(player), "JN30501", "0");
+                    "#获得2张补牌,T1" + ATeammatesTared(player), "JN30501", "0");
                 ushort who = ushort.Parse(input);
                 if (who != 0)
                     XI.RaiseGMessage("G0DH," + who + ",0,2");
@@ -979,21 +975,14 @@ namespace PSD.PSDGamepkg.JNS
         }
         public bool JN40102Valid(Player player, int type, string fuse)
         {
-            if (Artiad.KittyHelper.IsHarvest(fuse))
-            {
-                Artiad.HarvestPet hvp = Artiad.HarvestPet.Parse(fuse);
-                if (hvp.Farmer == player.Uid && hvp.Trophy)
-                {
-                    return hvp.Pets.Select(p => XI.LibTuple.ML.Decode(p).Element.Elem2Index()).Any(p =>
-                        XI.Board.Garden.Values.Any(q => q.IsAlive && q.Team == q.OppTeam && q.Pets[p] != 0));
-                }
-            }
-            return false;
+            Artiad.ObtainPet opt = Artiad.ObtainPet.Parse(fuse);
+            return opt.Farmer == player.Uid && opt.Trophy && opt.Pets.Select(p => XI.LibTuple.ML.Decode(p).Element
+                .Elem2Index()).Any(p => XI.Board.Garden.Values.Any(q => q.IsAlive && q.Team == q.OppTeam && q.Pets[p] != 0));
         }
         public void JN40102Action(Player player, int type, string fuse, string args)
         {
-            Artiad.HarvestPet hvp = Artiad.HarvestPet.Parse(fuse);
-            foreach (ushort pt in hvp.Pets)
+            Artiad.ObtainPet opt = Artiad.ObtainPet.Parse(fuse);
+            foreach (ushort pt in opt.Pets)
             {
                 Monster monster = XI.LibTuple.ML.Decode(pt);
                 int elem = monster.Element.Elem2Index();

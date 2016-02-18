@@ -62,18 +62,18 @@ namespace PSD.PSDGamepkg.JNS
         #region TR002 - XuChangqing
         public bool JNT0201Valid(Player player, int type, string fuse)
         {
-            if (Artiad.KittyHelper.IsHarvest(fuse) && !player.RFM.GetBool("InJNT0202"))
+            if (!player.RFM.GetBool("InJNT0202"))
             { // Not valid in JNT0202
-                Artiad.HarvestPet hvp = Artiad.HarvestPet.Parse(fuse);
+                Artiad.ObtainPet opt = Artiad.ObtainPet.Parse(fuse);
                 Func<ushort, bool> enemy = p => XI.Board.Garden[p].Team == player.OppTeam;
-                return enemy(hvp.Farmer) && (hvp.Farmland == 0 || !enemy(hvp.Farmland));
+                return enemy(opt.Farmer) && (opt.Farmland == 0 || !enemy(opt.Farmland));
             }
             else return false;
         }
         public void JNT0201Action(Player player, int type, string fuse, string argst)
         {
-            Artiad.HarvestPet hvp = Artiad.HarvestPet.Parse(fuse);
-            for (int i = 0; i < hvp.Pets.Length; ++i)
+            Artiad.ObtainPet opt = Artiad.ObtainPet.Parse(fuse);
+            for (int i = 0; i < opt.Pets.Length; ++i)
             {
                 string input = XI.AsyncInput(player.Uid, "#获得2张补牌,T1" +
                     ATeammatesTared(player), "JNT0201", "0");
@@ -1008,7 +1008,6 @@ namespace PSD.PSDGamepkg.JNS
         {
             if (type == 0)
             {
-                IDictionary<ushort, bool> dict = new Dictionary<ushort, bool>();
                 foreach (ushort ut in XI.Board.OrderedPlayer(player.Uid))
                 {
                     string us = ut.ToString();
@@ -2024,39 +2023,27 @@ namespace PSD.PSDGamepkg.JNS
         {
             if (type == 0) // ST->[EP]->GR
             {
-                player.RFM.Set("gotoEP", true);
+                player.RFM.Set("endEGR", 1);
                 XI.RaiseGMessage("G0JM,R" + player.Uid + "GS");
             }
             else if (type == 1) // GR->GE->[GF]->EV->GR->GE->...
             {
-                player.RFM.Set("gotoEP", false);
+                player.RFM.Set("endEGR", 2);
                 XI.RaiseGMessage("G0JM,R" + player.Uid + "EV");
             }
             else if (type == 2)
-                player.RFM.Set("backtoGR", true);
-            else if (type == 3)
-            {
-                player.RFM.Set("backtoGR", false);
                 Cure(player, player, 1);
-            }
         }
         public bool JNT1502Valid(Player player, int type, string fuse)
         {
             if (type == 0)
-                return !player.RFM.GetBool("gotoEP");
+                return player.RFM.GetInt("endEGR") == 0;
             else if (type == 1)
-                return player.RFM.GetBool("gotoEP");
+                return player.RFM.GetInt("endEGR") == 1;
             else if (type == 2)
             {
-                string[] g2ym = fuse.Split(',');
-                return XI.Board.Rounder == player && g2ym[1] == "2";
-            }
-            else if (type == 3)
-            {
-                bool b1 = player.RFM.GetBool("backtoGR");
                 string[] g1evs = fuse.Split(',');
-                bool b2 = g1evs[1] == player.Uid.ToString();
-                return b1 && b2;
+                return g1evs[1] == player.Uid.ToString();
             }
             else
                 return false;
@@ -3193,7 +3180,7 @@ namespace PSD.PSDGamepkg.JNS
                 Tux tux = XI.LibTuple.TL.DecodeTux(ut);
                 if (tux != null)
                 {
-                    if (tux.IsTuxEqiup() && gayaTux.IsTuxEqiup() || tux.Type == gayaTux.Type)
+                    if ((tux.IsTuxEqiup() && gayaTux.IsTuxEqiup()) || tux.Type == gayaTux.Type)
                     {
                         XI.RaiseGMessage("G0YM,8," + ut);
                         table.Add(ut);
@@ -3509,18 +3496,14 @@ namespace PSD.PSDGamepkg.JNS
         #region TR028 - Wuhou
         public bool JNT2801Valid(Player player, int type, string fuse)
         {
-            if (Artiad.KittyHelper.IsHarvest(fuse))
-            {
-                Artiad.HarvestPet hvp = Artiad.HarvestPet.Parse(fuse);
-                return hvp.Farmland == 0 || XI.Board.Garden[hvp.Farmer].Team
-                    == XI.Board.Garden[hvp.Farmland].OppTeam;
-            }
-            else return false;
+            Artiad.ObtainPet opt = Artiad.ObtainPet.Parse(fuse);
+            return opt.Farmland == 0 || XI.Board.Garden[opt.Farmer].Team ==
+                XI.Board.Garden[opt.Farmland].OppTeam;
         }
         public void JNT2801Action(Player player, int type, string fuse, string argst)
         {
-            Artiad.HarvestPet hvp = Artiad.HarvestPet.Parse(fuse);
-            for (int i = 0; i < hvp.Pets.Length; ++i)
+            Artiad.ObtainPet opt = Artiad.ObtainPet.Parse(fuse);
+            for (int i = 0; i < opt.Pets.Length; ++i)
             {
                 string input = XI.AsyncInput(player.Uid, "#获得补牌,T1" +
                     ATeammatesTared(player), "JNT2801", "0");

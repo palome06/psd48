@@ -2272,6 +2272,13 @@ namespace PSD.PSDGamepkg.JNS
             int idx = whoStr.IndexOf(',');
             FiveElement five = FiveElementHelper.Int2Elem(int.Parse(whoStr.Substring(0, idx)));
             int elemIdx = five.Elem2Index();
+            XI.RaiseGMessage(new Artiad.AnnouceCard()
+            {
+                Action = Artiad.AnnouceCard.Type.DECLARE,
+                Officer = player.Uid,
+                Genre = Card.Genre.Five,
+                SingleCard = (ushort)five.Elem2Int()
+            }.ToMessage());
             string selection = whoStr.Substring(idx + 1);
             if (selection == "2")
             {
@@ -2459,7 +2466,7 @@ namespace PSD.PSDGamepkg.JNS
         }
         public void ZPH1Action(Player player, int type, string fuse, string argst)
         {
-            var ai = XI.AsyncInput(player.Uid, "#命中-2,T1" + AAllTareds(player), "ZPH1", "0");
+            string ai = XI.AsyncInput(player.Uid, "#命中-2,T1" + AAllTareds(player), "ZPH1", "0");
             ushort to = ushort.Parse(ai);
             TargetPlayer(player.Uid, to);
             XI.RaiseGMessage("G0OX," + to + ",1,2");
@@ -2467,6 +2474,39 @@ namespace PSD.PSDGamepkg.JNS
         public bool ZPH1Valid(Player player, int type, string fuse)
         {
             return XI.Board.Garden.Values.Any(p => p.IsTared);
+        }
+        public bool ZPH2Valid(Player player, int type, string fuse)
+        {
+            return XI.Board.IsAttendWar(player) && XI.Board.Garden.Values.Any(
+                p => p.IsTared && !XI.Board.IsAttendWar(p));
+        }
+        public void ZPH3Action(Player player, int type, string fuse, string argst)
+        {
+            string ai = XI.AsyncInput(player.Uid, "#【幻渺蓝晶】作用目标,T1" + FormatPlayers(
+                p => p.IsTared && p.Uid != player.Uid && p.GetPetCount() > 0), "ZPH3", "0");
+            ushort to = ushort.Parse(ai);
+            Player py = XI.Board.Garden[to];
+            int nt = Math.Min(py.GetPetCount(), py.Tux.Count);
+            if (nt > 0)
+            {
+                string sel = XI.AsyncInput(to, "#弃置的,Q" + nt + "(p" + string.Join("p", py.Tux) + ")," +
+                    string.Format("#请选择【幻渺蓝晶】执行项##战力+{0}##命中+{0}##HP+{0},Y3", nt), "ZPH3", "1");
+                int idx = sel.LastIndexOf(',');
+                string tuxes = sel.Substring(0, idx);
+                XI.RaiseGMessage("G0QZ," + to + "," + tuxes);
+                ushort usel = ushort.Parse(sel.Substring(idx + 1));
+                if (usel == 3)
+                    Cure(player, py, nt);
+                else if (usel == 2)
+                    XI.RaiseGMessage("G0IX," + to + ",1," + nt);
+                else if (usel == 1)
+                    XI.RaiseGMessage("G0IA," + to + ",1," + nt);
+            }
+        }
+        public bool ZHP3Valid(Player player, int type, string fuse)
+        {
+            return XI.Board.Garden.Values.Any(p => p.IsTared &&
+                p.Uid != player.Uid && p.GetPetCount() > 0);
         }
         public bool WQH1ConsumeValid(Player player, int consumeType, int type, string fuse)
         {

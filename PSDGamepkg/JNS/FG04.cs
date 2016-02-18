@@ -2151,7 +2151,7 @@ namespace PSD.PSDGamepkg.JNS
         {
             if (consumeType == 0)
             {
-                Monster mon = XI.LibTuple.ML.Decode(XI.LibTuple.ML.Encode("GIT5"));
+                Monster mon = XI.LibTuple.ML.Decode(XI.LibTuple.ML.Encode("GIT6"));
                 return mon != null && XI.Board.IsAttendWar(player) && mon.RAMInt == 0;
             }
             else if (consumeType == 2)
@@ -2167,7 +2167,7 @@ namespace PSD.PSDGamepkg.JNS
         {
             if (consumeType == 0)
             {
-                Monster mon = XI.LibTuple.ML.Decode(XI.LibTuple.ML.Encode("GIT5"));
+                Monster mon = XI.LibTuple.ML.Decode(XI.LibTuple.ML.Encode("GIT6"));
                 mon.RAMInt = 1;
                 XI.RaiseGMessage("G0IX," + player.Uid + ",2");
             }
@@ -3128,9 +3128,36 @@ namespace PSD.PSDGamepkg.JNS
             {
                 IDictionary<ushort, string> ans = XI.MultiAsyncInput(invs.ToDictionary(p => p.Uid,
                     p => "#交给对面的,Q1(p" + string.Join("p", p.Tux) + ")"));
-                ans.ToList().ForEach(p => XI.RaiseGMessage("G0HQ,0," + XI.Board.Facer(XI.Board.Garden[p.Key]).Uid +
-                    "," + string.Join(",", p.Key + ",1,1," + p.Value)));
+                ans.ToList().ForEach(p => XI.RaiseGMessage("G0HQ,0," + XI.Board.Facer(
+                    XI.Board.Garden[p.Key]).Uid + "," + string.Join(",", p.Key + ",1,1," + p.Value)));
             }
+        }
+        public void GLH1ConsumeAction(Player player, int consumeType, int type, string fuse, string argst)
+        {
+            if (consumeType == 0)
+            {
+                if (type == 0)
+                {
+                    player.RFM.GetOrSetDiva("GLH1Consume").Set("endEGR", 1);
+                    XI.RaiseGMessage("G0JM,R" + player.Uid + "GS");
+                }
+                else if (type == 1)
+                {
+                    player.RFM.GetOrSetDiva("GLH1Consume").Set("endEGR", 2);
+                    XI.RaiseGMessage("G0JM,R" + player.Uid + "QR");
+                }
+            }
+        }
+        public bool GLH1ConsumeValid(Player player, int consumeType, int type, string fuse)
+        {
+            if (consumeType == 0)
+            {
+                if (type == 0)
+                    return player.RFM.GetOrSetDiva("GLH1Consume").GetInt("endEGR") == 0;
+                else if (type == 1)
+                    return player.RFM.GetOrSetDiva("GLH1Consume").GetInt("endEGR") == 1;
+            }
+            return false;
         }
         public void GLH2WinEff()
         {

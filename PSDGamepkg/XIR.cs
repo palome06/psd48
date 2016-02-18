@@ -167,11 +167,7 @@ namespace PSD.PSDGamepkg
                         WI.BCast(rstage + ",1");
                         rstage = "R" + rounder + "GE"; break;
                     case "GE":
-                        RunQuadStage(rstage);
-                        rstage = "R" + rounder + "GF"; break;
-                    //rstage = rounder == 1 ?"R200":"R100"; break;
-                    case "GF":
-                        RunQuadStage(rstage);
+                        RunQuadMixedStage(rstage, 0, null, null);
                         rstage = "R" + rounder + "Z0"; break;
                     case "Z0":
                         Board.Monster1 = 0; Board.Monster2 = 0;
@@ -565,21 +561,15 @@ namespace PSD.PSDGamepkg
                     case "ZZ":
                         RaiseGMessage("G17F,U," + rounder);
                         RunQuadStage(rstage);
-                        rstage = "R" + rounder + "BB"; break;
-                    case "BB":
-                        RunQuadStage(rstage);
                         rstage = "R" + rounder + "BC"; break;
                     case "BC":
                         WI.BCast(rstage + ",0");
-                        Board.InFight = false; Board.InFightThrough = false;
-                        RunQuadStage(rstage);
-                        if (Board.Battler != null)
-                            RaiseGMessage("G0HT," + Board.Rounder.Uid + ",2");
-                        else
-                            RaiseGMessage("G0HT," + Board.Rounder.Uid + ",1");
-                        rstage = "R" + rounder + "BD"; break;
-                    case "BD":
-                        RunQuadStage(rstage);
+                        RunQuadMixedStage(rstage, 0, new int[] { 100 },
+                            new Action[] { () => {
+                                Board.InFight = false; Board.InFightThrough = false;
+                                int tuxCount = Board.Battler != null ? 2 : 1;
+                                RaiseGMessage("G0HT," + Board.Rounder.Uid + "," + tuxCount);
+                            } });
                         rstage = "R" + rounder + "QR"; break;
                     case "QR":
                         RunQuadStage(rstage);

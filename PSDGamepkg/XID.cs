@@ -59,14 +59,14 @@ namespace PSD.PSDGamepkg
             //15002, 17007, 10105, 17021, 19018, 10502
             //17039, 19018, 17027, 17022, 17034, 17042
             //17029, 17036, 17027, 17045, 17043, 17040
-            //17024, 17036, 19007, 17045, 19013, 17040
+            17024, 19007, 10305, 17002, 19013, 17028
             //17023, 10305, 15002, 19016, 15001, 17004
             //17029, 10206, 17005, 17040, 17027, 19003
             //19014, 17029, 19010, 19004, 19015, 17032
             //17035, 19002, 17044, 17019, 10605, 17036
             //17044, 19002, 17026, 10404, 17036, 10502
             //19014, 19006, 19018, 19011, 17035, 19010
-            19003, 15005, 10501, 17039, 19011, 10605
+            //17024, 15005, 10501, 17039, 19011, 10605
         };
 
         private void DebugCondition()
@@ -256,7 +256,7 @@ namespace PSD.PSDGamepkg
             //RaiseGMessage("G0HQ,2,2,0,0,97,99");
             //RaiseGMessage("G0HQ,2,5,0,0,27,28,29");
             //RaiseGMessage("G0HQ,2,1,0,0,48,49,95");
-            //RaiseGMessage("G0HQ,2,3,0,0,92");
+            RaiseGMessage("G0HQ,2,3,0,0,108");
             //RaiseGMessage("G0HQ,2,5,0,0,90");
             //RaiseGMessage("G0HQ,2,2,0,0,10");
             //RaiseGMessage("G0HQ,2,4,0,0,47,48,52");
@@ -360,7 +360,7 @@ namespace PSD.PSDGamepkg
             //RaiseGMessage("G0HD,5,0,0,22");
             //RaiseGMessage("G0HD,4,0,0,19");
             //RaiseGMessage("G0HD,6,0,0,9");
-            //RaiseGMessage("G0HD,1,0,0,48");
+            RaiseGMessage("G0HD,1,0,0,45");
             //RaiseGMessage("G0HD,1,0,0,41");
             //RaiseGMessage("G0HD,5,0,0,68");
             //RaiseGMessage("G0HD,3,0,0,70");
@@ -384,7 +384,7 @@ namespace PSD.PSDGamepkg
             //RaiseGMessage(Artiad.Harm.ToMessage(new Artiad.Harm(2, 2, FiveElement.AQUA, 5, 0)));
             //Board.Garden[3].Escue.Add(1112);
             //RaiseGMessage("G2IL,3,1112");
-            RaiseGMessage("G0IF,6,3,4,6");
+            //RaiseGMessage("G0IF,6,3,4,6");
             //RaiseGMessage("G0IF,6,1,2,3,4");
             //RaiseGMessage("G0IF,4,1,2,3,4");
             //RaiseGMessage("G0IF,1,2");
