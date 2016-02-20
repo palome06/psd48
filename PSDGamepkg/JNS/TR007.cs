@@ -1871,7 +1871,7 @@ namespace PSD.PSDGamepkg.JNS
                 if (a > 0)
                     thisHarm.N = a;
                 else { harms.Remove(thisHarm); }
-                thisHarm.Mask = HPEvoMask.RSV_WORM.Set(thisHarm.Mask);
+                thisHarm.Mask = HPEvoMask.ALIVE.Set(HPEvoMask.RSV_WORM.Set(thisHarm.Mask));
 
                 if (b > 0)
                 {
@@ -1880,7 +1880,7 @@ namespace PSD.PSDGamepkg.JNS
                     else
                         harms.Add(thatHarm = new Artiad.Harm(ut, thisHarm.Source, thisHarm.Element,
                             b, thisHarm.Mask));
-                    thatHarm.Mask = HPEvoMask.RSV_WORM.Set(thatHarm.Mask);
+                    thatHarm.Mask = HPEvoMask.ALIVE.Set(HPEvoMask.RSV_WORM.Set(thatHarm.Mask));
                 }
             }
             if (harms.Count > 0)
@@ -1944,7 +1944,7 @@ namespace PSD.PSDGamepkg.JNS
             {
                 thisHarm.N = totalAmount;
                 thisHarm.Who = leifeng.Uid;
-                thisHarm.Mask = HPEvoMask.RSV_WORM.Set(thisHarm.Mask);
+                thisHarm.Mask = HPEvoMask.ALIVE.Set(HPEvoMask.RSV_WORM.Set(thisHarm.Mask));
                 ncnts.Add(thisHarm);
             }
             if (ncnts.Count > 0)
@@ -2642,7 +2642,7 @@ namespace PSD.PSDGamepkg.JNS
                     p.HP == 0 && p.Team == player.Team && p.IsAlive && !p.Loved && spouseContains(p));
             }
             else if (type == 1)
-                return player.ROM.GetOrSetUshortArray("ExSpFrom").Count > 0;
+                return player.ROM.GetOrSetIntArray("ExSpFrom").Count > 0;
             else return false;
         }
         public void JNT1904Action(Player player, int type, string fuse, string argst)

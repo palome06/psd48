@@ -378,12 +378,20 @@ namespace PSD.PSDGamepkg.JNS
         }
         public void NJH3Action(Player player, string fuse, string args)
         {
-            DefaultPutIntoEscueAction(player, fuse, player);
+            ushort tar = ushort.Parse(args);
+            TargetPlayer(player.Uid, tar);
+            Harm(player, 1);
+            DefaultPutIntoEscueAction(player, fuse, XI.Board.Garden[tar]);
+        }
+        public string NJH3Input(Player player, string fuse, string prev)
+        {
+            return (prev == "") ? AnyoneAliveString() : "";
         }
         public void NJH3EscueAction(Player player, ushort npcUt, int type, string fuse, string argst)
         {
             EscueDiscard(player, npcUt);
-            XI.RaiseGMessage("G0DH," + player.Uid + ",0," + (player.TuxLimit - player.Tux.Count));
+            if (player.TuxLimit > player.Tux.Count)
+                XI.RaiseGMessage("G0DH," + player.Uid + ",0," + (player.TuxLimit - player.Tux.Count));
         }
         public void NJH4Action(Player player, string fuse, string args)
         {
@@ -399,6 +407,7 @@ namespace PSD.PSDGamepkg.JNS
         {
             Monster monster = XI.Board.Battler as Monster;
             int n = (monster != null && monster.Level == Monster.ClLevel.BOSS) ? 3 : 1;
+            XI.RaiseGMessage("G0DS," + player.Uid + ",0,1");
             EscueDiscard(player, npcUt);
             XI.RaiseGMessage("G0IA," + player.Uid + ",1," + n);
             XI.RaiseGMessage("G0IX," + player.Uid + ",1," + n);

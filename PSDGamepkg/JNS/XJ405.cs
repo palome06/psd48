@@ -458,7 +458,7 @@ namespace PSD.PSDGamepkg.JNS
         public bool JN20202Valid(Player player, int type, string fuse)
         {
             Tux tp01 = XI.LibTuple.TL.EncodeTuxCode("TP01");
-            return tp01.Valid(player, type, fuse);
+            return player.Tux.Count > 0 && tp01 != null && tp01.Valid(player, type, fuse);
         }
         public void JN20202Action(Player player, int type, string fuse, string argst)
         {
@@ -663,7 +663,6 @@ namespace PSD.PSDGamepkg.JNS
         public void JN30202Action(Player player, int type, string fuse, string argst)
         {
             ushort card = ushort.Parse(argst);
-            VI.Cout(0, "唐雪见发动「连击」.");
             XI.RaiseGMessage("G0QZ," + player.Uid + "," + card);
             XI.RaiseGMessage("G0IA," + player.Uid + ",1,2");
         }
@@ -685,7 +684,7 @@ namespace PSD.PSDGamepkg.JNS
         {
             if (player.IsSKOpt && !XI.Board.IsAttendWarSucc(player))
                 return false;
-            return true;
+            return player.Tux.Count > 0;
         }
         public bool JN30203Valid(Player player, int type, string fuse)
         {

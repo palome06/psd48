@@ -2482,7 +2482,8 @@ namespace PSD.PSDGamepkg.JNS
         }
         public void ZPH3Action(Player player, int type, string fuse, string argst)
         {
-            string ai = XI.AsyncInput(player.Uid, "#【幻渺蓝晶】作用目标,T1" + FormatPlayers(
+            string tuxName = XI.LibTuple.TL.EncodeTuxCode("ZPH3").Name;
+            string ai = XI.AsyncInput(player.Uid, "#【" + tuxName + "】作用,T1" + FormatPlayers(
                 p => p.IsTared && p.Uid != player.Uid && p.GetPetCount() > 0), "ZPH3", "0");
             ushort to = ushort.Parse(ai);
             Player py = XI.Board.Garden[to];
@@ -2490,7 +2491,7 @@ namespace PSD.PSDGamepkg.JNS
             if (nt > 0)
             {
                 string sel = XI.AsyncInput(to, "#弃置的,Q" + nt + "(p" + string.Join("p", py.Tux) + ")," +
-                    string.Format("#请选择【幻渺蓝晶】执行项##战力+{0}##命中+{0}##HP+{0},Y3", nt), "ZPH3", "1");
+                    string.Format("#请选择【{0}】执行项##战力+{1}##命中+{1}##HP+{1},Y3", tuxName, nt), "ZPH3", "1");
                 int idx = sel.LastIndexOf(',');
                 string tuxes = sel.Substring(0, idx);
                 XI.RaiseGMessage("G0QZ," + to + "," + tuxes);

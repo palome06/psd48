@@ -2302,7 +2302,7 @@ namespace PSD.PSDGamepkg.JNS
                 {
                     ushort tar = ushort.Parse(opt);
                     TargetPlayer(py.Uid, tar);
-                    XI.AsyncInput(py.Uid, "(" + Algo.RepeatString("p0",
+                    XI.AsyncInput(py.Uid, "C1(" + Algo.RepeatString("p0",
                         XI.Board.Garden[tar].Tux.Count) + ")", "GIT8WinEff", "1");
                     XI.RaiseGMessage("G0HQ,0," + py.Uid + "," + tar + ",2,1");
                     Harm("GIT8", XI.Board.Garden[tar], 2);
@@ -2324,7 +2324,7 @@ namespace PSD.PSDGamepkg.JNS
                 {
                     ushort tar = ushort.Parse(opt);
                     TargetPlayer(py.Uid, tar);
-                    XI.AsyncInput(py.Uid, "(" + Algo.RepeatString("p0",
+                    XI.AsyncInput(py.Uid, "C1(" + Algo.RepeatString("p0",
                         XI.Board.Garden[tar].Tux.Count) + ")", "GIT8LoseEff", "1");
                     XI.RaiseGMessage("G0HQ,0," + py.Uid + "," + tar + ",2,1");
                     Harm("GIT8", XI.Board.Garden[tar], 2);
@@ -2638,7 +2638,8 @@ namespace PSD.PSDGamepkg.JNS
                 {
                     ushort tar = ushort.Parse(optTar);
                     TargetPlayer(op.Uid, tar);
-                    string optUt = XI.AsyncInput(op.Uid, "#弃置装备,Q1(p" + string.Join("p",
+                    char cq = (tar == op.Uid ? 'Q' : 'C');
+                    string optUt = XI.AsyncInput(op.Uid, "#弃置装备," + cq + "1(p" + string.Join("p",
                         XI.Board.Garden[tar].ListOutAllEquips()) + ")", "GYT6WinEff", "1");
                     if (optUt != VI.CinSentinel)
                         XI.RaiseGMessage("G0QZ," + tar + "," + optUt);
@@ -2658,7 +2659,8 @@ namespace PSD.PSDGamepkg.JNS
                 {
                     ushort tar = ushort.Parse(optTar);
                     TargetPlayer(rd.Uid, tar);
-                    string optUt = XI.AsyncInput(rd.Uid, "#弃置装备,Q1(p" + string.Join("p",
+                    char cq = (tar == rd.Uid ? 'Q' : 'C');
+                    string optUt = XI.AsyncInput(rd.Uid, "#弃置装备," + cq + "1(p" + string.Join("p",
                         XI.Board.Garden[tar].ListOutAllEquips()) + ")", "GYT6LoseEff", "1");
                     if (optUt != VI.CinSentinel)
                         XI.RaiseGMessage("G0QZ," + tar + "," + optUt);

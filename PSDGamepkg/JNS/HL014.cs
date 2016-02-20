@@ -2161,8 +2161,10 @@ namespace PSD.PSDGamepkg.JNS
                 p.Uid != player.Uid && p.Team == player.Team && p.HP > player.HP), "JNH1402", "0");
             if (giveString != VI.CinSentinel)
             {
+                ushort give = ushort.Parse(giveString);
+                TargetPlayer(player.Uid, give);
                 Artiad.HarvestPet hvp = Artiad.HarvestPet.Parse(fuse);
-                hvp.Farmer = ushort.Parse(giveString);
+                hvp.Farmer = give;
                 XI.InnerGMessage(hvp.ToMessage(), 21);
             }
             Harm(player, player, 1);

@@ -118,11 +118,6 @@ namespace PSD.PSDGamepkg
                         }
                         else
                         {
-                            //--Board.Garden[rounder].Immobilized;
-                            //if (Board.Garden[rounder].Immobilized != 0)
-                            //    WI.BCast(rstage + "1,1");
-                            //else
-                            //    WI.BCast(rstage + "1,2");
                             WI.BCast(rstage + "1,2");
                             RaiseGMessage("G0QR," + rounder);
                             RaiseGMessage("G0DS," + rounder + ",1");
@@ -146,8 +141,8 @@ namespace PSD.PSDGamepkg
                     case "EV":
                         {
                             WI.BCast(rstage + "1,0");
-                            string replyEve = AsyncInput(rounder, "#请决定是否翻看事件牌##不翻看##翻看,Y2",
-                                "R" + rounder + "EV1", "0");
+                            string replyEve = AsyncInput(rounder,
+                                "#请决定是否翻看事件牌##不翻看##翻看,Y2", rstage, "0");
                             if (replyEve == "2")
                                 RaiseGMessage("G1EV," + rounder + ",0");
                             else
