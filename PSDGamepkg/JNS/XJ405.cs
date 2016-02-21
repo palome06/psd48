@@ -306,10 +306,10 @@ namespace PSD.PSDGamepkg.JNS
         {
             // Ushort: 0->normal pass, 1->second battle, 2->give up second battle
             if (type == 0)
-                return player.RFM.GetUshort("DuoFight") == 0 && XI.Board.MonPiles.Count > 0;
+                return player.RFM.GetInt("DuoFight") == 0 && XI.Board.MonPiles.Count > 0;
             else if (type == 1)
             {
-                if (player.RFM.GetUshort("DuoFight") == 2)
+                if (player.RFM.GetInt("DuoFight") == 2)
                 {
                     string[] g0ht = fuse.Split(',');
                     for (int i = 1; i < g0ht.Length; i += 2)
@@ -323,7 +323,7 @@ namespace PSD.PSDGamepkg.JNS
                 return false;
             }
             else if (type == 2)
-                return player.RFM.GetUshort("DuoFight") == 1;
+                return player.RFM.GetInt("DuoFight") == 1;
             else
                 return false;
         }
@@ -1312,7 +1312,7 @@ namespace PSD.PSDGamepkg.JNS
             if (type == 0)
             {
                 XI.RaiseGMessage("G0IP," + player.Team + ",8");
-                player.ROM.Set("REC", (ushort)1); // 1: mark as triggered
+                player.ROM.Set("REC", 1); // 1: mark as triggered
             }
             else if (type == 1)
             {
@@ -1322,15 +1322,15 @@ namespace PSD.PSDGamepkg.JNS
                     Who = player.Uid,
                     NewValue = 0
                 }.ToMessage());
-                player.ROM.Set("REC", (ushort)2); // 2: Blind
+                player.ROM.Set("REC", 2); // 2: Blind
             }
         }
         public bool JN50102Valid(Player player, int type, string fuse)
         {
             if (type == 0)
-                return player.ROM.GetUshort("REC") == 0;
+                return player.ROM.GetInt("REC") == 0;
             else if (type == 1)
-                return player.ROM.GetUshort("REC") == 1;
+                return player.ROM.GetInt("REC") == 1;
             else
                 return false;
         }

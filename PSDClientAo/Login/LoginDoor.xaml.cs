@@ -1,18 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.IO.Packaging;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
+using PSD.Base.Rules;
+using System.Linq;
 
 namespace PSD.ClientAo.Login
 {
@@ -22,6 +16,8 @@ namespace PSD.ClientAo.Login
     public partial class LoginDoor : Window
     {
         public const int PORT_DEF = 40201;
+        public readonly string MEMORY_PATH = "PSDMemory.ini";
+        public readonly string LOCALHOST = "本机";
 
         private MediaPlayer mp;
 
@@ -52,6 +48,11 @@ namespace PSD.ClientAo.Login
                 Multiselect = false, RestoreDirectory = true,
                 Filter = "PSG|*.psg"
             };
+
+            SetSelTrigger();
+            SetLvTrigger();
+            SetTeamTrigger();
+            LoadFromConfig();
         }
 
         private ZI zi;
@@ -79,9 +80,15 @@ namespace PSD.ClientAo.Login
         private void ButtonOKClick(object sender, RoutedEventArgs e)
         {
             string addr = addrTextBox.Text;
-            if ("本机" == addr)
+            if (LOCALHOST == addr)
                 addr = "127.0.0.1";
             string nick = userTextBox.Text;
+            int tick = -1;
+            int nickIdx = nick.LastIndexOf('_');
+            string nickPure;
+            if (int.TryParse(nick.Substring(nickIdx + 1), out tick))
+                nickPure = nick.Substring(0, nickIdx);
+            else nickPure = nick;
             int ava = 0;
             if (IsRoomGained)
             {
@@ -116,6 +123,9 @@ namespace PSD.ClientAo.Login
                     int team = IsHallTeamEnabled ? HallTeamMode : Base.Rules.RuleCode.DEF_CODE;
                     string[] trainer = (LvTestCheckBox.IsChecked == true && LvRingText.Text.Length > 0) ?
                         LvRingText.Text.Split(',') : null;
+                    SaveToConfig("THEATER", SecertCodeDoor.Text, "IP", addrTextBox.Text, "NICK", nickPure,
+                        "TICK", tick, "MODE", mode, "LEVEL", IsHallLevelEnabled != false ? PkgMode : 0,
+                        "TEAM", team, "TRAINER", (LvTestCheckBox.IsChecked == true) ? LvRingText.Text : "");
                     if (resume)
                     {
                         int room;
@@ -179,8 +189,8 @@ namespace PSD.ClientAo.Login
         private void ButtonResetClick(object sender, RoutedEventArgs e) { ResetOptions(); }
         private void ResetOptions()
         {
-            addrTextBox.Text = "本机";
-            userTextBox.Text = GetRandomHeroName();
+            addrTextBox.Text = LOCALHOST;
+            userTextBox.Text = rsvHeroNames[random.Next(rsvHeroNames.Length)];
             //portTextBox.Text = PORT_DEF.ToString();
             //(teamRadioPanel.Children[0] as RadioButton).IsChecked = true;
             HallSelModeCB.IsChecked = null;
@@ -206,22 +216,16 @@ namespace PSD.ClientAo.Login
         }
 
         private Random random = new Random();
-
-        private string GetRandomHeroName()
-        {
-            string[] names = new string[] {
-                "凤天凌","瑚月","姬亭","迦兰多","蓉霜","白王",
-                "魂", "左殇", "银翎", "蝶", "瓷儿", "玄鱼", "冷荼", "雷当", "沐小葵", "长鸿",
-                "闻人羽","乐无异","夏夷则","阿阮","沈夜",
-                "夏侯仪","冰璃","封铃笙","慕容璇玑","古德伦",
-                "楚歌","海棠","甄瑶","韩靖","沈嫣","杜晏","夏侯翎",
-                "南宫飞云","燕若雪","柴嵩","赵无双","唐影","秋依水",
-                "司空宇","沐月","凤煜","子巧","共工",
-                "皇甫云昭","晴月","方锦","叶凝绮"
-            };
-            int idx = random.Next(names.Length);
-            return names[idx];
-        }
+        private readonly string[] rsvHeroNames = new string[] {
+            "凤天凌","瑚月","姬亭","迦兰多","蓉霜","白王",
+            "魂", "左殇", "银翎", "蝶", "瓷儿", "玄鱼", "冷荼", "雷当", "沐小葵", "长鸿",
+            "闻人羽","乐无异","夏夷则","阿阮","沈夜",
+            "夏侯仪","冰璃","封铃笙","慕容璇玑","古德伦",
+            "楚歌","海棠","甄瑶","韩靖","沈嫣","杜晏","夏侯翎",
+            "南宫飞云","燕若雪","柴嵩","赵无双","唐影","秋依水",
+            "司空宇","沐月","凤煜","子巧","共工",
+            "皇甫云昭","晴月","方锦","叶凝绮"
+        };
         #region Basis Checkboxes
         private bool IsReplayMode { set; get; }
         private bool IsHallMode { set; get; }
@@ -323,43 +327,49 @@ namespace PSD.ClientAo.Login
         #endregion Basis Checkboxes
         #region Options
         private int SelMode { set; get; }
-        private void Sel31Decided(object sender, RoutedEventArgs e) { SelMode = Base.Rules.RuleCode.MODE_31; }
-        private void SelNMDecided(object sender, RoutedEventArgs e) { SelMode = Base.Rules.RuleCode.MODE_NM; }
-        private void SelRMDecided(object sender, RoutedEventArgs e) { SelMode = Base.Rules.RuleCode.MODE_RM; }
-        private void SelBPDecided(object sender, RoutedEventArgs e) { SelMode = Base.Rules.RuleCode.MODE_BP; }
-        private void SelRDDecided(object sender, RoutedEventArgs e) { SelMode = Base.Rules.RuleCode.MODE_RD; }
-        private void SelZYDecided(object sender, RoutedEventArgs e) { SelMode = Base.Rules.RuleCode.MODE_ZY; }
-        private void SelCMDecided(object sender, RoutedEventArgs e) { SelMode = Base.Rules.RuleCode.MODE_CM; }
-        private void SelCPDecided(object sender, RoutedEventArgs e) { SelMode = Base.Rules.RuleCode.MODE_CP; }
-        private void SelINDecided(object sender, RoutedEventArgs e) { SelMode = Base.Rules.RuleCode.MODE_IN; }
-        private void SelSSDecided(object sender, RoutedEventArgs e) { SelMode = Base.Rules.RuleCode.MODE_SS; }
-        private void SelCJDecided(object sender, RoutedEventArgs e) { SelMode = Base.Rules.RuleCode.MODE_CJ; }
-        private void SelTCDecided(object sender, RoutedEventArgs e) { SelMode = Base.Rules.RuleCode.MODE_TC; }
-        private void Sel00Decided(object sender, RoutedEventArgs e) { SelMode = Base.Rules.RuleCode.MODE_00; }
+        private void SetSelTrigger()
+        {
+            SelMode = RuleCode.MODE_SS;
+            SelSS.Checked += (s, r) => SelMode = RuleCode.MODE_SS;
+            Sel31.Checked += (s, r) => SelMode = RuleCode.MODE_31;
+            SelZY.Checked += (s, r) => SelMode = RuleCode.MODE_ZY;
+            SelBP.Checked += (s, r) => SelMode = RuleCode.MODE_BP;
+            SelCM.Checked += (s, r) => SelMode = RuleCode.MODE_CM;
+            SelCP.Checked += (s, r) => SelMode = RuleCode.MODE_CP;
+            SelTC.Checked += (s, r) => SelMode = RuleCode.MODE_TC;
+            SelRM.Checked += (s, r) => SelMode = RuleCode.MODE_RM;
+            SelIN.Checked += (s, r) => SelMode = RuleCode.MODE_IN;
+            SelRD.Checked += (s, r) => SelMode = RuleCode.MODE_RD;
+            SelCJ.Checked += (s, r) => SelMode = RuleCode.MODE_CJ;
+            Sel00Radio.Checked += (s, r) => SelMode = RuleCode.MODE_00;
+        }
 
         private int PkgMode { set; get; }
-        private void Lv0Decided(object sender, RoutedEventArgs e) { PkgMode = 1; }
-        private void Lv1Decided(object sender, RoutedEventArgs e) { PkgMode = 2; }
-        private void Lv2Decided(object sender, RoutedEventArgs e) { PkgMode = 3; }
-        private void Lv3Decided(object sender, RoutedEventArgs e) { PkgMode = 4; LvTryTuxCheckBox.IsEnabled = true; }
-        private void Lv3UnDecided(object sender, RoutedEventArgs e) { LvTryTuxCheckBox.IsEnabled = false; }
-        private void Lv5Decided(object sender, RoutedEventArgs e) { PkgMode = 6; }
-
-        private int GetPkgCode()
+        private void SetLvTrigger()
         {
-            if (!IsHallPkgEnabled)
-                return 0;
-            int result = 0;
-            CheckBox[] cbs = new CheckBox[] { Pkg1CheckBox, Pkg2CheckBox, Pkg3CheckBox,
-                Pkg4CheckBox, Pkg5CheckBox, Pkg7CheckBox, Pkg6CheckBox };
-            int besu = 1;
-            for (int i = 0; i < cbs.Length; ++i, besu <<= 1)
-            {
-                if (cbs[i].IsChecked == true)
-                    result |= besu;
-            }
-            return result;
+            PkgMode = 3;
+            Lv0Radio.Checked += (s, r) => PkgMode = 1;
+            Lv1Radio.Checked += (s, r) => PkgMode = 2;
+            Lv2Radio.Checked += (s, r) => PkgMode = 3;
+            Lv3Radio.Checked += (s, r) => LvTryTuxCheckBox.IsEnabled = true; PkgMode = (LvTryTuxCheckBox.IsChecked == true) ? 5 : 4;
+            Lv3Radio.Unchecked += (s, r) => LvTryTuxCheckBox.IsEnabled = false; if (PkgMode == 5 && LvTryTuxCheckBox.IsChecked == true) PkgMode = 4;
+            Lv5Radio.Checked += (s, r) => PkgMode = 6;
         }
+        //private int GetPkgCode()
+        //{
+        //    if (!IsHallPkgEnabled)
+        //        return 0;
+        //    int result = 0;
+        //    CheckBox[] cbs = new CheckBox[] { Pkg1CheckBox, Pkg2CheckBox, Pkg3CheckBox,
+        //        Pkg4CheckBox, Pkg5CheckBox, Pkg7CheckBox, Pkg6CheckBox };
+        //    int besu = 1;
+        //    for (int i = 0; i < cbs.Length; ++i, besu <<= 1)
+        //    {
+        //        if (cbs[i].IsChecked == true)
+        //            result |= besu;
+        //    }
+        //    return result;
+        //}
         private void HallPkgAllSelClick(object sender, RoutedEventArgs e)
         {
             CheckBox[] cbs = new CheckBox[] { Pkg1CheckBox, Pkg2CheckBox, Pkg3CheckBox,
@@ -370,25 +380,14 @@ namespace PSD.ClientAo.Login
         }
 
         private int HallTeamMode { set; get; }
-        private void HallTeamNoDecided(object sender, RoutedEventArgs e)
+        private void SetTeamTrigger()
         {
-            HallTeamMode = Base.Rules.RuleCode.HOPE_NO;
-        }
-        private void HallTeamYesDecided(object sender, RoutedEventArgs e)
-        {
-            HallTeamMode = Base.Rules.RuleCode.HOPE_YES;
-        }
-        private void HallTeamAkaDecided(object sender, RoutedEventArgs e)
-        {
-            HallTeamMode = Base.Rules.RuleCode.HOPE_AKA;
-        }
-        private void HallTeamAoDecided(object sender, RoutedEventArgs e)
-        {
-            HallTeamMode = Base.Rules.RuleCode.HOPE_AO;
-        }
-        private void HallTeamIPDecided(object sender, RoutedEventArgs e)
-        {
-            HallTeamMode = Base.Rules.RuleCode.HOPE_IP;
+            HallTeamMode = RuleCode.HOPE_IP;
+            TeamNo.Checked += (s, r) => HallTeamMode = RuleCode.HOPE_NO;
+            TeamIP.Checked += (s, r) => HallTeamMode = RuleCode.HOPE_IP;
+            TeamYes.Checked += (s, r) => HallTeamMode = RuleCode.HOPE_YES;
+            TeamAka.Checked += (s, r) => HallTeamMode = RuleCode.HOPE_AKA;
+            TeamAo.Checked += (s, r) => HallTeamMode = RuleCode.HOPE_AO;
         }
         #endregion Options
         #region Dir Checkbox
@@ -494,6 +493,132 @@ namespace PSD.ClientAo.Login
             {
                 Sel00Radio.IsEnabled = false;
                 Lv5Radio.IsEnabled = false;
+            }
+        }
+
+        private void LoadFromConfig()
+        {
+            if (!File.Exists(MEMORY_PATH)) { return; }
+            IEnumerator<string> iter = File.ReadLines(MEMORY_PATH).GetEnumerator();
+            int tick = 0; string nick = "";
+            while (iter.MoveNext())
+            {
+                string line = iter.Current;
+                int idx = line.IndexOf('=');
+                string key = line.Substring(0, idx);
+                string value = line.Substring(idx + 1);
+                switch (key)
+                {
+                    case "THEATER":
+                        SecertCodeDoor.Text = value;
+                        if (value == "AKB48Show!")
+                        {
+                            Sel00Radio.IsEnabled = true;
+                            Lv5Radio.IsEnabled = true;
+                        }
+                        break;
+                    case "IP":
+                        if (!string.IsNullOrEmpty(value))
+                            addrTextBox.Text = value;
+                        break;
+                    case "TICK":
+                        if (!string.IsNullOrEmpty(value))
+                        {
+                            tick = int.Parse(value);
+                            if (tick >= 0 && nick != "")
+                                userTextBox.Text = nick + "_" + (tick + 1);
+                        }
+                        break;
+                    case "NICK":
+                        if (!string.IsNullOrEmpty(value) && !rsvHeroNames.Contains(value))
+                        {
+                            nick = value;
+                            if (tick >= 0 && nick != "")
+                                userTextBox.Text = nick + "_" + (tick + 1);
+                        }
+                        break;
+                    case "MODE":
+                        {
+                            int ivalue = int.Parse(value);
+                            RadioButton[] buttons = { SelSS, Sel31, SelZY, SelBP, SelCM, SelCP,
+                                SelTC, SelRM, SelIN, SelRD, SelCJ, Sel00Radio };
+                            int[] modes = { RuleCode.MODE_SS, RuleCode.MODE_31, RuleCode.MODE_ZY,
+                                RuleCode.MODE_BP, RuleCode.MODE_CM, RuleCode.MODE_CP, RuleCode.MODE_TC,
+                                RuleCode.MODE_RM, RuleCode.MODE_IN, RuleCode.MODE_RD, RuleCode.MODE_CJ,
+                                RuleCode.MODE_00 };
+                            bool anySet = false;
+                            for (int i = 0; i < modes.Length; ++i)
+                                if (ivalue == modes[i])
+                                {
+                                    HallSelModeCB.IsChecked = true;
+                                    buttons[i].IsChecked = true;
+                                    anySet = true; break;
+                                }
+                            if (!anySet)
+                                HallSelModeCB.IsChecked = false;
+                        }
+                        break;
+                    case "LEVEL":
+                        {
+                            int ivalue = int.Parse(value);
+                            HallLevelCB.IsChecked = ivalue > 0;
+                            switch (ivalue)
+                            {
+                                case 1: Lv0Radio.IsChecked = true; break;
+                                case 2: Lv1Radio.IsChecked = true; break;
+                                case 3: Lv2Radio.IsChecked = true; break;
+                                case 4: Lv3Radio.IsChecked = true; LvTryTuxCheckBox.IsChecked = false; break;
+                                case 5: Lv3Radio.IsChecked = true; LvTryTuxCheckBox.IsChecked = true; break;
+                                case 6: if (Lv5Radio.IsEnabled) Lv5Radio.IsChecked = true; break;
+                            }
+                        }
+                        break;
+                    case "TRAINER":
+                        LvTestCheckBox.IsChecked = true;
+                        LvRingText.Text = value.ToUpper();
+                        break;
+                    case "TEAM":
+                        {
+                            int ivalue = int.Parse(value);
+                            RadioButton[] buttons = { TeamNo, TeamIP, TeamYes, TeamAka, TeamAo };
+                            int[] modes = { RuleCode.HOPE_NO, RuleCode.HOPE_IP, RuleCode.HOPE_YES,
+                                RuleCode.HOPE_AKA, RuleCode.HOPE_AO };
+                            bool anySet = false;
+                            for (int i = 0; i < modes.Length; ++i)
+                                if (ivalue == modes[i])
+                                {
+                                    HallTeamCB.IsChecked = true;
+                                    buttons[i].IsChecked = true;
+                                    anySet = true; break;
+                                }
+                            if (!anySet)
+                                HallTeamCB.IsChecked = false;
+                        }
+                        break;
+                }
+            }
+        }
+        private void SaveToConfig(params object[] keyValues)
+        {
+            if (File.Exists(MEMORY_PATH))
+                File.Delete(MEMORY_PATH);
+            using (StreamWriter sw = new StreamWriter(MEMORY_PATH, false))
+            {
+                for (int i = 0; i < keyValues.Length; i += 2)
+                {
+                    string key = keyValues[i] as string;
+                    object value = keyValues[i + 1];
+                    if (value is bool)
+                        value = ((bool)value) ? 1 : 0;
+                    if (key == "IP" && value as string == LOCALHOST)
+                        continue;
+                    else if (key == "TICK" && (int)value < 0)
+                        continue;
+                    string svalue = value.ToString();
+                    if (svalue != "" && svalue != "null")
+                        sw.WriteLine(key + "=" + svalue);
+                }
+                sw.Flush();
             }
         }
     }

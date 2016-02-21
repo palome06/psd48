@@ -994,7 +994,7 @@ namespace PSD.PSDGamepkg.JNS
                             && (ytype == 0 || ytype == 2))
                         {
                             string us = ut.ToString();
-                            if (diva.GetUshort(us) == 1 || diva.GetUshort(us) == 2)
+                            if (diva.GetInt(us) == 1 || diva.GetInt(us) == 2)
                                 return true;
                         }
                     }
@@ -1018,12 +1018,12 @@ namespace PSD.PSDGamepkg.JNS
                             "##战力+1##命中+1,Y2", "JNT0707", "0");
                         if (choose == "1")
                         {
-                            player.ROM.GetOrSetDiva("Ice").Set(us, (ushort)1);
+                            player.ROM.GetOrSetDiva("Ice").Set(us, 1);
                             XI.RaiseGMessage("G0IA," + ut + ",0,1");
                         }
                         else
                         {
-                            player.ROM.GetOrSetDiva("Ice").Set(us, (ushort)2);
+                            player.ROM.GetOrSetDiva("Ice").Set(us, 2);
                             XI.RaiseGMessage("G0IX," + ut + ",0,1");
                         }
                     }
@@ -1035,9 +1035,9 @@ namespace PSD.PSDGamepkg.JNS
                 foreach (string key in diva.GetKeys())
                 {
                     ushort ut = ushort.Parse(key);
-                    if (diva.GetUshort(key) == 1)
+                    if (diva.GetInt(key) == 1)
                         XI.RaiseGMessage("G0OA," + ut + ",0,1");
-                    else if (diva.GetUshort(key) == 2)
+                    else if (diva.GetInt(key) == 2)
                         XI.RaiseGMessage("G0OX," + ut + ",0,1");
                 }
             }
@@ -1050,12 +1050,12 @@ namespace PSD.PSDGamepkg.JNS
                             "##战力+1##命中+1,Y2", "JNT0707", "0");
                 if (choose == "1")
                 {
-                    player.ROM.GetOrSetDiva("Ice").Set(us, (ushort)1);
+                    player.ROM.GetOrSetDiva("Ice").Set(us, 1);
                     XI.RaiseGMessage("G0IA," + ut + ",0,1");
                 }
                 else
                 {
-                    player.ROM.GetOrSetDiva("Ice").Set(us, (ushort)2);
+                    player.ROM.GetOrSetDiva("Ice").Set(us, 2);
                     XI.RaiseGMessage("G0IX," + ut + ",0,1");
                 }
             }
@@ -1073,9 +1073,9 @@ namespace PSD.PSDGamepkg.JNS
                         if (XI.Board.Garden[ut].Team == player.Team && ut != player.Uid
                             && (ytype == 0 || ytype == 2))
                         {
-                            if (diva.GetUshort(us) == 1)
+                            if (diva.GetInt(us) == 1)
                                 XI.RaiseGMessage("G0OA," + ut + ",0,1");
-                            else if (diva.GetUshort(us) == 2)
+                            else if (diva.GetInt(us) == 2)
                                 XI.RaiseGMessage("G0OX," + ut + ",0,1");
                             diva.Set(us, null);
                         }
@@ -1751,7 +1751,7 @@ namespace PSD.PSDGamepkg.JNS
 
                 if (XI.Board.InFight)
                     XI.RaiseGMessage("G0IA," + player.Uid + ",1,1");
-                player.RFM.Set("Watched", player.RFM.GetUshort("Watched") + 1);
+                player.RFM.Set("Watched", player.RFM.GetInt("Watched") + 1);
             }
             else if (type == 2)
                 XI.RaiseGMessage("G0IA," + player.Uid + ",1," + player.RFM.GetInt("Watched"));

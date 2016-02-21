@@ -1057,8 +1057,8 @@ namespace PSD.PSDGamepkg.JNS
         {
             if (consumeType == 0)
             {
-                return Artiad.Harm.Parse(fuse).Any(p => p.Who == player.Uid && p.N > 0 &&
-                    !HPEvoMask.IMMUNE_INVAO.IsSet(p.Mask) && !HPEvoMask.DECR_INVAO.IsSet(p.Mask)) &&
+                return player.Tux.Count > 0 && Artiad.Harm.Parse(fuse).Any(p => p.Who == player.Uid &&
+                    p.N > 0 && !HPEvoMask.IMMUNE_INVAO.IsSet(p.Mask) && !HPEvoMask.DECR_INVAO.IsSet(p.Mask)) &&
                     XI.Board.Garden.Values.Any(p => p.Team == player.OppTeam && p.IsTared);
             }
             else return false;
@@ -1082,9 +1082,7 @@ namespace PSD.PSDGamepkg.JNS
         public string FJT1ConsumeInput(Player player, int consumeType, int type, string fuse, string prev)
         {
             if (prev == "")
-                return "#交给对方,/Q1(p" + string.Join("p", player.Tux) + ")";
-            else if (prev.IndexOf(',') < 0)
-                return "#交给的,/T1" + AEnemyTared(player);
+                return "#交给对方,/Q1(p" + string.Join("p", player.Tux) + "),#交给的,/T1" + AEnemyTared(player);
             else
                 return "";
         }
@@ -2483,9 +2481,10 @@ namespace PSD.PSDGamepkg.JNS
         public void ZPH3Action(Player player, int type, string fuse, string argst)
         {
             string tuxName = XI.LibTuple.TL.EncodeTuxCode("ZPH3").Name;
-            string ai = XI.AsyncInput(player.Uid, "#【" + tuxName + "】作用,T1" + FormatPlayers(
-                p => p.IsTared && p.Uid != player.Uid && p.GetPetCount() > 0), "ZPH3", "0");
+            string ai = XI.AsyncInput(player.Uid, "#【" + tuxName + "】作用,T1" +
+                FormatPlayers(p => p.IsTared && p.GetPetCount() > 0), "ZPH3", "0");
             ushort to = ushort.Parse(ai);
+            TargetPlayer(player.Uid, to);
             Player py = XI.Board.Garden[to];
             int nt = Math.Min(py.GetPetCount(), py.Tux.Count);
             if (nt > 0)
@@ -2506,8 +2505,7 @@ namespace PSD.PSDGamepkg.JNS
         }
         public bool ZHP3Valid(Player player, int type, string fuse)
         {
-            return XI.Board.Garden.Values.Any(p => p.IsTared &&
-                p.Uid != player.Uid && p.GetPetCount() > 0);
+            return XI.Board.Garden.Values.Any(p => p.IsTared && p.GetPetCount() > 0);
         }
         public bool WQH1ConsumeValid(Player player, int consumeType, int type, string fuse)
         {

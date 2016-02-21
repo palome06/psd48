@@ -2412,20 +2412,20 @@ namespace PSD.PSDGamepkg.JNS
         }
         public bool JNH1602Valid(Player player, int type, string fuse)
         {
-            if (type == 0 && player.ROM.GetUshort("Holy") == 0)
+            if (type == 0 && player.ROM.GetInt("Holy") == 0)
             {
                 var hl = XI.LibTuple.HL;
                 return XI.Board.Garden.Values.Any(p => p.IsTared && p.HP == 0 &&
                     (p.Uid == player.Uid || hl.InstanceHero(p.SelectHero).Bio.Contains("H")));
             }
-            else if (type == 1 && player.ROM.GetUshort("Holy") == 2)
+            else if (type == 1 && player.ROM.GetInt("Holy") == 2)
                 return true;
-            else if (type == 2 && IsMathISOS("JNH1602", player, fuse) && player.ROM.GetUshort("Holy") == 2)
+            else if (type == 2 && IsMathISOS("JNH1602", player, fuse) && player.ROM.GetInt("Holy") == 2)
                 return XI.Board.InFight;
-            else if (type == 3 && player.ROM.GetUshort("Holy") == 1)
+            else if (type == 3 && player.ROM.GetInt("Holy") == 1)
                 return XI.Board.Garden.Values.Where(p => p.IsAlive &&
                     p.Team == player.OppTeam).Sum(p => p.GetPetCount()) >= 3;
-            else if (type == 4 && player.ROM.GetUshort("Holy") == 2)
+            else if (type == 4 && player.ROM.GetInt("Holy") == 2)
                 return XI.Board.Garden.Values.Where(p => p.IsAlive &&
                     p.Team == player.OppTeam).Sum(p => p.GetPetCount()) < 3;
             else
@@ -2913,7 +2913,7 @@ namespace PSD.PSDGamepkg.JNS
             if (XI.Board.Hinder.Uid != 0)
             {
                 TargetPlayer(player.Uid, XI.Board.Hinder.Uid);
-                if (player.ROM.GetUshort("Destroy") == 0)
+                if (player.ROM.GetInt("Destroy") == 0)
                     XI.RaiseGMessage("G0OX," + XI.Board.Hinder.Uid + ",1,4");
                 else
                     XI.RaiseGMessage("G0IX," + XI.Board.Hinder.Uid + ",1,4");
@@ -2950,7 +2950,7 @@ namespace PSD.PSDGamepkg.JNS
         {
             if (type == 0)
             {
-                if (player.ROM.GetUshort("Destroy") == 0 && XI.Board.MonPiles.Count > 0)
+                if (player.ROM.GetInt("Destroy") == 0 && XI.Board.MonPiles.Count > 0)
                 {
                     string[] g0hz = fuse.Split(',');
                     ushort who = ushort.Parse(g0hz[1]);
@@ -2960,7 +2960,10 @@ namespace PSD.PSDGamepkg.JNS
                 return false;
             }
             else if (type == 1 || type == 2)
-                return player.ROM.GetUshort("Destroy") == 1 || player.ROM.GetUshort("Destroy") == 2;
+            {
+                int destroy = player.ROM.GetInt("Destroy");
+                return destroy == 1 || destroy == 2;
+            }
             else
                 return false;
         }
@@ -3011,11 +3014,11 @@ namespace PSD.PSDGamepkg.JNS
                             break;
                     }
                 } while (true);
-                player.ROM.Set("Destory", 1);
+                player.ROM.Set("Destroy", 1);
                 if (bomb != 0)
                 {
                     XI.RaiseGMessage("G0HI," + owner + "," + bomb);
-                    player.ROM.Set("Destory", 2);
+                    player.ROM.Set("Destroy", 2);
                 }
                 if (newTangle != 0)
                 {
@@ -3043,7 +3046,7 @@ namespace PSD.PSDGamepkg.JNS
             else if (type == 1)
             {
                 ushort mon = XI.Board.Monster2;
-                if (NMBLib.IsMonster(mon) && player.ROM.GetUshort("Destroy") == 2)
+                if (NMBLib.IsMonster(mon) && player.ROM.GetInt("Destroy") == 2)
                 {
                     XI.RaiseGMessage("G0IP," + player.Team + "," + XI.LibTuple.ML.Decode(mon).STR);
                     XI.InnerGMessage(fuse, 301);
@@ -3054,7 +3057,7 @@ namespace PSD.PSDGamepkg.JNS
             else if (type == 2)
             {
                 XI.RaiseGMessage("G0OE,0," + player.Uid);
-                player.ROM.Set("Destory", 3);
+                player.ROM.Set("Destroy", 3);
             }
         }
         #endregion HL018 - Xu'Nansong
@@ -3498,10 +3501,10 @@ namespace PSD.PSDGamepkg.JNS
         }
         public bool JNE0202Valid(Player player, int type, string fuse)
         {
+            if (XI.Board.RoundIN != "R" + XI.Board.Rounder.Uid + "GR" || XI.Board.Rounder.Team == player.OppTeam)
+                return false;
             if (type == 0) // G1DI
             {
-                if (XI.Board.RoundIN != "R" + XI.Board.Rounder.Uid + "GR")
-                    return false;
                 string[] g1di = fuse.Split(',');
                 for (int i = 1; i < g1di.Length;)
                 {
