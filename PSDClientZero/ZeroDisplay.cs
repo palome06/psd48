@@ -374,7 +374,7 @@ namespace PSD.ClientZero
         }
         internal string Prop(IEnumerable<int> groups)
         {
-            return "(" + string.Join(",", groups.Select(p => Prop(p))) + "}";
+            return "{" + string.Join(",", groups.Select(p => Prop(p))) + "}";
         }
         internal string AnalysisAction(string mai, string typeStr)
         {

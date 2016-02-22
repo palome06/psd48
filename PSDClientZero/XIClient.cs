@@ -3063,9 +3063,6 @@ namespace PSD.ClientZero
                 case "VN":
                     VI.Cout(Uid, "判断本场战斗胜负结束,触发方{0}.", para == "0" ? "胜利" : "失败");
                     break;
-                //case "VT":
-                //case "VS":
-                //    VI.Cout(Uid, "判断战斗胜负阶段中..."); break;                
                 case "Z2":
                     Z0F.OPool = 0; Z0F.RPool = 0; break;
                 case "Z3":

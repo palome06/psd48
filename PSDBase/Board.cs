@@ -48,10 +48,13 @@ namespace PSD.Base
         //public int IsFight { set; get; }
         public bool ClockWised { set; get; }
 
-        // Whether in a fight/battle, consequence excluded
-        public bool InFight { set; get; }
-        // Whether in a fight/battle, consequence included
-        public bool InFightThrough { set; get; }
+        // Whether marked in a battle, usually trigger other SKB, Z1:Z2
+        public bool InCampaign { set; get; }
+        // Whether pool and A value is enabled, Z1:ZN
+        public bool PoolEnabled { set; get; }
+        // Whether C value is enabled, ZC:ZN
+        public bool PlayerPoolEnabled { set; get; }
+
         // Whether the debut action of monster is valid
         public bool IsMonsterDebut { set; get; }
         // Bonus Pool Value of Rounder Side
@@ -299,9 +302,9 @@ namespace PSD.Base
                         case "hp": uList.Add(py.HP); break;
                         case "hpa": uList.Add(py.HPb); break;
                         case "str": uList.Add(py.STR); break;
-                        case "stra": uList.Add(InFight ? py.STRa : py.STR); break;
+                        case "stra": uList.Add(PoolEnabled ? py.STRa : py.STR); break;
                         case "dex": uList.Add(py.DEX); break;
-                        case "dexa": uList.Add(InFight ? py.DEXa : py.DEX); break;
+                        case "dexa": uList.Add(PoolEnabled ? py.DEXa : py.DEX); break;
                         case "tuxCount": uList.Add(py.Tux.Count); break;
                         case "wp": uList.Add(py.Weapon); break;
                         case "am": uList.Add(py.Armor); break;
@@ -340,7 +343,7 @@ namespace PSD.Base
             h09p.Append("," + (Rounder != null ? Rounder.Uid : 0));
             h09p.Append("," + Supporter.Uid + "," + Hinder.Uid);
             h09p.Append("," + (Monster1 + "," + Monster2 + "," + Eve));
-            if (InFight)
+            if (PoolEnabled)
                 h09p.Append("," + Rounder.Team + "," + CalculateRPool() + "," +
                     Rounder.OppTeam + "," + CalculateOPool());
             else

@@ -386,7 +386,7 @@ namespace PSD.PSDGamepkg
                                     RaiseGMessage("G0ON,10,M,1," + Board.Monster1);
                                     Board.Monster1 = 0;
                                 }
-                                rstage = "R" + rounder + "Z3";
+                                rstage = "R" + rounder + "ZF";
                             }
                             break;
                         }
@@ -400,7 +400,8 @@ namespace PSD.PSDGamepkg
                                 if (monster != null && monster.IsSilence())
                                     Board.Silence.Add(Board.Battler.Code);
                             }, () => {
-                                Board.InFightThrough = true;
+                                Board.InCampaign = true;
+                                Board.PoolEnabled = true;
                                 Board.FightTangled = false;
                                 AwakeABCValue(false);
                             }, () => RaiseGMessage("G09P,0"), () => RaiseGMessage("G0CZ,2") });
@@ -414,20 +415,18 @@ namespace PSD.PSDGamepkg
                         RunQuadStage(rstage);
                         WI.BCast(rstage + ",1");
                         //Board.Battler.Debut();
-                        Board.IsMonsterDebut = true;
+                        Board.IsMonsterDebut = true; // Enable Curtain
                         LibTuple.ML.Decode(Board.Monster1).Debut();
                         rstage = "R" + rounder + "PD"; break;
                     case "PD":
                         RunQuadStage(rstage);
                         rstage = "R" + rounder + "ZC"; break;
                     case "ZC":
-                        Board.InFight = true;
-                        AwakeABCValue(true);
-                        RunQuadStage(rstage);
-                        RaiseGMessage("G09P,0");
-                        rstage = "R" + rounder + "ZI"; break;
-                    case "ZI":
-                        RunQuadStage(rstage);
+                        RunQuadMixedStage(rstage, 0, new int[] { -100, 100 },
+                            new Action[] { () => {
+                                Board.PlayerPoolEnabled = true;
+                                AwakeABCValue(true);
+                            }, () => RaiseGMessage("G09P,0") });
                         rstage = "R" + rounder + "ZD"; break;
                     case "ZD":
                         WI.BCast(rstage + ",0");
@@ -459,14 +458,13 @@ namespace PSD.PSDGamepkg
                         Board.PoolDelta = Board.CalculateRPool() - Board.CalculateOPool();
                         WI.BCast(rstage + "," + (Board.IsBattleWin ? "0" : "1"));
                         RunQuadStage(rstage);
+                        Board.PoolEnabled = false;
+                        Board.PlayerPoolEnabled = false;
                         rstage = "R" + rounder + "VS"; break;
                     case "VT":
                     case "VS":
                         {
-                            Board.InFight = false;
                             bool skip = rstage.Substring("R#".Length) == "VT";
-                            //WI.BCast(rstage + "1,0");
-                            //Board.IsBattleWin = Board.IsRounderBattleWin();
                             bool mon1zero = false, mon2zero = false;
                             Board.Mon1Catchable = true; Board.Mon2Catchable = true;
                             if (Board.IsBattleWin) // OK, win
@@ -518,40 +516,32 @@ namespace PSD.PSDGamepkg
                             RunQuadStage(rstage);
 
                             RecycleMonster(mon1zero, mon2zero);
-                            Board.InFightThrough = false;
                             RaiseGMessage("G1ZK,1");
                             RaiseGMessage("G1HK,1");
                             WI.BCast(rstage + "3");
                             rstage = "R" + rounder + "Z2"; break;
                         }
                     case "Z2":
-                        Board.InFight = false; Board.InFightThrough = false;
                         WI.BCast(rstage + ",0");
                         RaiseGMessage("G1ZK,1");
                         RaiseGMessage("G1HK,1");
                         foreach (Player player in Board.Garden.Values)
                             RaiseGMessage("G0AX," + player.Uid);
                         RunQuadStage(rstage);
-                        rstage = "R" + rounder + "Z3"; break;
-                    case "Z3":
-                        Board.InFight = false; Board.InFightThrough = false;
+                        rstage = "R" + rounder + "ZF"; break;
+                    case "ZF":
+                        WI.BCast(rstage + ",0");
+                        Board.PoolEnabled = false;
                         Board.RPool = 0; Board.OPool = 0;
                         Board.RPoolGain.Clear(); Board.OPoolGain.Clear();
                         RecycleMonster(false, false);
-                        //WI.BCast(rstage + ",0");
-                        //RaiseGMessage("G0FI,U," + rounder);
                         if (Board.Battler as Monster != null && (Board.Battler as Monster).IsSilence())
                             Board.Silence.Add(Board.Battler.Code);
-                        RunQuadStage(rstage);
-                        Board.CleanBattler();
-                        rstage = "R" + rounder + "ZZ"; break;
-                    case "ZF":
-                        WI.BCast(rstage + ",0");
-                        Board.InFight = false; Board.InFightThrough = false;
                         foreach (Player player in Board.Garden.Values)
                             RaiseGMessage("G0AX," + player.Uid);
                         RunQuadStage(rstage);
                         Board.CleanBattler();
+                        Board.InCampaign = false;
                         rstage = "R" + rounder + "ZZ"; break;
                     case "ZZ":
                         RaiseGMessage("G17F,U," + rounder);
@@ -561,7 +551,6 @@ namespace PSD.PSDGamepkg
                         WI.BCast(rstage + ",0");
                         RunQuadMixedStage(rstage, 0, new int[] { 100 },
                             new Action[] { () => {
-                                Board.InFight = false; Board.InFightThrough = false;
                                 int tuxCount = Board.Battler != null ? 2 : 1;
                                 RaiseGMessage("G0HT," + Board.Rounder.Uid + "," + tuxCount);
                             } });
@@ -572,7 +561,6 @@ namespace PSD.PSDGamepkg
                         rstage = "R" + rounder + "TM"; break;
                     case "TM":
                         WI.BCast(rstage + ",0");
-                        Board.InFight = false; Board.InFightThrough = false;
                         RunQuadStage(rstage);
                         rstage = "R" + rounder + "IC"; break;
                     case "IC":
@@ -583,11 +571,12 @@ namespace PSD.PSDGamepkg
                         RunQuadMixedStage(rstage, 0,
                             new int[] { -100, 100 },
                             new Action[] { () => {
-                                Board.InFight = false; Board.InFightThrough = false;
+                                Board.PoolEnabled = false;
                                 Board.Battler = null; Board.CleanBattler();
                                 if (Board.MonPiles.Count <= 0)
                                     RaiseGMessage("G1WJ,0");
                                 RecycleMonster(false, false);
+                                Board.InCampaign = false;
                                 if (Board.Wang != 0)
                                 {
                                     int wang = Board.Wang;

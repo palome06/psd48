@@ -1198,7 +1198,7 @@ namespace PSD.PSDGamepkg.JNS
         }
         public bool JNT0710Valid(Player player, int type, string fuse)
         {
-            return XI.Board.InFightThrough && Artiad.Harm.Parse(fuse).Any(p => p.Who == player.Uid &&
+            return XI.Board.InCampaign && Artiad.Harm.Parse(fuse).Any(p => p.Who == player.Uid &&
                 p.N > 0 && !HPEvoMask.TERMIN_AT.IsSet(p.Mask) && !HPEvoMask.DECR_INVAO.IsSet(p.Mask));
         }
         public void JNT0710Action(Player player, int type, string fuse, string argst)
@@ -1749,7 +1749,7 @@ namespace PSD.PSDGamepkg.JNS
                     "T1" + ATeammates(player), "JNT1201", "0"));
                 XI.RaiseGMessage("G0XZ," + gamer + ",2,0,1");
 
-                if (XI.Board.InFight)
+                if (XI.Board.PoolEnabled)
                     XI.RaiseGMessage("G0IA," + player.Uid + ",1,1");
                 player.RFM.Set("Watched", player.RFM.GetInt("Watched") + 1);
             }
@@ -2905,7 +2905,7 @@ namespace PSD.PSDGamepkg.JNS
                 {
                     Who = player.Uid, Source = player.Uid, SingleCard = ut
                 }.ToMessage());
-                if (XI.Board.InFight)
+                if (XI.Board.PoolEnabled)
                     XI.RaiseGMessage("G0IP," + player.Team + ",1");
             }
             else if (type == 1)
@@ -2921,7 +2921,7 @@ namespace PSD.PSDGamepkg.JNS
                     count += cards.Intersect(player.ExCards).Count();
                     idx += (n + 2);
                 }
-                if (count > 0 && XI.Board.InFight)
+                if (count > 0 && XI.Board.PoolEnabled)
                     XI.RaiseGMessage("G0OP," + player.Team + "," + count);
             }
         }
@@ -3381,7 +3381,7 @@ namespace PSD.PSDGamepkg.JNS
         #region TR027 - Qianye
         public bool JNT2701Valid(Player player, int type, string fuse)
         {
-            if ((type == 0) || type >= 2 && type <= 5 && XI.Board.InFightThrough) // Z1 || I/OX, I/OW
+            if ((type == 0) || type >= 2 && type <= 5 && XI.Board.PoolEnabled) // Z1 || I/OX, I/OW
             {
                 if (XI.Board.IsAttendWar(player) && XI.Board.Battler != null)
                 {
@@ -3402,7 +3402,7 @@ namespace PSD.PSDGamepkg.JNS
                 }
                 return false;
             }
-            else if (type == 1 && XI.Board.InFight) // FI
+            else if (type == 1 && XI.Board.PoolEnabled) // FI
             {
                 string[] g0fi = fuse.Split(',');
                 int zero = 0;
@@ -3730,9 +3730,9 @@ namespace PSD.PSDGamepkg.JNS
         {
             Func<Player, bool> cond = p => p.IsAlive && p.Uid != player.Uid && p.Tux.Count <= player.Tux.Count;
             // IT/OT
-            if ((type == 0 || (type == 1 && XI.Board.InFightThrough)) && !player.RFM.GetBool("Poorest"))
+            if ((type == 0 || (type == 1 && XI.Board.PoolEnabled)) && !player.RFM.GetBool("Poorest"))
                 return !XI.Board.Garden.Values.Any(cond);
-            else if (type == 2 && XI.Board.InFightThrough && player.RFM.GetBool("Poorest"))
+            else if (type == 2 && XI.Board.PoolEnabled && player.RFM.GetBool("Poorest"))
                 return XI.Board.Garden.Values.Any(cond);
             else
                 return false;
@@ -3967,7 +3967,7 @@ namespace PSD.PSDGamepkg.JNS
                 return XI.Board.Garden.Values.Any(p => p.IsAlive && XI.Board.IsAttendWar(p) &&
                     XI.LibTuple.HL.InstanceHero(p.SelectHero).Bio.Contains("K"));
             }
-            else if (type == 1 && XI.Board.InFight) // FI
+            else if (type == 1 && XI.Board.PoolEnabled) // FI
             {
                 string[] g0fi = fuse.Split(',');
                 int zero = 0;
@@ -4592,7 +4592,7 @@ namespace PSD.PSDGamepkg.JNS
             {
                 XI.RaiseGMessage("G0OJ," + player.Uid + ",1,1,I25");
                 XI.RaiseGMessage("G2TZ,0," + player.Uid + ",I25");
-                if (XI.Board.InFightThrough) // TODO: and it attend the war...
+                if (XI.Board.PoolEnabled)
                 {
                     ushort rk = (ushort)(3000 + 25);
                     if (XI.Board.Supporter.Uid == rk)
@@ -5207,7 +5207,7 @@ namespace PSD.PSDGamepkg.JNS
                 JNT1202Action(player, 0, fuse, argst);
             else if (type == 1)
             {
-                if (XI.Board.InFight)
+                if (XI.Board.PoolEnabled)
                     XI.RaiseGMessage("G0IA," + player.Uid + ",1,2");
                 string[] g1ck = fuse.Split(',');
                 string skill = g1ck[2];

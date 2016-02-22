@@ -341,7 +341,7 @@ namespace PSD.PSDGamepkg
                                     }
                                     mightInvolve = true;
                                 }
-                                if (mightInvolve && Board.InFight)
+                                if (mightInvolve && Board.PoolEnabled)
                                     _9ped = true;
                             }
                         }
@@ -1340,22 +1340,21 @@ namespace PSD.PSDGamepkg
                         if (changeType == 0 || changeType == 2)
                         {
                             player.ResetROM(Board);
-                            player.InitFromHero(hero, true, Board.InFightThrough, Board.InFight);
+                            player.InitFromHero(hero, true, Board.PoolEnabled, Board.PlayerPoolEnabled);
                             Artiad.ContentRule.LoadDefaultPrice(player);
                         }
                         else
-                            player.InitFromHero(hero, false, Board.InFightThrough, Board.InFight);
+                            player.InitFromHero(hero, false, Board.PoolEnabled, Board.PlayerPoolEnabled);
                         if (changeType == 2 || (changeType == 1 && args.Length > 4))
                         {
                             player.HP = int.Parse(args[4]);
                             if (player.HP > player.HPb)
                                 player.HP = player.HPb;
                         }
-                        if (Board.InFightThrough)
-                        {
+                        if (Board.PoolEnabled)
                             AwakeABCValue(false, player);
+                        if (Board.PlayerPoolEnabled)
                             AwakeABCValue(true, player);
-                        }
                         RaiseGMessage("G2AK," + player.Uid + ","
                             + player.HP + "," + player.HPb + "," + player.STR + "," + player.DEX);
                         // remove all cosses containing the player
@@ -1394,7 +1393,7 @@ namespace PSD.PSDGamepkg
                                         RaiseGMessage("G0IC,0," + player.Uid + "," + ut);
                                 }
                         }
-                        if (Board.IsAttendWar(player) && Board.InFight)
+                        if (Board.IsAttendWar(player) && Board.PoolEnabled)
                             RaiseGMessage("G09P,0");
                     }
                     break;
@@ -1877,7 +1876,7 @@ namespace PSD.PSDGamepkg
                             ushort pet = ushort.Parse(args[i + 1]);
                             Algo.AddToMultiMap(jmc, who, pet);
                         }
-                        if (Board.InFightThrough) // to mark as to be discard
+                        if (Board.InCampaign) // to mark as to be discard
                         {
                             jmc.Keys.ToList().ForEach(p =>
                             {
@@ -2013,15 +2012,15 @@ namespace PSD.PSDGamepkg
                                 player.STRh += n;
                             if (type == 0 || type == 3)
                                 player.STRb = player.mSTRb + n;
-                            if (Board.InFightThrough && !Board.InFight)
-                            {
-                                player.STRa = player.mSTRa + n;
-                                WI.BCast("E0IA," + me + "," + type + "," + n + "," + player.STRa);
-                            }
-                            else if (Board.InFight)
+                            if (Board.PlayerPoolEnabled)
                             {
                                 player.STRc = player.STRc + n;
                                 WI.BCast("E0IA," + me + "," + type + "," + n + "," + player.STRa + "," + player.STRc);
+                            }
+                            else if (Board.PoolEnabled)
+                            {
+                                player.STRa = player.mSTRa + n;
+                                WI.BCast("E0IA," + me + "," + type + "," + n + "," + player.STRa);
                             }
                             else
                                 WI.BCast("E0IA," + me + "," + type + "," + n + "," + player.STRb);
@@ -2031,7 +2030,7 @@ namespace PSD.PSDGamepkg
                             player.STRi = 1;
                             WI.BCast("E0IA," + me + ",2");
                         }
-                        if (Board.InFightThrough)
+                        if (Board.PoolEnabled)
                             RaiseGMessage("G09P,1");
                         break;
                     }
@@ -2054,15 +2053,15 @@ namespace PSD.PSDGamepkg
                                 player.STRh -= n;
                             if (type == 0 || type == 3)
                                 player.STRb = player.mSTRb - n;
-                            if (Board.InFightThrough && !Board.InFight)
-                            {
-                                player.STRa = player.mSTRa - n;
-                                WI.BCast("E0OA," + me + "," + type + "," + n + "," + player.STRa);
-                            }
-                            else if (Board.InFight)
+                            if (Board.PlayerPoolEnabled)
                             {
                                 player.STRc = player.STRc - n;
                                 WI.BCast("E0OA," + me + "," + type + "," + n + "," + player.STRa + "," + player.STRc);
+                            }
+                            else if (Board.PoolEnabled)
+                            {
+                                player.STRa = player.mSTRa - n;
+                                WI.BCast("E0OA," + me + "," + type + "," + n + "," + player.STRa);
                             }
                             else
                                 WI.BCast("E0OA," + me + "," + type + "," + n + "," + player.STRb);
@@ -2072,7 +2071,7 @@ namespace PSD.PSDGamepkg
                             player.STRi = -1;
                             WI.BCast("E0OA," + me + ",2");
                         }
-                        if (Board.InFightThrough)
+                        if (Board.PoolEnabled)
                             RaiseGMessage("G09P,1");
                         break;
                     }
@@ -2096,15 +2095,15 @@ namespace PSD.PSDGamepkg
                                     player.DEXh += n;
                                 if (type == 0 || type == 3)
                                     player.DEXb = player.mDEXb + n;
-                                if (Board.InFightThrough && !Board.InFight)
-                                {
-                                    player.DEXa = player.mDEXa + n;
-                                    WI.BCast("E0IX," + me + "," + type + "," + n + "," + player.DEXa);
-                                }
-                                else if (Board.InFight)
+                                if (Board.PlayerPoolEnabled)
                                 {
                                     player.DEXc = player.DEXc + n;
                                     WI.BCast("E0IX," + me + "," + type + "," + n + "," + player.DEXa + "," + player.DEXc);
+                                }
+                                else if (Board.PoolEnabled)
+                                {
+                                    player.DEXa = player.mDEXa + n;
+                                    WI.BCast("E0IX," + me + "," + type + "," + n + "," + player.DEXa);
                                 }
                                 else
                                     WI.BCast("E0IX," + me + "," + type + "," + n + "," + player.DEXb);
@@ -2114,7 +2113,7 @@ namespace PSD.PSDGamepkg
                                 player.DEXi = 1;
                                 WI.BCast("E0IX," + me + ",2");
                             }
-                            if (Board.InFightThrough)
+                            if (Board.PoolEnabled)
                                 RaiseGMessage("G09P,0");
                         }
                         break;
@@ -2139,16 +2138,15 @@ namespace PSD.PSDGamepkg
                                     player.DEXh -= n;
                                 if (type == 0 || type == 3)
                                     player.DEXb = player.mDEXb - n;
-                                if (Board.InFightThrough && !Board.InFight)
+                                if (Board.PlayerPoolEnabled)
+                                {
+                                    player.DEXc = player.DEXc - n;
+                                    WI.BCast("E0OX," + me + "," + type + "," + n + "," + player.DEXa + "," + player.DEXc);
+                                }
+                                else if (Board.PoolEnabled)
                                 {
                                     player.DEXa = player.mDEXa - n;
                                     WI.BCast("E0OX," + me + "," + type + "," + n + "," + player.DEXa);
-                                }
-                                else if (Board.InFight)
-                                {
-                                    player.DEXc = player.DEXc - n;
-                                    WI.BCast("E0OX," + me + "," + type + "," + n +
-                                        "," + player.DEXa + "," + player.DEXc);
                                 }
                                 else
                                     WI.BCast("E0OX," + me + "," + type + "," + n + "," + player.DEXb);
@@ -2158,7 +2156,7 @@ namespace PSD.PSDGamepkg
                                 player.DEXi = 1;
                                 WI.BCast("E0OX," + me + ",2");
                             }
-                            if (Board.InFightThrough)
+                            if (Board.PoolEnabled)
                                 RaiseGMessage("G09P,0");
                         }
                     }
@@ -2175,7 +2173,7 @@ namespace PSD.PSDGamepkg
                             Monster mon = (Monster)nmb;
                             mon.STR = mon.mSTR + n;
                             WI.BCast("E0IB," + x + "," + n + "," + mon.STR);
-                            if (Board.InFight)
+                            if (Board.PoolEnabled)
                                 RaiseGMessage("G09P,1");
                             RaiseGMessage("G2WK," + string.Join(",",
                                 CalculatePetsScore().Select(p => p.Key + "," + p.Value)));
@@ -2198,7 +2196,7 @@ namespace PSD.PSDGamepkg
                             Monster mon = (Monster)nmb;
                             mon.STR = mon.mSTR - n;
                             WI.BCast("E0OB," + x + "," + n + "," + mon.STR);
-                            if (Board.InFight)
+                            if (Board.PoolEnabled)
                                 RaiseGMessage("G09P,1");
                             RaiseGMessage("G2WK," + string.Join(",",
                                 CalculatePetsScore().Select(p => p.Key + "," + p.Value)));
@@ -2221,7 +2219,7 @@ namespace PSD.PSDGamepkg
                             Monster mon = (Monster)nmb;
                             mon.AGL += (ushort)n;
                             WI.BCast("E0IW," + x + "," + n + "," + mon.AGL);
-                            if (Board.InFight)
+                            if (Board.PoolEnabled)
                                 RaiseGMessage("G09P,0");
                         }
                         break;
@@ -2236,7 +2234,7 @@ namespace PSD.PSDGamepkg
                             Monster mon = (Monster)nmb;
                             mon.AGL -= (ushort)n;
                             WI.BCast("E0OW," + x + "," + n + "," + mon.AGL);
-                            if (Board.InFight)
+                            if (Board.PoolEnabled)
                                 RaiseGMessage("G09P,0");
                         }
                         break;
@@ -2316,6 +2314,7 @@ namespace PSD.PSDGamepkg
                     }
                     break;
                 case "G0IP":
+                    if (Board.PoolEnabled)
                     {
                         ushort side = ushort.Parse(args[1]);
                         ushort delta = ushort.Parse(args[2]);
@@ -2329,11 +2328,11 @@ namespace PSD.PSDGamepkg
                             Board.OPool += delta;
                             WI.BCast("E0IP," + side + "," + delta);
                         }
-                        if (Board.InFight)
-                            RaiseGMessage("G09P,1");
-                        break;
+                        RaiseGMessage("G09P,1");
                     }
+                    break;
                 case "G0OP":
+                    if (Board.PoolEnabled)
                     {
                         ushort side = ushort.Parse(args[1]);
                         int delta = int.Parse(args[2]);
@@ -2347,10 +2346,9 @@ namespace PSD.PSDGamepkg
                             Board.OPool -= delta;
                             WI.BCast("E0OP," + side + "," + delta);
                         }
-                        if (Board.InFight)
-                            RaiseGMessage("G09P,1");
-                        break;
+                        RaiseGMessage("G09P,1");
                     }
+                    break;
                 case "G0CZ":
                     if (args[1] == "0")
                         --Board.Garden[ushort.Parse(args[2])].RestZP;
@@ -2643,7 +2641,7 @@ namespace PSD.PSDGamepkg
                             ushort pet = ushort.Parse(args[i + 1]);
                             Algo.AddToMultiMap(jmc, who, pet);
                         }
-                        if (Board.InFightThrough) // to mark as to be discard
+                        if (Board.InCampaign) // to mark as to be discard
                         {
                             jmc.Keys.ToList().ForEach(p =>
                             {
@@ -3424,7 +3422,7 @@ namespace PSD.PSDGamepkg
                             else if (position == 'T') { }
                             else if (position == 'W') { }
                         }
-                        if (Board.InFight)
+                        if (Board.PoolEnabled)
                             RaiseGMessage("G09P,0");
                     }
                     break;

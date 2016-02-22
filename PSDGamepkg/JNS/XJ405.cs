@@ -117,7 +117,7 @@ namespace PSD.PSDGamepkg.JNS
         }
         #endregion XJ102 - ZhaoLing'er
         #region XJ103 - Mengshe
-        public bool JN10302Valid(Player player, int type, string fuse)
+        public bool JN10302Valid(Player player, int type, string fuse) // Others are the same as ZhaoLing'er
         {
             if (player.IsAlive && XI.Board.Garden.Values.Where(p => p.IsAlive &&
                 p.Team == player.OppTeam).Select(p => p.GetPetCount()).Sum() < 3)
@@ -139,7 +139,7 @@ namespace PSD.PSDGamepkg.JNS
         public bool JN10303Valid(Player player, int type, string fuse)
         {
             if (type == 0) return true;
-            else if ((type == 1 || type == 2) && XI.Board.InFight)
+            else if ((type == 1 || type == 2) && XI.Board.PoolEnabled)
                 return IsMathISOS("JN10303", player, fuse);
             else
                 return false;
@@ -254,7 +254,6 @@ namespace PSD.PSDGamepkg.JNS
         }
         public void JN10502Action(Player player, int type, string fuse, string argst)
         {
-            VI.Cout(0, "阿奴发动「万蛊蚀天」.");
             XI.RaiseGMessage("G0DH," + AffichePlayers(p => p.IsAlive && p.Team == player.Team, p => p.Uid + ",0,1"));
             Harm(player, XI.Board.Garden.Values.Where(p => p.IsAlive && p != player), 1);
         }
@@ -302,11 +301,11 @@ namespace PSD.PSDGamepkg.JNS
                 //XI.InnerGMessage(fuse, 71);
             }
         }
-        public bool JN10602Valid(Player player, int type, string fuse)
+        public bool JN10602Valid(Player player, int type, string fuse) // Set as Lock'in
         {
             // Ushort: 0->normal pass, 1->second battle, 2->give up second battle
             if (type == 0)
-                return player.RFM.GetInt("DuoFight") == 0 && XI.Board.MonPiles.Count > 0;
+                return XI.Board.Battler != null && player.RFM.GetInt("DuoFight") == 0 && XI.Board.MonPiles.Count > 0;
             else if (type == 1)
             {
                 if (player.RFM.GetInt("DuoFight") == 2)
@@ -490,7 +489,7 @@ namespace PSD.PSDGamepkg.JNS
             else if (player.Team == XI.Board.Rounder.OppTeam)
                 notin = XI.Board.Hinder == null || !XI.Board.HinderSucc;
 
-            if (type == 0 || (type == 1 && XI.Board.InFight))
+            if (type == 0 || (type == 1 && XI.Board.PoolEnabled))
             {
                 if (!player.RFM.GetBool("STR+3") && notin)
                     return true;
@@ -2181,21 +2180,21 @@ namespace PSD.PSDGamepkg.JNS
                 return XI.Board.Rounder.Gender == 'F' || XI.Board.Supporter.Gender == 'F'
                     || XI.Board.Hinder.Gender == 'F';
             }
-            else if (type == 1)
+            else if (type == 1 && XI.Board.PoolEnabled)
             { // GOIY,0/1,A,S
                 string[] blocks = fuse.Split(',');
                 ushort who = ushort.Parse(blocks[2]);
                 Player py = XI.Board.Garden[who];
-                return py.Gender == 'F' && XI.Board.IsAttendWar(py) && XI.Board.InFight;
+                return py.Gender == 'F' && XI.Board.IsAttendWar(py);
             }
-            else if (type == 3)
+            else if (type == 2 && XI.Board.PoolEnabled)
             { // GOOY,0/1,A
                 string[] blocks = fuse.Split(',');
                 for (int i = 1; i < blocks.Length; i += 2)
                 {
                     ushort who = ushort.Parse(blocks[i + 1]);
                     Player py = XI.Board.Garden[who];
-                    if (py.Gender == 'F' && XI.Board.IsAttendWar(py) && XI.Board.InFight)
+                    if (py.Gender == 'F' && XI.Board.IsAttendWar(py))
                         return true;
                 }
                 return false;
@@ -2212,15 +2211,9 @@ namespace PSD.PSDGamepkg.JNS
                 XI.RaiseGMessage("G0IA," + player.Uid + ",1," + count);
             }
             else if (type == 1)
-            {
                 XI.RaiseGMessage("G0IA," + player.Uid + ",1,1");
-                //XI.InnerGMessage(fuse, 121);
-            }
-            else
-            {
+            else if (type == 2)
                 XI.RaiseGMessage("G0OA," + player.Uid + ",1,1");
-                //XI.InnerGMessage(fuse, 91);
-            }
         }
         public bool JN60302Valid(Player player, int type, string fuse)
         {
@@ -2389,7 +2382,7 @@ namespace PSD.PSDGamepkg.JNS
                 return IsMathISOS("JN60501", player, fuse) &&
                      XI.Board.IsAttendWar(player) && !self && player.HP < player.HPb;
             }
-            else if (type == 5 && XI.Board.InFight && player.HP < player.HPb)
+            else if (type == 5 && XI.Board.PoolEnabled && player.HP < player.HPb)
             {
                 string[] g0fi = fuse.Split(',');
                 if (g0fi[1] == "O" || g0fi[1] == "U")
@@ -2514,7 +2507,7 @@ namespace PSD.PSDGamepkg.JNS
                 XI.RaiseGMessage("G0IJ," + player.Uid + ",1," + heros.Count + "," + hs);
                 XI.RaiseGMessage("G2TZ," + player.Uid + ",0," + hs);
                 XI.Board.BannedHero.AddRange(heros);
-                if (XI.Board.InFight)
+                if (XI.Board.PoolEnabled)
                     XI.RaiseGMessage("G0IP," + player.Team + "," + heros.Count);
             }
             else if (type == 1)
@@ -2527,7 +2520,7 @@ namespace PSD.PSDGamepkg.JNS
                     p => int.Parse(p.Substring("H".Length))).ToList();
                 XI.Board.BannedHero.RemoveAll(p => souls.Contains(p));
                 XI.Board.HeroDises.AddRange(souls);
-                if (XI.Board.InFight)
+                if (XI.Board.PoolEnabled)
                     XI.RaiseGMessage("G0OP," + player.Team + "," + n);
             }
         }
@@ -3213,7 +3206,7 @@ namespace PSD.PSDGamepkg.JNS
             if (type == 0)
                 return XI.Board.IsAttendWar(player);
             else if (type == 1)
-                return XI.Board.InFight && XI.Board.IsAttendWar(player) && IsMathISOS("JNS0401", player, fuse);
+                return XI.Board.PoolEnabled && XI.Board.IsAttendWar(player) && IsMathISOS("JNS0401", player, fuse);
             else
                 return false;
         }

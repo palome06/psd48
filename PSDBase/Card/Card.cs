@@ -81,7 +81,7 @@ namespace PSD.Base.Card
         public enum Genre { NIL, Tux, NMB, Eve, TuxSerial, Rune, Five, Exsp }
         public static char Genre2Char(this Genre genre)
         {
-            return new char[] { ' ', 'C', 'M', 'E', 'G', 'R', 'F', 'I' }[(int)genre];
+            return new char[] { ' ', 'C', 'M', 'E', 'G', 'F', 'V', 'I' }[(int)genre];
         }
         public static Genre Char2Genre(this char @char)
         {

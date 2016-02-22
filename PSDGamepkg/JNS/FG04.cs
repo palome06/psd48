@@ -666,7 +666,7 @@ namespace PSD.PSDGamepkg.JNS
         public void GT03DecrAction(Player player)
         {
             ushort rk = (ushort)(1000 + XI.LibTuple.ML.Encode("GT03"));
-            if (XI.Board.InFightThrough)
+            if (XI.Board.InCampaign)
             {
                 if (XI.Board.Supporter.Uid == rk)
                     XI.RaiseGMessage("G17F,S,0");
@@ -2835,9 +2835,8 @@ namespace PSD.PSDGamepkg.JNS
             }
             else if (consumeType == 2)
             {
-                if (XI.Board.InFightThrough)
+                if (XI.Board.InCampaign) // G0FI
                 {
-                    // G0FI,
                     string[] g0fi = fuse.Split(',');
                     if (g0fi[1] == "O" || g0fi[1] == "U")
                         return false;
@@ -2946,7 +2945,7 @@ namespace PSD.PSDGamepkg.JNS
                     p.Uid != player.Uid && XI.Board.IsAttendWar(p) && p.GetPetCount() > 0);
                 if (type == 0) // Z1
                     return XI.Board.IsAttendWar(player) && yesIncr;
-                else if (type == 1 && XI.Board.InFight) // FI
+                else if (type == 1 && XI.Board.PoolEnabled) // FI
                 {
                     string[] g0fi = fuse.Split(',');
                     if (g0fi[1] == "O" || g0fi[1] == "U")
@@ -2977,7 +2976,7 @@ namespace PSD.PSDGamepkg.JNS
                 }
                 else if (type == 2 || type == 3) // IC/OC
                 {
-                    if (XI.Board.InFightThrough && XI.Board.IsAttendWar(player) && yesIncr)
+                    if (XI.Board.PoolEnabled && XI.Board.IsAttendWar(player) && yesIncr)
                     {
                         string[] iocs = fuse.Split(',');
                         for (int idx = 1; idx < iocs.Length; idx += 3)

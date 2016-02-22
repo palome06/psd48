@@ -1084,7 +1084,7 @@ namespace PSD.PSDGamepkg.JNS
         #region HL007 - Yingyue
         public bool JNH0701Valid(Player player, int type, string fuse)
         {
-            if (type == 0)
+            if (type == 0) // ON
             {
                 string[] blocks = fuse.Split(',');
                 for (int idx = 1; idx < blocks.Length;)
@@ -1104,36 +1104,41 @@ namespace PSD.PSDGamepkg.JNS
                     idx += (3 + cnt);
                 }
             }
-            else if (type == 1) // Z1
+            else if (type == 1) // PD
             {
                 bool stucken = (XI.Board.IsAttendWar(player) && player.TokenExcl.Count > 0) ||
                     player.TokenExcl.Any(p => XI.LibTuple.NL.Decode(
                     (ushort)(int.Parse(p.Substring("M".Length)) - 1000)).STR >= 5);
                 return stucken;
             }
-            else if (type == 2) // AF
+            else if (type == 2 && player.TokenExcl.Count > 0) // FI
             {
-                bool waken = player.TokenExcl.Any(p => XI.LibTuple.NL.Decode(
-                    (ushort)(int.Parse(p.Substring("M".Length)) - 1000)).STR < 5);
-                string[] g0af = fuse.Split(',');
-                if (g0af[1] != "0" && XI.Board.InFight && waken)
-                    for (int i = 1; i < g0af.Length; i += 2)
+                string[] g0fi = fuse.Split(',');
+                if (g0fi[1] == "O" || g0fi[1] == "U")
+                    return false;
+                int result = 0;
+                for (int i = 1; i < g0fi.Length; i += 3)
+                {
+                    char ch = g0fi[i][0];
+                    ushort old = ushort.Parse(g0fi[i + 1]);
+                    ushort to = ushort.Parse(g0fi[i + 2]);
+                    if (ch == 'S' || ch == 'H')
                     {
-                        ushort ut = ushort.Parse(g0af[i + 1]);
-                        if (ut == player.Uid)
-                        {
-                            ushort delta = ushort.Parse(g0af[i]);
-                            if (delta > 4 && player.RFM.GetInt("helper") > 0)
-                                return true;
-                            else if (delta <= 4 && player.RFM.GetInt("helper") == 0)
-                                return true;
-                        }
+                        if (old == player.Uid)
+                            --result;
+                        if (to == player.Uid)
+                            ++result;
                     }
-                return false;
+                    else if (ch == 'T' || ch == 'W')
+                    {
+                        result = 0; break;
+                    }
+                }
+                return result != 0;
             }
             else if (type == 3 || type == 4) // IS/OS
             {
-                if (IsMathISOS("JNH0701", player, fuse) && XI.Board.InFight)
+                if (IsMathISOS("JNH0701", player, fuse) && XI.Board.PoolEnabled)
                 {
                     return (XI.Board.IsAttendWar(player) && player.TokenExcl.Count > 0) ||
                     player.TokenExcl.Any(p => XI.LibTuple.NL.Decode(NMBLib.OriginalNPC(
@@ -1206,51 +1211,18 @@ namespace PSD.PSDGamepkg.JNS
                         XI.InnerGMessage("G0ON" + n0on, 31);
                 }
             }
-            else if (type == 1)
+            else if (type == 1 || type == 2 || type == 3)
             {
                 int upfive = player.TokenExcl.Count(p => XI.LibTuple.NL.Decode(
                     (ushort)(int.Parse(p.Substring("M".Length)) - 1000)).STR >= 5);
                 int dnfive = player.TokenExcl.Count; int delta;
                 if (XI.Board.IsAttendWar(player))
-                    delta = dnfive - player.RFM.GetInt("helper");
-                else
-                    delta = upfive - player.RFM.GetInt("helper");
-                player.RFM.Set("helper", dnfive);
-                if (delta > 0)
-                    XI.RaiseGMessage("G0IP," + player.Team + "," + delta);
-                else if (delta < 0)
-                    XI.RaiseGMessage("G0OP," + player.Team + "," + (-delta));
+                    XI.RaiseGMessage("G1WP," + player.Team + "," + player.Uid + ",JNH0701," + dnfive);
+                else if (!XI.Board.IsAttendWar(player))
+                    XI.RaiseGMessage("G1WP," + player.Team + "," + player.Uid + ",JNH0701," + upfive);
             }
-            else if (type == 2)
-            {
-                int dnfive = player.TokenExcl.Count(p => XI.LibTuple.NL.Decode(
-                    (ushort)(int.Parse(p.Substring("M".Length)) - 1000)).STR < 5);
-                if (XI.Board.IsAttendWar(player))
-                {
-                    player.RFM.Set("helper", player.RFM.GetInt("helper") + dnfive);
-                    XI.RaiseGMessage("G0IP," + player.Team + "," + dnfive);
-                }
-                else
-                {
-                    player.RFM.Set("helper", player.RFM.GetInt("helper") - dnfive);
-                    XI.RaiseGMessage("G0OP," + player.Team + "," + dnfive);
-                }
-            }
-            else if (type == 3)
-            {
-                int upfive = player.TokenExcl.Count(p => XI.LibTuple.NL.Decode(
-                    (ushort)(int.Parse(p.Substring("M".Length)) - 1000)).STR >= 5);
-                int dnfive = player.TokenExcl.Count;
-                int delta = XI.Board.IsAttendWar(player) ? dnfive : upfive;
-                player.RFM.Set("helper", delta);
-                if (delta > 0)
-                    XI.RaiseGMessage("G0IP," + player.Team + "," + delta);
-            }
-            else if (type == 4 && player.RFM.GetInt("helper") > 0)
-            {
-                XI.RaiseGMessage("G0OP," + player.Team + "," + player.RFM.GetInt("helper"));
-                player.RFM.Set("helper", null);
-            }
+            else if (type == 4)
+                XI.RaiseGMessage("G1WP," + player.Team + "," + player.Uid + ",JNH0701,0");
         }
         public string JNH0701Input(Player player, int type, string fuse, string prev)
         {
@@ -1891,7 +1863,7 @@ namespace PSD.PSDGamepkg.JNS
                 Player py = XI.Board.Garden[ushort.Parse(g1cw[1])];
                 return py != null && py.Team == player.OppTeam;
             }
-            else if (type == 3 || type == 4)
+            else if (type == 3)
                 return player.TokenFold.Count > 0 || player.RFM.GetBool("Scared");
             else
                 return false;
@@ -1949,7 +1921,7 @@ namespace PSD.PSDGamepkg.JNS
                 }
                 XI.InnerGMessage(cdFuse, 106);
             }
-            else if (type == 3 || type == 4)
+            else if (type == 3)
             {
                 if (player.TokenFold.Count > 0)
                 {
@@ -2421,7 +2393,7 @@ namespace PSD.PSDGamepkg.JNS
             else if (type == 1 && player.ROM.GetInt("Holy") == 2)
                 return true;
             else if (type == 2 && IsMathISOS("JNH1602", player, fuse) && player.ROM.GetInt("Holy") == 2)
-                return XI.Board.InFight;
+                return XI.Board.PoolEnabled;
             else if (type == 3 && player.ROM.GetInt("Holy") == 1)
                 return XI.Board.Garden.Values.Where(p => p.IsAlive &&
                     p.Team == player.OppTeam).Sum(p => p.GetPetCount()) >= 3;
@@ -2466,7 +2438,7 @@ namespace PSD.PSDGamepkg.JNS
                     p.Team == player.OppTeam).Sum(p => p.GetPetCount()) >= 3)
                 {
                     player.ROM.Set("Holy", 2);
-                    if (XI.Board.InFight)
+                    if (XI.Board.PoolEnabled)
                         XI.RaiseGMessage("G0IP," + player.Team + ",2");
                 }
                 else
@@ -2480,13 +2452,13 @@ namespace PSD.PSDGamepkg.JNS
             else if (type == 3)
             {
                 player.ROM.Set("Holy", 2);
-                if (XI.Board.InFight)
+                if (XI.Board.PoolEnabled)
                     XI.RaiseGMessage("G0IP," + player.Team + ",2");
             }
             else if (type == 4)
             {
                 player.ROM.Set("Holy", 1);
-                if (XI.Board.InFight)
+                if (XI.Board.PoolEnabled)
                     XI.RaiseGMessage("G0OP," + player.Team + ",2");
             }
         }

@@ -541,7 +541,7 @@ namespace PSD.PSDGamepkg.JNS
         #region NPC Single
         public void NCT32Debut(Player trigger)
         {
-            if (XI.Board.InFight)
+            if (XI.Board.InCampaign)
                 ++XI.Board.Rounder.RestZP;
         }
         public void NCT33Debut(Player trigger)

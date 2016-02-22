@@ -1327,7 +1327,7 @@ namespace PSD.PSDGamepkg.JNS
             if (lug != null && consumeType == 0 && !lug.Pull)
             {
                 if (type == 0) {
-                    if (XI.Board.InFightThrough && XI.Board.Rounder.Team == player.Team) {
+                    if (XI.Board.InCampaign && XI.Board.Rounder.Team == player.Team) {
                         string[] g0on = fuse.Split(',');
                         for (int i = 1; i < g0on.Length; ) {
                             string cardType = g0on[i + 1];
@@ -1947,7 +1947,7 @@ namespace PSD.PSDGamepkg.JNS
             Base.Card.Luggage lug = XI.LibTuple.TL.EncodeTuxCode("XBT4") as Base.Card.Luggage;
             if (lug != null && consumeType == 0)
             {
-                if (type == 0 && XI.Board.InFight)
+                if (type == 0 && XI.Board.PlayerPoolEnabled)
                 {
                     // G0CC,A,0,B,TP02,17,36
                     string[] args = fuse.Split(',');

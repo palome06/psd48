@@ -982,7 +982,7 @@ namespace PSD.PSDGamepkg
                 {
                     Player player = Board.Rounder;
                     ushort mon1 = Board.Monster1;
-                    if (mon1 != 0 && Board.InFightThrough && Board.IsMonsterDebut)
+                    if (mon1 != 0 && Board.InCampaign && Board.IsMonsterDebut)
                     {
                         Base.Card.Monster mon = LibTuple.ML.Decode(mon1);
                         if (mon != null && mon == mt && mt.ConsumeValid(player, consumeType, ske.InType, ske.Fuse))

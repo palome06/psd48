@@ -160,17 +160,6 @@ namespace PSD.Base
         public Utils.Diva RFM { private set; get; } // Alive in a round
         public Utils.Diva RAM { private set; get; } // Alive in a period
 
-        //public List<ushort> RAMUtList { set; get; }
-        //public IDictionary<string, object> ROM { private set; get; }
-        //public IDictionary<string, object> RIM { private set; get; } // check hero, to be substituded by first-class Diva
-        //public IDictionary<string, object> RAM { private set; get; }
-        //public IDictionary<string, object> RTM { private set; get; } // check hero, to be substituded by first-class Diva
-        //public ushort ROMUshort { set; get; }
-        //public int ROMInt { set; get; }
-        //public ushort RAMUshort { set; get; }
-        //public int RAMInt { set; get; }
-        //public List<ushort> RAMUtList { private set; get; }
-
         // Cos players Stack, e.g. SP101-SP102-XJ404
         public Stack<int> Coss { private set; get; }
         // Guardian, e.g. TR007/TR020
