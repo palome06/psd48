@@ -3140,12 +3140,12 @@ namespace PSD.PSDGamepkg.JNS
                 if (type == 0)
                 {
                     player.RFM.GetOrSetDiva("GLH1Consume").Set("endEGR", 1);
-                    XI.RaiseGMessage("G0JM,R" + player.Uid + "GS");
+                    XI.RaiseGMessage(new Artiad.Goto() { Terminal = "R" + player.Uid + "GS" }.ToMessage());
                 }
                 else if (type == 1)
                 {
                     player.RFM.GetOrSetDiva("GLH1Consume").Set("endEGR", 2);
-                    XI.RaiseGMessage("G0JM,R" + player.Uid + "QR");
+                    XI.RaiseGMessage(new Artiad.Goto() { Terminal = "R" + player.Uid + "QR" }.ToMessage());
                 }
             }
         }

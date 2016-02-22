@@ -326,19 +326,13 @@ namespace PSD.PSDGamepkg
                                 if (Board.Supporter.Uid == who)
                                 {
                                     if (changeType == 2)
-                                    {
-                                        Board.Supporter = null;
-                                        Board.SupportSucc = false;
-                                    }
+                                        RaiseGMessage("G17F,S,0");
                                     mightInvolve = true;
                                 }
                                 else if (Board.Hinder.Uid == who)
                                 {
                                     if (changeType == 2)
-                                    {
-                                        Board.Hinder = null;
-                                        Board.HinderSucc = false;
-                                    }
+                                        RaiseGMessage("G17F,H,0"); // TODO: if changed, still need monitor
                                     mightInvolve = true;
                                 }
                                 if (mightInvolve && Board.PoolEnabled)
@@ -346,7 +340,7 @@ namespace PSD.PSDGamepkg
                             }
                         }
                         if (rounded)
-                            RaiseGMessage("G0JM,R" + Board.Rounder.Uid + "ED");
+                            RaiseGMessage(new Artiad.Goto() { Terminal = "R" + Board.Rounder.Uid + "ED" }.ToMessage());
                         if (_9ped)
                             RaiseGMessage("G09P,0");
                     }
@@ -2795,33 +2789,7 @@ namespace PSD.PSDGamepkg
                     }
                     break;
                 case "G0JM":
-                    {
-                        WI.RecvInfTermin();
-                        // Reset board information
-                        Board.UseCardRound = 0;
-                        string stage = cmdrst;
-                        WI.BCast("F0JM," + stage);
-                        // count how many players have received the F0JM message
-                        int count = Board.Garden.Keys.Count;
-                        WI.RecvInfStart();
-                        while (count > 0)
-                        {
-                            Base.VW.Msgs msg = WI.RecvInfRecvPending();
-                            if (msg.Msg.StartsWith("F0JM"))
-                                --count;
-                            else
-                                WI.Send("F0JM," + stage, 0, msg.From);
-                        }
-                        WI.RecvInfEnd();
-                        WI.Live("F0JM," + stage);
-                        lock (jumpTareget)
-                        {
-                            jumpTareget = stage;
-                            jumpEnd = "H0TM";
-                        }
-                        System.Threading.Thread.CurrentThread.Abort();
-                    }
-                    break;
+                    Artiad.Goto.Parse(cmd).Handle(this); break;
                 case "G0WN":
                     {
                         WI.RecvInfTermin();

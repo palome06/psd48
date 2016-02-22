@@ -338,7 +338,7 @@ namespace PSD.PSDGamepkg.JNS
                     player.RFM.Set("DuoFight", 1);
                     XI.RaiseGMessage("G17F,U," + player.Uid);
                     XI.Board.CleanBattler();
-                    XI.RaiseGMessage("G0JM,R" + player.Uid + "ZW");
+                    XI.RaiseGMessage(new Artiad.Goto() { Terminal = "R" + player.Uid + "ZW" }.ToMessage());
                 }
                 else
                     player.RFM.Set("DuoFight", 2);
@@ -451,7 +451,7 @@ namespace PSD.PSDGamepkg.JNS
                     XI.Board.Mon1From = 0;
                 XI.Board.Monster1 = 0; XI.Board.Battler = null;
                 player.RFM.Set("DuoFight", true);
-                XI.RaiseGMessage("G0JM,R" + player.Uid + "ZM");
+                XI.RaiseGMessage(new Artiad.Goto() { Terminal = "R" + player.Uid + "ZM" }.ToMessage());
             }
         }
         public bool JN20202Valid(Player player, int type, string fuse)
@@ -2175,45 +2175,35 @@ namespace PSD.PSDGamepkg.JNS
         #region XJ503 - LongYou
         public bool JN60301Valid(Player player, int type, string fuse)
         {
-            if (type == 0)
+            if (XI.Board.PoolEnabled)
             {
-                return XI.Board.Rounder.Gender == 'F' || XI.Board.Supporter.Gender == 'F'
-                    || XI.Board.Hinder.Gender == 'F';
-            }
-            else if (type == 1 && XI.Board.PoolEnabled)
-            { // GOIY,0/1,A,S
-                string[] blocks = fuse.Split(',');
-                ushort who = ushort.Parse(blocks[2]);
-                Player py = XI.Board.Garden[who];
-                return py.Gender == 'F' && XI.Board.IsAttendWar(py);
-            }
-            else if (type == 2 && XI.Board.PoolEnabled)
-            { // GOOY,0/1,A
-                string[] blocks = fuse.Split(',');
-                for (int i = 1; i < blocks.Length; i += 2)
-                {
-                    ushort who = ushort.Parse(blocks[i + 1]);
-                    Player py = XI.Board.Garden[who];
-                    if (py.Gender == 'F' && XI.Board.IsAttendWar(py))
-                        return true;
-                }
-                return false;
+                int count = XI.Board.Garden.Values.Count(p => p.IsAlive &&
+                    p.Gender == 'F' && XI.Board.IsAttendWar(p));
+                if (type == 0)
+                    return count > 0;
+                else
+                    return count != player.RFM.GetInt("Girlfriend");
             }
             return false;
         }
         public void JN60301Action(Player player, int type, string fuse, string args)
         {
+            int count = XI.Board.Garden.Values.Count(p => p.IsAlive &&
+                p.Gender == 'F' && XI.Board.IsAttendWar(p));
             if (type == 0)
             {
-                int count = XI.Board.Rounder.Gender == 'F' ? 1 : 0;
-                count += (XI.Board.Supporter.Gender == 'F' ? 1 : 0);
-                count += (XI.Board.Hinder.Gender == 'F' ? 1 : 0);
+                player.RFM.Set("Girlfriend", count);
                 XI.RaiseGMessage("G0IA," + player.Uid + ",1," + count);
             }
-            else if (type == 1)
-                XI.RaiseGMessage("G0IA," + player.Uid + ",1,1");
-            else if (type == 2)
-                XI.RaiseGMessage("G0OA," + player.Uid + ",1,1");
+            else
+            {
+                int delta = count - player.RFM.GetInt("Girlfriend");
+                player.RFM.Set("Girlfriend", count);
+                if (delta > 0)
+                    XI.RaiseGMessage("G0IA," + player.Uid + ",1," + delta);
+                else if (delta < 0)
+                    XI.RaiseGMessage("G0OA," + player.Uid + ",1," + (-delta));
+            }
         }
         public bool JN60302Valid(Player player, int type, string fuse)
         {
@@ -2465,7 +2455,11 @@ namespace PSD.PSDGamepkg.JNS
             {
                 XI.RaiseGMessage("G0IA," + player.Uid + ",2");
                 player.ROM.Set("Sacrified", true);
-                XI.RaiseGMessage("G0JM,R" + XI.Board.Rounder.Uid + "ZN");
+                XI.RaiseGMessage(new Artiad.Goto()
+                {
+                    CrossStage = false,
+                    Terminal = "R" + XI.Board.Rounder.Uid + "ZN"
+                }.ToMessage());
             }
             else if (type == 1)
                 XI.RaiseGMessage("G0ZW," + player.Uid);
@@ -3224,7 +3218,11 @@ namespace PSD.PSDGamepkg.JNS
         public void JNS0402Action(Player player, int type, string fuse, string argst)
         {
             XI.RaiseGMessage("G0QZ," + player.Uid + "," + argst);
-            XI.RaiseGMessage("G0JM,R" + XI.Board.Rounder.Uid + "VT");
+            XI.RaiseGMessage(new Artiad.Goto()
+            {
+                CrossStage = false,
+                Terminal = "R" + XI.Board.Rounder.Uid + "VT"
+            }.ToMessage());
         }
         public string JNS0402Input(Player player, int type, string fuse, string prev)
         {

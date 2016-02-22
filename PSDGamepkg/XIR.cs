@@ -86,6 +86,14 @@ namespace PSD.PSDGamepkg
             }
             //RunRound("R100", "H0TM");
         }
+        public void BlockSetJumpTable(string jumpTarget, string jumpEnd)
+        {
+            lock (this.jumpTareget)
+            {
+                this.jumpTareget = jumpTarget;
+                this.jumpEnd = jumpEnd;
+            }
+        }
 
         public void RunRound(string rstage, string endRstage)
         {
@@ -110,6 +118,7 @@ namespace PSD.PSDGamepkg
                 switch (rstage.Substring(2))
                 {
                     case "00":
+                        ResetPlayerRAM(); // 0:00
                         Board.Garden[rounder].ResetRFM();
                         if (!Board.Garden[rounder].Immobilized)
                         {
@@ -125,6 +134,7 @@ namespace PSD.PSDGamepkg
                         }
                         break;
                     case "OC":
+                        ResetPlayerRAM(); // 1:ST
                         RunQuadStage(rstage);
                         rstage = "R" + rounder + "ST";
                         break;
@@ -135,6 +145,7 @@ namespace PSD.PSDGamepkg
                         rstage = "R" + rounder + "EP";
                         break;
                     case "EP":
+                        ResetPlayerRAM(); // 2:EV
                         RunQuadStage(rstage);
                         rstage = "R" + rounder + "EV";
                         break;
@@ -154,6 +165,7 @@ namespace PSD.PSDGamepkg
                         RunQuadStage(rstage);
                         rstage = "R" + rounder + "GS"; break;
                     case "GS":
+                        ResetPlayerRAM(); // 3:GR
                         RunQuadStage(rstage);
                         rstage = "R" + rounder + "GR"; break;
                     case "GR":
@@ -165,6 +177,7 @@ namespace PSD.PSDGamepkg
                         RunQuadMixedStage(rstage, 0, null, null);
                         rstage = "R" + rounder + "Z0"; break;
                     case "Z0":
+                        ResetPlayerRAM(); // 4:ZD
                         Board.Monster1 = 0; Board.Monster2 = 0;
                         Board.RPool = 0; Board.OPool = 0;
                         Board.RPoolGain.Clear(); Board.OPoolGain.Clear();
@@ -174,6 +187,7 @@ namespace PSD.PSDGamepkg
                         rstage = "R" + rounder + "ZW"; break;
                     case "ZW":
                         {
+                            ResetPlayerRAM();
                             // to substitute old ZW event on considering the capability
                             Board.PosHinders.Clear();
                             ushort[] hMember = Board.Garden.Values.Where(p => p.IsAlive &&
@@ -546,20 +560,24 @@ namespace PSD.PSDGamepkg
                     case "ZZ":
                         RaiseGMessage("G17F,U," + rounder);
                         RunQuadStage(rstage);
-                        rstage = "R" + rounder + "BC"; break;
+                        rstage = "R" + rounder + "BC";
+                        break;
                     case "BC":
+                        ResetPlayerRAM(); // 5:BC
                         WI.BCast(rstage + ",0");
                         RunQuadMixedStage(rstage, 0, new int[] { 100 },
                             new Action[] { () => {
                                 int tuxCount = Board.Battler != null ? 2 : 1;
                                 RaiseGMessage("G0HT," + Board.Rounder.Uid + "," + tuxCount);
                             } });
+                        ResetPlayerRAM();
                         rstage = "R" + rounder + "QR"; break;
                     case "QR":
                         RunQuadStage(rstage);
                         RaiseGMessage("G0QR," + Board.Rounder.Uid);
                         rstage = "R" + rounder + "TM"; break;
-                    case "TM":
+                    case "TM": // 6:TM
+                        ResetPlayerRAM();
                         WI.BCast(rstage + ",0");
                         RunQuadStage(rstage);
                         rstage = "R" + rounder + "IC"; break;
@@ -567,6 +585,7 @@ namespace PSD.PSDGamepkg
                         RunQuadStage(rstage);
                         rstage = "R" + rounder + "ED"; break;
                     case "ED":
+                        ResetPlayerRAM(); // 7:ED
                         WI.BCast(rstage + ",0");
                         RunQuadMixedStage(rstage, 0,
                             new int[] { -100, 100 },
@@ -577,6 +596,7 @@ namespace PSD.PSDGamepkg
                                     RaiseGMessage("G1WJ,0");
                                 RecycleMonster(false, false);
                                 Board.InCampaign = false;
+                                Board.PlayerPoolEnabled = Board.PoolEnabled = false;
                                 if (Board.Wang != 0)
                                 {
                                     int wang = Board.Wang;
@@ -626,8 +646,6 @@ namespace PSD.PSDGamepkg
                         }
                         break;
                 }
-                foreach (Player player in Board.Garden.Values)
-                    player.ResetRAM();
             }
         }
         private void RunQuadStage(string zero) { RunQuadMixedStage(zero, 0, null, null); }
@@ -990,6 +1008,11 @@ namespace PSD.PSDGamepkg
                 py.STRc = py.STRa;
                 py.DEXc = py.DEXa;
             }
+        }
+        private void ResetPlayerRAM()
+        {
+            foreach (Player player in Board.Garden.Values)
+                player.ResetRAM();
         }
     }
 }

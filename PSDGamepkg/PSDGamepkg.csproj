@@ -57,6 +57,7 @@
     <Compile Include="Artiad\HPIssue.cs" />
     <Compile Include="Artiad\ContentRule.cs" />
     <Compile Include="Artiad\Clothing.cs" />
+    <Compile Include="Artiad\GotoNoodle.cs" />
     <Compile Include="Artiad\JanuaryMan.cs" />
     <Compile Include="Artiad\Kitty.cs" />
     <Compile Include="Artiad\Procedure.cs" />

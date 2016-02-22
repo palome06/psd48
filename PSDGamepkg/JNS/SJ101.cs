@@ -615,7 +615,10 @@ namespace PSD.PSDGamepkg.JNS
         public void SJH01(Player rd)
         {
             XI.AsyncInput(rd.Uid, "//", "SJH01", "0");
-            XI.RaiseGMessage("G0JM,R" + XI.Board.Rounder.Uid + "ED");
+            XI.RaiseGMessage(new Artiad.Goto()
+            {
+                Terminal = "R" + XI.Board.Rounder.Uid + "ED"
+            }.ToMessage());
         }
         public void SJH02(Player rd)
         {

@@ -708,8 +708,11 @@ namespace PSD.PSDGamepkg.JNS
         }
         public void ZP01Action(Player player, int type, string fuse, string argst)
         {
-            string rwho = fuse.Substring(0, 2);
-            XI.RaiseGMessage("G0JM," + rwho + "Z2");
+            XI.RaiseGMessage(new Artiad.Goto()
+            {
+                CrossStage = false,
+                Terminal = "R" + XI.Board.Rounder.Uid + "Z2"
+            }.ToMessage());
         }
         // Tiangangzhanqi
         public bool ZP02Valid(Player player, int type, string fuse)
@@ -2163,8 +2166,11 @@ namespace PSD.PSDGamepkg.JNS
                 XI.RaiseGMessage("G0OA," + player.Uid + ",2");
             else
                 XI.RaiseGMessage("G0IP," + player.Team + "," + val);
-            string rwho = fuse.Substring(0, 2);
-            XI.RaiseGMessage("G0JM," + rwho + "ZN");
+            XI.RaiseGMessage(new Artiad.Goto()
+            {
+                CrossStage = false,
+                Terminal = "R" + XI.Board.Rounder.Uid + "ZN"
+            }.ToMessage());
         }
         public bool ZPT4Valid(Player player, int type, string fuse)
         {

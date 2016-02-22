@@ -131,7 +131,11 @@ namespace PSD.PSDGamepkg.JNS
                     XI.Board.Monster2 = 0;
 
                     XI.RaiseGMessage("G0IA," + player.Uid + ",2");
-                    XI.RaiseGMessage("G0JM,R" + XI.Board.Rounder.Uid + "ZN");
+                    XI.RaiseGMessage(new Artiad.Goto()
+                    {
+                        CrossStage = false,
+                        Terminal = "R" + XI.Board.Rounder.Uid + "ZN"
+                    }.ToMessage());
                 }
                 else
                     XI.InnerGMessage(fuse, 281);
@@ -597,7 +601,11 @@ namespace PSD.PSDGamepkg.JNS
         {
             XI.RaiseGMessage("G0QZ," + player.Uid + "," + argst);
             XI.RaiseGMessage("G0OW," + XI.Board.Monster1 + ",2");
-            XI.RaiseGMessage("G0JM,R" + XI.Board.Rounder.Uid + "PD");
+            XI.RaiseGMessage(new Artiad.Goto()
+            {
+                CrossStage = false,
+                Terminal = "R" + XI.Board.Rounder.Uid + "PD"
+            }.ToMessage());
         }
         public string JNH0401Input(Player player, int type, string fuse, string prev)
         {
@@ -854,7 +862,13 @@ namespace PSD.PSDGamepkg.JNS
                     XI.InnerGMessage(Artiad.Harm.ToMessage(harms), -44);
             }
             else if (type == 3)
-                XI.RaiseGMessage("G0JM,R" + XI.Board.Rounder.Uid + "GF");
+            {
+                XI.RaiseGMessage(new Artiad.Goto()
+                {
+                    CrossStage = false,
+                    Terminal = "R" + XI.Board.Rounder.Uid + "GF"
+                }.ToMessage());
+            }
             else if (type == 4)
             {
                 Player rd = XI.Board.Rounder;
@@ -1213,13 +1227,16 @@ namespace PSD.PSDGamepkg.JNS
             }
             else if (type == 1 || type == 2 || type == 3)
             {
-                int upfive = player.TokenExcl.Count(p => XI.LibTuple.NL.Decode(
-                    (ushort)(int.Parse(p.Substring("M".Length)) - 1000)).STR >= 5);
-                int dnfive = player.TokenExcl.Count; int delta;
-                if (XI.Board.IsAttendWar(player))
-                    XI.RaiseGMessage("G1WP," + player.Team + "," + player.Uid + ",JNH0701," + dnfive);
-                else if (!XI.Board.IsAttendWar(player))
-                    XI.RaiseGMessage("G1WP," + player.Team + "," + player.Uid + ",JNH0701," + upfive);
+                if (XI.Board.PoolEnabled)
+                {
+                    int upfive = player.TokenExcl.Count(p => XI.LibTuple.NL.Decode(
+                        (ushort)(int.Parse(p.Substring("M".Length)) - 1000)).STR >= 5);
+                    int dnfive = player.TokenExcl.Count;
+                    if (XI.Board.IsAttendWar(player))
+                        XI.RaiseGMessage("G1WP," + player.Team + "," + player.Uid + ",JNH0701," + dnfive);
+                    else if (!XI.Board.IsAttendWar(player))
+                        XI.RaiseGMessage("G1WP," + player.Team + "," + player.Uid + ",JNH0701," + upfive);
+                }
             }
             else if (type == 4)
                 XI.RaiseGMessage("G1WP," + player.Team + "," + player.Uid + ",JNH0701,0");
@@ -1877,6 +1894,9 @@ namespace PSD.PSDGamepkg.JNS
                 XI.RaiseGMessage("G0OT," + player.Uid + "," + n + "," + string.Join(",", ijs));
                 XI.RaiseGMessage("G0IJ," + player.Uid + ",4," + n + "," + string.Join(",", ijs));
                 player.RFM.Set("Scared", true);
+                if (player.Weapon != 0 && !player.WeaponDisabled)
+                    XI.RaiseGMessage("G0ZL," + player.Uid + "," + player.Weapon);
+                player.SetWeaponDisabled("JNH1102", true);
             }
             else if (type == 1)
             {
@@ -1894,6 +1914,8 @@ namespace PSD.PSDGamepkg.JNS
                     Tux tux = XI.LibTuple.TL.EncodeTuxCode(cardname);
                     int prior = tux.Priorities[inType];
                     XI.InnerGMessage(origin, prior);
+                    // TODO:Fatal Error, JNT2902 will trigger the event at wrong priority
+                    // e.g. card=JP01,inType=0,prior=0;while origin=G1TH
                 }
             }
             else if (type == 2)
@@ -1930,6 +1952,9 @@ namespace PSD.PSDGamepkg.JNS
                     XI.RaiseGMessage("G0IT," + player.Uid + "," + ijs.Count + "," + string.Join(",", ijs));
                 }
                 player.RFM.Set("Scared", false);
+                player.SetWeaponDisabled("JNH1102", false);
+                if (player.Weapon != 0 && !player.WeaponDisabled)
+                    XI.RaiseGMessage("G0ZS," + player.Uid + "," + player.Weapon);
             }
         }
         #endregion HL011 - ShuiGang

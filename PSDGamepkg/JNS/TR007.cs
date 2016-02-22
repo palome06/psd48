@@ -1323,7 +1323,7 @@ namespace PSD.PSDGamepkg.JNS
                 ushort tar = ushort.Parse(argst);
                 player.RFM.Set("Flag", tar);
                 XI.RaiseGMessage("G17F,W," + tar);
-                XI.RaiseGMessage("G0JM,R" + tar + "ZW");
+                XI.RaiseGMessage(new Artiad.Goto() { Terminal = "R" + tar + "ZW" }.ToMessage());
             }
             else if (type == 1)
                 XI.Board.AllowNoSupport = false;
@@ -1331,10 +1331,10 @@ namespace PSD.PSDGamepkg.JNS
             {
                 player.RFM.Set("Flag", null);
                 // Mark the target back.
-                XI.RaiseGMessage("G0JM,R" + player.Uid + "ZZ");
+                XI.RaiseGMessage(new Artiad.Goto() { Terminal = "R" + player.Uid + "ZZ" }.ToMessage());
             }
             else if (type == 3)
-                XI.RaiseGMessage("G0JM,R" + player.Uid + "ZZ");
+                XI.RaiseGMessage(new Artiad.Goto() { Terminal = "R" + player.Uid + "ZZ" }.ToMessage());
             else if (type == 4)
             {
                 ushort ut = player.RFM.GetUshort("Flag");
@@ -2024,12 +2024,12 @@ namespace PSD.PSDGamepkg.JNS
             if (type == 0) // ST->[EP]->GR
             {
                 player.RFM.Set("endEGR", 1);
-                XI.RaiseGMessage("G0JM,R" + player.Uid + "GS");
+                XI.RaiseGMessage(new Artiad.Goto() { Terminal = "R" + player.Uid + "GS" }.ToMessage());
             }
             else if (type == 1) // GR->GE->[GF]->EV->GR->GE->...
             {
                 player.RFM.Set("endEGR", 2);
-                XI.RaiseGMessage("G0JM,R" + player.Uid + "EV");
+                XI.RaiseGMessage(new Artiad.Goto() { Terminal = "R" + player.Uid + "EV" }.ToMessage());
             }
             else if (type == 2)
                 Cure(player, player, 1);
@@ -2089,7 +2089,13 @@ namespace PSD.PSDGamepkg.JNS
                 if (meLose)
                     Harm(player, player, 2, FiveElement.AQUA);
                 else
-                    XI.RaiseGMessage("G0JM,R" + XI.Board.Rounder.Uid + "VT");
+                {
+                    XI.RaiseGMessage(new Artiad.Goto()
+                    {
+                        CrossStage = false,
+                        Terminal = "R" + XI.Board.Rounder.Uid + "VT"
+                    }.ToMessage());
+                }
             }
             else if (type == 3 || type == 5)
             {
@@ -3994,19 +4000,19 @@ namespace PSD.PSDGamepkg.JNS
             {
                 int count = XI.Board.Garden.Values.Count(p => p.IsAlive && XI.Board.IsAttendWar(p) &&
                     XI.LibTuple.HL.InstanceHero(p.SelectHero).Bio.Contains("K"));
-                player.RAM.Set("Ghost", count);
+                player.RFM.Set("Ghost", count);
                 XI.RaiseGMessage("G0IA," + player.Uid + ",1," + count * 2);
             }
             else if (type == 1)
             {
                 int count = XI.Board.Garden.Values.Count(p => p.IsAlive && XI.Board.IsAttendWar(p) &&
                     XI.LibTuple.HL.InstanceHero(p.SelectHero).Bio.Contains("K"));
-                int ghost = player.RAM.GetInt("Ghost");
+                int ghost = player.RFM.GetInt("Ghost");
                 if (count > ghost)
                     XI.RaiseGMessage("G0IA," + player.Uid + ",1," + (count - ghost) * 2);
                 else if (count < ghost)
                     XI.RaiseGMessage("G0OA," + player.Uid + ",1," + (ghost - count) * 2);
-                player.RAM.Set("Ghost", count);
+                player.RFM.Set("Ghost", count);
             }
         }
         public bool JNT3403Valid(Player player, int type, string fuse)
