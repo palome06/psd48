@@ -2273,15 +2273,19 @@ namespace PSD.ClientZero
                     break;
                 case "E0IE":
                 case "E0OE":
+                    if (args[1] == "0")
                     {
                         for (int i = 2; i < args.Length; ++i)
                         {
                             ushort who = ushort.Parse(args[i]);
-                            if (args[0] == "E0IE")
-                                Z0D[who].PetDisabled = false;
-                            else
-                                Z0D[who].PetDisabled = true;
+                            Z0D[who].PetDisabled = args[0] == "E0OE";
                         }
+                    }
+                    else if (args[1] == "1")
+                    {
+                        ushort[] pets = Algo.TakeRange(args, 2, args.Length)
+                            .Select(p => ushort.Parse(p)).ToArray();
+                        VI.Cout(Uid, "{0}宠物效果{1}.", zd.Monster(pets), args[0] == "E0OE" ? "失效" : "生效");
                     }
                     break;
                 case "E0YM":

@@ -240,7 +240,8 @@ namespace PSD.PSDGamepkg
                 case "G0OY":
                     if (priority == 100)
                     {
-                        string g1zl = "", g0oc = "";
+                        string g1zl = "";
+                        List<Artiad.PetEffectUnit> peuList = new List<Artiad.PetEffectUnit>();
                         List<string> g0qzs = new List<string>();
                         for (int i = 1; i < args.Length; i += 2)
                         {
@@ -257,14 +258,18 @@ namespace PSD.PSDGamepkg
                                 g1zl += "," + player.Uid + "," + player.ExEquip;
                             if (!player.PetDisabled)
                             {
-                                foreach (ushort ut in player.Pets)
-                                    if (ut != 0 && !Board.NotActionPets.Contains(ut))
+                                ushort[] pets = player.Pets.Where(p => p != 0 &&
+                                    !Board.NotActionPets.Contains(p)).ToArray();
+                                if (pets.Length > 0)
+                                {
+                                    peuList.Add(new Artiad.PetEffectUnit()
                                     {
-                                        if (changeType == 1)
-                                            g0oc += ",1," + player.Uid + "," + ut;
-                                        else
-                                            g0oc += ",0," + player.Uid + "," + ut;
-                                    }
+                                        Owner = player.Uid,
+                                        Pets = pets,
+                                        Reload = (changeType == 1) ? Artiad.PetEffectUnit.ReloadType.ABLE :
+                                            Artiad.PetEffectUnit.ReloadType.BORROW
+                                    });
+                                }
                             }
                             if (changeType == 0 || changeType == 2)
                             {
@@ -282,8 +287,8 @@ namespace PSD.PSDGamepkg
                         }
                         if (g1zl != "")
                             RaiseGMessage("G1OZ" + g1zl);
-                        if (g0oc != "")
-                            RaiseGMessage("G0OC" + g0oc);
+                        if (peuList.Count > 0)
+                            RaiseGMessage(new Artiad.CollapsePetEffects() { List = peuList }.ToMessage());
                         foreach (string g0qz in g0qzs)
                             RaiseGMessage(g0qz);
                         WI.BCast("E0OY," + cmdrst);
@@ -1378,14 +1383,18 @@ namespace PSD.PSDGamepkg
                             RaiseGMessage("G1IZ" + zs);
                         if (!player.PetDisabled)
                         {
-                            foreach (ushort ut in player.Pets)
-                                if (ut != 0 && !Board.NotActionPets.Contains(ut))
+                            ushort[] pets = player.Pets.Where(p => p != 0 &&
+                                 !Board.NotActionPets.Contains(p)).ToArray();
+                            if (pets.Length > 0)
+                            {
+                                RaiseGMessage(new Artiad.JoinPetEffects() { SingleUnit = new Artiad.PetEffectUnit()
                                 {
-                                    if (changeType == 1)
-                                        RaiseGMessage("G0IC,1," + player.Uid + "," + ut);
-                                    else
-                                        RaiseGMessage("G0IC,0," + player.Uid + "," + ut);
-                                }
+                                    Owner = player.Uid,
+                                    Pets = pets,
+                                    Reload = (changeType == 1) ? Artiad.PetEffectUnit.ReloadType.ABLE :
+                                        Artiad.PetEffectUnit.ReloadType.BORROW
+                                } }.ToMessage());
+                            }
                         }
                         if (Board.IsAttendWar(player) && Board.PoolEnabled)
                             RaiseGMessage("G09P,0");
@@ -2211,7 +2220,7 @@ namespace PSD.PSDGamepkg
                         if (nmb.IsMonster() && n > 0)
                         {
                             Monster mon = (Monster)nmb;
-                            mon.AGL += (ushort)n;
+                            mon.AGL = mon.mAGL + n;
                             WI.BCast("E0IW," + x + "," + n + "," + mon.AGL);
                             if (Board.PoolEnabled)
                                 RaiseGMessage("G09P,0");
@@ -2226,7 +2235,7 @@ namespace PSD.PSDGamepkg
                         if (nmb.IsMonster() && n > 0)
                         {
                             Monster mon = (Monster)nmb;
-                            mon.AGL -= (ushort)n;
+                            mon.AGL = mon.mAGL - n;
                             WI.BCast("E0OW," + x + "," + n + "," + mon.AGL);
                             if (Board.PoolEnabled)
                                 RaiseGMessage("G09P,0");
@@ -2241,17 +2250,17 @@ namespace PSD.PSDGamepkg
                         {
                             Monster mon = (Monster)nmb;
                             bool change = false;
-                            if (mon.STR != mon.STRb)
+                            if (mon.mSTR != mon.STRb)
                             {
+                                change |= (mon.STR != mon.STRb);
                                 mon.STR = mon.STRb;
-                                change |= true;
                                 RaiseGMessage("G2WK," + string.Join(",",
                                     CalculatePetsScore().Select(p => p.Key + "," + p.Value)));
                             }
-                            if (mon.AGL != mon.AGLb)
+                            if (mon.mAGL != mon.AGLb)
                             {
+                                change |= (mon.AGL != mon.AGLb);
                                 mon.AGL = mon.AGLb;
-                                change |= true;
                             }
                             if (change)
                                 WI.BCast("E0WB," + x + "," + mon.STR + "," + mon.AGL);
@@ -2259,8 +2268,11 @@ namespace PSD.PSDGamepkg
                         else if (nmb.IsNPC())
                         {
                             NPC npc = (NPC)nmb;
-                            npc.STR = npc.STRb;
-                            WI.BCast("E0WB," + x + "," + npc.STR);
+                            if (npc.STR != npc.STRb)
+                            {
+                                npc.STR = npc.STRb;
+                                WI.BCast("E0WB," + x + "," + npc.STR);
+                            }
                         }
                     }
                     break;
@@ -2405,6 +2417,7 @@ namespace PSD.PSDGamepkg
                                         {
                                             Owner = hvp.Farmland,
                                             SinglePet = pt,
+                                            Stepper = hvp.Farmer,
                                             Recycle = false
                                         }.ToMessage());
                                     }
@@ -2427,6 +2440,7 @@ namespace PSD.PSDGamepkg
                                     {
                                         Owner = hvp.Farmland,
                                         SinglePet = ayPt,
+                                        Stepper = hvp.Farmer,
                                         Recycle = false
                                     }.ToMessage());
                                 }
@@ -2435,6 +2449,7 @@ namespace PSD.PSDGamepkg
                                 {
                                     Owner = hvp.Farmer,
                                     SinglePet = myPt,
+                                    Stepper = hvp.Farmland,
                                     Recycle = false
                                 }.ToMessage());
                                 giveBack.Add(myPt);
@@ -2453,6 +2468,7 @@ namespace PSD.PSDGamepkg
                                     {
                                         Owner = hvp.Farmland,
                                         SinglePet = ayPt,
+                                        Stepper = hvp.Farmer,
                                         Recycle = false
                                     }.ToMessage());
                                 }
@@ -2495,6 +2511,7 @@ namespace PSD.PSDGamepkg
                                         {
                                             Owner = hvp.Farmland,
                                             SinglePet = sel,
+                                            Stepper = hvp.Farmer,
                                             Recycle = false
                                         }.ToMessage());
                                     }
@@ -2545,6 +2562,7 @@ namespace PSD.PSDGamepkg
                             {
                                 Owner = tdp.A,
                                 Pets = tdp.AGoods,
+                                Stepper = tdp.B,
                                 Recycle = false
                             }.ToMessage());
                         if (tdp.BGoods.Length > 0)
@@ -2552,6 +2570,7 @@ namespace PSD.PSDGamepkg
                             {
                                 Owner = tdp.B,
                                 Pets = tdp.BGoods,
+                                Stepper = tdp.A,
                                 Recycle = false
                             }.ToMessage());
                         if (tdp.BGoods.Length > 0)
@@ -2575,27 +2594,7 @@ namespace PSD.PSDGamepkg
                     }
                     break;
                 case "G0HD":
-                    {
-                        Artiad.ObtainPet op = Artiad.ObtainPet.Parse(cmd);
-                        foreach (ushort which in op.Pets)
-                        {
-                            Monster pet = LibTuple.ML.Decode(which);
-                            Player player = Board.Garden[op.Farmer];
-                            player.Pets[pet.Element.Elem2Index()] = which;
-                            RaiseGMessage("G0WB," + which);
-                            if (!player.PetDisabled && !Board.NotActionPets.Contains(which))
-                                RaiseGMessage("G0IC,0," + op.Farmer + "," + which);
-                        }
-                        new Artiad.ObtainPetSemaphore()
-                        {
-                            Farmer = op.Farmer,
-                            Farmland = op.Farmland,
-                            Pets = op.Pets
-                        }.Telegraph(WI.BCast);
-                        RaiseGMessage("G2WK," + string.Join(",",
-                            CalculatePetsScore().Select(p => p.Key + "," + p.Value)));
-                    }
-                    break;
+                    Artiad.ObtainPet.Parse(cmd).Handle(this, WI); break;
                 case "G0HH":
                     {
                         // G0HH,A,0/1,x,y..;T,F
@@ -2682,70 +2681,11 @@ namespace PSD.PSDGamepkg
                     }
                     break;
                 case "G0HL":
-                    {
-                        Artiad.LosePet lp = Artiad.LosePet.Parse(cmd);
-                        Player player = Board.Garden[lp.Owner];
-                        ushort[] pets = lp.Pets.Where(p => player.Pets[
-                            LibTuple.ML.Decode(p).Element.Elem2Index()] == p).ToArray();
-                        if (pets.Length > 0)
-                        {
-                            foreach (ushort pet in lp.Pets)
-                            {
-                                if (!player.PetDisabled && !Board.NotActionPets.Contains(pet))
-                                    RaiseGMessage("G0OC,0," + lp.Owner + "," + pet);
-                                player.Pets[LibTuple.ML.Decode(pet).Element.Elem2Index()] = 0;
-                                RaiseGMessage("G0WB," + pet);
-                            }
-                            new Artiad.LosePetSemaphore() { Owner = lp.Owner, Pets = pets }.Telegraph(WI.BCast);
-                            RaiseGMessage("G2WK," + string.Join(",",
-                                CalculatePetsScore().Select(p => p.Key + "," + p.Value)));
-                            if (lp.Recycle)
-                                RaiseGMessage("G0ON," + lp.Owner + ",M," + Algo.ListToString(pets.ToList()));
-                        }
-                    }
-                    break;
+                    Artiad.LosePet.Parse(cmd).Handle(this, WI); break;
                 case "G0IC":
-                    {
-                        for (int i = 1; i < args.Length; i += 3)
-                        {
-                            bool reset = (args[i] != "1");
-                            ushort who = ushort.Parse(args[i + 1]);
-                            ushort which = ushort.Parse(args[i + 2]);
-                            Player player = Board.Garden[who];
-                            Monster pet = LibTuple.ML.Decode(which);
-                            if (reset)
-                            {
-                                pet.ROMUshort = 0;
-                                pet.RAMInt = 0;
-                            }
-                            pet.IncrAction(player);
-                            WI.BCast("E0IC," + who + "," + which);
-                        }
-                        break;
-                    }
+                    Artiad.JoinPetEffects.Parse(cmd).Handle(this, WI); break;
                 case "G0OC":
-                    {
-                        for (int i = 1; i < args.Length; i += 3)
-                        {
-                            bool reset = (args[i] != "1");
-                            ushort who = ushort.Parse(args[i + 1]);
-                            ushort which = ushort.Parse(args[i + 2]);
-                            Player player = Board.Garden[who];
-                            Monster pet = LibTuple.ML.Decode(which);
-                            int pe = pet.Element.Elem2Index();
-                            if (player.Pets[pe] == which)
-                            {
-                                pet.DecrAction(player);
-                                if (reset)
-                                {
-                                    pet.ROMUshort = 0;
-                                    pet.RAMInt = 0;
-                                }
-                                WI.BCast("E0OC," + who + "," + which);
-                            }
-                        }
-                        break;
-                    }
+                    Artiad.CollapsePetEffects.Parse(cmd).Handle(this, WI); break;
                 case "G0HT":
                     {
                         ushort who = ushort.Parse(args[1]);
@@ -2789,7 +2729,7 @@ namespace PSD.PSDGamepkg
                     }
                     break;
                 case "G0JM":
-                    Artiad.Goto.Parse(cmd).Handle(this); break;
+                    Artiad.Goto.Parse(cmd).Handle(this, WI); break;
                 case "G0WN":
                     {
                         WI.RecvInfTermin();
@@ -2924,98 +2864,16 @@ namespace PSD.PSDGamepkg
                     }
                     break;
                 case "G0IE":
-                    {
-                        string ioc = "", e0ie = "";
-                        if (args[1] == "0")
-                        {
-                            for (int i = 2; i < args.Length; ++i)
-                            {
-                                ushort who = ushort.Parse(args[i]);
-                                Player player = Board.Garden[who];
-                                if (player.PetDisabled)
-                                {
-                                    foreach (ushort pt in player.Pets)
-                                        if (pt != 0 && !Board.NotActionPets.Contains(pt))
-                                            ioc += ",1," + who + "," + pt;
-                                    player.PetDisabled = false;
-                                    e0ie += "," + who;
-                                }
-                            }
-                            if (ioc != "")
-                                RaiseGMessage("G0IC" + ioc);
-                            if (e0ie != "")
-                                WI.BCast("E0IE,0" + e0ie);
-                        }
-                        else if (args[1] == "1")
-                        {
-                            for (int i = 2; i < args.Length; ++i)
-                            {
-                                ushort pt = ushort.Parse(args[i]);
-                                if (Board.NotActionPets.Contains(pt))
-                                {
-                                    Board.NotActionPets.Remove(pt);
-                                    int elem = LibTuple.ML.Decode(pt).Element.Elem2Index();
-                                    foreach (Player py in Board.Garden.Values)
-                                    {
-                                        if (py.Pets[elem] == pt && !py.PetDisabled)
-                                            ioc += ",1," + py.Uid + "," + pt;
-                                    }
-                                    e0ie += "," + pt;
-                                }
-                            }
-                            if (ioc != "")
-                                RaiseGMessage("G0IC" + ioc);
-                            if (e0ie != "")
-                                WI.BCast("E0IE,1" + e0ie);
-                        }
-                    }
+                    if (Artiad.KittyHelper.IsEnablePlayerPetEffect(cmd))
+                        Artiad.EnablePlayerPetEffect.Parse(cmd).Handle(this, WI);
+                    else if (Artiad.KittyHelper.IsEnableItPetEffect(cmd))
+                        Artiad.EnableItPetEffect.Parse(cmd).Handle(this, WI);
                     break;
                 case "G0OE":
-                    {
-                        string ioc = "", e0oe = "";
-                        if (args[1] == "0")
-                        {
-                            for (int i = 2; i < args.Length; ++i)
-                            {
-                                ushort who = ushort.Parse(args[i]);
-                                Player player = Board.Garden[who];
-                                if (!player.PetDisabled)
-                                {
-                                    foreach (ushort pt in player.Pets)
-                                        if (pt != 0 && !Board.NotActionPets.Contains(pt))
-                                            ioc += ",1," + who + "," + pt;
-                                    player.PetDisabled = true;
-                                    e0oe += "," + who;
-                                }
-                            }
-                            if (ioc != "")
-                                RaiseGMessage("G0OC" + ioc);
-                            if (e0oe != "")
-                                WI.BCast("E0OE,0" + e0oe);
-                        }
-                        else if (args[1] == "1")
-                        {
-                            for (int i = 2; i < args.Length; ++i)
-                            {
-                                ushort pt = ushort.Parse(args[i]);
-                                if (!Board.NotActionPets.Contains(pt))
-                                {
-                                    Board.NotActionPets.Add(pt);
-                                    int elem = LibTuple.ML.Decode(pt).Element.Elem2Index();
-                                    foreach (Player py in Board.Garden.Values)
-                                    {
-                                        if (py.Pets[elem] == pt && !py.PetDisabled)
-                                            ioc += ",1," + py.Uid + "," + pt;
-                                    }
-                                    e0oe += "," + pt;
-                                }
-                            }
-                            if (ioc != "")
-                                RaiseGMessage("G0OC" + ioc);
-                            if (e0oe != "")
-                                WI.BCast("E0IE,1" + e0oe);
-                        }
-                    }
+                    if (Artiad.KittyHelper.IsDisablePlayerPetEffect(cmd))
+                        Artiad.DisablePlayerPetEffect.Parse(cmd).Handle(this, WI);
+                    else if (Artiad.KittyHelper.IsDisableItPetEffect(cmd))
+                        Artiad.DisableItPetEffect.Parse(cmd).Handle(this, WI);
                     break;
                 case "G0IS":
                     {

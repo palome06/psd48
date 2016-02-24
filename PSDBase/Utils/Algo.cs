@@ -96,6 +96,12 @@ namespace PSD.Base.Utils
             next = start + n + 1;
             return TakeRange(blocks, start + 1, start + 1 + n);
         }
+        public static ushort[] TakeArrayWithSize(string[] blocks, int start, out int next)
+        {
+            int n = int.Parse(blocks[start]);
+            next = start + n + 1;
+            return TakeRange(blocks, start + 1, start + 1 + n).Select(p => ushort.Parse(p)).ToArray();
+        }
         public static string RepeatString(string @string, int times)
         {
             StringBuilder sb = new StringBuilder();

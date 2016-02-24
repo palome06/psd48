@@ -24,13 +24,10 @@ namespace PSD.Base.Card
         public ushort DBSerial { set; get; }
 
         public int mSTR;
-        public int STR
-        {
-            set { mSTR = value; }
-            get { return mSTR >= 0 ? mSTR : 0; }
-        }
+        public int STR { set { mSTR = value; } get { return mSTR >= 0 ? mSTR : 0; } }
         public ushort STRb { private set; get; }
-        public int AGL { set; get; }
+        public int mAGL;
+        public int AGL { set { mAGL = value; } get { return mAGL >= 0 ? mAGL : 0; } }
         public ushort AGLb { private set; get; }
 
         public string[][] EAOccurs { private set; get; }
@@ -47,9 +44,16 @@ namespace PSD.Base.Card
         public string WinText { set; get; }
         public string LoseText { set; get; }
 
-        public ushort ROMUshort { set; get; }
-        public int RAMInt { set; get; }
-        public List<ushort> RAMUtList { private set; get; }
+        //public ushort ROMUshort { set; get; }
+        //public int RAMInt { set; get; }
+        //public List<ushort> RAMUtList { private set; get; }
+
+        #region Memory
+        public Utils.Diva ROM { private set; get; } // Alive during the entire game
+        public Utils.Diva RFM { private set; get; } // Alive in a round
+        public Utils.Diva RAM { private set; get; } // Alive in a period
+        public bool TeamBursted { set; get; } // whether brust in the team, only reset when changing side
+        #endregion Memory
 
         #region SPI Info
         private int mSpiHW, mSpiHL, mSpiHw, mSpiHl, mSpiHC, mSpiHc;
@@ -115,7 +119,7 @@ namespace PSD.Base.Card
             mSpiHW = mSpiHL = mSpiHw = mSpiHl = mSpiHC = mSpiHc = 0;
             mSpiTW = mSpiTL = mSpiTw = mSpiTl = mSpiTC = mSpiTc = 0;
             mSpiS = false;
-            for (int i = 0; i < spis.Length; )
+            for (int i = 0; i < spis.Length;)
             {
                 if (spis[i] == 'S')
                 {
@@ -253,28 +257,26 @@ namespace PSD.Base.Card
             this.EAHinds = eahinds;
             this.Padrone = 0;
             ParseSpi(spis);
-            RAMUtList = new List<ushort>();
+
+            ROM = new Utils.Diva();
+            RFM = new Utils.Diva();
+            RAM = new Utils.Diva();
+            TeamBursted = false;
         }
 
         public bool IsMonster() { return true; }
         public bool IsNPC() { return false; }
 
-        private DebutDelegate DefDebut = new DebutDelegate(delegate() { });
-        private WLDelegate DefWL = new WLDelegate(delegate() { });
-        private static CrActionDelegate DefCrAction = new CrActionDelegate(
-            delegate(Player player) { });
-        private static CsActionDelegate DefCsAction = new CsActionDelegate(
-            delegate(Player player, int consumeType, int type, string fuse, string argst) { });
-        private static CsValidDelegate DefCsValid = new CsValidDelegate(
-            delegate(Player player, int consumeType, int type, string fuse) { return true; });
-        private static CsInputDelegate DefCsInput = new CsInputDelegate(
-            delegate(Player player, int consumeType, int type, string fuse, string prev) { return ""; });
+        private DebutDelegate DefDebut = new DebutDelegate(delegate () { });
+        private WLDelegate DefWL = new WLDelegate(delegate () { });
+        private static CrActionDelegate DefCrAction = p => { };
+        private static CsActionDelegate DefCsAction = (p, c, t, f, a) => { };
+        private static CsValidDelegate DefCsValid = (p, c, t, f) => true;
+        private static CsInputDelegate DefCsInput = (p, c, t, f, pv) => "";
 
-        public void ResetRAM()
-        {
-            RAMInt = 0;
-            RAMUtList.Clear();
-        }
+        public void ResetRAM() { RAM.Clear(); }
+        public void ResetRFM() { ResetRAM(); RFM.Clear(); }
+        public void ResetROM() { ResetRFM(); ROM.Clear(); }
     }
 
     public class MonsterLib
@@ -396,13 +398,13 @@ namespace PSD.Base.Card
                 string loseText = data["LOSETEXT"] as string;
                 Monster monster = new Monster(name, code, group, genre, five, str, agl,
                     level, eaoccurs, eaprops, ealocks, eaonces, eaterminies, eahinds, spis)
-                    {
-                        DebutText = debutText ?? "",
-                        PetText = petText ?? "",
-                        WinText = winText ?? "",
-                        LoseText = loseText ?? "",
-                        DBSerial = (ushort)mid
-                    };
+                {
+                    DebutText = debutText ?? "",
+                    PetText = petText ?? "",
+                    WinText = winText ?? "",
+                    LoseText = loseText ?? "",
+                    DBSerial = (ushort)mid
+                };
                 Firsts.Add(monster);
                 dicts.Add((ushort)mid, monster);
             }

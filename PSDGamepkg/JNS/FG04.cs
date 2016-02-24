@@ -921,10 +921,10 @@ namespace PSD.PSDGamepkg.JNS
         {
             if (consumeType == 0)
             {
-                Base.Card.Monster mon = XI.LibTuple.ML.Decode(XI.LibTuple.ML.Encode("GHT1"));
-                if (mon != null)
+                Monster ght1 = XI.LibTuple.ML.Decode(XI.LibTuple.ML.Encode("GHT1"));
+                if (ght1 != null)
                 {
-                    mon.ROMUshort = (ushort)player.Team;
+                    ght1.TeamBursted = true;
                     XI.RaiseGMessage("G0IP," + player.Team + ",3");
                 }
             }
@@ -934,7 +934,7 @@ namespace PSD.PSDGamepkg.JNS
             if (consumeType == 0)
             {
                 Base.Card.Monster mon = XI.LibTuple.ML.Decode(XI.LibTuple.ML.Encode("GHT1"));
-                return mon != null && mon.ROMUshort != player.Team;
+                return mon != null && !mon.TeamBursted;
             }
             return false;
         }
@@ -963,24 +963,24 @@ namespace PSD.PSDGamepkg.JNS
         }
         public void GHT2IncrAction(Player player)
         {
-            Base.Card.Monster mon = XI.LibTuple.ML.Decode(XI.LibTuple.ML.Encode("GHT2"));
-            if (mon != null)
+            Monster ght2 = XI.LibTuple.ML.Decode(XI.LibTuple.ML.Encode("GHT2"));
+            if (ght2 != null)
             {
-                if (mon.ROMUshort == 0)
+                if (ght2.ROM.GetInt("Incr") == 0)
                 {
                     string hint = "#请选择「镇狱明王」宠物效果。##战-1，命+2##命-1，战+2,Y2";
                     string option = XI.AsyncInput(player.Uid, hint, "GHT2IncrAction", "0");
                     if (option == "1")
-                        mon.ROMUshort = 1;
+                        ght2.ROM.Set("Incr", 1);
                     else if (option == "2")
-                        mon.ROMUshort = 2;
+                        ght2.ROM.Set("Incr", 2);
                 }
-                if (mon.ROMUshort == 1)
+                if (ght2.ROM.GetInt("Incr") == 1)
                 {
                     XI.RaiseGMessage("G0OA," + player.Uid + ",0,1");
                     XI.RaiseGMessage("G0IX," + player.Uid + ",0,2");
                 }
-                else if (mon.ROMUshort == 2)
+                else if (ght2.ROM.GetInt("Incr") == 2)
                 {
                     XI.RaiseGMessage("G0OX," + player.Uid + ",0,1");
                     XI.RaiseGMessage("G0IA," + player.Uid + ",0,2");
@@ -989,15 +989,15 @@ namespace PSD.PSDGamepkg.JNS
         }
         public void GHT2DecrAction(Player player)
         {
-            Base.Card.Monster mon = XI.LibTuple.ML.Decode(XI.LibTuple.ML.Encode("GHT2"));
-            if (mon != null)
+            Monster ght2 = XI.LibTuple.ML.Decode(XI.LibTuple.ML.Encode("GHT2"));
+            if (ght2 != null)
             {
-                if (mon.ROMUshort == 1)
+                if (ght2.ROM.GetInt("Incr") == 1)
                 {
                     XI.RaiseGMessage("G0IA," + player.Uid + ",0,1");
                     XI.RaiseGMessage("G0OX," + player.Uid + ",0,2");
                 }
-                else if (mon.ROMUshort == 2)
+                else if (ght2.ROM.GetInt("Incr") == 2)
                 {
                     XI.RaiseGMessage("G0IX," + player.Uid + ",0,1");
                     XI.RaiseGMessage("G0OA," + player.Uid + ",0,2");
@@ -1628,27 +1628,21 @@ namespace PSD.PSDGamepkg.JNS
         }
         public void GHT4IncrAction(Player player)
         {
-            Base.Card.Monster mon = XI.LibTuple.ML.Decode(XI.LibTuple.ML.Encode("GHT4"));
-            if (mon != null && mon.ROMUshort == 0)
+            Monster ght4 = XI.LibTuple.ML.Decode(XI.LibTuple.ML.Encode("GHT4"));
+            if (ght4 != null && ght4.ROM.GetInt("Five") == 0)
             {
                 string opt = XI.AsyncInput(player.Uid, "#免疫伤害,V1(p" + string.Join("p",
                     FiveElementHelper.GetPropedElements().Select(p => p.Elem2Int())) + ")", "GHT4IncrAction", "0");
-                ushort five = ushort.Parse(opt);
-                mon.ROMUshort = five;
+                int five = int.Parse(opt);
+                ght4.ROM.Set("Five", five);
                 XI.RaiseGMessage(new Artiad.AnnouceCard()
                 {
                     Action = Artiad.AnnouceCard.Type.DECLARE,
                     Officer = player.Uid,
                     Genre = Card.Genre.Five,
-                    SingleCard = five
+                    SingleCard = (ushort)five
                 }.ToMessage());
             }
-        }
-        public void GHT4DecrAction(Player player)
-        {
-            Monster mon = XI.LibTuple.ML.Decode(XI.LibTuple.ML.Encode("GHT4"));
-            if (mon != null)
-                mon.ROMUshort = 0;
         }
         public void GHT4ConsumeAction(Player player, int consumeType, int type, string fuse, string argst)
         {
@@ -1658,8 +1652,8 @@ namespace PSD.PSDGamepkg.JNS
                 Base.Card.Monster mon = XI.LibTuple.ML.Decode(XI.LibTuple.ML.Encode("GHT4"));
                 if (mon != null)
                 {
-                    harms.RemoveAll(p => p.Element.Elem2Int() == mon.ROMUshort &&
-                        p.Who == player.Uid && !HPEvoMask.IMMUNE_INVAO.IsSet(p.Mask));
+                    harms.RemoveAll(p => p.Element.Elem2Int() == mon.ROM.GetInt("Five") &&
+                        p.Element.IsPropedElement() && p.Who == player.Uid && !HPEvoMask.IMMUNE_INVAO.IsSet(p.Mask));
                 }
                 if (harms.Count > 0)
                     XI.InnerGMessage(Artiad.Harm.ToMessage(harms), -9);
@@ -1670,9 +1664,9 @@ namespace PSD.PSDGamepkg.JNS
             if (consumeType == 0)
             {
                 List<Artiad.Harm> harms = Artiad.Harm.Parse(fuse);
-                Base.Card.Monster mon = XI.LibTuple.ML.Decode(XI.LibTuple.ML.Encode("GHT4"));
-                return mon != null && harms.Any(p => p.Element.Elem2Int() == mon.ROMUshort &&
-                    p.Who == player.Uid && !HPEvoMask.IMMUNE_INVAO.IsSet(p.Mask));
+                Monster mon = XI.LibTuple.ML.Decode(XI.LibTuple.ML.Encode("GHT4"));
+                return mon != null && harms.Any(p => p.Element.Elem2Int() == mon.ROM.GetInt("Five") &&
+                    p.Element.IsPropedElement() && p.Who == player.Uid && !HPEvoMask.IMMUNE_INVAO.IsSet(p.Mask));
             }
             return false;
         }
@@ -1721,9 +1715,9 @@ namespace PSD.PSDGamepkg.JNS
         {
             if (consumeType == 0)
             {
-                Base.Card.Monster mon = XI.LibTuple.ML.Decode(XI.LibTuple.ML.Encode("GLT4"));
-                if (mon != null)
-                    mon.ROMUshort = (ushort)player.Team;
+                Monster glt4 = XI.LibTuple.ML.Decode(XI.LibTuple.ML.Encode("GLT4"));
+                if (glt4 != null)
+                    glt4.TeamBursted = true;
                 string[] g1ev = fuse.Split(',');
                 XI.InnerGMessage("G1EV," + g1ev[1] + "," + g1ev[2], 201);
             }
@@ -1733,7 +1727,7 @@ namespace PSD.PSDGamepkg.JNS
             if (consumeType == 0)
             {
                 Base.Card.Monster mon = XI.LibTuple.ML.Decode(XI.LibTuple.ML.Encode("GLT4"));
-                return mon != null && mon.ROMUshort != player.Team;
+                return mon != null && !mon.TeamBursted;
             }
             return false;
         }
@@ -2021,32 +2015,32 @@ namespace PSD.PSDGamepkg.JNS
         }
         public void GIT3IncrAction(Player player)
         {
-            Base.Card.Monster mon = XI.LibTuple.ML.Decode(XI.LibTuple.ML.Encode("GIT3"));
-            if (mon != null)
+            Monster git3 = XI.LibTuple.ML.Decode(XI.LibTuple.ML.Encode("GIT3"));
+            if (git3 != null)
             {
-                if (mon.ROMUshort == 0)
+                if (git3.ROM.GetInt("Incr") == 0)
                 {
                     string hint = "#请选择「魔骨」宠物效果。##战力+1##命中+1,Y2";
                     string option = XI.AsyncInput(player.Uid, hint, "GIT3IncrAction", "0");
                     if (option == "1")
-                        mon.ROMUshort = 1;
+                        git3.ROM.Set("Incr", 1);
                     else if (option == "2")
-                        mon.ROMUshort = 2;
+                        git3.ROM.Set("Incr", 2);
                 }
-                if (mon.ROMUshort == 1)
+                if (git3.ROM.GetInt("Incr") == 1)
                     XI.RaiseGMessage("G0IA," + player.Uid + ",0,1");
-                else if (mon.ROMUshort == 2)
+                else if (git3.ROM.GetInt("Incr") == 2)
                     XI.RaiseGMessage("G0IX," + player.Uid + ",0,1");
             }
         }
         public void GIT3DecrAction(Player player)
         {
-            Base.Card.Monster mon = XI.LibTuple.ML.Decode(XI.LibTuple.ML.Encode("GIT3"));
-            if (mon != null)
+            Monster git3 = XI.LibTuple.ML.Decode(XI.LibTuple.ML.Encode("GIT3"));
+            if (git3 != null)
             {
-                if (mon.ROMUshort == 1)
+                if (git3.ROM.GetInt("Incr") == 1)
                     XI.RaiseGMessage("G0OA," + player.Uid + ",0,1");
-                else if (mon.ROMUshort == 2)
+                else if (git3.ROM.GetInt("Incr") == 2)
                     XI.RaiseGMessage("G0OX," + player.Uid + ",0,1");
             }
         }
@@ -2152,7 +2146,7 @@ namespace PSD.PSDGamepkg.JNS
             if (consumeType == 0)
             {
                 Monster mon = XI.LibTuple.ML.Decode(XI.LibTuple.ML.Encode("GIT6"));
-                return mon != null && XI.Board.IsAttendWar(player) && mon.RAMInt == 0;
+                return mon != null && XI.Board.IsAttendWar(player) && !mon.RAM.GetBool("Hit");
             }
             else if (consumeType == 2)
             {
@@ -2168,7 +2162,7 @@ namespace PSD.PSDGamepkg.JNS
             if (consumeType == 0)
             {
                 Monster mon = XI.LibTuple.ML.Decode(XI.LibTuple.ML.Encode("GIT6"));
-                mon.RAMInt = 1;
+                mon.RAM.Set("Hit", true);
                 XI.RaiseGMessage("G0IX," + player.Uid + ",2");
             }
             else if (consumeType == 2)
@@ -2265,7 +2259,8 @@ namespace PSD.PSDGamepkg.JNS
                 {
                     Monster mon = XI.LibTuple.ML.Decode(XI.LibTuple.ML.Encode("GIT8"));
                     string[] g1ck = fuse.Split(',');
-                    return mon != null && mon.RAMInt >= 2 && g1ck[1] == player.Uid.ToString() &&
+                    ushort who = ushort.Parse(g1ck[1]);
+                    return mon != null && mon.RAM.GetInt("TuxCount") >= 2 && who == player.Uid &&
                         g1ck[2] == "GT08Consume" && g1ck[3] == "0";
                 }
                 else return false;
@@ -2279,12 +2274,12 @@ namespace PSD.PSDGamepkg.JNS
             {
                 if (type == 0 || type == 1)
                 {
-                    ++mon.RAMInt;
+                    mon.RAM.Set("TuxCount", mon.RAM.GetInt("TuxCount") + 1);
                     XI.RaiseGMessage("G1CK," + player.Uid + ",GT08Consume,0");
                 }
                 else if (type == 2) // G1CK
                 {
-                    mon.RAMInt = 0;
+                    mon.RAM.Set("TuxCount", 0);
                     XI.RaiseGMessage("G0DH," + player.Uid + ",0,1");
                 }
             }
@@ -2900,41 +2895,45 @@ namespace PSD.PSDGamepkg.JNS
                 Harm("GSH2", XI.Board.Garden[who], 4, (long)HPEvoMask.TUX_INAVO);
             }
         }
+        private int GSH3GetIncrCnt(Player player)
+        {
+            List<Player> invs = XI.Board.Garden.Values.Where(p => p.IsAlive &&
+                 p.Uid != player.Uid && XI.Board.IsAttendWar(p) && p.GetPetCount() > 0).ToList();
+            ISet<int> props = new HashSet<int>();
+            foreach (Player py in invs)
+            {
+                for (int i = 0; i < FiveElementHelper.PropCount; ++i)
+                {
+                    if (py.Pets[i] != 0) props.Add(i);
+                }
+            }
+            return props.Count;
+        }
         public void GSH3IncrAction(Player player)
         {
             XI.Board.PetProtecedPlayer.Add(player.Uid);
+            if (XI.Board.PoolEnabled && XI.Board.IsAttendWar(player))
+                XI.RaiseGMessage("G1WP," + player.Team + "," + player.Uid + ",GSH3," + GSH3GetIncrCnt(player));
         }
         public void GSH3DecrAction(Player player)
         {
             XI.Board.PetProtecedPlayer.Remove(player.Uid);
+            if (XI.Board.PoolEnabled && XI.Board.IsAttendWar(player))
+                XI.RaiseGMessage("G1WP," + player.Team + "," + player.Uid + ",GSH3,0");
         }
         public void GSH3ConsumeAction(Player player, int consumeType, int type, string fuse, string argst)
         {
             if (consumeType == 0)
             {
-                List<Player> invs = XI.Board.Garden.Values.Where(p => p.IsAlive &&
-                     p.Uid != player.Uid && XI.Board.IsAttendWar(p) && p.GetPetCount() > 0).ToList();
-                ISet<int> props = new HashSet<int>();
-                foreach (Player py in invs)
-                {
-                    for (int i = 0; i < FiveElementHelper.PropCount; ++i)
-                    {
-                        if (py.Pets[i] != 0) props.Add(i);
-                    }
-                }
                 if (type == 0)
-                    XI.RaiseGMessage("G1WP," + player.Team + "," + player.Uid + ",GSH3," + props.Count);
+                    XI.RaiseGMessage("G1WP," + player.Team + "," + player.Uid + ",GSH3," + GSH3GetIncrCnt(player));
                 else if (type == 1)
                 { // FI
                     if (XI.Board.IsAttendWar(player))
-                        XI.RaiseGMessage("G1WP," + player.Team + "," + player.Uid + ",GSH3," + props.Count);
+                        XI.RaiseGMessage("G1WP," + player.Team + "," + player.Uid + ",GSH3," + GSH3GetIncrCnt(player));
                     else
                         XI.RaiseGMessage("G1WP," + player.Team + "," + player.Uid + ",GSH3,0");
                 }
-                else if (type == 2)
-                    XI.RaiseGMessage("G1WP," + player.Team + "," + player.Uid + ",GSH3," + props.Count);
-                else if (type == 3)
-                    XI.RaiseGMessage("G1WP," + player.Team + "," + player.Uid + ",GSH3,0");
             }
         }
         public bool GSH3ConsumeValid(Player player, int consumeType, int type, string fuse)
@@ -2973,21 +2972,6 @@ namespace PSD.PSDGamepkg.JNS
                         }
                     }
                     return leaver || playerIn != 0;
-                }
-                else if (type == 2 || type == 3) // IC/OC
-                {
-                    if (XI.Board.PoolEnabled && XI.Board.IsAttendWar(player) && yesIncr)
-                    {
-                        string[] iocs = fuse.Split(',');
-                        for (int idx = 1; idx < iocs.Length; idx += 3)
-                        {
-                            ushort who = ushort.Parse(iocs[idx + 1]);
-                            ushort petUt = ushort.Parse(iocs[idx + 2]);
-                            Monster pet = XI.LibTuple.ML.Decode(petUt);
-                            if (who == player.Uid && pet != null && pet.Code == "GSH3")
-                                return true;
-                        }
-                    }
                 }
             }
             return false;
@@ -3137,14 +3121,15 @@ namespace PSD.PSDGamepkg.JNS
         {
             if (consumeType == 0)
             {
+                Monster glh1 = XI.LibTuple.ML.Decode(XI.LibTuple.ML.Encode("GLH1"));
                 if (type == 0)
                 {
-                    player.RFM.GetOrSetDiva("GLH1Consume").Set("endEGR", 1);
+                    glh1.RFM.Set("endEGR", 1);
                     XI.RaiseGMessage(new Artiad.Goto() { Terminal = "R" + player.Uid + "GS" }.ToMessage());
                 }
                 else if (type == 1)
                 {
-                    player.RFM.GetOrSetDiva("GLH1Consume").Set("endEGR", 2);
+                    glh1.RFM.Set("endEGR", 2);
                     XI.RaiseGMessage(new Artiad.Goto() { Terminal = "R" + player.Uid + "QR" }.ToMessage());
                 }
             }
@@ -3153,10 +3138,11 @@ namespace PSD.PSDGamepkg.JNS
         {
             if (consumeType == 0)
             {
+                Monster glh1 = XI.LibTuple.ML.Decode(XI.LibTuple.ML.Encode("GLH1"));
                 if (type == 0)
-                    return player.RFM.GetOrSetDiva("GLH1Consume").GetInt("endEGR") == 0;
+                    return glh1.RFM.GetInt("endEGR") == 0;
                 else if (type == 1)
-                    return player.RFM.GetOrSetDiva("GLH1Consume").GetInt("endEGR") == 1;
+                    return glh1.RFM.GetInt("endEGR") == 1;
             }
             return false;
         }
@@ -3438,32 +3424,32 @@ namespace PSD.PSDGamepkg.JNS
                 {
                     if (player.Pets.Any(p => p != 0 && p != me))
                     {
-                        XI.RaiseGMessage("G0OB," + me + "," + monster.ROMUshort);
-                        monster.ROMUshort = 0;
+                        XI.RaiseGMessage("G0OB," + me + "," + monster.ROM.GetInt("iSTR"));
+                        monster.ROM.Set("iSTR", 0);
                     }
                     else
                     {
-                        int delta = player.STR - (int)monster.ROMUshort;
+                        int delta = player.STR - monster.ROM.GetInt("iSTR");
                         if (delta < 0)
                             XI.RaiseGMessage("G0OB," + me + "," + (-delta));
                         else if (delta > 0)
                             XI.RaiseGMessage("G0IB," + me + "," + delta);
-                        monster.ROMUshort = (ushort)player.STR;
+                        monster.ROM.Set("iSTR", player.STR);
                     }
                 }
                 else if (type == 1)
                 {
                     XI.RaiseGMessage("G0IB," + me + "," + player.STR);
-                    monster.ROMUshort = (ushort)player.STR;
+                    monster.ROM.Set("iSTR", player.STR);
                 }
                 else if (type == 2 || type == 3 || type == 4)
                 {
-                    int delta = player.STR - (int)monster.ROMUshort;
+                    int delta = player.STR - monster.ROM.GetInt("iSTR");
                     if (delta < 0)
                         XI.RaiseGMessage("G0OB," + me + "," + (-delta));
                     else if (delta > 0)
                         XI.RaiseGMessage("G0IB," + me + "," + delta);
-                    monster.ROMUshort = (ushort)player.STR;
+                    monster.ROM.Set("iSTR", player.STR);
                 }//g0ax
             }
         }
@@ -3477,13 +3463,13 @@ namespace PSD.PSDGamepkg.JNS
                 if (type == 0) // HD, case 1: obtain others then eliminate gth1; case 2: obtain gth1
                 {
                     Artiad.ObtainPet otp = Artiad.ObtainPet.Parse(fuse);
-                    return (anyOther && monster.ROMUshort != 0) || (!anyOther && player.STR > 0 &&
+                    return (anyOther && monster.ROM.GetInt("iSTR") != 0) || (!anyOther && player.STR > 0 &&
                         otp.Farmer == player.Uid && otp.SinglePet == me);
                 }
-                else if (type == 1 && monster.ROMUshort == 0 && player.STR > 0)
+                else if (type == 1 && monster.ROM.GetInt("iSTR") == 0 && player.STR > 0)
                     return !anyOther && player.STR > 0;
                 else if (type == 2 || type == 3 || type == 4)
-                    return !anyOther && monster.ROMUshort != player.STR;
+                    return !anyOther && monster.ROM.GetInt("iSTR") != player.STR;
             }
             return false;
         }

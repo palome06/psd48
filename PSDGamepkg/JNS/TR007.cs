@@ -358,7 +358,7 @@ namespace PSD.PSDGamepkg.JNS
             string target = XI.AsyncInput(player.Uid, "#无宠物效果,T1" + AOthersTared(player), "JNT0502", "0");
             ushort who = ushort.Parse(target);
             TargetPlayer(player.Uid, who);
-            XI.RaiseGMessage("G0OE,0," + who);
+            XI.RaiseGMessage(new Artiad.DisablePlayerPetEffect() { SingleWho = who }.ToMessage());
             XI.SendOutUAMessage(player.Uid, "JNT0502," + target, "0");
         }
         public bool JNT0502Valid(Player player, int type, string fuse)
@@ -2862,14 +2862,14 @@ namespace PSD.PSDGamepkg.JNS
         }
         public bool JNT2102Valid(Player player, int type, string fuse)
         {
-            if (player.Uid == XI.Board.Hinder.Uid && !player.RFM.GetBool("Hit"))
+            if (player.Uid == XI.Board.Hinder.Uid && !player.RAM.GetBool("Hit"))
                 return true;
             else
                 return false;
         }
         public void JNT2102Action(Player player, int type, string fuse, string args)
         {
-            player.RFM.Set("Hit", true);
+            player.RAM.Set("Hit", true);
             TargetPlayer(player.Uid, XI.Board.Rounder.Uid);
             XI.RaiseGMessage("G0IX," + player.Uid + ",2");
         }
@@ -3404,7 +3404,7 @@ namespace PSD.PSDGamepkg.JNS
                     int now = player.DEX - XI.Board.Battler.AGL;
                     if (now < 0)
                         now = 0;
-                    return now != player.RFM.GetInt("Moqi");
+                    return now != player.RAM.GetInt("Moqi");
                 }
                 return false;
             }
@@ -3436,12 +3436,12 @@ namespace PSD.PSDGamepkg.JNS
             {
                 int delta = player.DEX - XI.Board.Battler.AGL;
                 if (delta < 0) { delta = 0; }
-                int moqi = player.RFM.GetInt("Moqi");
+                int moqi = player.RAM.GetInt("Moqi");
                 if (delta < moqi)
                     XI.RaiseGMessage("G0IB," + XI.Board.Monster1 + "," + (moqi - delta));
                 else if (delta > moqi)
                     XI.RaiseGMessage("G0OB," + XI.Board.Monster1 + "," + (delta - moqi));
-                player.RFM.Set("Moqi", delta);
+                player.RAM.Set("Moqi", delta);
             }
             else if (type == 1)
             {
@@ -3449,25 +3449,25 @@ namespace PSD.PSDGamepkg.JNS
                 {
                     int delta = player.DEX - XI.Board.Battler.AGL;
                     if (delta <= 0)
-                        player.RFM.Set("Moqi", 0);
+                        player.RAM.Set("Moqi", 0);
                     else
                     {
-                        player.RFM.Set("Moqi", delta);
+                        player.RAM.Set("Moqi", delta);
                         XI.RaiseGMessage("G0OB," + XI.Board.Monster1 + "," + delta);
                     }
                 }
                 else
                 {
-                    if (player.RFM.GetInt("Moqi") > 0)
-                        XI.RaiseGMessage("G0IB," + XI.Board.Monster1 + "," + player.RFM.GetInt("Moqi"));
-                    player.RFM.Set("Moqi", 0);
+                    if (player.RAM.GetInt("Moqi") > 0)
+                        XI.RaiseGMessage("G0IB," + XI.Board.Monster1 + "," + player.RAM.GetInt("Moqi"));
+                    player.RAM.Set("Moqi", 0);
                 }
             }
         }
         public bool JNT2702Valid(Player player, int type, string fuse)
         {
             if (type == 0 || type == 1) // ZB/OT
-                return player.GetBaseEquipCount() != player.RFM.GetInt("Moqi");
+                return player.GetBaseEquipCount() != player.RFM.GetInt("Cloth");
             else if (type == 2 || type == 3) // IS/OS
                 return IsMathISOS("JNT2702", player, fuse) && player.GetBaseEquipCount() > 0;
             else if (type == 4) // Give up
@@ -3480,20 +3480,20 @@ namespace PSD.PSDGamepkg.JNS
             if (type == 0 || type == 1)
             {
                 int now = player.GetBaseEquipCount();
-                int delta = now - player.RFM.GetInt("Moqi");
-                player.RFM.Set("Moqi", now);
+                int delta = now - player.RFM.GetInt("Cloth");
+                player.RFM.Set("Cloth", now);
                 player.TuxLimit += delta;
             }
             else if (type == 2)
             {
                 int now = player.GetBaseEquipCount();
-                player.RFM.Set("Moqi", now);
+                player.RFM.Set("Cloth", now);
                 player.TuxLimit += now;
             }
             else if (type == 3)
             {
                 player.TuxLimit -= player.GetBaseEquipCount();
-                player.RFM.Set("Moqi", null);
+                player.RFM.Set("Cloth", null);
             }
             else if (type == 4)
                 XI.RaiseGMessage("G0DH," + player.Uid + ",0,2");
@@ -3736,9 +3736,9 @@ namespace PSD.PSDGamepkg.JNS
         {
             Func<Player, bool> cond = p => p.IsAlive && p.Uid != player.Uid && p.Tux.Count <= player.Tux.Count;
             // IT/OT
-            if ((type == 0 || (type == 1 && XI.Board.PoolEnabled)) && !player.RFM.GetBool("Poorest"))
+            if ((type == 0 || (type == 1 && XI.Board.PoolEnabled)) && !player.RAM.GetBool("Poorest"))
                 return !XI.Board.Garden.Values.Any(cond);
-            else if (type == 2 && XI.Board.PoolEnabled && player.RFM.GetBool("Poorest"))
+            else if (type == 2 && XI.Board.PoolEnabled && player.RAM.GetBool("Poorest"))
                 return XI.Board.Garden.Values.Any(cond);
             else
                 return false;
@@ -3747,13 +3747,13 @@ namespace PSD.PSDGamepkg.JNS
         {
             if (type == 0 || type == 1)
             {
-                player.RFM.Set("Poorest", true);
+                player.RAM.Set("Poorest", true);
                 XI.RaiseGMessage("G0IA," + player.Uid + ",1,1");
                 XI.RaiseGMessage("G0IX," + player.Uid + ",1,1");
             }
             else if (type == 2)
             {
-                player.RFM.Set("Poorest", false);
+                player.RAM.Set("Poorest", false);
                 XI.RaiseGMessage("G0OA," + player.Uid + ",1,1");
                 XI.RaiseGMessage("G0OX," + player.Uid + ",1,1");
             }
@@ -4000,19 +4000,19 @@ namespace PSD.PSDGamepkg.JNS
             {
                 int count = XI.Board.Garden.Values.Count(p => p.IsAlive && XI.Board.IsAttendWar(p) &&
                     XI.LibTuple.HL.InstanceHero(p.SelectHero).Bio.Contains("K"));
-                player.RFM.Set("Ghost", count);
+                player.RAM.Set("Ghost", count);
                 XI.RaiseGMessage("G0IA," + player.Uid + ",1," + count * 2);
             }
             else if (type == 1)
             {
                 int count = XI.Board.Garden.Values.Count(p => p.IsAlive && XI.Board.IsAttendWar(p) &&
                     XI.LibTuple.HL.InstanceHero(p.SelectHero).Bio.Contains("K"));
-                int ghost = player.RFM.GetInt("Ghost");
+                int ghost = player.RAM.GetInt("Ghost");
                 if (count > ghost)
                     XI.RaiseGMessage("G0IA," + player.Uid + ",1," + (count - ghost) * 2);
                 else if (count < ghost)
                     XI.RaiseGMessage("G0OA," + player.Uid + ",1," + (ghost - count) * 2);
-                player.RFM.Set("Ghost", count);
+                player.RAM.Set("Ghost", count);
             }
         }
         public bool JNT3403Valid(Player player, int type, string fuse)
@@ -4059,14 +4059,14 @@ namespace PSD.PSDGamepkg.JNS
         #region TR035 - GuHanjiang
         public bool JNT3501Valid(Player player, int type, string fuse)
         {
-            if (type == 0 && !player.RFM.GetBool("InChangeFate")) // G1EV,130
+            if (type == 0 && !player.RAM.GetBool("InChangeFate")) // G1EV,130
             {
                 bool b1 = player.DEX > 0 && XI.Board.EveDises.Count > 0 && XI.Board.Eve != 0;
                 Player trigger = XI.Board.Garden[ushort.Parse(fuse.Split(',')[1])];
                 bool b2 = trigger != null && trigger.Team == player.Team && trigger.IsAlive;
                 return b1 && b2;
             }
-            else if ((type == 1 || type == 2) && player.RFM.GetBool("InChangeFate")) // G1EV,220
+            else if ((type == 1 || type == 2) && player.RAM.GetBool("InChangeFate")) // G1EV,220
                 return XI.Board.Eve != 0;
             else if (type == 3) // G0I/OJ
             {
@@ -4117,7 +4117,7 @@ namespace PSD.PSDGamepkg.JNS
                     XI.RaiseGMessage("G0IJ," + player.Uid + ",1,1,E" + ut);
                     XI.RaiseGMessage("G2TZ," + player.Uid + ",0,E" + ut);
                 }
-                player.RFM.Set("InChangeFate", true);
+                player.RAM.Set("InChangeFate", true);
             }
             else if (type == 1 || type == 2)
             {
@@ -4126,7 +4126,7 @@ namespace PSD.PSDGamepkg.JNS
                 XI.RaiseGMessage("G0IJ," + player.Uid + ",1,1,E" + XI.Board.Eve);
                 XI.RaiseGMessage("G2TZ," + player.Uid + ",0,E" + XI.Board.Eve);
                 XI.Board.Eve = 0;
-                player.RFM.Set("InChangeFate", null);
+                player.RAM.Set("InChangeFate", null);
             }
             else if (type == 3) // G0I/OJ
             {

@@ -118,7 +118,7 @@ namespace PSD.PSDGamepkg
                 switch (rstage.Substring(2))
                 {
                     case "00":
-                        ResetPlayerRAM(); // 0:00
+                        ResetAllPlayerRAM(); // 0:00
                         Board.Garden[rounder].ResetRFM();
                         if (!Board.Garden[rounder].Immobilized)
                         {
@@ -134,7 +134,7 @@ namespace PSD.PSDGamepkg
                         }
                         break;
                     case "OC":
-                        ResetPlayerRAM(); // 1:ST
+                        ResetAllPlayerRAM(); // 1:ST
                         RunQuadStage(rstage);
                         rstage = "R" + rounder + "ST";
                         break;
@@ -145,7 +145,7 @@ namespace PSD.PSDGamepkg
                         rstage = "R" + rounder + "EP";
                         break;
                     case "EP":
-                        ResetPlayerRAM(); // 2:EV
+                        ResetAllPlayerRAM(); // 2:EV
                         RunQuadStage(rstage);
                         rstage = "R" + rounder + "EV";
                         break;
@@ -165,7 +165,7 @@ namespace PSD.PSDGamepkg
                         RunQuadStage(rstage);
                         rstage = "R" + rounder + "GS"; break;
                     case "GS":
-                        ResetPlayerRAM(); // 3:GR
+                        ResetAllPlayerRAM(); // 3:GR
                         RunQuadStage(rstage);
                         rstage = "R" + rounder + "GR"; break;
                     case "GR":
@@ -177,7 +177,7 @@ namespace PSD.PSDGamepkg
                         RunQuadMixedStage(rstage, 0, null, null);
                         rstage = "R" + rounder + "Z0"; break;
                     case "Z0":
-                        ResetPlayerRAM(); // 4:ZD
+                        ResetAllPlayerRAM(); // 4:ZD
                         Board.Monster1 = 0; Board.Monster2 = 0;
                         Board.RPool = 0; Board.OPool = 0;
                         Board.RPoolGain.Clear(); Board.OPoolGain.Clear();
@@ -187,7 +187,6 @@ namespace PSD.PSDGamepkg
                         rstage = "R" + rounder + "ZW"; break;
                     case "ZW":
                         {
-                            ResetPlayerRAM();
                             // to substitute old ZW event on considering the capability
                             Board.PosHinders.Clear();
                             ushort[] hMember = Board.Garden.Values.Where(p => p.IsAlive &&
@@ -563,21 +562,20 @@ namespace PSD.PSDGamepkg
                         rstage = "R" + rounder + "BC";
                         break;
                     case "BC":
-                        ResetPlayerRAM(); // 5:BC
+                        ResetAllPlayerRAM(); // 5:BC
                         WI.BCast(rstage + ",0");
                         RunQuadMixedStage(rstage, 0, new int[] { 100 },
                             new Action[] { () => {
                                 int tuxCount = Board.Battler != null ? 2 : 1;
                                 RaiseGMessage("G0HT," + Board.Rounder.Uid + "," + tuxCount);
                             } });
-                        ResetPlayerRAM();
                         rstage = "R" + rounder + "QR"; break;
                     case "QR":
                         RunQuadStage(rstage);
                         RaiseGMessage("G0QR," + Board.Rounder.Uid);
                         rstage = "R" + rounder + "TM"; break;
-                    case "TM": // 6:TM
-                        ResetPlayerRAM();
+                    case "TM":
+                        ResetAllPlayerRAM(); // 6:TM
                         WI.BCast(rstage + ",0");
                         RunQuadStage(rstage);
                         rstage = "R" + rounder + "IC"; break;
@@ -585,7 +583,7 @@ namespace PSD.PSDGamepkg
                         RunQuadStage(rstage);
                         rstage = "R" + rounder + "ED"; break;
                     case "ED":
-                        ResetPlayerRAM(); // 7:ED
+                        ResetAllPlayerRAM(); // 7:ED
                         WI.BCast(rstage + ",0");
                         RunQuadMixedStage(rstage, 0,
                             new int[] { -100, 100 },
@@ -615,20 +613,9 @@ namespace PSD.PSDGamepkg
                                 if (Board.Silence.Count > 0)
                                     Board.Silence.Clear();
                             }, () => {
-                                if (Board.PendingTux.Count > 0)
-                                {
-                                    IDictionary<ushort, List<ushort>> imt = new Dictionary<ushort, List<ushort>>();
-                                    foreach (string pendItem in Board.PendingTux)
-                                    {
-                                        string[] pends = pendItem.Split(',');
-                                        ushort pendWho = ushort.Parse(pends[0]);
-                                        for (int i = 2; i < pends.Length; ++i)
-                                            Algo.AddToMultiMap(imt, pendWho, ushort.Parse(pends[i]));
-                                    }
-                                    if (imt.Count > 0)
-                                        RaiseGMessage("G0ON," + string.Join(",", imt.Select(p => p.Key + ",C," +
-                                            p.Value.Count + "," + string.Join(",", p.Value))));
-                                }
+                                ClearLeftPendingTux();
+                                Board.CsPets.Clear();
+                                Board.CsEqiups.Clear();
                                 if (!Board.Rounder.IsAlive && Board.Garden.Values.Any(p => p.IsAlive && p.HP == 0))
                                     RaiseGMessage("G0ZH,1");
                             } });
@@ -641,8 +628,8 @@ namespace PSD.PSDGamepkg
                         foreach (Player player in Board.Garden.Values)
                         {
                             player.ResetRFM();
-                            player.Pets.Select(p => LibTuple.ML.Decode(p)).Where(p => p != null)
-                                .ToList().ForEach(p => p.ResetRAM());
+                            player.Pets.Where(p => p != 0).Select(p => LibTuple.ML.Decode(p))
+                                .Where(p => p != null).ToList().ForEach(p => p.ResetRFM());
                         }
                         break;
                 }
@@ -1009,10 +996,31 @@ namespace PSD.PSDGamepkg
                 py.DEXc = py.DEXa;
             }
         }
-        private void ResetPlayerRAM()
+        public void ResetAllPlayerRAM()
         {
             foreach (Player player in Board.Garden.Values)
+            {
                 player.ResetRAM();
+                player.Pets.Where(p => p != 0).Select(p => LibTuple.ML.Decode(p))
+                    .Where(p => p != null).ToList().ForEach(p => p.ResetRAM());
+            }
+        }
+        public void ClearLeftPendingTux()
+        {
+            if (Board.PendingTux.Count > 0)
+            {
+                IDictionary<ushort, List<ushort>> imt = new Dictionary<ushort, List<ushort>>();
+                foreach (string pendItem in Board.PendingTux)
+                {
+                    string[] pends = pendItem.Split(',');
+                    ushort pendWho = ushort.Parse(pends[0]);
+                    for (int i = 2; i < pends.Length; ++i)
+                        Algo.AddToMultiMap(imt, pendWho, ushort.Parse(pends[i]));
+                }
+                if (imt.Count > 0)
+                    RaiseGMessage("G0ON," + string.Join(",", imt.Select(p => p.Key + ",C," +
+                        p.Value.Count + "," + string.Join(",", p.Value))));
+            }
         }
     }
 }

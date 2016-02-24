@@ -2578,11 +2578,14 @@ namespace PSD.ClientAo
                         for (int i = 2; i < args.Length; ++i)
                         {
                             ushort who = ushort.Parse(args[i]);
-                            if (args[0] == "E0IE")
-                                A0P[who].PetDisabled = false;
-                            else
-                                A0P[who].PetDisabled = true;
+                            A0P[who].PetDisabled = args[0] == "E0OE";
                         }
+                    }
+                    else if (args[1] == "1")
+                    {
+                        ushort[] pets = Algo.TakeRange(args, 2, args.Length)
+                            .Select(p => ushort.Parse(p)).ToArray();
+                        VI.Cout(Uid, "{0}宠物效果{1}.", zd.Monster(pets), args[0] == "E0OE" ? "失效" : "生效");
                     }
                     break;
                 case "E0YM":
