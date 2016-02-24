@@ -307,8 +307,15 @@ namespace PSD.PSDGamepkg.JNS
             if (type == 0)
             {
                 ushort side = ushort.Parse(args);
-                NPC npc = XI.LibTuple.NL.Decode(Base.Card.NMBLib.OriginalNPC(npcUt));
+                NPC npc = XI.LibTuple.NL.Decode(NMBLib.OriginalNPC(npcUt));
                 npc.ROMUshort = 1;
+                XI.RaiseGMessage(new Artiad.AnnouceCard()
+                {
+                    Action = Artiad.AnnouceCard.Type.DECLARE,
+                    Genre = Card.Genre.NMB,
+                    Officer = player.Uid,
+                    SingleCard = npcUt
+                }.ToMessage());
                 XI.RaiseGMessage("G0IP," + side + ",4");
             }
             else if (type == 1)
@@ -316,7 +323,7 @@ namespace PSD.PSDGamepkg.JNS
                 Player oy = XI.Board.GetOpponenet(player);
                 string next = XI.AsyncInput(oy.Uid, "#获得【阮英扬】的," + AnyoneAliveString(), "NJH1", "0");
                 ushort nx = ushort.Parse(next);
-                NPC npc = XI.LibTuple.NL.Decode(Base.Card.NMBLib.OriginalNPC(npcUt));
+                NPC npc = XI.LibTuple.NL.Decode(NMBLib.OriginalNPC(npcUt));
                 npc.ROMUshort = 0;
                 if (nx != player.Uid)
                 {

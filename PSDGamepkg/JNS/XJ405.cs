@@ -1468,24 +1468,32 @@ namespace PSD.PSDGamepkg.JNS
         {
             if (type == 0)
             {
-                return Artiad.JoinPetEffects.Parse(fuse).List.Any(p => 
-                    XI.Board.Garden[p.Owner].IsAlive && XI.Board.Garden[p.Owner].Team == player.Team);
+                return Artiad.JoinPetEffects.Parse(fuse).List.Any(p =>
+                    XI.Board.Garden[p.Owner].Team == player.Team);
             }
             else if (type == 1)
             {
-                return Artiad.CollapsePetEffects.Parse(fuse).List.Any(p => 
-                    XI.Board.Garden[p.Owner].IsAlive && XI.Board.Garden[p.Owner].Team == player.Team);
+                return Artiad.CollapsePetEffects.Parse(fuse).List.Any(p =>
+                   XI.Board.Garden[p.Owner].Team == player.Team);
             }
             else if (type == 2 || type == 3)
                 return IsMathISOS("JN50301", player, fuse) && XI.Board.Garden.Values.Any(p =>
-                    p.IsAlive && p.Team == player.Team && p.GetActivePetCount(XI.Board) > 0);
+                    p.Team == player.Team && p.GetActivePetCount(XI.Board) > 0);
             else return false;
         }
         public void JN50302Action(Player player, int type, string fuse, string argst)
         {
             if (type == 0)
             {
-                XI.RaiseGMessage("G0IX," + player.Uid + ",0," + (5 - 3));
+                XI.RaiseGMessage(new Artiad.InnateChange()
+                {
+                    Item = Artiad.InnateChange.Prop.DEX,
+                    Who = player.Uid,
+                    NewValue = 5
+                }.ToMessage());
+                List<string> otherSkill = player.Skills.Where(p => p != "JN50302").ToList();
+                if (otherSkill.Count > 0)
+                    XI.RaiseGMessage("G0OS," + player.Uid + ",0," + string.Join(",", otherSkill));
                 string[] blocks = fuse.Split(','); int idx = 0;
                 for (int i = 1; i < blocks.Length; ++i)
                 {
@@ -1505,20 +1513,12 @@ namespace PSD.PSDGamepkg.JNS
                 ushort ut = (ushort)(fuse[1] - '0');
                 Player rp = XI.Board.Garden[ut];
                 if (rp.Team == player.Team)
-                    XI.Board.PosSupporters.Add(player.Uid.ToString());
+                    XI.Board.PosSupporters.Add("T" + player.Uid);
                 else
-                    XI.Board.PosHinders.Add(player.Uid.ToString());
+                    XI.Board.PosHinders.Add("T" + player.Uid);
             }
             else if (type == 2)
-            {
                 XI.RaiseGMessage("G0OY,2," + player.Uid);
-                //XI.InnerGMessage(fuse, 91);
-            }
-            else if (type == 3)
-            {
-                XI.RaiseGMessage("G0OX," + player.Uid + ",0," + (5 - 3));
-                //XI.InnerGMessage(fuse, 81);
-            }
         }
         public bool JN50302Valid(Player player, int type, string fuse)
         {
@@ -1543,14 +1543,6 @@ namespace PSD.PSDGamepkg.JNS
                 if (hero != null && hero.Avatar == 10503)
                     return true;
                 else return false;
-            }
-            else if (type == 3)
-            {
-                string[] blocks = fuse.Split(',');
-                for (int i = 1; i < blocks.Length; i += 2)
-                    if (blocks[i + 1] == player.Uid.ToString())
-                        return true;
-                return false;
             }
             else
                 return false;

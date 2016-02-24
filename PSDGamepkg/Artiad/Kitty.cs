@@ -427,15 +427,16 @@ namespace PSD.PSDGamepkg.Artiad
             {
                 List<Player> pyis = pys.Where(p => p.Pets.Any(q => q != 0 &&
                     !XI.Board.NotActionPets.Contains(q))).ToList();
-                XI.RaiseGMessage(new Artiad.CollapsePetEffects()
-                {
-                    List = pyis.Select(p => new Artiad.PetEffectUnit()
+                if (pyis.Count > 0)
+                    XI.RaiseGMessage(new CollapsePetEffects()
                     {
-                        Owner = p.Uid,
-                        Pets = p.Pets.Where(q => q != 0 && !XI.Board.NotActionPets.Contains(q)).ToArray(),
-                        Reload = Artiad.PetEffectUnit.ReloadType.ABLE
-                    }).ToList()
-                }.ToMessage());
+                        List = pyis.Select(p => new PetEffectUnit()
+                        {
+                            Owner = p.Uid,
+                            Pets = p.Pets.Where(q => q != 0 && !XI.Board.NotActionPets.Contains(q)).ToArray(),
+                            Reload = PetEffectUnit.ReloadType.ABLE
+                        }).ToList()
+                    }.ToMessage());
                 pys.ForEach(p => p.PetDisabled = true);
                 new DisablePetEffectSemaphore()
                 {
@@ -469,7 +470,7 @@ namespace PSD.PSDGamepkg.Artiad
             if (pets.Count > 0)
             {
                 pets.ForEach(p => XI.Board.NotActionPets.Add(p));
-                List<Artiad.PetEffectUnit> peuList = Artiad.ContentRule.GetPetOwnershipTable(pets, XI)
+                List<PetEffectUnit> peuList = ContentRule.GetPetOwnershipTable(pets, XI)
                     .Where(p => !XI.Board.Garden[p.Key].PetDisabled).Select(p => new Artiad.PetEffectUnit()
                     {
                         Owner = p.Key,
@@ -477,7 +478,7 @@ namespace PSD.PSDGamepkg.Artiad
                         Reload = Artiad.PetEffectUnit.ReloadType.ABLE
                     }).ToList();
                 if (peuList.Count > 0)
-                    XI.RaiseGMessage(new Artiad.CollapsePetEffects() { List = peuList }.ToMessage());
+                    XI.RaiseGMessage(new CollapsePetEffects() { List = peuList }.ToMessage());
                 new DisablePetEffectSemaphore() { IsPlayer = false, Targets = pets.ToArray() }.Telegraph(WI.BCast);
             }
         }

@@ -67,7 +67,8 @@ namespace PSD.PSDGamepkg
             //17044, 19002, 17026, 10404, 17036, 10502
             //19014, 19006, 19018, 19011, 17035, 19010
             //17024, 15005, 10501, 17039, 19011, 10605
-            10501, 15005, 19016, 19007, 10603, 17029
+            //10501, 15005, 19016, 19007, 10603, 17029
+            10105, 15005, 10503, 19007, 10603, 17029
         };
 
         private void DebugCondition()
@@ -259,9 +260,9 @@ namespace PSD.PSDGamepkg
             //RaiseGMessage("G0HQ,2,1,0,0,48,49,95");
             //RaiseGMessage("G0HQ,2,3,0,0,108");
             //RaiseGMessage("G0HQ,2,5,0,0,90");
-            //RaiseGMessage("G0HQ,2,2,0,0,10");
+            RaiseGMessage("G0HQ,2,2,0,0,103");
             //RaiseGMessage("G0HQ,2,4,0,0,47,48,52");
-            RaiseGMessage("G0HQ,2,1,0,0,16");
+            //RaiseGMessage("G0HQ,2,1,0,0,16");
             //RaiseGMessage("G0HQ,2,2,0,0,136");
             //RaiseGMessage("G0HQ,2,1,0,0,124,101,117,71");
             //RaiseGMessage("G0HQ,2,2,0,0,102,69");
@@ -363,9 +364,10 @@ namespace PSD.PSDGamepkg
             //RaiseGMessage("G0HD,4,0,0,19");
             //RaiseGMessage("G0HD,6,0,0,9");
             //RaiseGMessage("G0HD,1,0,0,45");
+            RaiseGMessage("G0HD,1,0,0,29");
             //RaiseGMessage("G0HD,1,0,0,41");
             //RaiseGMessage("G0HD,5,0,0,68");
-            //RaiseGMessage("G0HD,3,0,0,70");
+            RaiseGMessage("G0HD,3,0,0,70");
             //RaiseGMessage("G0HD,6,0,0,19");
             //RaiseGMessage("G0HD,1,0,0,5");
             //RaiseGMessage("G0IJ,1,1,2,E1,E2");
@@ -391,8 +393,8 @@ namespace PSD.PSDGamepkg
             //RaiseGMessage("G0IF,4,1,2,3,4");
             //RaiseGMessage("G0IF,1,2");
             //RaiseGMessage("G0IF,4,4");
-            foreach (Player player in Board.Garden.Values)
-                RaiseGMessage("G0HQ,2," + player.Uid + ",1,3");
+            //foreach (Player player in Board.Garden.Values)
+            //    RaiseGMessage("G0HQ,2," + player.Uid + ",1,3");
             //RaiseGMessage("G0HQ,2,4,1,8");
             //RaiseGMessage("G0HQ,2,6,1,2");
             //RaiseGMessage("G0HQ,2,1,1,1");

@@ -1260,40 +1260,40 @@ namespace PSD.PSDGamepkg.JNS
         {
             if (consumeType == 0)
             {
-                string[] blocks = fuse.Split(',');
-                string g0dh = "";
-                for (int i = 1; i < blocks.Length; i += 3)
+                string[] g0ht = fuse.Split(',');
+                List<string> ng0ht = new List<string>();
+                for (int i = 1; i < g0ht.Length; i += 2)
                 {
-                    ushort ut = ushort.Parse(blocks[i]);
-                    int gtype = int.Parse(blocks[i + 1]);
-                    int n = int.Parse(blocks[i + 2]);
-                    if (ut == player.Uid && gtype == 0)
-                    {
-                        if (n > 1)
-                            g0dh += "," + ut + ",0," + (n - 1);
-                    }
-                    else
-                        g0dh += "," + ut + "," + gtype + "," + n;
+                    ushort ut = ushort.Parse(g0ht[i]);
+                    int n = int.Parse(g0ht[i + 1]);
+                    if (ut != player.Uid)
+                        ng0ht.Add(ut + "," + n);
+                    else if (n > 1)
+                        ng0ht.Add(player.Uid + "," + (n - 1));
                 }
-                if (g0dh.Length > 0)
-                    XI.InnerGMessage("G0DH" + g0dh, 61);
+                if (ng0ht.Count > 0)
+                    XI.InnerGMessage("G0HT," + string.Join(",", ng0ht), 81);
 
-                string st = XI.AsyncInput(player.Uid, "#获得手牌的,T1(p" + string.Join("p", XI.Board.Garden.
-                    Values.Where(p => p.Uid != player.Uid && p.Tux.Count > 0).Select(p => p.Uid)) + ")",
-                    "GTT1", "0");
-                ushort from = ushort.Parse(st);
-                string c0 = Algo.RepeatString("p0", XI.Board.Garden[from].Tux.Count);
-                XI.AsyncInput(player.Uid, "#获得的,C1(" + c0 + ")", "GTT1", "0");
+                string sel = XI.AsyncInput(player.Uid, "#获得手牌,T1" + FormatPlayers(p =>
+                    p.Uid != player.Uid && p.Tux.Count > 0 && p.IsAlive), "GTT1", "0");
+                ushort from = ushort.Parse(sel);
+                XI.AsyncInput(player.Uid, "#获得,C1(" + Algo.RepeatString("p0",
+                    XI.Board.Garden[from].Tux.Count) + ")", "GTT1", "1");
                 XI.RaiseGMessage("G0HQ,0," + player.Uid + "," + from + ",2,1");
             }
-            //XI.RaiseGMessage("G0DH," + player.Uid + ",0,1");
         }
         public bool GTT1ConsumeValid(Player player, int consumeType, int type, string fuse)
         {
             if (consumeType == 0)
             {
-                if (XI.Board.RoundIN == ("R" + player.Uid + "BC"))
-                    return XI.Board.Garden.Values.Where(p => p.Uid != player.Uid && p.Tux.Count > 0).Any();
+                string[] g0ht = fuse.Split(',');
+                for (int i = 1; i < g0ht.Length; i += 2)
+                {
+                    ushort ut = ushort.Parse(g0ht[i]);
+                    int n = int.Parse(g0ht[i + 1]);
+                    if (ut == player.Uid && n > 0)
+                        return true;
+                }
             }
             return false;
         }
@@ -3016,6 +3016,7 @@ namespace PSD.PSDGamepkg.JNS
                 ushort card = ushort.Parse(uts[0]);
                 ushort to = ushort.Parse(uts[1]);
                 XI.RaiseGMessage("G0QZ," + player.Uid + "," + card);
+                TargetPlayer(player.Uid, to);
                 Harm("GHH1", XI.Board.Garden[to], 2);
             }
         }

@@ -3736,22 +3736,22 @@ namespace PSD.PSDGamepkg.JNS
         {
             Func<Player, bool> cond = p => p.IsAlive && p.Uid != player.Uid && p.Tux.Count <= player.Tux.Count;
             // IT/OT
-            if ((type == 0 || (type == 1 && XI.Board.PoolEnabled)) && !player.RAM.GetBool("Poorest"))
+            if ((type == 0 || (type == 2 && XI.Board.PoolEnabled)) && !player.RAM.GetBool("Poorest"))
                 return !XI.Board.Garden.Values.Any(cond);
-            else if (type == 2 && XI.Board.PoolEnabled && player.RAM.GetBool("Poorest"))
+            else if (type == 1 && XI.Board.PoolEnabled && player.RAM.GetBool("Poorest"))
                 return XI.Board.Garden.Values.Any(cond);
             else
                 return false;
         }
         public void JNT3002Action(Player player, int type, string fuse, string argst)
         {
-            if (type == 0 || type == 1)
+            if (type == 0 || type == 2)
             {
                 player.RAM.Set("Poorest", true);
                 XI.RaiseGMessage("G0IA," + player.Uid + ",1,1");
                 XI.RaiseGMessage("G0IX," + player.Uid + ",1,1");
             }
-            else if (type == 2)
+            else if (type == 1)
             {
                 player.RAM.Set("Poorest", false);
                 XI.RaiseGMessage("G0OA," + player.Uid + ",1,1");

@@ -2844,12 +2844,13 @@ namespace PSD.PSDGamepkg.JNS
                 {
                     List<Player> pys = input.Split(',').Select(
                         p => XI.Board.Garden[ushort.Parse(p)]).ToList();
+                    TargetPlayer(player.Uid, pys.Select(p => p.Uid));
                     foreach (Player py in pys)
                     {
                         if (py.Uid != player.Uid)
                         {
-                            XI.AsyncInput(player.Uid, "#弃置的,C1(" +
-                                Algo.RepeatString("p0", py.Tux.Count) + ")", "JNH1702", "1");
+                            XI.AsyncInput(player.Uid, string.Format("#弃置{0},C1({1})", XI.DisplayPlayer(py.Uid),
+                                Algo.RepeatString("p0", py.Tux.Count)), "JNH1702", "1");
                             XI.RaiseGMessage("G0DH," + py.Uid + ",2,1");
                         }
                     }

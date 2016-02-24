@@ -2258,7 +2258,7 @@ namespace PSD.PSDGamepkg.JNS
             string select = XI.AsyncInput(who,
                 "#请响应【罡风惊天】##HP-" + n + "##弃置装备,Y2", "JPH2", "0");
             if (select == "1")
-                Harm(player, py, n, FiveElement.AERO);
+                Harm(player, py, n, FiveElement.AERO, (long)HPEvoMask.FROM_JP);
             else
             {
                 if (py.HasAnyEquips())
@@ -2373,12 +2373,17 @@ namespace PSD.PSDGamepkg.JNS
         }
         public void TPH1Action(Player player, int type, string fuse, string argst)
         {
-            if (type == 0) {
-                string whoStr = XI.AsyncInput(player.Uid, "#获得「神算」的,T1(p" + string.Join("p", XI.Board.Garden
-                    .Values.Where(p => p.IsTared  && !p.Runes.Contains(6)).Select(p => p.Uid)) + ")", "TPH1", "0");
+            if (type == 0)
+            {
+                string whoStr = XI.AsyncInput(player.Uid,
+                    "#获得「神算」的,T1" + AAllTareds(player), "TPH1", "0");
                 ushort who = ushort.Parse(whoStr);
+                TargetPlayer(player.Uid, who);
                 XI.RaiseGMessage("G0IF," + who + ",7");
-            } else if (type == 1) {
+            }
+            else if (type == 1)
+            {
+                XI.RaiseGMessage("G2YS,T," + player.Uid + ",M,1");
                 string sel = XI.AsyncInput(player.Uid, "#调整怪物闪避##-1##+1,Y2", "TPH1", "1");
                 if (sel == "1")
                     XI.RaiseGMessage("G0OW," + XI.Board.Monster1 + ",1");
@@ -2447,16 +2452,14 @@ namespace PSD.PSDGamepkg.JNS
             if (player.Uid != rd.Uid)
             {
                 TargetPlayer(player.Uid, rd.Uid);
-                XI.RaiseGMessage("G0HQ,4," + player.Uid + "," + rd.Uid + "," + player.Tux.Count + "," +
-                    rd.Tux.Count + (player.Tux.Count > 0 ? ("," + string.Join(",", player.Tux)) : "") +
-                    (rd.Tux.Count > 0 ? ("," + string.Join(",", rd.Tux)) : ""));
-                if (rd.Tux.Count < rd.TuxLimit && player.Tux.Count > 0)
+                int ptc = player.Tux.Count, rtc = rd.Tux.Count;
+                XI.RaiseGMessage("G0HQ,4," + player.Uid + "," + rd.Uid + "," + ptc + "," + rtc +
+                    (ptc > 0 ? ("," + string.Join(",", player.Tux)) : "") +
+                    (rtc > 0 ? ("," + string.Join(",", rd.Tux)) : ""));
+                if (ptc <= rtc - 3)
                 {
-                    int delta = Math.Min(rd.TuxLimit - rd.Tux.Count, player.Tux.Count);
-                    string giveBack = XI.AsyncInput(player.Uid, "#交还的,Q" + delta +
-                        "(p" + string.Join("p", player.Tux) + ")", "TPH3", "0");
-                    if (!giveBack.Contains(VI.CinSentinel))
-                        XI.RaiseGMessage("G0HQ,0," + rd.Uid + "," + player.Uid + ",1," + delta + "," + giveBack);
+                    XI.RaiseGMessage("G0DS," + player.Uid + ",0,1");
+                    Harm(player, player, 2);
                 }
             }
         }
@@ -2579,7 +2582,8 @@ namespace PSD.PSDGamepkg.JNS
         }
         public void FJH1DelAction(Player player)
         {
-            Cure(player, player, 1);
+            if (player.IsAlive)
+                Cure(player, player, 1);
         }
         public bool XBH1ConsumeValid(Player player, int consumeType, int type, string fuse)
         {
