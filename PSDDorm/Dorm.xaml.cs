@@ -37,6 +37,8 @@ namespace PSDDorm
             InitializeComponent();
             Tuple = new LibGroup();
             dict = new Dictionary<int, string>();
+            var ass = System.Reflection.Assembly.GetExecutingAssembly().GetName();
+            Title = ass.Name + " v" + ass.Version + " 录像转换器";
 
             if (File.Exists("PSDDorm.AKB48Show!"))
                 convCheckBox.Visibility = Visibility.Visible;

@@ -274,6 +274,7 @@ namespace PSD.ClientAo
 
         public ushort Supporter { set; get; }
         public ushort Hinder { set; get; }
+        public List<ushort> Drums { private set; get; }
 
         #endregion /f zone
 
@@ -290,6 +291,7 @@ namespace PSD.ClientAo
             Monster1 = 0; Monster2 = 0;
             PoolAka = 0; PoolAo = 0;
             Supporter = 0; Hinder = 0;
+            Drums = new List<ushort>();
             Eve1 = 0;
         }
     }

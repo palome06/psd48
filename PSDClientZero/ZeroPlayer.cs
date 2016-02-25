@@ -101,6 +101,7 @@ namespace PSD.ClientZero
 
         public ushort Supporter { set; get; }
         public ushort Hinder { set; get; }
+        public List<ushort> Drums { private set; get; }
 
         public ushort Eve1 { set; get; }
 
@@ -109,6 +110,7 @@ namespace PSD.ClientZero
             Monster1 = 0; Monster2 = 0;
             RPool = 0; OPool = 0;
             Supporter = 0; Hinder = 0;
+            Drums = new List<ushort>();
             Eve1 = 0;
         }
 
@@ -119,7 +121,8 @@ namespace PSD.ClientZero
             if (Eve1 > 0)
                 Aps(sb, "本回合响应事件牌：{0}", xic.zd.Eve(Eve1));
             Aps(sb, "触发方灵力池：{0} 妨碍方灵力池：{1}", RPool, OPool);
-            Aps(sb, "支援者: {0} 妨碍者: {1}", xic.zd.Warrior(Supporter), xic.zd.Warrior(Hinder));
+            Aps(sb, "支援者: {0} 妨碍者: {1}" + (Drums.Count > 0 ? " 额外参战者: {2}" : ""),
+                xic.zd.Warrior(Supporter), xic.zd.Warrior(Hinder), xic.zd.Warrior(Drums));
             Base.Card.NMB nmb1 = Base.Card.NMBLib.Decode(Monster1, xic.Tuple.ML, xic.Tuple.NL);
             Aps(sb, "当前第一怪物/NPC: {0}. 战力：{1} 闪避：{2}", xic.zd.Monster(Monster1),
                 nmb1 == null ? 0 : nmb1.STR, nmb1 == null ? 0 : nmb1.AGL);

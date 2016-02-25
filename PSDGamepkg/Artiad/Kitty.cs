@@ -214,8 +214,6 @@ namespace PSD.PSDGamepkg.Artiad
             }
         }
     }
-    // G0I/OC,G0I/OE
-    // OC -> Lose[RESET ALL],Disable[DON'T CLEAR STATUS].Move[DON'T CLEAR TEAM]; IC -> Gain[RESET ALL],Enable[DON'T CLEAR STATUS AND TRY TO RECOVERY].Move[RESET NON-TEAM]
     // Pet's effect take action, specially to handle with buffer Incr
     public class JoinPetEffects
     {

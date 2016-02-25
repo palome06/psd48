@@ -1125,31 +1125,8 @@ namespace PSD.PSDGamepkg.JNS
                     (ushort)(int.Parse(p.Substring("M".Length)) - 1000)).STR >= 5);
                 return stucken;
             }
-            else if (type == 2 && player.TokenExcl.Count > 0) // FI
-            {
-                string[] g0fi = fuse.Split(',');
-                if (g0fi[1] == "O" || g0fi[1] == "U")
-                    return false;
-                int result = 0;
-                for (int i = 1; i < g0fi.Length; i += 3)
-                {
-                    char ch = g0fi[i][0];
-                    ushort old = ushort.Parse(g0fi[i + 1]);
-                    ushort to = ushort.Parse(g0fi[i + 2]);
-                    if (ch == 'S' || ch == 'H')
-                    {
-                        if (old == player.Uid)
-                            --result;
-                        if (to == player.Uid)
-                            ++result;
-                    }
-                    else if (ch == 'T' || ch == 'W')
-                    {
-                        result = 0; break;
-                    }
-                }
-                return result != 0;
-            }
+            else if (type == 2 && XI.Board.PoolEnabled && player.TokenExcl.Count > 0) // FI
+                return Artiad.CoachingChange.Parse(fuse).AttendOrLeave(player.Uid) != 0;
             else if (type == 3 || type == 4) // IS/OS
             {
                 if (IsMathISOS("JNH0701", player, fuse) && XI.Board.PoolEnabled)
@@ -2064,7 +2041,10 @@ namespace PSD.PSDGamepkg.JNS
         public bool JNH1302Valid(Player player, int type, string fuse)
         {
             if (type == 0)
-                return fuse == "G0FI,O" && XI.Board.Rounder.Team == player.OppTeam;
+            {
+                return Artiad.CoachingChange.Parse(fuse).List.Any(p => p.Role ==
+                    Artiad.CoachingChangeUnit.PType.GIVEUP) && XI.Board.Rounder.Team == player.OppTeam;
+            }
             else if (type == 1)
             {
                 string[] g1yp = fuse.Split(',');

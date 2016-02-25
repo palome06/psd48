@@ -141,7 +141,7 @@ namespace PSD.ClientAo.VW
                 if (line.StartsWith("H09G"))
                 {
                     string[] blocks = line.Split(',');
-                    for (int idx = 1; idx < blocks.Length; )
+                    for (int idx = 1; idx < blocks.Length;)
                     {
                         int nextIdx = idx + 18;
                         int excdsz = int.Parse(blocks[nextIdx]);
@@ -240,7 +240,7 @@ namespace PSD.ClientAo.VW
                         ch = 'M';
                     else if (utype == 2)
                         ch = 'E';
-                    if (ch!= '\0')
+                    if (ch != '\0')
                     {
                         line = "E0ON,10," + ch + "," + (args.Length - 2) + ","
                             + string.Join(",", Algo.TakeRange(args, 2, args.Length));
@@ -692,6 +692,16 @@ namespace PSD.ClientAo.VW
                         string rest = string.Join(",", Algo.TakeRange(e0zc, 4, e0zc.Length));
                         line = "E0ZC," + me + "," + consumeType + "," + rest;
                     }
+                }
+            }
+            if (Version <= 154)
+            {
+                if (line.StartsWith("H09G"))
+                {
+                    string[] h09g = line.Split(',');
+                    h09g[8] += ",1"; // Add SupportSucc after Supporter
+                    h09g[9] += ",1,0,0"; // Add HinderSucc, Drums and Wang after Hinder
+                    line = "H09G," + Algo.TakeRange(h09g, 2, h09g.Length); // remove [1]=Eve
                 }
             }
         }

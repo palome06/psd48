@@ -2278,7 +2278,7 @@ namespace PSD.PSDGamepkg.JNS
             int elemIdx = five.Elem2Index();
             XI.RaiseGMessage(new Artiad.AnnouceCard()
             {
-                Action = Artiad.AnnouceCard.Type.DECLARE,
+                Action = Artiad.AnnouceCard.Type.FLASH,
                 Officer = player.Uid,
                 Genre = Card.Genre.Five,
                 SingleCard = (ushort)five.Elem2Int()
@@ -2481,6 +2481,21 @@ namespace PSD.PSDGamepkg.JNS
         public bool ZPH1Valid(Player player, int type, string fuse)
         {
             return XI.Board.Garden.Values.Any(p => p.IsTared);
+        }
+        public void ZPH2Action(Player player, int type, string fuse, string argst)
+        {
+            string ai = XI.AsyncInput(player.Uid, "#额外参战,T1" + FormatPlayers(
+                p => p.IsTared && !XI.Board.IsAttendWar(p)), "ZPH2", "0");
+            ushort attender = ushort.Parse(ai);
+            TargetPlayer(player.Uid, attender);
+            // TODO: Use G17F
+            XI.RaiseGMessage("G17F,C," + attender);
+            //Player py = XI.Board.Garden[attender];
+            //if (py.Team == XI.Board.Rounder.Team)
+            //    XI.Board.RDrums[py] = false;
+            //else if (py.Team == XI.Board.Rounder.OppTeam)
+            //    XI.Board.RDrums[py] = false;
+            //XI.RaiseGMessage("G09P,0");
         }
         public bool ZPH2Valid(Player player, int type, string fuse)
         {

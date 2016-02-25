@@ -143,6 +143,42 @@ namespace PSD.PSDGamepkg.Artiad
             if (exspUt == 25) { str = 2; dex = 4; }
             return Player.Warriors(exspName, exspUt + 3000, team, str, dex);
         }
+        // convert ushort to a corresponding player/lumberjack/robinhood/...
+        public static Player DecodePlayer(ushort ut, XI xi)
+        {
+            Player py;
+            if (ut == 0)
+                py = null;
+            else if (ut > 0 && ut < 1000)
+                py = xi.Board.Garden[ut];
+            else if (ut < 2000) // Monster
+            {
+                ushort mut = (ushort)(ut - 1000);
+                NMB nmb = NMBLib.Decode(mut, xi.LibTuple.ML, xi.LibTuple.NL);
+                if (nmb != null)
+                {
+                    Player owner = xi.Board.Garden.Values.Single(p => p.Pets.Contains(mut));
+                    py = Artiad.ContentRule.Lumberjack(nmb, mut, owner.Team);
+                }
+                else
+                    py = null;
+            }
+            else if (ut < 3000) { py = null; } // Npc
+            else // Exsp
+            {
+                ushort esut = (ushort)(ut - 3000);
+                string escode = "I" + esut;
+                Exsp exsp = xi.LibTuple.ESL.Encode(escode);
+                if (exsp != null)
+                {
+                    Player owner = xi.Board.Garden.Values.Single(p => p.TokenExcl.Contains(escode));
+                    py = Artiad.ContentRule.RobinHood(exsp.Name, esut, owner.Team);
+                }
+                else
+                    py = null;
+            }
+            return py;
+        }
 
         #endregion Sparse Base Rules
     }

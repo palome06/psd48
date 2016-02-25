@@ -96,11 +96,12 @@ namespace PSD.Base.Utils
             next = start + n + 1;
             return TakeRange(blocks, start + 1, start + 1 + n);
         }
-        public static ushort[] TakeArrayWithSize(string[] blocks, int start, out int next)
+        // rate means the size of each entry, e.g. (2, 4, -4, 5, -5) then rate = 2
+        public static ushort[] TakeArrayWithSize(string[] blocks, int start, out int next, int rate = 1)
         {
             int n = int.Parse(blocks[start]);
-            next = start + n + 1;
-            return TakeRange(blocks, start + 1, start + 1 + n).Select(p => ushort.Parse(p)).ToArray();
+            next = start + n * rate + 1;
+            return TakeRange(blocks, start + 1, start + 1 + n * rate).Select(p => ushort.Parse(p)).ToArray();
         }
         public static string RepeatString(string @string, int times)
         {
@@ -154,12 +155,7 @@ namespace PSD.Base.Utils
                         idx += n;
                     }
                     else if (ktype == "LU") // array of ushort
-                    {
-                        int n = int.Parse(lines[idx++]);
-                        string[] values = TakeRange(lines, idx, idx + n);
-                        assign(who, kname, values.Select(p => ushort.Parse(p)).ToArray());
-                        idx += n;
-                    }
+                        assign(who, kname, TakeArrayWithSize(lines, idx, out idx));
                     else if (ktype == "LI") // array of int
                     {
                         int n = int.Parse(lines[idx++]);

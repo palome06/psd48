@@ -68,7 +68,8 @@ namespace PSD.PSDGamepkg
             //19014, 19006, 19018, 19011, 17035, 19010
             //17024, 15005, 10501, 17039, 19011, 10605
             //10501, 15005, 19016, 19007, 10603, 17029
-            10105, 15005, 10503, 19007, 10603, 17029
+            //10105, 15005, 10503, 19007, 10603, 17029
+            10603, 10605, 17030, 17027, 17029, 17034,
         };
 
         private void DebugCondition()
@@ -99,7 +100,7 @@ namespace PSD.PSDGamepkg
             //garden[2].Pets[0] = 4;
             //Board.MonPiles.PushBack(13);
             //Board.MonPiles.PushBack(1011);
-            //Board.MonPiles.PushBack(8);
+            Board.MonPiles.PushBack(8);
             //RaiseGMessage("G0HC,0,1,19");
             //Board.MonPiles.PushBack(1022);
             //Board.MonPiles.PushBack(1041);
@@ -259,10 +260,10 @@ namespace PSD.PSDGamepkg
             //RaiseGMessage("G0HQ,2,5,0,0,27,28,29");
             //RaiseGMessage("G0HQ,2,1,0,0,48,49,95");
             //RaiseGMessage("G0HQ,2,3,0,0,108");
-            //RaiseGMessage("G0HQ,2,5,0,0,90");
-            RaiseGMessage("G0HQ,2,2,0,0,103");
+            RaiseGMessage("G0HQ,2,5,0,0,137");
+            //RaiseGMessage("G0HQ,2,2,0,0,103");
             //RaiseGMessage("G0HQ,2,4,0,0,47,48,52");
-            //RaiseGMessage("G0HQ,2,1,0,0,16");
+            RaiseGMessage("G0HQ,2,1,0,0,107");
             //RaiseGMessage("G0HQ,2,2,0,0,136");
             //RaiseGMessage("G0HQ,2,1,0,0,124,101,117,71");
             //RaiseGMessage("G0HQ,2,2,0,0,102,69");

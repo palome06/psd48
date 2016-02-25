@@ -53,8 +53,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\lib\SharedAssemblyInfo.cs">
+      <Link>Properties\SharedAssemblyInfo.cs</Link>
+    </Compile>
     <Compile Include="Artiad\BHW.cs" />
     <Compile Include="Artiad\HPIssue.cs" />
+    <Compile Include="Artiad\Coaching.cs" />
     <Compile Include="Artiad\ContentRule.cs" />
     <Compile Include="Artiad\Clothing.cs" />
     <Compile Include="Artiad\GotoNoodle.cs" />

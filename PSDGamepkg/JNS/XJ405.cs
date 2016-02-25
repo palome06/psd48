@@ -2156,6 +2156,7 @@ namespace PSD.PSDGamepkg.JNS
         #region XJ503 - LongYou
         public bool JN60301Valid(Player player, int type, string fuse)
         {
+            if (type == 1 || type == 2) return false; // Temp:to be removed
             if (XI.Board.PoolEnabled)
             {
                 int count = XI.Board.Garden.Values.Count(p => p.IsAlive &&
@@ -2355,30 +2356,7 @@ namespace PSD.PSDGamepkg.JNS
                      XI.Board.IsAttendWar(player) && !self && player.HP < player.HPb;
             }
             else if (type == 5 && XI.Board.PoolEnabled && player.HP < player.HPb)
-            {
-                string[] g0fi = fuse.Split(',');
-                if (g0fi[1] == "O" || g0fi[1] == "U")
-                    return false;
-                int result = 0;
-                for (int i = 1; i < g0fi.Length; i += 3)
-                {
-                    char ch = g0fi[i][0];
-                    ushort old = ushort.Parse(g0fi[i + 1]);
-                    ushort to = ushort.Parse(g0fi[i + 2]);
-                    if (ch == 'S' || ch == 'H')
-                    {
-                        if (old == player.Uid)
-                            --result;
-                        if (to == player.Uid)
-                            ++result;
-                    }
-                    else if (ch == 'T' || ch == 'W')
-                    {
-                        result = 0; break;
-                    }
-                }
-                return result != 0;
-            }
+                return Artiad.CoachingChange.Parse(fuse).AttendOrLeave(player.Uid) != 0;
             return false;
         }
         public void JN60501Action(Player player, int type, string fuse, string argst)
@@ -2392,27 +2370,7 @@ namespace PSD.PSDGamepkg.JNS
                 XI.RaiseGMessage("G1WP," + player.Team + "," + player.Uid + ",JN60501,0");
             else if (type == 5)
             {
-                string[] g0fi = fuse.Split(',');
-                if (g0fi[1] == "O" || g0fi[1] == "U")
-                    return;
-                int result = 0;
-                for (int i = 1; i < g0fi.Length; i += 3)
-                {
-                    char ch = g0fi[i][0];
-                    ushort old = ushort.Parse(g0fi[i + 1]);
-                    ushort to = ushort.Parse(g0fi[i + 2]);
-                    if (ch == 'S' || ch == 'H')
-                    {
-                        if (old == player.Uid)
-                            --result;
-                        if (to == player.Uid)
-                            ++result;
-                    }
-                    else if (ch == 'T' || ch == 'W')
-                    {
-                        result = 0; break;
-                    }
-                }
+                int result = Artiad.CoachingChange.Parse(fuse).AttendOrLeave(player.Uid);
                 if (result < 0)
                     XI.RaiseGMessage("G1WP," + player.Team + "," + player.Uid + ",JN60501,0");
                 else if (result > 0)

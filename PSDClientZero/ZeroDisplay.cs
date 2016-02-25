@@ -137,6 +137,10 @@ namespace PSD.ClientZero
             else
                 return "0:天使";
         }
+        internal string Warrior(IEnumerable<ushort> extUids)
+        {
+            return "{" + string.Join(",", extUids.Select(p => Warrior(p))) + "}";
+        }
         internal string Warriors(IEnumerable<string> strings) // mix results of entites
         {
             // !PT19,!I25,1,3,5

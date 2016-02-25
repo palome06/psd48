@@ -30,6 +30,7 @@ namespace PSD.Base
             get { return mSupporter ?? ghost; }
         }
         // Somebody that ordered to trigger a battle
+        // take no action now
         public Player Horn
         {
             set { mHorn = value ?? ghost; }
@@ -43,6 +44,10 @@ namespace PSD.Base
         public List<string> PosSupporters { private set; get; }
         public bool AllowNoSupport { set; get; }
         public bool AllowNoHinder { set; get; }
+
+        // other extra attender, table of Player and whether it hits
+        public IDictionary<Player, bool> RDrums { private set; get; }
+        public IDictionary<Player, bool> ODrums { private set; get; }
         // 0. fight; 1. Skip fight; 2. not enter the stage.
         #endregion battle related
         //public int IsFight { set; get; }
@@ -77,6 +82,7 @@ namespace PSD.Base
         public ushort Mon1From { set; get; }
         //public bool IsTangled { set; get; }
         public ushort Wang { set; get; } // NPC card in ex-NPC actions, cover the Monster1 here
+        // TODO: Possible set as a stack to handle with mulit-NPC actions
         // Battler servers as a snapshot of Monster1, nothing to with the card
         public NMB Battler { set; get; }
         public ushort Eve { get; set; }
@@ -177,24 +183,32 @@ namespace PSD.Base
 
         public bool IsAttendWar(Player player)
         {
-            return player.Uid == Rounder.Uid ||
-                player.Uid == Hinder.Uid ||
-                player.Uid == Supporter.Uid;
+            return player.Uid == Rounder.Uid || player.Uid == Hinder.Uid ||
+                player.Uid == Supporter.Uid || RDrums.ContainsKey(player) ||
+                ODrums.ContainsKey(player);
         }
         public bool IsAttendWarSucc(Player player)
         {
             return player.Uid == Rounder.Uid ||
                 (player.Uid == Hinder.Uid && HinderSucc) ||
-                (player.Uid == Supporter.Uid && SupportSucc);
+                (player.Uid == Supporter.Uid && SupportSucc) ||
+                (RDrums.ContainsKey(player) && RDrums[player]) ||
+                (ODrums.ContainsKey(player) && ODrums[player]);
+        }
+        public List<ushort> DrumUts
+        {
+            get { return RDrums.Keys.Select(p => p.Uid).Concat(ODrums.Keys.Select(p => p.Uid)).ToList(); }
         }
 
         public int CalculateRPool()
         {
-            return Math.Max(Rounder.STR + RPool + (SupportSucc ? Supporter.STR : 0), 0);
+            return Math.Max(Rounder.STR + RPool + (SupportSucc ? Supporter.STR : 0) +
+                RDrums.Where(p => p.Value).Sum(p => p.Key.STR), 0);
         }
         public int CalculateOPool()
         {
-            return Math.Max(Battler.STR + OPool + (HinderSucc ? Hinder.STR : 0), 0);
+            return Math.Max(Battler.STR + OPool + (HinderSucc ? Hinder.STR : 0) +
+                ODrums.Where(p => p.Value).Sum(p => p.Key.STR), 0);
         }
         public bool IsRounderBattleWin()
         {
@@ -211,6 +225,7 @@ namespace PSD.Base
         {
             Supporter = null; Hinder = null;
             SupportSucc = false; HinderSucc = false;
+            RDrums.Clear(); ODrums.Clear();
             EscueBanned.Clear(); Silence.Clear();
         }
         public List<ushort> OrderedPlayer() { return OrderedPlayer(Rounder.Uid); }
@@ -267,6 +282,10 @@ namespace PSD.Base
             FightTangled = false;
             EscueBanned = new HashSet<string>();
             Silence = new HashSet<string>();
+
+            Player.PlayerCompare pc = new Player.PlayerCompare();
+            RDrums = new Dictionary<Player, bool>(pc);
+            ODrums = new Dictionary<Player, bool>(pc);
         }
 
         private Player mRounder, mHinder, mSupporter;
@@ -333,16 +352,20 @@ namespace PSD.Base
                     }
                 }
             }
-            return uList.Count > 0 ? ("H09G," + string.Join(",", uList)) : "";
+            return uList.Count > 0 ? ("H09G," + string.Join(",", string.Join(",", uList))) : "";
         }
         public string GenerateSerialFieldMessage()
         {
             StringBuilder h09p = new StringBuilder();
-            h09p.Append(Eve + "," + TuxPiles.Count + "," + MonPiles.Count + "," +
-                EvePiles.Count + "," + TuxDises.Count + "," + MonDises.Count + "," + EveDises.Count);
+            h09p.Append(TuxPiles.Count + "," + MonPiles.Count + "," + EvePiles.Count + "," +
+                TuxDises.Count + "," + MonDises.Count + "," + EveDises.Count);
             h09p.Append("," + (Rounder != null ? Rounder.Uid : 0));
-            h09p.Append("," + Supporter.Uid + "," + Hinder.Uid);
-            h09p.Append("," + (Monster1 + "," + Monster2 + "," + Eve));
+            h09p.Append("," + Supporter.Uid + "," + (SupportSucc || !PoolEnabled ? 1 : 0) +
+                "," + Hinder.Uid + "," + (HinderSucc || !PoolEnabled ? 1 : 0));
+            h09p.Append("," + Algo.ListToString(RDrums.Select(p => p.Key.Uid + "," +
+                (p.Value || !PoolEnabled ? 1 : 0)).Concat(ODrums.Select(p =>
+                p.Key.Uid + "," + (p.Value || !PoolEnabled ? 1 : 0))).ToList()));
+            h09p.Append("," + Wang + "," + Monster1 + "," + Monster2 + "," + Eve);
             if (PoolEnabled)
                 h09p.Append("," + Rounder.Team + "," + CalculateRPool() + "," +
                     Rounder.OppTeam + "," + CalculateOPool());

@@ -500,5 +500,11 @@ namespace PSD.Base
                 Team = team
             };
         }
+
+        internal class PlayerCompare : System.Collections.Generic.IEqualityComparer<Player>
+        {
+            public bool Equals(Player p, Player q) { return p == q; }
+            public int GetHashCode(Player p) { return p.Uid.GetHashCode(); }
+        }
     }
 }

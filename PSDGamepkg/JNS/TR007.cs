@@ -3408,25 +3408,8 @@ namespace PSD.PSDGamepkg.JNS
                 }
                 return false;
             }
-            else if (type == 1 && XI.Board.PoolEnabled) // FI
-            {
-                string[] g0fi = fuse.Split(',');
-                int zero = 0;
-                for (int i = 1; i < g0fi.Length; i += 3)
-                {
-                    char ch = g0fi[i][0];
-                    ushort od = ushort.Parse(g0fi[i + 1]);
-                    ushort nw = ushort.Parse(g0fi[i + 2]);
-                    if (g0fi[i] == "S" || g0fi[i] == "H")
-                    {
-                        if (od == player.Uid)
-                            --zero;
-                        if (nw == player.Uid)
-                            ++zero;
-                    }
-                }
-                return zero != 0 && (player.DEX > XI.Board.Battler.AGL);
-            }
+            else if (type == 1 && XI.Board.PoolEnabled && player.DEX > XI.Board.Battler.AGL) // FI
+                return Artiad.CoachingChange.Parse(fuse).AttendOrLeave(player.Uid) != 0;
             else
                 return false;
         }
@@ -3471,7 +3454,10 @@ namespace PSD.PSDGamepkg.JNS
             else if (type == 2 || type == 3) // IS/OS
                 return IsMathISOS("JNT2702", player, fuse) && player.GetBaseEquipCount() > 0;
             else if (type == 4) // Give up
-                return fuse == "G0FI,O";
+            {
+                return Artiad.CoachingChange.Parse(fuse).List.Any(
+                    p => p.Role == Artiad.CoachingChangeUnit.PType.GIVEUP);
+            }
             else
                 return false;
         }
@@ -3968,51 +3954,34 @@ namespace PSD.PSDGamepkg.JNS
         }
         public bool JNT3402Valid(Player player, int type, string fuse)
         {
-            if (type == 0) // PD
+            if (XI.Board.PoolEnabled)
             {
-                return XI.Board.Garden.Values.Any(p => p.IsAlive && XI.Board.IsAttendWar(p) &&
+                int count = XI.Board.Garden.Values.Count(p => p.IsAlive && XI.Board.IsAttendWar(p) &&
                     XI.LibTuple.HL.InstanceHero(p.SelectHero).Bio.Contains("K"));
-            }
-            else if (type == 1 && XI.Board.PoolEnabled) // FI
-            {
-                string[] g0fi = fuse.Split(',');
-                int zero = 0;
-                for (int i = 1; i < g0fi.Length; i += 3)
-                {
-                    char ch = g0fi[i][0];
-                    ushort od = ushort.Parse(g0fi[i + 1]);
-                    ushort nw = ushort.Parse(g0fi[i + 2]);
-                    if (g0fi[i] == "S" || g0fi[i] == "H")
-                    {
-                        if (XI.LibTuple.HL.InstanceHero(XI.Board.Garden[od].SelectHero).Bio.Contains("K"))
-                            --zero;
-                        if (XI.LibTuple.HL.InstanceHero(XI.Board.Garden[nw].SelectHero).Bio.Contains("K"))
-                            ++zero;
-                    }
-                }
-                return zero != 0;
+                if (type == 0)
+                    return count > 0;
+                else
+                    return count != player.RAM.GetInt("Ghost");
             }
             else return false;
         }
         public void JNT3402Action(Player player, int type, string fuse, string args)
         {
-            if (type == 0) // PD
+            int count = XI.Board.Garden.Values.Count(p => p.IsAlive && XI.Board.IsAttendWar(p) &&
+                XI.LibTuple.HL.InstanceHero(p.SelectHero).Bio.Contains("K") );
+            if (type == 0)
             {
-                int count = XI.Board.Garden.Values.Count(p => p.IsAlive && XI.Board.IsAttendWar(p) &&
-                    XI.LibTuple.HL.InstanceHero(p.SelectHero).Bio.Contains("K"));
                 player.RAM.Set("Ghost", count);
                 XI.RaiseGMessage("G0IA," + player.Uid + ",1," + count * 2);
             }
-            else if (type == 1)
+            else
             {
-                int count = XI.Board.Garden.Values.Count(p => p.IsAlive && XI.Board.IsAttendWar(p) &&
-                    XI.LibTuple.HL.InstanceHero(p.SelectHero).Bio.Contains("K"));
-                int ghost = player.RAM.GetInt("Ghost");
-                if (count > ghost)
-                    XI.RaiseGMessage("G0IA," + player.Uid + ",1," + (count - ghost) * 2);
-                else if (count < ghost)
-                    XI.RaiseGMessage("G0OA," + player.Uid + ",1," + (ghost - count) * 2);
+                int delta = count - player.RAM.GetInt("Ghost");
                 player.RAM.Set("Ghost", count);
+                if (delta > 0)
+                    XI.RaiseGMessage("G0IA," + player.Uid + ",1," + delta * 2);
+                else if (delta < 0)
+                    XI.RaiseGMessage("G0OA," + player.Uid + ",1," + (-delta) * 2);
             }
         }
         public bool JNT3403Valid(Player player, int type, string fuse)

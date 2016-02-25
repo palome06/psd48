@@ -311,7 +311,7 @@ namespace PSD.PSDGamepkg.JNS
                 npc.ROMUshort = 1;
                 XI.RaiseGMessage(new Artiad.AnnouceCard()
                 {
-                    Action = Artiad.AnnouceCard.Type.DECLARE,
+                    Action = Artiad.AnnouceCard.Type.FLASH,
                     Genre = Card.Genre.NMB,
                     Officer = player.Uid,
                     SingleCard = npcUt

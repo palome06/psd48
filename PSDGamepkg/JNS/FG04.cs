@@ -1274,11 +1274,10 @@ namespace PSD.PSDGamepkg.JNS
                 if (ng0ht.Count > 0)
                     XI.InnerGMessage("G0HT," + string.Join(",", ng0ht), 81);
 
-                string sel = XI.AsyncInput(player.Uid, "#获得手牌,T1" + FormatPlayers(p =>
-                    p.Uid != player.Uid && p.Tux.Count > 0 && p.IsAlive), "GTT1", "0");
-                ushort from = ushort.Parse(sel);
+                ushort from = ushort.Parse(argst);
+                TargetPlayer(player.Uid, from);
                 XI.AsyncInput(player.Uid, "#获得,C1(" + Algo.RepeatString("p0",
-                    XI.Board.Garden[from].Tux.Count) + ")", "GTT1", "1");
+                    XI.Board.Garden[from].Tux.Count) + ")", "GTT1", "0");
                 XI.RaiseGMessage("G0HQ,0," + player.Uid + "," + from + ",2,1");
             }
         }
@@ -1296,6 +1295,12 @@ namespace PSD.PSDGamepkg.JNS
                 }
             }
             return false;
+        }
+        public string GTT1ConsumeInput(Player player, int consumeType, int type, string fuse, string prev)
+        {
+            if (consumeType == 0 && prev == "")
+                return "#获得手牌,/T1" + FormatPlayers(p => p.Uid != player.Uid && p.IsAlive && p.Tux.Count > 0);
+            else return "";
         }
         public void GTT1WinEff()
         {
@@ -1856,35 +1861,19 @@ namespace PSD.PSDGamepkg.JNS
         }
         public void GTT3WinEff()
         {
-            List<Player> invs = new List<Player> { XI.Board.Rounder };
-            if (XI.Board.Supporter.IsValidPlayer())
-                invs.Add(XI.Board.Supporter);
-            if (XI.Board.Hinder.IsValidPlayer())
-                invs.Add(XI.Board.Hinder);
-            Harm("GTT3", invs, 2);
+            Harm("GTT3", XI.Board.Garden.Values.Where(p => p.IsAlive && XI.Board.IsAttendWar(p)), 2);
         }
         public void GTT3LoseEff()
         {
-            List<Player> invs = new List<Player> { XI.Board.Rounder };
-            if (XI.Board.Supporter.IsValidPlayer())
-                invs.Add(XI.Board.Supporter);
-            if (XI.Board.Hinder.IsValidPlayer())
-                invs.Add(XI.Board.Hinder);
-            invs = XI.Board.Garden.Values.Where(p => p.IsAlive).Except(invs).ToList();
-            if (invs.Count > 0)
-                Harm("GTT3", invs, 2);
+            Harm("GTT3", XI.Board.Garden.Values.Where(p => p.IsAlive && !XI.Board.IsAttendWar(p)), 2);
         }
         public void GTT4Debut()
         {
-            var g = XI.Board.Garden;
-            Player r = XI.Board.Rounder, o = XI.Board.Opponent;
             IDictionary<ushort, string> ques = new Dictionary<ushort, string>();
-            ques[r.Uid] = "#HP-2,T1(p" + string.Join("p", g.Values.Where(
-                p => p.IsAlive && p.Team == r.OppTeam).Select(p => p.Uid)) + ")";
-            ques[o.Uid] = "#HP-2,T1(p" + string.Join("p", g.Values.Where(
-                p => p.IsAlive && p.Team == r.Team).Select(p => p.Uid)) + ")";
+            ques[XI.Board.Rounder.Uid] = "#HP-2,T1" + AEnemy(XI.Board.Rounder);
+            ques[XI.Board.Opponent.Uid] = "#HP-2,T1" + AEnemy(XI.Board.Opponent);
             IDictionary<ushort, string> ans = XI.MultiAsyncInput(ques);
-            Harm("GTT4", ans.Values.Select(p => g[ushort.Parse(p)]).ToList(), 2);
+            Harm("GTT4", ans.Values.Select(p => XI.Board.Garden[ushort.Parse(p)]).ToList(), 2);
         }
         public void GTT4ConsumeAction(Player player, int consumeType, int type, string fuse, string argst)
         {
@@ -2830,18 +2819,11 @@ namespace PSD.PSDGamepkg.JNS
             }
             else if (consumeType == 2)
             {
-                if (XI.Board.InCampaign) // G0FI
-                {
-                    string[] g0fi = fuse.Split(',');
-                    if (g0fi[1] == "O" || g0fi[1] == "U")
-                        return false;
-                    for (int i = 1; i < g0fi.Length; i += 3)
-                    {
-                        char ch = g0fi[i][0];
-                        if (ch == 'S' || ch == 'H')
-                            return true;
-                    }
-                }
+                return Artiad.CoachingChange.Parse(fuse).List.Any(p =>
+                    p.Role == Artiad.CoachingChangeUnit.PType.SUPPORTER ||
+                    p.Role == Artiad.CoachingChangeUnit.PType.HINDER ||
+                    p.Role == Artiad.CoachingChangeUnit.PType.EX_ENTER ||
+                    p.Role == Artiad.CoachingChangeUnit.PType.EX_EXIT);
             }
             return false;
         }
@@ -2852,20 +2834,27 @@ namespace PSD.PSDGamepkg.JNS
                 XI.RaiseGMessage("G0QZ," + player.Uid + "," + argst);
             else if (consumeType == 2)
             {
-                string[] g0fi = fuse.Split(',');
-                for (int i = 1; i < g0fi.Length; i += 3)
+                Artiad.CoachingChange.Parse(fuse).List.ForEach(p =>
                 {
-                    char ch = g0fi[i][0];
-                    ushort old = ushort.Parse(g0fi[i + 1]);
-                    ushort to = ushort.Parse(g0fi[i + 2]);
-                    if (ch == 'S' || ch == 'H')
+                    if (p.Role == Artiad.CoachingChangeUnit.PType.SUPPORTER ||
+                        p.Role == Artiad.CoachingChangeUnit.PType.HINDER)
                     {
-                        if (old != 0)
-                            XI.Board.Garden[old].DrTuxDisabled = true;
-                        if (to != 0)
-                            XI.Board.Garden[to].DrTuxDisabled = false;
+                        if (p.Elder != 0 && p.Elder < 1000)
+                            XI.Board.Garden[p.Elder].DrTuxDisabled = true;
+                        if (p.Stepper != 0 && p.Stepper < 1000)
+                            XI.Board.Garden[p.Stepper].DrTuxDisabled = false;
                     }
-                }
+                    else if (p.Role == Artiad.CoachingChangeUnit.PType.EX_ENTER)
+                    {
+                        if (p.Stepper != 0 && p.Stepper < 1000)
+                            XI.Board.Garden[p.Stepper].DrTuxDisabled = false;
+                    }
+                    else if (p.Role == Artiad.CoachingChangeUnit.PType.EX_EXIT)
+                    {
+                        if (p.Elder != 0 && p.Elder < 1000)
+                            XI.Board.Garden[p.Elder].DrTuxDisabled = true;
+                    }
+                });
             }
         }
         public string GSH2ConsumeInput(Player player, int consumeType, int type, string fuse, string prev)
@@ -2943,35 +2932,17 @@ namespace PSD.PSDGamepkg.JNS
                 bool yesIncr = XI.Board.Garden.Values.Any(p =>
                     p.Uid != player.Uid && XI.Board.IsAttendWar(p) && p.GetPetCount() > 0);
                 if (type == 0) // Z1
-                    return XI.Board.IsAttendWar(player) && yesIncr;
+                    return XI.Board.IsAttendWar(player) && GSH3GetIncrCnt(player) > 0;
                 else if (type == 1 && XI.Board.PoolEnabled) // FI
                 {
-                    string[] g0fi = fuse.Split(',');
-                    if (g0fi[1] == "O" || g0fi[1] == "U")
-                        return false;
-                    int playerIn = 0;
-                    bool leaver = false;
-                    for (int i = 1; i < g0fi.Length; i += 3)
-                    {
-                        char ch = g0fi[i][0];
-                        ushort old = ushort.Parse(g0fi[i + 1]);
-                        ushort to = ushort.Parse(g0fi[i + 2]);
-                        if (old == player.Uid)
-                            --playerIn;
-                        else
-                        {
-                            Player po = XI.Board.Garden[old];
-                            if (po != null && po.GetPetCount() > 0) { leaver = true; break; }
-                        }
-                        if (to == player.Uid)
-                            ++playerIn;
-                        else
-                        {
-                            Player pt = XI.Board.Garden[to];
-                            if (pt != null && pt.GetPetCount() > 0) { leaver = true; break; }
-                        }
-                    }
-                    return leaver || playerIn != 0;
+                    Artiad.CoachingChange cc = Artiad.CoachingChange.Parse(fuse);
+                    return cc.AttendOrLeave(player.Uid) != 0 || (cc.List.Any(p =>
+                        (p.Role == Artiad.CoachingChangeUnit.PType.SUPPORTER ||
+                        p.Role == Artiad.CoachingChangeUnit.PType.HINDER ||
+                        p.Role == Artiad.CoachingChangeUnit.PType.EX_ENTER ||
+                        p.Role == Artiad.CoachingChangeUnit.PType.EX_EXIT) &&
+                        (p.Elder != 0 && p.Elder < 1000 && XI.Board.Garden[p.Elder].GetPetCount() > 0 ||
+                        p.Stepper != 0 && p.Stepper < 1000 && XI.Board.Garden[p.Stepper].GetPetCount() > 0)));
                 }
             }
             return false;
@@ -3517,11 +3488,14 @@ namespace PSD.PSDGamepkg.JNS
 
         private void Harm(string monCode, IEnumerable<Player> invs, int n, long mask = 0)
         {
-            mask = HPEvoMask.FROM_NMB.Set(mask);
-            ushort monValue = XI.LibTuple.ML.Encode(monCode);
-            Monster mon = XI.LibTuple.ML.Decode(monValue);
-            XI.RaiseGMessage(Artiad.Harm.ToMessage(invs.Select(p =>
-                new Artiad.Harm(p.Uid, (monValue + 1000), mon.Element, n, mask))));
+            if (invs.Any())
+            {
+                mask = HPEvoMask.FROM_NMB.Set(mask);
+                ushort monValue = XI.LibTuple.ML.Encode(monCode);
+                Monster mon = XI.LibTuple.ML.Decode(monValue);
+                XI.RaiseGMessage(Artiad.Harm.ToMessage(invs.Select(p =>
+                    new Artiad.Harm(p.Uid, (monValue + 1000), mon.Element, n, mask))));
+            }
         }
 
         private void Harm(string monCode, List<Player> invs, List<int> ns, long mask = 0)

@@ -2163,28 +2163,31 @@ namespace PSD.ClientAo
                 case "E09P":
                     if (args[1] == "0")
                     {
+                        Action<ushort, bool> updateAs = (u, uy) =>
+                        {
+                            if (u != 0 && u < 1000)
+                            {
+                                if (uy) { A0P[u].SetAsSpSucc(); }
+                                else { A0P[u].SetAsSpFail(); }
+                            }
+                        };
+                        List<string> msgs = new List<string>();
                         ushort s = ushort.Parse(args[2]);
                         bool sy = args[3].Equals("1");
                         ushort h = ushort.Parse(args[4]);
                         bool hy = args[5].Equals("1");
-                        string comp1 = (s != 0) ? "{0}支援" + (sy ? "成功" : "失败") : "无支援";
-                        string comp2 = (h != 0) ? "{1}妨碍" + (hy ? "成功" : "失败") : "无妨碍";
-                        VI.Cout(Uid, comp1 + "，" + comp2 + "。", zd.Warrior(s), zd.Warrior(h));
-
-                        if (s != 0 && s < 1000)
+                        msgs.Add(s != 0 ? (zd.Warrior(s) + "支援" + (sy ? "成功" : "失败")) : "无支援");
+                        updateAs(s, sy);
+                        msgs.Add(h != 0 ? (zd.Warrior(h) + "妨碍" + (hy ? "成功" : "失败")) : "无妨碍");
+                        updateAs(h, hy);
+                        for (int i = 6; i < args.Length; i += 2)
                         {
-                            if (sy)
-                                A0P[s].SetAsSpSucc();
-                            else
-                                A0P[s].SetAsSpFail();
+                            ushort d = ushort.Parse(args[i]);
+                            bool dy = args[i + 1] == "1";
+                            msgs.Add(string.Format("{0}额外参战{1}命中", zd.Warrior(d), (dy ? "" : "未")));
+                            updateAs(d, dy);
                         }
-                        if (h != 0 && h < 1000)
-                        {
-                            if (hy)
-                                A0P[h].SetAsSpSucc();
-                            else
-                                A0P[h].SetAsSpFail();
-                        }
+                        VI.Cout(Uid, "{0}。", string.Join(",", msgs));
                     }
                     else if (args[1] == "1")
                     {
@@ -2802,57 +2805,68 @@ namespace PSD.ClientAo
                     {
                         ushort rounder = ushort.Parse(args[2]);
                         A0P.Where(p => p.Key != rounder).ToList().ForEach((p) => p.Value.SetAsClear());
-                        A0F.Hinder = 0; A0F.Supporter = 0;
+                        A0F.Hinder = 0; A0F.Supporter = 0; A0F.Drums.Clear();
                     }
                     else
                     {
                         List<ushort> leavers = new List<ushort>();
                         List<ushort> joiners = new List<ushort>();
                         List<string> msgs = new List<string>();
-                        for (int i = 1; i < args.Length; i += 3)
+                        int idx = 1;
+                        while (idx < args.Length)
                         {
-                            char position = args[i][0];
-                            ushort old = ushort.Parse(args[i + 1]);
-                            ushort s = ushort.Parse(args[i + 2]);
-                            if (old != 0)
-                                leavers.Add(old);
-                            if (s != 0)
+                            char position = args[idx][0];
+                            if (new char[] { 'T', 'S', 'H', 'W', 'D' }.Contains(position))
+                                leavers.Add(ushort.Parse(args[idx + 1]));
+                            if (position == 'T')
                             {
-                                joiners.Add(s);
-                                if (position == 'T')
+                                ushort s = ushort.Parse(args[idx + 2]); // A0F.Trigger = s;
+                                msgs.Add(string.Format("{0}触发战斗", zd.Warrior(s)));
+                                if (s != 0 && s < 1000)
+                                    A0P[s].SetAsRounder();
+                            }
+                            else if (position == 'S')
+                            {
+                                ushort s = ushort.Parse(args[idx + 2]); A0F.Supporter = s;
+                                msgs.Add(string.Format("{0}支援", zd.Warrior(s)));
+                                if (s != 0 && s < 1000)
+                                    A0P[s].SetAsSpSucc();
+                            }
+                            else if (position == 'H')
+                            {
+                                ushort s = ushort.Parse(args[idx + 2]); A0F.Hinder = s;
+                                msgs.Add(string.Format("{0}妨碍", zd.Warrior(s)));
+                                if (s != 0 && s < 1000)
+                                    A0P[s].SetAsSpSucc();
+                            }
+                            else if (position == 'W')
+                            {
+                                ushort s = ushort.Parse(args[idx + 2]); // A0F.Horn = s;
+                                msgs.Add(string.Format("{0}代为触发战斗", zd.Warrior(s)));
+                                if (s != 0 && s < 1000)
                                 {
-                                    msgs.Add(string.Format("{0}触发战斗", zd.Warrior(s)));
-                                    //A0F.Trigger = s;
-                                    if (s != 0 && s < 1000)
-                                        A0P[s].SetAsRounder();
-                                }
-                                else if (position == 'S')
-                                {
-                                    msgs.Add(string.Format("{0}支援", zd.Warrior(s)));
-                                    A0F.Supporter = s;
-                                    if (s != 0 && s < 1000)
-                                        A0P[s].SetAsSpSucc();
-                                }
-                                else if (position == 'H')
-                                {
-                                    msgs.Add(string.Format("{0}妨碍", zd.Warrior(s)));
-                                    A0F.Hinder = s;
-                                    if (s != 0 && s < 1000)
-                                        A0P[s].SetAsSpSucc();
-                                }
-                                else if (position == 'W')
-                                {
-                                    msgs.Add(string.Format("{0}代为触发战斗", zd.Warrior(s)));
-                                    //A0F.Horn = s;
-                                    if (s != 0 && s < 1000)
-                                    {
-                                        A0P.Values.ToList().ForEach((p) => p.SetAsNotTrigger());
-                                        A0P[s].SetAsDelegate();
-                                    }
+                                    A0P.Values.ToList().ForEach((p) => p.SetAsNotTrigger());
+                                    A0P[s].SetAsDelegate();
                                 }
                             }
+                            else if (position == 'C')
+                            {
+                                ushort s = ushort.Parse(args[idx + 1]); A0F.Drums.Add(s);
+                                msgs.Add(string.Format("{0}额外参战", zd.Warrior(s)));
+                                if (s != 0 && s < 1000)
+                                    A0P[s].SetAsSpSucc();
+                            }
+                            else if (position == 'D')
+                            {
+                                ushort s = ushort.Parse(args[idx + 1]); A0F.Drums.Remove(s);
+                            }
+                            if (new char[] { 'T', 'S', 'H', 'W' }.Contains(position))
+                                idx += 3;
+                            else if (new char[] { 'C', 'D', 'R' }.Contains(position))
+                                idx += 2;
+                            else break;
                         }
-                        leavers.RemoveAll(p => joiners.Contains(p));
+                        leavers.RemoveAll(p => p == 0 || joiners.Contains(p));
                         if (leavers.Count > 0)
                         {
                             msgs.AddRange(leavers.Select(p => string.Format("{0}退出战斗", zd.Warrior(p))));
@@ -3592,9 +3606,9 @@ namespace PSD.ClientAo
                         VI.Cout(Uid, "{0}战牌结束阶段结束.", zd.Player(rounder));
                     break;
                 case "BC":
-                    A0P.Where(p => p.Key != rounder).ToList().ForEach((p) => p.Value.SetAsClear());
-                    A0P[rounder].SetAsRounder();
-                    A0F.Supporter = 0; A0F.Hinder = 0;
+                    //A0P.Where(p => p.Key != rounder).ToList().ForEach((p) => p.Value.SetAsClear());
+                    //A0P[rounder].SetAsRounder();
+                    //A0F.Supporter = 0; A0F.Hinder = 0;
                     if (para == "0")
                         VI.Cout(Uid, "{0}补牌阶段开始.", zd.Player(rounder));
                     else if (para == "1")
@@ -3608,7 +3622,7 @@ namespace PSD.ClientAo
                     break;
                 case "ED":
                     A0P.Values.ToList().ForEach((p) => p.SetAsClear());
-                    A0F.Supporter = 0; A0F.Hinder = 0;
+                    A0F.Supporter = 0; A0F.Hinder = 0; A0F.Drums.Clear();
                     A0F.Monster1 = 0; A0F.Monster2 = 0;
                     A0F.Eve1 = 0;
                     A0F.PoolAka = 0; A0F.PoolAo = 0;
@@ -4338,48 +4352,68 @@ namespace PSD.ClientAo
                         //Z0F = new ZeroField(this);
                         //Z0P = new ZeroPiles(this);
                         string[] blocks = cmdrst.Split(',');
-                        A0F.Eve1 = ushort.Parse(blocks[0]);
-                        A0F.TuxCount = int.Parse(blocks[1]);
-                        A0F.MonCount = int.Parse(blocks[2]);
-                        A0F.EveCount = int.Parse(blocks[3]);
+                        A0F.TuxCount = int.Parse(blocks[0]);
+                        A0F.MonCount = int.Parse(blocks[1]);
+                        A0F.EveCount = int.Parse(blocks[2]);
 
-                        A0F.TuxDises = int.Parse(blocks[4]);
-                        A0F.MonDises = int.Parse(blocks[5]);
-                        A0F.EveDises = int.Parse(blocks[6]);
+                        A0F.TuxDises = int.Parse(blocks[3]);
+                        A0F.MonDises = int.Parse(blocks[4]);
+                        A0F.EveDises = int.Parse(blocks[5]);
 
                         //A0F.Rounder
-                        ushort rounder = ushort.Parse(blocks[7]);
-                        ushort supporter = ushort.Parse(blocks[8]);
+                        ushort rounder = ushort.Parse(blocks[6]);
+                        ushort supporter = ushort.Parse(blocks[7]);
+                        bool shit = blocks[8] == "1";
                         ushort hinder = ushort.Parse(blocks[9]);
+                        bool hhit = blocks[10] == "1";
                         foreach (AoPlayer ap in A0P.Values)
                             ap.SetAsClear();
                         if (rounder != 0)
                             A0P[rounder].SetAsRounder();
-                        if (supporter != 0)
+                        A0F.Supporter = supporter;
+                        if (supporter != 0 && supporter < 1000)
                         {
-                            A0F.Supporter = supporter;
-                            if (supporter < 1000)
-                                A0P[supporter].SetAsSpSucc();
+                            if (shit) { A0P[supporter].SetAsSpSucc(); }
+                            else { A0P[supporter].SetAsSpFail(); }
                         }
-                        if (hinder != 0)
+                        A0F.Hinder = hinder;
+                        if (hinder != 0 && hinder < 1000)
                         {
-                            A0F.Hinder = hinder;
-                            if (hinder < 1000)
-                                A0P[hinder].SetAsSpSucc();
+                            if (hhit) { A0P[hinder].SetAsSpSucc(); }
+                            else { A0P[hinder].SetAsSpFail(); }
                         }
-                        ushort mon1 = ushort.Parse(blocks[10]);
-                        ushort mon2 = ushort.Parse(blocks[11]);
-                        ushort eve1 = ushort.Parse(blocks[12]);
-                        A0F.Monster1 = mon1; A0F.Monster2 = mon2; A0F.Eve1 = eve1;
 
-                        for (int i = 13; i < Math.Min(blocks.Length, 17); i += 2)
+                        int idx = 11;
+                        ushort[] drums = Algo.TakeArrayWithSize(blocks, idx, out idx, 2);
+                        for (int i = 0; i < drums.Length; i += 2)
+                        {
+                            ushort d = drums[i];
+                            if (d != 0)
+                            {
+                                A0F.Drums.Add(d);
+                                if (d < 1000)
+                                {
+                                    if (drums[i + 1] == 1) A0P[d].SetAsSpSucc();
+                                    else A0P[d].SetAsSpFail();
+                                }
+                            }
+                        }
+
+                        ushort wang = ushort.Parse(blocks[idx]);
+                        ushort mon1 = ushort.Parse(blocks[idx + 1]);
+                        ushort mon2 = ushort.Parse(blocks[idx + 2]);
+                        ushort eve1 = ushort.Parse(blocks[idx + 3]);
+                        A0F.Eve1 = eve1; A0F.Wang = wang;
+                        A0F.Monster1 = mon1; A0F.Monster2 = mon2;
+
+                        for (int i = idx + 4; i < Math.Min(blocks.Length, idx + 8); i += 2)
                         {
                             if (blocks[i] == "1")
                                 A0F.PoolAka = int.Parse(blocks[i + 1]);
                             else if (blocks[i] == "2")
                                 A0F.PoolAo = int.Parse(blocks[i + 1]);
                         }
-                        for (int i = 17; i < blocks.Length; i += 2)
+                        for (int i = idx + 8; i < blocks.Length; i += 2)
                         {
                             if (blocks[i] == "1")
                                 A0F.ScoreAka = int.Parse(blocks[i + 1]);
