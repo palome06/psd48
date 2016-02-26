@@ -2488,14 +2488,10 @@ namespace PSD.PSDGamepkg.JNS
                 p => p.IsTared && !XI.Board.IsAttendWar(p)), "ZPH2", "0");
             ushort attender = ushort.Parse(ai);
             TargetPlayer(player.Uid, attender);
-            // TODO: Use G17F
-            XI.RaiseGMessage("G17F,C," + attender);
-            //Player py = XI.Board.Garden[attender];
-            //if (py.Team == XI.Board.Rounder.Team)
-            //    XI.Board.RDrums[py] = false;
-            //else if (py.Team == XI.Board.Rounder.OppTeam)
-            //    XI.Board.RDrums[py] = false;
-            //XI.RaiseGMessage("G09P,0");
+            XI.RaiseGMessage(new Artiad.CoachingSign() { SingleUnit = new Artiad.CoachingSignUnit()
+            {
+                Role = Artiad.CoachingHelper.PType.EX_ENTER, Coach = attender
+            } }.ToMessage());
         }
         public bool ZPH2Valid(Player player, int type, string fuse)
         {

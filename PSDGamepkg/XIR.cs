@@ -256,7 +256,10 @@ namespace PSD.PSDGamepkg
 
                             if (!isFight)
                             {
-                                RaiseGMessage("G17F,O");
+                                RaiseGMessage(new Artiad.CoachingSign() { SingleUnit = new Artiad.CoachingSignUnit()
+                                {
+                                    Role = Artiad.CoachingHelper.PType.GIVEUP
+                                } }.ToMessage());
                                 // Ensure XI.Board.Mon1From == 0
                                 if (Board.Mon1From == 0 || Board.Monster1 == 0)
                                 {
@@ -270,7 +273,10 @@ namespace PSD.PSDGamepkg
                             }
                             else
                             {
-                                RaiseGMessage("G17F,S," + sprUid);
+                                RaiseGMessage(new Artiad.CoachingSign() { SingleUnit = new Artiad.CoachingSignUnit()
+                                {
+                                    Role = Artiad.CoachingHelper.PType.SUPPORTER, Coach = sprUid
+                                } }.ToMessage());
                                 // Hinder side
                                 isFight = false; // decide to show fight or just pass
                                 string hnsm = "#妨碍者(决定)", hnsn = "#妨碍者(建议)";
@@ -320,7 +326,10 @@ namespace PSD.PSDGamepkg
                                 }
                                 else if (decision.StartsWith("/"))
                                     hndUid = 0;
-                                RaiseGMessage("G17F,H," + hndUid);
+                                RaiseGMessage(new Artiad.CoachingSign() { SingleUnit = new Artiad.CoachingSignUnit()
+                                {
+                                    Role = Artiad.CoachingHelper.PType.HINDER, Coach = hndUid
+                                } }.ToMessage());
                                 //WI.BCast(rstage + "7,2," + Board.Hinder.Uid);
                                 rstage = "R" + rounder + "ZU";
                             }
@@ -417,7 +426,8 @@ namespace PSD.PSDGamepkg
                                 Board.PoolEnabled = true;
                                 Board.FightTangled = false;
                                 AwakeABCValue(false);
-                            }, () => RaiseGMessage("G09P,0"), () => RaiseGMessage("G0CZ,2") });
+                            }, () => RaiseGMessage(new Artiad.PondRefresh() { CheckHit = true }.ToMessage()),
+                            () => RaiseGMessage("G0CZ,2") });
                         WI.BCast(rstage + ",1");
                         rstage = "R" + rounder + "Z8"; break;
                     case "Z8":
@@ -439,7 +449,7 @@ namespace PSD.PSDGamepkg
                             new Action[] { () => {
                                 Board.PlayerPoolEnabled = true;
                                 AwakeABCValue(true);
-                            }, () => RaiseGMessage("G09P,0") });
+                            }, () => RaiseGMessage(new Artiad.PondRefresh() { CheckHit = true }.ToMessage()) });
                         rstage = "R" + rounder + "ZD"; break;
                     case "ZD":
                         WI.BCast(rstage + ",0");
@@ -557,7 +567,10 @@ namespace PSD.PSDGamepkg
                         Board.InCampaign = false;
                         rstage = "R" + rounder + "ZZ"; break;
                     case "ZZ":
-                        RaiseGMessage("G17F,U," + rounder);
+                        RaiseGMessage(new Artiad.CoachingSign() { SingleUnit = new Artiad.CoachingSignUnit()
+                        {
+                            Role = Artiad.CoachingHelper.PType.DONE, Coach = rounder
+                        } }.ToMessage());
                         RunQuadStage(rstage);
                         rstage = "R" + rounder + "BC";
                         break;
@@ -1020,6 +1033,7 @@ namespace PSD.PSDGamepkg
                 if (imt.Count > 0)
                     RaiseGMessage("G0ON," + string.Join(",", imt.Select(p => p.Key + ",C," +
                         p.Value.Count + "," + string.Join(",", p.Value))));
+                Board.PendingTux.Dequeue(Board.PendingTux.Count); // Clear the pending tux
             }
         }
     }

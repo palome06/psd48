@@ -11,20 +11,20 @@ namespace PSD.PSDGamepkg
     public partial class XI
     {
         #region G-Loop
-        // public void RaiseGObject(UnitObject uo)
+        // public void RaiseNGT(NGT ngt)
         // {
-        //     Log.Logger(uo.ToMessage());
-        //     if (uo.IsSentDirect)
-        //         SimpleGObject100(uo);
-        //     else
-        //         InnerGObject(uo, int.MinValue);
+        //    if (ngt != null)
+        //    {
+        //         Log.Logger(ngt.ToMessage());
+        //         Mint mint = new Mint(ngt, int.MinValue);
+        //         InnerMint(mint);
+        //    }
         // }
         // Raise Command from skill declaration, without Priory Control
         public void RaiseGMessage(string cmd)
         {
             if (cmd.StartsWith("G"))
             {
-                //VI.Cout(0, "☆◇○" + cmd + "○◇☆");
                 Log.Logger(cmd);
                 if (cmd.StartsWith("G2"))
                     SimpleGMessage100(cmd);
@@ -330,14 +330,21 @@ namespace PSD.PSDGamepkg
                                 bool mightInvolve = false;
                                 if (Board.Supporter.Uid == who)
                                 {
+                                    // if changeType = 1, trigger REFRESH and handle in G0IY
                                     if (changeType == 2)
-                                        RaiseGMessage("G17F,S,0");
+                                        RaiseGMessage(new Artiad.CoachingSign() { SingleUnit = new Artiad.CoachingSignUnit()
+                                        {
+                                            Role = Artiad.CoachingHelper.PType.SUPPORTER, Coach = 0
+                                        } }.ToMessage());
                                     mightInvolve = true;
                                 }
                                 else if (Board.Hinder.Uid == who)
                                 {
                                     if (changeType == 2)
-                                        RaiseGMessage("G17F,H,0"); // TODO: if changed, still need monitor
+                                        RaiseGMessage(new Artiad.CoachingSign() { SingleUnit = new Artiad.CoachingSignUnit()
+                                        {
+                                            Role = Artiad.CoachingHelper.PType.HINDER, Coach = 0
+                                        } }.ToMessage());
                                     mightInvolve = true;
                                 }
                                 if (mightInvolve && Board.PoolEnabled)
@@ -347,7 +354,7 @@ namespace PSD.PSDGamepkg
                         if (rounded)
                             RaiseGMessage(new Artiad.Goto() { Terminal = "R" + Board.Rounder.Uid + "ED" }.ToMessage());
                         if (_9ped)
-                            RaiseGMessage("G09P,0");
+                            RaiseGMessage(new Artiad.PondRefresh() { CheckHit = true }.ToMessage());
                     }
                     break;
                 case "G0CC": // prepare to use card
@@ -1373,7 +1380,10 @@ namespace PSD.PSDGamepkg
                         else if (changeType == 1)
                         {
                             if (Board.IsAttendWar(player))
-                                RaiseGMessage("G17F,R," + player.Uid);
+                                RaiseGMessage(new Artiad.CoachingSign() { SingleUnit = new Artiad.CoachingSignUnit()
+                                {
+                                    Role = Artiad.CoachingHelper.PType.REFRESH, Coach = player.Uid
+                                } }.ToMessage());
                         }
                         string zs = "";
                         if (player.Weapon != 0)
@@ -1402,7 +1412,7 @@ namespace PSD.PSDGamepkg
                             }
                         }
                         if (Board.IsAttendWar(player) && Board.PoolEnabled)
-                            RaiseGMessage("G09P,0");
+                            RaiseGMessage(new Artiad.PondRefresh() { CheckHit = true }.ToMessage());
                     }
                     break;
                 case "G0DS":
@@ -2039,7 +2049,7 @@ namespace PSD.PSDGamepkg
                             WI.BCast("E0IA," + me + ",2");
                         }
                         if (Board.PoolEnabled)
-                            RaiseGMessage("G09P,1");
+                            RaiseGMessage(new Artiad.PondRefresh() { CheckHit = false }.ToMessage());
                         break;
                     }
                 case "G0OA":
@@ -2080,7 +2090,7 @@ namespace PSD.PSDGamepkg
                             WI.BCast("E0OA," + me + ",2");
                         }
                         if (Board.PoolEnabled)
-                            RaiseGMessage("G09P,1");
+                            RaiseGMessage(new Artiad.PondRefresh() { CheckHit = false }.ToMessage());
                         break;
                     }
                 case "G0IX":
@@ -2122,7 +2132,7 @@ namespace PSD.PSDGamepkg
                                 WI.BCast("E0IX," + me + ",2");
                             }
                             if (Board.PoolEnabled)
-                                RaiseGMessage("G09P,0");
+                                RaiseGMessage(new Artiad.PondRefresh() { CheckHit = true }.ToMessage());
                         }
                         break;
                     }
@@ -2165,7 +2175,7 @@ namespace PSD.PSDGamepkg
                                 WI.BCast("E0OX," + me + ",2");
                             }
                             if (Board.PoolEnabled)
-                                RaiseGMessage("G09P,0");
+                                RaiseGMessage(new Artiad.PondRefresh() { CheckHit = true }.ToMessage());
                         }
                     }
                     break;
@@ -2182,7 +2192,7 @@ namespace PSD.PSDGamepkg
                             mon.STR = mon.mSTR + n;
                             WI.BCast("E0IB," + x + "," + n + "," + mon.STR);
                             if (Board.PoolEnabled)
-                                RaiseGMessage("G09P,1");
+                                RaiseGMessage(new Artiad.PondRefresh() { CheckHit = false }.ToMessage());
                             RaiseGMessage("G2WK," + string.Join(",",
                                 CalculatePetsScore().Select(p => p.Key + "," + p.Value)));
                         }
@@ -2205,7 +2215,7 @@ namespace PSD.PSDGamepkg
                             mon.STR = mon.mSTR - n;
                             WI.BCast("E0OB," + x + "," + n + "," + mon.STR);
                             if (Board.PoolEnabled)
-                                RaiseGMessage("G09P,1");
+                                RaiseGMessage(new Artiad.PondRefresh() { CheckHit = false }.ToMessage());
                             RaiseGMessage("G2WK," + string.Join(",",
                                 CalculatePetsScore().Select(p => p.Key + "," + p.Value)));
                         }
@@ -2228,7 +2238,7 @@ namespace PSD.PSDGamepkg
                             mon.AGL = mon.mAGL + n;
                             WI.BCast("E0IW," + x + "," + n + "," + mon.AGL);
                             if (Board.PoolEnabled)
-                                RaiseGMessage("G09P,0");
+                                RaiseGMessage(new Artiad.PondRefresh() { CheckHit = true }.ToMessage());
                         }
                         break;
                     }
@@ -2243,7 +2253,7 @@ namespace PSD.PSDGamepkg
                             mon.AGL = mon.mAGL - n;
                             WI.BCast("E0OW," + x + "," + n + "," + mon.AGL);
                             if (Board.PoolEnabled)
-                                RaiseGMessage("G09P,0");
+                                RaiseGMessage(new Artiad.PondRefresh() { CheckHit = true }.ToMessage());
                         }
                         break;
                     }
@@ -2282,28 +2292,7 @@ namespace PSD.PSDGamepkg
                     }
                     break;
                 case "G09P":
-                    if (args[1] == "0")
-                    {
-                        Func<Player, bool> hit = (p) => p.DEXi > 0 || (p.DEXi == 0 && p.DEX >= Board.Battler.AGL);
-                        Board.HinderSucc = hit(Board.Hinder);
-                        Board.SupportSucc = hit(Board.Supporter);
-                        Board.RDrums.Keys.ToList().ForEach(p => Board.RDrums[p] = hit(p));
-                        Board.ODrums.Keys.ToList().ForEach(p => Board.ODrums[p] = hit(p));
-
-                        List<string> msgs = new List<string>();
-                        msgs.Add(Board.Supporter.Uid + "," + (Board.SupportSucc ? "1" : "0"));
-                        msgs.Add(Board.Hinder.Uid + "," + (Board.HinderSucc ? "1" : "0"));
-                        msgs.AddRange(Board.RDrums.Select(p => p.Key.Uid + "," + (p.Value ? "1" : "0")));
-                        msgs.AddRange(Board.ODrums.Select(p => p.Key.Uid + "," + (p.Value ? "1" : "0")));
-
-                        WI.BCast("E09P,0," + string.Join(",", msgs));
-                    }
-                    if (args[1] == "0" || args[1] == "1")
-                    {
-                        WI.BCast("E09P,1," + Board.Rounder.Team + "," + Board.CalculateRPool()
-                                + "," + Board.Rounder.OppTeam + "," + Board.CalculateOPool());
-                    }
-                    break;
+                    Artiad.PondRefresh.Parse(cmd).Handle(this, WI); break;
                 case "G1WP":
                     for (int i = 1; i < args.Length; i += 4)
                     {
@@ -2348,7 +2337,7 @@ namespace PSD.PSDGamepkg
                             Board.OPool += delta;
                             WI.BCast("E0IP," + side + "," + delta);
                         }
-                        RaiseGMessage("G09P,1");
+                        RaiseGMessage(new Artiad.PondRefresh() { CheckHit = false }.ToMessage());
                     }
                     break;
                 case "G0OP":
@@ -2366,7 +2355,7 @@ namespace PSD.PSDGamepkg
                             Board.OPool -= delta;
                             WI.BCast("E0OP," + side + "," + delta);
                         }
-                        RaiseGMessage("G09P,1");
+                        RaiseGMessage(new Artiad.PondRefresh() { CheckHit = false }.ToMessage());
                     }
                     break;
                 case "G0CZ":
@@ -3164,103 +3153,7 @@ namespace PSD.PSDGamepkg
                     }
                     break;
                 case "G17F":
-                    if (args[1] == "O")
-                        RaiseGMessage(new Artiad.CoachingChange() { SingleUnit = new Artiad.CoachingChangeUnit()
-                        {
-                            Role = Artiad.CoachingChangeUnit.PType.GIVEUP
-                        } }.ToMessage());
-                    else if (args[1] == "U") // Just start the fight
-                        RaiseGMessage(new Artiad.CoachingChange() { SingleUnit = new Artiad.CoachingChangeUnit()
-                        {
-                            Role = Artiad.CoachingChangeUnit.PType.DONE,
-                            Elder = ushort.Parse(args[2])
-                        } }.ToMessage());
-                    else
-                    {
-                        ushort[] lists = new ushort[] { Board.Rounder.Uid, Board.Rounder.Uid,
-                             Board.Supporter.Uid, Board.Supporter.Uid,
-                             Board.Hinder.Uid, Board.Hinder.Uid, 0, 0 }; // TODO: Horn
-                        ISet<ushort> clist = new HashSet<ushort>();
-                        ISet<ushort> dlist = new HashSet<ushort>();
-                        ISet<ushort> rlist = new HashSet<ushort>();
-                        for (int i = 1; i < args.Length; i += 2)
-                        {
-                            char position = args[i][0];
-                            ushort who = ushort.Parse(args[i + 1]);
-
-                            if (position == 'R')
-                                rlist.Add(who);
-                            else if (who == Board.Rounder.Uid)
-                                lists[1] = 0;
-                            else if (who == Board.Supporter.Uid)
-                                lists[3] = 0;
-                            else if (who == Board.Hinder.Uid)
-                                lists[5] = 0;
-                            else if (who == Board.Horn.Uid)
-                                lists[7] = 0;
-                            else if (Board.DrumUts.Contains(who) && position != 'C')
-                                dlist.Add(who);
-                            else if (!Board.DrumUts.Contains(who) && position == 'C')
-                                clist.Add(who);
-
-                            if (position == 'T' && lists[1] != who)
-                                lists[1] = who;
-                            else if (position == 'S' && lists[3] != who)
-                                lists[3] = who;
-                            else if (position == 'H' && lists[5] != who)
-                                lists[5] = who;
-                            else if (position == 'W' && lists[7] != who)
-                                lists[7] = who;
-                        }
-                        List<Artiad.CoachingChangeUnit> ccus = new List<Artiad.CoachingChangeUnit>();
-                        if (lists[0] != lists[1])
-                            ccus.Add(new Artiad.CoachingChangeUnit()
-                            {
-                                Role = Artiad.CoachingChangeUnit.PType.TRIGGER,
-                                Elder = lists[0],
-                                Stepper = lists[1]
-                            });
-                        if (lists[2] != lists[3])
-                            ccus.Add(new Artiad.CoachingChangeUnit()
-                            {
-                                Role = Artiad.CoachingChangeUnit.PType.SUPPORTER,
-                                Elder = lists[2],
-                                Stepper = lists[3]
-                            });
-                        if (lists[4] != lists[5])
-                            ccus.Add(new Artiad.CoachingChangeUnit()
-                            {
-                                Role = Artiad.CoachingChangeUnit.PType.HINDER,
-                                Elder = lists[4],
-                                Stepper = lists[5]
-                            });
-                        if (lists[6] != lists[7])
-                            ccus.Add(new Artiad.CoachingChangeUnit()
-                            {
-                                Role = Artiad.CoachingChangeUnit.PType.HORN,
-                                Elder = lists[6],
-                                Stepper = lists[7]
-                            });
-                        ccus.AddRange(clist.Select(p => new Artiad.CoachingChangeUnit()
-                        {
-                            Role = Artiad.CoachingChangeUnit.PType.EX_ENTER,
-                            Stepper = p
-                        }));
-                        ccus.AddRange(dlist.Select(p => new Artiad.CoachingChangeUnit()
-                        {
-                            Role = Artiad.CoachingChangeUnit.PType.EX_EXIT,
-                            Elder = p
-                        }));
-                        ccus.AddRange(rlist.Select(p => new Artiad.CoachingChangeUnit()
-                        {
-                            Role = Artiad.CoachingChangeUnit.PType.REFRESH,
-                            Elder = p
-                        }));
-
-                        if (ccus.Count > 0)
-                            RaiseGMessage(new Artiad.CoachingChange() { List = ccus }.ToMessage());
-                    }
-                    break;
+                    Artiad.CoachingSign.Parse(cmd).Handle(this); break;
                 case "G0FI":
                     Artiad.CoachingChange.Parse(cmd).Handle(this, WI); break;
                 case "G0ON":

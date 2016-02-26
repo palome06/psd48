@@ -388,12 +388,27 @@ namespace PSD.PSDGamepkg.JNS
                 }.ToMessage());
                 XI.RaiseGMessage("G0DH," + ut + ",0,1");
             }
-            string willDiscard = XI.AsyncInput(ut, "#弃置的,/Q1(p" + randomCard + ")", "JNH0206", "1");
-            if (!willDiscard.StartsWith("/") && !willDiscard.Contains(VI.CinSentinel))
+
+            if (!tux.IsTuxEqiup())
             {
-                if (tar.ListOutAllCards().Contains(randomCard))
-                    XI.RaiseGMessage("G0QZ," + ut + "," + randomCard);
-                XI.RaiseGMessage("G0DH," + ut + ",0,1");
+                string willAsk = "#弃置的,/Q1(p" + randomCard + ")";
+                string willDiscard = XI.AsyncInput(ut, willAsk, "JNH0206", "1");
+                if (!willDiscard.StartsWith("/") && willDiscard != VI.CinSentinel)
+                {
+                    if (tar.ListOutAllCards().Contains(randomCard))
+                        XI.RaiseGMessage("G0QZ," + ut + "," + randomCard);
+                    XI.RaiseGMessage("G0DH," + ut + ",0,1");
+                }
+                else
+                {
+                    willDiscard = XI.AsyncInput(ut, willAsk, "JNH0206", "2");
+                    if (!willDiscard.StartsWith("/") && willDiscard != VI.CinSentinel)
+                    {
+                        if (tar.ListOutAllCards().Contains(randomCard))
+                            XI.RaiseGMessage("G0QZ," + ut + "," + randomCard);
+                        XI.RaiseGMessage("G0DH," + ut + ",0,1");
+                    }
+                }
             }
             XI.RaiseGMessage("G1CK," + player.Uid + ",JNH0206,0");
         }
@@ -1440,11 +1455,16 @@ namespace PSD.PSDGamepkg.JNS
             if (who != 0)
             {
                 if (XI.Board.Supporter == player)
-                    XI.RaiseGMessage("G17F,S," + who);
+                    XI.RaiseGMessage(new Artiad.CoachingSign() { SingleUnit = new Artiad.CoachingSignUnit()
+                    {
+                        Role = Artiad.CoachingHelper.PType.SUPPORTER, Coach = who
+                    } }.ToMessage());
                 else if (XI.Board.Hinder == player)
-                    XI.RaiseGMessage("G17F,H," + who);
+                    XI.RaiseGMessage(new Artiad.CoachingSign() { SingleUnit = new Artiad.CoachingSignUnit()
+                    {
+                        Role = Artiad.CoachingHelper.PType.HINDER, Coach = who
+                    } }.ToMessage());
             }
-            XI.RaiseGMessage("G09P,0");
         }
         public bool JNH0802Valid(Player player, int type, string fuse)
         {
@@ -2043,7 +2063,7 @@ namespace PSD.PSDGamepkg.JNS
             if (type == 0)
             {
                 return Artiad.CoachingChange.Parse(fuse).List.Any(p => p.Role ==
-                    Artiad.CoachingChangeUnit.PType.GIVEUP) && XI.Board.Rounder.Team == player.OppTeam;
+                    Artiad.CoachingHelper.PType.GIVEUP) && XI.Board.Rounder.Team == player.OppTeam;
             }
             else if (type == 1)
             {
@@ -3072,9 +3092,15 @@ namespace PSD.PSDGamepkg.JNS
                     if (value == 1 || value == 2)
                     {
                         if (b.Garden[ut] == b.Supporter)
-                            XI.RaiseGMessage("G17F,S,0");
+                            XI.RaiseGMessage(new Artiad.CoachingSign() { SingleUnit = new Artiad.CoachingSignUnit()
+                            {
+                                Role = Artiad.CoachingHelper.PType.SUPPORTER, Coach = 0
+                            } }.ToMessage());
                         else if (b.Garden[ut] == b.Hinder)
-                            XI.RaiseGMessage("G17F,H,0");
+                            XI.RaiseGMessage(new Artiad.CoachingSign() { SingleUnit = new Artiad.CoachingSignUnit()
+                            {
+                                Role = Artiad.CoachingHelper.PType.HINDER, Coach = 0
+                            } }.ToMessage());
                     }
                     else if (value == 5 || value == 6)
                         XI.RaiseGMessage("G0OJ," + player.Uid + ",0,1");

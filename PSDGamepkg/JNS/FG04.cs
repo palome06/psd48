@@ -669,9 +669,15 @@ namespace PSD.PSDGamepkg.JNS
             if (XI.Board.InCampaign)
             {
                 if (XI.Board.Supporter.Uid == rk)
-                    XI.RaiseGMessage("G17F,S,0");
+                    XI.RaiseGMessage(new Artiad.CoachingSign() { SingleUnit = new Artiad.CoachingSignUnit()
+                    {
+                        Role = Artiad.CoachingHelper.PType.SUPPORTER, Coach = 0
+                    } }.ToMessage());
                 else if (XI.Board.Hinder.Uid == rk)
-                    XI.RaiseGMessage("G17F,H,0");
+                    XI.RaiseGMessage(new Artiad.CoachingSign() { SingleUnit = new Artiad.CoachingSignUnit()
+                    {
+                        Role = Artiad.CoachingHelper.PType.HINDER, Coach = 0
+                    } }.ToMessage());
             }
         }
         public void GT03WinEff()
@@ -2132,7 +2138,7 @@ namespace PSD.PSDGamepkg.JNS
         }
         public bool GIT6ConsumeValid(Player player, int consumeType, int type, string fuse)
         {
-            if (consumeType == 0)
+            if (consumeType == 0 && Artiad.PondRefresh.Parse(fuse).CheckHit)
             {
                 Monster mon = XI.LibTuple.ML.Decode(XI.LibTuple.ML.Encode("GIT6"));
                 return mon != null && XI.Board.IsAttendWar(player) && !mon.RAM.GetBool("Hit");
@@ -2820,10 +2826,10 @@ namespace PSD.PSDGamepkg.JNS
             else if (consumeType == 2)
             {
                 return Artiad.CoachingChange.Parse(fuse).List.Any(p =>
-                    p.Role == Artiad.CoachingChangeUnit.PType.SUPPORTER ||
-                    p.Role == Artiad.CoachingChangeUnit.PType.HINDER ||
-                    p.Role == Artiad.CoachingChangeUnit.PType.EX_ENTER ||
-                    p.Role == Artiad.CoachingChangeUnit.PType.EX_EXIT);
+                    p.Role == Artiad.CoachingHelper.PType.SUPPORTER ||
+                    p.Role == Artiad.CoachingHelper.PType.HINDER ||
+                    p.Role == Artiad.CoachingHelper.PType.EX_ENTER ||
+                    p.Role == Artiad.CoachingHelper.PType.EX_EXIT);
             }
             return false;
         }
@@ -2836,20 +2842,20 @@ namespace PSD.PSDGamepkg.JNS
             {
                 Artiad.CoachingChange.Parse(fuse).List.ForEach(p =>
                 {
-                    if (p.Role == Artiad.CoachingChangeUnit.PType.SUPPORTER ||
-                        p.Role == Artiad.CoachingChangeUnit.PType.HINDER)
+                    if (p.Role == Artiad.CoachingHelper.PType.SUPPORTER ||
+                        p.Role == Artiad.CoachingHelper.PType.HINDER)
                     {
                         if (p.Elder != 0 && p.Elder < 1000)
                             XI.Board.Garden[p.Elder].DrTuxDisabled = true;
                         if (p.Stepper != 0 && p.Stepper < 1000)
                             XI.Board.Garden[p.Stepper].DrTuxDisabled = false;
                     }
-                    else if (p.Role == Artiad.CoachingChangeUnit.PType.EX_ENTER)
+                    else if (p.Role == Artiad.CoachingHelper.PType.EX_ENTER)
                     {
                         if (p.Stepper != 0 && p.Stepper < 1000)
                             XI.Board.Garden[p.Stepper].DrTuxDisabled = false;
                     }
-                    else if (p.Role == Artiad.CoachingChangeUnit.PType.EX_EXIT)
+                    else if (p.Role == Artiad.CoachingHelper.PType.EX_EXIT)
                     {
                         if (p.Elder != 0 && p.Elder < 1000)
                             XI.Board.Garden[p.Elder].DrTuxDisabled = true;
@@ -2929,18 +2935,16 @@ namespace PSD.PSDGamepkg.JNS
         {
             if (consumeType == 0)
             {
-                bool yesIncr = XI.Board.Garden.Values.Any(p =>
-                    p.Uid != player.Uid && XI.Board.IsAttendWar(p) && p.GetPetCount() > 0);
                 if (type == 0) // Z1
                     return XI.Board.IsAttendWar(player) && GSH3GetIncrCnt(player) > 0;
                 else if (type == 1 && XI.Board.PoolEnabled) // FI
                 {
                     Artiad.CoachingChange cc = Artiad.CoachingChange.Parse(fuse);
                     return cc.AttendOrLeave(player.Uid) != 0 || (cc.List.Any(p =>
-                        (p.Role == Artiad.CoachingChangeUnit.PType.SUPPORTER ||
-                        p.Role == Artiad.CoachingChangeUnit.PType.HINDER ||
-                        p.Role == Artiad.CoachingChangeUnit.PType.EX_ENTER ||
-                        p.Role == Artiad.CoachingChangeUnit.PType.EX_EXIT) &&
+                        (p.Role == Artiad.CoachingHelper.PType.SUPPORTER ||
+                        p.Role == Artiad.CoachingHelper.PType.HINDER ||
+                        p.Role == Artiad.CoachingHelper.PType.EX_ENTER ||
+                        p.Role == Artiad.CoachingHelper.PType.EX_EXIT) &&
                         (p.Elder != 0 && p.Elder < 1000 && XI.Board.Garden[p.Elder].GetPetCount() > 0 ||
                         p.Stepper != 0 && p.Stepper < 1000 && XI.Board.Garden[p.Stepper].GetPetCount() > 0)));
                 }

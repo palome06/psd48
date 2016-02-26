@@ -336,7 +336,10 @@ namespace PSD.PSDGamepkg.JNS
                 if (yes.Equals("2"))
                 {
                     player.RFM.Set("DuoFight", 1);
-                    XI.RaiseGMessage("G17F,U," + player.Uid);
+                    XI.RaiseGMessage(new Artiad.CoachingSign() { SingleUnit = new Artiad.CoachingSignUnit()
+                    {
+                        Role = Artiad.CoachingHelper.PType.DONE, Coach = player.Uid
+                    } }.ToMessage());
                     XI.Board.CleanBattler();
                     XI.RaiseGMessage(new Artiad.Goto() { Terminal = "R" + player.Uid + "ZW" }.ToMessage());
                 }
@@ -489,7 +492,7 @@ namespace PSD.PSDGamepkg.JNS
             else if (player.Team == XI.Board.Rounder.OppTeam)
                 notin = XI.Board.Hinder == null || !XI.Board.HinderSucc;
 
-            if (type == 0 || (type == 1 && XI.Board.PoolEnabled))
+            if (type == 0 || (type == 1 && XI.Board.PoolEnabled && Artiad.PondRefresh.Parse(fuse).CheckHit))
             {
                 if (!player.RAM.GetBool("STR+3") && notin)
                     return true;
@@ -1007,7 +1010,7 @@ namespace PSD.PSDGamepkg.JNS
         #region X3W02 - WenHui
         public bool JN40201Valid(Player player, int type, string fuse)
         {
-            if (type == 0 || (type == 1 && XI.Board.Rounder.Uid == player.Uid))
+            if (type == 0 || (type == 1 && XI.Board.Rounder.Uid == player.Uid && Artiad.PondRefresh.Parse(fuse).CheckHit))
             { // Trigger Support Status in self round'
                 if (!player.RAM.GetBool("STR+3") && XI.Board.SupportSucc)
                     return true;
@@ -2189,7 +2192,8 @@ namespace PSD.PSDGamepkg.JNS
         }
         public bool JN60302Valid(Player player, int type, string fuse)
         {
-            return player.Uid == XI.Board.Rounder.Uid && XI.Board.Supporter.Uid != 0 && !player.RAM.GetBool("Hit");
+            return player.Uid == XI.Board.Rounder.Uid && XI.Board.Supporter.Uid != 0 &&
+                Artiad.PondRefresh.Parse(fuse).CheckHit && !player.RAM.GetBool("Hit");
         }
         public void JN60302Action(Player player, int type, string fuse, string args)
         {

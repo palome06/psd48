@@ -1322,7 +1322,10 @@ namespace PSD.PSDGamepkg.JNS
             {
                 ushort tar = ushort.Parse(argst);
                 player.RFM.Set("Flag", tar);
-                XI.RaiseGMessage("G17F,W," + tar);
+                XI.RaiseGMessage(new Artiad.CoachingSign() { SingleUnit = new Artiad.CoachingSignUnit()
+                {
+                    Role = Artiad.CoachingHelper.PType.HORN, Coach = tar
+                } }.ToMessage());
                 XI.RaiseGMessage(new Artiad.Goto() { Terminal = "R" + tar + "ZW" }.ToMessage());
             }
             else if (type == 1)
@@ -2120,7 +2123,7 @@ namespace PSD.PSDGamepkg.JNS
                 }
                 return false;
             }
-            else if (type == 1 && player.RAM.GetInt("AquaHit") == 1)
+            else if (type == 1 && player.RAM.GetInt("AquaHit") == 1 && Artiad.PondRefresh.Parse(fuse).CheckHit)
             {
                 return (player.Team == XI.Board.Rounder.Team && XI.Board.Supporter.Uid != 0) ||
                     (player.Team == XI.Board.Rounder.OppTeam && XI.Board.Hinder.Uid != 0);
@@ -2862,10 +2865,8 @@ namespace PSD.PSDGamepkg.JNS
         }
         public bool JNT2102Valid(Player player, int type, string fuse)
         {
-            if (player.Uid == XI.Board.Hinder.Uid && !player.RAM.GetBool("Hit"))
-                return true;
-            else
-                return false;
+            return player.Uid == XI.Board.Hinder.Uid && !player.RAM.GetBool("Hit") &&
+                Artiad.PondRefresh.Parse(fuse).CheckHit;
         }
         public void JNT2102Action(Player player, int type, string fuse, string args)
         {
@@ -3456,7 +3457,7 @@ namespace PSD.PSDGamepkg.JNS
             else if (type == 4) // Give up
             {
                 return Artiad.CoachingChange.Parse(fuse).List.Any(
-                    p => p.Role == Artiad.CoachingChangeUnit.PType.GIVEUP);
+                    p => p.Role == Artiad.CoachingHelper.PType.GIVEUP);
             }
             else
                 return false;
@@ -3701,9 +3702,15 @@ namespace PSD.PSDGamepkg.JNS
         public void JNT2902Action(Player player, int type, string fuse, string argst)
         {
             if (XI.Board.Rounder.Team == player.Team)
-                XI.RaiseGMessage("G17F,S," + player.Uid);
+                XI.RaiseGMessage(new Artiad.CoachingSign() { SingleUnit = new Artiad.CoachingSignUnit()
+                {
+                    Role = Artiad.CoachingHelper.PType.SUPPORTER, Coach = player.Uid
+                } }.ToMessage());
             else if (XI.Board.Rounder.Team == player.OppTeam)
-                XI.RaiseGMessage("G17F,H," + player.Uid);
+                XI.RaiseGMessage(new Artiad.CoachingSign() { SingleUnit = new Artiad.CoachingSignUnit()
+                {
+                    Role = Artiad.CoachingHelper.PType.HINDER, Coach = player.Uid
+                } }.ToMessage());
         }
         #endregion TR029 - Xianqing
         #region TR030 - LuoZhaoyan Male
@@ -4571,9 +4578,15 @@ namespace PSD.PSDGamepkg.JNS
                 {
                     ushort rk = (ushort)(3000 + 25);
                     if (XI.Board.Supporter.Uid == rk)
-                        XI.RaiseGMessage("G17F,S,0");
+                        XI.RaiseGMessage(new Artiad.CoachingSign() { SingleUnit = new Artiad.CoachingSignUnit()
+                        {
+                            Role = Artiad.CoachingHelper.PType.SUPPORTER, Coach = 0
+                        } }.ToMessage());
                     else if (XI.Board.Hinder.Uid == rk)
-                        XI.RaiseGMessage("G17F,H,0");
+                        XI.RaiseGMessage(new Artiad.CoachingSign() { SingleUnit = new Artiad.CoachingSignUnit()
+                        {
+                            Role = Artiad.CoachingHelper.PType.HINDER, Coach = 0
+                        } }.ToMessage());
                 }
             }
         }

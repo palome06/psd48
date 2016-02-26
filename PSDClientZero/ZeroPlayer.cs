@@ -286,7 +286,7 @@ namespace PSD.ClientZero
             if (Trove != 0 && Treasures.ContainsKey(Trove) && Treasures[Trove].Count > 0)
                 Aps(sb, "行囊中：{0}", xic.zd.MixedCards(Treasures[Trove]));
             if (Runes.Count > 0)
-                Aps(sb, "身法：{0}", xic.zd.Rune(Runes));
+                Aps(sb, "标记：{0}", xic.zd.Rune(Runes));
 
             string special = "";
             if (Token > 0)
