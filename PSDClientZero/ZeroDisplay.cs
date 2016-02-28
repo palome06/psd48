@@ -156,6 +156,11 @@ namespace PSD.ClientZero
                     ushort ut = ushort.Parse(jname.Substring("!I".Length));
                     return ("I" + ut) + ":" + tuple.ESL.Encode("I" + ut).Name;
                 }
+                else if (jname.StartsWith("!WQ"))
+                {
+                    string uname = jname.Substring("!".Length);
+                    return uname + ":" + tuple.TL.EncodeTuxCode(uname).Name;
+                }
                 else
                     return Player(ushort.Parse(jname));
             };
@@ -527,6 +532,8 @@ namespace PSD.ClientZero
                             return "指定场上一人男性";
                         else if (p == "!7")
                             return "全体衡道众统领";
+                        else if (p == "!8")
+                            return "魔剑";
                         else
                             return "";
                     })));

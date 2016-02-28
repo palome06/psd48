@@ -1276,6 +1276,37 @@ namespace PSD.PSDGamepkg
                                                 loses.Add(py.Uid, 1);
                                         }
                                     }
+                                    else if (spo == 8) // !8:Mojian
+                                    {
+                                        ushort cardId = (LibTuple.TL.EncodeTuxCode("WQ04") as TuxEqiup).SingleEntry;
+                                        bool found = false;
+                                        foreach (Player py in Board.Garden.Values)
+                                        {
+                                            foreach (ushort eq in py.ListOutAllEquips())
+                                            {
+                                                if (eq == cardId)
+                                                    found = true;
+                                                Tux tux = LibTuple.TL.DecodeTux(eq);
+                                                if (tux.IsTuxEqiup())
+                                                {
+                                                    TuxEqiup tue = tux as TuxEqiup;
+                                                    if (tue.IsLuggage())
+                                                    {
+                                                        Luggage lg = tue as Luggage;
+                                                        if (lg.Capacities.Contains("C" + cardId))
+                                                            found = true;
+                                                    }
+                                                }
+                                            }
+                                            if (py.TokenExcl.Contains("C" + cardId))
+                                                found = true;
+                                        }
+                                        if (found)
+                                        {
+                                            player.Loved = true;
+                                            candidates.Add("!WQ04");
+                                        }
+                                    }
                                 }
                             }
                             if (candidates.Count > 0)

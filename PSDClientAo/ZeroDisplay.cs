@@ -138,6 +138,11 @@ namespace PSD.ClientAo
                     ushort ut = ushort.Parse(jname.Substring("!I".Length));
                     return ("I" + ut) + ":" + tuple.ESL.Encode("I" + ut).Name;
                 }
+                else if (jname.StartsWith("!WQ"))
+                {
+                    string uname = jname.Substring("!".Length);
+                    return uname + ":" + tuple.TL.EncodeTuxCode(uname).Name;
+                }
                 else
                     return Player(ushort.Parse(jname));
             };

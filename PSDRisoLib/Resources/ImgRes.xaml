@@ -466,6 +466,8 @@
     <Image x:Key="exspCard23" Source="Card/ExSp/EP023.png"/>
     <Image x:Key="exspCard24" Source="Card/ExSp/EP024.png"/>
     <Image x:Key="exspCard25" Source="Card/ExSp/EP025.png"/>
+    <Image x:Key="exspCard26" Source="Card/ExSp/EP026.png"/>
+    <Image x:Key="exspCard27" Source="Card/ExSp/EP027.png"/>
 
     <BitmapImage x:Key="eveCard000src" UriSource="Card/Eve00.png"/>
     <Image x:Key="eveCard000" Source="Card/Eve00.png"/>
@@ -941,6 +943,8 @@
     <ImageBrush x:Key="loadGuard17" ImageSource="Guard/L17.png"/>
     <ImageBrush x:Key="loadGuard18" ImageSource="Guard/L18.png"/>
     <ImageBrush x:Key="loadGuard19" ImageSource="Guard/L19.png"/>
+    <ImageBrush x:Key="loadGuard20" ImageSource="Guard/L20.png"/>
+    <ImageBrush x:Key="loadGuard21" ImageSource="Guard/L21.png"/>
 
     <Image x:Key="bufferIconSF01" Source="Buffer/SF01.png" ToolTip="强袭"/>
     <Image x:Key="bufferIconSF02" Source="Buffer/SF02.png" ToolTip="神行"/>

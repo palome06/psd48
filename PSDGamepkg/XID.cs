@@ -68,8 +68,8 @@ namespace PSD.PSDGamepkg
             //19014, 19006, 19018, 19011, 17035, 19010
             //17024, 15005, 10501, 17039, 19011, 10605
             //10501, 15005, 19016, 19007, 10603, 17029
-            //10105, 15005, 10503, 19007, 10603, 17029
-            10603, 10605, 17030, 17027, 17029, 17034,
+            19020, 10105, 10203, 10503, 10601, 10603,
+            //10603, 10605, 17030, 17027, 17029, 17034,
         };
 
         private void DebugCondition()
@@ -263,7 +263,7 @@ namespace PSD.PSDGamepkg
             RaiseGMessage("G0HQ,2,5,0,0,137");
             //RaiseGMessage("G0HQ,2,2,0,0,103");
             //RaiseGMessage("G0HQ,2,4,0,0,47,48,52");
-            RaiseGMessage("G0HQ,2,1,0,0,107");
+            RaiseGMessage("G0HQ,2,1,0,0,107,138,50");
             //RaiseGMessage("G0HQ,2,2,0,0,136");
             //RaiseGMessage("G0HQ,2,1,0,0,124,101,117,71");
             //RaiseGMessage("G0HQ,2,2,0,0,102,69");
@@ -360,15 +360,15 @@ namespace PSD.PSDGamepkg
             //RaiseGMessage("G0HD,2,0,0,2");
             //RaiseGMessage("G0HD,2,0,0,33");
             //RaiseGMessage("G0HD,3,0,0,7");
-            //RaiseGMessage("G0HD,3,0,0,14");
+            RaiseGMessage("G0HD,3,0,0,49");
             //RaiseGMessage("G0HD,5,0,0,22");
             //RaiseGMessage("G0HD,4,0,0,19");
             //RaiseGMessage("G0HD,6,0,0,9");
             //RaiseGMessage("G0HD,1,0,0,45");
-            RaiseGMessage("G0HD,1,0,0,29");
+            //RaiseGMessage("G0HD,1,0,0,29");
             //RaiseGMessage("G0HD,1,0,0,41");
             //RaiseGMessage("G0HD,5,0,0,68");
-            RaiseGMessage("G0HD,3,0,0,70");
+            //RaiseGMessage("G0HD,3,0,0,70");
             //RaiseGMessage("G0HD,6,0,0,19");
             //RaiseGMessage("G0HD,1,0,0,5");
             //RaiseGMessage("G0IJ,1,1,2,E1,E2");
@@ -384,7 +384,7 @@ namespace PSD.PSDGamepkg
             //     .Select(p => new Artiad.Harm(p, 1, FiveElement.YINN, 5, 0))));
             //RaiseGMessage(Artiad.Harm.ToMessage(new ushort[] { 1, 4, 5, 6 }
             //    .Select(p => new Artiad.Harm(p, 1, FiveElement.YIN, 6, 0))));
-            //RaiseGMessage(Artiad.Harm.ToMessage(new Artiad.Harm(1, 1, FiveElement.AQUA, 8, 0)));
+            RaiseGMessage(Artiad.Harm.ToMessage(new Artiad.Harm(1, 1, FiveElement.AQUA, 8, 0)));
             //RaiseGMessage(Artiad.Harm.ToMessage(new Artiad.Harm(5, 5, FiveElement.AQUA, 4, 0)));
             //RaiseGMessage(Artiad.Harm.ToMessage(new Artiad.Harm(2, 2, FiveElement.AQUA, 5, 0)));
             //Board.Garden[3].Escue.Add(1112);

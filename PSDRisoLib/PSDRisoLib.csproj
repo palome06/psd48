@@ -441,6 +441,8 @@
     <Resource Include="Resources\Card\ExSp\EP023.png" />
     <Resource Include="Resources\Card\ExSp\EP024.png" />
     <Resource Include="Resources\Card\ExSp\EP025.png" />
+    <Resource Include="Resources\Card\ExSp\EP026.png" />
+    <Resource Include="Resources\Card\ExSp\EP027.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Card\NMB\NC303.jpg" />
@@ -1072,6 +1074,8 @@
     <Resource Include="Resources\Guard\L17.png" />
     <Resource Include="Resources\Guard\L18.png" />
     <Resource Include="Resources\Guard\L19.png" />
+    <Resource Include="Resources\Guard\L20.png" />
+    <Resource Include="Resources\Guard\L21.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Buffer\SF01.png" />

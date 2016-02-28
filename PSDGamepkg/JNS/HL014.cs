@@ -2354,12 +2354,14 @@ namespace PSD.PSDGamepkg.JNS
             IDictionary<ushort, ushort> im = new Dictionary<ushort, ushort>();
             IDictionary<ushort, ushort> jm = new Dictionary<ushort, ushort>();
             IDictionary<ushort, string> isk = new Dictionary<ushort, string>();
-            for (ushort i = 0; i < 8; ++i)
+            System.Action<int, int, int> reg = (i, l, sk) =>
             {
-                im[(ushort)(15 + i)] = (ushort)(10 + i);
-                jm[(ushort)(10 + i)] = (ushort)(15 + i);
-                isk[(ushort)(15 + i)] = i < 7 ? ("JNH160" + (3 + i)) : ("JNH16" + (3 + i));
-            }
+                ushort ui = (ushort)i, ul = (ushort)l;
+                im[ui] = ul; jm[ul] = ui; isk[ui] = string.Format("JNH16{0:D2}", sk);
+            };
+            reg(15, 10, 3); reg(16, 11, 4); reg(17, 12, 5); reg(18, 13, 6); reg(19, 14, 7);
+            reg(26, 20, 8); reg(27, 21, 9);
+            reg(20, 15, 10); reg(21, 16, 11); reg(22, 17, 12);
 
             if (type == 0)
             {
@@ -2651,7 +2653,27 @@ namespace PSD.PSDGamepkg.JNS
             JNH16SeriesAction(player, type, fuse, "JNH1607",
                 FiveElement.SATURN, FiveElement.AQUA, FiveElement.AERO);
         }
-        public bool JNH1608BKValid(Player player, int type, string fuse, ushort owner)
+        public bool JNH1608Valid(Player player, int type, string fuse)
+        {
+            return JNH16SeriesValid(player, type, fuse, "JNH1608",
+                FiveElement.YINN, FiveElement.SOLARIS, FiveElement.SOLARIS);
+        }
+        public void JNH1608Action(Player player, int type, string fuse, string argst)
+        {
+            JNH16SeriesAction(player, type, fuse, "JNH1608",
+                FiveElement.YINN, FiveElement.SOLARIS, FiveElement.SOLARIS);
+        }
+        public bool JNH1609Valid(Player player, int type, string fuse)
+        {
+            return JNH16SeriesValid(player, type, fuse, "JNH1609",
+                FiveElement.SOLARIS, FiveElement.YINN, FiveElement.YINN);
+        }
+        public void JNH1609Action(Player player, int type, string fuse, string argst)
+        {
+            JNH16SeriesAction(player, type, fuse, "JNH1609",
+                FiveElement.SOLARIS, FiveElement.YINN, FiveElement.YINN);
+        }
+        public bool JNH1610BKValid(Player player, int type, string fuse, ushort owner)
         {
             if (player.Tux.Count > 0)
             {
@@ -2661,14 +2683,14 @@ namespace PSD.PSDGamepkg.JNS
             else
                 return false;
         }
-        public void JNH1608Action(Player player, int type, string fuse, string argst)
+        public void JNH1610Action(Player player, int type, string fuse, string argst)
         {
             ushort ut = ushort.Parse(argst.Substring(argst.IndexOf(',') + 1));
             ushort uid = player.Uid;
             XI.RaiseGMessage("G0CC," + uid + ",0," + uid + ",ZP02," + ut + ";0," + fuse);
             XI.RaiseGMessage("G0CZ,0," + player.Uid);
         }
-        public string JNH1608Input(Player player, int type, string fuse, string prev)
+        public string JNH1610Input(Player player, int type, string fuse, string prev)
         {
             if (prev.IndexOf(',') < 0)
             {
@@ -2682,7 +2704,7 @@ namespace PSD.PSDGamepkg.JNS
             else
                 return "";
         }
-        public bool JNH1609BKValid(Player player, int type, string fuse, ushort owner)
+        public bool JNH1611BKValid(Player player, int type, string fuse, ushort owner)
         {
             if (player.Tux.Count > 0 && ((type == 0 && XI.Board.Rounder.Uid == player.Uid) || type == 1))
             {
@@ -2692,13 +2714,13 @@ namespace PSD.PSDGamepkg.JNS
             else
                 return false;
         }
-        public void JNH1609Action(Player player, int type, string fuse, string argst)
+        public void JNH1611Action(Player player, int type, string fuse, string argst)
         {
             ushort ut = ushort.Parse(argst.Substring(argst.IndexOf(',') + 1));
             ushort uid = player.Uid;
             XI.RaiseGMessage("G0CC," + uid + ",0," + uid + ",TPT1," + ut + ";" + type + "," + fuse);
         }
-        public string JNH1609Input(Player player, int type, string fuse, string prev)
+        public string JNH1611Input(Player player, int type, string fuse, string prev)
         {
             if (prev.IndexOf(',') < 0)
             {
@@ -2712,7 +2734,7 @@ namespace PSD.PSDGamepkg.JNS
             else
                 return "";
         }
-        public bool JNH1610BKValid(Player player, int type, string fuse, ushort owner)
+        public bool JNH1612BKValid(Player player, int type, string fuse, ushort owner)
         {
             if (player.Uid == XI.Board.Rounder.Uid && player.Tux.Count > 0)
             {
@@ -2722,12 +2744,12 @@ namespace PSD.PSDGamepkg.JNS
             else
                 return false;
         }
-        public void JNH1610Action(Player player, int type, string fuse, string argst)
+        public void JNH1612Action(Player player, int type, string fuse, string argst)
         {
             ushort ut = ushort.Parse(argst.Substring(argst.IndexOf(',') + 1));
             XI.RaiseGMessage("G0CC," + player.Uid + ",0," + player.Uid + ",JP03," + ut + ";0," + fuse);
         }
-        public string JNH1610Input(Player player, int type, string fuse, string prev)
+        public string JNH1612Input(Player player, int type, string fuse, string prev)
         {
             if (prev.IndexOf(',') < 0)
             {
@@ -3201,12 +3223,15 @@ namespace PSD.PSDGamepkg.JNS
         #region HL020 - Mojianke
         public bool JNH2001Valid(Player player, int type, string fuse)
         {
-            if (type == 0) // ZB
-                return Artiad.ClothingHelper.GetWho(fuse) != 0;
-            else if (type == 1) // HD
-                return true;
-            else if (type == 2) // IF
-                return true;
+            if (!player.RFM.GetBool("InJNH2002"))
+            {
+                if (type == 0) // ZB
+                    return Artiad.ClothingHelper.GetWho(fuse) != 0;
+                else if (type == 1) // HD
+                    return true;
+                else if (type == 2) // IF
+                    return true;
+            }
             return false;
         }
         public void JNH2001Action(Player player, int type, string fuse, string argst)
@@ -3242,7 +3267,7 @@ namespace PSD.PSDGamepkg.JNS
                 else
                 {
                     string select = XI.AsyncInput(player.Uid, "#置为「魔灵」,Q1(p" +
-                        string.Join("p", player.Tux) + ")", "JNH1903", "0");
+                        string.Join("p", player.Tux) + ")", "JNH2001", "0");
                     if (select != VI.CinSentinel)
                     {
                         ushort ut = ushort.Parse(select);
@@ -3257,19 +3282,20 @@ namespace PSD.PSDGamepkg.JNS
             if (type == 0 && player.TokenFold.Count >= 1)
                 return player.RestZP <= 0 && (player.Team == XI.Board.Rounder.Team ? XI.Board.CalculateRPool() : XI.Board.CalculateOPool()) >= 2;
             else if (type == 1 && player.TokenFold.Count >= 2)
-                return XI.Board.Garden.Values.Any(p => p.IsTared && p.GetEquipCount() > 0);
+                return XI.Board.Garden.Values.Any(p => p.IsTared && p.GetBaseEquipCount() > 0);
             else if (type == 2 && player.TokenFold.Count >= 3)
                 return XI.Board.Rounder.Team == player.Team && XI.Board.MonDises.Count > 0;
             else if (type == 3 && player.TokenFold.Count >= 4)
                 return true;
             else if (type == 4 && player.TokenFold.Count >= 5)
-                return XI.Board.Rounder.GetEquipCount() > 0 || XI.Board.Rounder.Runes.Count > 0;
+                return XI.Board.Garden.Values.Any(p => p.IsTared && (p.Team == player.OppTeam || p.Runes.Count > 0));
             else
                 return false;
         }
         public void JNH2002Action(Player player, int type, string fuse, string argst)
         {
             string[] args = argst.Split(',');
+            player.RFM.Set("InJNH2002", true);
             if (type == 0)
             {
                 XI.RaiseGMessage("G0OJ," + player.Uid + ",4,1," + argst);
@@ -3308,81 +3334,86 @@ namespace PSD.PSDGamepkg.JNS
                 XI.RaiseGMessage("G0ON," + player.Uid + ",C,4," + argst);
                 XI.RaiseGMessage("G2TZ,0," + player.Uid + "," + string.Join(",", args.Select(p => "C" + p)));
                 XI.RaiseGMessage("G0DH," + player.Uid + ",0,2");
+                XI.RaiseGMessage("G0IF," + player.Uid + ",2");
             }
             else if (type == 4)
             {
-                bool b1 = XI.Board.Rounder.GetEquipCount() > 0;
-                bool b2 = XI.Board.Rounder.Runes.Count > 0;
-                string[] tokens = Algo.TakeRange(args, 0, args.Length - 1);
-                XI.RaiseGMessage("G0OJ," + player.Uid + ",4,5," + string.Join(",", tokens));
-                XI.RaiseGMessage("G0ON," + player.Uid + ",C,5," + string.Join(",", tokens));
-                XI.RaiseGMessage("G2TZ,0," + player.Uid + "," + string.Join(",", tokens.Select(p => "C" + p)));
-                Player rd = XI.Board.Rounder;
-                if ((!b1 && b2) || args[args.Length - 1] == "2")
-                    XI.RaiseGMessage("G0OF," + rd.Uid + "," + string.Join(",", rd.Runes));
-                else
-                    XI.RaiseGMessage("G0QZ," + rd.Uid + "," + string.Join(",", rd.ListOutAllEquips()));
+                XI.RaiseGMessage("G0OJ," + player.Uid + ",4,5," + argst);
+                XI.RaiseGMessage("G0ON," + player.Uid + ",C,5," + argst);
+                XI.RaiseGMessage("G2TZ,0," + player.Uid + "," + string.Join(",", args.Select(p => "C" + p)));
+                int total = XI.Board.Garden.Values.Where(p => p.IsAlive && p.Team == player.OppTeam)
+                    .Sum(p => p.GetEquipCount() + p.Runes.Count);
+                while (total > 0)
+                {
+                    string selTarget = XI.AsyncInput(player.Uid, "#(剩余" + total + "枚)/T1" + FormatPlayers(p =>
+                        p.IsTared && (p.Team == player.OppTeam || p.Runes.Count > 0)), "JNH2002", "0");
+                    if (selTarget.StartsWith("/") || selTarget == VI.CinSentinel)
+                        break;
+                    ushort target = ushort.Parse(selTarget);
+                    TargetPlayer(player.Uid, target);
+                    Player py = XI.Board.Garden[target];
+                    bool bmins = py.Runes.Count > 0;
+                    bool bplus = py.Team == player.OppTeam;
+                    string msg = "#请选择" + XI.DisplayPlayer(target) + "执行项";
+                    if (bmins)
+                        msg += "##弃置标记";
+                    if (bplus)
+                        msg += "##获得标记";
+                    msg += (bmins && bplus) ? ",Y2" : ",Y1";
+                    string selAction = XI.AsyncInput(player.Uid, msg, "JNH2002", "1");
+                    if (selAction == "1" && bmins)
+                    {
+                        int upLimit = System.Math.Min(py.Runes.Count, total);
+                        string selDis = XI.AsyncInput(player.Uid, "#弃置的,/F1" + (upLimit > 1 ?
+                            ("~" + upLimit) : "") + "(p" + string.Join("p", py.Runes) + ")", "JNH2002", "2");
+                        if (!selDis.StartsWith("/") && selDis != VI.CinSentinel)
+                        {
+                            string[] runes = selDis.Split(',');
+                            XI.RaiseGMessage("G0OF," + target + "," + selDis);
+                            total -= runes.Length;
+                        }
+                    }
+                    else
+                    {
+                        ushort[] uts = XI.LibTuple.RL.GetFullAppendableList();
+                        int upLimit = System.Math.Min(uts.Length, total);
+                        string selDis = XI.AsyncInput(player.Uid, "#获得的,/F1" + (upLimit > 1 ?
+                            ("~" + upLimit) : "") + "(p" + string.Join("p", uts) + ")", "JNH2002", "3");
+                        if (!selDis.StartsWith("/") && selDis != VI.CinSentinel)
+                        {
+                            string[] runes = selDis.Split(',');
+                            XI.RaiseGMessage("G0IF," + target + "," + selDis);
+                            total -= runes.Length;
+                        }
+                    }
+                }
             }
+            player.RFM.Set("InJNH2002", false);
         }
         public string JNH2002Input(Player player, int type, string fuse, string prev)
         {
-            if (type == 0)
-            {
-                if (prev == "")
-                    return "#弃置魔灵,/C1(p" + string.Join("p", player.TokenFold) + ")";
-                else
-                    return "";
-            }
+            if (type == 0 && prev == "")
+                return "#弃置魔灵,/C1(p" + string.Join("p", player.TokenFold) + ")";
             else if (type == 1)
             {
                 if (prev == "")
                     return "/T1(p" + string.Join("p", XI.Board.Garden.Values.Where(p =>
-                        p.IsTared && p.GetBaseEquipCount() > 0).Select(p => p.Uid)) + ")";
+                        p.IsTared && p.GetEquipCount() > 0).Select(p => p.Uid)) + ")";
                 else if (prev.IndexOf(',') < 0)
                 {
                     ushort who = ushort.Parse(prev);
                     return "/" + (who == player.Uid ? "Q" : "C") + "1(p" +
-                        string.Join("p", XI.Board.Garden[who].ListOutAllEquips()) +
+                        string.Join("p", XI.Board.Garden[who].ListOutAllBaseEquip()) +
                         "),#弃置魔灵,/C2(p" + string.Join("p", player.TokenFold) + ")";
                 }
-                else
-                    return "";
             }
-            else if (type == 2)
-            {
-                if (prev == "")
-                    return "/M1(p" + XI.Board.MonDises.Last() + "),#弃置魔灵,/C3(p" + string.Join("p", player.TokenFold) + ")";
-                else
-                    return "";
-            }
-            else if (type == 3)
-            {
-                if (prev == "")
-                    return "#弃置魔灵,/C4(p" + string.Join("p", player.TokenFold) + ")";
-                else
-                    return "";
-            }
-            else if (type == 4)
-            {
-                if (prev == "")
-                {
-                    bool b1 = XI.Board.Rounder.GetEquipCount() > 0;
-                    bool b2 = XI.Board.Rounder.Runes.Count > 0;
-                    string costr = "";
-                    if (b1 && b2)
-                        costr = "##弃置装备##弃置标记,/Y2";
-                    else if (b1)
-                        costr = "##弃置装备,/Y1";
-                    else if (b2)
-                        costr = "##弃置标记,/Y1";
-                    return "#弃置魔灵,/C5(p" + string.Join("p", player.TokenFold) +
-                        "),#请选择『魔剑闪空』执行项" + costr;
-                }
-                else
-                    return "";
-            }
-            else
-                return "";
+            else if (type == 2 && prev == "")
+                return "/M1(p" + XI.Board.MonDises.Last() + "),#弃置魔灵,/C3(p" + string.Join("p", player.TokenFold) + ")";
+            else if (type == 3 && prev == "")
+                return "#弃置魔灵,/C4(p" + string.Join("p", player.TokenFold) + ")";
+            else if (type == 4 && prev == "")
+                return "#弃置魔灵,/C5(p" + string.Join("p", player.TokenFold) + ")";
+            return "";
         }
         #endregion HL020 - Mojianke
         #region HL021 - MurongKe

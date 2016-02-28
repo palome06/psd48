@@ -252,6 +252,7 @@ namespace PSD.PSDGamepkg.JNS
                 {
                     ushort p1 = ushort.Parse(whostr.Substring(0, idx));
                     ushort p2 = ushort.Parse(whostr.Substring(idx + 1));
+                    TargetPlayer(op.Uid, new ushort[] { p1, p2 });
                     Harm("GH03", new Player[] { XI.Board.Garden[p1], XI.Board.Garden[p2] }, 3);
                 }
             }
@@ -262,6 +263,7 @@ namespace PSD.PSDGamepkg.JNS
                 if (whostr != XI.VI.CinSentinel)
                 {
                     ushort p1 = ushort.Parse(whostr);
+                    TargetPlayer(op.Uid, p1);
                     Harm("GH03", XI.Board.Garden[p1], 3);
                 }
             }
@@ -1600,6 +1602,7 @@ namespace PSD.PSDGamepkg.JNS
                 string input = XI.AsyncInput(XI.Board.Rounder.Uid, "#依次进行拼点,T2(p" +
                     string.Join("p", py.Select(p => p.Uid)), "GHT4WinEff", "0");
                 ushort[] ip = input.Split(',').Select(p => ushort.Parse(p)).ToArray();
+                TargetPlayer(XI.Board.Rounder.Uid, ip);
                 XI.RaiseGMessage("G0TT," + ip[0]);
                 int v0 = XI.Board.DiceValue;
                 XI.RaiseGMessage("G0TT," + ip[1]);
@@ -1623,6 +1626,7 @@ namespace PSD.PSDGamepkg.JNS
                 string input = XI.AsyncInput(XI.Board.Opponent.Uid, "#依次进行拼点,T2(p" +
                     string.Join("p", py.Select(p => p.Uid)), "GHT4WinEff", "0");
                 ushort[] ip = input.Split(',').Select(p => ushort.Parse(p)).ToArray();
+                TargetPlayer(XI.Board.Opponent.Uid, ip);
                 XI.RaiseGMessage("G0TT," + ip[0]);
                 int v0 = XI.Board.DiceValue;
                 XI.RaiseGMessage("G0TT," + ip[1]);
@@ -2877,6 +2881,7 @@ namespace PSD.PSDGamepkg.JNS
             if (target != VI.CinSentinel)
             {
                 ushort who = ushort.Parse(target);
+                TargetPlayer(py.Uid, who);
                 Harm("GSH2", XI.Board.Garden[who], 4, (long)HPEvoMask.TUX_INAVO);
             }
         }
@@ -2887,6 +2892,7 @@ namespace PSD.PSDGamepkg.JNS
             if (target != VI.CinSentinel)
             {
                 ushort who = ushort.Parse(target);
+                TargetPlayer(py.Uid, who);
                 Harm("GSH2", XI.Board.Garden[who], 4, (long)HPEvoMask.TUX_INAVO);
             }
         }
@@ -3390,6 +3396,26 @@ namespace PSD.PSDGamepkg.JNS
                 }
             }
         }
+        public void GTH1IncrAction(Player player)
+        {
+            ushort me = XI.LibTuple.ML.Encode("GTH1");
+            if (!player.Pets.Any(p => p != 0 && p != me))
+            {
+                Monster monster = XI.LibTuple.ML.Decode(me) as Monster;
+                XI.RaiseGMessage("G0IB," + me + "," + player.STR);
+                monster.ROM.Set("iSTR", player.STR);
+            }
+        }
+        public void GTH1DecrAction(Player player)
+        {
+            ushort me = XI.LibTuple.ML.Encode("GTH1");
+            Monster monster = XI.LibTuple.ML.Decode(me) as Monster;
+            if (monster.ROM.GetInt("iSTR") != 0)
+            {
+                XI.RaiseGMessage("G0OB," + me + "," + monster.ROM.GetInt("iSTR"));
+                monster.ROM.Set("iSTR", null);
+            }
+        }
         public void GTH1ConsumeAction(Player player, int consumeType, int type, string fuse, string args)
         {
             if (consumeType == 0)
@@ -3398,20 +3424,8 @@ namespace PSD.PSDGamepkg.JNS
                 Monster monster = XI.LibTuple.ML.Decode(me) as Monster;
                 if (type == 0)
                 {
-                    if (player.Pets.Any(p => p != 0 && p != me))
-                    {
-                        XI.RaiseGMessage("G0OB," + me + "," + monster.ROM.GetInt("iSTR"));
-                        monster.ROM.Set("iSTR", 0);
-                    }
-                    else
-                    {
-                        int delta = player.STR - monster.ROM.GetInt("iSTR");
-                        if (delta < 0)
-                            XI.RaiseGMessage("G0OB," + me + "," + (-delta));
-                        else if (delta > 0)
-                            XI.RaiseGMessage("G0IB," + me + "," + delta);
-                        monster.ROM.Set("iSTR", player.STR);
-                    }
+                    XI.RaiseGMessage("G0OB," + me + "," + monster.ROM.GetInt("iSTR"));
+                    monster.ROM.Set("iSTR", 0);
                 }
                 else if (type == 1)
                 {
@@ -3431,20 +3445,19 @@ namespace PSD.PSDGamepkg.JNS
         }
         public bool GTH1ConsumeValid(Player player, int consumeType, int type, string fuse)
         {
-            if (consumeType == 0)
+            if (consumeType == 0) // HD:gain others, set iSTR = 0
             {
                 ushort me = XI.LibTuple.ML.Encode("GTH1");
                 Monster monster = XI.LibTuple.ML.Decode(me) as Monster;
                 bool anyOther = player.Pets.Any(p => p != 0 && p != me);
-                if (type == 0) // HD, case 1: obtain others then eliminate gth1; case 2: obtain gth1
+                if (type == 0 && monster.ROM.GetInt("iSTR") != 0 && player.STR > 0) // HD, obtain others, set iSTR = 0
                 {
                     Artiad.ObtainPet otp = Artiad.ObtainPet.Parse(fuse);
-                    return (anyOther && monster.ROM.GetInt("iSTR") != 0) || (!anyOther && player.STR > 0 &&
-                        otp.Farmer == player.Uid && otp.SinglePet == me);
+                    return otp.Pets.Any(p => p != me);
                 }
-                else if (type == 1 && monster.ROM.GetInt("iSTR") == 0 && player.STR > 0)
-                    return !anyOther && player.STR > 0;
-                else if (type == 2 || type == 3 || type == 4)
+                else if (type == 1 && monster.ROM.GetInt("iSTR") == 0 && player.STR > 0) // HL, lose others, set iSTR
+                    return !anyOther;
+                else if (type == 2 || type == 3 || type == 4) // IA/OA/AX
                     return !anyOther && monster.ROM.GetInt("iSTR") != player.STR;
             }
             return false;
