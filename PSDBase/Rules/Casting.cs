@@ -402,7 +402,6 @@ namespace PSD.Base.Rules
         }
         public bool IsDecide(ushort ut)
         {
-            bool aka = (ut % 2 == 1);
             return !Ding.Any(p => (p.Key % 2 == ut % 2) && p.Value == 0);
         }
         public string ToMessage(bool akaTeam, bool watch = false)

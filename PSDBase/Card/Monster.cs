@@ -277,6 +277,12 @@ namespace PSD.Base.Card
         public void ResetRAM() { RAM.Clear(); }
         public void ResetRFM() { ResetRAM(); RFM.Clear(); }
         public void ResetROM() { ResetRFM(); ROM.Clear(); }
+
+        public bool IsLinked(int consumeType, int inType)
+        {
+            return EAOccurs != null && EAOccurs.Length > consumeType && EAOccurs[consumeType] != null &&
+                EAOccurs[consumeType].Length > inType && EAOccurs[consumeType][inType].Contains('%');
+        }
     }
 
     public class MonsterLib

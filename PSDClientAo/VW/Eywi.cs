@@ -699,9 +699,16 @@ namespace PSD.ClientAo.VW
                 if (line.StartsWith("H09G"))
                 {
                     string[] h09g = line.Split(',');
+                    h09g[1] = "H09G";
                     h09g[8] += ",1"; // Add SupportSucc after Supporter
                     h09g[9] += ",1,0,0"; // Add HinderSucc, Drums and Wang after Hinder
-                    line = "H09G," + Algo.TakeRange(h09g, 2, h09g.Length); // remove [1]=Eve
+                    line = string.Join(",", Algo.TakeRange(h09g, 1, h09g.Length)); // remove [1]=Eve
+                }
+                else if (line.StartsWith("E0ZC"))
+                {
+                    string[] e0zc = line.Split(',');
+                    e0zc[2] += ",0"; // Add target = 0 after consumeType
+                    line = string.Join(",", e0zc);
                 }
             }
         }

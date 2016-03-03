@@ -4,8 +4,8 @@ using System.Linq;
 
 namespace PSD.PSDGamepkg
 {
-      public partial class XI
-      {
+    public partial class XI
+    {
         private int[] mode00heroes = new int[] {
             //10602, 17005, 10107, 10404, 10501, 10504
             //10102, 10303, 10605, 10402, 10305, 10504
@@ -68,7 +68,7 @@ namespace PSD.PSDGamepkg
             //19014, 19006, 19018, 19011, 17035, 19010
             //17024, 15005, 10501, 17039, 19011, 10605
             //10501, 15005, 19016, 19007, 10603, 17029
-            19020, 10105, 10203, 10503, 10601, 10603,
+            15001, 17040, 10203, 10503, 17007, 10603,
             //10603, 10605, 17030, 17027, 17029, 17034,
         };
 
@@ -100,7 +100,7 @@ namespace PSD.PSDGamepkg
             //garden[2].Pets[0] = 4;
             //Board.MonPiles.PushBack(13);
             //Board.MonPiles.PushBack(1011);
-            Board.MonPiles.PushBack(8);
+            //Board.MonPiles.PushBack(8);
             //RaiseGMessage("G0HC,0,1,19");
             //Board.MonPiles.PushBack(1022);
             //Board.MonPiles.PushBack(1041);
@@ -209,7 +209,7 @@ namespace PSD.PSDGamepkg
             //Board.MonPiles.PushBack(1109);
             //Board.MonPiles.PushBack(1031);
             //Board.MonPiles.PushBack(1);
-            //Board.MonPiles.PushBack(1007);
+            //Board.MonPiles.PushBack(50);
             //Board.RestMonPiles.PushBack(2);
             //Board.RestMonPiles.PushBack(3);
             //Board.RestMonPiles.PushBack(7);
@@ -258,12 +258,12 @@ namespace PSD.PSDGamepkg
             //RaiseGMessage("G0HQ,2,3,0,0,37");
             //RaiseGMessage("G0HQ,2,2,0,0,97,99");
             //RaiseGMessage("G0HQ,2,5,0,0,27,28,29");
-            //RaiseGMessage("G0HQ,2,1,0,0,48,49,95");
+            //RaiseGMessage("G0HQ,2,1,0,0,95,53,109,10,92,88");
             //RaiseGMessage("G0HQ,2,3,0,0,108");
-            RaiseGMessage("G0HQ,2,5,0,0,137");
+            //RaiseGMessage("G0HQ,2,5,0,0,137");
             //RaiseGMessage("G0HQ,2,2,0,0,103");
             //RaiseGMessage("G0HQ,2,4,0,0,47,48,52");
-            RaiseGMessage("G0HQ,2,1,0,0,107,138,50");
+            //RaiseGMessage("G0HQ,2,1,0,0,95,1");
             //RaiseGMessage("G0HQ,2,2,0,0,136");
             //RaiseGMessage("G0HQ,2,1,0,0,124,101,117,71");
             //RaiseGMessage("G0HQ,2,2,0,0,102,69");
@@ -354,13 +354,13 @@ namespace PSD.PSDGamepkg
             //RaiseGMessage("G0HD,5,0,0,6");
             //RaiseGMessage("G0HD,5,0,0,17");
             //RaiseGMessage("G0HD,2,0,0,24");
-            //RaiseGMessage("G0HD,1,0,0,30");
+            RaiseGMessage("G0HD,1,0,0,50");
             //RaiseGMessage("G0HD,5,0,0,36");
             //RaiseGMessage("G0HD,6,0,0,16");
             //RaiseGMessage("G0HD,2,0,0,2");
             //RaiseGMessage("G0HD,2,0,0,33");
             //RaiseGMessage("G0HD,3,0,0,7");
-            RaiseGMessage("G0HD,3,0,0,49");
+            // RaiseGMessage("G0HD,3,0,0,49");
             //RaiseGMessage("G0HD,5,0,0,22");
             //RaiseGMessage("G0HD,4,0,0,19");
             //RaiseGMessage("G0HD,6,0,0,9");
@@ -384,7 +384,7 @@ namespace PSD.PSDGamepkg
             //     .Select(p => new Artiad.Harm(p, 1, FiveElement.YINN, 5, 0))));
             //RaiseGMessage(Artiad.Harm.ToMessage(new ushort[] { 1, 4, 5, 6 }
             //    .Select(p => new Artiad.Harm(p, 1, FiveElement.YIN, 6, 0))));
-            RaiseGMessage(Artiad.Harm.ToMessage(new Artiad.Harm(1, 1, FiveElement.AQUA, 8, 0)));
+            //RaiseGMessage(Artiad.Harm.ToMessage(new Artiad.Harm(1, 1, FiveElement.AQUA, 8, 0)));
             //RaiseGMessage(Artiad.Harm.ToMessage(new Artiad.Harm(5, 5, FiveElement.AQUA, 4, 0)));
             //RaiseGMessage(Artiad.Harm.ToMessage(new Artiad.Harm(2, 2, FiveElement.AQUA, 5, 0)));
             //Board.Garden[3].Escue.Add(1112);
@@ -394,8 +394,8 @@ namespace PSD.PSDGamepkg
             //RaiseGMessage("G0IF,4,1,2,3,4");
             //RaiseGMessage("G0IF,1,2");
             //RaiseGMessage("G0IF,4,4");
-            //foreach (Player player in Board.Garden.Values)
-            //    RaiseGMessage("G0HQ,2," + player.Uid + ",1,3");
+            foreach (Player player in Board.Garden.Values)
+               RaiseGMessage("G0HQ,2," + player.Uid + ",1,3");
             //RaiseGMessage("G0HQ,2,4,1,8");
             //RaiseGMessage("G0HQ,2,6,1,2");
             //RaiseGMessage("G0HQ,2,1,1,1");

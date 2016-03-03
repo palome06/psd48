@@ -246,7 +246,7 @@ namespace PSD.Base
             {
                 foreach (string key in RAM.GetKeys())
                 {
-                    if (key.StartsWith("@") && !key.StartsWith(hero + "@"))
+                    if (key.StartsWith("@") && !key.StartsWith("@" + hero))
                         newDiva.Set(key, RAM.GetObject(key));
                 }
                 RAM = newDiva;
@@ -263,7 +263,7 @@ namespace PSD.Base
             {
                 foreach (string key in RFM.GetKeys())
                 {
-                    if (key.StartsWith("@") && !key.StartsWith(hero + "@"))
+                    if (key.StartsWith("@") && !key.StartsWith("@" + hero))
                         newDiva.Set(key, RFM.GetObject(key));
                 }
                 RFM = newDiva;
@@ -298,7 +298,7 @@ namespace PSD.Base
             {
                 foreach (string key in ROM.GetKeys())
                 {
-                    if (key.StartsWith("@") && !key.StartsWith(hero + "@"))
+                    if (key.StartsWith("@") && !key.StartsWith("@" + hero))
                         newDiva.Set(key, ROM.GetObject(key));
                 }
                 ROM = newDiva;

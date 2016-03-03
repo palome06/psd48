@@ -1908,7 +1908,7 @@ namespace PSD.PSDGamepkg
                         TuxEqiup tux = LibTuple.TL.DecodeTux(card) as TuxEqiup;
                         if (consumeType % 3 == 1)
                             RaiseGMessage("G0ZI," + me + "," + card);
-                        WI.BCast("E0ZC," + me + "," + consumeType + "," + card + "," + sktInType + cargsv);
+                        WI.BCast("E0ZC," + me + "," + consumeType + "," + target + "," + card + "," + sktInType + cargsv);
                         if (consumeType < 3)
                             tux.ConsumeAction(player, consumeType, sktInType, sktFuse, argsv);
                         else

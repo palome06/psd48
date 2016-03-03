@@ -37,6 +37,10 @@ namespace PSD.PSDGamepkg
         {
             return skt.Priorty - sku.Priorty;
         }
+        internal string ToHeader()
+        {
+            return Name + "," + ((Type == SKTType.EQ || Type == SKTType.PT) ? (Consume + "!") : "") + InType;
+        }
     }
     // Skill Triple Element, contains Trigger Information (e.g. Fuse, Tick, Tg)
     internal class SKE
@@ -466,14 +470,15 @@ namespace PSD.PSDGamepkg
                 string args = mai.Substring(idx + 1);
                 // args starts with monster card code now.
                 int consumeCode = ske.Consume;
-                string otherPara = mt.ConsumeInput(garden[from], consumeCode, ske.InType, ske.Fuse, args);
+                string lf = (mt.IsLinked(consumeCode, ske.InType) ? ske.LinkFrom + ":" : "") + ske.Fuse;
+                string otherPara = mt.ConsumeInput(garden[from], consumeCode, ske.InType, lf, args);
                 if (otherPara == "")
                 {
                     string sTop = "U5," + from + ";;" + skName;
                     string sType = ";;" + ske.InType + "!" + consumeCode;
                     WI.BCast(sTop + "," + args + sType);
                     RaiseGMessage("G0HH," + from + "," + consumeCode +
-                           "," + args + ";" + ske.InType + "," + ske.Fuse);
+                           "," + args + ";" + ske.InType + "," + lf);
                     u5ed = ske.IsTermini ? UEchoCode.END_TERMIN : UEchoCode.END_ACTION;
                     ++ske.Tick;
                 }

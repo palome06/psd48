@@ -1865,7 +1865,12 @@ namespace PSD.ClientAo
                             for (int i = 4; i < args.Length; ++i)
                                 ravs[i - 4] = ushort.Parse(args[i]);
                             //VI.Cout(uid, "您观看{0}结果为{1}.", dd[args[3]], df[args[3]](ravs));
-                            VI.Watch(Uid, ravs.Select(p => "M" + p), "E0XZ");
+                            ushort diceType = ushort.Parse(args[3]);
+                            string pileType = "";
+                            if (diceType == 1) { pileType = "C"; }
+                            else if (diceType == 2) { pileType = "M"; }
+                            else if (diceType == 3) { pileType = "E"; }
+                            VI.Watch(Uid, ravs.Select(p => pileType + p), "E0XZ");
                         }
                         else if (type == 1)
                             VI.Cout(Uid, "{0}观看{1}上方{2}张牌.", zd.Player(py), dd[args[3]], args[4]);
@@ -1950,12 +1955,8 @@ namespace PSD.ClientAo
                         int argvIdx = 1;
                         ushort me = ushort.Parse(args[argvIdx++]);
                         ushort consumeType = ushort.Parse(args[argvIdx++]);
+                        ushort target = ushort.Parse(args[argvIdx++]);
                         ushort card = ushort.Parse(args[argvIdx++]);
-                        ushort target;
-                        if (consumeType == 0 || consumeType == 1)
-                            target = 0;
-                        else
-                            target = ushort.Parse(args[argvIdx++]);
                         int type = int.Parse(args[argvIdx++]);
                         string argvs = string.Join(",", Algo.TakeRange(args, argvIdx, args.Length));
                         if (!string.IsNullOrEmpty(argvs))

@@ -506,15 +506,20 @@ namespace PSD.PSDGamepkg.JNS
         {
             if (player.Uid == owner)
                 return false;
-            int lfidx = linkFuse.IndexOf(':');
-            string[] linkHeads = linkFuse.Substring(0, lfidx).Split('&');
-            string fuse = linkFuse.Substring(lfidx + 1);
             Player opy = XI.Board.Garden[owner];
             if (player.Team != opy.Team)
                 return false;
+            int lfidx = linkFuse.IndexOf(':');
+            string[] linkHeads = linkFuse.Substring(0, lfidx).Split('&');
+            string fuse = linkFuse.Substring(lfidx + 1);
 
-            foreach (string linkHead in linkHeads)
+            foreach (string linkHeadComp in linkHeads)
             {
+                int lastIdx = linkHeadComp.LastIndexOf(',');
+                string linkHead = linkHeadComp.Substring(0, lastIdx);
+                string rawFuse = linkHeadComp.Substring(lastIdx + 1);
+                if (!Artiad.ContentRule.IsFuseMatch(rawFuse, fuse, XI.Board))
+                    continue;
                 List<string> relateds = XI.Sk03[linkHead].ToList();
                 relateds.Add(linkHead);
                 // relateds = { "TP03,0", "FJ02,0!0" };
@@ -537,19 +542,25 @@ namespace PSD.PSDGamepkg.JNS
                         //}
                         Base.Card.Tux tux = XI.LibTuple.TL.EncodeTuxCode(rName);
                         if (player.Tux.Count > 0 && tux != null)
-                            if (tux.Bribe(opy, tType, fuse) && tux.Valid(opy, tType, fuse))
+                        {
+                            string tfuse = tux.IsLinked(tType) ? linkFuse : fuse;
+                            if (tux.Bribe(opy, tType, fuse) && tux.Valid(opy, tType, tfuse))
                                 return true;
+                        }
                     }
                     else
                     {
+                        int tConsType = int.Parse(rlink.Substring(pdIdx + 1));
                         int tType = int.Parse(Algo.Substring(rlink, rcmIdx + 1, pdIdx));
-                        int tConsType = (pdIdx < 0) ? -1 : int.Parse(rlink.Substring(pdIdx + 1));
                         foreach (ushort ut in player.ListOutAllEquips())
                         {
-                            Base.Card.TuxEqiup tux = XI.LibTuple.TL.DecodeTux(ut) as Base.Card.TuxEqiup;
-                            if (tux != null && tux.Code == rName)
-                                if (tux.ConsumeValidHolder(player, opy, tConsType, tType, linkFuse))
+                            TuxEqiup tue = XI.LibTuple.TL.DecodeTux(ut) as TuxEqiup;
+                            if (tue != null && tue.Code == rName)
+                            {
+                                string tfuse = tue.IsLinked(tConsType, tType) ? linkFuse : fuse;
+                                if (tue.ConsumeValidHolder(player, opy, tConsType, tType, tfuse))
                                     return true;
+                            }
                         }
                     }
                 }
@@ -563,96 +574,102 @@ namespace PSD.PSDGamepkg.JNS
             string[] linkHeads = linkFuse.Substring(0, lfidx).Split('&');
             string fuse = linkFuse.Substring(lfidx + 1);
 
-            if (prev == "")
-                return "";
+            ushort targetTo, tuxTo; string rest;
+            if (prev == "") { return ""; }
             else if (prev.IndexOf(',') < 0)
             {
-                ushort who = ushort.Parse(prev);
-                Player opy = XI.Board.Garden[who];
-                ISet<ushort> usefulTux = new HashSet<ushort>();
-                foreach (string linkHead in linkHeads)
-                {
-                    List<string> relateds = XI.Sk03[linkHead].ToList();
-                    relateds.Add(linkHead);
-                    // relateds = { "TP03,0", "FJ02,0!0" };
-                    foreach (string rlink in relateds)
-                    {
-                        if (rlink.StartsWith("JNT0701"))
-                            continue;
-                        int rcmIdx = rlink.IndexOf(',');
-                        string rName = Algo.Substring(rlink, 0, rcmIdx);
-                        int pdIdx = rlink.IndexOf('!', rcmIdx + 1);
-                        if (pdIdx < 0) // Not equip special case
-                        {
-                            int tType = int.Parse(rlink.Substring(rcmIdx + 1));
-                            foreach (ushort ut in player.Tux)
-                            {
-                                Base.Card.Tux tux = XI.LibTuple.TL.DecodeTux(ut);
-                                if (tux != null && tux.Code == rName)
-                                    if (tux.Bribe(opy, tType, fuse) && tux.Valid(opy, tType, fuse))
-                                        usefulTux.Add(ut);
-                            }
-                        }
-                        else
-                        {
-                            int tConsType = int.Parse(Algo.Substring(rlink, rcmIdx + 1, pdIdx));
-                            int tType = (pdIdx < 0) ? -1 : int.Parse(rlink.Substring(pdIdx + 1));
-                            foreach (ushort ut in player.ListOutAllEquips())
-                            {
-                                Base.Card.TuxEqiup tux = XI.LibTuple.TL.DecodeTux(ut) as Base.Card.TuxEqiup;
-                                if (tux != null && tux.Code == rName)
-                                    if (tux.ConsumeValidHolder(player, opy, tConsType, tType, linkFuse))
-                                        usefulTux.Add(ut);
-                            }
-                        }
-                    }
-                }
-                if (usefulTux.Count > 0)
-                    return "/Q1(p" + string.Join("p", usefulTux) + ")";
-                else
-                    return "/";
+                targetTo = ushort.Parse(prev);
+                tuxTo = 0; rest = "";
             }
             else
             {
-                int ichicm = prev.IndexOf(',');
-                int nicm = prev.IndexOf(',', ichicm + 1);
-                ushort who = ushort.Parse(Algo.Substring(prev, 0, ichicm));
-                ushort ut = ushort.Parse(Algo.Substring(prev, ichicm + 1, nicm));
-                string rest = nicm < 0 ? "" : prev.Substring(nicm + 1);
-                Base.Card.Tux tux = XI.LibTuple.TL.DecodeTux(ut);
-                Player opy = XI.Board.Garden[who];
+                string[] parts = prev.Split(',');
+                targetTo = ushort.Parse(parts[0]);
+                tuxTo = ushort.Parse(parts[1]);
+                rest = string.Join(",", Algo.TakeRange(parts, 2, parts.Length));
+            }
+            List<ushort> usefulTux = new List<ushort>();
+            string nextAsk = "";
 
-                foreach (string linkHead in linkHeads)
+            System.Func<ushort, Player, int, bool> tuxUsable = (ut, py, tType) =>
+            {
+                Tux tux = XI.LibTuple.TL.DecodeTux(ut);
+                if (tux == null) { return false; }
+                string tfuse = tux.IsLinked(tType) ? linkFuse : fuse;
+                return tux.Bribe(py, tType, tfuse) && tux.Valid(player, tType, tfuse);
+            };
+            System.Func<ushort, Player, int, int, bool> eqUsable = (ut, py, tConsume, tType) =>
+            {
+                TuxEqiup tue = XI.LibTuple.TL.DecodeTux(ut) as TuxEqiup;
+                if (tue == null) { return false; }
+                string tfuse = tue.IsLinked(tConsume, tType) ? linkFuse : fuse;
+                return tue.ConsumeValidHolder(player, py, tConsume, tType, tfuse);
+            };
+
+            foreach (string linkHeadComp in linkHeads)
+            {
+                int lastIdx = linkHeadComp.LastIndexOf(',');
+                string linkHead = linkHeadComp.Substring(0, lastIdx);
+                string rawFuse = linkHeadComp.Substring(lastIdx + 1);
+                if (!Artiad.ContentRule.IsFuseMatch(rawFuse, fuse, XI.Board))
+                    continue;
+                List<string> relateds = XI.Sk03[linkHead].ToList();
+                relateds.Add(linkHead);
+                // relateds = { "TP03,0", "FJ02,0!0" };
+                foreach (string rlink in relateds)
                 {
-                    List<string> relateds = XI.Sk03[linkHead].ToList();
-                    relateds.Add(linkHead);
-                    // relateds = { "TP03,0", "FJ02,0!0" };
-                    foreach (string rlink in relateds)
+                    if (rlink.StartsWith("JNT0701"))
+                        continue;
+                    int rcmIdx = rlink.IndexOf(',');
+                    string rName = Algo.Substring(rlink, 0, rcmIdx);
+                    int pdIdx = rlink.IndexOf('!', rcmIdx + 1);
+                    if (pdIdx < 0) // Not equip special case
                     {
-                        if (rlink.StartsWith("JNT0701"))
-                            continue;
-                        int rcmIdx = rlink.IndexOf(',');
-                        string rName = Algo.Substring(rlink, 0, rcmIdx);
-                        int pdIdx = rlink.IndexOf('!', rcmIdx + 1);
-                        if (pdIdx < 0) // Not equip special case
+                        int tType = int.Parse(rlink.Substring(rcmIdx + 1));
+                        if (tuxTo == 0)
                         {
-                            int tType = int.Parse(rlink.Substring(rcmIdx + 1));
-                            if (tux != null && tux.Code == rName)
-                                if (tux.Bribe(opy, tType, fuse) && tux.Valid(opy, tType, fuse))
-                                    return tux.InputHolder(player, opy, tType, fuse, rest);
+                            Player py = XI.Board.Garden[targetTo];
+                            usefulTux.AddRange(player.Tux.Where(p =>
+                                XI.LibTuple.TL.DecodeTux(p).Code == rName && tuxUsable(p, py, tType)));
                         }
                         else
                         {
-                            int tConsType = int.Parse(Algo.Substring(rlink, rcmIdx + 1, pdIdx));
-                            int tType = (pdIdx < 0) ? -1 : int.Parse(rlink.Substring(pdIdx + 1));
-                            Base.Card.TuxEqiup te = tux as Base.Card.TuxEqiup;
-                            if (te != null && te.Code == rName)
-                                return te.ConsumeInputHolder(player, opy, tConsType, tType, linkFuse, rest);
+                            Player py = XI.Board.Garden[targetTo];
+                            Tux tux = XI.LibTuple.TL.DecodeTux(tuxTo);
+                            if (tux != null && tux.Code == rName)
+                            {
+                                string tfuse = tux.IsLinked(tType) ? linkFuse : fuse;
+                                nextAsk = tux.InputHolder(player, py, tType, tfuse, rest); break;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        int tConsType = int.Parse(Algo.Substring(rlink, rcmIdx + 1, pdIdx));
+                        int tType = int.Parse(rlink.Substring(pdIdx + 1));
+                        if (tuxTo == 0)
+                        {
+                            Player py = XI.Board.Garden[targetTo];
+                            usefulTux.AddRange(player.ListOutAllEquips().Where(p =>
+                                XI.LibTuple.TL.DecodeTux(p).Code == rName && eqUsable(p, py, tConsType, tType)));
+                        }
+                        else
+                        {
+                            Player py = XI.Board.Garden[targetTo];
+                            TuxEqiup tue = XI.LibTuple.TL.DecodeTux(tuxTo) as TuxEqiup;
+                            if (tue != null && tue.Code == rName)
+                            {
+                                string tfuse = tue.IsLinked(tConsType, tType) ? linkFuse : fuse;
+                                nextAsk = tue.ConsumeInputHolder(player, py, tConsType, tType, tfuse, rest); break;
+                            }
                         }
                     }
                 }
-                return "";
             }
+            if (tuxTo == 0)
+                return usefulTux.Count > 0 ? "/Q1(p" + string.Join("p", usefulTux.Distinct()) + ")" : "/";
+            else
+                return nextAsk;
         }
         public void JNT0701Action(Player player, int type, string linkFuse, string argst)
         {
@@ -668,8 +685,13 @@ namespace PSD.PSDGamepkg.JNS
             string fuse = linkFuse.Substring(lfidx + 1);
 
             Base.Card.Tux tux = XI.LibTuple.TL.DecodeTux(ut);
-            foreach (string linkHead in linkHeads)
+            foreach (string linkHeadComp in linkHeads)
             {
+                int lastIdx = linkHeadComp.LastIndexOf(',');
+                string linkHead = linkHeadComp.Substring(0, lastIdx);
+                string rawFuse = linkHeadComp.Substring(lastIdx + 1);
+                if (!Artiad.ContentRule.IsFuseMatch(rawFuse, fuse, XI.Board))
+                    continue;
                 List<string> relateds = XI.Sk03[linkHead].ToList();
                 relateds.Add(linkHead);
                 // relateds = { "TP03,0", "FJ02,0!0" };
@@ -688,13 +710,15 @@ namespace PSD.PSDGamepkg.JNS
                             int sancm = inTypeStr.IndexOf('!');
                             ushort consumeCode = ushort.Parse(inTypeStr.Substring(0, sancm));
                             ushort inTypeCode = ushort.Parse(inTypeStr.Substring(sancm + 1));
+                            string tfuse = (tux as TuxEqiup).IsLinked(consumeCode, inTypeCode) ? linkFuse : fuse;
                             XI.RaiseGMessage("G0ZC," + player.Uid + "," + (3 + consumeCode) + "," +
-                                ut + "," + to + crest + ";" + inTypeCode + "," + fuse);
+                                ut + "," + to + crest + ";" + inTypeCode + "," + tfuse);
                         }
                         else
                         {
+                            string tfuse = tux.IsLinked(int.Parse(inTypeStr)) ? linkFuse : fuse;
                             XI.RaiseGMessage("G0CC," + player.Uid + ",0," + to + "," + tux.Code
-                                    + "," + ut + ";" + inTypeStr + "," + fuse);
+                                    + "," + ut + ";" + inTypeStr + "," + tfuse);
                         }
                         return;
                     }
@@ -2461,19 +2485,15 @@ namespace PSD.PSDGamepkg.JNS
                 return false;
             string linkFuse = fuse;
             int lfidx = linkFuse.IndexOf(':');
-            // linkHeads = { "TP02,0", "TP03,0" };
-            string[] linkHeads = linkFuse.Substring(0, lfidx).Split('&');
             string pureFuse = linkFuse.Substring(lfidx + 1);
-
-            for (int i = 0; i < linkHeads.Length; ++i)
+            foreach (string linkHead in linkFuse.Substring(0, lfidx).Split('&'))
             {
-                if (linkHeads[i].StartsWith("JNT1902"))
+                if (linkHead.StartsWith("JNT1902"))
                     continue;
-                int idx = linkHeads[i].IndexOf(',');
-                string pureName = linkHeads[i].Substring(0, idx);
-                string pureTypeStr = linkHeads[i].Substring(idx + 1);
+                string[] lh = linkFuse.Substring(0, lfidx).Split(',');
+                string pureName = lh[0], pureTypeStr = lh[1], rawOc = lh[2];
 
-                if (!pureTypeStr.Contains("!"))
+                if (!pureTypeStr.Contains("!") && Artiad.ContentRule.IsFuseMatch(rawOc, pureFuse, XI.Board))
                 {
                     ushort pureType = ushort.Parse(pureTypeStr);
                     Tux tux = XI.LibTuple.TL.EncodeTuxCode(pureName);
@@ -2493,30 +2513,13 @@ namespace PSD.PSDGamepkg.JNS
             ushort ut = ushort.Parse(args[2]);
             Tux tux = XI.LibTuple.TL.EncodeTuxDbSerial(udb);
 
-            string linkFuse = fuse;
-            int lfidx = linkFuse.IndexOf(':');
-            // linkHeads = { "TP02,0", "TP03,0" };
-            string[] linkHeads = linkFuse.Substring(0, lfidx).Split('&');
-            string pureFuse = linkFuse.Substring(lfidx + 1);
-            for (int i = 0; i < linkHeads.Length; ++i)
-            {
-                int idx = linkHeads[i].IndexOf(',');
-                string pureName = linkHeads[i].Substring(0, idx);
-                string pureTypeStr = linkHeads[i].Substring(idx + 1);
-                if (!pureTypeStr.Contains("!"))
-                {
-                    ushort pureType = ushort.Parse(pureTypeStr);
-                    if (tux.Code == pureName && tux.Bribe(player, pureType, pureFuse)
-                                && tux.Valid(player, pureType, pureFuse))
-                    {
-                        if (tux.Type == Tux.TuxType.ZP)
-                            XI.RaiseGMessage("G0CZ,0," + player.Uid);
-                        XI.RaiseGMessage("G0CC," + player.Uid + ",0," + player.Uid + "," +
-                            tux.Code + "," + ut + ";" + pureType + "," + pureFuse);
-                        break;
-                    }
-                }
-            }
+            string pureFuse;
+            int pureType = Artiad.ContentRule.GetTuxTypeFromLink(fuse,
+                tux, player, XI.Board, out pureFuse);
+            if (tux.Type == Tux.TuxType.ZP)
+                XI.RaiseGMessage("G0CZ,0," + player.Uid);
+            XI.RaiseGMessage("G0CC," + player.Uid + ",0," + player.Uid + "," +
+                tux.Code + "," + ut + ";" + pureType + "," + pureFuse);
         }
         public string JNT1902Input(Player player, int type, string fuse, string prev)
         {
@@ -2538,11 +2541,9 @@ namespace PSD.PSDGamepkg.JNS
                 {
                     if (linkHeads[i].StartsWith("JNT1902"))
                         continue;
-                    int idx = linkHeads[i].IndexOf(',');
-                    string pureName = linkHeads[i].Substring(0, idx);
-                    string pureTypeStr = linkHeads[i].Substring(idx + 1);
-
-                    if (!pureTypeStr.Contains("!"))
+                    string[] lh = linkFuse.Substring(0, lfidx).Split(',');
+                    string pureName = lh[0], pureTypeStr = lh[1], rawOc = lh[2];
+                    if (!pureTypeStr.Contains("!") && Artiad.ContentRule.IsFuseMatch(rawOc, pureFuse, XI.Board))
                     {
                         ushort pureType = ushort.Parse(pureTypeStr);
                         Tux tux = XI.LibTuple.TL.EncodeTuxCode(pureName);
@@ -4440,27 +4441,13 @@ namespace PSD.PSDGamepkg.JNS
                 player.RFM.Set("UseSoul", true);
                 ushort ut = ushort.Parse(argst);
                 Tux tux = XI.LibTuple.TL.DecodeTux(ut);
-                string linkFuse = fuse;
-                int lfidx = linkFuse.IndexOf(':');
-                string[] linkHeads = linkFuse.Substring(0, lfidx).Split('&');
-                string pureFuse = linkFuse.Substring(lfidx + 1);
 
-                for (int i = 0; i < linkHeads.Length; ++i)
+                string pureFuse;
+                int pureType = Artiad.ContentRule.GetTuxTypeFromLink(fuse, tux, player, XI.Board, out pureFuse);
+                if (pureType >= 0) // argst contains ut and won't be null
                 {
-                    int idx = linkHeads[i].IndexOf(',');
-                    string pureName = linkHeads[i].Substring(0, idx);
-                    string pureTypeStr = linkHeads[i].Substring(idx + 1);
-                    if (!pureTypeStr.Contains("!"))
-                    {
-                        ushort pureType = ushort.Parse(pureTypeStr);
-                        if (tux.Code == pureName && tux.Bribe(player, pureType, pureFuse)
-                                        && tux.Valid(player, pureType, pureFuse))
-                        {
-                            XI.RaiseGMessage("G0CC," + player.Uid + ",0," + player.Uid + "," + tux.Code +
-                                "," + argst + ";" + pureType + "," + pureFuse); // argst contains ut and won't be null
-                            break;
-                        }
-                    }
+                    XI.RaiseGMessage("G0CC," + player.Uid + ",0," + player.Uid + "," +
+                        tux.Code + "," + argst + ";" + pureType + "," + pureFuse);
                 }
             }
             else if (type == 2)
@@ -4470,33 +4457,8 @@ namespace PSD.PSDGamepkg.JNS
         {
             if ((type == 0 || type == 1) && player.ExCards.Count > 0)
             {
-                string linkFuse = fuse;
-                int lfidx = linkFuse.IndexOf(':');
-                // linkHeads = { "TP02,0", "TP03,0" };
-                string[] linkHeads = linkFuse.Substring(0, lfidx).Split('&');
-                string pureFuse = linkFuse.Substring(lfidx + 1);
-
-                foreach (ushort ut in player.ExCards)
-                {
-                    Base.Card.Tux tux = XI.LibTuple.TL.DecodeTux(ut);
-                    if (tux != null)
-                    {
-                        for (int i = 0; i < linkHeads.Length; ++i)
-                        {
-                            int idx = linkHeads[i].IndexOf(',');
-                            string pureName = linkHeads[i].Substring(0, idx);
-                            string pureTypeStr = linkHeads[i].Substring(idx + 1);
-                            if (!pureTypeStr.Contains("!"))
-                            {
-                                ushort pureType = ushort.Parse(pureTypeStr);
-                                if (tux.Code == pureName && tux.Bribe(player, pureType, pureFuse)
-                                        && tux.Valid(player, pureType, pureFuse))
-                                    return true;
-                            }
-                        }
-                    }
-                }
-                return false;
+                return player.ExCards.Any(p => Artiad.ContentRule.GetTuxTypeFromLink(fuse,
+                    XI.LibTuple.TL.DecodeTux(p), player, XI.Board) >= 0);
             }
             else if (type == 2 && player.ExCards.Count > 0)
                 return player.RFM.GetBool("UseSoul");
@@ -4506,34 +4468,8 @@ namespace PSD.PSDGamepkg.JNS
         {
             if ((type == 0 || type == 1) && prev == "")
             {
-                List<ushort> candidates = new List<ushort>();
-                string linkFuse = fuse;
-                int lfidx = linkFuse.IndexOf(':');
-                string[] linkHeads = linkFuse.Substring(0, lfidx).Split('&');
-                string pureFuse = linkFuse.Substring(lfidx + 1);
-
-                foreach (ushort ut in player.ExCards)
-                {
-                    Base.Card.Tux tux = XI.LibTuple.TL.DecodeTux(ut);
-                    if (tux != null)
-                    {
-                        for (int i = 0; i < linkHeads.Length; ++i)
-                        {
-                            int idx = linkHeads[i].IndexOf(',');
-                            string pureName = linkHeads[i].Substring(0, idx);
-                            string pureTypeStr = linkHeads[i].Substring(idx + 1);
-                            if (!pureTypeStr.Contains("!"))
-                            {
-                                ushort pureType = ushort.Parse(pureTypeStr);
-                                if (tux.Code == pureName && tux.Bribe(player, pureType, pureFuse)
-                                            && tux.Valid(player, pureType, pureFuse))
-                                {
-                                    candidates.Add(ut); break;
-                                }
-                            }
-                        }
-                    }
-                }
+                List<ushort> candidates = player.ExCards.Where(p => Artiad.ContentRule.GetTuxTypeFromLink(
+                    fuse, XI.LibTuple.TL.DecodeTux(p), player, XI.Board) >= 0).ToList();
                 return "/Q1(p" + string.Join("p", candidates) + ")";
             }
             else return "";
@@ -4771,33 +4707,9 @@ namespace PSD.PSDGamepkg.JNS
             else if (type == 1)
                 return player.TokenExcl.Count > 0;
             else if ((type == 2 || type == 3) && player.TokenExcl.Count > 0)
-            {
-                string linkFuse = fuse;
-                int lfidx = linkFuse.IndexOf(':');
-                // linkHeads = { "TP02,0", "TP03,0" };
-                string[] linkHeads = linkFuse.Substring(0, lfidx).Split('&');
-                string pureFuse = linkFuse.Substring(lfidx + 1);
-
-                ushort ut = ushort.Parse(player.TokenExcl[0].Substring("C".Length));
-                Base.Card.Tux tux = XI.LibTuple.TL.DecodeTux(ut);
-                if (tux != null)
-                {
-                    for (int i = 0; i < linkHeads.Length; ++i)
-                    {
-                        int idx = linkHeads[i].IndexOf(',');
-                        string pureName = linkHeads[i].Substring(0, idx);
-                        string pureTypeStr = linkHeads[i].Substring(idx + 1);
-                        if (!pureTypeStr.Contains("!"))
-                        {
-                            ushort pureType = ushort.Parse(pureTypeStr);
-                            if (tux.Code == pureName && tux.Bribe(player, pureType, pureFuse)
-                                    && tux.Valid(player, pureType, pureFuse))
-                                return true;
-                        }
-                    }
-                }
-                return false;
-            }
+                return player.TokenExcl.Select(p => ushort.Parse(p.Substring("C".Length))).Any(
+                        p => Artiad.ContentRule.GetTuxTypeFromLink(fuse,
+                        XI.LibTuple.TL.DecodeTux(p), player, XI.Board) >= 0);
             else
                 return false;
         }
@@ -4842,49 +4754,28 @@ namespace PSD.PSDGamepkg.JNS
             }
             else if (type == 2 || type == 3)
             {
-                string linkFuse = fuse;
-                int lfidx = linkFuse.IndexOf(':');
-                // linkHeads = { "TP02,0", "TP03,0" };
-                string[] linkHeads = linkFuse.Substring(0, lfidx).Split('&');
-                string pureFuse = linkFuse.Substring(lfidx + 1);
-
-                List<string> excl = player.TokenExcl.ToList();
-                foreach (string ccode in excl)
+                ushort ut = ushort.Parse(argst);
+                Tux tux = XI.LibTuple.TL.DecodeTux(ut);
+                string pureFuse;
+                int pureType = Artiad.ContentRule.GetTuxTypeFromLink(
+                    fuse, tux, player, XI.Board, out pureFuse);
+                if (!tux.IsTuxEqiup())
                 {
-                    ushort ut = ushort.Parse(ccode.Substring("C".Length));
-                    Base.Card.Tux tux = XI.LibTuple.TL.DecodeTux(ut);
-                    if (tux != null && !tux.IsTuxEqiup())
-                        for (int i = 0; i < linkHeads.Length; ++i)
-                        {
-                            int idx = linkHeads[i].IndexOf(',');
-                            string pureName = linkHeads[i].Substring(0, idx);
-                            string pureTypeStr = linkHeads[i].Substring(idx + 1);
-                            if (!pureTypeStr.Contains("!"))
-                            {
-                                ushort pureType = ushort.Parse(pureTypeStr);
-                                if (tux.Code == pureName && tux.Bribe(player, pureType, pureFuse)
-                                            && tux.Valid(player, pureType, pureFuse))
-                                {
-                                    XI.RaiseGMessage("G0OJ," + player.Uid + ",1,1,C" + ut);
-                                    XI.RaiseGMessage("G2TZ,0," + player.Uid + ",C" + ut);
-                                    if (!Artiad.ContentRule.IsTuxVestige(tux.Code, pureType))
-                                        XI.RaiseGMessage("G0ON," + player.Uid + ",C,1," + ut);
-                                    else
-                                        XI.Board.PendingTux.Enqueue(player.Uid + ",G0CC," + ut);
-                                    if (tux.Type == Base.Card.Tux.TuxType.ZP)
-                                        XI.RaiseGMessage("G0CZ,0," + player.Uid);
-                                    XI.InnerGMessage("G0CC," + player.Uid + ",0," + player.Uid + "," +
-                                        tux.Code + "," + ut + ";" + pureType + "," + pureFuse, 101);
-                                    break;
-                                }
-                            }
-                        }
-                    else if (tux != null)
-                    {
-                        XI.RaiseGMessage("G0OJ," + player.Uid + ",1,1,C" + ut);
-                        XI.RaiseGMessage("G1UE," + player.Uid + ",0," + ut);
-                        break;
-                    }
+                    XI.RaiseGMessage("G0OJ," + player.Uid + ",1,1,C" + ut);
+                    XI.RaiseGMessage("G2TZ,0," + player.Uid + ",C" + ut);
+                    if (!Artiad.ContentRule.IsTuxVestige(tux.Code, pureType))
+                        XI.RaiseGMessage("G0ON," + player.Uid + ",C,1," + ut);
+                    else
+                        XI.Board.PendingTux.Enqueue(player.Uid + ",G0CC," + ut);
+                    if (tux.Type == Tux.TuxType.ZP)
+                        XI.RaiseGMessage("G0CZ,0," + player.Uid);
+                    XI.InnerGMessage("G0CC," + player.Uid + ",0," + player.Uid + "," +
+                        tux.Code + "," + ut + ";" + pureType + "," + pureFuse, 101);
+                }
+                else if (tux != null)
+                {
+                    XI.RaiseGMessage("G0OJ," + player.Uid + ",1,1,C" + ut);
+                    XI.RaiseGMessage("G1UE," + player.Uid + ",0," + ut);
                 }
             }
         }
@@ -4907,35 +4798,9 @@ namespace PSD.PSDGamepkg.JNS
             {
                 if (prev == "")
                 {
-                    List<ushort> candidates = new List<ushort>();
-                    string linkFuse = fuse;
-                    int lfidx = linkFuse.IndexOf(':');
-                    string[] linkHeads = linkFuse.Substring(0, lfidx).Split('&');
-                    string pureFuse = linkFuse.Substring(lfidx + 1);
-
-                    foreach (string ccard in player.TokenExcl)
-                    {
-                        ushort ut = ushort.Parse(ccard.Substring("C".Length));
-                        Base.Card.Tux tux = XI.LibTuple.TL.DecodeTux(ut);
-                        if (tux != null)
-                        {
-                            for (int i = 0; i < linkHeads.Length; ++i)
-                            {
-                                int idx = linkHeads[i].IndexOf(',');
-                                string pureName = linkHeads[i].Substring(0, idx);
-                                string pureTypeStr = linkHeads[i].Substring(idx + 1);
-                                if (!pureTypeStr.Contains("!"))
-                                {
-                                    ushort pureType = ushort.Parse(pureTypeStr);
-                                    if (tux.Code == pureName && tux.Bribe(player, pureType, pureFuse)
-                                                && tux.Valid(player, pureType, pureFuse))
-                                    {
-                                        candidates.Add(ut); break;
-                                    }
-                                }
-                            }
-                        }
-                    }
+                    List<ushort> candidates = player.TokenExcl.Select(p => ushort.Parse(
+                        p.Substring("C".Length))).Where(p => Artiad.ContentRule.GetTuxTypeFromLink(fuse,
+                        XI.LibTuple.TL.DecodeTux(p), player, XI.Board) >= 0).ToList();
                     return "/C1(p" + string.Join("p", candidates) + ")";
                 }
                 else return "";

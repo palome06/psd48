@@ -186,7 +186,7 @@ namespace PSD.Base.Card
 
         public bool IsLinked(int inType)
         {
-            return Occurs != null && Occurs.Length > inType && Occurs[inType].Contains('&');
+            return Occurs != null && Occurs.Length > inType && Occurs[inType].Contains('%');
         }
 
         public bool IsSameType(Tux tux)
@@ -616,8 +616,8 @@ namespace PSD.Base.Card
 
         public bool IsLinked(int consumeType, int inType)
         {
-            return CsOccur != null && CsOccur.Length > consumeType &&
-                CsOccur[consumeType].Length > inType && CsOccur[consumeType][inType].Contains('&');
+            return CsOccur != null && CsOccur.Length > consumeType && CsOccur[consumeType].Length > inType &&
+                CsOccur[consumeType][inType].Contains('%');
         }
 
         public TuxEqiup(string name, string code, int genre, TuxType type,

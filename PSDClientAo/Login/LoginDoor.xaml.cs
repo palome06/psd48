@@ -347,12 +347,20 @@ namespace PSD.ClientAo.Login
         private int PkgMode { set; get; }
         private void SetLvTrigger()
         {
-            PkgMode = 3;
+            PkgMode = 2;
             Lv0Radio.Checked += (s, r) => PkgMode = 1;
             Lv1Radio.Checked += (s, r) => PkgMode = 2;
             Lv2Radio.Checked += (s, r) => PkgMode = 3;
-            Lv3Radio.Checked += (s, r) => LvTryTuxCheckBox.IsEnabled = true; PkgMode = (LvTryTuxCheckBox.IsChecked == true) ? 5 : 4;
-            Lv3Radio.Unchecked += (s, r) => LvTryTuxCheckBox.IsEnabled = false; if (PkgMode == 5 && LvTryTuxCheckBox.IsChecked == true) PkgMode = 4;
+            Lv3Radio.Checked += (s, r) =>
+            {
+                LvTryTuxCheckBox.IsEnabled = true;
+                PkgMode = (LvTryTuxCheckBox.IsChecked == true) ? 5 : 4;
+            };
+            Lv3Radio.Unchecked += (s, r) =>
+            {
+                LvTryTuxCheckBox.IsEnabled = false;
+                if (PkgMode == 5 && LvTryTuxCheckBox.IsChecked == true) { PkgMode = 4; }
+            };
             Lv5Radio.Checked += (s, r) => PkgMode = 6;
         }
         //private int GetPkgCode()

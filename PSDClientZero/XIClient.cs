@@ -1712,12 +1712,8 @@ namespace PSD.ClientZero
                         int argvIdx = 1;
                         ushort me = ushort.Parse(args[argvIdx++]);
                         ushort consumeType = ushort.Parse(args[argvIdx++]);
+                        ushort target = ushort.Parse(args[argvIdx++]);
                         ushort card = ushort.Parse(args[argvIdx++]);
-                        ushort target;
-                        if (consumeType == 0 || consumeType == 1)
-                            target = 0;
-                        else
-                            target = ushort.Parse(args[argvIdx++]);
                         int type = int.Parse(args[argvIdx++]);
                         string argvs = string.Join(",", Algo.TakeRange(args, argvIdx, args.Length));
                         if (!string.IsNullOrEmpty(argvs))

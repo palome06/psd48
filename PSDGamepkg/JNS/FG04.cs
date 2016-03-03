@@ -3453,7 +3453,7 @@ namespace PSD.PSDGamepkg.JNS
                 if (type == 0 && monster.ROM.GetInt("iSTR") != 0 && player.STR > 0) // HD, obtain others, set iSTR = 0
                 {
                     Artiad.ObtainPet otp = Artiad.ObtainPet.Parse(fuse);
-                    return otp.Pets.Any(p => p != me);
+                    return otp.Farmer == player.Uid && otp.Pets.Any(p => p != me);
                 }
                 else if (type == 1 && monster.ROM.GetInt("iSTR") == 0 && player.STR > 0) // HL, lose others, set iSTR
                     return !anyOther;
@@ -3464,7 +3464,30 @@ namespace PSD.PSDGamepkg.JNS
         }
         public void GTH2Debut()
         {
-            // 5 -> 3 -> 1 -> 2 -> 4 -> 6
+            ushort[] order = { 1, 3, 5, 6, 4, 2 };
+            List<Player> invs = new List<Player>();
+            for (int i = 0; i < order.Length; ++i)
+            {
+                Player py = XI.Board.Garden[order[i]];
+                if (py.IsAlive)
+                    invs.Add(py);
+            }
+            if (invs.Count > 1)
+            {
+                invs.Add(invs[0]);
+                IDictionary<Player, ushort> giveTo = Enumerable.Range(0, invs.Count - 1).
+                    Where(p => invs[p].Tux.Count > 0).ToDictionary(p => invs[p], p => invs[p + 1].Uid);
+                IDictionary<ushort, string> ask = giveTo.ToDictionary(p => p.Key.Uid, p => string.Format(
+                    "#交予{0},Q{1}(p{2})", XI.DisplayPlayer(p.Value), p.Key.Tux.Count >= 2 ? 2 : 1,
+                    string.Join("p", p.Key.Tux)));
+                IDictionary<ushort, string> ans = XI.MultiAsyncInput(ask);
+                foreach (var pair in ans)
+                {
+                    string[] tuxes = pair.Value.Split(',');
+                    XI.RaiseGMessage("G0HQ,0," + giveTo[XI.Board.Garden[pair.Key]] + "," +
+                        pair.Key + ",1," + tuxes.Length + "," + pair.Value);
+                }
+            }
         }
         public void GTH2WinEff()
         {
@@ -3489,6 +3512,67 @@ namespace PSD.PSDGamepkg.JNS
             pys = XI.Board.Garden.Values.Where(p => p.IsAlive && p.Tux.Count > 0).ToList();
             if (pys.Any())
                 XI.RaiseGMessage("G1XR,1,0,0," + string.Join(",", pys.Select(p => p.Uid)));
+        }
+        public bool GTH2ConsumeValid(Player player, int consumeType, int type, string fuse)
+        {
+            if (consumeType == 0 && player.Tux.Count > 0 && XI.Board.TuxPiles.Count > 0)
+            {
+                string linkFuse = fuse;
+                int lfidx = linkFuse.IndexOf(':');
+                string pureFuse = linkFuse.Substring(lfidx + 1);
+                foreach (string linkHead in linkFuse.Substring(0, lfidx).Split('&'))
+                {
+                    if (linkHead.StartsWith("GTH2"))
+                        continue;
+                    string[] lh = linkHead.Split(',');
+                    string pureName = lh[0], pureTypeStr = lh[1], rawOc = lh[2];
+                    if (!pureTypeStr.Contains("!") && Artiad.ContentRule.IsFuseMatch(rawOc, pureFuse, XI.Board))
+                    {
+                        ushort pureType = ushort.Parse(pureTypeStr);
+                        Tux tux = XI.LibTuple.TL.EncodeTuxCode(pureName);
+                        if (tux != null && XI.LibTuple.TL.IsTuxInGroup(tux, XI.PCS.Level))
+                        {
+                            if (tux.Bribe(player, pureType, pureFuse) && tux.Valid(player, pureType, pureFuse))
+                                return true;
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+        public void GTH2ConsumeAction(Player player, int consumeType, int type, string fuse, string argst)
+        {
+            if (consumeType == 0)
+            {
+                string pureFuse;
+                XI.RaiseGMessage("G0XZ," + player.Uid + ",1,0,1");
+                ushort ut = XI.Board.TuxPiles.Watch();
+                Tux tux = XI.LibTuple.TL.DecodeTux(ut);
+                int pt = Artiad.ContentRule.GetTuxTypeFromLink(fuse, tux, player, XI.Board, out pureFuse);
+                if (pt >= 0)
+                {
+                    string sel = XI.AsyncInput(player.Uid, "#是否使用【" + tux.Name +
+                        "】##是##否,Y2", "GTH2ConsumeAction", "0");
+                    if (sel == "1")
+                    {
+                        if (player.Tux.Count > 0)
+                            XI.RaiseGMessage("G0DH," + player.Uid + ",1," + player.Tux.Count / 2);
+                        XI.DequeueOfPile(XI.Board.TuxPiles);
+                        XI.RaiseGMessage("G2IN,0,1");
+                        XI.RaiseGMessage("G0YM,8," + ut);
+                        if (tux.IsTuxEqiup())
+                            XI.RaiseGMessage("G1UE," + player.Uid + ",0," + ut);
+                        else
+                        {
+                            string tfuse = tux.IsLinked(pt) ? fuse : pureFuse;
+                            XI.RaiseGMessage("G0CC,0,0," + player.Uid +
+                                "," + tux.Code + "," + ut + ";" + pt + "," + tfuse);
+                        }
+                    }
+                }
+                else
+                    XI.AsyncInput(player.Uid, "/", "GTH2ConsumeAction", "1");
+            }
         }
         #endregion Package HL
 

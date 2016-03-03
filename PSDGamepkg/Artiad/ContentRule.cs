@@ -179,6 +179,43 @@ namespace PSD.PSDGamepkg.Artiad
             }
             return py;
         }
+        // judge whether the fuse is matched
+        public static bool IsFuseMatch(string rawFuse, string fuse, Board board)
+        {
+            string r = board.Rounder.Uid.ToString();
+            fuse = Algo.Substring(fuse, 0, fuse.IndexOf(','));
+            return rawFuse == fuse || (rawFuse.Replace("#", r) == fuse) ||
+                board.Garden.Keys.Any(p => p != board.Rounder.Uid && rawFuse.Replace("$", r) == fuse) ||
+                board.Garden.Keys.Any(p => rawFuse.Replace("*", r) == fuse);
+        }
+        // check whether $player's $linkHead is suitable for $tux, then return the pureType
+        public static int GetTuxTypeFromLink(string linkFuse, Tux tux, Player player, Board board)
+        {
+            string pureFuse;
+            return GetTuxTypeFromLink(linkFuse, tux, player, board, out pureFuse);
+        }
+        // check whether $player's $linkHead is suitable for $tux, then return the pureType
+        public static int GetTuxTypeFromLink(string linkFuse, Tux tux, Player player, Board board, out string pureFuse)
+        {
+            int idx = linkFuse.IndexOf(":");
+            pureFuse = linkFuse.Substring(idx + 1);
+            if (tux == null || idx <= 0)
+                return -1;
+            string[] linkHeads = Algo.Substring(linkFuse, 0, idx).Split('&');
+            foreach (string linkHead in linkHeads)
+            {
+                string[] lh = linkHead.Split(',');
+                string pureName = lh[0], pureTypeStr = lh[1], rawOc = lh[2];
+                if (!pureTypeStr.Contains("!") && IsFuseMatch(rawOc, pureFuse, board))
+                {
+                    int pureType = int.Parse(pureTypeStr);
+                    if (tux.Code == pureName && tux.Bribe(player, pureType, pureFuse)
+                                && tux.Valid(player, pureType, pureFuse))
+                        return pureType;
+                }
+            }
+            return -1;
+        }
 
         #endregion Sparse Base Rules
     }

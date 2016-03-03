@@ -103,5 +103,15 @@ namespace PSD.Base
             }
             return skbs;
         }
+
+        public static string GetAas(int aliasSerial)
+        {
+            System.Data.DataRowCollection data = new Utils.ReadonlySQL("psd.db3")
+                .Query(new string[] { "AVAL" }, "AAs", "AKEY = " + aliasSerial);
+            if (data.Count == 1)
+                return (string)data[0]["AVAL"];
+            else
+                return "";
+        }
     }
 }

@@ -18,14 +18,11 @@ namespace PSD.Base.Card
         public List<string> Skills { private set; get; }
         public IDictionary<string, string> Description { private set; get; }
 
-        private ExspLib lib;
-
         internal Exsp(string name, ushort type, int hero, string code,
-            List<string> skills, IDictionary<string, string> description, ExspLib lib)
+            List<string> skills, IDictionary<string, string> description)
         {
             Name = name; Code = code;
             Type = type; Hero = hero;
-            this.lib = lib;
             Skills = skills;
             Description = description;
         }
@@ -65,7 +62,7 @@ namespace PSD.Base.Card
                     id.Add(descSpt[i], descSpt[i + 1]);
                 string[] codes = codeGroup.Split(',');
                 foreach (string code in codes)
-                    firsts.Add(new Exsp(name, type, hero, code, skill, id, this));
+                    firsts.Add(new Exsp(name, type, hero, code, skill, id));
             }
             dicts = new Dictionary<string, Exsp>();
             foreach (Exsp exsp in firsts)

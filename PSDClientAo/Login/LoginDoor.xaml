@@ -123,9 +123,9 @@
                                     <WrapPanel>
                                         <RadioButton Content="新手场" Width="120" GroupName="LvGroup" x:Name="Lv0Radio"
                                                      ToolTip="使用标准版游戏，去除苏媚，唐雪见，南宫煌，王蓬絮与小蛮等操作或询问复杂的角色。"/>
-                                        <RadioButton Content="标准场" Width="120" GroupName="LvGroup" x:Name="Lv1Radio"
+                                        <RadioButton Content="标准场" Width="120" GroupName="LvGroup" x:Name="Lv1Radio" IsChecked="True" 
                                                      ToolTip="使用标准版与资料篇一《凤鸣玉誓》的官方正式出版的版本游戏。"/>
-                                        <RadioButton Content="高手场" Width="120" GroupName="LvGroup" IsChecked="True" x:Name="Lv2Radio"
+                                        <RadioButton Content="高手场" Width="120" GroupName="LvGroup" x:Name="Lv2Radio"
                                                      ToolTip="使用标准版、资料篇一《凤鸣玉誓》、同人资料篇二《三世轮回》，同人资料篇三《云来奇缘》成熟的版本游戏。"/>
                                         <RadioButton Content="至尊场" Width="120" GroupName="LvGroup" x:Name="Lv3Radio"
                                                      ToolTip="使用标准版、资料篇一～三，以及资料篇四《含笑九泉》、番外资料篇《宿命篇》、SP、EX中部分内容游戏（不含手牌）。享受至尊全扩的尊贵。"/>

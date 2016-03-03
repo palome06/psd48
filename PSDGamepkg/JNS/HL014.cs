@@ -881,7 +881,7 @@ namespace PSD.PSDGamepkg.JNS
                 XI.RaiseGMessage(new Artiad.Goto()
                 {
                     CrossStage = false,
-                    Terminal = "R" + XI.Board.Rounder.Uid + "GF"
+                    Terminal = "R" + XI.Board.Rounder.Uid + "Z0"
                 }.ToMessage());
             }
             else if (type == 4)
@@ -3345,7 +3345,7 @@ namespace PSD.PSDGamepkg.JNS
                     .Sum(p => p.GetEquipCount() + p.Runes.Count);
                 while (total > 0)
                 {
-                    string selTarget = XI.AsyncInput(player.Uid, "#(剩余" + total + "枚)/T1" + FormatPlayers(p =>
+                    string selTarget = XI.AsyncInput(player.Uid, "#(剩余" + total + "枚),/T1" + FormatPlayers(p =>
                         p.IsTared && (p.Team == player.OppTeam || p.Runes.Count > 0)), "JNH2002", "0");
                     if (selTarget.StartsWith("/") || selTarget == VI.CinSentinel)
                         break;

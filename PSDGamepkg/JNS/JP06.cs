@@ -1730,14 +1730,16 @@ namespace PSD.PSDGamepkg.JNS
                 }
             }
         }
-        public void XBT3ConsumeAction(Player player, int consumeType, int type, string fuse, string argst)
+        public void XBT3ConsumeActionHolder(Player provider, Player user, int consumeType, int type,
+            string fuse, string argst)
         {
-            Base.Card.Luggage lug = XI.LibTuple.TL.EncodeTuxCode("XBT3") as Base.Card.Luggage;
+            Luggage lug = XI.LibTuple.TL.EncodeTuxCode("XBT3") as Luggage;
             ushort lugCode = XI.LibTuple.TL.UniqueEquipSerial("XBT3");
             if (lug != null && consumeType == 0)
             {
                 if (type == 0)
                 {
+                    Player player = provider;
                     if (lug.Capacities.Count > 0)
                     {
                         List<string> cap = lug.Capacities.ToList();
@@ -1766,55 +1768,42 @@ namespace PSD.PSDGamepkg.JNS
                 }
                 else if (type == 1 || type == 2)
                 {
-                    string linkFuse = fuse;
-                    int lfidx = linkFuse.IndexOf(':');
-                    // linkHeads = { "TP02,0", "TP03,0" };
-                    string[] linkHeads = linkFuse.Substring(0, lfidx).Split('&');
-                    string pureFuse = linkFuse.Substring(lfidx + 1);
-
+                    string pureFuse;
                     ushort ut = ushort.Parse(argst);
-                    Base.Card.Tux tux = XI.LibTuple.TL.DecodeTux(ut);
-                    if (tux != null && !tux.IsTuxEqiup())
-                        for (int i = 0; i < linkHeads.Length; ++i)
-                        {
-                            int idx = linkHeads[i].IndexOf(',');
-                            string pureName = linkHeads[i].Substring(0, idx);
-                            string pureTypeStr = linkHeads[i].Substring(idx + 1);
-                            if (!pureTypeStr.Contains("!"))
-                            {
-                                ushort pureType = ushort.Parse(pureTypeStr);
-                                if (tux.Code == pureName && tux.Bribe(player, pureType, pureFuse)
-                                            && tux.Valid(player, pureType, pureFuse))
-                                {
-                                    XI.RaiseGMessage("G0SN," + player.Uid + "," + lugCode + ",1,C" + ut);
-                                    XI.RaiseGMessage("G2TZ,0," + player.Uid + ",C" + ut);
-                                    if (!Artiad.ContentRule.IsTuxVestige(tux.Code, pureType))
-                                        XI.RaiseGMessage("G0ON," + player.Uid + ",C,1," + ut);
-                                    else
-                                        XI.Board.PendingTux.Enqueue(player.Uid + ",G0CC," + ut);
-                                    if (tux.Type == Base.Card.Tux.TuxType.ZP)
-                                        XI.RaiseGMessage("G0CZ,0," + player.Uid);
-                                    XI.InnerGMessage("G0CC," + player.Uid + ",0," + player.Uid + "," +
-                                        tux.Code + "," + ut + ";" + pureType + "," + pureFuse, 101);
-                                    break;
-                                }
-                            }
-                        }
-                    else if (tux != null)
+                    Tux tux = XI.LibTuple.TL.DecodeTux(ut);
+                    if (!tux.IsTuxEqiup())
                     {
-                        XI.RaiseGMessage("G0SN," + player.Uid + "," + lugCode + ",1,C" + ut);
-                        XI.RaiseGMessage("G1UE," + player.Uid + ",0," + ut);
+                        int pt = Artiad.ContentRule.GetTuxTypeFromLink(fuse, tux, user, XI.Board, out pureFuse);
+                        if (pt >= 0)
+                        {
+                            XI.RaiseGMessage("G0SN," + provider.Uid + "," + lugCode + ",1,C" + ut);
+                            XI.RaiseGMessage("G2TZ,0," + provider.Uid + ",C" + ut);
+                            if (!Artiad.ContentRule.IsTuxVestige(tux.Code, pt))
+                                XI.RaiseGMessage("G0ON," + provider.Uid + ",C,1," + ut);
+                            else
+                                XI.Board.PendingTux.Enqueue(user.Uid + ",G0CC," + ut);
+                            if (tux.Type == Base.Card.Tux.TuxType.ZP)
+                                XI.RaiseGMessage("G0CZ,0," + provider.Uid);
+                            XI.InnerGMessage("G0CC," + provider.Uid + ",0," + user.Uid + "," +
+                                tux.Code + "," + ut + ";" + pt + "," + pureFuse, 101);
+                        }
+                    }
+                    else
+                    {
+                        XI.RaiseGMessage("G0SN," + provider.Uid + "," + lugCode + ",1,C" + ut);
+                        XI.RaiseGMessage("G1UE," + user.Uid + ",0," + ut);
                     }
                 }
             }
         }
-        public bool XBT3ConsumeValid(Player player, int consumeType, int type, string fuse)
+        public bool XBT3ConsumeValidHolder(Player provider, Player user, int consumeType, int type, string fuse)
         {
             Base.Card.Luggage lug = XI.LibTuple.TL.EncodeTuxCode("XBT3") as Base.Card.Luggage;
             if (lug != null && consumeType == 0)
             {
                 if (type == 0)
                 {
+                    Player player = provider;
                     string[] blocks = fuse.Split(',');
                     int idx = 1;
                     while (idx < blocks.Length)
@@ -1832,84 +1821,22 @@ namespace PSD.PSDGamepkg.JNS
                 }
                 else if (type == 1 || type == 2)
                 {
-                    string linkFuse = fuse;
-                    int lfidx = linkFuse.IndexOf(':');
-                    // linkHeads = { "TP02,0", "TP03,0" };
-                    string[] linkHeads = linkFuse.Substring(0, lfidx).Split('&');
-                    string pureFuse = linkFuse.Substring(lfidx + 1);
-
-                    foreach (string ccard in lug.Capacities)
-                    {
-                        ushort ut = ushort.Parse(ccard.Substring("C".Length));
-                        Base.Card.Tux tux = XI.LibTuple.TL.DecodeTux(ut);
-                        if (tux != null)
-                        {
-                            for (int i = 0; i < linkHeads.Length; ++i)
-                            {
-                                int idx = linkHeads[i].IndexOf(',');
-                                string pureName = linkHeads[i].Substring(0, idx);
-                                string pureTypeStr = linkHeads[i].Substring(idx + 1);
-                                //if (pureTypeStr.Contains("!"))
-                                //{
-                                //    int jdx = pureTypeStr.IndexOf('!');
-                                //    ushort pureType = ushort.Parse(pureTypeStr.Substring(0, jdx));
-                                //    ushort pureConsu = ushort.Parse(pureTypeStr.Substring(jdx + 1));
-                                //    if (tux.Code == pureName && tux.IsTuxEqiup())
-                                //    {
-                                //        Base.Card.TuxEqiup tue = tux as Base.Card.TuxEqiup;
-                                //        if (tue.ConsumeValid(player, pureConsu, pureType, pureFuse))
-                                //            return true;
-                                //    }
-                                //} else
-                                if (!pureTypeStr.Contains("!"))
-                                {
-                                    ushort pureType = ushort.Parse(pureTypeStr);
-                                    if (tux.Code == pureName && tux.Bribe(player, pureType, pureFuse)
-                                            && tux.Valid(player, pureType, pureFuse))
-                                        return true;
-                                }
-                            }
-                        }
-                    }
+                    return lug.Capacities.Select(p => ushort.Parse(p.Substring("C".Length))).Any(
+                        p => Artiad.ContentRule.GetTuxTypeFromLink(fuse,
+                        XI.LibTuple.TL.DecodeTux(p), user, XI.Board) >= 0);
                 }
             }
             return false;
         }
-        public string XBT3ConsumeInput(Player player, int consumeType, int type, string fuse, string prev)
+        public string XBT3ConsumeInputHolder(Player provider, Player user, int consumeType,
+            int type, string fuse, string prev)
         {
             Base.Card.Luggage lug = XI.LibTuple.TL.EncodeTuxCode("XBT3") as Base.Card.Luggage;
             if (lug != null && consumeType == 0 && (type == 1 || type == 2) && prev == "")
             {
-                List<ushort> candidates = new List<ushort>();
-
-                string linkFuse = fuse;
-                int lfidx = linkFuse.IndexOf(':');
-                string[] linkHeads = linkFuse.Substring(0, lfidx).Split('&');
-                string pureFuse = linkFuse.Substring(lfidx + 1);
-
-                foreach (string ccard in lug.Capacities)
-                {
-                    ushort ut = ushort.Parse(ccard.Substring("C".Length));
-                    Base.Card.Tux tux = XI.LibTuple.TL.DecodeTux(ut);
-                    if (tux != null)
-                    {
-                        for (int i = 0; i < linkHeads.Length; ++i)
-                        {
-                            int idx = linkHeads[i].IndexOf(',');
-                            string pureName = linkHeads[i].Substring(0, idx);
-                            string pureTypeStr = linkHeads[i].Substring(idx + 1);
-                            if (!pureTypeStr.Contains("!"))
-                            {
-                                ushort pureType = ushort.Parse(pureTypeStr);
-                                if (tux.Code == pureName && tux.Bribe(player, pureType, pureFuse)
-                                            && tux.Valid(player, pureType, pureFuse))
-                                {
-                                    candidates.Add(ut); break;
-                                }
-                            }
-                        }
-                    }
-                }
+                List<ushort> candidates = lug.Capacities.Select(p => ushort.Parse(p.Substring("C".Length)))
+                    .Where(p => Artiad.ContentRule.GetTuxTypeFromLink(fuse,
+                    XI.LibTuple.TL.DecodeTux(p), user, XI.Board) >= 0).ToList();
                 return "/C1(p" + string.Join("p", candidates) + ")";
             }
             else return "";
@@ -2186,34 +2113,34 @@ namespace PSD.PSDGamepkg.JNS
         {
             return XI.Board.IsAttendWarSucc(player) && player.HP < player.HPb;
         }
-        public bool XBT5ConsumeValid(Player player, int consumeType, int type, string fuse)
+        public bool XBT5ConsumeValidHolder(Player provider, Player user, int consumeType, int type, string fuse)
         {
-            if (consumeType == 0)
+            if (consumeType == 0 && type == 0 && provider.Tux.Count > 0)
             {
-                if (type == 0)
-                {
-                    Tux zp04 = XI.LibTuple.TL.EncodeTuxCode("ZP04");
-                    return player.Tux.Count > 0 && zp04.Bribe(player, type, fuse) && zp04.Valid(player, type, fuse);
-                }
-                else return false;
+                int lfidx = fuse.IndexOf(':');
+                string pureFuse = fuse.Substring(lfidx + 1);
+                Tux zp04 = XI.LibTuple.TL.EncodeTuxCode("ZP04");
+                return zp04 != null && zp04.Bribe(provider, type, pureFuse) && zp04.Valid(user, type, pureFuse);
             }
-            else return false;
+            else
+                return false;
         }
-        public void XBT5ConsumeAction(Player player, int consumeType, int type, string fuse, string argst)
+        public void XBT5ConsumeActionHolder(Player provider, Player user, int consumeType, int type,
+            string fuse, string argst)
         {
-            if (consumeType == 0)
+            if (consumeType == 0 && type == 0)
             {
-                if (type == 0)
-                {
-                    XI.RaiseGMessage("G0CC," + player.Uid + ",0," + player.Uid + ",ZP04," + argst + ";0," + fuse);
-                    XI.RaiseGMessage("G0CZ,0," + player.Uid);
-                }
+                int lfidx = fuse.IndexOf(':');
+                string pureFuse = fuse.Substring(lfidx + 1);
+                XI.RaiseGMessage("G0CC," + provider.Uid + ",0," + user.Uid + ",ZP04," + argst + ";0," + pureFuse);
+                XI.RaiseGMessage("G0CZ,0," + provider.Uid);
             }
         }
-        public string XBT5ConsumeInput(Player player, int consumeType, int type, string fuse, string prev)
+        public string XBT5ConsumeInputHolder(Player provider, Player user, int consumeType, int type,
+            string fuse, string prev)
         {
             if (consumeType == 0 && type == 0 && prev == "")
-                return "/Q1(p" + string.Join("p", player.Tux) + ")";
+                return "/Q1(p" + string.Join("p", provider.Tux) + ")";
             else return "";
         }
         #endregion Package of 6
@@ -2527,27 +2454,35 @@ namespace PSD.PSDGamepkg.JNS
         {
             return XI.Board.Garden.Values.Any(p => p.IsTared && p.GetPetCount() > 0);
         }
-        public bool WQH1ConsumeValid(Player player, int consumeType, int type, string fuse)
+
+        public bool WQH1ConsumeValidHolder(Player provider, Player user, int consumeType, int type, string fuse)
         {
-            if (consumeType == 0)
+            if (consumeType == 0 && provider.Tux.Count >= 2)
             {
+                int lfidx = fuse.IndexOf(':');
+                string pureFuse = fuse.Substring(lfidx + 1);
                 Tux zp03 = XI.LibTuple.TL.EncodeTuxCode("ZP03");
-                return player.Tux.Count >= 2 && zp03.Bribe(player, type, fuse) && zp03.Valid(player, type, fuse);
+                return zp03 != null && zp03.Bribe(provider, type, pureFuse) && zp03.Valid(user, type, pureFuse);
             }
-            else return false;
+            else
+                return false;
         }
-        public void WQH1ConsumeAction(Player player, int consumeType, int type, string fuse, string argst)
+        public void WQH1ConsumeActionHolder(Player provider, Player user, int consumeType, int type,
+            string fuse, string argst)
         {
             if (consumeType == 0)
             {
-                XI.RaiseGMessage("G0CC," + player.Uid + ",0," + player.Uid + ",ZP03," + argst + ";0," + fuse);
-                XI.RaiseGMessage("G0CZ,0," + player.Uid);
+                int lfidx = fuse.IndexOf(':');
+                string pureFuse = fuse.Substring(lfidx + 1);
+                XI.RaiseGMessage("G0CC," + provider.Uid + ",0," + user.Uid + ",ZP03," + argst + ";0," + pureFuse);
+                XI.RaiseGMessage("G0CZ,0," + provider.Uid);
             }
         }
-        public string WQH1ConsumeInput(Player player, int consumeType, int type, string fuse, string prev)
+        public string WQH1ConsumeInputHolder(Player provider, Player user, int consumeType, int type,
+            string fuse, string prev)
         {
             if (consumeType == 0 && prev == "")
-                return "/Q2(p" + string.Join("p", player.Tux) + ")";
+                return "/Q2(p" + string.Join("p", provider.Tux) + ")";
             else return "";
         }
         public bool FJH1ConsumeValid(Player player, int consumeType, int type, string fuse)

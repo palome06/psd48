@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-
+using System.Text;
 using PSD.Base;
 using PSD.Base.Rules;
 using PSD.Base.Utils;
@@ -149,17 +149,12 @@ namespace PSD.PSDGamepkg
         }
         private void ConstructPiles(int levelCode)
         {
-            //List<ushort> tuxLst = Base.Card.Card.GeneratePiles(null,
-            //    new ushort[] { 1, (ushort)LibTuple.TL.Size });
             List<ushort> tuxLst = LibTuple.TL.ListAllTuxCodes(levelCode);
-            //Console.WriteLine("tuxLst = {" + string.Join(",", tuxLst) + "} (" + tuxLst.Count + ")");
             Algo.Shuffle(tuxLst);
             Board.TuxPiles = new Rueue<ushort>(tuxLst);
             List<ushort> eveLst = LibTuple.EL.ListAllSeleable(levelCode);
             Algo.Shuffle(eveLst);
             Board.EvePiles = new Rueue<ushort>(eveLst);
-            //List<ushort> monLst = Base.Card.Card.GeneratePiles(null, new ushort[] {
-            //    Base.Card.NMBLib.CodeOfMonster(1), (ushort)(Base.Card.NMBLib.CodeOfMonster(0) + LibTuple.ML.Size) });
             List<ushort> monLst = LibTuple.ML.ListAllSeleable(levelCode)
                 .Select(p => Base.Card.NMBLib.CodeOfMonster(p)).ToList();
             List<ushort> npcLst = LibTuple.NL.ListAllSeleable(levelCode)
@@ -278,6 +273,87 @@ namespace PSD.PSDGamepkg
         #endregion Piles Operation
 
         #region Skill Inv-Register
+        private void PutSKTIntoDict(SkTriple skt, string occur, IDictionary<string, List<SkTriple>> dict,
+            IDictionary<string, List<string>> links, List<SkTriple> parasitisms)
+        {
+            if (occur.StartsWith("%"))
+            {
+                int aliasSerial = int.Parse(occur.Substring("%".Length));
+                string theAlias = SKBranch.GetAas(aliasSerial);
+                foreach (string theA in theAlias.Split('&'))
+                    Algo.AddToMultiMap(links, theA, skt.ToHeader());
+                skt.Occur = theAlias;
+                parasitisms.Add(skt);
+            }
+            else if (occur.StartsWith("&"))
+            {
+                occur = occur.Substring("&".Length);
+                string[] theBlias = occur.Split('&');
+                string[] theAlias = new string[theBlias.Length / 2];
+                for (int i = 0; i < theAlias.Length; ++i)
+                    theAlias[i] = theBlias[2 * i] + "," + theBlias[2 * i + 1];
+                foreach (string theA in theAlias)
+                    Algo.AddToMultiMap(links, theA, skt.ToHeader());
+                skt.Occur = string.Join("&", theAlias);
+                parasitisms.Add(skt);
+            }
+            else if (occur.Contains('#') || occur.Contains('$') || occur.Contains('*'))
+            {
+                Board.Garden.Keys.Select(p => p.ToString()).ToList().ForEach(p =>
+                    Algo.AddToMultiMap(dict, occur.Replace("#", p).Replace("$", p).Replace("*", p), skt));
+            }
+            else
+                Algo.AddToMultiMap(dict, occur, skt);
+        }
+        private void PutParamsIntoDict(IDictionary<string, List<SkTriple>> dict,
+            List<SkTriple> parasitisms, bool resort)
+        {
+            IDictionary<string, List<Diva>> invTable = new Dictionary<string, List<Diva>>();
+            foreach (var pair in dict)
+            {
+                pair.Value.ForEach(p => Algo.AddToMultiMap(invTable, p.ToHeader(),
+                    new Diva().Set("oc", pair.Key).Set("prior", p.Priorty).Set("rawoc", p.Occur)));
+            }
+            foreach (SkTriple mskt in parasitisms)
+            {
+                Dictionary<string, List<Diva>> linkChain = new Dictionary<string, List<Diva>>();
+                string[] paras = Algo.Splits(mskt.Occur, "&");
+                foreach (string para in paras.Where(p => invTable.ContainsKey(p)))
+                {
+                    foreach (Diva diva in invTable[para])
+                    {
+                        Algo.AddToMultiMap(linkChain, diva.GetString("oc") + "," + diva.GetInt("prior"),
+                            new Diva().Set("rawoc", diva.GetString("rawoc")).Set("header", para));
+                    }
+                }
+                foreach (var pair in linkChain)
+                {
+                    int lidx = pair.Key.IndexOf(',');
+                    string loc = pair.Key.Substring(0, lidx);
+                    int lprior = int.Parse(pair.Key.Substring(lidx + 1));
+                    SkTriple skt = new SkTriple()
+                    {
+                        Name = mskt.Name,
+                        Priorty = lprior,
+                        Owner = mskt.Owner, // Owner would always be 0
+                        InType = mskt.InType,
+                        Type = mskt.Type,
+                        Consume = mskt.Consume,
+                        Lock = mskt.Lock,
+                        IsOnce = mskt.IsOnce,
+                        Occur = loc, // needs #/*/$
+                        LinkFrom = string.Join("&", pair.Value.Select(p =>
+                            p.GetString("header") + "," + p.GetString("rawoc"))),
+                        IsTermini = mskt.IsTermini
+                    };
+                    if (pair.Value.GroupBy(p => p.GetString("rawoc")).Count() == 1)
+                        skt.Occur = pair.Value[0].GetString("rawoc");
+                    Algo.AddToMultiMap(dict, loc, skt);
+                    if (resort)
+                        dict[loc].Sort(SkTriple.Cmp);
+                }
+            }
+        }
         // $dict is the main sk02 dictionary mapping from Occur to SKTriple
         // $links is the dictionary mapping from one SKTriple to all its parasitisms
         private void MappingSksp(out IDictionary<string, List<SkTriple>> dict,
@@ -309,14 +385,7 @@ namespace PSD.PSDGamepkg
                             Occur = oc,
                             IsTermini = tux.IsTermini[i]
                         };
-                        if (oc.Contains('#') || oc.Contains('$') || oc.Contains('*'))
-                        {
-                            foreach (ushort p in Board.Garden.Keys)
-                                Algo.AddToMultiMap(dict, oc.Replace("#", p.ToString()).Replace(
-                                    "$", p.ToString()).Replace("*", p.ToString()), skt);
-                        }
-                        else
-                            Algo.AddToMultiMap(dict, oc, skt);
+                        PutSKTIntoDict(skt, oc, dict, links, parasitism);
                     }
                 }
                 if (tux.IsTuxEqiup())
@@ -344,33 +413,7 @@ namespace PSD.PSDGamepkg
                                         Occur = oc,
                                         IsTermini = tue.CsIsTermini[i][j],
                                     };
-                                    if (oc.StartsWith("&"))
-                                    {
-                                        int nexdex = oc.IndexOf('&', 1);
-                                        int start = int.Parse(Algo.Substring(oc, "&".Length, nexdex));
-                                        int end = int.Parse(Algo.Substring(oc, nexdex + 1, -1));
-                                        //skt.Occur = string.Join("&", Algo.TakeRange(skill.Parasitism, start, end));
-                                        List<string> parList = new List<string>();
-                                        for (int ji = start; ji < end; ++ji)
-                                        {
-                                            parList.Add(tux.Parasitism[ji]);
-                                            string sktKey = skt.Name + "," + skt.InType;
-                                            sktKey += ("!" + skt.Consume);
-                                            Algo.AddToMultiMap(links, tux.Parasitism[ji], sktKey); // myself
-                                        }
-                                        skt.Occur = string.Join("&", parList);
-                                        parasitism.Add(skt);
-                                    }
-                                    else if (oc.Contains('#') || oc.Contains('$') || oc.Contains('*'))
-                                    {
-                                        foreach (Player p in Board.Garden.Values)
-                                            Algo.AddToMultiMap(dict, oc
-                                                .Replace("#", p.Uid.ToString())
-                                                .Replace("$", p.Uid.ToString())
-                                                .Replace("*", p.Uid.ToString()), skt);
-                                    }
-                                    else
-                                        Algo.AddToMultiMap(dict, oc, skt);
+                                    PutSKTIntoDict(skt, oc, dict, links, parasitism);
                                 }
                             }
                         }
@@ -392,14 +435,7 @@ namespace PSD.PSDGamepkg
                     Occur = cz.Occur,
                     IsTermini = false
                 };
-                if (cz.Occur.Contains('#') || cz.Occur.Contains('$') || cz.Occur.Contains('*'))
-                {
-                    foreach (ushort p in Board.Garden.Keys)
-                        Algo.AddToMultiMap(dict, cz.Occur.Replace("#", p.ToString()).Replace(
-                            "$", p.ToString()).Replace("*", p.ToString()), skt);
-                }
-                else
-                    Algo.AddToMultiMap(dict, cz.Occur, skt);
+                PutSKTIntoDict(skt, cz.Occur, dict, links, parasitism);
             }
             foreach (Base.Rune sf in sf01.Values)
             {
@@ -416,14 +452,7 @@ namespace PSD.PSDGamepkg
                     Occur = sf.Occur,
                     IsTermini = sf.IsTermin
                 };
-                if (sf.Occur.Contains('#') || sf.Occur.Contains('$') || sf.Occur.Contains('*'))
-                {
-                    foreach (ushort p in Board.Garden.Keys)
-                        Algo.AddToMultiMap(dict, sf.Occur.Replace("#", p.ToString()).Replace(
-                            "$", p.ToString()).Replace("*", p.ToString()), skt);
-                }
-                else
-                    Algo.AddToMultiMap(dict, sf.Occur, skt);
+                PutSKTIntoDict(skt, sf.Occur, dict, links, parasitism);
             }
             foreach (Base.Card.Monster mt in LibTuple.ML.ListAllMonster(levelCode))
             {
@@ -448,16 +477,7 @@ namespace PSD.PSDGamepkg
                                     Occur = oc,
                                     IsTermini = mt.EAIsTermini[i][j]
                                 };
-                                if (oc.Contains('#') || oc.Contains('$') || oc.Contains('*'))
-                                {
-                                    foreach (Player p in Board.Garden.Values)
-                                        Algo.AddToMultiMap(dict, oc
-                                            .Replace("#", p.Uid.ToString())
-                                            .Replace("$", p.Uid.ToString())
-                                            .Replace("*", p.Uid.ToString()), skt);
-                                }
-                                else
-                                    Algo.AddToMultiMap(dict, oc, skt);
+                                PutSKTIntoDict(skt, oc, dict, links, parasitism);
                             }
                         }
                     }
@@ -481,16 +501,7 @@ namespace PSD.PSDGamepkg
                         Occur = oc,
                         IsTermini = skb.Demiurgic
                     };
-                    if (oc.Contains('#') || oc.Contains('$') || oc.Contains('*'))
-                    {
-                        foreach (Player p in Board.Garden.Values)
-                            Algo.AddToMultiMap(dict, oc
-                                .Replace("#", p.Uid.ToString())
-                                .Replace("$", p.Uid.ToString())
-                                .Replace("*", p.Uid.ToString()), skt);
-                    }
-                    else
-                        Algo.AddToMultiMap(dict, oc, skt);
+                    PutSKTIntoDict(skt, oc, dict, links, parasitism);
                 }
             }
             foreach (Base.Card.Evenement eve in LibTuple.EL.ListAllEves(levelCode))
@@ -511,95 +522,22 @@ namespace PSD.PSDGamepkg
                         Occur = oc,
                         IsTermini = eve.IsTermini[i]
                     };
-                    if (oc.Contains('#') || oc.Contains('$') || oc.Contains('*'))
-                    {
-                        foreach (Player p in Board.Garden.Values)
-                            Algo.AddToMultiMap(dict, oc
-                                .Replace("#", p.Uid.ToString())
-                                .Replace("$", p.Uid.ToString())
-                                .Replace("*", p.Uid.ToString()), skt);
-                    }
-                    else
-                        Algo.AddToMultiMap(dict, oc, skt);
+                    PutSKTIntoDict(skt, oc, dict, links, parasitism);
                 }
             }
             if (parasitism.Count > 0)
-            {
-                IDictionary<string, List<string>> occurTable =
-                    new Dictionary<string, List<string>>();
-                ISet<string> occurNotLocked = new HashSet<string>();
-                // IDictionary<string, bool> occurLock = new Dictionary<string, bool>();
-                // occurTable: {sktName,InType : occur,priorty,owner}
-                foreach (var pair in dict)
-                {
-                    // pair : <Occur : SkTriple>
-                    foreach (SkTriple skt in pair.Value)
-                    {
-                        string sktKey = skt.Name + "," + ((skt.Type == SKTType.EQ || skt.Type == SKTType.PT) ?
-                            (skt.Consume + "!" + skt.InType) : skt.InType.ToString());
-                        Algo.AddToMultiMap(occurTable, sktKey,
-                            pair.Key + "," + skt.Priorty + "," + skt.Owner + "," + skt.Occur);
-                        if (skt.Lock == false)
-                            occurNotLocked.Add(sktKey);
-                    }
-                }
+                PutParamsIntoDict(dict, parasitism, false);
 
-                foreach (SkTriple para in parasitism)
-                {
-                    string[] paras = Algo.Splits(para.Occur, "&");
-                    IDictionary<string, List<string>> registered =
-                        new Dictionary<string, List<string>>();
-                    // occurs -> link_from
-                    //ISet<string> registered = new HashSet<string>();
-                    foreach (string host in paras)
-                    {
-                        if (occurTable.ContainsKey(host))
-                        {
-                            List<string> ics = occurTable[host];
-                            foreach (string ic in ics)
-                                Algo.AddToMultiMap(registered, ic, host);
-                        }
-                    }
-                    foreach (var pair in registered)
-                    {
-                        string triple = pair.Key;
-                        string host = string.Join("&", pair.Value);
-
-                        string[] splits = triple.Split(',');
-                        string oc = splits[0];
-                        int priority = int.Parse(splits[1]);
-                        // ushort owner = ushort.Parse(splits[2]);
-                        string acOccur = splits[3];
-
-                        SkTriple skt = new SkTriple()
-                        {
-                            Name = para.Name,
-                            Priorty = priority,
-                            Owner = para.Owner,
-                            InType = para.InType,
-                            Type = para.Type,
-                            Consume = para.Consume,
-                            Lock = para.Lock & !occurNotLocked.Contains(oc + "," + priority),
-                            IsOnce = para.IsOnce,
-                            Occur = acOccur,
-                            LinkFrom = host, // format: TP02,0&TP03,0
-                            IsTermini = para.IsTermini
-                        };
-                        Algo.AddToMultiMap(dict, oc, skt);
-                    }
-                }
-            }
-
-            string[] g0 = new string[] { "IT", "OT", "HQ", "QZ", "DH", "IH", "OH", "ZH", "LV", "LU",
-                 "ZW", "IY", "OY", "DS", "CC", "CD", "CE", "XZ", "ZB", "ZC", "ZI", "ZS", "ZL", "IA",
-                 "OA", "IX", "OX", "AX", "IB", "OB", "IW", "OW", "WB", "9P", "IP", "OP", "CZ", "HC",
-                 "HD", "HH", "HI", "HL", "IC", "OC", "HT", "HG", "QR", "HZ", "TT", "T7", "JM", "WN",
-                 "IJ", "OJ", "IE", "OE", "IS", "OS", "LA", "IV", "OV", "PB", "YM", "HR", "FI", "ON",
-                 "SN", "MA", "ZJ", "IF", "OF", "PQ" };
-            string[] g1 = new string[] { "DI", "IU", "OU", "TH", "CW", "ZK", "IZ", "OZ", "WP", "SG",
-                 "HK", "WJ", "XR", "EV", "CK", "7F", "YP", "NI", "GE", "LY", "UE" };
-            string[] g2 = new string[] { "IN", "RN", "CN", "QC", "FU", "QU", "CL", "WK", "AK", "IL",
-                 "OL", "SW", "AS", "SY" };
+            string[] g0 = { "IT", "OT", "HQ", "QZ", "DH", "IH", "OH", "ZH", "LV", "LU", "ZW", "IY",
+                "OY", "DS", "CC", "CD", "CE", "XZ", "ZB", "ZC", "ZI", "ZS", "ZL", "IA", "OA", "IX",
+                "OX", "AX", "IB", "OB", "IW", "OW", "WB", "9P", "IP", "OP", "CZ", "HC", "HD", "HH",
+                "HI", "HL", "IC", "OC", "HT", "HG", "QR", "HZ", "TT", "T7", "JM", "WN", "IJ", "OJ",
+                "IE", "OE", "IS", "OS", "LA", "IV", "OV", "PB", "YM", "HR", "FI", "ON", "SN", "MA",
+                "ZJ", "IF", "OF", "PQ" };
+            string[] g1 = { "DI", "IU", "OU", "TH", "CW", "ZK", "IZ", "OZ", "WP", "SG", "HK", "WJ",
+                "XR", "EV", "CK", "7F", "YP", "NI", "GE", "LY", "UE" };
+            string[] g2 = { "IN", "RN", "CN", "QC", "FU", "QU", "CL", "WK", "AK", "IL", "OL", "SW",
+                "AS", "SY" };
             foreach (string g0event in g0)
                 RegisterBasicSKTs(dict, "G0" + g0event, 100);
             foreach (string g1event in g1)
@@ -958,13 +896,14 @@ namespace PSD.PSDGamepkg
                             if (petCode == 0 || Board.NotActionPets.Contains(petCode)) continue;
                             if (petCode == Board.Monster1 && consumeType == 1) continue;
                             Base.Card.Monster pet = LibTuple.ML.Decode(petCode);
-                            if (pet.Code.Equals(mt.Code) && mt.ConsumeValid(player, consumeType, ske.InType, ske.Fuse))
+                            string lf = (pet.IsLinked(ske.Consume, ske.InType) ? ske.LinkFrom + ":" : "") + ske.Fuse;
+                            if (pet.Code.Equals(mt.Code) && mt.ConsumeValid(player, consumeType, ske.InType, lf))
                             {
                                 if (consumeType == 1 && Board.CsPets.Contains(player.Uid + "," + petCode))
                                     continue;
                                 if (ske.Lock == false)
                                 {
-                                    string req = pet.ConsumeInput(player, consumeType, ske.InType, ske.Fuse, "");
+                                    string req = pet.ConsumeInput(player, consumeType, ske.InType, lf, "");
                                     string msg = string.IsNullOrEmpty(req) ? "" : "," + req;
                                     pris[player.Uid] += ";PT" + petCode + msg;
                                     //iTypes[skt.Tg] += "," + skt.InType;
@@ -985,11 +924,12 @@ namespace PSD.PSDGamepkg
                     if (mon1 != 0 && Board.InCampaign && Board.IsMonsterDebut)
                     {
                         Base.Card.Monster mon = LibTuple.ML.Decode(mon1);
-                        if (mon != null && mon == mt && mt.ConsumeValid(player, consumeType, ske.InType, ske.Fuse))
+                        string lf = (mon.IsLinked(ske.Consume, ske.InType) ? ske.LinkFrom + ":" : "") + ske.Fuse;
+                        if (mon != null && mon == mt && mt.ConsumeValid(player, consumeType, ske.InType, lf))
                         {
                             if (ske.Lock == false)
                             {
-                                string req = mon.ConsumeInput(player, consumeType, ske.InType, ske.Fuse, "");
+                                string req = mon.ConsumeInput(player, consumeType, ske.InType, lf, "");
                                 string msg = string.IsNullOrEmpty(req) ? "" : "," + req;
                                 pris[player.Uid] += ";PT" + mon1 + msg;
                                 //iTypes[skt.Tg] += "," + skt.InType;
@@ -1105,20 +1045,25 @@ namespace PSD.PSDGamepkg
                     Occur = occur,
                     IsTermini = skill.IsTermini[i]
                 };
-                if (occur.StartsWith("&"))
+                if (occur.StartsWith("%"))
                 {
-                    int nexdex = occur.IndexOf('&', 1);
-                    int start = int.Parse(Algo.Substring(occur, "&".Length, nexdex));
-                    int end = int.Parse(Algo.Substring(occur, nexdex + 1, -1));
-                    //skt.Occur = string.Join("&", Algo.TakeRange(skill.Parasitism, start, end));
-                    List<string> parList = new List<string>();
-                    for (int j = start; j < end; ++j)
-                    {
-                        parList.Add(skill.Parasitism[j]);
-                        string sktKey = skt.Name + "," + skt.InType;
-                        Algo.AddToMultiMap(links, skill.Parasitism[j], sktKey); // myself
-                    }
-                    skt.Occur = string.Join("&", parList);
+                    int aliasSerial = int.Parse(occur.Substring("%".Length));
+                    string theAlias = SKBranch.GetAas(aliasSerial);
+                    foreach (string theA in theAlias.Split('&'))
+                        Algo.AddToMultiMap(links, theA, skt.ToHeader());
+                    skt.Occur = theAlias;
+                    parasitism.Add(skt);
+                }
+                else if (occur.StartsWith("&"))
+                {
+                    occur = occur.Substring("&".Length);
+                    string[] theBlias = occur.Split('&');
+                    string[] theAlias = new string[theBlias.Length / 2];
+                    for (int j = 0; j < theAlias.Length; ++j)
+                        theAlias[j] = theBlias[2 * j] + "," + theBlias[2 * j + 1];
+                    foreach (string theA in theAlias)
+                        Algo.AddToMultiMap(links, theA, skt.ToHeader());
+                    skt.Occur = string.Join("&", theAlias);
                     parasitism.Add(skt);
                 }
                 else
@@ -1158,171 +1103,92 @@ namespace PSD.PSDGamepkg
                 }
             }
             if (parasitism.Count > 0)
-            {
-                IDictionary<string, List<string>> occurTable =
-                    new Dictionary<string, List<string>>();
-                // occurTable: {sktName,InType : occur,priorty,owner}
-                foreach (var pair in dict)
-                {
-                    // pair : <Occur : SkTriple>
-                    foreach (SkTriple skt in pair.Value)
-                    {
-                        string sktKey = skt.Name + "," + ((skt.Type == SKTType.EQ || skt.Type == SKTType.PT) ?
-                            (skt.Consume + "!" + skt.InType) : skt.InType.ToString());
-                        Algo.AddToMultiMap(occurTable, sktKey,
-                            pair.Key + "," + skt.Priorty + "," + skt.Owner + "," + skt.Occur);
-                    }
-                }
-
-                foreach (SkTriple para in parasitism)
-                {
-                    string[] paras = Algo.Splits(para.Occur, "&");
-                    IDictionary<string, List<string>> registered =
-                        new Dictionary<string, List<string>>();
-                    // occurs -> link_from
-                    //ISet<string> registered = new HashSet<string>();
-                    foreach (string host in paras)
-                    {
-                        if (occurTable.ContainsKey(host))
-                        {
-                            List<string> ics = occurTable[host];
-                            foreach (string ic in ics)
-                                Algo.AddToMultiMap(registered, ic, host);
-                        }
-                    }
-                    foreach (var pair in registered)
-                    {
-                        string triple = pair.Key;
-                        string host = string.Join("&", pair.Value);
-
-                        string[] splits = triple.Split(',');
-                        string oc = splits[0];
-                        int priority = int.Parse(splits[1]);
-                        // ushort owner = ushort.Parse(splits[2]);
-                        string acOccur = splits[3];
-
-                        SkTriple skt = new SkTriple()
-                        {
-                            Name = para.Name,
-                            Priorty = priority,
-                            Owner = para.Owner,
-                            InType = para.InType,
-                            Type = para.Type,
-                            Consume = para.Consume,
-                            Lock = para.Lock,
-                            IsOnce = para.IsOnce,
-                            Occur = acOccur,
-                            LinkFrom = host, // format: TP02,0&TP03,0
-                            IsTermini = para.IsTermini
-                        };
-                        Algo.AddToMultiMap(dict, oc, skt);
-                        dict[oc].Sort(SkTriple.Cmp);
-                    }
-                }
-            }
+                PutParamsIntoDict(dict, parasitism, true);
         }
 
         // Handle with single skill when removed
         private void RemoveSingleSkill(ushort ut, Skill skill, IDictionary<string, List<SkTriple>> dict,
             IDictionary<string, List<string>> links)
         {
-            bool anyPara = false;
+            List<int> paraInTypes = new List<int>();
             // maybe need check parasitism chain list from others?
             for (int i = 0; i < skill.Occurs.Length; ++i)
             {
                 string occur = skill.Occurs[i];
-                if (occur.StartsWith("&"))
-                    anyPara = true;
-                else
+                if (occur.StartsWith("%") || occur.StartsWith("&"))
+                    paraInTypes.Add(i);
+                else if (occur.Contains('#'))
                 {
-                    if (occur.Contains('#'))
-                    {
-                        string oc = occur.Replace("#", ut.ToString());
-                        if (dict.ContainsKey(oc))
-                            dict[oc].RemoveAll(p => (p.Name == skill.Code && p.Owner == ut));
-                    }
-                    else if (occur.Contains('$'))
-                    {
-                        foreach (ushort ky in Board.Garden.Keys)
-                            if (ky != ut)
-                            {
-                                string oc = occur.Replace("$", ky.ToString());
-                                if (dict.ContainsKey(oc))
-                                    dict[oc].RemoveAll(p => (p.Name == skill.Code && p.Owner == ut));
-                            }
-                    }
-                    else if (occur.Contains('*'))
-                    {
-                        foreach (ushort ky in Board.Garden.Keys)
+                    string oc = occur.Replace("#", ut.ToString());
+                    if (dict.ContainsKey(oc))
+                        dict[oc].RemoveAll(p => (p.Name == skill.Code && p.Owner == ut));
+                }
+                else if (occur.Contains('$'))
+                {
+                    foreach (ushort ky in Board.Garden.Keys)
+                        if (ky != ut)
                         {
-                            string oc = occur.Replace("*", ky.ToString());
+                            string oc = occur.Replace("$", ky.ToString());
                             if (dict.ContainsKey(oc))
                                 dict[oc].RemoveAll(p => (p.Name == skill.Code && p.Owner == ut));
                         }
-                    }
-                    else
+                }
+                else if (occur.Contains('*'))
+                {
+                    foreach (ushort ky in Board.Garden.Keys)
                     {
-                        if (dict.ContainsKey(occur))
-                            dict[occur].RemoveAll(p => (p.Name == skill.Code && p.Owner == ut));
+                        string oc = occur.Replace("*", ky.ToString());
+                        if (dict.ContainsKey(oc))
+                            dict[oc].RemoveAll(p => (p.Name == skill.Code && p.Owner == ut));
                     }
+                }
+                else
+                {
+                    if (dict.ContainsKey(occur))
+                        dict[occur].RemoveAll(p => (p.Name == skill.Code && p.Owner == ut));
                 }
             }
-            if (anyPara)
+            if (paraInTypes.Count > 0)
             {
-                IDictionary<string, List<string>> occurTable =
-                    new Dictionary<string, List<string>>();
-                // occurTable: {sktName,InType : occur,priorty,owner}
+                IDictionary<string, List<string>> invTable = new Dictionary<string, List<string>>();
                 foreach (var pair in dict)
+                    pair.Value.ForEach(p => Algo.AddToMultiMap(invTable, p.ToHeader(), pair.Key));
+                foreach (int inType in paraInTypes)
                 {
-                    // pair : <Occur : SkTriple>
-                    foreach (SkTriple skt in pair.Value)
+                    string[] theAlias = null;
+                    string occur = skill.Occurs[inType];
+                    if (occur.StartsWith("%"))
                     {
-                        string sktKey = skt.Name + "," + ((skt.Type == SKTType.EQ || skt.Type == SKTType.PT) ?
-                            (skt.Consume + "!" + skt.InType) : skt.InType.ToString());
-                        Algo.AddToMultiMap(occurTable, sktKey,
-                            pair.Key + "," + skt.Priorty + "," + skt.Owner);
+                        int aliasSerial = int.Parse(occur.Substring("%".Length));
+                        theAlias = SKBranch.GetAas(aliasSerial).Split('&');
                     }
-                }
-                for (int i = 0; i < skill.Occurs.Length; ++i)
-                {
-                    string occur = skill.Occurs[i];
-                    if (occur.StartsWith("&"))
+                    else if (occur.StartsWith("&"))
                     {
-                        int nexdex = occur.IndexOf('&', 1);
-                        int start = int.Parse(Algo.Substring(occur, "&".Length, nexdex));
-                        int end = int.Parse(Algo.Substring(occur, nexdex + 1, -1));
-                        //skt.Occur = string.Join("&", Algo.TakeRange(skill.Parasitism, start, end));
-                        for (int j = start; j < end; ++j)
+                        occur = occur.Substring("&".Length);
+                        string[] theBlias = occur.Split('&');
+                        theAlias = new string[theBlias.Length / 2];
+                        for (int i = 0; i < theAlias.Length; ++i)
+                            theAlias[i] = theBlias[2 * i] + "," + theBlias[2 * i + 1];
+                    }
+                    foreach (string term in theAlias)
+                    {
+                        if (links.ContainsKey(term))
                         {
-                            // WQ02,0 : JN10201,0
-                            if (links.ContainsKey(skill.Parasitism[j]))
+                            links[term].Remove(skill.Code + "," + inType);
+                            if (links[term].Count == 0)
+                                links.Remove(term);
+                        }
+                        if (invTable.ContainsKey(term))
+                        {
+                            List<string> ocs = invTable[term];
+                            foreach (string oc in ocs)
                             {
-                                string sktKey = skill.Code + "," + i;
-                                links[skill.Parasitism[j]].Remove(sktKey);
-                                if (links[skill.Parasitism[j]].Count == 0)
-                                    links.Remove(skill.Parasitism[j]);
-                                // WQ02,0->G0IH->[JN10201,0]
-                            }
-                            if (occurTable.ContainsKey(skill.Parasitism[j]))
-                            {
-                                List<string> invis = occurTable[skill.Parasitism[j]];
-                                foreach (string invi in invis)
+                                if (dict.ContainsKey(oc))
                                 {
-                                    string head = Algo.Substring(invi, 0, invi.IndexOf(','));
-                                    if (dict.ContainsKey(head))
-                                    {
-                                        List<SkTriple> skts = dict[head];
-                                        List<SkTriple> sktrvs = new List<SkTriple>();
-                                        foreach (SkTriple skt in skts)
-                                        {
-                                            if (skt.Name == skill.Code && skt.InType == i)
-                                                sktrvs.Add(skt);
-                                        }
-                                        foreach (SkTriple skt in sktrvs)
-                                            skts.Remove(skt);
-                                        if (skts.Count <= 0)
-                                            dict.Remove(head);
-                                    }
+                                    dict[oc].RemoveAll(p => p.Name == skill.Code &&
+                                        p.InType == inType && p.Owner == ut);
+                                    if (dict[oc].Count == 0)
+                                        dict.Remove(oc);
                                 }
                             }
                         }

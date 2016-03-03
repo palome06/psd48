@@ -9,37 +9,6 @@ namespace PSD.Base.Card
     public static class Card
     {
         private static Random randomSeed = new Random();
-        /// <summary>
-        /// Generate Random Piles
-        /// </summary>
-        /// <param name="except">except for some codes that exists</param>
-        /// <param name="ranges">range of possible value, (e.g) [1,100,400,500]</param>
-        /// <returns>Queue of the piles</returns>
-        public static List<ushort> GeneratePiles(List<ushort> except, ushort[] ranges)
-        {
-            List<ushort> nums = new List<ushort>();
-            if (except != null && except.Count > 0)
-            {
-                except.Sort();
-                int expIdx = 0;
-                for (int i = 0; i < ranges.Length; i += 2)
-                    for (ushort j = ranges[i]; j <= ranges[i + 1]; ++j)
-                    {
-                        while (j >= except[expIdx] && expIdx < except.Count)
-                            ++expIdx;
-                        if (expIdx < except.Count && j != except[expIdx])
-                            nums.Add(j);
-                    }
-            }
-            else
-            {
-                for (int i = 0; i < ranges.Length; i += 2)
-                    for (ushort j = ranges[i]; j <= ranges[i + 1]; ++j)
-                        nums.Add(j);
-            }
-            return nums;
-        }
-
         public static IEnumerable<Type> PickSomeInRandomOrder<Type>(
             IEnumerable<Type> someTypes, int maxCount)
         {

@@ -140,7 +140,8 @@ namespace PSD.Base
 
         public bool IsLinked(int inType)
         {
-            return Occurs != null && Occurs.Length > inType && Occurs[inType].Contains('&');
+            return Occurs != null && Occurs.Length > inType &&
+                Occurs[inType].Contains('%');
         }
         /// <summary>
         /// Force Change Attribute of a skill, used mainly for capability for older version
