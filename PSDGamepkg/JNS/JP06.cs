@@ -1773,7 +1773,8 @@ namespace PSD.PSDGamepkg.JNS
                     Tux tux = XI.LibTuple.TL.DecodeTux(ut);
                     if (!tux.IsTuxEqiup())
                     {
-                        int pt = Artiad.ContentRule.GetTuxTypeFromLink(fuse, tux, user, XI.Board, out pureFuse);
+                        int pt = Artiad.ContentRule.GetTuxTypeFromLink(fuse,
+                            tux, provider, user, XI.Board, out pureFuse);
                         if (pt >= 0)
                         {
                             XI.RaiseGMessage("G0SN," + provider.Uid + "," + lugCode + ",1,C" + ut);
@@ -1823,7 +1824,7 @@ namespace PSD.PSDGamepkg.JNS
                 {
                     return lug.Capacities.Select(p => ushort.Parse(p.Substring("C".Length))).Any(
                         p => Artiad.ContentRule.GetTuxTypeFromLink(fuse,
-                        XI.LibTuple.TL.DecodeTux(p), user, XI.Board) >= 0);
+                        XI.LibTuple.TL.DecodeTux(p), provider, user, XI.Board) >= 0);
                 }
             }
             return false;
@@ -1836,7 +1837,7 @@ namespace PSD.PSDGamepkg.JNS
             {
                 List<ushort> candidates = lug.Capacities.Select(p => ushort.Parse(p.Substring("C".Length)))
                     .Where(p => Artiad.ContentRule.GetTuxTypeFromLink(fuse,
-                    XI.LibTuple.TL.DecodeTux(p), user, XI.Board) >= 0).ToList();
+                    XI.LibTuple.TL.DecodeTux(p), provider, user, XI.Board) >= 0).ToList();
                 return "/C1(p" + string.Join("p", candidates) + ")";
             }
             else return "";
@@ -2117,10 +2118,8 @@ namespace PSD.PSDGamepkg.JNS
         {
             if (consumeType == 0 && type == 0 && provider.Tux.Count > 0)
             {
-                int lfidx = fuse.IndexOf(':');
-                string pureFuse = fuse.Substring(lfidx + 1);
                 Tux zp04 = XI.LibTuple.TL.EncodeTuxCode("ZP04");
-                return zp04 != null && zp04.Bribe(provider, type, pureFuse) && zp04.Valid(user, type, pureFuse);
+                return zp04 != null && zp04.Bribe(provider, type, fuse) && zp04.Valid(user, type, fuse);
             }
             else
                 return false;
@@ -2130,9 +2129,7 @@ namespace PSD.PSDGamepkg.JNS
         {
             if (consumeType == 0 && type == 0)
             {
-                int lfidx = fuse.IndexOf(':');
-                string pureFuse = fuse.Substring(lfidx + 1);
-                XI.RaiseGMessage("G0CC," + provider.Uid + ",0," + user.Uid + ",ZP04," + argst + ";0," + pureFuse);
+                XI.RaiseGMessage("G0CC," + provider.Uid + ",0," + user.Uid + ",ZP04," + argst + ";0," + fuse);
                 XI.RaiseGMessage("G0CZ,0," + provider.Uid);
             }
         }
@@ -2141,6 +2138,105 @@ namespace PSD.PSDGamepkg.JNS
         {
             if (consumeType == 0 && type == 0 && prev == "")
                 return "/Q1(p" + string.Join("p", provider.Tux) + ")";
+            else return "";
+        }
+        public bool XBT7ConsumeValidHolder(Player provider, Player user, int consumeType, int type, string fuse)
+        {
+            if (consumeType == 0)
+            {
+                if ((type == 0 || type == 1) && provider.Tux.Count >= 2 && 
+                    !provider.RFM.GetOrSetDiva("XBT7").GetBool("Used"))
+                {
+                    string linkFuse = fuse;
+                    int lfidx = linkFuse.IndexOf(':');
+                    string pureFuse = linkFuse.Substring(lfidx + 1);
+                    foreach (string linkHead in linkFuse.Substring(0, lfidx).Split('&'))
+                    {
+                        if (linkHead.StartsWith("XBT7"))
+                            continue;
+                        string[] lh = linkHead.Split(',');
+                        string pureName = lh[0], pureTypeStr = lh[1], rawOc = lh[2];
+
+                        if (!pureTypeStr.Contains("!") && Artiad.ContentRule.IsFuseMatch(rawOc, pureFuse, XI.Board))
+                        {
+                            ushort pureType = ushort.Parse(pureTypeStr);
+                            Tux tux = XI.LibTuple.TL.EncodeTuxCode(pureName);
+                            if (tux != null && XI.LibTuple.TL.IsTuxInGroup(tux, XI.PCS.Level) &&
+                                tux.Bribe(provider, pureType, pureFuse) && tux.Valid(user, pureType, pureFuse))
+                                return true;
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+        public void XBT7ConsumeActionHolder(Player provider, Player user, int consumeType, int type,
+            string fuse, string argst)
+        {
+            if (consumeType == 0 && (type == 0 || type == 1))
+            {
+                string[] args = argst.Split(',');
+                ushort udb = ushort.Parse(args[0]);
+                string uts = args[1] + "," + args[2];
+                Tux tux = XI.LibTuple.TL.EncodeTuxDbSerial(udb);
+
+                string pureFuse;
+                int pureType = Artiad.ContentRule.GetTuxTypeFromLink(fuse,
+                    tux, provider, user, XI.Board, out pureFuse);
+                if (tux.Type == Tux.TuxType.ZP)
+                    XI.RaiseGMessage("G0CZ,0," + provider.Uid);
+                XI.RaiseGMessage("G0CC," + provider.Uid + ",0," + user.Uid + "," +
+                    tux.Code + "," + uts + ";" + pureType + "," + pureFuse);
+                provider.RFM.GetOrSetDiva("XBT7").Set("Used", true);
+            }
+        }
+        public string XBT7ConsumeInputHolder(Player provider, Player user, int consumeType,
+            int type, string fuse, string prev)
+        {
+            if (consumeType == 0 && (type == 0 || type == 1))
+            {
+                if (prev == "")
+                {
+                    ISet<ushort> dbs = new HashSet<ushort>();
+
+                    string linkFuse = fuse;
+                    int lfidx = linkFuse.IndexOf(':');
+                    // linkHeads = { "TP02,0", "TP03,0" };
+                    string[] linkHeads = linkFuse.Substring(0, lfidx).Split('&');
+                    string pureFuse = linkFuse.Substring(lfidx + 1);
+
+                    for (int i = 0; i < linkHeads.Length; ++i)
+                    {
+                        if (linkHeads[i].StartsWith("XBT7"))
+                            continue;
+                        string[] lh = linkHeads[i].Split(',');
+                        string pureName = lh[0], pureTypeStr = lh[1], rawOc = lh[2];
+                        if (!pureTypeStr.Contains("!") && Artiad.ContentRule.IsFuseMatch(rawOc, pureFuse, XI.Board))
+                        {
+                            ushort pureType = ushort.Parse(pureTypeStr);
+                            Tux tux = XI.LibTuple.TL.EncodeTuxCode(pureName);
+                            if (tux != null && XI.LibTuple.TL.IsTuxInGroup(tux, XI.PCS.Level))
+                            {
+                                if (tux.Bribe(provider, pureType, pureFuse) && tux.Valid(user, pureType, pureFuse))
+                                    dbs.Add(tux.DBSerial);
+                            }
+                        }
+                    }
+                    return "#转化,/G1(p" + string.Join("p", dbs) + ")";
+                }
+                else if (prev.IndexOf(',') < 0)
+                {
+                    ushort db = ushort.Parse(prev);
+                    Tux tux = XI.LibTuple.TL.EncodeTuxDbSerial(db);
+                    List<ushort> hands = provider.Tux.Where(p =>
+                        tux.IsSameType(XI.LibTuple.TL.DecodeTux(p))).ToList();
+                    if (hands.Count >= 2)
+                        return "/Q2(p" + string.Join("p", hands) + ")";
+                    else
+                        return "/";
+                }
+                else return "";
+            }
             else return "";
         }
         #endregion Package of 6

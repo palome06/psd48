@@ -188,14 +188,27 @@ namespace PSD.PSDGamepkg.Artiad
                 board.Garden.Keys.Any(p => p != board.Rounder.Uid && rawFuse.Replace("$", r) == fuse) ||
                 board.Garden.Keys.Any(p => rawFuse.Replace("*", r) == fuse);
         }
-        // check whether $player's $linkHead is suitable for $tux, then return the pureType
+        // check whether $player's $linkHead is suitable for $tux, not consider the pureFuse
         public static int GetTuxTypeFromLink(string linkFuse, Tux tux, Player player, Board board)
         {
             string pureFuse;
             return GetTuxTypeFromLink(linkFuse, tux, player, board, out pureFuse);
         }
+        // check whether $player's $linkHead is suitable for $tux, not consider the pureFuse
+        public static int GetTuxTypeFromLink(string linkFuse, Tux tux, Player provider, Player user, Board board)
+        {
+            string pureFuse;
+            return GetTuxTypeFromLink(linkFuse, tux, provider, user, board, out pureFuse);
+        }
         // check whether $player's $linkHead is suitable for $tux, then return the pureType
-        public static int GetTuxTypeFromLink(string linkFuse, Tux tux, Player player, Board board, out string pureFuse)
+        public static int GetTuxTypeFromLink(string linkFuse, Tux tux,
+            Player player, Board board, out string pureFuse)
+        {
+            return GetTuxTypeFromLink(linkFuse, tux, player, player, board, out pureFuse);
+        }
+        // check whether $player's $linkHead is suitable for $tux, then return the pureType
+        public static int GetTuxTypeFromLink(string linkFuse, Tux tux,
+            Player provider, Player user, Board board, out string pureFuse)
         {
             int idx = linkFuse.IndexOf(":");
             pureFuse = linkFuse.Substring(idx + 1);
@@ -209,8 +222,8 @@ namespace PSD.PSDGamepkg.Artiad
                 if (!pureTypeStr.Contains("!") && IsFuseMatch(rawOc, pureFuse, board))
                 {
                     int pureType = int.Parse(pureTypeStr);
-                    if (tux.Code == pureName && tux.Bribe(player, pureType, pureFuse)
-                                && tux.Valid(player, pureType, pureFuse))
+                    if (tux.Code == pureName && tux.Bribe(provider, pureType, pureFuse)
+                                && tux.Valid(user, pureType, pureFuse))
                         return pureType;
                 }
             }

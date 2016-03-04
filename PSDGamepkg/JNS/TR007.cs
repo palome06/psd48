@@ -2490,7 +2490,7 @@ namespace PSD.PSDGamepkg.JNS
             {
                 if (linkHead.StartsWith("JNT1902"))
                     continue;
-                string[] lh = linkFuse.Substring(0, lfidx).Split(',');
+                string[] lh = linkHead.Split(',');
                 string pureName = lh[0], pureTypeStr = lh[1], rawOc = lh[2];
 
                 if (!pureTypeStr.Contains("!") && Artiad.ContentRule.IsFuseMatch(rawOc, pureFuse, XI.Board))
@@ -2541,7 +2541,7 @@ namespace PSD.PSDGamepkg.JNS
                 {
                     if (linkHeads[i].StartsWith("JNT1902"))
                         continue;
-                    string[] lh = linkFuse.Substring(0, lfidx).Split(',');
+                    string[] lh = linkHeads[i].Split(',');
                     string pureName = lh[0], pureTypeStr = lh[1], rawOc = lh[2];
                     if (!pureTypeStr.Contains("!") && Artiad.ContentRule.IsFuseMatch(rawOc, pureFuse, XI.Board))
                     {

@@ -1852,14 +1852,13 @@ namespace PSD.PSDGamepkg.JNS
                         foreach (ushort ut in player.Tux)
                         {
                             Tux tux = XI.LibTuple.TL.DecodeTux(ut);
-                            if (tux.Code == rName)
+                            if (tux.Code == rName && tux.Bribe(player, tType, fuse))
                             {
                                 var vs = XI.Board.Garden.Values.Where(p => p.IsTared && p.Uid != player.Uid).ToList();
-                                foreach (Player py in vs)
-                                {
-                                    if (tux.Bribe(player, tType, fuse) && tux.Valid(py, tType, fuse))
-                                        return true;
-                                }
+                                if ((rName == "TP01" || rName == "TPT3") && player.IsSKOpt)
+                                    vs = vs.Where(p => p.Team == player.Team).ToList();
+                                if (vs.Any(p => tux.Valid(p, tType, fuse)))
+                                    return true;
                             }
                         }
                     }

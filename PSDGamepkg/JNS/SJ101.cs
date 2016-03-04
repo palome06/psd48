@@ -614,7 +614,25 @@ namespace PSD.PSDGamepkg.JNS
         #region Holiday
         public void SJH01(Player rd)
         {
-            XI.AsyncInput(rd.Uid, "//", "SJH01", "0");
+            List<ushort> greater = XI.Board.Garden.Values.Where(p =>
+                p.IsAlive && p.STR > rd.STR && p.Tux.Count > 0).Select(p => p.Uid).ToList();
+            string askHint = "/";
+            if (greater.Count == 1)
+                askHint = "#获取手牌,/T1(p" + greater[0] + ")";
+            else if (greater.Count >= 2)
+                askHint = "#获取手牌,/T1~2(p" + string.Join("p", greater) + ")";
+            string select = XI.AsyncInput(rd.Uid, askHint, "SJH01", "0");
+            if (select != VI.CinSentinel && !select.StartsWith("/"))
+            {
+                ushort[] tars = select.Split(',').Select(p => ushort.Parse(p)).ToArray();
+                TargetPlayer(rd.Uid, tars);
+                foreach (ushort tar in tars)
+                {
+                    XI.AsyncInput(rd.Uid, string.Format("#获得{0}的,C1({1})", XI.DisplayPlayer(tar),
+                        Algo.RepeatString("p0", XI.Board.Garden[tar].Tux.Count)), "SJH01", "1");
+                    XI.RaiseGMessage("G0HQ,0," + rd.Uid + "," + tar + ",2,1");
+                }
+            }
             XI.RaiseGMessage(new Artiad.Goto()
             {
                 Terminal = "R" + XI.Board.Rounder.Uid + "ED"
@@ -751,7 +769,7 @@ namespace PSD.PSDGamepkg.JNS
                 Player nx = XI.Board.GetOpponenet(rd);
                 XI.RaiseGMessage("G2FU,0," + nx.Uid + ",0,C," + string.Join(",", rd.Tux));
                 string select = XI.AsyncInput(nx.Uid, "C1(p" + string.Join("p", rd.Tux) + ")", "SJH05", "0");
-                if (!select.Contains(VI.CinSentinel))
+                if (select != VI.CinSentinel)
                 {
                     ushort ut = ushort.Parse(select);
                     Tux tux = XI.LibTuple.TL.DecodeTux(ut);
@@ -777,6 +795,7 @@ namespace PSD.PSDGamepkg.JNS
                     }
                 }
             }
+            XI.RaiseGMessage("G0DH," + rd.Uid + ",0,1");
         }
         public void SJH06(Player rd)
         {

@@ -1843,8 +1843,10 @@ namespace PSD.ClientAo
                         string cardName = args[2];
                         if (args.Length > 3)
                         {
-                            ushort[] ravs = Algo.TakeRange(args, 3, args.Length).Select(p => ushort.Parse(p)).ToArray();
-                            VI.Cout(Uid, "{0}的{1}({2})被抵消.", zd.Player(ust), zd.Tux(cardName), string.Join(",", ravs));
+                            ushort[] ravs = Algo.TakeRange(args, 3, args.Length).Select(
+                                p => ushort.Parse(p)).ToArray();
+                            VI.Cout(Uid, "{0}的{1}({2})被抵消.", zd.Player(ust),
+                                zd.Tux(cardName), string.Join(",", ravs));
                         }
                         else
                             VI.Cout(Uid, "{0}的{1}被抵消.", zd.Player(ust), zd.Tux(cardName));
