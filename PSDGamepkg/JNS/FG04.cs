@@ -2820,12 +2820,13 @@ namespace PSD.PSDGamepkg.JNS
         }
         public bool GSH2ConsumeValid(Player player, int consumeType, int type, string fuse)
         {
-            if (consumeType == 0 && player.Tux.Count >= 2)
+            if (consumeType == 0)
             {
+                Monster gsh2 = XI.LibTuple.ML.Decode(XI.LibTuple.ML.Encode("GSH2"));
                 List<Player> invs = Artiad.Harm.Parse(fuse).Where(p => p.N > 0).Select(
                     p => XI.Board.Garden[p.Who]).Where(p => p.IsAlive).Distinct().ToList();
-                return invs.Any(p => XI.Board.Garden.Values.Any(q => !invs.Contains(q) && q.IsAlive &&
-                    q.HP == p.HP && q.Tux.Count == p.Tux.Count && q.Gender == p.Gender));
+                return gsh2 != null && !gsh2.TeamBursted && invs.Any(p => XI.Board.Garden.Values.Any(q =>
+                    !invs.Contains(q) && q.IsAlive && q.HP == p.HP && q.Tux.Count == p.Tux.Count && q.Gender == p.Gender));
             }
             else if (consumeType == 2)
             {
@@ -2841,7 +2842,11 @@ namespace PSD.PSDGamepkg.JNS
         {
             // Cancel the harm directly
             if (consumeType == 0)
-                XI.RaiseGMessage("G0QZ," + player.Uid + "," + argst);
+            {
+                Monster gsh2 = XI.LibTuple.ML.Decode(XI.LibTuple.ML.Encode("GSH2"));
+                if (gsh2 != null)
+                    gsh2.TeamBursted = true;
+            }
             else if (consumeType == 2)
             {
                 Artiad.CoachingChange.Parse(fuse).List.ForEach(p =>
@@ -2867,13 +2872,6 @@ namespace PSD.PSDGamepkg.JNS
                 });
             }
         }
-        public string GSH2ConsumeInput(Player player, int consumeType, int type, string fuse, string prev)
-        {
-            if (consumeType == 0 && prev == "")
-                return "/Q2(p" + string.Join("p", player.Tux) + ")";
-            else
-                return "";
-        }
         public void GSH2WinEff()
         {
             Player py = XI.Board.Opponent;
@@ -2896,6 +2894,14 @@ namespace PSD.PSDGamepkg.JNS
                 Harm("GSH2", XI.Board.Garden[who], 4, (long)HPEvoMask.TUX_INAVO);
             }
         }
+        public void GSH3Debut()
+        {
+            XI.RaiseGMessage(new Artiad.Goto()
+            {
+                CrossStage = false,
+                Terminal = "R" + XI.Board.Rounder.Uid + "Z2"
+            }.ToMessage());
+        }
         private int GSH3GetIncrCnt(Player player)
         {
             List<Player> invs = XI.Board.Garden.Values.Where(p => p.IsAlive &&
@@ -2912,13 +2918,13 @@ namespace PSD.PSDGamepkg.JNS
         }
         public void GSH3IncrAction(Player player)
         {
-            XI.Board.PetProtecedPlayer.Add(player.Uid);
+            //XI.Board.PetProtecedPlayer.Add(player.Uid);
             if (XI.Board.PoolEnabled && XI.Board.IsAttendWar(player))
                 XI.RaiseGMessage("G1WP," + player.Team + "," + player.Uid + ",GSH3," + GSH3GetIncrCnt(player));
         }
         public void GSH3DecrAction(Player player)
         {
-            XI.Board.PetProtecedPlayer.Remove(player.Uid);
+            //XI.Board.PetProtecedPlayer.Remove(player.Uid);
             if (XI.Board.PoolEnabled && XI.Board.IsAttendWar(player))
                 XI.RaiseGMessage("G1WP," + player.Team + "," + player.Uid + ",GSH3,0");
         }
@@ -3019,6 +3025,33 @@ namespace PSD.PSDGamepkg.JNS
             }
             return "";
         }
+        public void GHH2Debut()
+        {
+            ushort[] order = { 1, 3, 5, 6, 4, 2 };
+            List<Player> invs = new List<Player>();
+            for (int i = 0; i < order.Length; ++i)
+            {
+                Player py = XI.Board.Garden[order[i]];
+                if (py.IsAlive)
+                    invs.Add(py);
+            }
+            if (invs.Count > 1)
+            {
+                invs.Add(invs[0]);
+                IDictionary<Player, ushort> giveTo = Enumerable.Range(0, invs.Count - 1).
+                    Where(p => invs[p].Tux.Count > 0).ToDictionary(p => invs[p], p => invs[p + 1].Uid);
+                IDictionary<ushort, string> ask = giveTo.ToDictionary(p => p.Key.Uid, p => string.Format(
+                    "#交予{0},Q{1}(p{2})", XI.DisplayPlayer(p.Value), p.Key.Tux.Count >= 2 ? 2 : 1,
+                    string.Join("p", p.Key.Tux)));
+                IDictionary<ushort, string> ans = XI.MultiAsyncInput(ask);
+                foreach (var pair in ans)
+                {
+                    string[] tuxes = pair.Value.Split(',');
+                    XI.RaiseGMessage("G0HQ,0," + giveTo[XI.Board.Garden[pair.Key]] + "," +
+                        pair.Key + ",1," + tuxes.Length + "," + pair.Value);
+                }
+            }
+        }
         public void GHH2WinEff()
         {
             if (XI.Board.Rounder.Tux.Count > 0)
@@ -3034,43 +3067,14 @@ namespace PSD.PSDGamepkg.JNS
         {
             if (consumeType == 1)
                 Harm("GHH2", XI.Board.Garden.Values.Where(p => p.IsAlive && p.Team == player.OppTeam), 2);
-            else if (consumeType == 2)
-            {
-                Monster ghh2 = XI.LibTuple.ML.Decode(XI.LibTuple.ML.Encode("GHH2"));
-                if (type == 0) // G09P,95;Hack the round result?
-                {
-                    // if (args[1] == "0")
-                    // {
-                    //     Board.HinderSucc = Board.Hinder.DEXi > 0 ||
-                    //         (Board.Hinder.DEXi == 0 && (Board.Hinder.DEX >= Board.Battler.AGL));
-                    //     Board.SupportSucc = Board.Supporter.DEXi > 0 ||
-                    //         (Board.Supporter.DEXi == 0 && (Board.Supporter.DEX >= Board.Battler.AGL));
-                    //     WI.BCast("E09P,0," + Board.Supporter.Uid + (Board.SupportSucc ? ",1," : ",0,")
-                    //             + Board.Hinder.Uid + (Board.HinderSucc ? ",1" : ",0"));
-                    // }
-                    // if (args[1] == "0" || args[1] == "1")
-                    // {
-                    //     int rpool = RPool;
-                    //     if (XI.Board.Rounder.STR)
-                    //     int rpool = Math.Max(Rounder.STR + RPool + (SupportSucc ? Supporter.STR : 0), 0)
-                    //     WI.BCast("E09P,1," + Board.Rounder.Team + "," + Board.CalculateRPool()
-                    //             + "," + Board.Rounder.OppTeam + "," + Board.CalculateOPool());
-                    // }
-                }
-                else if (type == 1) // G0CC,110
-                {
-                    string[] g0cc = Algo.Substring(fuse, 0, fuse.IndexOf(';')).Split(',');
-                    ushort who = ushort.Parse(g0cc[1]);
-                    // return !ghh2.RAMUtList.Contains(who);
-                }
-            }
         }
         public bool GHH2ConsumeValid(Player player, int consumeType, int type, string fuse)
         {
             if (consumeType == 1)
-                return Artiad.Harm.Parse(fuse).Any(p => p.Who == player.Uid && p.N > 0 && p.Element == FiveElement.AGNI);
-            else if (consumeType == 2)
-                return true;
+            {
+                return Artiad.Harm.Parse(fuse).Any(p => p.Who == player.Uid && p.N > 0 &&
+                    (p.Element == FiveElement.AQUA || p.Element == FiveElement.AGNI));
+            }
             return false;
         }
         public void GLH1Debut()
@@ -3336,13 +3340,21 @@ namespace PSD.PSDGamepkg.JNS
         }
         public void GTH1Debut()
         {
-            List<Player> pys = XI.Board.Garden.Values.Where(p => p.IsAlive && p.GetEquipCount() > 0).ToList();
-            IDictionary<ushort, string> requires = new Dictionary<ushort, string>();
-            foreach (Player py in pys)
-                requires.Add(py.Uid, "#须弃置,Q1(p" + string.Join("p", py.ListOutAllEquips()) + ")");
-            IDictionary<ushort, string> inputs = XI.MultiAsyncInput(requires);
-            foreach (var pair in inputs)
-                XI.RaiseGMessage("G0QZ," + pair.Key + "," + pair.Value);
+            foreach (ushort put in XI.Board.OrderedPlayer())
+            {
+                Player py = XI.Board.Garden[put];
+                if (py.IsAlive && py.GetEquipCount() > 0)
+                {
+                    string sel = XI.AsyncInput(put, "#放回,Q1(p" + string.Join("p",
+                        py.ListOutAllEquips()) + ")", "GTH1Debut", "0");
+                    if (sel != VI.CinSentinel)
+                    {
+                        ushort tuxUt = ushort.Parse(sel);
+                        XI.RaiseGMessage("G0OT," + put + ",1," + tuxUt);
+                        XI.RaiseGMessage("G0PB,0," + put + ",1," + tuxUt);
+                    }
+                }
+            }
         }
         public void GTH1WinEff()
         {
@@ -3402,7 +3414,11 @@ namespace PSD.PSDGamepkg.JNS
             if (!player.Pets.Any(p => p != 0 && p != me))
             {
                 Monster monster = XI.LibTuple.ML.Decode(me) as Monster;
-                XI.RaiseGMessage("G0IB," + me + "," + player.STR);
+                int delta = player.STR - monster.ROM.GetInt("iSTR");
+                if (delta < 0)
+                    XI.RaiseGMessage("G0OB," + me + "," + (-delta));
+                else if (delta > 0)
+                    XI.RaiseGMessage("G0IB," + me + "," + delta);
                 monster.ROM.Set("iSTR", player.STR);
             }
         }
@@ -3464,29 +3480,49 @@ namespace PSD.PSDGamepkg.JNS
         }
         public void GTH2Debut()
         {
-            ushort[] order = { 1, 3, 5, 6, 4, 2 };
-            List<Player> invs = new List<Player>();
-            for (int i = 0; i < order.Length; ++i)
+            Player[] players = { XI.Board.Supporter, XI.Board.Hinder };
+            List<Artiad.CoachingSignUnit> csus = new List<Artiad.CoachingSignUnit>();
+            ushort s = XI.Board.Supporter.Uid, h = XI.Board.Hinder.Uid;
+            if (s != 0)
+                csus.Add(new Artiad.CoachingSignUnit() { Role = Artiad.CoachingHelper.PType.SUPPORTER, Coach = 0 });
+            if (h != 0)
+                csus.Add(new Artiad.CoachingSignUnit() { Role = Artiad.CoachingHelper.PType.HINDER, Coach = 0 });
+            if (csus.Count > 0)
+                XI.RaiseGMessage(new Artiad.CoachingSign() { List = csus }.ToMessage());
+            ushort[] invs = new ushort[] { s, h }.Where(p => p != 0 && p < 1000).ToArray();
+            foreach (ushort inv in invs)
             {
-                Player py = XI.Board.Garden[order[i]];
-                if (py.IsAlive)
-                    invs.Add(py);
-            }
-            if (invs.Count > 1)
-            {
-                invs.Add(invs[0]);
-                IDictionary<Player, ushort> giveTo = Enumerable.Range(0, invs.Count - 1).
-                    Where(p => invs[p].Tux.Count > 0).ToDictionary(p => invs[p], p => invs[p + 1].Uid);
-                IDictionary<ushort, string> ask = giveTo.ToDictionary(p => p.Key.Uid, p => string.Format(
-                    "#交予{0},Q{1}(p{2})", XI.DisplayPlayer(p.Value), p.Key.Tux.Count >= 2 ? 2 : 1,
-                    string.Join("p", p.Key.Tux)));
-                IDictionary<ushort, string> ans = XI.MultiAsyncInput(ask);
-                foreach (var pair in ans)
+                List<ushort> zps = XI.Board.Garden[inv].Tux.Where(p => XI.LibTuple.TL.DecodeTux(p) != null &&
+                    XI.LibTuple.TL.DecodeTux(p).Type == Tux.TuxType.ZP).ToList();
+                if (XI.Board.Garden[inv].Tux.Count > 0 && zps.Count > 0)
                 {
-                    string[] tuxes = pair.Value.Split(',');
-                    XI.RaiseGMessage("G0HQ,0," + giveTo[XI.Board.Garden[pair.Key]] + "," +
-                        pair.Key + ",1," + tuxes.Length + "," + pair.Value);
+                    string select = XI.AsyncInput(inv, "#展示战牌,/Q1(p" + string.Join("p", zps) + ")", "GTH2Debut", "0");
+                    if (select != VI.CinSentinel && !select.StartsWith("/"))
+                    {
+                        ushort theCard = ushort.Parse(select);
+                        XI.RaiseGMessage(new Artiad.AnnouceCard()
+                        {
+                            Action = Artiad.AnnouceCard.Type.FLASH,
+                            Officer = inv,
+                            Genre = Card.Genre.Tux,
+                            SingleCard = theCard
+                        }.ToMessage());
+                        XI.RaiseGMessage(new Artiad.CoachingSign()
+                        {
+                            SingleUnit = new Artiad.CoachingSignUnit()
+                            {
+                                Role = Artiad.CoachingHelper.PType.EX_ENTER,
+                                Coach = inv
+                            }
+                        }.ToMessage());
+                        Tux tux = XI.LibTuple.TL.DecodeTux(theCard);
+                        XI.RaiseGMessage("G0CC," + inv + ",0," + inv + "," +
+                            tux.Code + "," + theCard + ";0," + XI.Board.RoundIN);
+                        XI.RaiseGMessage("G0CZ,0," + inv);
+                    }
                 }
+                else if (XI.Board.Garden[inv].Tux.Count > 0)
+                    XI.AsyncInput(inv, "/", "GTH2Debut", "0");
             }
         }
         public void GTH2WinEff()

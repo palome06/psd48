@@ -2985,21 +2985,22 @@ namespace PSD.PSDGamepkg
                         foreach (ushort ut in Board.Garden.Keys)
                             dict[ut] = "";
                         string word0 = "";
+                        ushort utype = ushort.Parse(args[1]);
                         for (int i = 2; i < args.Length;)
                         {
                             ushort who = ushort.Parse(args[i]);
                             int n = ushort.Parse(args[i + 1]);
                             List<ushort> cards = Algo.TakeRange(args, i + 2, i + 2 + n)
                                 .Select(p => ushort.Parse(p)).ToList();
-                            if (args[1] == "0")
+                            if (utype == 0)
                             {
                                 // We believe we don't claim the card source and its flow now
                                 // RaiseGMessage("G0OT," + who + "," + n + "," + string.Join(",", cards));
                                 Board.TuxPiles.PushBack(cards);
                             }
-                            else if (args[1] == "1")
+                            else if (utype == 1)
                                 Board.MonPiles.PushBack(cards);
-                            else if (args[1] == "2")
+                            else if (utype == 2)
                                 Board.EvePiles.PushBack(cards);
                             i += (2 + n);
                             word0 += "," + who + ",1," + n;
@@ -3014,9 +3015,9 @@ namespace PSD.PSDGamepkg
                         foreach (var pair in dict)
                         {
                             if (pair.Value.Length > 0)
-                                WI.Send("E0PB," + args[0] + pair.Value, 0, pair.Key);
+                                WI.Send("E0PB," + utype + pair.Value, 0, pair.Key);
                         }
-                        WI.Live("E0PB," + args[0] + word0);
+                        WI.Live("E0PB," + utype + word0);
                     }
                     break;
                 case "G0YM":

@@ -7,7 +7,7 @@ namespace PSD.PSDGamepkg.Artiad
     // Sign the appearance of a attender
     public class CoachingSign
     {
-        public List<CoachingSignUnit> List { private set; get; }
+        public List<CoachingSignUnit> List { set; get; }
         public CoachingSignUnit SingleUnit
         {
             set { List = new List<CoachingSignUnit>() { value }; }
