@@ -3325,7 +3325,7 @@ namespace PSD.PSDGamepkg.JNS
                 ushort pop = ushort.Parse(args[0]);
                 XI.Board.MonDises.Remove(pop);
                 XI.RaiseGMessage("G2CN,1,1");
-                XI.RaiseGMessage("G0PB,1," + player.Uid + ",1," + pop);
+                XI.RaiseGMessage("G0PB,0,1," + player.Uid + ",1," + pop);
                 XI.RaiseGMessage("G0YM,5," + pop);
             }
             else if (type == 3)

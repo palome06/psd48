@@ -122,7 +122,7 @@ namespace PSD.PSDGamepkg.JNS
         }
         public void SF06Action(Player player, string fuse, string args)
         {
-            Harm(null, player, 1);
+            Harm(player, player, 1);
             XI.RaiseGMessage("G1CK," + player.Uid + ",SF06,0");
         }
         public void SF07Action(Player player, string fuse, string args)

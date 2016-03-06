@@ -25,14 +25,14 @@ namespace PSD.Base.Card
         // YIN: 1101
         // SOL: 0111
 
-        FINAL_MASK = 0x3 << 4,
-        ALIVE = 0x1 << 4, TERMIN_AT = 0x2 << 4,
+        FINAL_MASK = 0x7 << 4,
+        ALIVE = 0x1 << 4, ALIVE_HARD = 0x2 << 5, TERMIN_AT = 0x4 << 4,
 
-        SRC_MASK = 0x3 << 6,
-        FROM_JP = 0x1 << 6, FROM_SK = 0x2 << 6, FROM_NMB = 0x3 << 6,
+        SRC_MASK = 0x3 << 7,
+        FROM_JP = 0x1 << 7, FROM_SK = 0x2 << 7, FROM_NMB = 0x3 << 7,
 
-        RESERVED_MASK = 0x3 << 8,
-        RSV_DUEL = 0x1 << 8, RSV_WORM = 0x2 << 8,
+        RESERVED_MASK = 0x3 << 9,
+        RSV_DUEL = 0x1 << 9, RSV_WORM = 0x2 << 9,
     }
 
     public static class FiveElementHelper

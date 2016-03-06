@@ -588,13 +588,30 @@ namespace PSD.PSDGamepkg.JNS
         }
         public void NCH10Debut(Player trigger)
         {
-            ushort card = (XI.LibTuple.TL.EncodeTuxCode("WQ03") as TuxEqiup).SingleEntry;
-            ushort who = XI.Board.Garden.Values.Where(p => p.ListOutAllEquips().Contains(card)).Select(p => p.Uid).FirstOrDefault();
-            if (who != 0)
+            System.Func<ushort, ushort, bool> cardBurstable =
+                (pyut, equt) => equt != 0 && !XI.Board.CsEqiups.Contains(pyut + "," + equt);
+            List<ushort> hasWqs = XI.Board.Garden.Values.Where(p => p.IsAlive && (cardBurstable(p.Uid, p.Weapon) ||
+                (cardBurstable(p.Uid, p.ExEquip) && (p.ExMask & 0x1) != 0))).Select(p => p.Uid).ToList();
+            if (hasWqs.Count > 0)
             {
-                ushort me = NMBLib.CodeOfNPC(XI.LibTuple.NL.Encode("NCH10"));
-                XI.RaiseGMessage("G0QZ," + who + "," + card);
-                XI.RaiseGMessage("G0IB," + me + "," + 3);
+                string whoSel = XI.AsyncInput(trigger.Uid, "#爆发武器,T1(p" +
+                    string.Join("p", hasWqs) + ")", "NCH10Debut", "0");
+                ushort who = ushort.Parse(whoSel);
+                Player py = XI.Board.Garden[who];
+                List<ushort> wqs = new List<ushort>();
+                if (py.Weapon != 0) wqs.Add(py.Weapon);
+                if (py.ExEquip != 0 && (py.ExMask & 0x1) != 0) wqs.Add(py.ExEquip);
+                string tuxSel = XI.AsyncInput(trigger.Uid, "#爆发," + (trigger.Uid == who ? "Q" : "C") +
+                    "1(p" + string.Join("p", wqs) + ")", "NCH10Debut", "1");
+                ushort ut = ushort.Parse(tuxSel);
+                XI.RaiseGMessage("G0ZI," + who + "," + ut);
+                TuxEqiup tue = XI.LibTuple.TL.DecodeTux(ut) as TuxEqiup;
+                int adj = tue.IncrOfSTR + 1;
+                if (adj > 0)
+                {
+                    ushort nch10 = NMBLib.CodeOfNPC(XI.LibTuple.NL.Encode("NCH10"));
+                    XI.RaiseGMessage("G0IB," + nch10 + "," + adj);
+                }
             }
         }
         #endregion NPC Single

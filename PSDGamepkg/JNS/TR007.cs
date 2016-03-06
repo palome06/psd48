@@ -1445,7 +1445,7 @@ namespace PSD.PSDGamepkg.JNS
         //public void JNT0901Action(Player player, int type, string fuse, string argst)
         //{
         //    XI.RaiseGMessage("G0HQ,2," + player.Uid + ",1,1");
-        //    XI.RaiseGMessage("G0PB,0," + player.Uid + ",1," + argst);
+        //    XI.RaiseGMessage("G0PB,1,0," + player.Uid + ",1," + argst);
         //}
         //public bool JNT0901Valid(Player player, int type, string fuse)
         //{
@@ -1898,7 +1898,7 @@ namespace PSD.PSDGamepkg.JNS
                 if (a > 0)
                     thisHarm.N = a;
                 else { harms.Remove(thisHarm); }
-                thisHarm.Mask = HPEvoMask.ALIVE.Set(HPEvoMask.RSV_WORM.Set(thisHarm.Mask));
+                thisHarm.Mask = HPEvoMask.ALIVE_HARD.Set(HPEvoMask.RSV_WORM.Set(thisHarm.Mask));
 
                 if (b > 0)
                 {
@@ -1907,7 +1907,7 @@ namespace PSD.PSDGamepkg.JNS
                     else
                         harms.Add(thatHarm = new Artiad.Harm(ut, thisHarm.Source, thisHarm.Element,
                             b, thisHarm.Mask));
-                    thatHarm.Mask = HPEvoMask.ALIVE.Set(HPEvoMask.RSV_WORM.Set(thatHarm.Mask));
+                    thatHarm.Mask = HPEvoMask.ALIVE_HARD.Set(HPEvoMask.RSV_WORM.Set(thatHarm.Mask));
                 }
             }
             if (harms.Count > 0)
@@ -1971,7 +1971,7 @@ namespace PSD.PSDGamepkg.JNS
             {
                 thisHarm.N = totalAmount;
                 thisHarm.Who = leifeng.Uid;
-                thisHarm.Mask = HPEvoMask.ALIVE.Set(HPEvoMask.RSV_WORM.Set(thisHarm.Mask));
+                thisHarm.Mask = HPEvoMask.ALIVE_HARD.Set(HPEvoMask.RSV_WORM.Set(thisHarm.Mask));
                 ncnts.Add(thisHarm);
             }
             if (ncnts.Count > 0)
@@ -2767,6 +2767,7 @@ namespace PSD.PSDGamepkg.JNS
             ushort pop = XI.Board.RestNPCPiles.Dequeue();
             if (selection == "1") // Put ahead
             {
+                // Consider Change it back into G0PB,0,who,...
                 XI.Board.MonPiles.PushBack(pop);
                 XI.RaiseGMessage("G0YM,6,0,0");
             }

@@ -1362,6 +1362,7 @@ namespace PSD.PSDGamepkg.JNS
                 if (st != "/0")
                 {
                     ushort to = ushort.Parse(st);
+                    TargetPlayer(player.Uid, to);
                     XI.RaiseGMessage("G0OA," + to + ",1,2");
                 }
             }
@@ -1485,8 +1486,10 @@ namespace PSD.PSDGamepkg.JNS
         }
         public bool GST3ConsumeValid(Player player, int consumeType, int type, string fuse)
         {
-            if (consumeType == 2) // No G0DS event occurs anymore
+            if (consumeType == 2)
             {
+                if (XI.Board.RoundIN != "R" + XI.Board.Rounder.Uid + "ZD")
+                    return false; // only happens in R*ZD
                 string[] parts = fuse.Split(',');
                 if (type == 0) // G1DI,A,1,n,x...
                 {
@@ -3351,7 +3354,7 @@ namespace PSD.PSDGamepkg.JNS
                     {
                         ushort tuxUt = ushort.Parse(sel);
                         XI.RaiseGMessage("G0OT," + put + ",1," + tuxUt);
-                        XI.RaiseGMessage("G0PB,0," + put + ",1," + tuxUt);
+                        XI.RaiseGMessage("G0PB,0,0," + put + ",1," + tuxUt);
                     }
                 }
             }

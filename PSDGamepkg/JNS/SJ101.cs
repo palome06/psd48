@@ -468,6 +468,25 @@ namespace PSD.PSDGamepkg.JNS
             if (pys.Any())
                 XI.RaiseGMessage("G1XR,1,0,0," + string.Join(",", pys.Select(p => p.Uid)));
         }
+        public void SJT13(Player rd)
+        {
+            List<Artiad.Harm> harms = XI.Board.Garden.Values.Where(p => p.IsAlive).Select(p =>
+                new Artiad.Harm(p.Uid, p.Uid, FiveElement.A, XI.LibTuple.HL.InstanceHero(p.SelectHero)
+                .Spouses.Count(q => !q.StartsWith("!")), (long)HPEvoMask.TUX_INAVO)).ToList();
+            List<Artiad.Harm> ones = harms.Where(p => p.N > 0).ToList();
+            if (harms.Count > 0)
+                XI.RaiseGMessage(Artiad.Harm.ToMessage(harms));
+            List<ushort> zeros = harms.Where(p => p.N == 0).Select(p => p.Who).ToList();
+            var ans = XI.MultiAsyncInput(zeros.Select(p => XI.Board.Garden[p]).Where(
+                p =>p.GetEquipCount() > 0).ToDictionary(p => p.Uid, p =>
+                "#弃置(否则获得负面标记),/Q1(p" + string.Join("p", p.ListOutAllEquips()) + ")"));
+            ans.Where(p => !p.Value.StartsWith("/") && p.Value != VI.CinSentinel).ToList().ForEach(p =>
+            {
+                XI.RaiseGMessage("G0QZ," + p.Key + "," + p.Value);
+                zeros.Remove(p.Key);
+            });
+            zeros.ForEach(p => XI.RaiseGMessage("G0IF," + p + ",5,6"));
+        }
         public void SJT14(Player rd)
         {
             int hpR = XI.Board.Garden.Values.Where(p => p.IsAlive && p.Team == rd.Team).Sum(p => p.HP);
@@ -835,7 +854,8 @@ namespace PSD.PSDGamepkg.JNS
                     XI.RaiseGMessage("G0HQ,0," + rd.Uid + "," + ut + ",2,1");
                 else
                     XI.RaiseGMessage("G0HQ,0," + rd.Uid + "," + ut + ",0,1," + card);
-                ++count;
+                if (py.Team == rd.OppTeam)
+                    ++count;
             }
             if (count > 0)
                 Harm(null, rd, count);

@@ -1250,7 +1250,7 @@ namespace PSD.PSDGamepkg.JNS
         public bool TPT3Valid(Player player, int type, string fuse)
         {
             string[] kekkaiA = new string[] { "TP01,0", "TPT3,0", "TPT3,1", "ZPT4,0", "TPH2,0" };
-            string[] kekkaiB = new string[] { "ZP01,0", "TPT1,0" };
+            string[] kekkaiB = new string[] { "ZP01,0", "TPT1,0", "JPH4,0" };
             // G0CD,A,T,KN,x..;TF
             if (type == 0)
             {
@@ -2278,15 +2278,18 @@ namespace PSD.PSDGamepkg.JNS
             Player py = XI.Board.Garden[who];
             TargetPlayer(player.Uid, who);
             int n = Math.Min(py.GetEquipCount() + 2, 5);
-            string select = XI.AsyncInput(who,
-                "#请响应【罡风惊天】##HP-" + n + "##弃置装备,Y2", "JPH2", "0");
+            string select = XI.AsyncInput(who, string.Format("#请响应【{0}】##HP-{1}##弃置装备,Y2",
+                XI.LibTuple.TL.EncodeTuxCode("JPH2").Name, n), "JPH2", "0");
             if (select == "1")
                 Harm(player, py, n, FiveElement.AERO, (long)HPEvoMask.FROM_JP);
-            else
+            else if (py.GetEquipCount() > 3)
             {
-                if (py.HasAnyEquips())
-                    XI.RaiseGMessage("G0QZ," + who + "," + string.Join(",", py.ListOutAllEquips()));
+                string eqSel = XI.AsyncInput(who, "#弃置,Q3(p" + string.Join("p", 
+                    py.ListOutAllEquips()) + ")", "JPH2", "1");
+                XI.RaiseGMessage("G0QZ," + who + "," + eqSel);
             }
+            else if (py.HasAnyEquips())
+                XI.RaiseGMessage("G0QZ," + who + "," + string.Join(",", py.ListOutAllEquips()));
         }
         public bool JPH2Valid(Player player, int type, string fuse)
         {
@@ -2321,6 +2324,9 @@ namespace PSD.PSDGamepkg.JNS
                 List<Player> invs = XI.Board.Garden.Values.Where(p => p.IsAlive && p.Pets[elemIdx] != 0).ToList();
                 if (invs.Count > 0)
                     Harm(player, invs, invs.Select(p => p.GetPetCount()), five, (long)HPEvoMask.FROM_JP);
+                invs = invs.Where(p => p.Tux.Count > 0).ToList();
+                if (invs.Count > 0)
+                    XI.RaiseGMessage("G0DH," + string.Join(",", invs.Select(p => p.Uid + ",1," + p.GetPetCount())));
             }
         }
         public void JPH4Action(Player player, int type, string fuse, string argst)
@@ -2363,31 +2369,31 @@ namespace PSD.PSDGamepkg.JNS
                 }
                 XI.RaiseGMessage("G2FU,3");
             }
-            while (popCount < 3)
-            {
-                List<ushort> pys = XI.Board.Garden.Values.Where(p =>
-                    p.Team == player.Team && p.GetPetCount() > 0).Select(p => p.Uid).ToList();
-                if (pys.Count == 0)
-                    break;
-                string inputWho = XI.AsyncInput(player.Uid, "#弃置宠物,T1(p" + string.Join("p", pys), "JPH4", "1");
-                if (!inputWho.Contains(VI.CinSentinel))
-                {
-                    ushort who = ushort.Parse(inputWho);
-                    List<ushort> pts = XI.Board.Garden[who].Pets.Where(p => p != 0).ToList();
-                    string inputMon = XI.AsyncInput(player.Uid, "#弃置宠物,/M1" + (pts.Count > 1 ?
-                        ("~" + pts.Count) : "") + "(p" + string.Join("p", pts) + ")", "JPH4", "2");
-                    if (!inputMon.Contains(VI.CinSentinel) && !inputMon.StartsWith("/"))
-                    {
-                        ushort[] pets = inputMon.Split(',').Select(p => ushort.Parse(p)).ToArray();
-                        XI.RaiseGMessage(new Artiad.LosePet()
-                        {
-                            Owner = who,
-                            Pets = pets
-                        }.ToMessage());
-                        popCount += pets.Length;
-                    }
-                }
-            }
+            //while (popCount < 3)
+            //{
+            //    List<ushort> pys = XI.Board.Garden.Values.Where(p =>
+            //        p.Team == player.Team && p.GetPetCount() > 0).Select(p => p.Uid).ToList();
+            //    if (pys.Count == 0)
+            //        break;
+            //    string inputWho = XI.AsyncInput(player.Uid, "#弃置宠物,T1(p" + string.Join("p", pys), "JPH4", "1");
+            //    if (!inputWho.Contains(VI.CinSentinel))
+            //    {
+            //        ushort who = ushort.Parse(inputWho);
+            //        List<ushort> pts = XI.Board.Garden[who].Pets.Where(p => p != 0).ToList();
+            //        string inputMon = XI.AsyncInput(player.Uid, "#弃置宠物,/M1" + (pts.Count > 1 ?
+            //            ("~" + pts.Count) : "") + "(p" + string.Join("p", pts) + ")", "JPH4", "2");
+            //        if (!inputMon.Contains(VI.CinSentinel) && !inputMon.StartsWith("/"))
+            //        {
+            //            ushort[] pets = inputMon.Split(',').Select(p => ushort.Parse(p)).ToArray();
+            //            XI.RaiseGMessage(new Artiad.LosePet()
+            //            {
+            //                Owner = who,
+            //                Pets = pets
+            //            }.ToMessage());
+            //            popCount += pets.Length;
+            //        }
+            //    }
+            //}
             XI.RaiseGMessage("G1WJ,0");
         }
         public bool JPH4Valid(Player player, int type, string fuse)

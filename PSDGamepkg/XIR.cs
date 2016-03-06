@@ -488,7 +488,6 @@ namespace PSD.PSDGamepkg
                     case "VS":
                         {
                             bool skip = rstage.Substring("R#".Length) == "VT";
-                            bool mon1zero = false, mon2zero = false;
                             Board.Mon1Catchable = true; Board.Mon2Catchable = true;
                             if (Board.IsBattleWin) // OK, win
                             {
@@ -508,7 +507,6 @@ namespace PSD.PSDGamepkg
                                         Reposit = true,
                                         Plow = true
                                     }.ToMessage());
-                                    mon1zero = true;
                                 }
                                 hasMonster2 = Board.Monster2 != 0 && NMBLib.IsMonster(Board.Monster2);
                                 if (hasMonster2 && (Board.Mon2Catchable || skip))
@@ -522,7 +520,6 @@ namespace PSD.PSDGamepkg
                                         Reposit = true,
                                         Plow = true
                                     }.ToMessage());
-                                    mon2zero = true;
                                 }
                             }
                             else
@@ -538,7 +535,7 @@ namespace PSD.PSDGamepkg
                             //WI.BCast(rstage + "2," + (Board.IsBattleWin ? "0" : "1"));
                             RunQuadStage(rstage);
 
-                            RecycleMonster(mon1zero, mon2zero);
+                            RecycleMonster(); // BUG: if not taken away, here mon1zero should be false?
                             RaiseGMessage("G1ZK,1");
                             RaiseGMessage("G1HK,1");
                             WI.BCast(rstage + "3");
@@ -557,7 +554,7 @@ namespace PSD.PSDGamepkg
                         Board.PoolEnabled = false;
                         Board.RPool = 0; Board.OPool = 0;
                         Board.RPoolGain.Clear(); Board.OPoolGain.Clear();
-                        RecycleMonster(false, false);
+                        RecycleMonster();
                         if (Board.Battler as Monster != null && (Board.Battler as Monster).IsSilence())
                             Board.Silence.Add(Board.Battler.Code);
                         foreach (Player player in Board.Garden.Values)
@@ -605,7 +602,7 @@ namespace PSD.PSDGamepkg
                                 Board.Battler = null; Board.CleanBattler();
                                 if (Board.MonPiles.Count <= 0)
                                     RaiseGMessage("G1WJ,0");
-                                RecycleMonster(false, false);
+                                RecycleMonster();
                                 Board.InCampaign = false;
                                 Board.PlayerPoolEnabled = Board.PoolEnabled = false;
                                 if (Board.Wang != 0)
@@ -892,38 +889,27 @@ namespace PSD.PSDGamepkg
         }
         // $zero1 means $monster1 has been taken to another places, only set to 0
         // otherwise, handle with it
-        private void RecycleMonster(bool zero1, bool zero2)
+        private void RecycleMonster()
         {
             if (Board.Monster1 != 0)
             {
                 Monster mon1 = LibTuple.ML.Decode(NMBLib.OriginalMonster(Board.Monster1));
                 if (mon1 != null && Board.IsMonsterDebut)
                     mon1.Curtain();
-                if (!zero1)
-                {
-                    if (Board.Mon1From != 0)
-                        RaiseGMessage("G0WB," + Board.Monster1);
-                    else
-                    {
-                        RaiseGMessage("G0ON,10,M,1," + Board.Monster1);
-                        RaiseGMessage("G0WB," + Board.Monster1);
-                    }
-                    RaiseGMessage("G0YM,0,0,0");
-                }
+                if (Board.Mon1From == 0 && Board.Garden.Values.Any(p => !p.Pets.Contains(Board.Monster1)))
+                    RaiseGMessage("G0ON,10,M,1," + Board.Monster1);
+                RaiseGMessage("G0WB," + Board.Monster1);
+                RaiseGMessage("G0YM,0,0,0");
+
                 Board.Mon1From = 0;
                 Board.Monster1 = 0;
             }
             if (Board.Monster2 != 0)
-            {
-                //Monster mon2 = LibTuple.ML.Decode(NMBLib.OriginalMonster(Board.Monster2));
-                //if (mon2 != null)
-                //    mon2.Curtain();
-                if (!zero2)
-                {
+            { // monster 2 doesn't curtain, and mon2from always is 0
+                if (Board.Garden.Values.Any(p => !p.Pets.Contains(Board.Monster2)))
                     RaiseGMessage("G0ON,10,M,1," + Board.Monster2);
-                    RaiseGMessage("G0WB," + Board.Monster2);
-                    RaiseGMessage("G0YM,1,0,0");
-                }
+                RaiseGMessage("G0WB," + Board.Monster2);
+                RaiseGMessage("G0YM,1,0,0");
                 Board.Monster2 = 0;
             }
             Board.IsMonsterDebut = false;

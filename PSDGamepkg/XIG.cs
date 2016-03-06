@@ -1132,11 +1132,15 @@ namespace PSD.PSDGamepkg
                         foreach (Artiad.Harm harm in harms)
                         {
                             Player py = Board.Garden[harm.Who];
-                            if (!py.IsValidPlayer() || harm.N < 0) { harm.N = -1; continue; }
+                            if (!py.IsValidPlayer() || harm.N < 0 || py.HP == 0) { harm.N = -1; continue; }
                             if (harm.N > 0)
+                            {
                                 harm.N = (harm.N < py.HP) ? harm.N : py.HP;
-                            if (HPEvoMask.ALIVE.IsSet(harm.Mask) && harm.N == py.HP)
-                                harm.N = py.HP - 1;
+                                if (HPEvoMask.ALIVE_HARD.IsSet(harm.Mask) && harm.N == py.HP)
+                                    harm.N = py.HP - 1;
+                                else if (HPEvoMask.ALIVE.IsSet(harm.Mask) && harm.N == py.HP)
+                                    harm.N = Math.Max(1, py.HP - 1);
+                            }
                             py.HP -= harm.N;
                         }
                         harms.RemoveAll(p => p.N <= 0);
@@ -1681,7 +1685,7 @@ namespace PSD.PSDGamepkg
                                 {
                                     pair.Value.ForEach((card) => 
                                     {
-                                        if (Board.Garden[eis.Source].HasCard(card))
+                                        if (eis.Source != 0 && Board.Garden[eis.Source].HasCard(card))
                                             RaiseGMessage("G0QZ," + eis.Source + "," + card);
                                         else
                                         {
@@ -1698,7 +1702,7 @@ namespace PSD.PSDGamepkg
                                     ushort[] keeps = askSel.Split(',').Select(p => ushort.Parse(p)).ToArray();
                                     pair.Value.Except(keeps).ToList().ForEach((card) =>
                                     {
-                                        if (Board.Garden[eis.Source].HasCard(card))
+                                        if (eis.Source != 0 && Board.Garden[eis.Source].HasCard(card))
                                             RaiseGMessage("G0QZ," + eis.Source + "," + card);
                                         else
                                         {
@@ -1724,7 +1728,7 @@ namespace PSD.PSDGamepkg
                             {
                                 if (eis.Source != 0)
                                 {
-                                    if (Board.Garden[eis.Source].HasCard(card))
+                                    if (eis.Source != 0 && Board.Garden[eis.Source].HasCard(card))
                                         RaiseGMessage("G0OT," + eis.Source + ",1," + card);
                                     else
                                         Board.PendingTux.Remove(eis.Source + ",G0ZB," + card);
@@ -2985,39 +2989,49 @@ namespace PSD.PSDGamepkg
                         foreach (ushort ut in Board.Garden.Keys)
                             dict[ut] = "";
                         string word0 = "";
-                        ushort utype = ushort.Parse(args[1]);
-                        for (int i = 2; i < args.Length;)
+                        bool encrpy = (args[1] == "1");
+                        ushort piletype = ushort.Parse(args[2]);
+                        for (int idx = 3; idx < args.Length;)
                         {
-                            ushort who = ushort.Parse(args[i]);
-                            int n = ushort.Parse(args[i + 1]);
-                            List<ushort> cards = Algo.TakeRange(args, i + 2, i + 2 + n)
+                            ushort who = ushort.Parse(args[idx]);
+                            int n = ushort.Parse(args[idx + 1]);
+                            List<ushort> cards = Algo.TakeRange(args, idx + 2, idx + 2 + n)
                                 .Select(p => ushort.Parse(p)).ToList();
-                            if (utype == 0)
+                            if (piletype == 0)
                             {
                                 // We believe we don't claim the card source and its flow now
                                 // RaiseGMessage("G0OT," + who + "," + n + "," + string.Join(",", cards));
                                 Board.TuxPiles.PushBack(cards);
                             }
-                            else if (utype == 1)
+                            else if (piletype == 1)
                                 Board.MonPiles.PushBack(cards);
-                            else if (utype == 2)
+                            else if (piletype == 2)
                                 Board.EvePiles.PushBack(cards);
-                            i += (2 + n);
-                            word0 += "," + who + ",1," + n;
-                            foreach (ushort ut in Board.Garden.Keys)
+                            idx += (2 + n);
+
+                            string known = "," + who + ",0," + n + "," + string.Join(",", cards);
+                            string unknown = "," + who + ",1," + n;
+                            if (encrpy)
                             {
-                                if (ut == who)
-                                    dict[who] += "," + who + ",0," + n + "," + string.Join(",", cards);
-                                else
-                                    dict[ut] += "," + who + ",1," + n;
+                                dict[who] += known;
+                                word0 += unknown;
+                                foreach (ushort ut in Board.Garden.Keys.Where(p => p != who))
+                                    dict[ut] += unknown;
                             }
+                            else
+                                word0 += known;
                         }
-                        foreach (var pair in dict)
+                        if (encrpy)
                         {
-                            if (pair.Value.Length > 0)
-                                WI.Send("E0PB," + utype + pair.Value, 0, pair.Key);
+                            foreach (var pair in dict)
+                            {
+                                if (pair.Value.Length > 0)
+                                    WI.Send("E0PB," + piletype + pair.Value, 0, pair.Key);
+                            }
+                            WI.Live("E0PB," + piletype + word0);
                         }
-                        WI.Live("E0PB," + utype + word0);
+                        else
+                            WI.BCast("E0PB," + piletype + word0);
                     }
                     break;
                 case "G0YM":
