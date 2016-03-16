@@ -86,10 +86,10 @@ namespace PSD.ClientAo
             if (input != null)
                 input("CZ02");
         }
-        private void CZ03ButtonClick(object sender, RoutedEventArgs e)
+        private void CZ04ButtonClick(object sender, RoutedEventArgs e)
         {
             if (input != null)
-                input("CZ03");
+                input("CZ04");
         }
         private void CZ05ButtonClick(object sender, RoutedEventArgs e)
         {

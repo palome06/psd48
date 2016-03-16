@@ -408,7 +408,7 @@ namespace PSD.PSDGamepkg
                                         Type = SKTType.EQ,
                                         Consume = i,
                                         Lock = tue.CsLock[i][j],
-                                        IsOnce = false,
+                                        IsOnce = tue.CsOnce[i][j],
                                         Occur = oc,
                                         IsTermini = tue.CsIsTermini[i][j],
                                     };
@@ -536,7 +536,7 @@ namespace PSD.PSDGamepkg
             string[] g1 = { "DI", "IU", "OU", "TH", "CW", "ZK", "IZ", "OZ", "WP", "SG", "HK", "WJ",
                 "XR", "EV", "CK", "7F", "YP", "NI", "GE", "LY", "UE" };
             string[] g2 = { "IN", "RN", "CN", "QC", "FU", "QU", "CL", "WK", "AK", "IL", "OL", "SW",
-                "AS", "SY" };
+                "AS", "SY", "UL" };
             foreach (string g0event in g0)
                 RegisterBasicSKTs(dict, "G0" + g0event, 100);
             foreach (string g1event in g1)
@@ -782,9 +782,10 @@ namespace PSD.PSDGamepkg
                                 if (consumeType == 1 && Board.CsEqiups.Contains(player.Uid + "," + card))
                                     continue;
                                 Base.Card.TuxEqiup tue = (Base.Card.TuxEqiup)hand;
-                                bool vi = (tue.Type == Base.Card.Tux.TuxType.FJ && !player.ArmorDisabled)
+                                bool vi = (!ske.IsOnce || ske.Tick == 0);
+                                vi &= (tue.Type == Base.Card.Tux.TuxType.FJ && !player.ArmorDisabled)
                                     || (tue.Type == Base.Card.Tux.TuxType.WQ && !player.WeaponDisabled)
-                                    || (tue.Type == Base.Card.Tux.TuxType.XB && !player.LuggageDisabled);
+                                    || (tue.Type == Base.Card.Tux.TuxType.XB && !player.TroveDisabled);
                                 string elf = (tue.IsLinked(consumeType, ske.InType) ? ske.LinkFrom + ":" : "") + ske.Fuse;
                                 if (vi && tue.ConsumeValid(player, consumeType, ske.InType, elf))
                                 {

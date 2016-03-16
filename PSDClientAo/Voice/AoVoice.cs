@@ -1,14 +1,13 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
+using System.Diagnostics;
 using System.Threading;
 using System.Windows;
 
 namespace PSD.ClientAo.Voice
 {
+    //[DebuggerDisplay("Count = {Count}")]
     public class AoVoice : IDisposable
     {
         private ResourceDictionary rs;
@@ -16,26 +15,26 @@ namespace PSD.ClientAo.Voice
         private BlockingCollection<string> voiceQueue;
         // dictionary from a voice collection to the seq number
         private IDictionary<string, int> voiceSeqDict;
-        // current voice entry
-        private VoiceEntry currentVoiceEntry;
+        // current voice entries        
+        private List<VoiceEntry> currentActiveVoiceEntry;
 
         private Random randSeed;
         private Thread runningThread;
 
         public bool IsMute { private set; get; }
 
-        public AoVoice()
+        public AoVoice(bool isMute)
         {
             rs = new ResourceDictionary()
             {
                 Source = new Uri("pack://application:,,,/PSDRisoLib;component/Resources/VocalRes.xaml",
                 UriKind.RelativeOrAbsolute)
             };
-            currentVoiceEntry = null;
             voiceQueue = new BlockingCollection<string>();
             voiceSeqDict = new Dictionary<string, int>();
             randSeed = new Random();
-            IsMute = false;
+            IsMute = isMute;
+            currentActiveVoiceEntry = new List<VoiceEntry>();
         }
 
         public void Speak(string name, int type)
@@ -57,9 +56,14 @@ namespace PSD.ClientAo.Voice
                     string voice = voiceQueue.Take();
                     if (!IsMute)
                     {
-                        currentVoiceEntry = new VoiceEntry(rs);
+                        VoiceEntry currentVoiceEntry = new VoiceEntry(rs);
+                        lock (currentActiveVoiceEntry)
+                        {
+                            currentActiveVoiceEntry.Add(currentVoiceEntry);
+                        }
                         currentVoiceEntry.Play("voice" + voice);
-                        currentVoiceEntry = null;
+                        currentVoiceEntry.OnPlayFinished +=
+                            () => currentActiveVoiceEntry.Remove(currentVoiceEntry);
                     }
                 }
             });
@@ -69,8 +73,10 @@ namespace PSD.ClientAo.Voice
         public void Mute()
         {
             IsMute = true;
-            if (currentVoiceEntry != null)
-                currentVoiceEntry.Stop();
+            lock (currentActiveVoiceEntry)
+            {
+                currentActiveVoiceEntry.ForEach(p => p.Stop());
+            }
         }
 
         public void Resume()

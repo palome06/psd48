@@ -23,8 +23,8 @@
                     Background="{StaticResource cz01ButtonImg}" Click="CZ01ButtonClick"/>
             <Button Canvas.Left="107" Canvas.Top="29" Width="32" Height="32" IsEnabled="{Binding Path=CZ02Valid}"
                     Background="{StaticResource cz02ButtonImg}" Click="CZ02ButtonClick"/>
-            <Button Canvas.Left="107" Canvas.Top="75" Width="32" Height="32" IsEnabled="{Binding Path=CZ03Valid}"
-                    Background="{StaticResource cz03ButtonImg}" Click="CZ03ButtonClick"/>
+            <Button Canvas.Left="107" Canvas.Top="75" Width="32" Height="32" IsEnabled="{Binding Path=CZ04Valid}"
+                    Background="{StaticResource cz04ButtonImg}" Click="CZ04ButtonClick"/>
             <Button Canvas.Left="23" Canvas.Top="75" Width="32" Height="32" IsEnabled="{Binding Path=CZ05Valid}"
                     Background="{StaticResource cz05ButtonImg}" Click="CZ05ButtonClick"/>
             <Button Canvas.Left="60" Width="32" Height="32" Canvas.Top="100" Click="PetButtonClick" Visibility="Collapsed"

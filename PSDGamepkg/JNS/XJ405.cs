@@ -155,44 +155,31 @@ namespace PSD.PSDGamepkg.JNS
         #region XJ104 - LinYueru
         public bool JN10401Valid(Player player, int type, string fuse)
         {
-            string[] blocks = fuse.Split(',');
-            if (type == 0 || type == 1)
+            if (type == 0)
             {
-                for (int i = 1; i < blocks.Length; i += 2)
-                {
-                    ushort who = ushort.Parse(blocks[i]);
-                    ushort weq = ushort.Parse(blocks[i + 1]);
-                    if (who == player.Uid && XI.LibTuple.TL.DecodeTux(weq).Type == Base.Card.Tux.TuxType.WQ)
-                        return true;
-                }
-                return false;
+                return Artiad.EqImport.Parse(fuse).Imports.Any(p => p.Who == player.Uid &&
+                    p.GetActualCardAs(XI).Type == Base.Card.Tux.TuxType.WQ);
+            }
+            else if (type == 1)
+            {
+                return Artiad.EqExport.Parse(fuse).Exports.Any(p => p.Who == player.Uid &&
+                    p.GetActualCardAs(XI).Type == Base.Card.Tux.TuxType.WQ);
             }
             else return false;
         }
         public void JN10401Action(Player player, int type, string fuse, string argst)
         {
-            string[] blocks = fuse.Split(',');
             if (type == 0)
             {
-                for (int i = 1; i < blocks.Length; i += 2)
-                {
-                    ushort who = ushort.Parse(blocks[i]);
-                    ushort weq = ushort.Parse(blocks[i + 1]);
-                    if (who == player.Uid && XI.LibTuple.TL.DecodeTux(weq).Type == Base.Card.Tux.TuxType.WQ)
-                        XI.RaiseGMessage("G0IA," + who + ",0,1");
-                }
-                //XI.InnerGMessage(fuse, 121);
+                int n = Artiad.EqImport.Parse(fuse).Imports.Count(p => p.Who == player.Uid &&
+                    p.GetActualCardAs(XI).Type == Base.Card.Tux.TuxType.WQ);
+                XI.RaiseGMessage("G0IA," + player.Uid + ",0," + n);
             }
             else if (type == 1)
             {
-                for (int i = 1; i < blocks.Length; i += 2)
-                {
-                    ushort who = ushort.Parse(blocks[i]);
-                    ushort weq = ushort.Parse(blocks[i + 1]);
-                    if (who == player.Uid && XI.LibTuple.TL.DecodeTux(weq).Type == Base.Card.Tux.TuxType.WQ)
-                        XI.RaiseGMessage("G0OA," + who + ",0,1");
-                }
-                //XI.InnerGMessage(fuse, 71);
+                int n = Artiad.EqExport.Parse(fuse).Exports.Count(p => p.Who == player.Uid &&
+                    p.GetActualCardAs(XI).Type == Base.Card.Tux.TuxType.WQ);
+                XI.RaiseGMessage("G0OA," + player.Uid + ",0," + n);
             }
         }
         public bool JN10402Valid(Player player, int type, string fuse)
@@ -259,49 +246,36 @@ namespace PSD.PSDGamepkg.JNS
         }
         #endregion XJ105 - A'Nu
         #region XJ106 - Jiujianxian
-        public bool JN10601Valid(Player player, int type, string fuse)
+        public bool JN10601Valid(Player player, int type, string fuse) //I'C //O'C
         {
-            string[] blocks = fuse.Split(',');
-            if (type == 0 || type == 1)
+            if (type == 0)
             {
-                for (int i = 1; i < blocks.Length; i += 2)
-                {
-                    ushort who = ushort.Parse(blocks[i]);
-                    ushort weq = ushort.Parse(blocks[i + 1]);
-                    if (who == player.Uid && XI.LibTuple.TL.DecodeTux(weq).Type == Base.Card.Tux.TuxType.WQ)
-                        return true;
-                }
-                return false;
+                return Artiad.EqImport.Parse(fuse).Imports.Any(p => p.Who == player.Uid &&
+                    p.GetActualCardAs(XI).Type == Base.Card.Tux.TuxType.WQ);
+            }
+            else if (type == 1)
+            {
+                return Artiad.EqExport.Parse(fuse).Exports.Any(p => p.Who == player.Uid &&
+                    p.GetActualCardAs(XI).Type == Base.Card.Tux.TuxType.WQ);
             }
             else return false;
         }
         public void JN10601Action(Player player, int type, string fuse, string argst)
         {
-            string[] blocks = fuse.Split(',');
             if (type == 0)
             {
-                for (int i = 1; i < blocks.Length; i += 2)
-                {
-                    ushort who = ushort.Parse(blocks[i]);
-                    ushort weq = ushort.Parse(blocks[i + 1]);
-                    if (who == player.Uid && XI.LibTuple.TL.DecodeTux(weq).Type == Base.Card.Tux.TuxType.WQ)
-                        XI.RaiseGMessage("G0IX," + who + ",0,1");
-                }
-                //XI.InnerGMessage(fuse, 121);
+                int n = Artiad.EqImport.Parse(fuse).Imports.Count(p => p.Who == player.Uid &&
+                    p.GetActualCardAs(XI).Type == Base.Card.Tux.TuxType.WQ);
+                XI.RaiseGMessage("G0IX," + player.Uid + ",0," + n);
             }
             else if (type == 1)
             {
-                for (int i = 1; i < blocks.Length; i += 2)
-                {
-                    ushort who = ushort.Parse(blocks[i]);
-                    ushort weq = ushort.Parse(blocks[i + 1]);
-                    if (who == player.Uid && XI.LibTuple.TL.DecodeTux(weq).Type == Base.Card.Tux.TuxType.WQ)
-                        XI.RaiseGMessage("G0OX," + who + ",0,1");
-                }
-                //XI.InnerGMessage(fuse, 71);
+                int n = Artiad.EqExport.Parse(fuse).Exports.Count(p => p.Who == player.Uid &&
+                    p.GetActualCardAs(XI).Type == Base.Card.Tux.TuxType.WQ);
+                XI.RaiseGMessage("G0OX," + player.Uid + ",0," + n);
             }
         }
-        public bool JN10602Valid(Player player, int type, string fuse) // Set as Lock'in
+        public bool JN10602Valid(Player player, int type, string fuse) // Set as Lockin
         {
             // Ushort: 0->normal pass, 1->second battle, 2->give up second battle
             if (type == 0)
@@ -1287,6 +1261,8 @@ namespace PSD.PSDGamepkg.JNS
             {
                 return XI.Board.IsAttendWar(player) && XI.Board.Battler != null &&
                     player.DEX - XI.Board.Battler.AGL >= 4 && !player.RAM.GetBool("STR+2");
+                // TODO: bug here, G0IA to others would trigger type = 0 and 1 together because the flag = false.
+                // Should be solve by general judge of lock skills in XID/G
             }
             else if (type == 2 || type == 3)
             {

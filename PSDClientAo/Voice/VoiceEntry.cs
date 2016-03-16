@@ -5,7 +5,7 @@ using System.Windows;
 
 namespace PSD.ClientAo.Voice
 {
-    public class VoiceEntry
+    public class VoiceEntry : IDisposable
     {
         private bool mStop;
         private ResourceDictionary rs;
@@ -31,6 +31,9 @@ namespace PSD.ClientAo.Voice
                     waveOut.Init(vorbisStream);
                     waveOut.Play();
                     SpinWait.SpinUntil(() => vorbisStream.Position >= vorbisStream.Length || mStop);
+                    Thread.Sleep(200);
+                    if (OnPlayFinished != null)
+                        OnPlayFinished();
                 }
             }).Start();
         }
@@ -47,5 +50,13 @@ namespace PSD.ClientAo.Voice
         }
 
         public void Stop() { mStop = true; }
+
+        public delegate bool FinishHandler();
+        public FinishHandler OnPlayFinished;
+
+        public void Dispose()
+        {
+            mStop = true;
+        }
     }
 }

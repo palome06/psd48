@@ -440,43 +440,13 @@ namespace PSD.PSDGamepkg.JNS
         }
         public void GL04IncrAction(Player player)
         {
-            string g0zl = "";
-            List<Player> involved = new List<Player>();
-            foreach (Player py in XI.Board.Garden.Values)
-            {
-                if (py.Team == player.OppTeam && !py.WeaponDisabled)
-                {
-                    involved.Add(py);
-                    List<ushort> equips = py.ListOutAllEquips().Where(
-                        p => XI.LibTuple.TL.DecodeTux(p).Type == Tux.TuxType.WQ).ToList();
-                    if (equips.Count > 0)
-                        g0zl += "," + string.Join(",", equips.Select(p => py.Uid + "," + p));
-                }
-            }
-            if (g0zl.Length > 0)
-                XI.RaiseGMessage("G0ZL" + g0zl);
-            foreach (Player py in involved)
-                py.SetWeaponDisabled("GL04", true);
+            Artiad.Procedure.SetPlayerAllEqDisable(XI, XI.Board.Garden.Values.Where(
+                p => p.Team == player.OppTeam).ToList(), 0x1, "GL04");
         }
         public void GL04DecrAction(Player player)
         {
-            string g0zs = "";
-            List<Player> involved = new List<Player>();
-            foreach (Player py in XI.Board.Garden.Values)
-            {
-                if (py.Team == player.OppTeam && py.WeaponDisabled)
-                {
-                    involved.Add(py);
-                    List<ushort> equips = py.ListOutAllEquips().Where(
-                        p => XI.LibTuple.TL.DecodeTux(p).Type == Tux.TuxType.WQ).ToList();
-                    if (equips.Count > 0)
-                        g0zs += "," + string.Join(",", equips.Select(p => py.Uid + "," + p));
-                }
-            }
-            if (g0zs.Length > 0)
-                XI.RaiseGMessage("G0ZS" + g0zs);
-            foreach (Player py in involved)
-                py.SetWeaponDisabled("GL04", false);
+            Artiad.Procedure.SetPlayerAllEqEnable(XI, XI.Board.Garden.Values.Where(
+                p => p.Team == player.OppTeam).ToList(), 0x1, "GL04");
         }
         public void GL04ConsumeAction(Player player, int consumeType, int type, string fuse, string argst)
         {
@@ -799,7 +769,7 @@ namespace PSD.PSDGamepkg.JNS
                     Base.Card.TuxEqiup te = tx as Base.Card.TuxEqiup;
                     if (te != null && !((te.Type == Tux.TuxType.FJ && player.ArmorDisabled) || (
                         te.Type == Tux.TuxType.WQ && player.WeaponDisabled) || (
-                        te.Type == Tux.TuxType.XB && player.LuggageDisabled)))
+                        te.Type == Tux.TuxType.XB && player.TroveDisabled)))
                     {
                         if (te.IncrOfSTR > 0)
                             XI.RaiseGMessage("G0IA," + player.Uid + ",0,1");
@@ -822,7 +792,7 @@ namespace PSD.PSDGamepkg.JNS
                     Base.Card.TuxEqiup te = tx as Base.Card.TuxEqiup;
                     if (te != null && !((te.Type == Tux.TuxType.FJ && player.ArmorDisabled) || (
                         te.Type == Tux.TuxType.WQ && player.WeaponDisabled) || (
-                        te.Type == Tux.TuxType.XB && player.LuggageDisabled)))
+                        te.Type == Tux.TuxType.XB && player.TroveDisabled)))
                     {
                         if (te.IncrOfSTR > 0)
                             XI.RaiseGMessage("G0OA," + player.Uid + ",0,1");
@@ -836,51 +806,44 @@ namespace PSD.PSDGamepkg.JNS
         {
             if (consumeType == 0 && (type == 0 || type == 1))
             {
-                // G0ZS/L,[A,y]*
-                string[] blocks = fuse.Split(',');
-                for (int i = 1; i < blocks.Length; i += 2)
+                if (type == 0)
                 {
-                    ushort who = ushort.Parse(blocks[i]);
-                    ushort ut = ushort.Parse(blocks[i + 1]);
-                    if (who == player.Uid && player.ListOutAllEquips().Contains(ut))
+                    Artiad.EquipIntoForce.Parse(fuse).Imports.Where(p => p.Who == player.Uid).ToList().ForEach(p =>
                     {
-                        Base.Card.TuxEqiup te = XI.LibTuple.TL.DecodeTux(ut) as Base.Card.TuxEqiup;
-                        if (te != null)
-                        {
-                            if (te.IncrOfSTR > 0)
-                            {
-                                if (type == 0)
-                                    XI.RaiseGMessage("G0IA," + player.Uid + ",0,1");
-                                else
-                                    XI.RaiseGMessage("G0OA," + player.Uid + ",0,1");
-                            }
-                            if (te.IncrOfDEX > 0)
-                            {
-                                if (type == 0)
-                                    XI.RaiseGMessage("G0IX," + player.Uid + ",0,1");
-                                else
-                                    XI.RaiseGMessage("G0OX," + player.Uid + ",0,1");
-                            }
-                        }
-                    }
+                        TuxEqiup tue = p.GetActualCardAs(XI) as TuxEqiup;
+                        if (tue.IncrOfSTR > 0)
+                            XI.RaiseGMessage("G0IA," + player.Uid + ",0,1");
+                        if (tue.IncrOfDEX > 0)
+                            XI.RaiseGMessage("G0IX," + player.Uid + ",0,1");
+                    });
                 }
-                //XI.InnerGMessage(fuse, 121);
+                else if (type == 1)
+                {
+                    Artiad.EquipOutofForce.Parse(fuse).Exports.Where(p => p.Who == player.Uid).ToList().ForEach(p =>
+                    {
+                        TuxEqiup tue = p.GetActualCardAs(XI) as TuxEqiup;
+                        if (tue.IncrOfSTR > 0)
+                            XI.RaiseGMessage("G0OA," + player.Uid + ",0,1");
+                        if (tue.IncrOfDEX > 0)
+                            XI.RaiseGMessage("G0OX," + player.Uid + ",0,1");
+                    });
+                }
             }
         }
         public bool GST2ConsumeValid(Player player, int consumeType, int type, string fuse)
         {
             if (consumeType == 0)
             {
-                if (type == 0 || type == 1)
+                System.Func<TuxEqiup, bool> adjust = (tue) => tue.IncrOfSTR > 0 || tue.IncrOfDEX > 0;
+                if (type == 0)
                 {
-                    // G0ZS/L,[A,y]*
-                    string[] blocks = fuse.Split(',');
-                    for (int i = 1; i < blocks.Length; i += 2)
-                    {
-                        ushort who = ushort.Parse(blocks[i]);
-                        if (who == player.Uid)
-                            return true;
-                    }
+                    return Artiad.EquipIntoForce.Parse(fuse).Imports.Any(p => p.Who == player.Uid &&
+                        adjust(p.GetActualCardAs(XI) as TuxEqiup));
+                }
+                else if (type == 1)
+                {
+                    return Artiad.EquipOutofForce.Parse(fuse).Exports.Any(p => p.Who == player.Uid &&
+                        adjust(p.GetActualCardAs(XI) as TuxEqiup));
                 }
             }
             return false;
@@ -1063,69 +1026,13 @@ namespace PSD.PSDGamepkg.JNS
 
         public void GLT2Debut()
         {
-            // Possible Case: G07F causes the new valid/invalid
-            var b = XI.Board;
-            string g0zl = "";
-            foreach (Player py in new Player[] { b.Rounder, b.Hinder, b.Supporter })
-            {
-                if (py.IsValidPlayer())
-                {
-                    //List<ushort> cards = new List<ushort>();
-                    foreach (ushort ut in py.ListOutAllEquips())
-                    {
-                        Tux tux = XI.LibTuple.TL.DecodeTux(ut);
-                        if (tux.Type == Tux.TuxType.WQ && !py.WeaponDisabled)
-                            g0zl += "," + py.Uid + "," + ut;
-                        if (tux.Type == Tux.TuxType.FJ && !py.ArmorDisabled)
-                            g0zl += "," + py.Uid + "," + ut;
-                    }
-                    py.SetArmorDisabled("GLT2", true);
-                    py.SetWeaponDisabled("GLT2", true);
-                    //foreach (ushort ut in cards)
-                    //{
-                    //    Tux tux = XI.LibTuple.TL.DecodeTux(ut);
-                    //    if (tux.Type == Tux.TuxType.WQ && !py.WeaponDisabled)
-                    //        g0zl += "," + py.Uid + "," + ut;
-                    //    if (tux.Type == Tux.TuxType.FJ && !py.ArmorDisabled)
-                    //        g0zl += "," + py.Uid + "," + ut;
-                    //}
-                }
-            }
-            if (g0zl.Length > 0)
-                XI.RaiseGMessage("G0ZL" + g0zl);
+            Artiad.Procedure.SetPlayerAllEqDisable(XI, XI.Board.Garden.Values.Where(
+                p => p.IsValidPlayer() && XI.Board.IsAttendWar(p)), 0x3, "GLT2");
         }
         public void GLT2Curtain()
         {
-            var b = XI.Board;
-            string g0zs = "";
-            //foreach (Player py in new Player[] { b.Rounder, b.Hinder, b.Supporter })
-            foreach (Player py in b.Garden.Values)
-            {
-                if (py.IsValidPlayer())
-                {
-                    List<ushort> cards = new List<ushort>();
-                    foreach (ushort ut in py.ListOutAllEquips())
-                    {
-                        Tux tux = XI.LibTuple.TL.DecodeTux(ut);
-                        if (tux.Type == Tux.TuxType.WQ && py.WeaponDisabled)
-                            cards.Add(ut);
-                        if (tux.Type == Tux.TuxType.FJ && py.ArmorDisabled)
-                            cards.Add(ut);
-                    }
-                    py.SetArmorDisabled("GLT2", false);
-                    py.SetWeaponDisabled("GLT2", false);
-                    foreach (ushort ut in cards)
-                    {
-                        Tux tux = XI.LibTuple.TL.DecodeTux(ut);
-                        if (tux.Type == Tux.TuxType.WQ && !py.WeaponDisabled)
-                            g0zs += "," + py.Uid + "," + ut;
-                        if (tux.Type == Tux.TuxType.FJ && !py.ArmorDisabled)
-                            g0zs += "," + py.Uid + "," + ut;
-                    }
-                }
-            }
-            if (g0zs.Length > 0)
-                XI.RaiseGMessage("G0ZS" + g0zs);
+            Artiad.Procedure.SetPlayerAllEqEnable(XI, XI.Board.Garden.Values.Where(
+                p => p.IsValidPlayer()), 0x3, "GLT2");
         }
         public void GLT2IncrAction(Player player)
         {

@@ -287,6 +287,21 @@ namespace PSD.ClientAo
                         readLine = "E0LA,H," + ut + "," + A0P[ut].HPa + "," + to;
                     }
                     break;
+                case "E0ZS":
+                case "E0ZL":
+                    if (version <= 155)
+                    {
+                        string[] e0z = readLine.Split(',');
+                        for (int i = 1; i < e0z.Length; i += 2)
+                        {
+                            ushort ut = ushort.Parse(e0z[i + 1]);
+                            Base.Card.Tux tux = Tuple.TL.DecodeTux(ut);
+                            e0z[i + 1] = ut + "," + tux.Code;
+                        }
+                        readLine = string.Join(",", e0z);
+                    }
+                    break;
+
             }
             return false;
         }

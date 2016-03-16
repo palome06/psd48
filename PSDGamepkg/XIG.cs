@@ -240,7 +240,7 @@ namespace PSD.PSDGamepkg
                 case "G0OY":
                     if (priority == 100)
                     {
-                        string g1zl = "";
+                        List<Artiad.CardAsUnit> zls = new List<Artiad.CardAsUnit>();
                         List<Artiad.PetEffectUnit> peuList = new List<Artiad.PetEffectUnit>();
                         List<string> g0qzs = new List<string>();
                         for (int i = 1; i < args.Length; i += 2)
@@ -248,14 +248,8 @@ namespace PSD.PSDGamepkg
                             int changeType = int.Parse(args[i]);
                             ushort who = ushort.Parse(args[i + 1]);
                             Player player = Board.Garden[who];
-                            if (player.Weapon != 0)
-                                g1zl += "," + player.Uid + "," + player.Weapon;
-                            if (player.Armor != 0)
-                                g1zl += "," + player.Uid + "," + player.Armor;
-                            if (player.Trove != 0)
-                                g1zl += "," + player.Uid + "," + player.Trove;
-                            if (player.ExEquip != 0)
-                                g1zl += "," + player.Uid + "," + player.ExEquip;
+                            zls.AddRange(player.ListOutAllBaseEquip().Select(p =>
+                                new Artiad.CardAsUnit() { Who = who, Card = p }));
                             if (!player.PetDisabled)
                             {
                                 ushort[] pets = player.Pets.Where(p => p != 0 &&
@@ -285,8 +279,8 @@ namespace PSD.PSDGamepkg
                                     RaiseGMessage("G0OV," + player.Uid + ",0");
                             }
                         }
-                        if (g1zl != "")
-                            RaiseGMessage("G1OZ" + g1zl);
+                        if (zls.Count > 0)
+                            RaiseGMessage(new Artiad.EqExport() { Exports = zls.ToArray() }.ToMessage());
                         if (peuList.Count > 0)
                             RaiseGMessage(new Artiad.CollapsePetEffects() { List = peuList }.ToMessage());
                         foreach (string g0qz in g0qzs)
@@ -704,7 +698,8 @@ namespace PSD.PSDGamepkg
                                         TuxEqiup te = tx as TuxEqiup;
                                         te.DelAction(py);
                                     }
-                                    RaiseGMessage("G1OZ," + who + "," + py.Weapon);
+                                    RaiseGMessage(new Artiad.EqExport() { SingleUnit =
+                                        new Artiad.CardAsUnit() { Who = who, Card = py.Weapon } }.ToMessage());
                                     py.Weapon = 0; bright.Add(card);
                                 }
                                 if (py.Armor == card)
@@ -715,18 +710,20 @@ namespace PSD.PSDGamepkg
                                         TuxEqiup te = tx as TuxEqiup;
                                         te.DelAction(py);
                                     }
-                                    RaiseGMessage("G1OZ," + who + "," + py.Armor);
+                                    RaiseGMessage(new Artiad.EqExport() { SingleUnit =
+                                        new Artiad.CardAsUnit() { Who = who, Card = py.Armor } }.ToMessage());
                                     py.Armor = 0; bright.Add(card);
                                 }
                                 if (py.Trove == card)
                                 {
-                                    if (!py.LuggageDisabled)
+                                    if (!py.TroveDisabled)
                                     {
                                         Tux tx = LibTuple.TL.DecodeTux(py.Trove);
                                         TuxEqiup te = tx as TuxEqiup;
                                         te.DelAction(py);
                                     }
-                                    RaiseGMessage("G1OZ," + who + "," + py.Trove);
+                                    RaiseGMessage(new Artiad.EqExport() { SingleUnit =
+                                        new Artiad.CardAsUnit() { Who = who, Card = py.Trove } }.ToMessage());
                                     py.Trove = 0; bright.Add(card);
                                 }
                                 if (py.ExEquip == card)
@@ -742,12 +739,13 @@ namespace PSD.PSDGamepkg
                                         TuxEqiup te = tx as TuxEqiup;
                                         te.DelAction(py);
                                     }
-                                    else if (tx.Type == Tux.TuxType.XB && !py.LuggageDisabled)
+                                    else if (tx.Type == Tux.TuxType.XB && !py.TroveDisabled)
                                     {
                                         TuxEqiup te = tx as TuxEqiup;
                                         te.DelAction(py);
                                     }
-                                    RaiseGMessage("G1OZ," + who + "," + py.ExEquip);
+                                    RaiseGMessage(new Artiad.EqExport() { SingleUnit =
+                                        new Artiad.CardAsUnit() { Who = who, Card = py.ExEquip } }.ToMessage());
                                     py.ExEquip = 0; bright.Add(card);
                                 }
                                 if (py.Fakeq.ContainsKey(card))
@@ -1420,17 +1418,14 @@ namespace PSD.PSDGamepkg
                                     Role = Artiad.CoachingHelper.PType.REFRESH, Coach = player.Uid
                                 } }.ToMessage());
                         }
-                        string zs = "";
-                        if (player.Weapon != 0)
-                            zs += "," + player.Uid + "," + player.Weapon;
-                        if (player.Armor != 0)
-                            zs += "," + player.Uid + "," + player.Armor;
-                        if (player.Trove != 0)
-                            zs += "," + player.Uid + "," + player.Trove;
-                        if (player.ExEquip != 0)
-                            zs += "," + player.Uid + "," + player.ExEquip;
-                        if (zs != "")
-                            RaiseGMessage("G1IZ" + zs);
+                        if (player.ListOutAllBaseEquip().Count > 0)
+                        {
+                            RaiseGMessage(new Artiad.EqImport()
+                            {
+                                Imports = player.ListOutAllBaseEquip().Select(p =>
+                                    new Artiad.CardAsUnit() { Who = player.Uid, Card = p }).ToArray()
+                            }.ToMessage());
+                        }
                         if (!player.PetDisabled)
                         {
                             ushort[] pets = player.Pets.Where(p => p != 0 &&
@@ -1796,13 +1791,15 @@ namespace PSD.PSDGamepkg
                                         Slot = slot,
                                         SingleCard = card
                                     }.Telegraph(WI.BCast);
-
-                                    RaiseGMessage("G1IZ," + eis.Who + "," + card);
+                                    RaiseGMessage(new Artiad.EqImport()
+                                    {
+                                        SingleUnit = new Artiad.CardAsUnit() { Who = eis.Who, Card = card }
+                                    }.ToMessage());
                                     if (te.Type == Tux.TuxType.WQ && !player.WeaponDisabled)
                                         te.InsAction(player);
                                     else if (te.Type == Tux.TuxType.FJ && !player.ArmorDisabled)
                                         te.InsAction(player);
-                                    else if (te.Type == Tux.TuxType.XB && !player.LuggageDisabled)
+                                    else if (te.Type == Tux.TuxType.XB && !player.TroveDisabled)
                                         te.InsAction(player);   
                                 }
                             }
@@ -1973,78 +1970,16 @@ namespace PSD.PSDGamepkg
                     }
                     break;
                 case "G1IZ":
-                    {
-                        string zls = "";
-                        for (int i = 1; i < args.Length; i += 2)
-                        {
-                            ushort who = ushort.Parse(args[i]);
-                            Player player = Board.Garden[who];
-                            ushort card = ushort.Parse(args[i + 1]);
-                            var cardSelf = LibTuple.TL.DecodeTux(card);
-                            bool enabled =
-                                (cardSelf.Type == Base.Card.Tux.TuxType.FJ && !player.ArmorDisabled)
-                                ||
-                                (cardSelf.Type == Base.Card.Tux.TuxType.WQ && !player.WeaponDisabled)
-                                ||
-                                (cardSelf.Type == Base.Card.Tux.TuxType.XB && !player.LuggageDisabled);
-                            if (enabled)
-                                zls += "," + who + "," + card;
-                        }
-                        if (zls != "")
-                            RaiseGMessage("G0ZS" + zls);
-                    }
+                    Artiad.EqImport.Parse(cmd).Handle(this);
                     break;
                 case "G1OZ":
-                    {
-                        string zls = "";
-                        for (int i = 1; i < args.Length; i += 2)
-                        {
-                            ushort who = ushort.Parse(args[i]);
-                            Player player = Board.Garden[who];
-                            ushort card = ushort.Parse(args[i + 1]);
-                            var cardSelf = LibTuple.TL.DecodeTux(card);
-                            bool enabled =
-                                (cardSelf.Type == Base.Card.Tux.TuxType.FJ && !player.ArmorDisabled)
-                                ||
-                                (cardSelf.Type == Base.Card.Tux.TuxType.WQ && !player.WeaponDisabled)
-                                ||
-                                (cardSelf.Type == Base.Card.Tux.TuxType.XB && !player.LuggageDisabled);
-                            if (enabled)
-                                zls += "," + who + "," + card;
-                        }
-                        if (zls != "")
-                            RaiseGMessage("G0ZL" + zls);
-                    }
+                    Artiad.EqExport.Parse(cmd).Handle(this);
                     break;
                 case "G0ZS":
-                    for (int i = 1; i < args.Length; i += 2)
-                    {
-                        ushort who = ushort.Parse(args[i]);
-                        ushort card = ushort.Parse(args[i + 1]);
-                        Player player = Board.Garden[who];
-                        Tux tux = LibTuple.TL.DecodeTux(card);
-                        if (tux.IsTuxEqiup())
-                        {
-                            TuxEqiup tue = (TuxEqiup)tux;
-                            tue.IncrAction(player);
-                            WI.BCast("E0ZS," + cmdrst);
-                        }
-                    }
+                    Artiad.EquipIntoForce.Parse(cmd).Handle(this, WI);
                     break;
                 case "G0ZL":
-                    for (int i = 1; i < args.Length; i += 2)
-                    {
-                        ushort who = ushort.Parse(args[i]);
-                        ushort card = ushort.Parse(args[i + 1]);
-                        Player player = Board.Garden[who];
-                        Tux tux = LibTuple.TL.DecodeTux(card);
-                        if (tux.IsTuxEqiup())
-                        {
-                            TuxEqiup tue = (TuxEqiup)tux;
-                            tue.DecrAction(player);
-                            WI.BCast("E0ZL," + cmdrst);
-                        }
-                    }
+                    Artiad.EquipOutofForce.Parse(cmd).Handle(this, WI);
                     break;
                 case "G0IA":
                     {

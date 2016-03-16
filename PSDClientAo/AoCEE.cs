@@ -18,7 +18,7 @@ namespace PSD.ClientAo
                 PropertyChanged(this, new PropertyChangedEventArgs(prop));
         }
 
-        private bool mcz01V, mcz02V, mcz03V, mcz05V;
+        private bool mcz01V, mcz02V, mcz04V, mcz05V;
         public bool CZ01Valid
         {
             set { if (mcz01V != value) { mcz01V = value; NotifyPropertyChanged("CZ01Valid"); } }
@@ -29,10 +29,10 @@ namespace PSD.ClientAo
             set { if (mcz02V != value) { mcz02V = value; NotifyPropertyChanged("CZ02Valid"); } }
             get { return mcz02V; }
         }
-        public bool CZ03Valid
+        public bool CZ04Valid
         {
-            set { if (mcz03V != value) { mcz03V = value; NotifyPropertyChanged("CZ03Valid"); } }
-            get { return mcz03V; }
+            set { if (mcz04V != value) { mcz04V = value; NotifyPropertyChanged("CZ04Valid"); } }
+            get { return mcz04V; }
         }
         public bool CZ05Valid
         {
@@ -208,7 +208,7 @@ namespace PSD.ClientAo
             ExtSkill6Valid = false;
             CZ01Valid = false;
             CZ02Valid = false;
-            CZ03Valid = false;
+            CZ04Valid = false;
             CZ05Valid = false;
 
             DecideValid = false;
@@ -251,8 +251,8 @@ namespace PSD.ClientAo
                 CZ01Valid = valid;
             else if (czName == "CZ02")
                 CZ02Valid = valid;
-            else if (czName == "CZ03")
-                CZ03Valid = valid;
+            else if (czName == "CZ04")
+                CZ04Valid = valid;
             else if (czName == "CZ05")
                 CZ05Valid = valid;
         }
