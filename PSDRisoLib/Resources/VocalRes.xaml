@@ -1,0 +1,29 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+    <sys:String x:Key="voiceFmxy">Voice/fmxy.ogg</sys:String>
+    <sys:String x:Key="voiceJNT2901_0_0">Voice/TR-H/JNT2901-1.ogg</sys:String>
+    <sys:String x:Key="voiceJNT2901_0_1">Voice/TR-H/JNT2901-2.ogg</sys:String>
+    <sys:String x:Key="voiceJNT2902_0_0">Voice/TR-H/JNT2902-1.ogg</sys:String>
+    <sys:String x:Key="voiceJNT2902_0_1">Voice/TR-H/JNT2902-2.ogg</sys:String>
+    <sys:String x:Key="voiceJNT3401_0_0">Voice/TR-H/JNT3401-1.ogg</sys:String>
+    <sys:String x:Key="voiceJNT3401_0_1">Voice/TR-H/JNT3401-2.ogg</sys:String>
+    <sys:String x:Key="voiceJNT3401_1_0">Voice/TR-H/JNT3401-1.ogg</sys:String>
+    <sys:String x:Key="voiceJNT3401_1_1">Voice/TR-H/JNT3401-2.ogg</sys:String>
+    <sys:String x:Key="voiceJNT3402_0_0">Voice/TR-H/JNT3402-1.ogg</sys:String>
+    <sys:String x:Key="voiceJNT3402_0_1">Voice/TR-H/JNT3402-2.ogg</sys:String>
+    <sys:String x:Key="voiceJNT3403_0_0">Voice/TR-H/JNT3403-1.ogg</sys:String>
+    <sys:String x:Key="voiceJNT3403_0_1">Voice/TR-H/JNT3403-2.ogg</sys:String>
+    <sys:String x:Key="voiceJNT3601_2_0">Voice/TR-H/JNT3601-1.ogg</sys:String>
+    <sys:String x:Key="voiceJNT3601_2_1">Voice/TR-H/JNT3601-2.ogg</sys:String>
+    <sys:String x:Key="voiceJNT3602_0_1">Voice/TR-H/JNT3602-1.ogg</sys:String>
+    <sys:String x:Key="voiceJNT3602_0_2">Voice/TR-H/JNT3602-2.ogg</sys:String>
+    <sys:String x:Key="voiceJNT3602_1_1">Voice/TR-H/JNT3602-3.ogg</sys:String>
+    <sys:String x:Key="voiceJNT3602_1_2">Voice/TR-H/JNT3602-4.ogg</sys:String>
+    <sys:String x:Key="voiceJNT3701_0_0">Voice/TR-H/JNT3701-1.ogg</sys:String>
+    <sys:String x:Key="voiceJNT3701_0_1">Voice/TR-H/JNT3701-2.ogg</sys:String>
+    <sys:String x:Key="voiceJNT3702_0_0">Voice/TR-H/JNT3702-1.ogg</sys:String>
+    <sys:String x:Key="voiceJNT3702_0_1">Voice/TR-H/JNT3702-2.ogg</sys:String>
+    <sys:String x:Key="voiceJNT3703_0_0">Voice/TR-H/JNT3703-1.ogg</sys:String>
+    <sys:String x:Key="voiceJNT3703_0_1">Voice/TR-H/JNT3703-2.ogg</sys:String>
+</ResourceDictionary>

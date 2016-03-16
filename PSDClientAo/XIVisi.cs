@@ -74,6 +74,8 @@ namespace PSD.ClientAo
         public AoOrchis A0O { private set; get; }
         private bool GameGraceEnd { set; get; }
 
+        public Voice.AoVoice AV { private set; get; }
+
         private Auxs.FlashWindowHelper flashHelper;
         //var helper = new Auxs.FlashWindowHelper(System.Windows.Application.Current);
         //// Flashes the window and taskbar 5 times and stays solid 
@@ -240,6 +242,9 @@ namespace PSD.ClientAo
             A0C = ad.yfJoy.CEE;
             A0D = ad.yfDeal.Deal;
             A0O = ad.yfOrchis40.Orch;
+
+            AV = new Voice.AoVoice(); // TODO: change to SoundTracker.AV
+            AV.Init();
 
             GameGraceEnd = false;
         }
@@ -3199,6 +3204,32 @@ namespace PSD.ClientAo
                 else
                     VI.Cout(Uid, "您{0}了{1}.", action, sktxcz);
                 ad.HideProgressBar(owner);
+                if (mai.StartsWith("JN"))
+                {
+                    int idx = mai.IndexOf(',');
+                    string title = Algo.Substring(mai, 0, idx);
+                    AV.Speak(title, int.Parse(inType));
+                }
+                //if (sktxcz.StartsWith("JNT2901"))
+                //{
+                //    int n = new Random().Next(1, 3);
+                //    Voice.AoVoice.PlayEntry("voiceJNT2901_" + n);
+                //}
+                //else if (sktxcz.StartsWith("JNT2902"))
+                //{
+                //    int n = new Random().Next(1, 3);
+                //    Voice.AoVoice.PlayEntry("voiceJNT2902_" + n);
+                //}
+                //else if (sktxcz.StartsWith("JNT3601"))
+                //{
+                //    int n = new Random().Next(1, 3);
+                //    Voice.AoVoice.PlayEntry("voiceJNT3601_" + n);
+                //}
+                //else if (sktxcz.StartsWith("JNT3602"))
+                //{
+                //    int n = new Random().Next(1, 5);
+                //    Voice.AoVoice.PlayEntry("voiceJNT3602_" + n);
+                //}
             }
             return false;
         }

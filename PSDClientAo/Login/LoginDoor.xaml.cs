@@ -4,7 +4,6 @@ using System.IO;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media;
 using PSD.Base.Rules;
 using System.Linq;
 
@@ -18,8 +17,8 @@ namespace PSD.ClientAo.Login
         public const int PORT_DEF = 40201;
         public readonly string MEMORY_PATH = "PSDMemory.ini";
         public readonly string LOCALHOST = "本机";
-
-        private MediaPlayer mp;
+        
+        private Voice.VoiceEntry voiceEntry;
 
         public LoginDoor()
         {
@@ -34,14 +33,8 @@ namespace PSD.ClientAo.Login
             ResetOptions();
             IsRoomGained = false;
 
-            mp = new MediaPlayer();
-            //mp.Open(new Uri(@"pack://application:,,,/PSDRisoLib;component/Resources/Sound/MainLogin.mp3"));
-            //string mp3Path = @"D:\Gradming\psd48\PSDRisoLib\Resources\Sound\MainLogin.wav";
-            //string mp3Path = @"pack://application:,,,/PSDRisoLib;component/Resources/Sound/MainLogin.mp3";
-            string mp3Path = @"pack://siteoforigin:,,,/Resources/fmxy.mp3";
-            Uri uri = new Uri(mp3Path, UriKind.RelativeOrAbsolute);
-            mp.Open(uri);
-            mp.Play();
+            voiceEntry = new Voice.VoiceEntry();
+            voiceEntry.Play("voiceFmxy");
 
             md_openDialog = new System.Windows.Forms.OpenFileDialog()
             {
@@ -211,8 +204,8 @@ namespace PSD.ClientAo.Login
             //Environment.Exit(0);
             if (ziThread != null && ziThread.IsAlive)
                 ziThread.Abort();
-            if (mp != null)
-                mp.Close();
+            if (voiceEntry != null)
+                voiceEntry.Stop();
         }
 
         private Random random = new Random();

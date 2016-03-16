@@ -5,6 +5,7 @@
         xmlns:besu="clr-namespace:PSD.Base;assembly=Base"
         xmlns:besucd="clr-namespace:PSD.Base.Card;assembly=Base"
         xmlns:sfio="clr-namespace:PSD.ClientAo.OI"
+        xmlns:sfvc="clr-namespace:PSD.ClientAo.Voice"
         Title="PSDClientAo v0.4" Height="640" Width="1260" ResizeMode="NoResize"
         Closed="WindowClosed">
     <Window.Resources>
@@ -30,6 +31,7 @@
             <Canvas x:Name="greatCanvas">
                 <TextBlock x:Name="yfRoomNumber" Canvas.Top="0" Canvas.Left="943" Width="60" Height="60"
                            FontSize="24" FontFamily="Fixedsys" TextAlignment="Right"/>
+                <sfvc:Soundtracker Canvas.Top="0" Canvas.Left="0"/>
                 <self:PilesBar x:Name="yfPilesBar" Canvas.Top="0" Canvas.Left="78" Tuple="{StaticResource libGroup}"/>
 
                 <self:Moonlight x:Name="yfMoonlightO1" Canvas.Top="208" Canvas.Left="110"/>

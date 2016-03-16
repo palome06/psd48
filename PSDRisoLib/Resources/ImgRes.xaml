@@ -910,6 +910,9 @@
     <ImageBrush x:Key="spderPlayIcon" ImageSource="Logo/SpderPlay.png"/>
     <ImageBrush x:Key="spderPrevIcon" ImageSource="Logo/SpderPrev.png"/>
     <ImageBrush x:Key="spderPauseIcon" ImageSource="Logo/SpderPause.png"/>
+    
+    <ImageBrush x:Key="volMuteIcon" ImageSource="Logo/VolMute.png"/>
+    <ImageBrush x:Key="volPlayIcon" ImageSource="Logo/VolPlay.png"/>
 
     <ImageBrush x:Key="smoothOpIcon" ImageSource="Logo/Smooth.png"/>
     <BitmapImage x:Key="loserIcon" UriSource="Logo/Loser.png"/>

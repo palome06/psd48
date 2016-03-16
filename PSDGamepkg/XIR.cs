@@ -896,7 +896,7 @@ namespace PSD.PSDGamepkg
                 Monster mon1 = LibTuple.ML.Decode(NMBLib.OriginalMonster(Board.Monster1));
                 if (mon1 != null && Board.IsMonsterDebut)
                     mon1.Curtain();
-                if (Board.Mon1From == 0 && Board.Garden.Values.Any(p => !p.Pets.Contains(Board.Monster1)))
+                if (Board.Mon1From == 0 && !Board.Garden.Values.Any(p => p.Pets.Contains(Board.Monster1)))
                     RaiseGMessage("G0ON,10,M,1," + Board.Monster1);
                 RaiseGMessage("G0WB," + Board.Monster1);
                 RaiseGMessage("G0YM,0,0,0");
@@ -906,7 +906,7 @@ namespace PSD.PSDGamepkg
             }
             if (Board.Monster2 != 0)
             { // monster 2 doesn't curtain, and mon2from always is 0
-                if (Board.Garden.Values.Any(p => !p.Pets.Contains(Board.Monster2)))
+                if (!Board.Garden.Values.Any(p => p.Pets.Contains(Board.Monster2)))
                     RaiseGMessage("G0ON,10,M,1," + Board.Monster2);
                 RaiseGMessage("G0WB," + Board.Monster2);
                 RaiseGMessage("G0YM,1,0,0");

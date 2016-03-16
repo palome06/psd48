@@ -1,0 +1,19 @@
+﻿<UserControl x:Class="PSD.ClientAo.Voice.Soundtracker"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:local="clr-namespace:PSD.ClientAo" Width="54" Height="54">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="pack://application:,,,/PSDRisoLib;component/Resources/ImgRes.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+    <Grid>
+        <Button x:Name="iconPlayButton" Background="{StaticResource volPlayIcon}"
+                Click="iconPlayButton_Click" Visibility="Visible"/>
+        <Button x:Name="iconMuteButton" Background="{StaticResource volMuteIcon}"
+                Click="iconMuteButton_Click" Visibility="Collapsed"/>
+    </Grid>
+</UserControl>

@@ -4234,10 +4234,12 @@ namespace PSD.PSDGamepkg.JNS
         }
         public void JNT3701Action(Player player, int type, string fuse, string argst)
         {
+            ushort rd = XI.Board.Rounder.Uid;
+            TargetPlayer(player.Uid, rd);
             if (argst == "2")
-                XI.RaiseGMessage("G0DH," + XI.Board.Rounder.Uid + ",0,1");
+                XI.RaiseGMessage("G0DH," + rd + ",0,1");
             else
-                XI.RaiseGMessage("G0IA," + XI.Board.Rounder.Uid + ",1,2");
+                XI.RaiseGMessage("G0IA," + rd + ",1,2");
         }
         public string JNT3701Input(Player player, int type, string fuse, string prev)
         {

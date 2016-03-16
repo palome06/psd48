@@ -41,9 +41,14 @@
     <StartupObject>PSD.ClientAo.App</StartupObject>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Mono.Data.Sqlite, Version=4.0.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\lib\Mono.Data.Sqlite.dll</HintPath>
+    <Reference Include="NAudio">
+      <HintPath>..\lib\NAudio.dll</HintPath>
+    </Reference>
+    <Reference Include="NAudio.Vorbis">
+      <HintPath>..\lib\NAudio.Vorbis.dll</HintPath>
+    </Reference>
+    <Reference Include="NVorbis">
+      <HintPath>..\lib\NVorbis.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -138,12 +143,17 @@
     <Compile Include="Card\Suban.xaml.cs">
       <DependentUpon>Suban.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Voice\AoVoice.cs" />
+    <Compile Include="Voice\Soundtracker.xaml.cs">
+      <DependentUpon>Soundtracker.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Speeder.xaml.cs">
       <DependentUpon>Speeder.xaml</DependentUpon>
     </Compile>
     <Compile Include="Tips\IchiDisplay.cs" />
     <Compile Include="TupleAdjuster.cs" />
     <Compile Include="Util.cs" />
+    <Compile Include="Voice\VoiceEntry.cs" />
     <Compile Include="VW\Cyvi.cs" />
     <Compile Include="VW\Bywi.cs" />
     <Compile Include="VW\Eywi.cs" />
@@ -247,6 +257,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Voice\Soundtracker.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Speeder.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -294,11 +308,6 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Ao.ico" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Resources\fmxy.mp3">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
