@@ -149,7 +149,89 @@ namespace PSD.PSDGamepkg.JNS
             return player.Escue.Count > 0;
             //return player.Escue.Any(p => XI.LibTuple.NL.Decode(NMBLib.OriginalNPC(p)).EscueValid(player, type, fuse));
         }
+        public bool CZ04Valid(Player player, string fuse)
+        {
+            if (player.TroveDisabled)
+                return false;
+            if (player.Tux.Count <= 0)
+                return false;
+            List<ushort> troves = new List<ushort>();
+            if (player.Trove != 0) { troves.Add(player.Trove); }
+            if (player.ExEquip != 0 && ((player.ExMask & 0x4) != 0)) { troves.Add(player.ExEquip); }
+            troves.RemoveAll(p => !XI.LibTuple.TL.DecodeTux(p).IsTuxEqiup() ||
+                !(XI.LibTuple.TL.DecodeTux(p) as TuxEqiup).IsIllusion());
+            foreach (ushort trove in troves)
+            {
+                Illusion ill = XI.LibTuple.TL.DecodeTux(trove) as Illusion;
+                string[] candidates = Artiad.ContentRule.GetIllusionResult(ill.Code);
+                foreach (string tuxCode in candidates)
+                {
+                    TuxEqiup tue = XI.LibTuple.TL.EncodeTuxCode(tuxCode) as TuxEqiup;
+                    if (tue == null)
+                        continue;
+                    if (XI.Board.Garden.Values.Any(p => p.ListOutAllEquips().Contains(tue.SingleEntry)))
+                        continue;
+                    if (player.GetSlotCapacity(tue.Type) <= player.GetCurrentEquipCount(tue.Type))
+                        continue;
+                    return true;
+                }
+            }
+            return false;
+        }
+        public void CZ04Action(Player player, string fuse, string argst)
+        {
+            string[] parts = argst.Split(',');
+            ushort trove = ushort.Parse(parts[0]);
+            ushort callUt = ushort.Parse(parts[1]);
+            ushort asDbSerial = ushort.Parse(parts[2]);
 
+            XI.RaiseGMessage("G0QZ," + player.Uid + "," + callUt);
+            TuxEqiup tue = XI.LibTuple.TL.EncodeTuxDbSerial(asDbSerial) as TuxEqiup;
+            Illusion ill = XI.LibTuple.TL.DecodeTux(trove) as Illusion;
+            ill.ILAS = tue.Code; // TODO: change into a standard NGT(G0UL)
+            XI.RaiseGMessage(new Artiad.EqImport()
+            {
+                SingleUnit = new Artiad.CardAsUnit()
+                {
+                    Who = player.Uid,
+                    Card = ill.SingleEntry,
+                    CardAs = ill.ILAS
+                }
+            }.ToMessage());
+        }
+        public string CZ04Input(Player player, string fuse, string prev)
+        {
+            if (prev == "")
+            {
+                List<ushort> troves = new List<ushort>();
+                if (player.Trove != 0) { troves.Add(player.Trove); }
+                if (player.ExEquip != 0 && ((player.ExMask & 0x4) != 0)) { troves.Add(player.ExEquip); }
+                troves.RemoveAll(p => !XI.LibTuple.TL.DecodeTux(p).IsTuxEqiup() ||
+                    !(XI.LibTuple.TL.DecodeTux(p) as TuxEqiup).IsIllusion());
+                return "#执行幻化,/Q1(p" + string.Join("p", troves) + ")";
+            }
+            else if (prev.IndexOf(',') < 0)
+            {
+                ushort trove = ushort.Parse(prev);
+                Illusion ill = XI.LibTuple.TL.DecodeTux(trove) as Illusion;
+                string[] candidates = Artiad.ContentRule.GetIllusionResult(ill.Code);
+                List<ushort> invs = new List<ushort>();
+                foreach (string tuxCode in candidates)
+                {
+                    TuxEqiup tue = XI.LibTuple.TL.EncodeTuxCode(tuxCode) as TuxEqiup;
+                    if (tue == null)
+                        continue;
+                    if (XI.Board.Garden.Values.Any(p => p.ListOutAllEquips().Contains(tue.SingleEntry)))
+                        continue;
+                    if (player.GetSlotCapacity(tue.Type) <= player.GetCurrentEquipCount(tue.Type))
+                        continue;
+                    invs.Add(tue.DBSerial);
+                }
+                return "#幻化弃置,/Q1(p" + string.Join("p", player.Tux) +
+                    "),#幻化,/G1(p" + string.Join("p", invs) + ")";
+            }
+            else return "";
+        }
         public void CZ05Action(Player player, string fuse, string args)
         {
             ushort card = ushort.Parse(args);

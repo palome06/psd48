@@ -1999,11 +1999,11 @@ namespace PSD.ClientAo
                 case "E0ZL":
                     {
                         List<string> result = new List<string>();
-                        for (int i = 1; i < args.Length; i += 2)
+                        for (int i = 1; i < args.Length; i += 3)
                         {
                             ushort who = ushort.Parse(args[i]);
-                            ushort card = ushort.Parse(args[i + 1]);
-                            result.Add(string.Format("{0}的{1}", zd.Player(who), zd.Tux(card)));
+                            string cardAs = args[i + 2];
+                            result.Add(string.Format("{0}的{1}", zd.Player(who), zd.Tux(cardAs)));
                         }
                         VI.Cout(Uid, "{0}装备特效无效化.", string.Join(",", result));
                     }
@@ -2011,11 +2011,11 @@ namespace PSD.ClientAo
                 case "E0ZS":
                     {
                         List<string> result = new List<string>();
-                        for (int i = 1; i < args.Length; i += 2)
+                        for (int i = 1; i < args.Length; i += 3)
                         {
                             ushort who = ushort.Parse(args[i]);
-                            ushort card = ushort.Parse(args[i + 1]);
-                            result.Add(string.Format("{0}的{1}", zd.Player(who), zd.Tux(card)));
+                            string cardAs = args[i + 2];
+                            result.Add(string.Format("{0}的{1}", zd.Player(who), zd.Tux(cardAs)));
                         }
                         VI.Cout(Uid, "{0}装备特效开始生效.", string.Join(",", result));
                     }

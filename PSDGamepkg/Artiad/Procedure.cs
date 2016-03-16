@@ -287,5 +287,76 @@ namespace PSD.PSDGamepkg.Artiad
             else
                 return false;
         }
+
+        public static void SetPlayerAllEqDisable(XI XI, IEnumerable<Player> pys, int eqTypeMask, string reason)
+        {
+            SetPlayerAllEqAblity(XI, pys.ToList(), eqTypeMask, reason, false);
+        }
+        public static void SetPlayerAllEqEnable(XI XI, IEnumerable<Player> pys, int eqTypeMask, string reason)
+        {
+            SetPlayerAllEqAblity(XI, pys.ToList(), eqTypeMask, reason, true);
+        }
+        private static void SetPlayerAllEqAblity(XI XI, List<Player> pys,
+             int eqTypeMask, string reason, bool enabled)
+        {
+            List<Artiad.CardAsUnit> caus = new List<Artiad.CardAsUnit>();
+            foreach (Player py in pys)
+            {
+                if ((eqTypeMask & 0x1) != 0 && py.WeaponDisabled == enabled)
+                {
+                    if (py.Weapon != 0)
+                        caus.Add(new Artiad.CardAsUnit() { Who = py.Uid, Card = py.Weapon });
+                    if ((py.ExMask & 0x1) != 0 && py.ExEquip != 0)
+                        caus.Add(new Artiad.CardAsUnit() { Who = py.Uid, Card = py.ExEquip });
+                    if (py.Trove != 0)
+                    {
+                        TuxEqiup trove = XI.LibTuple.TL.DecodeTux(py.Trove) as TuxEqiup;
+                        if (trove.IsIllusion())
+                        {
+                            Tux ilas = XI.LibTuple.TL.EncodeTuxCode((trove as Illusion).ILAS);
+                            if (ilas != null && ilas.Type == Tux.TuxType.WQ)
+                                caus.Add(new Artiad.CardAsUnit() { Who = py.Uid, Card = py.Trove, CardAs = ilas.Code });
+                        }
+                    }
+                }
+                if ((eqTypeMask & 0x2) != 0 && py.ArmorDisabled == enabled)
+                {
+                    if (py.Armor != 0)
+                        caus.Add(new Artiad.CardAsUnit() { Who = py.Uid, Card = py.Armor });
+                    if ((py.ExMask & 0x2) != 0 && py.ExEquip != 0)
+                        caus.Add(new Artiad.CardAsUnit() { Who = py.Uid, Card = py.ExEquip });
+                    if (py.Trove != 0)
+                    {
+                        TuxEqiup trove = XI.LibTuple.TL.DecodeTux(py.Trove) as TuxEqiup;
+                        if (trove.IsIllusion())
+                        {
+                            Tux ilas = XI.LibTuple.TL.EncodeTuxCode((trove as Illusion).ILAS);
+                            if (ilas != null && ilas.Type == Tux.TuxType.FJ)
+                                caus.Add(new Artiad.CardAsUnit() { Who = py.Uid, Card = py.Trove, CardAs = ilas.Code });
+                        }
+                    }
+                }
+                if ((eqTypeMask & 0x4) != 0 && py.WeaponDisabled == enabled)
+                {
+                    if (py.Trove != 0)
+                        caus.Add(new Artiad.CardAsUnit() { Who = py.Uid, Card = py.Trove });
+                    if ((py.ExMask & 0x4) != 0 && py.ExEquip != 0)
+                        caus.Add(new Artiad.CardAsUnit() { Who = py.Uid, Card = py.ExEquip });
+                }
+            }
+            if (caus.Count > 0)
+            {
+                if (enabled)
+                    XI.RaiseGMessage(new Artiad.EquipIntoForce() { Imports = caus.ToArray() }.ToMessage());
+                else
+                    XI.RaiseGMessage(new Artiad.EquipOutofForce() { Exports = caus.ToArray() }.ToMessage());
+            }
+            if ((eqTypeMask & 0x1) != 0)
+                pys.ForEach(p => p.SetWeaponDisabled(reason, !enabled));
+            if ((eqTypeMask & 0x2) != 0)
+                pys.ForEach(p => p.SetArmorDisabled(reason, !enabled));
+            if ((eqTypeMask & 0x4) != 0)
+                pys.ForEach(p => p.SetTroveDisabled(reason, !enabled));
+        }
     }
 }

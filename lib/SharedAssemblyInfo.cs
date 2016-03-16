@@ -8,7 +8,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("iptcg")]
 [assembly: AssemblyCopyright("Copyright © 2007-2016 Ventdealic")]
-[assembly: AssemblyTrademark("Turing Boardgame workshop")]
+[assembly: AssemblyTrademark("Turing Boardgame Studio")]
 [assembly: AssemblyCulture("")]
 
 // Version information for an assembly consists of the following four values:
@@ -21,5 +21,5 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("0.4.19.155")]
-[assembly: AssemblyFileVersion("0.4.19.155")]
+[assembly: AssemblyVersion("0.4.20.156")]
+[assembly: AssemblyFileVersion("0.4.20.156")]

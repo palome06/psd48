@@ -2114,12 +2114,29 @@ namespace PSD.PSDGamepkg.JNS
         {
             return XI.Board.IsAttendWarSucc(player) && player.HP < player.HPb;
         }
+        public void XBT5DecrAction(Player player)
+        {
+            GeneralClearIllusion(player, "XBT5");
+        }
         public bool XBT5ConsumeValidHolder(Player provider, Player user, int consumeType, int type, string fuse)
         {
-            if (consumeType == 0 && type == 0 && provider.Tux.Count > 0)
+            if (consumeType == 0)
             {
-                Tux zp04 = XI.LibTuple.TL.EncodeTuxCode("ZP04");
-                return zp04 != null && zp04.Bribe(provider, type, fuse) && zp04.Valid(user, type, fuse);
+                Illusion xbt5 = XI.LibTuple.TL.EncodeTuxCode("XBT5") as Illusion;
+                if (type == 0 && provider.Tux.Count > 0 && xbt5.ILAS == null)
+                {
+                    Tux zp04 = XI.LibTuple.TL.EncodeTuxCode("ZP04");
+                    return zp04 != null && zp04.Bribe(provider, type, fuse) && zp04.Valid(user, type, fuse);
+                }
+                else if (type == 1 && xbt5.ILAS != null)
+                    return true;
+                else if (type == 2 && xbt5.ILAS == "FJT1" && !user.ArmorDisabled)
+                {
+                    TuxEqiup fjt1 = XI.LibTuple.TL.EncodeTuxCode("FJT1") as TuxEqiup;
+                    return fjt1.ConsumeValid(user, 0, 0, fuse);
+                }
+                else
+                    return false;
             }
             else
                 return false;
@@ -2127,25 +2144,115 @@ namespace PSD.PSDGamepkg.JNS
         public void XBT5ConsumeActionHolder(Player provider, Player user, int consumeType, int type,
             string fuse, string argst)
         {
-            if (consumeType == 0 && type == 0)
+            if (consumeType == 0)
             {
-                XI.RaiseGMessage("G0CC," + provider.Uid + ",0," + user.Uid + ",ZP04," + argst + ";0," + fuse);
-                XI.RaiseGMessage("G0CZ,0," + provider.Uid);
+                if (type == 0)
+                {
+                    XI.RaiseGMessage("G0CC," + provider.Uid + ",0," + user.Uid + ",ZP04," + argst + ";0," + fuse);
+                    XI.RaiseGMessage("G0CZ,0," + provider.Uid);
+                }
+                else if (type == 1)
+                    GeneralDecrIllusion(user, "XBT5");
+                else if (type == 2)
+                {
+                    TuxEqiup fjt1 = XI.LibTuple.TL.EncodeTuxCode("FJT1") as TuxEqiup;
+                    fjt1.ConsumeAction(user, 0, 0, fuse, argst);
+                }
             }
         }
         public string XBT5ConsumeInputHolder(Player provider, Player user, int consumeType, int type,
             string fuse, string prev)
         {
-            if (consumeType == 0 && type == 0 && prev == "")
-                return "/Q1(p" + string.Join("p", provider.Tux) + ")";
+            if (consumeType == 0)
+            {
+                if (type == 0 && prev == "")
+                    return "/Q1(p" + string.Join("p", provider.Tux) + ")";
+                else if (type == 2)
+                {
+                    TuxEqiup fjt1 = XI.LibTuple.TL.EncodeTuxCode("FJT1") as TuxEqiup;
+                    return fjt1.ConsumeInput(user, 0, 0, fuse, prev);
+                }
+                else
+                    return "";
+            }
             else return "";
+        }
+        public void XBT6DecrAction(Player player)
+        {
+            GeneralClearIllusion(player, "XBT6");
+        }
+        public bool XBT6ConsumeValid(Player player, int consumeType, int type, string fuse)
+        {
+            if (consumeType == 0)
+            {
+                Illusion xbt6 = XI.LibTuple.TL.EncodeTuxCode("XBT6") as Illusion;
+                if (type == 0)
+                {
+                    return false; // TODO: start new Tux Trail here
+                }
+                else if (type == 1 && xbt6.ILAS != null)
+                    return true;
+                else
+                    return false;
+            }
+            else if (consumeType == 1)
+            {
+                Illusion xbt6 = XI.LibTuple.TL.EncodeTuxCode("XBT6") as Illusion;
+                if (type == 0 && xbt6.ILAS == "FJ01" && !player.ArmorDisabled)
+                {
+                    TuxEqiup fj01 = XI.LibTuple.TL.EncodeTuxCode("FJ01") as TuxEqiup;
+                    return fj01.ConsumeValid(player, 1, 0, fuse);
+                }
+                else
+                    return false;
+            }
+            else
+                return false;
+        }
+        public void XBT6ConsumeAction(Player player, int consumeType, int type, string fuse, string argst)
+        {
+            if (consumeType == 0)
+            {
+                if (type == 0)
+                {
+                }
+                else if (type == 1)
+                    GeneralDecrIllusion(player, "XBT6");
+            }
+            else if (consumeType == 1)
+            {
+                if (type == 0)
+                {
+                    TuxEqiup fj01 = XI.LibTuple.TL.EncodeTuxCode("FJ01") as TuxEqiup;
+                    fj01.ConsumeAction(player, 1, 0, fuse, argst);
+                }
+            }
+        }
+        public string XBT6ConsumeInput(Player player, int consumeType, int type, string fuse, string prev)
+        {
+            if (consumeType == 1)
+            {
+                if (type == 0)
+                {
+                    TuxEqiup fj01 = XI.LibTuple.TL.EncodeTuxCode("FJ01") as TuxEqiup;
+                    return fj01.ConsumeInput(player, 1, 0, fuse, prev);
+                }
+                else
+                    return "";
+            }
+            else return "";
+        }
+        public void XBT7DecrAction(Player player)
+        {
+            GeneralClearIllusion(player, "XBT7");
         }
         public bool XBT7ConsumeValidHolder(Player provider, Player user, int consumeType, int type, string fuse)
         {
             if (consumeType == 0)
             {
+                Illusion xbt7 = XI.LibTuple.TL.EncodeTuxCode("XBT7") as Illusion;
                 if ((type == 0 || type == 1) && provider.Tux.Count >= 2 && 
-                    !provider.RFM.GetOrSetDiva("XBT7").GetBool("Used"))
+                    !provider.RFM.GetOrSetDiva("XBT7").GetBool("Used") && xbt7.ILAS == null)
                 {
                     string linkFuse = fuse;
                     int lfidx = linkFuse.IndexOf(':');
@@ -2167,35 +2274,60 @@ namespace PSD.PSDGamepkg.JNS
                         }
                     }
                 }
+                else if (type == 2 && xbt7.ILAS != null)
+                    return true;
+                return false;
             }
-            return false;
+            else if (consumeType == 1)
+            {
+                if (type == 0)
+                {
+                    TuxEqiup fj05 = XI.LibTuple.TL.EncodeTuxCode("FJ05") as TuxEqiup;
+                    return fj05.ConsumeValid(user, 1, 0, fuse);
+                }
+                else return false;
+            }
+            else return false;
         }
         public void XBT7ConsumeActionHolder(Player provider, Player user, int consumeType, int type,
             string fuse, string argst)
         {
-            if (consumeType == 0 && (type == 0 || type == 1))
+            if (consumeType == 0)
             {
-                string[] args = argst.Split(',');
-                ushort udb = ushort.Parse(args[0]);
-                string uts = args[1] + "," + args[2];
-                Tux tux = XI.LibTuple.TL.EncodeTuxDbSerial(udb);
+                if (type == 0 || type == 1)
+                {
+                    string[] args = argst.Split(',');
+                    ushort udb = ushort.Parse(args[0]);
+                    string uts = args[1] + "," + args[2];
+                    Tux tux = XI.LibTuple.TL.EncodeTuxDbSerial(udb);
 
-                string pureFuse;
-                int pureType = Artiad.ContentRule.GetTuxTypeFromLink(fuse,
-                    tux, provider, user, XI.Board, out pureFuse);
-                if (tux.Type == Tux.TuxType.ZP)
-                    XI.RaiseGMessage("G0CZ,0," + provider.Uid);
-                XI.RaiseGMessage("G0CC," + provider.Uid + ",0," + user.Uid + "," +
-                    tux.Code + "," + uts + ";" + pureType + "," + pureFuse);
-                provider.RFM.GetOrSetDiva("XBT7").Set("Used", true);
+                    string pureFuse;
+                    int pureType = Artiad.ContentRule.GetTuxTypeFromLink(fuse,
+                        tux, provider, user, XI.Board, out pureFuse);
+                    if (tux.Type == Tux.TuxType.ZP)
+                        XI.RaiseGMessage("G0CZ,0," + provider.Uid);
+                    XI.RaiseGMessage("G0CC," + provider.Uid + ",0," + user.Uid + "," +
+                        tux.Code + "," + uts + ";" + pureType + "," + pureFuse);
+                    provider.RFM.GetOrSetDiva("XBT7").Set("Used", true);
+                }
+                else if (type == 2)
+                    GeneralDecrIllusion(user, "XBT7");
+            }
+            else if (consumeType == 1)
+            {
+                if (type == 0)
+                {
+                    TuxEqiup fj05 = XI.LibTuple.TL.EncodeTuxCode("FJ05") as TuxEqiup;
+                    fj05.ConsumeAction(user, 1, 0, fuse, argst);
+                }
             }
         }
         public string XBT7ConsumeInputHolder(Player provider, Player user, int consumeType,
             int type, string fuse, string prev)
         {
-            if (consumeType == 0 && (type == 0 || type == 1))
+            if (consumeType == 0)
             {
-                if (prev == "")
+                if ((type == 0 || type == 1) && prev == "")
                 {
                     ISet<ushort> dbs = new HashSet<ushort>();
 
@@ -2224,7 +2356,7 @@ namespace PSD.PSDGamepkg.JNS
                     }
                     return "#转化,/G1(p" + string.Join("p", dbs) + ")";
                 }
-                else if (prev.IndexOf(',') < 0)
+                else if ((type == 0 || type == 1) && prev.IndexOf(',') < 0)
                 {
                     ushort db = ushort.Parse(prev);
                     Tux tux = XI.LibTuple.TL.EncodeTuxDbSerial(db);
@@ -2234,6 +2366,15 @@ namespace PSD.PSDGamepkg.JNS
                         return "/Q2(p" + string.Join("p", hands) + ")";
                     else
                         return "/";
+                }
+                else return "";
+            }
+            else if (consumeType == 1)
+            {
+                if (type == 0 && prev == "")
+                {
+                    TuxEqiup fj05 = XI.LibTuple.TL.EncodeTuxCode("FJ05") as TuxEqiup;
+                    return fj05.ConsumeInput(user, 1, 0, fuse, prev);
                 }
                 else return "";
             }
@@ -2788,6 +2929,91 @@ namespace PSD.PSDGamepkg.JNS
             }
             XI.InnerGMessage(cdFuse + ";" + type + "," + fuse, 106);
         }
+        // private void GeneralIncrIllusion(Player player, string illCode, ushort callUt, ushort asDbSerial)
+        // {
+        //     XI.RaiseGMessage("G0QZ," + player.Uid + "," + callUt);
+        //     TuxEqiup tue = XI.LibTuple.TL.EncodeTuxDbSerial(asDbSerial) as TuxEqiup;
+        //     Illusion ill = XI.LibTuple.TL.EncodeTuxCode(illCode) as Illusion;
+        //     ill.ILAS = tue.Code; // TODO: change into a standard NGT(G0UL)
+        //     XI.RaiseGMessage(new Artiad.EqImport()
+        //     {
+        //         SingleUnit = new Artiad.CardAsUnit()
+        //         {
+        //             Who = player.Uid,
+        //             Card = ill.SingleEntry,
+        //             CardAs = ill.ILAS
+        //         }
+        //     }.ToMessage());
+        // }
+        // private void GeneralIncrIllusion(Player player, string illCode, string argst)
+        // {
+        //     int idx = argst.IndexOf(',');
+        //     GeneralIncrIllusion(player, illCode, ushort.Parse(argst.Substring(0, idx)),
+        //         ushort.Parse(argst.Substring(idx + 1)));
+        // }
+        private void GeneralDecrIllusion(Player player, string illCode)
+        {
+            Illusion ill = XI.LibTuple.TL.EncodeTuxCode(illCode) as Illusion;
+            XI.RaiseGMessage(new Artiad.EqExport()
+            {
+                SingleUnit = new Artiad.CardAsUnit()
+                {
+                    Who = player.Uid,
+                    Card = ill.SingleEntry,
+                    CardAs = ill.ILAS
+                }
+            }.ToMessage());
+            ill.ILAS = null;
+        }
+        private void GeneralClearIllusion(Player player, string illCode)
+        {
+            Illusion ill = XI.LibTuple.TL.EncodeTuxCode(illCode) as Illusion;
+            if (ill != null && ill.ILAS != null)
+            {
+                XI.RaiseGMessage(new Artiad.EqExport()
+                {
+                    SingleUnit = new Artiad.CardAsUnit()
+                    {
+                        Who = player.Uid,
+                        Card = ill.SingleEntry,
+                        CardAs = ill.ILAS
+                    }
+                }.ToMessage());
+            }
+        }
+        // private bool GeneralIllusionValid(Player player, string illCode, string[] candidates)
+        // {
+        //     if (player.Tux.Count == 0)
+        //         return false;
+        //     foreach (string tuxCode in candidates)
+        //     {
+        //         TuxEqiup tue = XI.LibTuple.TL.EncodeTuxCode(tuxCode) as TuxEqiup;
+        //         if (tue == null)
+        //             continue;
+        //         if (XI.Board.Garden.Values.Any(p => p.ListOutAllEquips().Contains(tue.SingleEntry)))
+        //             continue;
+        //         if (player.GetSlotCapacity(tue.Type) <= player.GetCurrentEquipCount(tue.Type))
+        //             continue;
+        //         return true;
+        //     }
+        //     return false;
+        // }
+        // private string GeneralIllusionInput(Player player, string illCode, string[] candidates)
+        // {
+        //     List<ushort> invs = new List<ushort>();
+        //     foreach (string tuxCode in candidates)
+        //     {
+        //         TuxEqiup tue = XI.LibTuple.TL.EncodeTuxCode(tuxCode) as TuxEqiup;
+        //         if (tue == null)
+        //             continue;
+        //         if (XI.Board.Garden.Values.Any(p => p.ListOutAllEquips().Contains(tue.SingleEntry)))
+        //             continue;
+        //         if (player.GetSlotCapacity(tue.Type) <= player.GetCurrentEquipCount(tue.Type))
+        //             continue;
+        //         invs.Add(tue.DBSerial);
+        //     }
+        //     return "#幻化弃置,/Q1(p" + string.Join("p", player.Tux) + "),#幻化,/G1(p" + string.Join("p", invs) + ")";
+        // }
         #endregion Tux Util
         //private bool IfFuseSatisfy(Player player, string prev, string target)
         //{

@@ -230,6 +230,18 @@ namespace PSD.PSDGamepkg.Artiad
             return -1;
         }
 
+        public static string[] GetIllusionResult(string tuxCode)
+        {
+            if (tuxCode == "XBT5")
+                return new string[] { "WQ01", "FJT1" };
+            else if (tuxCode == "XBT6")
+                return new string[] { "WQ05", "FJ01" };
+            else if (tuxCode == "XBT7")
+                return new string[] { "WQ03", "FJ05" };
+            else
+                return new string[] { };
+        }
+
         #endregion Sparse Base Rules
     }
 }

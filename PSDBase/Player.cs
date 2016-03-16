@@ -137,8 +137,8 @@ namespace PSD.Base
         public void SetWeaponDisabled(string tag, bool value) { SetEquipDisabled(tag, value, 1); }
         public bool ArmorDisabled { get { return (GetEquipDisabled() & 2) != 0; } }
         public void SetArmorDisabled(string tag, bool value) { SetEquipDisabled(tag, value, 2); }
-        public bool LuggageDisabled { get { return (GetEquipDisabled() & 4) != 0; } }
-        public void SetLuggageDisabled(string tag, bool value) { SetEquipDisabled(tag, value, 4); }
+        public bool TroveDisabled { get { return (GetEquipDisabled() & 4) != 0; } }
+        public void SetTroveDisabled(string tag, bool value) { SetEquipDisabled(tag, value, 4); }
         // whether the player is rounder and dead to cause continuous procedure
         public bool IsRan { set; get; }
         // whether the player is added and needed push back to pocket

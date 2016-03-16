@@ -408,7 +408,7 @@ namespace PSD.PSDGamepkg
                                         Type = SKTType.EQ,
                                         Consume = i,
                                         Lock = tue.CsLock[i][j],
-                                        IsOnce = false,
+                                        IsOnce = tue.CsOnce[i][j],
                                         Occur = oc,
                                         IsTermini = tue.CsIsTermini[i][j],
                                     };
@@ -532,7 +532,7 @@ namespace PSD.PSDGamepkg
                 "OX", "AX", "IB", "OB", "IW", "OW", "WB", "9P", "IP", "OP", "CZ", "HC", "HD", "HH",
                 "HI", "HL", "IC", "OC", "HT", "HG", "QR", "HZ", "TT", "T7", "JM", "WN", "IJ", "OJ",
                 "IE", "OE", "IS", "OS", "LA", "IV", "OV", "PB", "YM", "HR", "FI", "ON", "SN", "MA",
-                "ZJ", "IF", "OF", "PQ" };
+                "ZJ", "IF", "OF", "PQ", "UL" };
             string[] g1 = { "DI", "IU", "OU", "TH", "CW", "ZK", "IZ", "OZ", "WP", "SG", "HK", "WJ",
                 "XR", "EV", "CK", "7F", "YP", "NI", "GE", "LY", "UE" };
             string[] g2 = { "IN", "RN", "CN", "QC", "FU", "QU", "CL", "WK", "AK", "IL", "OL", "SW",
@@ -782,9 +782,10 @@ namespace PSD.PSDGamepkg
                                 if (consumeType == 1 && Board.CsEqiups.Contains(player.Uid + "," + card))
                                     continue;
                                 Base.Card.TuxEqiup tue = (Base.Card.TuxEqiup)hand;
-                                bool vi = (tue.Type == Base.Card.Tux.TuxType.FJ && !player.ArmorDisabled)
+                                bool vi = (!ske.IsOnce || ske.Tick == 0);
+                                vi &= (tue.Type == Base.Card.Tux.TuxType.FJ && !player.ArmorDisabled)
                                     || (tue.Type == Base.Card.Tux.TuxType.WQ && !player.WeaponDisabled)
-                                    || (tue.Type == Base.Card.Tux.TuxType.XB && !player.LuggageDisabled);
+                                    || (tue.Type == Base.Card.Tux.TuxType.XB && !player.TroveDisabled);
                                 string elf = (tue.IsLinked(consumeType, ske.InType) ? ske.LinkFrom + ":" : "") + ske.Fuse;
                                 if (vi && tue.ConsumeValid(player, consumeType, ske.InType, elf))
                                 {

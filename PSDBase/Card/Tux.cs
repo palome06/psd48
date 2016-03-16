@@ -250,6 +250,12 @@ namespace PSD.Base.Card
                     tux.Parse(countStr, occur, parasitismStr, priority, targets, terministr, (ushort)lid);
                     Firsts.Add(tux);
                 }
+                else if (type == Tux.TuxType.XB && growup.Contains("I"))
+                {
+                    var tux = new Illusion(name, code, genre, type, description, special, growup);
+                    tux.Parse(countStr, occur, parasitismStr, priority, targets, terministr, (ushort)lid);
+                    Firsts.Add(tux);
+                }
                 else if (type == Tux.TuxType.WQ || type == Tux.TuxType.FJ || type == Tux.TuxType.XB)
                 {
                     var tux = new TuxEqiup(name, code, genre, type, description, special, growup);
@@ -375,6 +381,7 @@ namespace PSD.Base.Card
         public int[][] CsPriorites { private set; get; }
         public string[][] CsOccur { private set; get; }
         public bool[][] CsLock { private set; get; }
+        public bool[][] CsOnce { private set; get; }
         public bool[][] CsIsTermini { private set; get; }
         public bool[][] CsHind { private set; get; }
 
@@ -478,8 +485,8 @@ namespace PSD.Base.Card
         protected static CsUseActionDelegate DefCsUseAction = (c, p, s) => { };
 
         public override bool IsTuxEqiup() { return true; }
-
         public virtual bool IsLuggage() { return false; }
+        public virtual bool IsIllusion() { return false; }
 
         internal override void Parse(string countStr, string occurStr, string parasitismStr,
             string priorStr, string tarStr, string tmhdstr, long dbSerial)
@@ -540,7 +547,10 @@ namespace PSD.Base.Card
                 Parasitism = new string[0];
             string[] priorStrss = priorStr.Split(';');
             if (priorStrss.Length > 1)
+            {
                 CsPriorites = new int[priorStrss.Length - 1][];
+                CsOnce = new bool[priorStrss.Length - 1][];
+            }
             for (int i = 0; i < priorStrss.Length; ++i)
             {
                 if (priorStrss[i] != "" && priorStrss[i] != "^")
@@ -556,8 +566,20 @@ namespace PSD.Base.Card
                     {
                         string[] priors = priorStrss[i].Split(',');
                         CsPriorites[i - 1] = new int[priors.Length];
+                        CsOnce[i - 1] = new bool[priors.Length];
                         for (int j = 0; j < priors.Length; ++j)
-                            CsPriorites[i - 1][j] = int.Parse(priors[j]);
+                        {
+                            if (priors[j].StartsWith("!"))
+                            {
+                                CsPriorites[i - 1][j] = int.Parse(priors[j].Substring("!".Length));
+                                CsOnce[i - 1][j] = true;
+                            }
+                            else
+                            {
+                                CsPriorites[i - 1][j] = int.Parse(priors[j]);
+                                CsOnce[i - 1][j] = false;
+                            }
+                        }
                     }
                 }
             }
@@ -656,6 +678,7 @@ namespace PSD.Base.Card
         public List<string> Capacities { private set; get; }
 
         public override bool IsLuggage() { return true; }
+        public override bool IsIllusion() { return false; }
         // Indicate whether in processing of pulling goods, avoid recycle when erase luggage itself.
         public bool Pull { set; get; }
 
@@ -665,6 +688,21 @@ namespace PSD.Base.Card
         {
             Capacities = new List<string>();
             Pull = false;
+        }
+    }
+
+    public class Illusion : TuxEqiup
+    {
+        public override bool IsLuggage() { return false; }
+        public override bool IsIllusion() { return true; }
+        // what the illusion illustrate now, null or empty means itself
+        public string ILAS { set; get; }
+
+        public Illusion(string name, string code, int genre, TuxType type,
+                string description, IDictionary<string, string> special, string growup) :
+            base(name, code, genre, type, description, special, growup)
+        {
+            ILAS = null;
         }
     }
 }

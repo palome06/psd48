@@ -178,6 +178,168 @@ namespace PSD.PSDGamepkg.Artiad
         }
     }
 
+    public class CardAsUnit
+    {
+        // the owner
+        public ushort Who { set; get; }
+        // the card itself
+        public ushort Card { set; get; }
+        // what the fakeq serves as
+        public string CardAs { set; get; }
+        // return the actual card as and it will parse default value "0"
+        public Tux GetActualCardAs(XI XI)
+        {
+            return CardAs == "0" ? XI.LibTuple.TL.DecodeTux(Card) : XI.LibTuple.TL.EncodeTuxCode(CardAs);
+        }
+
+        public CardAsUnit() { CardAs = "0"; }
+        internal string ToRawMessage()
+        {
+            return Who + "," + Card + "," + CardAs;
+        }
+        internal static CardAsUnit[] ParseFromLine(string line)
+        {
+            string[] caus = line.Split(',');
+            CardAsUnit[] result = new CardAsUnit[(caus.Length - 1) / 3];
+            for (int i = 1; i < caus.Length; i += 3)
+            {
+                result[(i - 1) / 3] = new CardAsUnit()
+                {
+                    Who = ushort.Parse(caus[i]),
+                    Card = ushort.Parse(caus[i + 1]),
+                    CardAs = caus[i + 2]
+                };
+            }
+            return result;
+        }
+    }
+    // An equip card go into the slot or virtual slot
+    public class EqImport
+    {
+        public CardAsUnit[] Imports { set; get; }
+        // single unit, only support set operator
+        public CardAsUnit SingleUnit
+        {
+            set { Imports = new CardAsUnit[] { value }; }
+        }
+
+        public string ToMessage()
+        {
+            return "G1IZ," + string.Join(",", Imports.Select(p => p.ToRawMessage()));
+        }
+        public static EqImport Parse(string line)
+        {
+            return new EqImport() { Imports = CardAsUnit.ParseFromLine(line) };
+        }
+
+        public void Handle(XI XI)
+        {
+            Func<Tux, Player, bool> enabled = (cardSelf, player) =>
+                (cardSelf.Type == Base.Card.Tux.TuxType.FJ && !player.ArmorDisabled) ||
+                (cardSelf.Type == Base.Card.Tux.TuxType.WQ && !player.WeaponDisabled) ||
+                (cardSelf.Type == Base.Card.Tux.TuxType.XB && !player.TroveDisabled);
+            CardAsUnit[] actives = Imports.Where(p => enabled(p.GetActualCardAs(XI),
+                XI.Board.Garden[p.Who])).ToArray();
+            if (actives.Length > 0)
+                XI.RaiseGMessage(new EquipIntoForce() { Imports = actives }.ToMessage());
+        }
+    }
+    // An equip card go out of the slot or virtual slot
+    public class EqExport
+    {
+        public CardAsUnit[] Exports { set; get; }
+        // single unit, only support set operator
+        public CardAsUnit SingleUnit
+        {
+            set { Exports = new CardAsUnit[] { value }; }
+        }
+
+        public string ToMessage()
+        {
+            return "G1OZ," + string.Join(",", Exports.Select(p => p.ToRawMessage()));
+        }
+        public static EqExport Parse(string line)
+        {
+            return new EqExport() { Exports = CardAsUnit.ParseFromLine(line) };
+        }
+
+        public void Handle(XI XI)
+        {
+            Func<Tux, Player, bool> enabled = (cardSelf, player) =>
+                (cardSelf.Type == Base.Card.Tux.TuxType.FJ && !player.ArmorDisabled) ||
+                (cardSelf.Type == Base.Card.Tux.TuxType.WQ && !player.WeaponDisabled) ||
+                (cardSelf.Type == Base.Card.Tux.TuxType.XB && !player.TroveDisabled);
+            CardAsUnit[] actives = Exports.Where(p => enabled(p.GetActualCardAs(XI),
+                XI.Board.Garden[p.Who])).ToArray();
+            if (actives.Length > 0)
+                XI.RaiseGMessage(new EquipOutofForce() { Exports = actives }.ToMessage());
+        }
+    }
+    // An equip starts being into force
+    public class EquipIntoForce
+    {
+        public CardAsUnit[] Imports { set; get; }
+        // single unit, only support set operator
+        public CardAsUnit SingleUnit
+        {
+            set { Imports = new CardAsUnit[] { value }; }
+        }
+
+        public string ToMessage()
+        {
+            return "G0ZS," + string.Join(",", Imports.Select(p => p.ToRawMessage()));
+        }
+        public static EquipIntoForce Parse(string line)
+        {
+            return new EquipIntoForce() { Imports = CardAsUnit.ParseFromLine(line) };
+        }
+
+        public void Handle(XI XI, Base.VW.IWISV WI)
+        {
+            foreach (CardAsUnit cau in Imports)
+            {
+                Tux tux = cau.CardAs == "0" ? XI.LibTuple.TL.DecodeTux(cau.Card) :
+                    XI.LibTuple.TL.EncodeTuxCode(cau.CardAs);
+                cau.CardAs = tux.Code;
+                if (tux.IsTuxEqiup())
+                    (tux as TuxEqiup).IncrAction(XI.Board.Garden[cau.Who]);
+            }
+            new EquipIntoForceSemaphore() { Imports = Imports }.Telegraph(WI.BCast);
+        }
+    }
+    // An equip starts being out of force
+    public class EquipOutofForce
+    {
+        public CardAsUnit[] Exports { set; get; }
+        // single unit, only support set operator
+        public CardAsUnit SingleUnit
+        {
+            set { Exports = new CardAsUnit[] { value }; }
+        }
+
+        public string ToMessage()
+        {
+            return "G0ZL," + string.Join(",", Exports.Select(p => p.ToRawMessage()));
+        }
+        public static EquipOutofForce Parse(string line)
+        {
+            return new EquipOutofForce() { Exports = CardAsUnit.ParseFromLine(line) };
+        }
+
+        public void Handle(XI XI, Base.VW.IWISV WI)
+        {
+            foreach (CardAsUnit cau in Exports)
+            {
+                Tux tux = cau.CardAs == "0" ? XI.LibTuple.TL.DecodeTux(cau.Card) :
+                    XI.LibTuple.TL.EncodeTuxCode(cau.CardAs);
+                cau.CardAs = tux.Code;
+                if (tux.IsTuxEqiup())
+                    (tux as TuxEqiup).DecrAction(XI.Board.Garden[cau.Who]);
+            }
+            new EquipOutofForceSemaphore() { Exports = Exports }.Telegraph(WI.BCast);
+        }
+    }
+
     public class EqSlotMoveSemaphore
     {
         public ushort Who { set; get; }
@@ -186,6 +348,23 @@ namespace PSD.PSDGamepkg.Artiad
         public void Telegraph(Action<string> send)
         {
             send("E0ZJ," + Who + "," + (int)Slot + "," + Card);
+        }
+    }
+
+    public class EquipIntoForceSemaphore
+    {
+        public CardAsUnit[] Imports { set; get; }
+        public void Telegraph(Action<string> send)
+        {
+            send("E0ZS," + string.Join(",", Imports.Select(p => p.ToRawMessage())));
+        }
+    }
+    public class EquipOutofForceSemaphore
+    {
+        public CardAsUnit[] Exports { set; get; }
+        public void Telegraph(Action<string> send)
+        {
+            send("E0ZL," + string.Join(",", Exports.Select(p => p.ToRawMessage())));
         }
     }
 
@@ -208,9 +387,7 @@ namespace PSD.PSDGamepkg.Artiad
         }
 
         public static bool IsStandard(string line) { return line.StartsWith("G0ZB,0"); }
-
         public static bool IsEx(string line) { return line.StartsWith("G0ZB,1"); }
-
         public static bool IsFakeq(string line) { return line.StartsWith("G0ZB,2"); }
 
         public static ushort GetWho(string line)

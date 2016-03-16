@@ -352,6 +352,7 @@ namespace PSD.PSDGamepkg
                         RaiseGMessage("G0ZC," + from + "," + consumeCode +
                                "," + args + ";" + ske.InType + "," + lf);
                         u5ed = ske.IsTermini ? UEchoCode.END_TERMIN : UEchoCode.END_ACTION;
+                        ++ske.Tick;
                     }
                     else // need further support
                     {

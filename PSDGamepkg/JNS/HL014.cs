@@ -1879,9 +1879,7 @@ namespace PSD.PSDGamepkg.JNS
                 XI.RaiseGMessage("G0OT," + player.Uid + "," + n + "," + string.Join(",", ijs));
                 XI.RaiseGMessage("G0IJ," + player.Uid + ",4," + n + "," + string.Join(",", ijs));
                 player.RAM.Set("Scared", true);
-                if (player.Weapon != 0 && !player.WeaponDisabled)
-                    XI.RaiseGMessage("G0ZL," + player.Uid + "," + player.Weapon);
-                player.SetWeaponDisabled("JNH1102", true);
+                Artiad.Procedure.SetPlayerAllEqDisable(XI, new Player[] { player }, 0x1, "JNH1102");
             }
             else if (type == 1)
             {
@@ -1937,9 +1935,7 @@ namespace PSD.PSDGamepkg.JNS
                     XI.RaiseGMessage("G0IT," + player.Uid + "," + ijs.Count + "," + string.Join(",", ijs));
                 }
                 player.RAM.Set("Scared", false);
-                player.SetWeaponDisabled("JNH1102", false);
-                if (player.Weapon != 0 && !player.WeaponDisabled)
-                    XI.RaiseGMessage("G0ZS," + player.Uid + "," + player.Weapon);
+                Artiad.Procedure.SetPlayerAllEqEnable(XI, new Player[] { player }, 0x1, "JNH1102");
             }
         }
         #endregion HL011 - ShuiGang
