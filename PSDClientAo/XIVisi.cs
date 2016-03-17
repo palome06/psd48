@@ -1650,18 +1650,20 @@ namespace PSD.ClientAo
                     break;
                 case "E0ZW":
                     {
-                        string result = "";
-                        for (int i = 1; i < args.Length; ++i)
+                        List<ushort> invs = Algo.TakeRange(args, 1, args.Length).Select(
+                            p => ushort.Parse(p)).ToList();
+                        if (invs.Count > 0)
                         {
-                            ushort py = ushort.Parse(args[i]);
-                            result += "," + zd.Player(py);
-                            A0P[py].IsAlive = false;
-                            A0P[py].HP = 0;
+                            invs.ForEach(p => { A0P[p].IsAlive = false; A0P[p].HP = 0; });
+                            VI.Cout(Uid, "{0}阵亡退场.", zd.Player(invs));
+                            invs.ForEach(p =>
+                            {
+                                string heroCode = Tuple.HL.InstanceHero(A0P[p].SelectHero).Ofcode;
+                                ad.yfSoundTracker.AV.Speak(heroCode + "-ZW");
+                            });
                         }
-                        if (result != "")
-                            VI.Cout(Uid, "{0}因阵亡退场.", result.Substring(1));
-                        break;
                     }
+                    break;
                 case "E0IY":
                     {
                         bool changed = (args[1] == "0");
@@ -1682,6 +1684,8 @@ namespace PSD.ClientAo
                             {
                                 A0P[who].ClearStatus();
                                 VI.Cout(Uid, "{1}加入到{0}#位置.", who, zd.Hero(hero));
+                                string heroCode = Tuple.HL.InstanceHero(A0P[who].SelectHero).Ofcode;
+                                ad.yfSoundTracker.AV.Speak(heroCode + "-IY");
                             }
                             A0P[who].UpdateExCardSpTitle();
                         }
@@ -2621,8 +2625,8 @@ namespace PSD.ClientAo
                     }
                     else if (args[1] == "3")
                     {
-                        ushort npc = ushort.Parse(args[2]);
-                        if (npc != 0)
+                        ushort npc = ushort.Parse(args[3]);
+                        if (args[2] == "0" && npc != 0) // New output of npc
                         {
                             VI.Cout(Uid, "额外翻出的NPC为【{0}】.", zd.Monster(npc));
                             A0O.FlyingGet("M" + npc, 0, 0, true);

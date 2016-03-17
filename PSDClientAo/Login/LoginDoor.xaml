@@ -128,7 +128,7 @@
                                         <RadioButton Content="高手场" Width="120" GroupName="LvGroup" x:Name="Lv2Radio"
                                                      ToolTip="使用标准版、资料篇一《凤鸣玉誓》、同人资料篇二《三世轮回》，同人资料篇三《云来奇缘》成熟的版本游戏。"/>
                                         <RadioButton Content="至尊场" Width="120" GroupName="LvGroup" x:Name="Lv3Radio"
-                                                     ToolTip="使用标准版、资料篇一～三，以及资料篇四《含笑九泉》、番外资料篇《宿命篇》、SP、EX中部分内容游戏（不含手牌）。享受至尊全扩的尊贵。"/>
+                                                     ToolTip="使用标准版、资料篇一～四（《含笑九泉》），番外资料篇《宿命篇》。享受至尊全扩的尊贵。"/>
                                         <RadioButton Content="界限突破场" Width="120" GroupName="LvGroup" IsEnabled="False" x:Name="Lv5Radio"
                                                      ToolTip="对标准版与资料篇一《凤鸣玉誓》进行尝试调整，以及加入少许官方先行角色的测试包。"/>
                                     </WrapPanel>
@@ -164,8 +164,8 @@
                                         <TextBox Width="140" x:Name="LvRingText" ToolTip="于此处输入特训角色开牌编号，以逗号隔开（如遥月党专属XJ101,XJ104），不要太贪加入太多哦～"/>
                                         <Grid Width="20"/>
                                         <CheckBox x:Name="LvTryTuxCheckBox" VerticalAlignment="Center" IsEnabled="False">
-                                            <CheckBox.ToolTip>不成比例加入部分资料篇四《含笑九泉》、番外资料篇《宿命篇》的手牌。成为吃螃蟹的勇士吧！</CheckBox.ToolTip>
-                                            新手牌体验
+                                            <CheckBox.ToolTip>挑战不可能！加入未充分测试的SP和EX卡牌。成为吃螃蟹的勇士吧！</CheckBox.ToolTip>
+                                            加入SP,EX
                                         </CheckBox>
                                     </StackPanel>
                                 </StackPanel>

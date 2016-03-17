@@ -92,6 +92,12 @@ namespace PSD.PSDGamepkg.Artiad
             Player py = xi.Board.Garden.Values.SingleOrDefault(p => p.TokenExcl.Contains("I" + exsp));
             return py != null ? py.Uid : (ushort)0;
         }
+        public static ushort GetEquipmentOwnership(string equipCode, XI xi)
+        {
+            ushort ut = (xi.LibTuple.TL.EncodeTuxCode(equipCode) as TuxEqiup).SingleEntry;
+            Player py = xi.Board.Garden.Values.SingleOrDefault(p => p.ListOutAllEquips().Contains(ut));
+            return py != null ? py.Uid : (ushort)0;
+        }
 
         #region Sparse Base Rules
 

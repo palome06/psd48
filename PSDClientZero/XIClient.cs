@@ -2317,8 +2317,8 @@ namespace PSD.ClientZero
                     }
                     else if (args[1] == "3")
                     {
-                        ushort npc = ushort.Parse(args[2]);
-                        if (npc != 0)
+                        ushort npc = ushort.Parse(args[3]);
+                        if (args[2] == "0" && npc != 0)
                             VI.Cout(Uid, "翻出的NPC牌为【{0}】.", zd.Monster(npc));
                         // Z0F.Wang = npc;
                     }

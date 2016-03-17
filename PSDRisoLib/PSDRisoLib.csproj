@@ -80,112 +80,208 @@
     <None Include="Resources\Voice\fmxy.ogg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Resources\Voice\TR-H\JNT2901-1.ogg">
+    <None Include="Resources\Voice\Pkg6-JN\JNT2901-1.ogg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Resources\Voice\TR-H\JNT2901-2.ogg">
+    <None Include="Resources\Voice\Pkg6-JN\JNT2901-2.ogg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Resources\Voice\TR-H\JNT2902-1.ogg">
+    <None Include="Resources\Voice\Pkg6-JN\JNT2902-1.ogg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Resources\Voice\TR-H\JNT2902-2.ogg">
+    <None Include="Resources\Voice\Pkg6-JN\JNT2902-2.ogg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Resources\Voice\TR-H\JNT3401-1.ogg">
+    <None Include="Resources\Voice\Pkg6-JN\JNT3401-1.ogg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Resources\Voice\TR-H\JNT3401-2.ogg">
+    <None Include="Resources\Voice\Pkg6-JN\JNT3401-2.ogg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Resources\Voice\TR-H\JNT3402-1.ogg">
+    <None Include="Resources\Voice\Pkg6-JN\JNT3402-1.ogg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Resources\Voice\TR-H\JNT3402-2.ogg">
+    <None Include="Resources\Voice\Pkg6-JN\JNT3402-2.ogg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Resources\Voice\TR-H\JNT3403-1.ogg">
+    <None Include="Resources\Voice\Pkg6-JN\JNT3403-1.ogg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Resources\Voice\TR-H\JNT3403-2.ogg">
+    <None Include="Resources\Voice\Pkg6-JN\JNT3403-2.ogg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Resources\Voice\TR-H\JNT3601-1.ogg">
+    <None Include="Resources\Voice\Pkg6-JN\JNT3501-1.ogg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Resources\Voice\TR-H\JNT3601-2.ogg">
+    <None Include="Resources\Voice\Pkg6-JN\JNT3501-2.ogg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Resources\Voice\TR-H\JNT3602-1.ogg">
+    <None Include="Resources\Voice\Pkg6-JN\JNT3501-3.ogg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Resources\Voice\TR-H\JNT3602-2.ogg">
+    <None Include="Resources\Voice\Pkg6-JN\JNT3501-4.ogg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Resources\Voice\TR-H\JNT3602-3.ogg">
+    <None Include="Resources\Voice\Pkg6-JN\JNT3502-1.ogg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Resources\Voice\TR-H\JNT3602-4.ogg">
+    <None Include="Resources\Voice\Pkg6-JN\JNT3502-2.ogg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Resources\Voice\TR-H\JNT3701-1.ogg">
+    <None Include="Resources\Voice\Pkg6-JN\JNT3601-1.ogg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Resources\Voice\TR-H\JNT3701-2.ogg">
+    <None Include="Resources\Voice\Pkg6-JN\JNT3601-2.ogg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Resources\Voice\TR-H\JNT3702-1.ogg">
+    <None Include="Resources\Voice\Pkg6-JN\JNT3602-1.ogg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Resources\Voice\TR-H\JNT3702-2.ogg">
+    <None Include="Resources\Voice\Pkg6-JN\JNT3602-2.ogg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Resources\Voice\TR-H\JNT3703-1.ogg">
+    <None Include="Resources\Voice\Pkg6-JN\JNT3602-3.ogg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Resources\Voice\TR-H\JNT3703-2.ogg">
+    <None Include="Resources\Voice\Pkg6-JN\JNT3602-4.ogg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Resources\Voice\TR-H\JNT4101-1.ogg">
+    <None Include="Resources\Voice\Pkg6-JN\JNT3701-1.ogg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Resources\Voice\TR-H\JNT4101-2.ogg">
+    <None Include="Resources\Voice\Pkg6-JN\JNT3701-2.ogg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Resources\Voice\TR-H\JNT4102-1.ogg">
+    <None Include="Resources\Voice\Pkg6-JN\JNT3702-1.ogg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Resources\Voice\TR-H\JNT4102-2.ogg">
+    <None Include="Resources\Voice\Pkg6-JN\JNT3702-2.ogg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Resources\Voice\TR-H\JNT4201-1.ogg">
+    <None Include="Resources\Voice\Pkg6-JN\JNT3703-1.ogg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Resources\Voice\TR-H\JNT4201-2.ogg">
+    <None Include="Resources\Voice\Pkg6-JN\JNT3703-2.ogg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Resources\Voice\TR-H\JNT4201-3.ogg">
+    <None Include="Resources\Voice\Pkg6-JN\JNT4001-1.ogg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Resources\Voice\TR-H\JNT4201-4.ogg">
+    <None Include="Resources\Voice\Pkg6-JN\JNT4001-2.ogg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Resources\Voice\TR-H\JNT4202-1.ogg">
+    <None Include="Resources\Voice\Pkg6-JN\JNT4002-1.ogg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Resources\Voice\TR-H\JNT4202-2.ogg">
+    <None Include="Resources\Voice\Pkg6-JN\JNT4002-2.ogg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Resources\Voice\TR-H\JNT4301-1.ogg">
+    <None Include="Resources\Voice\Pkg6-JN\JNT4002-3.ogg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Resources\Voice\TR-H\JNT4301-2.ogg">
+    <None Include="Resources\Voice\Pkg6-JN\JNT4002-4.ogg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Resources\Voice\TR-H\JNT4302-1.ogg">
+    <None Include="Resources\Voice\Pkg6-JN\JNT4003-1.ogg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Resources\Voice\TR-H\JNT4302-2.ogg">
+    <None Include="Resources\Voice\Pkg6-JN\JNT4003-2.ogg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\Voice\Pkg6-JN\JNT4101-1.ogg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\Voice\Pkg6-JN\JNT4101-2.ogg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\Voice\Pkg6-JN\JNT4102-1.ogg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\Voice\Pkg6-JN\JNT4102-2.ogg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\Voice\Pkg6-JN\JNT4201-1.ogg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\Voice\Pkg6-JN\JNT4201-2.ogg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\Voice\Pkg6-JN\JNT4201-3.ogg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\Voice\Pkg6-JN\JNT4201-4.ogg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\Voice\Pkg6-JN\JNT4202-1.ogg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\Voice\Pkg6-JN\JNT4202-2.ogg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\Voice\Pkg6-JN\JNT4301-1.ogg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\Voice\Pkg6-JN\JNT4301-2.ogg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\Voice\Pkg6-JN\JNT4302-1.ogg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\Voice\Pkg6-JN\JNT4302-2.ogg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\Voice\Pkg6-ZY\TR029-IY.ogg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\Voice\Pkg6-ZY\TR029-ZW.ogg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\Voice\Pkg6-ZY\TR034-IY.ogg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\Voice\Pkg6-ZY\TR034-ZW.ogg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\Voice\Pkg6-ZY\TR035-IY.ogg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\Voice\Pkg6-ZY\TR035-ZW.ogg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\Voice\Pkg6-ZY\TR036-IY.ogg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\Voice\Pkg6-ZY\TR036-ZW.ogg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\Voice\Pkg6-ZY\TR037-IY.ogg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\Voice\Pkg6-ZY\TR037-ZW.ogg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\Voice\Pkg6-ZY\TR040-IY.ogg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\Voice\Pkg6-ZY\TR040-ZW.ogg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\Voice\Pkg6-ZY\TR041-IY.ogg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\Voice\Pkg6-ZY\TR041-ZW.ogg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\Voice\Pkg6-ZY\TR042-IY.ogg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\Voice\Pkg6-ZY\TR042-ZW.ogg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\Voice\Pkg6-ZY\TR043-IY.ogg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\Voice\Pkg6-ZY\TR043-ZW.ogg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
@@ -510,7 +606,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Resources\Avatar\" />
-    <Folder Include="Resources\Voice\Pkg6H\" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Card\Heros\TR001.png" />

@@ -956,10 +956,11 @@
     <Image x:Key="bufferIconSF05" Source="Buffer/SF05.png" ToolTip="脱力"/>
     <Image x:Key="bufferIconSF06" Source="Buffer/SF06.png" ToolTip="虚弱"/>
     <Image x:Key="bufferIconSF07" Source="Buffer/SF07.png" ToolTip="神算"/>
-    <Image x:Key="bufferIconSF08" Source="Buffer/SF08.png" ToolTip="水屏"/>
+    <Image x:Key="bufferIconSF08" Source="Buffer/SF08.png" ToolTip="狂暴"/>
     <Image x:Key="bufferIconSF09" Source="Buffer/SF09.png"/>
     <Image x:Key="bufferIconSF10" Source="Buffer/SF10.png"/>
     <Image x:Key="bufferIconSF11" Source="Buffer/SF11.png"/>
+    <Image x:Key="bufferIconSF12" Source="Buffer/SF12.png"/>
 
     <Image x:Key="runeCard1" Source="Card/RuneCard/SF01.png"/>
     <Image x:Key="runeCard2" Source="Card/RuneCard/SF02.png"/>

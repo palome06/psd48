@@ -81,8 +81,8 @@ namespace PSD.Base
         public ushort Monster2 { set; get; }
         public ushort Mon1From { set; get; }
         //public bool IsTangled { set; get; }
-        public ushort Wang { set; get; } // NPC card in ex-NPC actions, cover the Monster1 here
-        // TODO: Possible set as a stack to handle with mulit-NPC actions
+        // NPC card in ex-NPC actions, cover the Monster1 here
+        public Stack<ushort> Wang { private set; get; }
         // Battler servers as a snapshot of Monster1, nothing to with the card
         public NMB Battler { set; get; }
         public ushort Eve { get; set; }
@@ -286,6 +286,7 @@ namespace PSD.Base
             Player.PlayerCompare pc = new Player.PlayerCompare();
             RDrums = new Dictionary<Player, bool>(pc);
             ODrums = new Dictionary<Player, bool>(pc);
+            Wang = new Stack<ushort>();
         }
 
         private Player mRounder, mHinder, mSupporter;
@@ -365,7 +366,8 @@ namespace PSD.Base
             h09p.Append("," + Algo.ListToString(RDrums.Select(p => p.Key.Uid + "," +
                 (p.Value || !PoolEnabled ? 1 : 0)).Concat(ODrums.Select(p =>
                 p.Key.Uid + "," + (p.Value || !PoolEnabled ? 1 : 0))).ToList()));
-            h09p.Append("," + Wang + "," + Monster1 + "," + Monster2 + "," + Eve);
+            ushort wang = Wang.Count != 0 ? Wang.Peek() : (ushort)0;
+            h09p.Append("," + wang + "," + Monster1 + "," + Monster2 + "," + Eve);
             if (PoolEnabled)
                 h09p.Append("," + Rounder.Team + "," + CalculateRPool() + "," +
                     Rounder.OppTeam + "," + CalculateOPool());

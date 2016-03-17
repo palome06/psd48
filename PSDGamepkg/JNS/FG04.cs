@@ -3390,7 +3390,6 @@ namespace PSD.PSDGamepkg.JNS
         }
         public void GTH2Debut()
         {
-            Player[] players = { XI.Board.Supporter, XI.Board.Hinder };
             List<Artiad.CoachingSignUnit> csus = new List<Artiad.CoachingSignUnit>();
             ushort s = XI.Board.Supporter.Uid, h = XI.Board.Hinder.Uid;
             if (s != 0)

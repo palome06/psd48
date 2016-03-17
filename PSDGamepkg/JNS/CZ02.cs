@@ -182,8 +182,8 @@ namespace PSD.PSDGamepkg.JNS
         {
             string[] parts = argst.Split(',');
             ushort trove = ushort.Parse(parts[0]);
-            ushort callUt = ushort.Parse(parts[1]);
-            ushort asDbSerial = ushort.Parse(parts[2]);
+            ushort asDbSerial = ushort.Parse(parts[1]);
+            ushort callUt = ushort.Parse(parts[2]);
 
             XI.RaiseGMessage("G0QZ," + player.Uid + "," + callUt);
             XI.RaiseGMessage("G2UL," + player.Uid + "," + trove + "," + asDbSerial);
@@ -228,8 +228,8 @@ namespace PSD.PSDGamepkg.JNS
                         continue;
                     invs.Add(tue.DBSerial);
                 }
-                return "#幻化弃置,/Q1(p" + string.Join("p", player.Tux) +
-                    "),#幻化,/G1(p" + string.Join("p", invs) + ")";
+                return "#幻化,/G1(p" + string.Join("p", invs) + 
+                    "),#幻化弃置,/Q1(p" + string.Join("p", player.Tux) + ")";
             }
             else return "";
         }

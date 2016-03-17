@@ -1,4 +1,4 @@
-﻿using PSD.Base;
+using PSD.Base;
 using PSD.Base.Card;
 using System;
 using System.Collections.Generic;
@@ -1193,27 +1193,30 @@ namespace PSD.PSDGamepkg.JNS
         }
         public void JPT5Action(Player player, int type, string fuse, string argst)
         {
-            ushort to = ushort.Parse(XI.AsyncInput(player.Uid, "#【还魂香】作用,T1" + AAllTareds(player), "JPT5", "0"));
-
+            string jpt5Name = XI.LibTuple.TL.EncodeTuxCode("JPT5").Name;
+            ushort to = ushort.Parse(XI.AsyncInput(player.Uid,
+                "#【" + jpt5Name + "】作用,T1" + AAllTareds(player), "JPT5", "0"));
             ushort pop = XI.Board.RestNPCPiles.Dequeue();
             NPC npc = XI.LibTuple.NL.Decode(NMBLib.OriginalNPC(pop));
-            XI.RaiseGMessage("G0YM,3," + pop);
+            XI.RaiseGMessage("G0YM,3,0," + pop);
             XI.RaiseGMessage("G1NI," + to + "," + pop);
-            XI.Board.Wang = pop;
-            UEchoCode r5ed = XI.HandleWithNPCEffect(XI.Board.Garden[to], npc, false);
+            XI.Board.Wang.Push(pop);
+            UEchoCode r5ed = XI.HandleWithNPCEffect(XI.Board.Garden[to], npc, "JPT5");
             if (r5ed == UEchoCode.NO_OPTIONS)
                 XI.AsyncInput(to, "//", "JPT5", "1");
             else if (r5ed == UEchoCode.END_ACTION)
                 XI.RaiseGMessage("G1YP," + player.Uid + "," + pop);
-            
-            if (XI.Board.Wang != 0) // In case the NPC has been taken away
+
+            if (XI.Board.Wang.Count > 0 && XI.Board.Wang.Peek() == pop)
             {
-                XI.Board.Wang = 0;
+                XI.Board.Wang.Pop();
                 XI.RaiseGMessage("G0ON,0,M,1," + pop);
             }
             // XI.Board.RestNPCDises.Add(pop);
-            XI.RaiseGMessage("G0YM,3,0");
-            //}
+            if (XI.Board.Wang.Count > 0)
+                XI.RaiseGMessage("G0YM,3,1," + XI.Board.Wang.Pop());
+            else
+                XI.RaiseGMessage("G0YM,3,1,0");
         }
         public void ZPT2Action(Player player, int type, string fuse, string argst)
         {
@@ -1990,8 +1993,8 @@ namespace PSD.PSDGamepkg.JNS
         {
             if (type == 0)
             {
-                return XI.Board.Garden.Values.Any(p => p.IsTared && p.Team == player.Team && p.Runes.Count > 0) &&
-                    XI.Board.Garden.Values.Any(p => p.IsTared && p.Team == player.OppTeam && p.Runes.Count > 0);
+                return XI.Board.Garden.Values.Any(p => p.IsTared && p.Team == player.Team) &&
+                    XI.Board.Garden.Values.Any(p => p.IsTared && p.Team == player.OppTeam);
             }
             else if (type == 1)
             {
@@ -2006,32 +2009,35 @@ namespace PSD.PSDGamepkg.JNS
         {
             if (type == 0)
             {
-                string person = XI.AsyncInput(player.Uid, "#弃置我方,T1" + FormatPlayers(p =>
-                    p.IsTared && p.Team == player.Team && p.Runes.Count > 0) + ",#弃置对方,T1" + FormatPlayers(p =>
-                    p.IsTared && p.Team == player.OppTeam && p.Runes.Count > 0), "TPT4", "0");
-                if (!string.IsNullOrEmpty(person) && !person.StartsWith("/"))
+                List<string> results = new List<string>();
+                int[] teams = new int[] { player.Team, player.OppTeam };
+                string[] teamName = new string[] { "#弃置我方", "#弃置对方" };
+                for (int i = 0; i < 2; ++i)
                 {
-                    int idx = person.IndexOf(',');
-                    ushort ur = ushort.Parse(person.Substring(0, idx));
-                    ushort uo = ushort.Parse(person.Substring(idx + 1));
-                    string target = XI.AsyncInput(player.Uid, "#弃置我方,F1(p" + string.Join("p", XI.Board.Garden[ur].Runes) +
-                        "),#弃置对方,F1(p" + string.Join("p", XI.Board.Garden[uo].Runes) + ")", "TPT4", "1");
-                    if (!string.IsNullOrEmpty(target) && !target.StartsWith("/"))
+                    List<ushort> pys = XI.Board.Garden.Values.Where(p => p.IsTared &&
+                        p.Team == teams[i] && p.Runes.Count > 0).Select(p => p.Uid).ToList();
+                    if (pys.Count > 0)
                     {
-                        int jdx = target.IndexOf(',');
-                        ushort tr = ushort.Parse(target.Substring(0, jdx));
-                        ushort to = ushort.Parse(target.Substring(jdx + 1));
-                        XI.RaiseGMessage("G0OF," + ur + "," + tr);
-                        XI.RaiseGMessage("G0OF," + uo + "," + to);
+                        string person = XI.AsyncInput(player.Uid, teamName[i] + ",/T1(p" +
+                            string.Join("p", pys) + ")", "TPT4", "0");
+                        if (!string.IsNullOrEmpty(person) && !person.StartsWith("/"))
+                        {
+                            ushort usr = ushort.Parse(person);
+                            string target = XI.AsyncInput(usr, teamName[i] + ",F1(p" +
+                                string.Join("p", XI.Board.Garden[usr]) + ")", "TPT4", "1");
+                            results.Add(usr + "," + target);
+                        }
                     }
                 }
+                results.ForEach(p => XI.RaiseGMessage("G0OF," + p));
             }
             else if (type == 1)
             {
                 List<Artiad.Harm> harms = Artiad.Harm.Parse(fuse);
                 List<ushort> targets = harms.Where(p => XI.Board.Garden[p.Who].IsTared &&
                     XI.Board.Garden[p.Who].HP <= p.N).Select(p => p.Who).Distinct().ToList();
-                string result = XI.AsyncInput(player.Uid, "#回复,T1(p" + string.Join("p", targets) + ")", "TPT4", "2");
+                string result = XI.AsyncInput(player.Uid, "#回复,T1(p" +
+                    string.Join("p", targets) + ")", "TPT4", "2");
                 if (!string.IsNullOrEmpty(result) && !result.StartsWith("/"))
                 {
                     ushort who = ushort.Parse(result);
@@ -2188,9 +2194,16 @@ namespace PSD.PSDGamepkg.JNS
                 Illusion xbt6 = XI.LibTuple.TL.EncodeTuxCode("XBT6") as Illusion;
                 if (type == 0)
                 {
-                    return false; // TODO: start new Tux Trail here
+                    return XI.Board.RestNPCPiles.Count > 0 && Artiad.Harm.Parse(fuse).Any(p => p.N > 0 &&
+                        p.Who != player.Uid && XI.Board.Garden[p.Who].Team == player.Team);
                 }
-                else if (type == 1 && xbt6.ILAS != null)
+                else if (type == 1)
+                {
+                    string[] g0zw = fuse.Split(',');
+                    return Algo.TakeRange(g0zw, 1, g0zw.Length).Any(p =>
+                        XI.Board.Garden[ushort.Parse(p)].IsAlive);
+                }
+                else if (type == 2 && xbt6.ILAS != null)
                     return true;
                 else
                     return false;
@@ -2213,10 +2226,30 @@ namespace PSD.PSDGamepkg.JNS
         {
             if (consumeType == 0)
             {
-                if (type == 0)
+                if (type == 0 || type == 1)
                 {
+                    ushort pop = XI.Board.RestNPCPiles.Dequeue();
+                    NPC npc = XI.LibTuple.NL.Decode(NMBLib.OriginalNPC(pop));
+                    XI.RaiseGMessage("G0YM,3,0," + pop);
+                    XI.RaiseGMessage("G1NI," + player.Uid + "," + pop);
+                    XI.Board.Wang.Push(pop);
+                    UEchoCode r5ed = XI.HandleWithNPCEffect(player, npc, "XBT6");
+                    if (r5ed == UEchoCode.NO_OPTIONS)
+                        XI.AsyncInput(player.Uid, "//", "XBT6ConsumeAction", "0");
+                    if (r5ed == UEchoCode.END_ACTION)
+                        XI.RaiseGMessage("G1YP," + player.Uid + "," + pop);
+
+                    if (XI.Board.Wang.Count > 0 && XI.Board.Wang.Peek() == pop)
+                    { // In case the NPC has been taken away
+                        XI.Board.Wang.Pop();
+                        XI.RaiseGMessage("G0ON,0,M,1," + pop);
+                    }
+                    if (XI.Board.Wang.Count > 0)
+                        XI.RaiseGMessage("G0YM,3,1," + XI.Board.Wang.Pop());
+                    else
+                        XI.RaiseGMessage("G0YM,3,1,0"); // actual just remove one Wang, it should show the rests
                 }
-                else if (type == 1)
+                else if (type == 2)
                     GeneralDecrIllusion(player, "XBT6");
             }
             else if (consumeType == 1)
@@ -2280,7 +2313,8 @@ namespace PSD.PSDGamepkg.JNS
             }
             else if (consumeType == 1)
             {
-                if (type == 0)
+                Illusion xbt7 = XI.LibTuple.TL.EncodeTuxCode("XBT7") as Illusion;
+                if (type == 0 && xbt7.ILAS == "FJ05" && !user.ArmorDisabled)
                 {
                     TuxEqiup fj05 = XI.LibTuple.TL.EncodeTuxCode("FJ05") as TuxEqiup;
                     return fj05.ConsumeValid(user, 1, 0, fuse);
@@ -2439,7 +2473,7 @@ namespace PSD.PSDGamepkg.JNS
         public void JPH3Action(Player player, int type, string fuse, string argst)
         {
             string whoStr = XI.AsyncInput(player.Uid, "V1(p" + string.Join("p", FiveElementHelper.GetPropedElements()
-                .Select(p => p.Elem2Int())) + "),#请选择【七光御阵】执行项##造成伤害##回复补牌,Y2", "JPH3", "0");
+                .Select(p => p.Elem2Int())) + "),#请选择【七光御阵】执行项##伤害弃牌##回复补牌,Y2", "JPH3", "0");
             int idx = whoStr.IndexOf(',');
             FiveElement five = FiveElementHelper.Int2Elem(int.Parse(whoStr.Substring(0, idx)));
             int elemIdx = five.Elem2Index();
@@ -2819,7 +2853,7 @@ namespace PSD.PSDGamepkg.JNS
            if (type == 0)
            {
                string whoStr = XI.AsyncInput(player.Uid, "#获得标记的,T1" + FormatPlayers(p => p.IsTared) +
-                    ",F1(p" + string.Join("p", XI.LibTuple.RL.GetFullAppendableList()) + ")", "TPR1Action", "0");
+                    ",F1(p" + string.Join("p", XI.LibTuple.RL.GetFullPositive()) + ")", "TPR1Action", "0");
                XI.RaiseGMessage("G0IF," + whoStr);
            }
            else if (type == 1)

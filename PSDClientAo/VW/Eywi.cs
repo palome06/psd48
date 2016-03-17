@@ -711,6 +711,18 @@ namespace PSD.ClientAo.VW
                     line = string.Join(",", e0zc);
                 }
             }
+            if (Version <= 156)
+            {
+                if (line.StartsWith("E0YM"))
+                {
+                    string[] e0ym = line.Split(',');
+                    if (e0ym[1] == "3")
+                    {
+                        e0ym[2] = "0," + e0ym[2];
+                        line = string.Join(",", e0ym);
+                    }
+                }
+            }
         }
         #endregion Version
     }

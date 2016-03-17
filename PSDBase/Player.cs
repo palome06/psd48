@@ -82,6 +82,9 @@ namespace PSD.Base
         private IDictionary<string, int> cardDisabled;
 
         public bool IsAlive { set; get; }
+        // indicate whether a player is in processing of leaving
+        // it might be interrupted by another join
+        public bool Nineteen { set; get; }
         // whether can become target for special Targets or Tuxes
         private bool mIsTared;
         public bool IsTared
@@ -208,6 +211,7 @@ namespace PSD.Base
             PetDisabled = false;
             ZPDisabled = false;
             IsAlive = false;
+            Nineteen = false;
             Loved = false;
             DrTuxDisabled = false;
 
@@ -318,6 +322,7 @@ namespace PSD.Base
             if (reset)
             {
                 IsAlive = true;
+                Nineteen = false;
                 IsTared = true;
                 PetDisabled = false;
                 Immobilized = false;

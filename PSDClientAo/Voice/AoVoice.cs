@@ -37,6 +37,10 @@ namespace PSD.ClientAo.Voice
             currentActiveVoiceEntry = new List<VoiceEntry>();
         }
 
+        public void Speak(string name)
+        {
+            voiceQueue.Add(name);
+        }
         public void Speak(string name, int type)
         {
             string entry = name + "_" + type;

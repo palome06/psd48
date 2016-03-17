@@ -354,6 +354,7 @@ namespace PSD.ClientAo.Login
                 LvTryTuxCheckBox.IsEnabled = false;
                 if (PkgMode == 5 && LvTryTuxCheckBox.IsChecked == true) { PkgMode = 4; }
             };
+            //Lv3Radio.Checked += (s, r) => PkgMode = 4;
             Lv5Radio.Checked += (s, r) => PkgMode = 6;
         }
         //private int GetPkgCode()
@@ -570,6 +571,8 @@ namespace PSD.ClientAo.Login
                                 case 3: Lv2Radio.IsChecked = true; break;
                                 case 4: Lv3Radio.IsChecked = true; LvTryTuxCheckBox.IsChecked = false; break;
                                 case 5: Lv3Radio.IsChecked = true; LvTryTuxCheckBox.IsChecked = true; break;
+                                //case 4:
+                                //case 5: Lv3Radio.IsChecked = true; break;
                                 case 6: if (Lv5Radio.IsEnabled) Lv5Radio.IsChecked = true; break;
                             }
                         }

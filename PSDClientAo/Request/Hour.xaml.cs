@@ -175,23 +175,61 @@ namespace PSD.ClientAo.Request
 
             IDictionary<int, WrapPanel> iCardDict = new Dictionary<int, WrapPanel>();
 
-            GroupBox gbOfRune = new GroupBox()
+            GroupBox gbOfRune1 = new GroupBox()
             {
                 Header = new TextBlock()
                 {
                     FontSize = 24,
                     FontFamily = new FontFamily("Lisu"),
-                    Text = "标准标记"
+                    Text = "普通增益标记"
                 }
             };
-            WrapPanel wpOfRune = new WrapPanel();
-            gbOfRune.Content = wpOfRune;
-            iCardStackPanel.Children.Add(gbOfRune);
-            foreach (Base.Rune rune in lg.RL.Firsts)
+            WrapPanel wpOfRune1 = new WrapPanel();
+            gbOfRune1.Content = wpOfRune1;
+            iCardStackPanel.Children.Add(gbOfRune1);
+            foreach (ushort rf in lg.RL.GetFullPositive())
             {
+                Base.Rune rune = lg.RL.Decode(rf);
                 ushort rnCode = lg.RL.GetSingleIndex(rune);
-                AddContent("R" + rnCode, 0, wpOfRune, false);
+                AddContent("R" + rnCode, 0, wpOfRune1, false);
             }
+            GroupBox gbOfRune2 = new GroupBox()
+            {
+                Header = new TextBlock()
+                {
+                    FontSize = 24,
+                    FontFamily = new FontFamily("Lisu"),
+                    Text = "普通负面标记"
+                }
+            };
+            WrapPanel wpOfRune2 = new WrapPanel();
+            gbOfRune2.Content = wpOfRune2;
+            iCardStackPanel.Children.Add(gbOfRune2);
+            foreach (ushort rf in lg.RL.GetFullNegative())
+            {
+                Base.Rune rune = lg.RL.Decode(rf);
+                ushort rnCode = lg.RL.GetSingleIndex(rune);
+                AddContent("R" + rnCode, 0, wpOfRune2, false);
+            }
+            GroupBox gbOfRune3 = new GroupBox()
+            {
+                Header = new TextBlock()
+                {
+                    FontSize = 24,
+                    FontFamily = new FontFamily("Lisu"),
+                    Text = "高阶标记"
+                }
+            };
+            WrapPanel wpOfRune3 = new WrapPanel();
+            gbOfRune3.Content = wpOfRune3;
+            iCardStackPanel.Children.Add(gbOfRune3);
+            foreach (ushort rf in lg.RL.GetFullAdvanced())
+            {
+                Base.Rune rune = lg.RL.Decode(rf);
+                ushort rnCode = lg.RL.GetSingleIndex(rune);
+                AddContent("R" + rnCode, 0, wpOfRune3, false);
+            }
+
             foreach (Exsp exsp in lg.ESL.Firsts.Where(p => p.Type == 3))
             {
                 string[] codes = exsp.Code.Split(',');

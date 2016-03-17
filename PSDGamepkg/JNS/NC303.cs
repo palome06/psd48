@@ -73,7 +73,7 @@ namespace PSD.PSDGamepkg.JNS
             Player tp = XI.Board.Garden[to];
 
             string npcCode = fuse.Substring(0, fuse.IndexOf(';'));
-            fuse = fuse.Substring(fuse.IndexOf(';') + 1);
+            string reason = fuse.Substring(fuse.IndexOf(';') + 1);
 
             NPC npc = XI.LibTuple.NL.Decode(XI.LibTuple.NL.Encode(npcCode));
             int tuxCount = wp.Tux.Count;
@@ -82,8 +82,17 @@ namespace PSD.PSDGamepkg.JNS
                 XI.RaiseGMessage("G0OY,0," + to);
 
             int hp = 2 * tuxCount;
-            if (fuse != "R" + XI.Board.Rounder.Uid + "NP" && hp > 3)
+            if ((reason.StartsWith("JP") || reason.StartsWith("EV")) && hp > 3)
                 hp = 3;
+            else if (reason.StartsWith("XBT6"))
+            {
+                ushort xbt6Owner = Artiad.ContentRule.GetEquipmentOwnership("XBT6", XI);
+                if (xbt6Owner != 0)
+                {
+                    ushort xbt6 = (XI.LibTuple.TL.EncodeTuxCode("XBT6") as TuxEqiup).SingleEntry;
+                    XI.RaiseGMessage("G0ZI," + xbt6Owner + "," + xbt6);
+                }
+            }
             XI.RaiseGMessage("G0IY,2," + to + "," + npc.Hero + "," + hp);
         }
         public string NJ01Input(Player player, string fuse, string prev)
@@ -102,8 +111,6 @@ namespace PSD.PSDGamepkg.JNS
         public bool NJ01Valid(Player player, string fuse)
         {
             string npcCode = fuse.Substring(0, fuse.IndexOf(';'));
-            fuse = fuse.Substring(fuse.IndexOf(';') + 1);
-
             NPC npc = XI.LibTuple.NL.Decode(XI.LibTuple.NL.Encode(npcCode));
             bool anyFriends = XI.Board.Garden.Values.Where(p => p.IsAlive
                 && p.Team == player.Team && p.Tux.Count > 0).Any();
@@ -619,7 +626,6 @@ namespace PSD.PSDGamepkg.JNS
         public void DefaultPutIntoEscueAction(Player player, string fuse, Player target)
         {
             string npcCode = fuse.Substring(0, fuse.IndexOf(';'));
-            fuse = fuse.Substring(fuse.IndexOf(';') + 1);
             ushort ut = NMBLib.CodeOfNPC(XI.LibTuple.NL.Encode(npcCode));
 
             if (!target.Escue.Contains(ut))

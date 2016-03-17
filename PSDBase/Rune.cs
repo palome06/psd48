@@ -123,5 +123,9 @@ namespace PSD.Base
         {
             return new ushort[] { 5, 6 };
         }
+        public ushort[] GetFullAdvanced()
+        {
+            return new ushort[] { 7, 8 };
+        }
     }
 }

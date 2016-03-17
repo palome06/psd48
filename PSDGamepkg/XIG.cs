@@ -94,29 +94,27 @@ namespace PSD.PSDGamepkg
                 if (locks.Count > 0)
                 {
                     locks.Sort(LockSkillCompare);
-                    while (!isTermini && locks.Count > 0)
-                    {
-                        string msg = locks.First();
-                        int idx = msg.IndexOf(',');
-                        ushort me = ushort.Parse(msg.Substring(0, idx));
-                        int jdx = msg.LastIndexOf(';');
-                        string mai = Algo.Substring(msg, idx + 1, jdx);
-                        //string inType = Algo.Substring(msg, jdx + 1, -1);
+                    string msg = locks.First();
+                    int idx = msg.IndexOf(',');
+                    ushort me = ushort.Parse(msg.Substring(0, idx));
+                    int jdx = msg.LastIndexOf(';');
+                    string mai = Algo.Substring(msg, idx + 1, jdx);
+                    //string inType = Algo.Substring(msg, jdx + 1, -1);
 
-                        string skName;
-                        mai = DecodeSimplifiedCommand(mai, out skName);
-                        SKE ske = SKE.Find(skName, me, purse);
-                        if (ske != null)
-                        {
-                            UEchoCode echo = HandleU24Message(me, involved, mai, ske);
-                            if (echo == UEchoCode.END_TERMIN)
-                                isTermini = true;
-                            else if (echo == UEchoCode.END_ACTION)
-                                isAnySet = true;
-                        }
-                        RaiseGMessage("G2AS,0");
-                        locks.RemoveAt(0);
+                    string skName;
+                    mai = DecodeSimplifiedCommand(mai, out skName);
+                    SKE ske = SKE.Find(skName, me, purse);
+                    if (ske != null)
+                    {
+                        UEchoCode echo = HandleU24Message(me, involved, mai, ske);
+                        if (echo == UEchoCode.END_TERMIN)
+                            isTermini = true;
+                        else if (echo == UEchoCode.END_ACTION)
+                            isAnySet = true;
                     }
+                    RaiseGMessage("G2AS,0");
+                    // locks.RemoveAt(0);
+                    continue;
                 }
                 if (Board.Garden.Keys.Where(p => involved[p]).Any() && !isTermini)
                 {
@@ -163,56 +161,68 @@ namespace PSD.PSDGamepkg
                         Artiad.Procedure.ArticuloMortis(this, WI, true);
                     break;
                 case "G0ZW":
-                    if (priority == 100)
+                    if (priority == 0)
                     {
                         WI.BCast("E0ZW," + cmdrst);
+                        List<Player> invs = Algo.TakeRange(args, 1, args.Length).Select(
+                            p => Board.Garden[ushort.Parse(p)]).Where(p => p.IsAlive).ToList();
+                        invs.ForEach(p => p.Nineteen = true);
+                    }
+                    else if (priority == 100)
+                    {
                         int teamMe = 0, teamOp = 0;
-                        for (int i = 1; i < args.Length; ++i)
+                        List<Player> players = Algo.TakeRange(args, 1, args.Length)
+                            .Select(p => Board.Garden[ushort.Parse(p)]).Where(p => p.Nineteen).ToList();
+                        if (players.Count > 0)
                         {
-                            ushort me = ushort.Parse(args[i]);
-                            Player player = Board.Garden[me];
-                            player.IsAlive = false;
-                            player.IsTared = false;
-                            player.HP = 0;
-                            if (player.Team == Board.Rounder.Team)
-                                ++teamMe;
-                            else if (player.Team == Board.Rounder.OppTeam)
-                                ++teamOp;
+                            foreach (Player py in players)
+                            {
+                                py.IsAlive = false;
+                                py.IsTared = false;
+                                py.HP = 0;
+                                if (py.Team == Board.Rounder.Team)
+                                    ++teamMe;
+                                else if (py.Team == Board.Rounder.OppTeam)
+                                    ++teamOp;
+                            }
+                            bool teamMeSuv = false, teamOpSuv = false;
+                            foreach (Player py in Board.Garden.Values)
+                            {
+                                if (py.Team == Board.Rounder.Team && py.IsAlive)
+                                    teamMeSuv = true;
+                                if (py.Team == Board.Rounder.OppTeam && py.IsAlive)
+                                    teamOpSuv = true;
+                            }
+                            if (!teamMeSuv && !teamOpSuv)
+                                RaiseGMessage("G0WN," + 0);
+                            else if (teamMeSuv && !teamOpSuv)
+                                RaiseGMessage("G0WN," + Board.Rounder.Team);
+                            else if (!teamMeSuv && teamOpSuv)
+                                RaiseGMessage("G0WN," + Board.Rounder.OppTeam);
+                            if (!teamMeSuv || !teamOpSuv)
+                                nextPriority = int.MaxValue;
                         }
-                        bool teamMeSuv = false, teamOpSuv = false;
-                        foreach (Player py in Board.Garden.Values)
-                        {
-                            if (py.Team == Board.Rounder.Team && py.IsAlive)
-                                teamMeSuv = true;
-                            if (py.Team == Board.Rounder.OppTeam && py.IsAlive)
-                                teamOpSuv = true;
-                        }
-                        if (!teamMeSuv && !teamOpSuv)
-                            RaiseGMessage("G0WN," + 0);
-                        else if (teamMeSuv && !teamOpSuv)
-                            RaiseGMessage("G0WN," + Board.Rounder.Team);
-                        else if (!teamMeSuv && teamOpSuv)
-                            RaiseGMessage("G0WN," + Board.Rounder.OppTeam);
-                        if (!teamMeSuv || !teamOpSuv)
+                        else
                             nextPriority = int.MaxValue;
                     }
                     if (priority == 200)
                     { // discard tux, pets and Escues
-                        IEnumerable<ushort> players = Algo.TakeRange(args, 1, args.Length).Select(p => ushort.Parse(p));
-                        RaiseGMessage("G0DH," + string.Join(",", players.Select(p => p + ",3")));
-                        foreach (ushort ut in players)
+                        List<Player> players = Algo.TakeRange(args, 1, args.Length)
+                            .Select(p => Board.Garden[ushort.Parse(p)]).Where(p => p.Nineteen).ToList();
+                        if (players.Count > 0)
+                            RaiseGMessage("G0DH," + string.Join(",", players.Select(p => p.Uid + ",3")));
+                        foreach (Player player in players)
                         {
-                            Player player = Board.Garden[ut];
                             ushort[] pets = player.Pets.Where(p => p != 0).ToArray();
                             if (pets.Length > 0)
-                                RaiseGMessage(new Artiad.LosePet() { Owner = ut, Pets = pets }.ToMessage());
+                                RaiseGMessage(new Artiad.LosePet() { Owner = player.Uid, Pets = pets }.ToMessage());
                             if (player.Escue.Count > 0)
                             {
                                 List<ushort> esc = player.Escue.ToList();
                                 player.Escue.Clear();
                                 RaiseGMessage("G2OL," + string.Join(",", esc.Select(
                                     p => (player.Uid + "," + p))));
-                                RaiseGMessage("G0ON," + ut + ",M," + Algo.ListToString(esc));
+                                RaiseGMessage("G0ON," + player.Uid + ",M," + Algo.ListToString(esc));
                             }
                             if (player.Runes.Count > 0)
                                 RaiseGMessage("G0OF," + player.Uid + "," + string.Join(",", player.Runes));
@@ -220,19 +230,21 @@ namespace PSD.PSDGamepkg
                     }
                     else if (priority == 300) // let teammates obtain tux
                     {
-                        for (int i = 1; i < args.Length; ++i)
+                        List<Player> players = Algo.TakeRange(args, 1, args.Length)
+                            .Select(p => Board.Garden[ushort.Parse(p)]).Where(p => p.Nineteen).ToList();
+                        if (players.Count > 0)
                         {
-                            ushort me = ushort.Parse(args[i]);
-                            Player player = Board.Garden[me];
-                            string input = AsyncInput(me, "#获得补牌的,T1(p" + string.Join("p", Board.Garden.Values
-                                .Where(p => p.IsAlive && p.Team == player.Team).Select(p => p.Uid)) + ")", "G0ZW", "0");
-                            RaiseGMessage("G0HG," + input + ",2");
+                            IDictionary<ushort, string> ask = players.ToDictionary(p => p.Uid,
+                                p => "#获得补牌的,T1(p" + string.Join("p", Board.Garden.Values.Where(
+                                q => q.IsAlive && q.Team == p.Team).Select(q => q.Uid)) + ")");
+                            IDictionary<ushort, string> ans = MultiAsyncInput(ask);
+                            ans.Values.ToList().ForEach(p => RaiseGMessage("G0HG," + p + ",2"));
                         }
                     }
                     else if (priority == 400) // leave
                     {
                         List<Player> players = Algo.TakeRange(args, 1, args.Length)
-                            .Select(p => Board.Garden[ushort.Parse(p)]).Where(p => !p.IsAlive).ToList();
+                            .Select(p => Board.Garden[ushort.Parse(p)]).Where(p => p.Nineteen && !p.IsAlive).ToList();
                         if (players.Count > 0)
                             RaiseGMessage("G0OY," + string.Join(",", players.Select(p => "2," + p.Uid)));
                     }
@@ -1957,6 +1969,7 @@ namespace PSD.PSDGamepkg
                     }
                     else if (args[1].Equals("1"))
                     {
+                        Console.WriteLine("Board.CsEqiups = " + string.Join(";", Board.CsEqiups));
                         foreach (string line in Board.CsEqiups)
                         {
                             int idx = line.IndexOf(',');

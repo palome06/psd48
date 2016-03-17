@@ -369,7 +369,7 @@ namespace PSD.PSDGamepkg
                             ushort npcut = Board.Monster1;
                             RaiseGMessage("G1NI," + Board.Rounder.Uid + "," + npcut);
                             NPC npc = LibTuple.NL.Decode(NMBLib.OriginalNPC(npcut));
-                            UEchoCode r5ed = HandleWithNPCEffect(Board.Rounder, npc, true);
+                            UEchoCode r5ed = HandleWithNPCEffect(Board.Rounder, npc, rstage);
                             if (r5ed == UEchoCode.NO_OPTIONS) // cannot take any action, check whether finished
                             {
                                 AsyncInput(Board.Rounder.Uid, "//", rstage, "1");
@@ -536,15 +536,11 @@ namespace PSD.PSDGamepkg
                             RunQuadStage(rstage);
 
                             RecycleMonster(); // BUG: if not taken away, here mon1zero should be false?
-                            RaiseGMessage("G1ZK,1");
-                            RaiseGMessage("G1HK,1");
                             WI.BCast(rstage + "3");
                             rstage = "R" + rounder + "Z2"; break;
                         }
                     case "Z2":
                         WI.BCast(rstage + ",0");
-                        RaiseGMessage("G1ZK,1");
-                        RaiseGMessage("G1HK,1");
                         foreach (Player player in Board.Garden.Values)
                             RaiseGMessage("G0AX," + player.Uid);
                         RunQuadStage(rstage);
@@ -562,6 +558,8 @@ namespace PSD.PSDGamepkg
                         RunQuadStage(rstage);
                         Board.CleanBattler();
                         Board.InCampaign = false;
+                        RaiseGMessage("G1ZK,1");
+                        RaiseGMessage("G1HK,1");
                         rstage = "R" + rounder + "ZZ"; break;
                     case "ZZ":
                         RaiseGMessage(new Artiad.CoachingSign() { SingleUnit = new Artiad.CoachingSignUnit()
@@ -605,12 +603,14 @@ namespace PSD.PSDGamepkg
                                 RecycleMonster();
                                 Board.InCampaign = false;
                                 Board.PlayerPoolEnabled = Board.PoolEnabled = false;
-                                if (Board.Wang != 0)
+                                RaiseGMessage("G1ZK,1");
+                                RaiseGMessage("G1HK,1");
+                                if (Board.Wang.Count > 0)
                                 {
-                                    int wang = Board.Wang;
-                                    Board.Wang = 0;
-                                    RaiseGMessage("G0YM,3,0,0");
-                                    RaiseGMessage("G0ON,10,M,1," + wang);
+                                    ushort[] wangs = Board.Wang.ToArray();
+                                    Board.Wang.Clear();
+                                    RaiseGMessage("G0YM,3,1,0");
+                                    RaiseGMessage("G0ON,10,M," + wangs.Length + "," + string.Join(",", wangs));
                                 }
                                 if (Board.Eve != 0)
                                 {
@@ -715,22 +715,20 @@ namespace PSD.PSDGamepkg
                     if (locks.Count > 0)
                     {
                         locks.Sort(LockSkillCompare);
-                        Queue<string> queue = new Queue<string>(locks);
-                        while (queue.Count > 0)
-                        {
-                            string msg = queue.Dequeue();
-                            int idx = msg.IndexOf(',');
-                            ushort me = ushort.Parse(msg.Substring(0, idx));
-                            int jdx = msg.LastIndexOf(';');
-                            string mai = Algo.Substring(msg, idx + 1, jdx);
+                        // handle locks one by one
+                        string msg = locks.First();
+                        int idx = msg.IndexOf(',');
+                        ushort me = ushort.Parse(msg.Substring(0, idx));
+                        int jdx = msg.LastIndexOf(';');
+                        string mai = Algo.Substring(msg, idx + 1, jdx);
 
-                            string skName;
-                            mai = DecodeSimplifiedCommand(mai, out skName);
-                            SKE ske = SKE.Find(skName, me, purse);
-                            if (ske != null)
-                                HandleU24Message(me, involved, mai, ske);
-                            //UKEvenMessage(involved, pocket, null);
-                        }
+                        string skName;
+                        mai = DecodeSimplifiedCommand(mai, out skName);
+                        SKE ske = SKE.Find(skName, me, purse);
+                        if (ske != null)
+                            HandleU24Message(me, involved, mai, ske);
+                        //UKEvenMessage(involved, pocket, null);
+                        continue; // validation would be re-calculated
                     }
                     if (!garden.Keys.Where(p => involved[p]).Any())
                         break; // No skills could be called, cancel
@@ -915,7 +913,7 @@ namespace PSD.PSDGamepkg
             Board.IsMonsterDebut = false;
         }
         // Handle With NPC
-        public UEchoCode HandleWithNPCEffect(Player player, NPC npc, bool watchValid)
+        public UEchoCode HandleWithNPCEffect(Player player, NPC npc, string reason)
         {
             string rstage = Board.RoundIN;
             ushort rd = player.Uid;
@@ -928,7 +926,8 @@ namespace PSD.PSDGamepkg
             foreach (string npsk in npc.Skills)
                 if (nj01.ContainsKey(npsk))
                 {
-                    string nfuse = npc.Code + ";" + rstage;
+                    // special kind of nfuse = Code + reason + pureFuse
+                    string nfuse = npc.Code + ";" + reason;
                     if (nj01[npsk].Valid(player, nfuse))
                     {
                         SKE skt = new SKE(new SkTriple()
@@ -954,7 +953,7 @@ namespace PSD.PSDGamepkg
             {
                 pris[rd] = pris[rd].Substring(1);
                 involved[rd] = true;
-                if (watchValid)
+                if (reason == "R" + Board.Rounder.Uid + "NP")
                     RaiseGMessage("G1SG,0");
                 SendOutU1Message(involved, pris, 0);
                 WI.RecvInfStart();
