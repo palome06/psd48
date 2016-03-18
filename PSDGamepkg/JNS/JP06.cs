@@ -2023,8 +2023,8 @@ namespace PSD.PSDGamepkg.JNS
                         if (!string.IsNullOrEmpty(person) && !person.StartsWith("/"))
                         {
                             ushort usr = ushort.Parse(person);
-                            string target = XI.AsyncInput(usr, teamName[i] + ",F1(p" +
-                                string.Join("p", XI.Board.Garden[usr]) + ")", "TPT4", "1");
+                            string target = XI.AsyncInput(player.Uid, teamName[i] + ",F1(p" +
+                                string.Join("p", XI.Board.Garden[usr].Runes) + ")", "TPT4", "1");
                             results.Add(usr + "," + target);
                         }
                     }

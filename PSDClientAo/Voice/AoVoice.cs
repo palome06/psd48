@@ -46,7 +46,7 @@ namespace PSD.ClientAo.Voice
             string entry = name + "_" + type;
             // JNT3501_0_1.sound;
             int soundTrack = voiceSeqDict.ContainsKey(entry) ?
-                (1 - voiceSeqDict[entry]) : randSeed.Next(0, 2);
+                (1 - voiceSeqDict[entry]) : randSeed.Next(2);
             voiceSeqDict[entry] = soundTrack;
             voiceQueue.Add(entry + "_" + soundTrack);
         }

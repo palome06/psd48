@@ -59,18 +59,39 @@ namespace PSD.ClientAo
                     }
                     break;
                 case "E0CC": // prepare to use card
-                    if (version <= 114)
+                    if (version <= 105)
                     {
                         ushort ust = ushort.Parse(args[1]);
                         ushort pst = ushort.Parse(args[2]);
+                        string tuxCode = args[3];
                         List<ushort> ravs = Algo.TakeRange(args, 4, args.Length)
                             .Select(p => ushort.Parse(p)).ToList();
                         if (pst == 0)
                             VI.Cout(Uid, "{0}将卡牌{1}当作卡牌{2}使用.", zd.Player(ust),
-                                zd.Tux(ravs), zd.Tux(args[3]));
+                                zd.Tux(ravs), zd.Tux(tuxCode));
                         else
                             VI.Cout(Uid, "{0}将卡牌{1}当作卡牌{2}，为{3}使用.", zd.Player(ust),
-                                zd.Tux(ravs), zd.Tux(args[3]), zd.Player(pst));
+                                zd.Tux(ravs), zd.Tux(tuxCode), zd.Player(pst));
+                        if (!ravs.Contains(0))
+                        {
+                            List<string> cedcards = ravs.Select(p => "C" + p).ToList();
+                            A0O.FlyingGet(cedcards, ust, 0);
+                        }
+                        return true;
+                    }
+                    else if (version <= 114)
+                    {
+                        ushort ust = ushort.Parse(args[1]);
+                        ushort pst = ushort.Parse(args[2]);
+                        string tuxCode = args[4];
+                        List<ushort> ravs = Algo.TakeRange(args, 5, args.Length)
+                            .Select(p => ushort.Parse(p)).ToList();
+                        if (pst == 0)
+                            VI.Cout(Uid, "{0}将卡牌{1}当作卡牌{2}使用.", zd.Player(ust),
+                                zd.Tux(ravs), zd.Tux(tuxCode));
+                        else
+                            VI.Cout(Uid, "{0}将卡牌{1}当作卡牌{2}，为{3}使用.", zd.Player(ust),
+                                zd.Tux(ravs), zd.Tux(tuxCode), zd.Player(pst));
                         if (!ravs.Contains(0))
                         {
                             List<string> cedcards = ravs.Select(p => "C" + p).ToList();

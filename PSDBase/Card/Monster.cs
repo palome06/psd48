@@ -377,12 +377,12 @@ namespace PSD.Base.Card
                             if (opss[j].StartsWith("!")) // Only once
                             {
                                 eaprops[i][j] = int.Parse(opss[j].Substring("!".Length));
-                                eaonces[i][j] = true;
+                                eaonces[i][j] = false;
                             }
                             else
                             {
                                 eaprops[i][j] = int.Parse(opss[j]);
-                                eaonces[i][j] = false;
+                                eaonces[i][j] = true;
                             }
                             if (omin[j].StartsWith("!")) // Hind
                             {

@@ -1968,10 +1968,10 @@ namespace PSD.ClientAo
                         if (!string.IsNullOrEmpty(argvs))
                             argvs = "(" + argvs + ")";
 
-                        bool hind = false; int acType = consumeType % 3;
+                        int acType = consumeType % 3;
                         TuxEqiup tuxeq = Tuple.TL.DecodeTux(card) as TuxEqiup;
-                        if (tuxeq != null && tuxeq.CsHind[acType][type])
-                            hind = true;
+                        bool hind = tuxeq != null && tuxeq.CsHind.Length < acType &&
+                            tuxeq.CsHind[acType].Length < type && tuxeq.CsHind[acType][type];
                         if (!hind)
                         {
                             string[] patstr = new string[]

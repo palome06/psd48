@@ -318,9 +318,9 @@ namespace PSD.Base
             DEXh = DEXb = hero.DEX;
             SDaSet = sdaset; SDcSet = sdcset;
             STRi = 0; DEXi = 0;
-            Skills.Clear();
             if (reset)
             {
+                Skills.Clear();
                 IsAlive = true;
                 Nineteen = false;
                 IsTared = true;

@@ -3036,7 +3036,7 @@ namespace PSD.PSDGamepkg.JNS
         public bool JNT2302Valid(Player player, int type, string fuse)
         {
             if (type == 0)
-                return XI.Board.IsAttendWar(player);
+                return XI.Board.IsAttendWar(player) && player.TokenExcl.Count > 0;
             else if (type == 1)
                 return player.RFM.GetBool("Resonance");
             else
@@ -4363,7 +4363,7 @@ namespace PSD.PSDGamepkg.JNS
         }
         public void JNT3802Action(Player player, int type, string fuse, string argst)
         {
-            if (type == 0)
+            if (type == 0 && Artiad.ClothingHelper.IsEx(fuse))
             {
                 Artiad.EquipExCards eec = Artiad.EquipExCards.Parse(fuse);
                 XI.RaiseGMessage("G0IA," + player.Uid + ",0," + eec.Cards.Length);
@@ -4385,7 +4385,7 @@ namespace PSD.PSDGamepkg.JNS
         }
         public bool JNT3802Valid(Player player, int type, string fuse)
         {
-            if (type == 0)
+            if (type == 0 && Artiad.ClothingHelper.IsEx(fuse))
             {
                 Artiad.EquipExCards eec = Artiad.EquipExCards.Parse(fuse);
                 return eec.Who == player.Uid && eec.Cards.Length > 0;
@@ -4465,6 +4465,11 @@ namespace PSD.PSDGamepkg.JNS
             }
             else if (type == 2 || type == 3)
                 return IsMathISOS("JNT3901", player, fuse);
+            else if (type == 4) // only notify the action, do nothing
+            {
+                ushort zs17 = (ushort)(3000 + 25);
+                return XI.Board.Hinder.Uid == zs17 || XI.Board.Supporter.Uid == zs17;
+            }
             else
                 return false;
         }
@@ -4490,13 +4495,13 @@ namespace PSD.PSDGamepkg.JNS
                 XI.RaiseGMessage("G2TZ,0," + player.Uid + ",I25");
                 if (XI.Board.PoolEnabled)
                 {
-                    ushort rk = (ushort)(3000 + 25);
-                    if (XI.Board.Supporter.Uid == rk)
+                    ushort zs17 = (ushort)(3000 + 25);
+                    if (XI.Board.Supporter.Uid == zs17)
                         XI.RaiseGMessage(new Artiad.CoachingSign() { SingleUnit = new Artiad.CoachingSignUnit()
                         {
                             Role = Artiad.CoachingHelper.PType.SUPPORTER, Coach = 0
                         } }.ToMessage());
-                    else if (XI.Board.Hinder.Uid == rk)
+                    else if (XI.Board.Hinder.Uid == zs17)
                         XI.RaiseGMessage(new Artiad.CoachingSign() { SingleUnit = new Artiad.CoachingSignUnit()
                         {
                             Role = Artiad.CoachingHelper.PType.HINDER, Coach = 0
@@ -4520,15 +4525,11 @@ namespace PSD.PSDGamepkg.JNS
                     (p.GetActualCardAs(XI).Type == Base.Card.Tux.TuxType.FJ ||
                     p.GetActualCardAs(XI).Type == Base.Card.Tux.TuxType.XB));
             }
-            else if (type == 4) // G0ZB
+            else if (type == 4 && Artiad.ClothingHelper.IsStandard(fuse)) // G0ZB
             {
-                if (Artiad.ClothingHelper.IsStandard(fuse))
-                {
-                    Artiad.EquipStandard eis = Artiad.EquipStandard.Parse(fuse);
-                    return eis.Who == player.Uid && eis.Cards.Any(p => XI.LibTuple.TL.DecodeTux(p) != null &&
-                        XI.LibTuple.TL.DecodeTux(p).Type == Tux.TuxType.WQ);
-                }
-                return false;
+                Artiad.EquipStandard eis = Artiad.EquipStandard.Parse(fuse);
+                return eis.Who == player.Uid && eis.Cards.Any(p => XI.LibTuple.TL.DecodeTux(p) != null &&
+                    XI.LibTuple.TL.DecodeTux(p).Type == Tux.TuxType.WQ);
             }
             else
                 return false;

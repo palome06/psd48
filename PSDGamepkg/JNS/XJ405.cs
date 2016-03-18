@@ -1203,7 +1203,7 @@ namespace PSD.PSDGamepkg.JNS
         }
         public void JN40403Action(Player player, int type, string fuse, string argst)
         {
-            if (type == 0)
+            if (type == 0 && Artiad.ClothingHelper.IsEx(fuse))
             {
                 Artiad.EquipExCards eec = Artiad.EquipExCards.Parse(fuse);
                 XI.RaiseGMessage("G0IA," + player.Uid + ",0," + eec.Cards.Length);
