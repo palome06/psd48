@@ -1969,7 +1969,6 @@ namespace PSD.PSDGamepkg
                     }
                     else if (args[1].Equals("1"))
                     {
-                        Console.WriteLine("Board.CsEqiups = " + string.Join(";", Board.CsEqiups));
                         foreach (string line in Board.CsEqiups)
                         {
                             int idx = line.IndexOf(',');

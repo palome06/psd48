@@ -95,5 +95,6 @@ namespace PSD.ClientAo.Voice
             if (voiceQueue != null)
                 voiceQueue.Dispose();
         }
+        // Source: http://moriya.ca/oggextract/
     }
 }

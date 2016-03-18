@@ -728,6 +728,7 @@ namespace PSD.PSDGamepkg
                         if (ske != null)
                             HandleU24Message(me, involved, mai, ske);
                         //UKEvenMessage(involved, pocket, null);
+                        involved[me] = true;
                         continue; // validation would be re-calculated
                     }
                     if (!garden.Keys.Where(p => involved[p]).Any())
@@ -810,22 +811,21 @@ namespace PSD.PSDGamepkg
                     if (locks.Count > 0)
                     {
                         locks.Sort(LockSkillCompare);
-                        Queue<string> queue = new Queue<string>(locks);
-                        while (queue.Count > 0)
-                        {
-                            string msg = queue.Dequeue();
-                            int idx = msg.IndexOf(',');
-                            ushort me = ushort.Parse(msg.Substring(0, idx));
-                            int jdx = msg.LastIndexOf(';');
-                            string mai = Algo.Substring(msg, idx + 1, jdx);
+                        // handle locks one by one
+                        string msg = locks.First();
+                        int idx = msg.IndexOf(',');
+                        ushort me = ushort.Parse(msg.Substring(0, idx));
+                        int jdx = msg.LastIndexOf(';');
+                        string mai = Algo.Substring(msg, idx + 1, jdx);
 
-                            string skName;
-                            mai = DecodeSimplifiedCommand(mai, out skName);
-                            SKE ske = SKE.Find(skName, me, purse);
-                            if (ske != null)
-                                HandleU24Message(me, involved, mai, ske);
-                            //UKEvenMessage(involved, pocket, null);
-                        }
+                        string skName;
+                        mai = DecodeSimplifiedCommand(mai, out skName);
+                        SKE ske = SKE.Find(skName, me, purse);
+                        if (ske != null)
+                            HandleU24Message(me, involved, mai, ske);
+                        //UKEvenMessage(involved, pocket, null);
+                        involved[me] = true;
+                        continue; // validation would be re-calculated
                     }
                     if (!garden.Keys.Where(p => involved[p]).Any())
                         break; // No skills could be called, cancel

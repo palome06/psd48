@@ -484,7 +484,6 @@ namespace PSD.PSDGamepkg.JNS
             List<Artiad.Harm> harms = XI.Board.Garden.Values.Where(p => p.IsAlive).Select(p =>
                 new Artiad.Harm(p.Uid, p.Uid, FiveElement.A, XI.LibTuple.HL.InstanceHero(p.SelectHero)
                 .Spouses.Count(q => !q.StartsWith("!")), (long)HPEvoMask.TUX_INAVO)).ToList();
-            List<Artiad.Harm> ones = harms.Where(p => p.N > 0).ToList();
             if (harms.Count > 0)
                 XI.RaiseGMessage(Artiad.Harm.ToMessage(harms));
             List<ushort> zeros = harms.Where(p => p.N == 0).Select(p => p.Who).ToList();

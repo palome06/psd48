@@ -143,12 +143,13 @@ namespace PSD.PSDGamepkg
             //Board.EveDises.Add(Board.EvePiles.Dequeue());
             //Board.EveDises.Add(Board.EvePiles.Dequeue());
             //Board.EvePiles.PushBack(52);
-            Board.EvePiles.PushBack(27);
+            //Board.EvePiles.PushBack(27);
             //Board.EvePiles.PushBack(30);
             //Board.EvePiles.PushBack(31);
-            Board.EvePiles.PushBack(9);
-            Board.RestNPCPiles.PushBack(1068);
-            Board.RestNPCPiles.PushBack(1077);
+            //Board.EvePiles.PushBack(9);
+            //Board.RestNPCPiles.PushBack(1068);
+            //oard.RestNPCPiles.PushBack(1077);
+            Board.RestNPCPiles.PushBack(1102);
             // Board.HeroPiles.PushBack(19003);
             //Board.EvePiles.PushBack(31);
             //while (Board.MonPiles.Count > 0)
@@ -173,10 +174,10 @@ namespace PSD.PSDGamepkg
             //Board.MonPiles.PushBack(18);
             //Board.MonPiles.PushBack(62);
             //Board.MonPiles.PushBack(1003);
-            //Board.MonPiles.PushBack(8);
+            Board.MonPiles.PushBack(19);
+            Board.MonPiles.PushBack(8);
             //Board.MonPiles.PushBack(1077);
             //Board.MonPiles.PushBack(23);
-            //Board.MonPiles.PushBack(19);
             //Board.MonPiles.PushBack(2);
             //Board.MonPiles.PushBack(37);
             //Board.MonPiles.PushBack(1025);

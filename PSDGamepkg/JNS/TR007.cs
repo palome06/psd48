@@ -4699,8 +4699,11 @@ namespace PSD.PSDGamepkg.JNS
         {
             if (type == 0)
             {
-                ushort ut = ushort.Parse(argst.Substring(0, argst.IndexOf(',')));
-                List<ushort> vals = XI.Board.Garden[ut].Tux.Except(XI.Board.ProtectedTux).ToList();
+                ushort ut = ushort.Parse(argst);
+                TargetPlayer(player.Uid, ut);
+                Player who = XI.Board.Garden[ut];
+                XI.AsyncInput(player.Uid, "C1(" + Algo.RepeatString("p0", who.Tux.Count) + ")", "JNT4201", "0");
+                List<ushort> vals = who.Tux.Except(XI.Board.ProtectedTux).ToList();
                 vals.Shuffle();
                 XI.RaiseGMessage("G0OT," + ut + ",1," + vals[0]);
                 XI.RaiseGMessage("G2TZ," + player.Uid + "," + ut + ",C" + vals[0]);
@@ -4725,7 +4728,7 @@ namespace PSD.PSDGamepkg.JNS
                     if (player.Tux.Count > 0)
                     {
                         string select = XI.AsyncInput(player.Uid, "#交还,Q1(p" + 
-                            string.Join("p", player.Tux) + ")","JNT4201", "0");
+                            string.Join("p", player.Tux) + ")","JNT4201", "1");
                         if (select != VI.CinSentinel)
                         {
                             ushort back = ushort.Parse(select);
@@ -4768,11 +4771,6 @@ namespace PSD.PSDGamepkg.JNS
                 if (prev == "")
                     return "/T1(p" + string.Join("p", XI.Board.Garden.Values.Where(p => p.IsTared &&
                         p.Uid != player.Uid && p.Tux.Count > 0).Select(p => p.Uid)) + ")";
-                else if (prev.IndexOf(',') < 0)
-                {
-                    ushort who = ushort.Parse(prev);
-                    return "C1(" + Algo.RepeatString("p0", XI.Board.Garden[who].Tux.Count) + ")";
-                }
                 else
                     return "";
             }
