@@ -1,29 +1,36 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Linq;
 using System.Text;
 using System.IO;
-using System.Threading;
+using System.Threading.Tasks;
 using System.Security.Cryptography;
 
 namespace PSD.Base
 {
-    public class Log
+    // Client log
+    public class ClLog
     {
         private string rName, lName;
-        private Queue<string> rq, lq;
+        //private Queue<string> rq, lq;
+        private BlockingCollection<string> rq, lq;
         //private List<string> recentList;
 
         // record literature results 
         private bool record;
         // record log in code
         private bool msglog;
+        // whether the writing to Log stops or not
+        public bool Stop { set; get; }
 
         public void Start(int playerId, bool record, bool msglog, int nouse)
         {
-            rq = new Queue<string>();
-            lq = new Queue<string>();
+            rq = new BlockingCollection<string>();
+            lq = new BlockingCollection<string>();
+            //rq = new Queue<string>();
+            //lq = new Queue<string>();
             this.record = record; this.msglog = msglog;
+            Stop = false;
 
             DateTime dt = System.DateTime.Now;
             if (record)
@@ -32,28 +39,21 @@ namespace PSD.Base
                     Directory.CreateDirectory("./rec");
                 rName = string.Format("./rec/逍遥游游戏记录{0:D4}{1:D2}{2:D2}-{3:D2}{4:D2}{5:D2}({6}).txt",
                     dt.Year, dt.Month, dt.Day, dt.Hour, dt.Minute, dt.Second, playerId);
-                new Thread(delegate()
+                Task.Factory.StartNew(() =>
                 {
-                    while (true)
+                    using (StreamWriter sw = new StreamWriter(rName, true))
                     {
-                        string line = null;
-                        lock (rq)
+                        while (!Stop) 
                         {
-                            if (rq.Count > 0)
-                                line = rq.Dequeue();
-                        }
-                        if (!string.IsNullOrEmpty(line))
-                        {
-                            using (StreamWriter sw = new StreamWriter(rName, true))
+                            string line = rq.Take();
+                            if (!string.IsNullOrEmpty(line))
                             {
                                 sw.WriteLine(line);
                                 sw.Flush();
                             }
                         }
-                        else
-                            Thread.Sleep(300);
                     }
-                }).Start();
+                });
             }
             if (msglog)
             {
@@ -63,24 +63,17 @@ namespace PSD.Base
                     dt.Year, dt.Month, dt.Day, dt.Hour, dt.Minute, dt.Second, playerId);
                 var ass = System.Reflection.Assembly.GetExecutingAssembly().GetName();
                 int version = ass.Version.Revision;
-                using (StreamWriter sw = new StreamWriter(lName, true))
+
+                Task.Factory.StartNew(() =>
                 {
-                    sw.WriteLine("VERSION={0} UID={1}", version, playerId);
-                    sw.Flush();
-                }
-                new Thread(delegate()
-                {
-                    while (true)
+                    using (StreamWriter sw = new StreamWriter(lName, true))
                     {
-                        string line = null;
-                        lock (lq)
+                        sw.WriteLine("VERSION={0} UID={1}", version, playerId);
+                        sw.Flush();
+                        while (!Stop)
                         {
-                            if (lq.Count > 0)
-                                line = lq.Dequeue();
-                        }
-                        if (!string.IsNullOrEmpty(line))
-                        {
-                            using (StreamWriter sw = new StreamWriter(lName, true))
+                            string line = lq.Take();
+                            if (!string.IsNullOrEmpty(line))
                             {
                                 sw.WriteLine(LogES.DESEncrypt(line, "AKB48Show!", 
                                     (version * version).ToString()));
@@ -90,10 +83,8 @@ namespace PSD.Base
                                 sw.Flush();
                             }
                         }
-                        else
-                            Thread.Sleep(300);
                     }
-                }).Start();
+                });
             }
         }
 
@@ -101,11 +92,7 @@ namespace PSD.Base
         {
             if (msglog)
             {
-                new Thread(delegate()
-                {
-                    lock (lq)
-                        lq.Enqueue(line);
-                }).Start();
+                Task.Factory.StartNew(() => { lq.Add(line); });
             }
         }
 
@@ -113,11 +100,7 @@ namespace PSD.Base
         {
             if (record)
             {
-                new Thread(delegate()
-                {
-                    lock (rq)
-                        rq.Enqueue(line);
-                }).Start();
+                Task.Factory.StartNew(() => { rq.Add(line); });
             }
         }
     }
@@ -134,39 +117,34 @@ namespace PSD.Base
         public static string DESEncrypt(string encryptStr, string key, string IV)
         {
             // Set it to length of 8
-            key += "12345678";
-            IV += "12345678";
-            key = key.Substring(0, 8);
-            IV = IV.Substring(0, 8);
+            key = (key + "12345678").Substring(0, 8);
+            IV = (IV + "12345678").Substring(0, 8);
 
-            SymmetricAlgorithm sa;
-            ICryptoTransform ict;
-            MemoryStream ms;
-            CryptoStream cs;
-            byte[] byt;
+            SymmetricAlgorithm sa = new DESCryptoServiceProvider()
+            {
+                Key = Encoding.UTF8.GetBytes(key),
+                IV = Encoding.UTF8.GetBytes(IV)
+            };
+            ICryptoTransform ict = sa.CreateEncryptor();
+            byte[] byt = Encoding.UTF8.GetBytes(encryptStr);
 
-            sa = new DESCryptoServiceProvider();
-            sa.Key = Encoding.UTF8.GetBytes(key);
-            sa.IV = Encoding.UTF8.GetBytes(IV);
-            ict = sa.CreateEncryptor();
+            string retVal = "";
+            using (MemoryStream ms = new MemoryStream())
+            {
+                using (CryptoStream cs = new CryptoStream(ms, ict, CryptoStreamMode.Write))
+                {
+                    cs.Write(byt, 0, byt.Length);
+                    cs.FlushFinalBlock();        
+                }
+                retVal = Convert.ToBase64String(ms.ToArray());
+            }
 
-            byt = Encoding.UTF8.GetBytes(encryptStr);
-
-            ms = new MemoryStream();
-            cs = new CryptoStream(ms, ict, CryptoStreamMode.Write);
-            cs.Write(byt, 0, byt.Length);
-            cs.FlushFinalBlock();
-
-            cs.Close();
-
-            //加上一些干扰字符
-            string retVal = Convert.ToBase64String(ms.ToArray());
+            // do some confusion
             System.Random ra = new Random();
-
             for (int i = 0; i < 8; i++)
             {
                 int radNum = ra.Next(36);
-                char radChr = Convert.ToChar(radNum + 65);//生成一个随机字符
+                char radChr = Convert.ToChar(radNum + 65);// get a random character
 
                 retVal = retVal.Substring(0, 2 * i + 1) + radChr.ToString() + retVal.Substring(2 * i + 1);
             }
@@ -197,34 +175,28 @@ namespace PSD.Base
             encryptedValue = tmp;
 
             // Set it to length of 8
-            key += "12345678";
-            IV += "12345678";
-            key = key.Substring(0, 8);
-            IV = IV.Substring(0, 8);
-
-            SymmetricAlgorithm sa;
-            ICryptoTransform ict;
-            MemoryStream ms;
-            CryptoStream cs;
-            byte[] byt;
+            key = (key + "12345678").Substring(0, 8);
+            IV = (IV + "12345678").Substring(0, 8);
 
             try
             {
-                sa = new DESCryptoServiceProvider();
-                sa.Key = Encoding.UTF8.GetBytes(key);
-                sa.IV = Encoding.UTF8.GetBytes(IV);
-                ict = sa.CreateDecryptor();
+                SymmetricAlgorithm sa = new DESCryptoServiceProvider()
+                {
+                    Key = Encoding.UTF8.GetBytes(key),
+                    IV = Encoding.UTF8.GetBytes(IV)
+                };
+                ICryptoTransform ict = sa.CreateDecryptor();
 
-                byt = Convert.FromBase64String(encryptedValue);
-
-                ms = new MemoryStream();
-                cs = new CryptoStream(ms, ict, CryptoStreamMode.Write);
-                cs.Write(byt, 0, byt.Length);
-                cs.FlushFinalBlock();
-
-                cs.Close();
-
-                return Encoding.UTF8.GetString(ms.ToArray());
+                byte[] byt = Convert.FromBase64String(encryptedValue);
+                using (MemoryStream ms = new MemoryStream())
+                {
+                    using (CryptoStream cs = new CryptoStream(ms, ict, CryptoStreamMode.Write))
+                    {
+                        cs.Write(byt, 0, byt.Length);
+                        cs.FlushFinalBlock();
+                    }
+                    return Encoding.UTF8.GetString(ms.ToArray());
+                }
             }
             catch (System.Exception)
             {

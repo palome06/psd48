@@ -67,7 +67,7 @@ namespace PSD.ClientZero
 
         private Queue<string> unhandledMsg;
 
-        public Log Log { private set; get; }
+        public ClLog Log { private set; get; }
 
         private void CommonConstruct()
         {
@@ -90,7 +90,7 @@ namespace PSD.ClientZero
             this.port = Base.NetworkCode.HALL_PORT + room;
 
             VW.Bywi bywi = new VW.Bywi(server, port, name, avatar, hopeTeam, uid, this);
-            Log = new Log(); Log.Start(auid, record, msglog, 0);
+            Log = new ClLog(); Log.Start(auid, record, msglog, 0);
             bywi.Log = Log;
             if (VI is VW.Ayvi)
                 (VI as VW.Ayvi).Log = Log;
@@ -106,7 +106,7 @@ namespace PSD.ClientZero
             this.auid = this.Uid = uid;
             WI = wi; VI = vi;
             this.hopeTeam = 0;
-            Log = new Log(); Log.Start(auid, false, false, 0);
+            Log = new ClLog(); Log.Start(auid, false, false, 0);
             CommonConstruct();
         }
         // Constructor 3#: Used for Direct Connection
@@ -124,7 +124,7 @@ namespace PSD.ClientZero
             VW.Bywi bywi = new VW.Bywi(server, port, name, avatar, hopeTeam, 0, this);
             WI = bywi;
             
-            Log = new Log(); Log.Start(Uid, record, msglog, 0);
+            Log = new ClLog(); Log.Start(Uid, record, msglog, 0);
             if (!bywi.StartConnectDirect(watcher, VI))
             {
                 VI.Cout(Uid, "咦，您是不是掉线或者连错人了:-(");
@@ -154,7 +154,7 @@ namespace PSD.ClientZero
             this.port = Base.NetworkCode.HALL_PORT + room;
             
             VW.Bywi bywi = new VW.Bywi(server, port, name, avatar, hopeTeam = 0, newUid, this);
-            Log = new Log(); Log.Start(auid, record, msglog, 0);
+            Log = new ClLog(); Log.Start(auid, record, msglog, 0);
             bywi.Log = Log;
             if (VI is VW.Ayvi)
                 (VI as VW.Ayvi).Log = Log;

@@ -281,7 +281,7 @@ namespace PSD.ClientZero.VW
 
         private XIClient xic;
 
-        internal Log Log { set; get; }
+        internal ClLog Log { set; get; }
         // direct true : Single Room, RM/NW exists; otherwise, hall
         public Bywi(string serverName, int port, string name,
             int avatar, int hopeTeam, ushort uid, XIClient xic)
