@@ -392,6 +392,7 @@ namespace PSD.ClientZero.VW
                 Log.Logg("<" + talk);
             return talk;
         }
+        public void Dispose() { }
         #endregion Implementation
 
         private static string ReadByteLine(NetworkStream ns)

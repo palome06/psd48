@@ -765,6 +765,7 @@ namespace PSD.PSDGamepkg.VW
         //    if (me != 0)
         //        infNMsgs.Enqueue(new Base.VW.Msgs("\\D" + msg, 0, to));
         }
+        public void Dispose() { }
         #endregion Implementation
 
         #region Stream Utils

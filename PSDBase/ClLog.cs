@@ -25,8 +25,8 @@ namespace PSD.Base
 
         public void Start(int playerId, bool record, bool msglog, int nouse)
         {
-            rq = new BlockingCollection<string>();
-            lq = new BlockingCollection<string>();
+            rq = new BlockingCollection<string>(new ConcurrentQueue<string>());
+            lq = new BlockingCollection<string>(new ConcurrentQueue<string>());
             //rq = new Queue<string>();
             //lq = new Queue<string>();
             this.record = record; this.msglog = msglog;

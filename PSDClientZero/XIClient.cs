@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -60,10 +61,10 @@ namespace PSD.ClientZero
         public IDictionary<ushort, ZeroPlayer> Z0D { private set; get; }
 
         private bool GameGraceEnd { set; get; }
-
         //public IDictionary<ushort, int> Heros { private set; get; }
         // list of running threads handling events
         private List<Thread> listOfThreads;
+        //private BlockingCollection<string> msgPool;
 
         private Queue<string> unhandledMsg;
 
@@ -75,6 +76,7 @@ namespace PSD.ClientZero
             listOfThreads = new List<Thread>();
             zd = new ZeroDisplay(this);
             Z0D = new Dictionary<ushort, ZeroPlayer>();
+            //msgPool = new BlockingCollection<string>();
             unhandledMsg = new Queue<string>();
             GameGraceEnd = false;
         }
@@ -142,7 +144,7 @@ namespace PSD.ClientZero
             return new XIClient(server, port, name, avatar, hopeTeam, record, msglog, watcher);
         }
         // Constructor 4#: Used for ResumeHall
-		// passCode is the password for a settled room
+        // passCode is the password for a settled room
         private XIClient(ushort newUid, ushort oldUid, string name, Base.VW.IVI vi,
             string server, int room, string passCode, bool record, bool msglog)
         {
@@ -211,6 +213,8 @@ namespace PSD.ClientZero
                 while (true)
                 {
                     string readLine = WI.Recv(Uid, 0);
+                    // if (!string.IsNullOrEmpty(readLine))
+                    //     msgPool.Add(readLine);
                     //if (uid == 1)
                     //VI.Cout(uid, "★●▲■" + readLine + "★●▲■");
                     if (!string.IsNullOrEmpty(readLine))

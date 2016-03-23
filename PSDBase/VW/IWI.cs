@@ -26,7 +26,7 @@
     //    // Ask for Input with tag/param from $to, return only data
     //    //string AsyncInput(string tag, string param, ushort to);
     //}
-    public interface IWISV
+    public interface IWISV : System.IDisposable
     {
         // Standard receive from $from to $me
         string Recv(ushort me, ushort from);
@@ -54,7 +54,7 @@
         //Msgs Hear();
     }
 
-    public interface IWICL
+    public interface IWICL : System.IDisposable
     {
         // Standard receive from $from to $me
         string Recv(ushort me, ushort from);

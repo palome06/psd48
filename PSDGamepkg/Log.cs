@@ -26,7 +26,7 @@ namespace PSD.PSDGamepkg
             var ass = System.Reflection.Assembly.GetExecutingAssembly().GetName();
             int version = ass.Version.Revision;
 
-            queue = new BlockingCollection<string>();
+            queue = new BlockingCollection<string>(new ConcurrentQueue<string>());
             Task.Factory.StartNew(() =>
             {
                 using (StreamWriter sw = new StreamWriter(fileName, true))
