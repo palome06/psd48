@@ -113,6 +113,8 @@ namespace PSD.ClientAo.VW
         public void SendDirect(string msg, ushort me) { }
         public void Close() { }
 
+        public void Dispose() { }
+
         private Queue<string> yMessage;
 
         public string Hear()

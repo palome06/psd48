@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading;
 using System.IO;
 using Algo = PSD.Base.Utils.Algo;
+using System.Collections.Concurrent;
 
 namespace PSD.ClientAo.VW
 {
@@ -18,7 +19,7 @@ namespace PSD.ClientAo.VW
             internal int Avatar { set; get; }
             internal ushort Uid { set; get; }
         }
-
+        public const int MSG_SIZE = 4096;
         public Thread recvThread, sendThread;
 
         private string serverName;
@@ -214,28 +215,16 @@ namespace PSD.ClientAo.VW
 
         private void KeepOnListenRecv()
         {
-            byte[] recv = new byte[2048];
+            byte[] recv = new byte[MSG_SIZE];
             try
             {
                 while (true)
                 {
                     string line = ReadByteLine(stream);
-                    //Console.WriteLine("=============>>>> Do Receive:" + line);
-                    if (line.StartsWith("\\D"))
-                    {
-                        line = line.Substring("\\D".Length);
-                        msgNQueues.Enqueue(line);
-                    }
-                    else if (line.StartsWith("\\I"))
-                    {
-                        line = line.Substring("\\I".Length);
-                        if (line.StartsWith("Y"))
-                            msgTalk.Enqueue(line);
-                        else
-                            msgNQueues.Enqueue(line);
-                    }
+                    if (line.StartsWith("Y"))
+                        msgTalk.Add(line);
                     else
-                        Thread.Sleep(100);
+                        msgNPools.Add(line);
                 }
             }
             catch (IOException)
@@ -248,22 +237,7 @@ namespace PSD.ClientAo.VW
             try
             {
                 while (true)
-                {
-                    if (msg0Queues.Count > 0)
-                    {
-                        string msgs = msg0Queues.Dequeue();
-                        //Base.VW.Msgs msg = new Base.VW.Msgs(msgs, Uid, 0);
-                        //byte[] sent = Encoding.Unicode.GetBytes(msg.Msg);
-                        //stream.Write(sent, 0, sent.Length);
-                        //StreamWriter sw = new StreamWriter(stream); //Encoding.Unicode
-                        //sw.WriteLine(msgs);
-                        //sw.Flush();
-                        SentByteLine(stream, msgs);
-                        //Thread.Sleep(20);
-                    }
-                    else
-                        Thread.Sleep(100);
-                }
+                    SentByteLine(stream, msg0Pools.Take());
             }
             catch (IOException)
             {
@@ -277,9 +251,9 @@ namespace PSD.ClientAo.VW
         /// msg0Queues: message from $i to 0
         /// msgNQueues: message from 0 to $i
         /// </summary>
-        private Queue<string> msgNQueues;
-        private Queue<string> msg0Queues;
-        private Queue<string> msgTalk;
+        private BlockingCollection<string> msgNPools;
+        private BlockingCollection<string> msg0Pools;
+        private BlockingCollection<string> msgTalk;
 
         private XIVisi visi;
 
@@ -297,9 +271,9 @@ namespace PSD.ClientAo.VW
             if (uid != 0)
                 Uid = uid;
 
-            msg0Queues = new Queue<string>();
-            msgNQueues = new Queue<string>();
-            msgTalk = new Queue<string>();
+            msg0Pools = new BlockingCollection<string>(new ConcurrentQueue<string>());
+            msgNPools = new BlockingCollection<string>(new ConcurrentQueue<string>());
+            msgTalk = new BlockingCollection<string>(new ConcurrentQueue<string>());
 
             this.visi = visi;
         }
@@ -311,23 +285,8 @@ namespace PSD.ClientAo.VW
         {
             if (from == 0)
             {
-                bool valid = false;
-                string rvDeq = null;
-                while (!valid)
-                {
-                    lock (msgNQueues)
-                    {
-                        valid = msgNQueues.Count != 0;
-                        if (valid)
-                        {
-                            rvDeq = msgNQueues.Dequeue();
-                            break;
-                        }
-                    }
-                    Thread.Sleep(100);
-                }
-                if (rvDeq != null)
-                    Log.Logg("<" + rvDeq);
+                string rvDeq = msgNPools.Take();
+                Log.Logg("<" + rvDeq);
                 return rvDeq;
             }
             else
@@ -340,21 +299,13 @@ namespace PSD.ClientAo.VW
             {
                 if (Log != null)
                     Log.Logg(">" + msg);
-                lock (msg0Queues)
-                {
-                    msg0Queues.Enqueue("\\I" + msg);
-                }
+                msg0Pools.Add(msg);
             }
         }
         // Send direct message that won't be caught by RecvInfRecv from $me to 0
         public void SendDirect(string msg, ushort me)
         {
-            if (Log != null)
-                Log.Logg(">" + msg);
-            lock (msg0Queues)
-            {
-                msg0Queues.Enqueue("\\D" + msg);
-            }
+            Send(msg, me, 0);
         }
         // Close the socket for recycling
         public void Close()
@@ -369,6 +320,8 @@ namespace PSD.ClientAo.VW
             }
             catch (IOException) { }
         }
+
+        public void Dispose() { }
         //// Talk text message to others
         //public void Talk(string msg)
         //{
@@ -377,19 +330,7 @@ namespace PSD.ClientAo.VW
         // Hear any text message from others
         public string Hear()
         {
-            string talk = null;
-            while (true)
-            {
-                lock (msgTalk)
-                {
-                    if (msgTalk.Count > 0)
-                    {
-                        talk = msgTalk.Dequeue();
-                        break;
-                    }
-                }
-                Thread.Sleep(100);
-            }
+            string talk = msgTalk.Take();
             if (talk != null)
                 Log.Logg("<" + talk);
             return talk;
@@ -401,9 +342,9 @@ namespace PSD.ClientAo.VW
             byte[] byte2 = new byte[2];
             ns.Read(byte2, 0, 2);
             ushort value = (ushort)((byte2[0] << 8) + byte2[1]);
-            byte[] actual = new byte[2048];
-            if (value > 2048)
-                value = 2048;
+            byte[] actual = new byte[MSG_SIZE];
+            if (value > MSG_SIZE)
+                value = MSG_SIZE;
             ns.Read(actual, 0, value);
             return Encoding.Unicode.GetString(actual, 0, value);
         }

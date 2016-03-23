@@ -21,7 +21,7 @@ namespace PSD.ClientAo.VW
         //private int shuzi = 0;
         //private int activeCin = 0;
 
-        internal Base.Log Log { set; get; }
+        internal Base.ClLog Log { set; get; }
 
         public Cyvi(AoDisplay ad, bool record, bool msglog)
         {

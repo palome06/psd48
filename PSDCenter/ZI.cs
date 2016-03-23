@@ -121,6 +121,7 @@ namespace PSD.PSDCenter
                         new Thread(delegate()
                         {
                             Thread.Sleep(1000);
+                            //Process.Start(new ProcessStartInfo("PSDGamepkg.exe", ag) { UseShellExecute = false });
                             Process.Start("PSDGamepkg.exe", ag);
                         }).Start();
                         reqRoom.Ps = new NamedPipeServerStream(pg, PipeDirection.InOut);

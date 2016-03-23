@@ -75,7 +75,11 @@
         public string Msg { private set; get; }
         public ushort From { private set; get; }
         public ushort To { private set; get; }
-        public bool Direct { private set; get; }
+        public bool Direct { private set; get; } // TODO: maybe remove the property
+        public Msgs(string msg, ushort from, ushort to)
+        {
+            Msg = msg; From = from; To = to; Direct = false;
+        }
         public Msgs(string msg, ushort from, ushort to, bool direct)
         {
             Msg = msg; From = from; To = to; Direct = direct;

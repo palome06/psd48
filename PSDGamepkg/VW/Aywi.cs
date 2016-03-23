@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -10,13 +11,13 @@ using System.IO;
 using PSD.Base.Utils;
 using System.IO.Pipes;
 using System.Runtime.CompilerServices;
-using System.Collections.Concurrent;
 
 namespace PSD.PSDGamepkg.VW
 {
     // Server In it
     public class Aywi : Base.VW.IWISV
     {
+        public const int MSG_SIZE = 4096;
         private List<Thread> recvThread;
         private Thread sendThread;
         // Thread when someone lost connection and wait for rejoin;
@@ -43,7 +44,7 @@ namespace PSD.PSDGamepkg.VW
         public bool IsRecvBlocked
         {
             [MethodImpl(MethodImplOptions.Synchronized)]
-            set { isRecvBlocked = value; }
+            private set { isRecvBlocked = value; }
             [MethodImpl(MethodImplOptions.Synchronized)]
             get { return isRecvBlocked; }
         }
@@ -60,7 +61,7 @@ namespace PSD.PSDGamepkg.VW
         {
             NetworkStream ns = new NetworkStream(socket);
             string data = ReadByteLine(ns);
-            string addr = (socket.RemoteEndPoint as IPEndPoint).Address.ToString();
+            //string addr = (socket.RemoteEndPoint as IPEndPoint).Address.ToString();
             if (data.StartsWith("C2CO,"))
             {
                 string[] blocks = data.Split(',');
@@ -390,7 +391,6 @@ namespace PSD.PSDGamepkg.VW
         #region Communication and Tunnel
 
         public bool IsTalkSilence { set; get; }
-
         // $paruru is of type Neayer, register to the socket
         // only support neayer. Watcher -> Indirect Live Message only
         private void KeepOnListenRecv(object paruru)
@@ -407,33 +407,16 @@ namespace PSD.PSDGamepkg.VW
                     // Always return, Keep on find survivors if game not end, otherwise...
                     // and stop searching for survivors after a time limit (300s)
                 }
-                if (line.StartsWith("\\D")) // Direct Message
+                if (line.StartsWith("Y")) // word
                 {
-                    line = line.Substring("\\D".Length);
-                    if (line.StartsWith("Y"))
-                    {
-                        if (yMsgHandler != null)
-                            yMsgHandler(line, ny.Uid);
-                    }
-                    else
-                    {
-                        bool inValid = ((line.StartsWith("U") || line.StartsWith("V")) && IsRecvBlocked);
-                        if (!inValid)
-                        {
-                            msg0Queues[ny.Uid].Enqueue(new Base.VW.Msgs(line, ny.Uid, 0, true));
-                            Log.Logger(0 + "<<" + ny.Uid + ":" + line);
-                        }
-                    }
+                    if (yMsgHandler != null)
+                        yMsgHandler(line, ny.Uid);
                 }
-                else if (line.StartsWith("\\I"))
+                else if (!string.IsNullOrEmpty(line))
                 {
-                    line = line.Substring("\\I".Length);
-                    bool inValid = ((line.StartsWith("U") || line.StartsWith("V")) && IsRecvBlocked);
-                    if (!inValid)
-                    {
-                        msg0Queues[ny.Uid].Enqueue(new Base.VW.Msgs(line, ny.Uid, 0, false));
-                        //Log.Logger(0 + "<" + ny.Uid + ":" + line);
-                    }
+                    if (!IsRecvBlocked)
+                        msg0Pools[ny.Uid].Add(line);
+                    //Log.Logger(0 + "<" + ny.Uid + ":" + line);
                 }
                 else
                     Thread.Sleep(80);
@@ -443,21 +426,17 @@ namespace PSD.PSDGamepkg.VW
         {
             while (true)
             {
-                if (infNMsgs.Count > 0)
+                Base.VW.Msgs msg = infNMsgs.Take();
+                if (!IsRecvBlocked && msg.From == 0)
                 {
-                    Base.VW.Msgs msg = infNMsgs.Dequeue();
-                    bool inValid = ((msg.Msg.StartsWith("U") || msg.Msg.StartsWith("V")) && IsRecvBlocked);
-                    if (!inValid && msg.From == 0)
+                    if (neayers.ContainsKey(msg.To) && neayers[msg.To].Alive)
                     {
-                        if (neayers.ContainsKey(msg.To) && neayers[msg.To].Alive)
-                        {
-                            Log.Logger(0 + ">" + msg.To + ":" + msg.Msg.Substring("\\I".Length));
-                            try { SentByteLine(new NetworkStream(neayers[msg.To].Tunnel), msg.Msg); }
-                            catch (IOException) { OnLoseConnection(msg.To); break; }
-                        }
-                        else
-                            KeepOnListenSendWatcher(msg);
+                        Log.Logger(0 + ">" + msg.To + ";" + msg.Msg);
+                        try { SentByteLine(new NetworkStream(neayers[msg.To].Tunnel), msg.Msg); }
+                        catch (IOException) { OnLoseConnection(msg.To); break; }
                     }
+                    else
+                        KeepOnListenSendWatcher(msg);
                 }
                 else
                     Thread.Sleep(80);
@@ -510,7 +489,7 @@ namespace PSD.PSDGamepkg.VW
                                 // OK, all gathered.
                                 BCast("H0RK,0");
                                 WriteBytes(Ps, "C3RV,0");
-                                isRecvBlocked = false;
+                                IsRecvBlocked = false;
                                 if (OnReconstructRoom != null)
                                     OnReconstructRoom();
                                 return true;
@@ -548,7 +527,7 @@ namespace PSD.PSDGamepkg.VW
                 Send("H0WT," + who, neayers.Where(p => p.Value.Alive).Select(p => p.Key).ToArray());
                 Live("H0WT," + who);
                 // Step 1: block all U/V input
-                isRecvBlocked = true;
+                IsRecvBlocked = true;
 
                 // Step 2: Start Waiting thread and init news signal queue.
                 if (updateNeayersInWaiting == null)
@@ -589,18 +568,17 @@ namespace PSD.PSDGamepkg.VW
 
         private const int playerCapacity = 6;
         /// <summary>
-        /// msg0Queues: message from $i to 0
-        /// msgNQueues: message from 0 to $i
+        /// msg0Pools: message from $i to 0
+        /// msgNPools: message from 0 to $i
         /// </summary>
-        private Rueue<Base.VW.Msgs>[] msg0Queues;
+        private BlockingCollection<string>[] msg0Pools;
         // message queue of handling inf
         //private Queue<Base.VW.Msgs> inf0Msgs;
         // only for send
-        private Queue<Base.VW.Msgs> infNMsgs;
+        private BlockingCollection<Base.VW.Msgs> infNMsgs;
         // queue for talk message, format as Y2,4,Hello
         //private Queue<Base.VW.Msgs> talkMsgs;
         // whether listen on or not
-        private int infOn;
         // handler of Y message, inits from XI Instance.
         private Action<string, ushort> yMsgHandler;
 
@@ -609,133 +587,57 @@ namespace PSD.PSDGamepkg.VW
             this.port = port;
             this.recvThread = new List<Thread>();
 
-            msg0Queues = new Rueue<Base.VW.Msgs>[playerCapacity + 1];
-            for (int i = 0; i <= playerCapacity; ++i)
-                msg0Queues[i] = new Rueue<Base.VW.Msgs>();
-            //cinListenThread = new Thread(CinListenStarts);
-            //inf0Msgs = new Queue<Base.VW.Msgs>();
-            infNMsgs = new Queue<Base.VW.Msgs>();
-            //talkMsgs = new Queue<Base.VW.Msgs>();
-            infOn = 0;
-            this.Log = log;
+            msg0Pools = new BlockingCollection<string>[playerCapacity + 1];
+            for (int i = 0; i<= playerCapacity; ++i)
+                msg0Pools[i] = new BlockingCollection<string>(new ConcurrentQueue<string>());
+            infNMsgs = new BlockingCollection<Base.VW.Msgs>(new ConcurrentQueue<Base.VW.Msgs>());
+
             IsTalkSilence = false;
-
             this.yMsgHandler = yHandler;
+            this.Log = log;
         }
-
         #region Implemetation
         // Get input result from $from to $me (require reply from $side to $me)
         public string Recv(ushort me, ushort from)
         {
             if (me == 0)
             {
-                bool valid = false;
-                string rvDeq = null;
-                while (!valid)
-                {
-                    lock (msg0Queues[from])
-                    {
-                        valid = msg0Queues[from].Count != 0;
-                        if (valid)
-                        {
-                            rvDeq = msg0Queues[from].Dequeue().Msg;
-                            break;
-                        }
-                    }
-                    Thread.Sleep(100);
-                }
+                string rvDeq = msg0Pools[from].Take();
                 if (rvDeq != null)
-                    Log.Logger("=" + from + ":" + rvDeq);
-                return rvDeq;
-            }
-            else
-                return null;
-        }
-        // infinite process starts
-        public void RecvInfStart()
-        {
-            ++infOn;
-            //foreach (Rueue<Base.VW.Msgs> queue in msg0Queues)
-            //{
-            //    lock (queue)
-            //    {
-            //        if (queue.Count > 0)
-            //        {
-            //            List<Base.VW.Msgs> dels = new List<Base.VW.Msgs>();
-            //            foreach (Base.VW.Msgs msg in queue)
-            //            {
-            //                if (!msg.Direct)
-            //                    dels.Add(msg);
-            //            }
-            //            foreach (Base.VW.Msgs msg in dels)
-            //            {
-            //                queue.Remove(msg);
-            //                inf0Msgs.Enqueue(msg);
-            //            }
-            //        }
-            //    }
-            //}
-        }
-        // receive each message during the process
-        public Base.VW.Msgs RecvInfRecv()
-        {
-            //if (inf0Msgs.Count != 0)
-            //    return inf0Msgs.Dequeue();
-            //else
-            //    return null;
-            foreach (Rueue<Base.VW.Msgs> queue in msg0Queues)
-            {
-                lock (queue)
                 {
-                    if (queue.Count > 0)
-                    {
-                        foreach (Base.VW.Msgs msg in queue)
-                        {
-                            if (!msg.Direct)
-                            {
-                                queue.Remove(msg);
-                                Log.Logger("==" + msg.From + ":" + msg.Msg);
-                                return msg;
-                            }
-                        }
-                    }
+                    Log.Logger("=" + from + ":" + rvDeq);
+                    return rvDeq;
                 }
             }
             return null;
         }
+        // infinite process starts
+        public void RecvInfStart() { }
+        // receive each message during the process
+        public Base.VW.Msgs RecvInfRecv()
+        {
+            string msg;
+            int index = BlockingCollection<string>.TakeFromAny(msg0Pools, out msg);
+            if (index <= playerCapacity && index > 0)
+            {
+                Log.Logger("==" + index + ":" + msg);
+                return new Base.VW.Msgs(msg, (ushort)index, 0);
+            }
+            else return null;
+        }
         public Base.VW.Msgs RecvInfRecvPending()
         {
-            do
-            {
-                Base.VW.Msgs msgs = RecvInfRecv();
-                if (msgs != null)
-                    return msgs;
-                Thread.Sleep(100);
-            } while (true);
+            return RecvInfRecv();
         }
         // infinite process ends
-        public void RecvInfEnd()
-        {
-            --infOn;
-            //if (infOn <= 0) { infOn = 0; inf0Msgs.Clear(); }
-            if (infOn <= 0) { infOn = 0; }
-        }
+        public void RecvInfEnd() { }
         // reset the terminal flag to 0, start new stage
-        public void RecvInfTermin()
-        {
-            //infOn = 0; inf0Msgs.Clear();
-            infOn = 0;
-        }
+        public void RecvInfTermin() { }
         // Send raw message from $me to $to
         public void Send(string msg, ushort me, ushort to)
         {
             if (me == 0)
-            {
-                lock (infNMsgs)
-                {
-                    infNMsgs.Enqueue(new Base.VW.Msgs("\\I" + msg, me, to, false));
-                }
-            }
+                infNMsgs.Add(new Base.VW.Msgs(msg, me, to));
         }
         // Send raw message to multiple $to
         public void Send(string msg, ushort[] tos)
@@ -760,11 +662,7 @@ namespace PSD.PSDGamepkg.VW
                 Send(msg, 0, to);
         }
         // Send direct message that won't be caught by RecvInfRecv from $me to 0
-        public void SendDirect(string msg, ushort me)
-        {
-        //    if (me != 0)
-        //        infNMsgs.Enqueue(new Base.VW.Msgs("\\D" + msg, 0, to));
-        }
+        public void SendDirect(string msg, ushort me) { }
         public void Dispose() { }
         #endregion Implementation
 
@@ -777,9 +675,9 @@ namespace PSD.PSDGamepkg.VW
             {
                 ns.Read(byte2, 0, 2);
                 ushort value = (ushort)((byte2[0] << 8) + byte2[1]);
-                byte[] actual = new byte[2048];
-                if (value > 2048)
-                    value = 2048;
+                byte[] actual = new byte[MSG_SIZE];
+                if (value > MSG_SIZE)
+                    value = MSG_SIZE;
                 ns.Read(actual, 0, value);
                 return Encoding.Unicode.GetString(actual, 0, value);
             }
@@ -802,8 +700,8 @@ namespace PSD.PSDGamepkg.VW
         {
             if (ps != null)
             {
-                byte[] byte2 = new byte[4096];
-                int readCount = ps.Read(byte2, 0, 4096);
+                byte[] byte2 = new byte[MSG_SIZE];
+                int readCount = ps.Read(byte2, 0, MSG_SIZE);
                 if (readCount > 0)
                     return Encoding.Unicode.GetString(byte2, 0, readCount);
                 else
