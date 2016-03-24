@@ -114,6 +114,7 @@ namespace PSD.PSDGamepkg
                     }
                     RaiseGMessage("G2AS,0");
                     // locks.RemoveAt(0);
+                    involved[me] = true;
                     continue;
                 }
                 if (Board.Garden.Keys.Where(p => involved[p]).Any() && !isTermini)

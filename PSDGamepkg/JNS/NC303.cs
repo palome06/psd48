@@ -369,7 +369,8 @@ namespace PSD.PSDGamepkg.JNS
             List<ushort> players = XI.Board.OrderedPlayer(player.Uid);
             foreach (ushort ut in players)
             {
-                if (pops.Count <= 0) break;
+                if (pops.Count <= 0) { break; }
+                if (!XI.Board.Garden[ut].IsAlive) { continue; }
                 XI.RaiseGMessage("G2FU,0," + ut + ",0,C," + string.Join(",", XI.Board.PZone));
                 string input = XI.AsyncInput(ut, "Z1(p" +
                     string.Join("p", XI.Board.PZone) + ")", "NJH2", "0");
