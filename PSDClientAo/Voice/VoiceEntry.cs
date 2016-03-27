@@ -28,12 +28,14 @@ namespace PSD.ClientAo.Voice
                 using (var vorbisStream = new NAudio.Vorbis.VorbisWaveReader(stream))
                 using (var waveOut = new NAudio.Wave.WaveOutEvent())
                 {
-                    waveOut.Init(vorbisStream);
-                    waveOut.Play();
-                    SpinWait.SpinUntil(() => vorbisStream.Position >= vorbisStream.Length || mStop);
-                    Thread.Sleep(200);
-                    if (OnPlayFinished != null)
-                        OnPlayFinished();
+                    try {
+                        waveOut.Init(vorbisStream);
+                        waveOut.Play();
+                        SpinWait.SpinUntil(() => vorbisStream.Position >= vorbisStream.Length || mStop);
+                        Thread.Sleep(200);
+                        if (OnPlayFinished != null)
+                            OnPlayFinished();
+                    } catch (NAudio.MmException) { }
                 }
             }).Start();
         }

@@ -3501,7 +3501,10 @@ namespace PSD.PSDGamepkg.JNS
                     if (sel == "1")
                     {
                         if (player.Tux.Count > 0)
-                            XI.RaiseGMessage("G0DH," + player.Uid + ",1," + player.Tux.Count / 2);
+                        {
+                            int tn = System.Math.Max(1, player.Tux.Count / 2);
+                            XI.RaiseGMessage("G0DH," + player.Uid + ",1," + tn);
+                        }
                         XI.DequeueOfPile(XI.Board.TuxPiles);
                         XI.RaiseGMessage("G2IN,0,1");
                         XI.RaiseGMessage("G0YM,8," + ut);

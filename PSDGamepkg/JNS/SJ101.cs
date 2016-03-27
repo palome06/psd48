@@ -828,7 +828,7 @@ namespace PSD.PSDGamepkg.JNS
         }
         public void SJH06(Player rd)
         {
-            foreach (ushort ut in XI.Board.OrderedPlayer())
+            foreach (ushort ut in XI.Board.OrderedPlayer(rd.Uid))
             {
                 if (rd.Tux.Count == 0) { break; }
                 Player py = XI.Board.Garden[ut];
@@ -852,7 +852,7 @@ namespace PSD.PSDGamepkg.JNS
         public void SJH07(Player rd)
         {
             int count = 0;
-            foreach (ushort ut in XI.Board.OrderedPlayer())
+            foreach (ushort ut in XI.Board.OrderedPlayer(rd.Uid))
             {
                 Player py = XI.Board.Garden[ut];
                 if (ut == rd.Uid || !py.IsAlive || py.GetAllCardsCount() == 0) { continue; }

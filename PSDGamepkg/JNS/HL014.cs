@@ -261,22 +261,22 @@ namespace PSD.PSDGamepkg.JNS
         }
         public bool JNH0203Valid(Player player, int type, string fuse)
         {
-            return player.HP < player.HPb && player.Tux.Count > 0 &&
-                Artiad.Harm.Parse(fuse).Any(p => !HPEvoMask.CHAIN_INVAO.IsSet(p.Mask));
+            return player.HP < player.HPb && player.Tux.Count > 0 && Artiad.Harm.Parse(
+                fuse).Any(p => !HPEvoMask.TERMIN_AT.IsSet(p.Mask) && !HPEvoMask.CHAIN_INVAO.IsSet(p.Mask));
         }
         public void JNH0203Action(Player player, int type, string fuse, string argst)
         {
             ushort resi = ushort.Parse(argst);
             XI.RaiseGMessage("G0QZ," + player.Uid + "," + resi);
             List<Artiad.Harm> harms = Artiad.Harm.Parse(fuse);
-            harms.ForEach(p =>
+            foreach (Artiad.Harm harm in harms)
             {
-                if (!HPEvoMask.CHAIN_INVAO.IsSet(p.Mask))
+                if (!HPEvoMask.CHAIN_INVAO.IsSet(harm.Mask) && !HPEvoMask.TERMIN_AT.IsSet(harm.Mask))
                 {
-                    if (player.HP < 3) { p.N *= 2; }
-                    else { ++p.N; }
+                    if (player.HP < 3) { harm.N *= 2; }
+                    else { ++harm.N; }
                 }
-            });
+            }
             TargetPlayer(player.Uid, harms.Select(p => p.Who).Distinct());
             XI.RaiseGMessage("G1CK," + player.Uid + ",JNH0203,0");
             XI.InnerGMessage(Artiad.Harm.ToMessage(harms), -189);
@@ -391,9 +391,10 @@ namespace PSD.PSDGamepkg.JNS
 
             if (!tux.IsTuxEqiup())
             {
-                string willAsk = "#弃置的,/Q1(p" + randomCard + ")";
-                string willDiscard = XI.AsyncInput(ut, willAsk, "JNH0206", "1");
-                if (!willDiscard.StartsWith("/") && willDiscard != VI.CinSentinel)
+                string willAsk = string.Format("#是否弃置{0}的【{1}】##是##否,Y2",
+                    XI.DisplayPlayer(ut), tux.Name);
+                string willDiscard = XI.AsyncInput(player.Uid, willAsk, "JNH0206", "1");
+                if (willDiscard == "1")
                 {
                     if (tar.ListOutAllCards().Contains(randomCard))
                         XI.RaiseGMessage("G0QZ," + ut + "," + randomCard);
@@ -402,7 +403,7 @@ namespace PSD.PSDGamepkg.JNS
                 else
                 {
                     willDiscard = XI.AsyncInput(ut, willAsk, "JNH0206", "2");
-                    if (!willDiscard.StartsWith("/") && willDiscard != VI.CinSentinel)
+                    if (willDiscard == "1")
                     {
                         if (tar.ListOutAllCards().Contains(randomCard))
                             XI.RaiseGMessage("G0QZ," + ut + "," + randomCard);
