@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Net;
-using System.IO.Pipes;
 
 using PSD.Base;
 using PSD.Base.Rules;
@@ -16,8 +15,6 @@ namespace PSD.PSDGamepkg
     public partial class XI
     {
         private const int playerCapacity = 6;
-
-        private NamedPipeClientStream ps = null;
 
         private static string GetValue(string[] args, int index, string hint)
         {
@@ -177,10 +174,14 @@ namespace PSD.PSDGamepkg
             Log.Start();
             aywi.TcpListenerStart();
             aywi.OnReconstructRoom = ResumeLostInputEvent;
-            ps = new NamedPipeClientStream(pipeName);
-            ps.Connect();
-            aywi.Ps = ps;
-            WriteBytes(ps, "C3RD," + room);
+
+            aywi.StartFakePipe(room);
+
+            // TcpClient::::::
+            // ps = new NamedPipeClientStream(pipeName);
+            // ps.Connect();
+            // aywi.Ps = ps;
+            // WriteBytes(ps, "C3RD," + room);
             //sw = new StreamWriter(ps);
             //aywi.Sw = sw;
             //sw.Write("C3RD," + room);
@@ -301,31 +302,5 @@ namespace PSD.PSDGamepkg
                 }
             }, delegate(Exception e) { Log.Logger(e.ToString()); })).Start();
         }
-        #region Stream Utils
-        private static string ReadBytes(NamedPipeClientStream ps)
-        {
-            if (ps != null)
-            {
-                byte[] byte2 = new byte[4096];
-                int readCount = ps.Read(byte2, 0, 4096);
-                if (readCount > 0)
-                    return Encoding.Unicode.GetString(byte2, 0, readCount);
-                else
-                    return "";
-            }
-            else
-                return "";
-        }
-        private static void WriteBytes(NamedPipeClientStream ps, string value)
-        {
-            if (ps != null)
-            {
-                byte[] byte2 = Encoding.Unicode.GetBytes(value);
-                if (byte2.Length > 0)
-                    ps.Write(byte2, 0, byte2.Length);
-                ps.Flush();
-            }
-        }
-        #endregion Stream Utils
     }
 }

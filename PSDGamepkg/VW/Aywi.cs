@@ -9,7 +9,6 @@ using System.Threading;
 using PSD.Base;
 using System.IO;
 using PSD.Base.Utils;
-using System.IO.Pipes;
 using System.Runtime.CompilerServices;
 
 namespace PSD.PSDGamepkg.VW
@@ -27,8 +26,8 @@ namespace PSD.PSDGamepkg.VW
         private TcpListener listener;
         private int port; // actual port number taken room int consideration
 
-        //public string PipeName { set; get; }
-        public NamedPipeClientStream Ps { set; get; }
+        // network stream to center, to replace Pipe
+        private NetworkStream cns;
         // Action to block all U/V inputs
         public Action OnBlockUVInputs { private set; get; }
         // Action to notify the finish of reconstructing the room
@@ -62,7 +61,8 @@ namespace PSD.PSDGamepkg.VW
             NetworkStream ns = new NetworkStream(socket);
             string data = ReadByteLine(ns);
             //string addr = (socket.RemoteEndPoint as IPEndPoint).Address.ToString();
-            if (data.StartsWith("C2CO,"))
+            if (data == null) { return; }
+            else if (data.StartsWith("C2CO,"))
             {
                 string[] blocks = data.Split(',');
                 ushort ut = ushort.Parse(blocks[1]);
@@ -339,7 +339,8 @@ namespace PSD.PSDGamepkg.VW
                 Socket socket = listener.AcceptSocket();
                 NetworkStream ns = new NetworkStream(socket);
                 string data = ReadByteLine(ns);
-                if (data.StartsWith("C2QI,")) // Watcher case
+                if (data == null) { return 0; }
+                else if (data.StartsWith("C2QI,")) // Watcher case
                 {
                     string[] blocks = data.Split(',');
                     ushort ut = ushort.Parse(blocks[1]);
@@ -399,14 +400,14 @@ namespace PSD.PSDGamepkg.VW
             while (true)
             {
                 string line = "";
-                try { line = ReadByteLine(new NetworkStream(ny.Tunnel)); }
-                catch (IOException)
+                try
                 {
-                    OnLoseConnection(ny.Uid);
-                    break;
-                    // Always return, Keep on find survivors if game not end, otherwise...
-                    // and stop searching for survivors after a time limit (300s)
+                    line = ReadByteLine(new NetworkStream(ny.Tunnel));
+                    if (line == null) { ny.Tunnel.Close(); OnLoseConnection(ny.Uid); break; }
                 }
+                catch (IOException) { OnLoseConnection(ny.Uid); break; }
+                // Always return, Keep on find survivors if game not end, otherwise...
+                // and stop searching for survivors after a time limit (300s)
                 if (line.StartsWith("Y")) // word
                 {
                     if (yMsgHandler != null)
@@ -427,7 +428,7 @@ namespace PSD.PSDGamepkg.VW
             while (true)
             {
                 Base.VW.Msgs msg = infNMsgs.Take();
-                if (!IsRecvBlocked && msg.From == 0)
+                if (msg.From == 0) // send won't be blocked
                 {
                     if (neayers.ContainsKey(msg.To) && neayers[msg.To].Alive)
                     {
@@ -480,7 +481,7 @@ namespace PSD.PSDGamepkg.VW
                         // Awake the neayer
                         if (neayers.ContainsKey(uts[1]))
                             neayers[uts[1]].Alive = true;
-                        WriteBytes(Ps, "C3RA," + uts[0]);
+                        SentByteLine(cns, "C3RA," + uts[0]);
                         // Check whether all members has gathered.
                         lock (neayers)
                         {
@@ -488,7 +489,7 @@ namespace PSD.PSDGamepkg.VW
                             {
                                 // OK, all gathered.
                                 BCast("H0RK,0");
-                                WriteBytes(Ps, "C3RV,0");
+                                SentByteLine(cns, "C3RV,0");
                                 IsRecvBlocked = false;
                                 if (OnReconstructRoom != null)
                                     OnReconstructRoom();
@@ -539,13 +540,12 @@ namespace PSD.PSDGamepkg.VW
                 }
 
                 // Step 3: Report to Centre
-                if (Ps != null)
-                    WriteBytes(Ps, "C3LS," + neayers[who].AUid);
+                SentByteLine(cns, "C3LS," + neayers[who].AUid);
                 lock (neayers)
                 {
                     if (neayers.Count(p => p.Value.Alive) == 0 && netchers.Count == 0)
                     {
-                        WriteBytes(Ps, "C3LV,0");
+                        SentByteLine(cns, "C3LV,0");
                         Environment.Exit(0);
                     }
                 }
@@ -557,14 +557,30 @@ namespace PSD.PSDGamepkg.VW
             if (vi != null) vi.Cout(0, "房间严重损坏，本场游戏终结.");
             Send("H0LT,0", neayers.Where(p => p.Value.Alive).Select(p => p.Key).ToArray());
             Live("H0LT,0");
-            WriteBytes(Ps, "C3LV,0");
+            SentByteLine(cns, "C3LV,0");
             lock (neayers)
             {
                 if (neayers.Count(p => p.Value.Alive) == 0 && netchers.Count == 0)
                     Environment.Exit(0);
             }
         }
+        // report to fake pipe
+        public void Report(string message)
+        {
+            if (cns != null)
+                SentByteLine(cns, message);
+        }
         #endregion Communication and Tunnel
+
+        #region Fake Pipe
+        public void StartFakePipe(int roomNum)
+        {
+            TcpClient client = new TcpClient("127.0.0.1", Base.NetworkCode.HALL_PORT);
+            NetworkStream tcpStream = client.GetStream();
+            SentByteLine(tcpStream, "C3HI," + roomNum);
+            cns = tcpStream;
+        }
+        #endregion Fake Pipe
 
         private const int playerCapacity = 6;
         /// <summary>
@@ -670,55 +686,36 @@ namespace PSD.PSDGamepkg.VW
         // Read from Socket Tunnel
         private static string ReadByteLine(NetworkStream ns)
         {
-            byte[] byte2 = new byte[2];
-            try
+            if (ns != null)
             {
-                ns.Read(byte2, 0, 2);
-                ushort value = (ushort)((byte2[0] << 8) + byte2[1]);
-                byte[] actual = new byte[MSG_SIZE];
-                if (value > MSG_SIZE)
-                    value = MSG_SIZE;
-                ns.Read(actual, 0, value);
-                return Encoding.Unicode.GetString(actual, 0, value);
+                byte[] byte2 = new byte[2];
+                try
+                {
+                    ns.Read(byte2, 0, 2);
+                    ushort value = (ushort)((byte2[0] << 8) + byte2[1]);
+                    byte[] actual = new byte[MSG_SIZE];
+                    if (value > MSG_SIZE)
+                        value = MSG_SIZE;
+                    ns.Read(actual, 0, value);
+                    return value > 0 ? Encoding.Unicode.GetString(actual, 0, value) : null;
+                }
+                catch (IOException) { return ""; }
             }
-            catch (IOException) { return ""; }
+            else return "";
         }
         // Write into Socket Tunnel
         private static void SentByteLine(NetworkStream ns, string value)
         {
-            byte[] actual = Encoding.Unicode.GetBytes(value);
-                int al = actual.Length;
-            byte[] buf = new byte[al + 2];
-            buf[0] = (byte)(al >> 8);
-            buf[1] = (byte)(al & 0xFF);
-            actual.CopyTo(buf, 2);
-            ns.Write(buf, 0, al + 2);
-            ns.Flush();
-        }
-        // Read from Pipe Tunnel
-        private static string ReadBytes(NamedPipeClientStream ps)
-        {
-            if (ps != null)
+            if (ns != null)
             {
-                byte[] byte2 = new byte[MSG_SIZE];
-                int readCount = ps.Read(byte2, 0, MSG_SIZE);
-                if (readCount > 0)
-                    return Encoding.Unicode.GetString(byte2, 0, readCount);
-                else
-                    return "";
-            }
-            else
-                return "";
-        }
-        // Write into Pipe Tunnel
-        private static void WriteBytes(NamedPipeClientStream ps, string value)
-        {
-            if (ps != null)
-            {
-                byte[] byte2 = Encoding.Unicode.GetBytes(value);
-                if (byte2.Length > 0)
-                    ps.Write(byte2, 0, byte2.Length);
-                ps.Flush();
+                byte[] actual = Encoding.Unicode.GetBytes(value);
+                    int al = actual.Length;
+                byte[] buf = new byte[al + 2];
+                buf[0] = (byte)(al >> 8);
+                buf[1] = (byte)(al & 0xFF);
+                actual.CopyTo(buf, 2);
+                ns.Write(buf, 0, al + 2);
+                ns.Flush();
             }
         }
         #endregion Stream Utils

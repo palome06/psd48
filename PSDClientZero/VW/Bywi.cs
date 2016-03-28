@@ -43,7 +43,9 @@ namespace PSD.ClientZero.VW
             while (true)
             {
                 string line = ReadByteLine(tcpStream);
-                if (line.StartsWith("C2CN,") && !watch)
+                if (line == null)
+                    return false;
+                else if (line.StartsWith("C2CN,") && !watch)
                 {
                     ushort ut = ushort.Parse(line.Substring("C2CN,".Length));
                     if (ut == 0)
@@ -87,7 +89,9 @@ namespace PSD.ClientZero.VW
             while (true)
             {
                 string line = ReadByteLine(tcpStream);
-                if (line.StartsWith("C2CN,") && !watch)
+                if (line == null)
+                    return false;
+                else if (line.StartsWith("C2CN,") && !watch)
                 {
                     ushort ut = ushort.Parse(line.Substring("C2CN,".Length));
                     if (ut == 0)
@@ -160,7 +164,9 @@ namespace PSD.ClientZero.VW
             while (true)
             {
                 string line = ReadByteLine(tcpStream);
-                if (line.StartsWith("C4CS,"))
+                if (line == null)
+                    return false;
+                else if (line.StartsWith("C4CS,"))
                 {
                     ushort ut = ushort.Parse(line.Substring("C4CS,".Length));
                     if (ut == 0)
@@ -218,7 +224,13 @@ namespace PSD.ClientZero.VW
                 while (true)
                 {
                     string line = ReadByteLine(stream);
-                    if (line.StartsWith("Y"))
+                    if (string.IsNullOrEmpty(line))
+                    {
+                        xic.ReportConnectionLost();
+                        stream.Close();
+                        break;
+                    }
+                    else if (line.StartsWith("Y"))
                         msgTalk.Add(line);
                     else
                         msgNPools.Add(line);
@@ -342,7 +354,7 @@ namespace PSD.ClientZero.VW
             if (value > MSG_SIZE)
                 value = MSG_SIZE;
             ns.Read(actual, 0, value);
-            return Encoding.Unicode.GetString(actual, 0, value);
+            return value > 0 ? Encoding.Unicode.GetString(actual, 0, value) : null;
         }
 
         private static void SentByteLine(NetworkStream ns, string value)

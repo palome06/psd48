@@ -8,7 +8,6 @@ using System.Threading;
 using PSD.Base.Rules;
 using System.IO;
 using System.Diagnostics;
-using System.IO.Pipes;
 
 namespace PSD.PSDCenter
 {
@@ -116,89 +115,25 @@ namespace PSD.PSDCenter
                         //    lThread.Abort();
                         string ag = "1 " + reqRoom.ConvToString() + " " +
                             string.Join(",", reqRoom.players);
-                        string pg = "psd48pipe" + reqRoom.Number;
-                        //string pgr = "psd48piper" + reqRoom.Number;
+                        //string pg = "psd48pipe" + reqRoom.Number;
                         new Thread(delegate()
                         {
                             Thread.Sleep(1000);
                             //Process.Start(new ProcessStartInfo("PSDGamepkg.exe", ag) { UseShellExecute = false });
                             Process.Start("PSDGamepkg.exe", ag);
                         }).Start();
-                        reqRoom.Ps = new NamedPipeServerStream(pg, PipeDirection.InOut);
-                        var ps = reqRoom.Ps;
-                        ps.WaitForConnection();
-                        string line;
-                        while ((line = ReadBytes(ps)) != "")
-                        {
-                            if (line.StartsWith("C3RD"))
-                            {
-                                lock (reqRoom.players)
-                                {
-                                    foreach (ushort nyru in reqRoom.players)
-                                    {
-                                        Neayer nyr = neayers[nyru];
-                                        SentByteLine(new NetworkStream(nyr.Tunnel), "C1SA,0");
-                                    }
-                                }
-                            }
-                            else if (line.StartsWith("C3LV")) // Terminate unexpected
-                            {
-                                Console.WriteLine("Room " + reqRoom.Number + "# is forced closed.");
-                                rooms.Remove(reqRoom.Number);
-                                //reqRoom.Ps.Close(); // TODO: LV don't termintate directly
-                                break;
-                            }
-                            else if (line.StartsWith("C3TM")) // Terminate gracefully
-                            {
-                                Console.WriteLine("Room " + reqRoom.Number + "# terminates gracefully.");
-                                rooms.Remove(reqRoom.Number);
-                                // reqRoom.Ps.Close(); // TODO: LV don't termintate directly
-                                break;
-                            }
-                            else if (line.StartsWith("C3LS"))
-                            {
-                                ushort ut = ushort.Parse(line.Substring("C3LS,".Length));
-                                Console.WriteLine("Player " + ut + "#[" +
-                                    neayers[ut].Name + "] loses connection with Room " + reqRoom.Number + "#.");
-                                // $ut is the old uid
-                                if (rooms.ContainsKey(reqRoom.Number) && neayers.ContainsKey(ut))
-                                    losers.Add(neayers[ut]);
-                            }
-                            else if (line.StartsWith("C3RA"))
-                            {
-                                ushort ut = ushort.Parse(line.Substring("C3RA,".Length));
-                                if (substitudes.ContainsKey(ut))
-                                {
-                                    ushort subsut = substitudes[ut];
-                                    location[ut] = reqRoom.Number;
-                                    Neayer rny = neayers[subsut];
-                                    losers.Remove(rny);
-                                    if (neayers.ContainsKey(subsut))
-                                        neayers.Remove(subsut);
-                                    substitudes.Remove(ut);
-                                }
-                                Console.WriteLine("Player " + ut + "#[" +
-                                    neayers[ut].Name + "] has been back to Room " + reqRoom.Number + "#.");
-                            }
-                            else if (line.StartsWith("C3RV"))
-                            {
-                                Console.WriteLine("Room " + reqRoom.Number + "# is recovered.");
-                            }
-                        }
                     }
-                    else
+                    // Wait for C1ST message to terminate the socket
+                    do
                     {
-                        // Wait for C1ST message to terminate the socket
                         string reply = ReadByteLine(ns);
-                        while (true)
-                        {
-                            if (reply.StartsWith("C0TK,"))
-                                HandleTalkInConnection(socket, reply.Substring("C0TK,".Length));
-                            else if (reply.StartsWith("C1ST,"))
-                                break;
-                            reply = ReadByteLine(ns);
-                        }
-                    }
+                        if (reply == null)
+                            socket.Close(); // close twice then led to IOException
+                        else if (reply.StartsWith("C0TK,"))
+                            HandleTalkInConnection(socket, reply.Substring("C0TK,".Length));
+                        else if (reply.StartsWith("C1ST,"))
+                            break;
+                    } while (true);
                     socket.Close();
                 }
                 catch (IOException)
@@ -331,6 +266,69 @@ namespace PSD.PSDCenter
 				if (!foundOrg)
 					SentByteLine(ns, "C4RM,0");
             }
+            else if (data.StartsWith("C3HI,")) // hello from pkg to replace pipestream
+            {
+                ushort roomNum = ushort.Parse(data.Substring("C3HI,".Length));
+                Room reqRoom = rooms[roomNum];
+                if (reqRoom != null)
+                {
+                    lock (reqRoom.players)
+                    {
+                        foreach (ushort nyru in reqRoom.players)
+                        {
+                            Neayer nyr = neayers[nyru];
+                            SentByteLine(new NetworkStream(nyr.Tunnel), "C1SA,0");
+                        }
+                    }
+                    string line;
+                    while (!string.IsNullOrEmpty(line = ReadByteLine(ns)))
+                    {
+                        if (line.StartsWith("C3LV")) // Terminate unexpected
+                        {
+                            Console.WriteLine("Room " + reqRoom.Number + "# is forced closed.");
+                            rooms.Remove(reqRoom.Number);
+                            //reqRoom.Ps.Close(); // TODO: LV don't termintate directly
+                            break;
+                        }
+                        else if (line.StartsWith("C3TM")) // Terminate gracefully
+                        {
+                            Console.WriteLine("Room " + reqRoom.Number + "# terminates gracefully.");
+                            rooms.Remove(reqRoom.Number);
+                            // reqRoom.Ps.Close(); // TODO: LV don't termintate directly
+                            break;
+                        }
+                        else if (line.StartsWith("C3LS"))
+                        {
+                            ushort ut = ushort.Parse(line.Substring("C3LS,".Length));
+                            Console.WriteLine("Player " + ut + "#[" +
+                                neayers[ut].Name + "] loses connection with Room " + reqRoom.Number + "#.");
+                            // $ut is the old uid
+                            if (rooms.ContainsKey(reqRoom.Number) && neayers.ContainsKey(ut))
+                                losers.Add(neayers[ut]);
+                        }
+                        else if (line.StartsWith("C3RA"))
+                        {
+                            ushort ut = ushort.Parse(line.Substring("C3RA,".Length));
+                            if (substitudes.ContainsKey(ut))
+                            {
+                                ushort subsut = substitudes[ut];
+                                location[ut] = reqRoom.Number;
+                                Neayer rny = neayers[subsut];
+                                losers.Remove(rny);
+                                if (neayers.ContainsKey(subsut))
+                                    neayers.Remove(subsut);
+                                substitudes.Remove(ut);
+                            }
+                            Console.WriteLine("Player " + ut + "#[" +
+                                neayers[ut].Name + "] has been back to Room " + reqRoom.Number + "#.");
+                        }
+                        else if (line.StartsWith("C3RV"))
+                        {
+                            Console.WriteLine("Room " + reqRoom.Number + "# is recovered.");
+                        }
+                    }
+                }
+            }
         }
 
         private void HandleTalkInConnection(Socket socket, string msg)
@@ -459,7 +457,7 @@ namespace PSD.PSDCenter
             if (value > 2048)
                 value = 2048;
             ns.Read(actual, 0, value);
-            return Encoding.Unicode.GetString(actual, 0, value);
+            return value > 0 ? Encoding.Unicode.GetString(actual, 0, value) : null;
         }
 
         private static void SentByteLine(NetworkStream ns, string value)
@@ -473,28 +471,11 @@ namespace PSD.PSDCenter
             ns.Write(buf, 0, al + 2);
             ns.Flush();
         }
-
-        private static string ReadBytes(NamedPipeServerStream ps)
-        {
-            byte[] byte2 = new byte[4096];
-            int readCount = ps.Read(byte2, 0, 4096);
-            if (readCount > 0)
-                return Encoding.Unicode.GetString(byte2, 0, readCount);
-            else
-                return "";
-        }
-        private static void WriteBytes(NamedPipeServerStream ps, string value)
-        {
-            byte[] byte2 = Encoding.Unicode.GetBytes(value);
-            if (byte2.Length > 0)
-                ps.Write(byte2, 0, byte2.Length);
-            ps.Flush();
-        }
         #endregion Constructor and Utils
 
         public static void Main(string[] args)
         {
-            Console.WriteLine("PSDCenter スタート.");
+            Console.WriteLine("PSDCenter Launched.");
             IPAddress[] ipHost = Dns.GetHostAddresses(Dns.GetHostName());
             if (ipHost.Length > 0)
             {

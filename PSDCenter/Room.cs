@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.IO.Pipes;
 
 namespace PSD.PSDCenter
 {
@@ -12,8 +10,6 @@ namespace PSD.PSDCenter
 
         public List<ushort> players;
         public List<ushort> watchers;
-
-        public NamedPipeServerStream Ps { set; get; }
 
         public int OptTeam { set; get; }
         public int OptSel { set; get; }
@@ -38,7 +34,8 @@ namespace PSD.PSDCenter
             players = new List<ushort>();
             watchers = new List<ushort>();
             OptTeam = optTeam; OptSel = optSel; OptLevel = optLevel;
-            Ready = false; Ps = null;
+            Ready = false;
+            // Ps = null;
             if (trainers == null)
                 Trainers = new string[0];
             else if (trainers != null && trainers.Length > 6)
