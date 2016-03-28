@@ -204,6 +204,7 @@ namespace PSD.PSDGamepkg.JNS
                 SinglePet = pt,
                 TreatyAct = Artiad.HarvestPet.Treaty.PASSIVE
             }.ToMessage());
+            XI.RaiseGMessage("G0DH," + player.Uid + ",0,2");
         }
         public string JNT0302Input(Player player, int type, string fuse, string prev)
         {

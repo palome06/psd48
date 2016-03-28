@@ -896,6 +896,13 @@ namespace PSD.PSDGamepkg.JNS
                 if (ght1 != null)
                 {
                     ght1.TeamBursted = true;
+                    XI.RaiseGMessage(new Artiad.HarvestPet()
+                    {
+                        Farmer = player.Uid,
+                        SinglePet = XI.LibTuple.ML.Encode("GHT1"),
+                        Trophy = true,
+                        TreatyAct = Artiad.HarvestPet.Treaty.PASSIVE
+                    }.ToMessage());
                     XI.RaiseGMessage("G0IP," + player.Team + ",3");
                 }
             }
@@ -1643,6 +1650,13 @@ namespace PSD.PSDGamepkg.JNS
                 Monster glt4 = XI.LibTuple.ML.Decode(XI.LibTuple.ML.Encode("GLT4"));
                 if (glt4 != null)
                     glt4.TeamBursted = true;
+                XI.RaiseGMessage(new Artiad.HarvestPet()
+                {
+                    Farmer = player.Uid,
+                    SinglePet = XI.LibTuple.ML.Encode("GLT4"),
+                    Trophy = true,
+                    TreatyAct = Artiad.HarvestPet.Treaty.PASSIVE
+                }.ToMessage());
                 string[] g1ev = fuse.Split(',');
                 XI.InnerGMessage("G1EV," + g1ev[1] + "," + g1ev[2], 201);
             }
@@ -2756,6 +2770,13 @@ namespace PSD.PSDGamepkg.JNS
                 Monster gsh2 = XI.LibTuple.ML.Decode(XI.LibTuple.ML.Encode("GSH2"));
                 if (gsh2 != null)
                     gsh2.TeamBursted = true;
+                XI.RaiseGMessage(new Artiad.HarvestPet()
+                {
+                    Farmer = player.Uid,
+                    SinglePet = XI.LibTuple.ML.Encode("GSH2"),
+                    Trophy = true,
+                    TreatyAct = Artiad.HarvestPet.Treaty.PASSIVE
+                }.ToMessage());
             }
             else if (consumeType == 2)
             {

@@ -1179,8 +1179,8 @@ namespace PSD.PSDGamepkg.JNS
 
                 ushort npcUt = ushort.Parse(argst);
                 NPC npc = XI.LibTuple.NL.Decode(NMBLib.OriginalNPC(npcUt));
-                int rest = npc.STR + 1;
-                foreach (ushort ut in XI.Board.OrderedPlayer(player.Uid))
+                int rest = System.Math.Max(npc.STR, player.TokenExcl.Count) + 1;
+                foreach (ushort ut in XI.Board.OrderedPlayer())
                 {
                     Player py = XI.Board.Garden[ut];
                     if (py.IsAlive && py.Team == player.Team && py.Tux.Count > 0)
@@ -3223,11 +3223,18 @@ namespace PSD.PSDGamepkg.JNS
             if (!player.RFM.GetBool("InJNH2002"))
             {
                 if (type == 0) // ZB
-                    return Artiad.ClothingHelper.GetWho(fuse) != 0;
+                {
+                    ushort who = Artiad.ClothingHelper.GetWho(fuse);
+                    return who != 0 && who != player.Uid;
+                }
                 else if (type == 1) // HD
-                    return true;
+                    return Artiad.ObtainPet.Parse(fuse).Farmer != player.Uid;
                 else if (type == 2) // IF
-                    return true;
+                {
+                    string[] g0ifs = fuse.Split(',');
+                    ushort who = ushort.Parse(g0ifs[1]);
+                    return who != player.Uid;
+                }
             }
             return false;
         }
