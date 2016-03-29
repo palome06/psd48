@@ -6,6 +6,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using PSD.Base;
 using System.IO;
 using PSD.Base.Utils;
@@ -17,11 +18,8 @@ namespace PSD.PSDGamepkg.VW
     public class Aywi : Base.VW.IWISV
     {
         public const int MSG_SIZE = 4096;
-        private List<Thread> recvThread;
-        private Thread sendThread;
-        // Thread when someone lost connection and wait for rejoin;
-        private Thread waitingThread;
-        //private Thread watchReceptionThread;
+        // token to terminate all running thread when Aywi is closed
+        private CancellationTokenSource ctoken;
 
         private TcpListener listener;
         private int port; // actual port number taken room int consideration
@@ -30,8 +28,6 @@ namespace PSD.PSDGamepkg.VW
         private NetworkStream cns;
         // Action to block all U/V inputs
         public Action OnBlockUVInputs { private set; get; }
-        // Action to notify the finish of reconstructing the room
-        public Action OnReconstructRoom { private get; set; }
 
         private IDictionary<ushort, Neayer> neayers;
         private IDictionary<ushort, Netcher> netchers;
@@ -39,8 +35,8 @@ namespace PSD.PSDGamepkg.VW
         // queue to store update news in waiting stage, "AUid,Uid" pair
         private ConcurrentQueue<string> updateNeayersInWaiting;
         private bool isRecvBlocked = false;
-        // indicate whether recv could return real message or all blocked
-        public bool IsRecvBlocked
+        // indicate whether the room is hanged up, thus blocking all recv action
+        public bool IsHangedUp
         {
             [MethodImpl(MethodImplOptions.Synchronized)]
             private set { isRecvBlocked = value; }
@@ -88,7 +84,7 @@ namespace PSD.PSDGamepkg.VW
 
                 if (valids != null)
                 {
-                    if (valids.Contains(ut) && neayers.Count < playerCapacity)
+                    if (valids.Contains(ut) && GetAliveNeayersCount() < playerCapacity)
                     {
                         Neayer ny = new Neayer(uname, uava)
                         {
@@ -179,23 +175,18 @@ namespace PSD.PSDGamepkg.VW
             }
             foreach (var pair in neayers)
             {
-                Thread rvt = new Thread(() => XI.SafeExecute(() => KeepOnListenRecv(pair.Value),
-                        delegate(Exception e) { Log.Logger(e.ToString()); }));
-                recvThread.Add(rvt);
-                rvt.Start();
+                Task.Factory.StartNew(() => XI.SafeExecute(() => KeepOnListenRecv(pair.Value),
+                    delegate(Exception e) { if (Log != null) { Log.Logger(e.ToString()); } }), ctoken.Token);
                 SentByteLine(new NetworkStream(pair.Value.Tunnel), "C2SA,0");
             }
             foreach (var pair in netchers)
             {
-                Thread rvt = new Thread(() => XI.SafeExecute(() => KeepOnListenRecv(pair.Value),
-                        delegate(Exception e) { Log.Logger(e.ToString()); }));
-                recvThread.Add(rvt);
-                rvt.Start();
+                Task.Factory.StartNew(() => XI.SafeExecute(() => KeepOnListenRecv(pair.Value),
+                    delegate(Exception e) { if (Log != null) { Log.Logger(e.ToString()); } }), ctoken.Token);
                 SentByteLine(new NetworkStream(pair.Value.Tunnel), "C2SA,0");
             }
-            sendThread = new Thread(() => XI.SafeExecute(() => KeepOnListenSend(),
-                        delegate(Exception e) { if (Log != null) { Log.Logger(e.ToString()); } }));
-            sendThread.Start();
+            Task.Factory.StartNew(() => XI.SafeExecute(() => KeepOnListenSend(),
+                delegate(Exception e) { if (Log != null) { Log.Logger(e.ToString()); } }), ctoken.Token);
 
             //foreach (var pair in neayers)
             //    SentByteLine(new NetworkStream(pair.Value.Tunnel), "C2AS,0");
@@ -374,11 +365,9 @@ namespace PSD.PSDGamepkg.VW
                         Alive = false
                     };
                     neayers[ny.Uid] = ny;
+                    Task.Factory.StartNew(() => XI.SafeExecute(() => KeepOnListenRecv(ny),
+                        delegate(Exception e) { Log.Logger(e.ToString()); }), ctoken.Token);
                     SentByteLine(ns, "C4CS," + ny.Uid);
-                    Thread rvt = new Thread(() => XI.SafeExecute(() => KeepOnListenRecv(ny),
-                        delegate(Exception e) { Log.Logger(e.ToString()); }));
-                    recvThread.Add(rvt);
-                    rvt.Start();
                     ny.Alive = true;
                     WakeTunnelInWaiting(ny.AUid, ny.Uid);
                     return ny.Uid;
@@ -413,10 +402,9 @@ namespace PSD.PSDGamepkg.VW
                     if (yMsgHandler != null)
                         yMsgHandler(line, ny.Uid);
                 }
-                else if (!string.IsNullOrEmpty(line))
+                else if (!string.IsNullOrEmpty(line) && !IsHangedUp)
                 {
-                    if (!IsRecvBlocked)
-                        msg0Pools[ny.Uid].Add(line);
+                    msg0Pools[ny.Uid].Add(line);
                     //Log.Logger(0 + "<" + ny.Uid + ":" + line);
                 }
                 else
@@ -456,7 +444,7 @@ namespace PSD.PSDGamepkg.VW
                 // On Leave of watcher, don't care.
                 Log.Logger("%%Watcher(" + msg.To + ") Leaves.");
                 netchers.Remove(msg.To);
-                if (neayers.Count(p => p.Value.Alive) == 0 && netchers.Count == 0)
+                if (GetAliveNeayersCount() == 0 && netchers.Count == 0)
                     Environment.Exit(0);
                 return false;
             }
@@ -469,33 +457,23 @@ namespace PSD.PSDGamepkg.VW
                 string news;
                 while (updateNeayersInWaiting.TryDequeue(out news))
                 {
-                    if (string.IsNullOrEmpty(news) || news == "0")
-                    { // Totally give up, then report and back
-                        OnBrokenConnection(); return false;
-                    }
-                    else
+                    // Totally give up, then report and back
+                    if (string.IsNullOrEmpty(news) || news == "0") { break; }
+                    ushort[] uts = news.Split(',').Select(p => ushort.Parse(p)).ToArray();
+                    Send("H0BK," + uts[1], neayers.Where(p => p.Value.Alive).Select(p => p.Key).ToArray());
+                    Live("H0BK," + uts[1]);
+                    // Awake the neayer
+                    if (neayers.ContainsKey(uts[1]))
+                        neayers[uts[1]].Alive = true;
+                    SentByteLine(cns, "C3RA," + uts[0]);
+                    // Check whether all members has gathered.
+                    if (GetAliveNeayersCount() == playerCapacity)
                     {
-                        ushort[] uts = news.Split(',').Select(p => ushort.Parse(p)).ToArray();
-                        Send("H0BK," + uts[1], neayers.Where(p => p.Value.Alive).Select(p => p.Key).ToArray());
-                        Live("H0BK," + uts[1]);
-                        // Awake the neayer
-                        if (neayers.ContainsKey(uts[1]))
-                            neayers[uts[1]].Alive = true;
-                        SentByteLine(cns, "C3RA," + uts[0]);
-                        // Check whether all members has gathered.
-                        lock (neayers)
-                        {
-                            if (neayers.Values.Count(p => p.Alive) == playerCapacity)
-                            {
-                                // OK, all gathered.
-                                BCast("H0RK,0");
-                                SentByteLine(cns, "C3RV,0");
-                                IsRecvBlocked = false;
-                                if (OnReconstructRoom != null)
-                                    OnReconstructRoom();
-                                return true;
-                            }
-                        }
+                        // OK, all gathered.
+                        BCast("H0RK,0");
+                        SentByteLine(cns, "C3RV,0");
+                        IsHangedUp = false;
+                        return true;
                     }
                 }
                 Thread.Sleep(100);
@@ -508,11 +486,10 @@ namespace PSD.PSDGamepkg.VW
                     Send("H0WD," + left, neayers.Where(p => p.Value.Alive).Select(p => p.Key).ToArray());
                     Live("H0WD," + left);
                 }
-                else if (timeout == 4800)
-                {
-                    OnBrokenConnection(); return false;
-                }
+                else if (timeout == 4800) { break; }
             } while (true);
+            OnBrokenConnection();
+            return false;
         }
         private void WakeTunnelInWaiting(ushort auid, ushort suid)
         {
@@ -527,27 +504,19 @@ namespace PSD.PSDGamepkg.VW
                 if (vi != null) vi.Cout(0, "玩家{0}掉线，房间等待重连中.", who);
                 Send("H0WT," + who, neayers.Where(p => p.Value.Alive).Select(p => p.Key).ToArray());
                 Live("H0WT," + who);
-                // Step 1: block all U/V input
-                IsRecvBlocked = true;
 
-                // Step 2: Start Waiting thread and init news signal queue.
-                if (updateNeayersInWaiting == null)
-                    updateNeayersInWaiting = new ConcurrentQueue<string>();
-                if (waitingThread == null || !waitingThread.IsAlive) {
-                    waitingThread = new Thread(() => XI.SafeExecute(() => StartWaitingStage(),
-                            delegate(Exception e) { if (Log != null) { Log.Logger(e.ToString()); } }));
-                    waitingThread.Start();
-                }
-
-                // Step 3: Report to Centre
+                // Report to Centre
                 SentByteLine(cns, "C3LS," + neayers[who].AUid);
-                lock (neayers)
+                if (GetAliveNeayersCount() == 0 && netchers.Count == 0)
+                    Bye();
+
+                if (!IsHangedUp)
                 {
-                    if (neayers.Count(p => p.Value.Alive) == 0 && netchers.Count == 0)
-                    {
-                        SentByteLine(cns, "C3LV,0");
-                        Environment.Exit(0);
-                    }
+                    // Start Waiting thread and init news signal queue
+                    IsHangedUp = true;
+                    updateNeayersInWaiting = new ConcurrentQueue<string>();
+                    Task.Factory.StartNew(() => XI.SafeExecute(() => StartWaitingStage(),
+                        delegate(Exception e) { if (Log != null) { Log.Logger(e.ToString()); } }), ctoken.Token);
                 }
             }
         }
@@ -557,12 +526,8 @@ namespace PSD.PSDGamepkg.VW
             if (vi != null) vi.Cout(0, "房间严重损坏，本场游戏终结.");
             Send("H0LT,0", neayers.Where(p => p.Value.Alive).Select(p => p.Key).ToArray());
             Live("H0LT,0");
-            SentByteLine(cns, "C3LV,0");
-            lock (neayers)
-            {
-                if (neayers.Count(p => p.Value.Alive) == 0 && netchers.Count == 0)
-                    Environment.Exit(0);
-            }
+            if (GetAliveNeayersCount() == 0 && netchers.Count == 0)
+                Bye();
         }
         // report to fake pipe
         public void Report(string message)
@@ -579,6 +544,12 @@ namespace PSD.PSDGamepkg.VW
             NetworkStream tcpStream = client.GetStream();
             SentByteLine(tcpStream, "C3HI," + roomNum);
             cns = tcpStream;
+        }
+        [MethodImpl(MethodImplOptions.Synchronized)]
+        private int GetAliveNeayersCount()
+        {
+            lock (neayers)
+                return neayers.Values.Count(p => p.Alive);
         }
         #endregion Fake Pipe
 
@@ -601,8 +572,6 @@ namespace PSD.PSDGamepkg.VW
         public Aywi(int port, Log log, Action<string, ushort> yHandler)
         {
             this.port = port;
-            this.recvThread = new List<Thread>();
-
             msg0Pools = new BlockingCollection<string>[playerCapacity + 1];
             for (int i = 0; i<= playerCapacity; ++i)
                 msg0Pools[i] = new BlockingCollection<string>(new ConcurrentQueue<string>());
@@ -611,6 +580,7 @@ namespace PSD.PSDGamepkg.VW
             IsTalkSilence = false;
             this.yMsgHandler = yHandler;
             this.Log = log;
+            ctoken = new CancellationTokenSource();
         }
         #region Implemetation
         // Get input result from $from to $me (require reply from $side to $me)
@@ -680,6 +650,11 @@ namespace PSD.PSDGamepkg.VW
         // Send direct message that won't be caught by RecvInfRecv from $me to 0
         public void SendDirect(string msg, ushort me) { }
         public void Dispose() { }
+        public void Bye()
+        {
+            SentByteLine(cns, "C3LV,0");
+            Environment.Exit(0);
+        }
         #endregion Implementation
 
         #region Stream Utils

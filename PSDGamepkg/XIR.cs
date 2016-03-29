@@ -37,6 +37,7 @@ namespace PSD.PSDGamepkg
             MappingSksp(out sk02, out sk03, levelCode);
             mt01 = new JNS.MonsterCottage(this, VI).RegisterDelegates(LibTuple.ML);
 
+            Board.RoundIN = "H0ST";
             foreach (Player player in garden.Values)
             {
                 Base.Card.Hero hero = LibTuple.HL.InstanceHero(player.SelectHero);
@@ -49,7 +50,6 @@ namespace PSD.PSDGamepkg
                 if (hero.Skills.Count > 0)
                     RaiseGMessage("G0IS," + player.Uid + ",0," + string.Join(",", hero.Skills));
             }
-            Board.RoundIN = "H0ST";
             RunQuadStage("H0ST"); // Game start stage
             if (inDebug)
                 DebugCondition();

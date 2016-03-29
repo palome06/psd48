@@ -169,12 +169,13 @@ namespace PSD.ClientAo
 
         private void WindowClosed(object sender, EventArgs e)
         {
-            Environment.Exit(0);
             if (visiThread != null && visiThread.IsAlive)
                 visiThread.Abort();
             if (VISI != null)
                 VISI.CancelThread();
             yfOrchis40.Close();
+            Environment.Exit(0);
+            // TODO: it leads to assert error in AoVoice, to change to a better way
         }
         //visi.RunAsync();
 

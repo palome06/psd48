@@ -135,7 +135,6 @@ namespace PSD.PSDGamepkg
 
                 Log.Start();
                 aywi.TcpListenerStart();
-                aywi.OnReconstructRoom = ResumeLostInputEvent;
                 Board.Garden = aywi.Connect(VI, teamMode, null);
 
                 WI.RecvInfStart();
@@ -163,8 +162,7 @@ namespace PSD.PSDGamepkg
         private void StartRoom(int room, int[] opts, ushort[] invs, string[] trainer)
         {
             int port = Base.NetworkCode.HALL_PORT + room;
-            string pipeName = "psd48pipe" + room;
-            //string piperName = "psd48piper" + room;
+            //string pipeName = "psd48pipe" + room;
             VW.Aywi aywi = new VW.Aywi(port, Log, HandleYMessage);
             WI = aywi;
 
@@ -173,7 +171,6 @@ namespace PSD.PSDGamepkg
             VI.Init(); // VI inits here?
             Log.Start();
             aywi.TcpListenerStart();
-            aywi.OnReconstructRoom = ResumeLostInputEvent;
 
             aywi.StartFakePipe(room);
 
@@ -285,6 +282,7 @@ namespace PSD.PSDGamepkg
                     CalculatePetsScore().Select(p => p.Key + "," + p.Value)), 0, wuid);
                 // TODO: remove the score field, calculate on the demand
                 WI.Send("H09F," + Board.GeneratePrivateMessage(wuid), 0, wuid);
+                ResumeLostInputEvent();
             }
             // TODO: needs private data (e.g. Tux) in such connection
         }

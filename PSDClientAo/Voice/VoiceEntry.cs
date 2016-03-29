@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 
 namespace PSD.ClientAo.Voice
@@ -23,19 +24,21 @@ namespace PSD.ClientAo.Voice
         private void Play(Stream stream)
         {
             mStop = false;
-            new Thread(() =>
+            Task.Factory.StartNew(() =>
             {
                 using (var vorbisStream = new NAudio.Vorbis.VorbisWaveReader(stream))
                 using (var waveOut = new NAudio.Wave.WaveOutEvent())
                 {
-                    waveOut.Init(vorbisStream);
-                    waveOut.Play();
-                    SpinWait.SpinUntil(() => vorbisStream.Position >= vorbisStream.Length || mStop);
-                    Thread.Sleep(200);
-                    if (OnPlayFinished != null)
-                        OnPlayFinished();
+                    try
+                    {
+                        waveOut.Init(vorbisStream);
+                        waveOut.Play();
+                        SpinWait.SpinUntil(() => vorbisStream.Position >= vorbisStream.Length || mStop);
+                        Thread.Sleep(200);
+                    }
+                    catch (NAudio.MmException) { }
                 }
-            }).Start();
+            }).ContinueWith((t) => { if (OnPlayFinished != null) OnPlayFinished(); });
         }
 
         public void Play(string resourceKey)

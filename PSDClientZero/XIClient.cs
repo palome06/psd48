@@ -3749,7 +3749,16 @@ namespace PSD.ClientZero
                                 case "tr": zp.Trove = (ushort)value; break;
                                 case "exq": zp.ExEquip = (ushort)value; break;
                                 case "lug":
-                                    zp.Treasures[zp.Trove].AddRange((string[])value); break;
+                                {
+                                    string[] lugs = (string[])value;
+                                    if (lugs.Length > 0 && zp.Trove != 0)
+                                    {
+                                        if (!zp.Treasures.ContainsKey(zp.Trove))
+                                            zp.Treasures[zp.Trove] = new List<string>();
+                                        zp.Treasures[zp.Trove].AddRange(lugs);
+                                    }
+                                    break;
+                                }
                                 case "guard": zp.Guardian = (ushort)value; break;
                                 case "coss": zp.Coss = (ushort)value; break;
                                 case "pet":

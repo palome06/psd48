@@ -218,7 +218,6 @@ namespace PSD.ClientZero.VW
 		
         private void KeepOnListenRecv()
         {
-            byte[] recv = new byte[MSG_SIZE];
             try
             {
                 while (true)

@@ -55,7 +55,7 @@ namespace PSD.PSDCenter
                 var ass = System.Reflection.Assembly.GetExecutingAssembly().GetName();
                 if (blocks.Length <= 6 || int.Parse(blocks[6]) != ass.Version.Revision)
                 { // version error, report exit
-                    Console.WriteLine(user + " has tried connecting with a wrong version.");
+                    Console.WriteLine("{0} has tried connecting with a wrong version.", user);
                     SentByteLine(ns, "C0XV," + ass.Version.ToString());
                     socket.Close();
                     return;
@@ -78,7 +78,7 @@ namespace PSD.PSDCenter
                     Ip = (socket.RemoteEndPoint as IPEndPoint).Address.ToString() + "|"
                         + (socket.LocalEndPoint as IPEndPoint).Address.ToString()
                 };
-                Console.WriteLine(user + " has entered the hall.");
+                Console.WriteLine("{0} has entered the hall.", user);
                 SentByteLine(ns, "C0CN," + uid);
                 neayers.Add(uid, ny);
                 //Thread lThread = new Thread(delegate() { ListenToTalkSocket(socket); });
@@ -94,7 +94,7 @@ namespace PSD.PSDCenter
                         if (members.Length > 0)
                             members = "," + members;
                         SentByteLine(ns, "C1RM," + reqRoom.Number + members);
-                        Console.WriteLine(user + " is allocated with room " + reqRoom.Number + "#.");
+                        Console.WriteLine("{0} is allocated with room {1}#.", user, reqRoom.Number);
                         location[uid] = reqRoom.Number;
                         lock (reqRoom.players)
                         {
@@ -119,8 +119,8 @@ namespace PSD.PSDCenter
                         new Thread(delegate()
                         {
                             Thread.Sleep(1000);
-                            //Process.Start(new ProcessStartInfo("PSDGamepkg.exe", ag) { UseShellExecute = false });
-                            Process.Start("PSDGamepkg.exe", ag);
+                            Process.Start(new ProcessStartInfo("PSDGamepkg.exe", ag) { UseShellExecute = false });
+                            //Process.Start("PSDGamepkg.exe", ag);
                         }).Start();
                     }
                     // Wait for C1ST message to terminate the socket
@@ -139,6 +139,7 @@ namespace PSD.PSDCenter
                 catch (IOException)
                 {
                     neayers[uid].Alive = false;
+                    Console.WriteLine("Player {0}#[{1}] left the hall.", uid, neayers[uid].Name);
                     lock (reqRoom.players)
                     {
                         bool any = false;
@@ -249,7 +250,7 @@ namespace PSD.PSDCenter
                                 };
                                 neayers[uid] = ny;
                                 substitudes[uid] = loser.Uid;
-                                Console.WriteLine(user + " has required for re-connection.");
+                                Console.WriteLine("{0} has required for re-connection.", user);
                                 SentByteLine(ns, "C4RM," + uid + "," + loser.Uid + "," + curRoomNo + "," + user + ",#CD0");
 								foundOrg = true; break;
 								// TODO: set the room code as "#CD0" for testing.
@@ -300,8 +301,8 @@ namespace PSD.PSDCenter
                         else if (line.StartsWith("C3LS"))
                         {
                             ushort ut = ushort.Parse(line.Substring("C3LS,".Length));
-                            Console.WriteLine("Player " + ut + "#[" +
-                                neayers[ut].Name + "] loses connection with Room " + reqRoom.Number + "#.");
+                            Console.WriteLine("Player {0}#[{1}] loses connection with Room {2}#.",
+                                ut, neayers[ut].Name, reqRoom.Number);
                             // $ut is the old uid
                             if (rooms.ContainsKey(reqRoom.Number) && neayers.ContainsKey(ut))
                                 losers.Add(neayers[ut]);
@@ -319,12 +320,12 @@ namespace PSD.PSDCenter
                                     neayers.Remove(subsut);
                                 substitudes.Remove(ut);
                             }
-                            Console.WriteLine("Player " + ut + "#[" +
-                                neayers[ut].Name + "] has been back to Room " + reqRoom.Number + "#.");
+                            Console.WriteLine("Player {0}#[{1}] has been back to Room Room {2}#.",
+                                ut, neayers[ut].Name, reqRoom.Number);
                         }
                         else if (line.StartsWith("C3RV"))
                         {
-                            Console.WriteLine("Room " + reqRoom.Number + "# is recovered.");
+                            Console.WriteLine("Room {0}# is recovered.", reqRoom.Number);
                         }
                     }
                 }

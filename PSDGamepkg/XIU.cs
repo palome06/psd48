@@ -166,6 +166,7 @@ namespace PSD.PSDGamepkg
                 ans &= MatchedPopFromLastUV(ut, msg);
             return ans;
         }
+        // Action to notify the finish of reconstructing the room
         private void ResumeLostInputEvent()
         {
             foreach (var pair in LastUVs)
