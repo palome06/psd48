@@ -110,19 +110,7 @@ namespace PSD.PSDCenter
                         }
                     }
                     if (reqRoom.Ready)
-                    {
-                        //if (lThread != null && lThread.IsAlive)
-                        //    lThread.Abort();
-                        string ag = "1 " + reqRoom.ConvToString() + " " +
-                            string.Join(",", reqRoom.players);
-                        //string pg = "psd48pipe" + reqRoom.Number;
-                        new Thread(delegate()
-                        {
-                            Thread.Sleep(1000);
-                            Process.Start(new ProcessStartInfo("PSDGamepkg.exe", ag) { UseShellExecute = false });
-                            //Process.Start("PSDGamepkg.exe", ag);
-                        }).Start();
-                    }
+                        reqRoom.CreateRoomPkg();
                     // Wait for C1ST message to terminate the socket
                     do
                     {

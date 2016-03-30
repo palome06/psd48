@@ -457,24 +457,25 @@ namespace PSD.PSDGamepkg.VW
                 string news;
                 while (updateNeayersInWaiting.TryDequeue(out news))
                 {
-                    // Totally give up, then report and back
-                    if (string.IsNullOrEmpty(news) || news == "0") { break; }
-                    ushort[] uts = news.Split(',').Select(p => ushort.Parse(p)).ToArray();
-                    Send("H0BK," + uts[1], neayers.Where(p => p.Value.Alive).Select(p => p.Key).ToArray());
-                    Live("H0BK," + uts[1]);
-                    // Awake the neayer
-                    if (neayers.ContainsKey(uts[1]))
-                        neayers[uts[1]].Alive = true;
-                    SentByteLine(cns, "C3RA," + uts[0]);
-                    // Check whether all members has gathered.
-                    if (GetAliveNeayersCount() == playerCapacity)
-                    {
-                        // OK, all gathered.
-                        BCast("H0RK,0");
-                        SentByteLine(cns, "C3RV,0");
-                        IsHangedUp = false;
-                        return true;
-                    }
+                    // // Totally give up, then report and back
+                    // if (string.IsNullOrEmpty(news) || news == "0") { break; }
+                    // ushort[] uts = news.Split(',').Select(p => ushort.Parse(p)).ToArray();
+                    // Send("H0BK," + uts[1], neayers.Where(p => p.Value.Alive).Select(p => p.Key).ToArray());
+                    // Live("H0BK," + uts[1]);
+                    // // Awake the neayer
+                    // if (neayers.ContainsKey(uts[1]))
+                    //     neayers[uts[1]].Alive = true;
+                    // SentByteLine(cns, "C3RA," + uts[0]);
+                    // // Check whether all members has gathered.
+                    // if (GetAliveNeayersCount() == playerCapacity)
+                    // {
+                    //     // OK, all gathered.
+                    //     BCast("H0RK,0");
+                    //     SentByteLine(cns, "C3RV,0");
+                    //     IsHangedUp = false;
+                    //     return true;
+                    // }
+                    if (GetAliveNeayersCount() == playerCapacity) { return true; }
                 }
                 Thread.Sleep(100);
                 ++timeout;
@@ -491,8 +492,23 @@ namespace PSD.PSDGamepkg.VW
             OnBrokenConnection();
             return false;
         }
+        [MethodImpl(MethodImplOptions.Synchronized)]
         private void WakeTunnelInWaiting(ushort auid, ushort suid)
         {
+            Send("H0BK," + suid, neayers.Where(p => p.Value.Alive).Select(p => p.Key).ToArray());
+            Live("H0BK," + suid);
+            // Awake the neayer
+            if (neayers.ContainsKey(suid))
+                neayers[suid].Alive = true;
+            SentByteLine(cns, "C3RA," + auid);
+            // Check whether all members has gathered.
+            if (GetAliveNeayersCount() == playerCapacity)
+            {
+                // OK, all gathered.
+                BCast("H0RK,0");
+                SentByteLine(cns, "C3RV,0");
+                IsHangedUp = false;
+            }
             updateNeayersInWaiting.Enqueue(auid + "," + suid);
         }
         // lose the connection with $who, hoping to get echo and resume game

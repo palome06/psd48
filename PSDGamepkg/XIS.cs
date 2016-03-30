@@ -214,7 +214,7 @@ namespace PSD.PSDGamepkg
             Run(opts[2], opts[1] == Base.Rules.RuleCode.MODE_00);
         }
         
-		private void HandleHoldOfWatcher(ushort wuid) {
+        private void HandleHoldOfWatcher(ushort wuid) {
             WI.Send("H0SM," + SelCode + "," + PCS.Level, 0, wuid);
             if (Board.RoundIN != "H0PR")
             {
@@ -264,7 +264,7 @@ namespace PSD.PSDGamepkg
                     }
                 }
             }
-		}
+        }
         private void HandleHoldOfReconnect(ushort wuid)
         {
             VI.Cout(0, "{0}#玩家恢复连接。", wuid);
@@ -280,11 +280,8 @@ namespace PSD.PSDGamepkg
                 string h09p = Board.GenerateSerialFieldMessage();
                 WI.Send("H09P," + h09p + "," + string.Join(",",
                     CalculatePetsScore().Select(p => p.Key + "," + p.Value)), 0, wuid);
-                // TODO: remove the score field, calculate on the demand
                 WI.Send("H09F," + Board.GeneratePrivateMessage(wuid), 0, wuid);
-                ResumeLostInputEvent();
             }
-            // TODO: needs private data (e.g. Tux) in such connection
         }
         private void HoldRoomTunnel()
         {
@@ -292,11 +289,18 @@ namespace PSD.PSDGamepkg
             {
                 while (true)
                 {
-                    ushort wuid = (WI as VW.Aywi).CatchNewRoomComer();
-                    if (wuid > 1000) // Watcher case
-						HandleHoldOfWatcher(wuid);
+                    VW.Aywi aywi = WI as VW.Aywi;
+                    ushort wuid = aywi.CatchNewRoomComer();
+                    if (wuid > 1000)
+                    { // Watcher case
+                        HandleHoldOfWatcher(wuid);
+                    }
                     else // Reconnection case
-						HandleHoldOfReconnect(wuid);
+                    {
+                        HandleHoldOfReconnect(wuid);
+                        if (!aywi.IsHangedUp)
+                            ResumeLostInputEvent();
+                    }
                 }
             }, delegate(Exception e) { Log.Logger(e.ToString()); })).Start();
         }

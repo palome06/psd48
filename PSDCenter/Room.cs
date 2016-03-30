@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace PSD.PSDCenter
 {
@@ -16,6 +19,8 @@ namespace PSD.PSDCenter
         public int OptLevel { set; get; }
 
         public string[] Trainers { set; get; }
+
+        private Process proc;
 
         private bool mReady;
         public bool Ready {
@@ -51,10 +56,20 @@ namespace PSD.PSDCenter
                 (Trainers == null || Trainers.Length == 0 ? "^" : (string.Join(",", Trainers)));
         }
 
-        //public static Room CreateRoom(int number, int optTeam, int optSel, int optPkg)
-        //{
-        //    Room room = new Room(number, optTeam, optSel, optPkg);
-        //    // Start a new processes
-        //}
+        public void CreateRoomPkg()
+        {
+            string ag = "1 " + ConvToString() + " " + string.Join(",", players);
+            //string pg = "psd48pipe" + Number;
+            Task.Factory.StartNew(() =>
+            {
+                Thread.Sleep(1000);
+                proc = Process.Start(new ProcessStartInfo("PSDGamepkg.exe", ag) { UseShellExecute = true });
+            });
+        }
+        public void CloseRoomPkg()
+        {
+            if (proc != null)
+                proc.Kill();
+        }
     }
 }

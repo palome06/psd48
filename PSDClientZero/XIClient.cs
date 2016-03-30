@@ -2620,16 +2620,20 @@ namespace PSD.ClientZero
         #region F
         private void HandleF0Message(string readLine)
         {
-            lock (listOfThreads)
-            {
-                foreach (Thread td in listOfThreads)
-                {
-                    if (td != Thread.CurrentThread && td.IsAlive)
-                        td.Abort();
-                }
-                listOfThreads.Clear();
-                listOfThreads.Add(Thread.CurrentThread);
-            }
+            Console.WriteLine("Now dealing with F0 Msg: " + readLine + "...");
+            // lock (listOfThreads)
+            // {
+            //     foreach (Thread td in listOfThreads)
+            //     {
+            //         if (td != Thread.CurrentThread && td.IsAlive)
+            //             td.Abort();
+            //     }
+            //     listOfThreads.Clear();
+            //     listOfThreads.Add(Thread.CurrentThread);
+            // }
+            // TODO: New Solution-->
+            // start a new task to send back the feedback and start a new single message thread w/ new token
+            // Cancel all tokens
             // Reset Cin Count
             VI.TerminCinTunnel(Uid);
             WI.Send(readLine, Uid, 0);
