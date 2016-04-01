@@ -175,33 +175,15 @@ namespace PSD.PSDGamepkg.VW
             }
             foreach (var pair in neayers)
             {
-                Task.Factory.StartNew(() => XI.SafeExecute(() => KeepOnListenRecv(pair.Value),
-                    delegate(Exception e) { if (Log != null) { Log.Logger(e.ToString()); } }), ctoken.Token);
+                StartListenTask(() => KeepOnListenRecv(pair.Value));
                 SentByteLine(new NetworkStream(pair.Value.Tunnel), "C2SA,0");
             }
             foreach (var pair in netchers)
             {
-                Task.Factory.StartNew(() => XI.SafeExecute(() => KeepOnListenRecv(pair.Value),
-                    delegate(Exception e) { if (Log != null) { Log.Logger(e.ToString()); } }), ctoken.Token);
+                StartListenTask(() => KeepOnListenRecv(pair.Value));
                 SentByteLine(new NetworkStream(pair.Value.Tunnel), "C2SA,0");
             }
-            Task.Factory.StartNew(() => XI.SafeExecute(() => KeepOnListenSend(),
-                delegate(Exception e) { if (Log != null) { Log.Logger(e.ToString()); } }), ctoken.Token);
-
-            //foreach (var pair in neayers)
-            //    SentByteLine(new NetworkStream(pair.Value.Tunnel), "C2AS,0");
-            //foreach (var pair in netchers)
-            //    SentByteLine(new NetworkStream(pair.Value.Tunnel), "C2AS,0");
-
-            //watchReceptionThread = new Thread(() => Algo.SafeExecute(() =>
-            //{
-            //    Socket socket = listener.AcceptSocket();
-            //    try { ConnectDo(socket, valids, n1); }
-            //    catch (SocketException) { }
-            //    Thread.Sleep(50);
-            //},
-            //  delegate(Exception e) { if (Log != null) { Log.Logger(e.ToString()); } }));
-            //watchReceptionThread.Start();
+            StartListenTask(() => KeepOnListenSend());
             return newGarden;
         }
         private IDictionary<ushort, ushort> Rearrange(bool selTeam, IDictionary<ushort, Neayer> n1)
@@ -404,7 +386,7 @@ namespace PSD.PSDGamepkg.VW
                 }
                 else if (!string.IsNullOrEmpty(line) && !IsHangedUp)
                 {
-                    msg0Pools[ny.Uid].Add(line);
+                    inf0Msgs.Add(new Base.VW.Msgs(line, ny.Uid, 0));
                     //Log.Logger(0 + "<" + ny.Uid + ":" + line);
                 }
                 else
@@ -567,6 +549,16 @@ namespace PSD.PSDGamepkg.VW
             lock (neayers)
                 return neayers.Values.Count(p => p.Alive);
         }
+        /// <summary>
+        /// start an async Listening task
+        /// </summary>
+        /// <param name="action">the acutal listen action</param>
+        private void StartListenTask(Action action)
+        {
+            Action<Exception> ae = (e) => { if (Log != null) Log.Logger(e.ToString()); };
+            Task.Factory.StartNew(() => XI.SafeExecute(action, ae), ctoken.Token,
+                TaskCreationOptions.LongRunning, TaskScheduler.Default);
+        }
         #endregion Fake Pipe
 
         private const int playerCapacity = 6;
@@ -574,9 +566,9 @@ namespace PSD.PSDGamepkg.VW
         /// msg0Pools: message from $i to 0
         /// msgNPools: message from 0 to $i
         /// </summary>
-        private BlockingCollection<string>[] msg0Pools;
+        // private BlockingCollection<string>[] msg0Pools;
         // message queue of handling inf
-        //private Queue<Base.VW.Msgs> inf0Msgs;
+        private BlockingCollection<Base.VW.Msgs> inf0Msgs;
         // only for send
         private BlockingCollection<Base.VW.Msgs> infNMsgs;
         // queue for talk message, format as Y2,4,Hello
@@ -588,9 +580,7 @@ namespace PSD.PSDGamepkg.VW
         public Aywi(int port, Log log, Action<string, ushort> yHandler)
         {
             this.port = port;
-            msg0Pools = new BlockingCollection<string>[playerCapacity + 1];
-            for (int i = 0; i<= playerCapacity; ++i)
-                msg0Pools[i] = new BlockingCollection<string>(new ConcurrentQueue<string>());
+            inf0Msgs = new BlockingCollection<Base.VW.Msgs>(new ConcurrentQueue<Base.VW.Msgs>());
             infNMsgs = new BlockingCollection<Base.VW.Msgs>(new ConcurrentQueue<Base.VW.Msgs>());
 
             IsTalkSilence = false;
@@ -604,11 +594,11 @@ namespace PSD.PSDGamepkg.VW
         {
             if (me == 0)
             {
-                string rvDeq = msg0Pools[from].Take();
-                if (rvDeq != null)
+                Base.VW.Msgs rvDeq = inf0Msgs.Take();
+                if (rvDeq.From == from && !string.IsNullOrEmpty(rvDeq.Msg))
                 {
-                    Log.Logger("=" + from + ":" + rvDeq);
-                    return rvDeq;
+                    Log.Logger("=" + from + ":" + rvDeq.Msg);
+                    return rvDeq.Msg;
                 }
             }
             return null;
@@ -618,14 +608,7 @@ namespace PSD.PSDGamepkg.VW
         // receive each message during the process
         public Base.VW.Msgs RecvInfRecv()
         {
-            string msg;
-            int index = BlockingCollection<string>.TakeFromAny(msg0Pools, out msg);
-            if (index <= playerCapacity && index > 0)
-            {
-                Log.Logger("==" + index + ":" + msg);
-                return new Base.VW.Msgs(msg, (ushort)index, 0);
-            }
-            else return null;
+            return inf0Msgs.Take();
         }
         public Base.VW.Msgs RecvInfRecvPending()
         {
