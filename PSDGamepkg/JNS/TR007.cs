@@ -4955,7 +4955,10 @@ namespace PSD.PSDGamepkg.JNS
         public bool JNT4502Valid(Player player, int type, string fuse)
         {
             string[] g0iy = fuse.Split(',');
-            return g0iy[1] != "1";
+            int changeType = int.Parse(g0iy[1]);
+            ushort who = ushort.Parse(g0iy[2]);
+            //int heroNum = int.Parse(g0iy[3]);
+            return changeType != 1 && who != player.Uid;
         }
         public void JNT4502Action(Player player, int type, string fuse, string argst)
         {

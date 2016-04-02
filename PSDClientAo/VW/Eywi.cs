@@ -723,6 +723,15 @@ namespace PSD.ClientAo.VW
                     }
                 }
             }
+            if (Version <= 158)
+            {
+                if (line.StartsWith("E0WB"))
+                {
+                    string[] e0wb = line.Split(',');
+                    if (e0wb.Length < 4)
+                        line = line + ",0";
+                }
+            }
         }
         #endregion Version
     }

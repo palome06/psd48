@@ -863,9 +863,12 @@ namespace PSD.PSDGamepkg.JNS
         public void JN30502Action(Player player, int type, string fuse, string argst)
         {
             string[] g0wb = fuse.Split(',');
-            ushort x = ushort.Parse(g0wb[1]);
-            if (player.Pets.Contains(x))
-                XI.RaiseGMessage("G0IB," + x + ",3");
+            ushort[] pets = Algo.TakeRange(g0wb, 1, g0wb.Length).Select(p => ushort.Parse(p)).ToArray();
+            foreach (ushort x in pets)
+            {
+                if (player.Pets.Contains(x))
+                    XI.RaiseGMessage("G0IB," + x + ",3");
+            }
         }
         #endregion XJ305 - Zixuan
         #region XJ306 - ChongLou

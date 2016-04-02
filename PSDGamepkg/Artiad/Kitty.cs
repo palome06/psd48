@@ -240,6 +240,7 @@ namespace PSD.PSDGamepkg.Artiad
                     if (jpes.Reload != PetEffectUnit.ReloadType.ABLE)
                     {
                         pet.ResetROM();
+                        XI.RaiseGMessage("G0WB," + pt);
                         // pet.SetIncrOption(player);
                     }
                     pet.IncrAction(player);
@@ -274,6 +275,7 @@ namespace PSD.PSDGamepkg.Artiad
                         pet.ResetROM();
                     if (jpes.Reload == PetEffectUnit.ReloadType.NEW)
                         pet.TeamBursted = false;
+                    XI.RaiseGMessage("G0WB," + pt);
                 }
                 new CollapsePetSemaphore() { Owner = jpes.Owner, Pets = jpes.Pets }.Telegraph(WI.BCast);
             });

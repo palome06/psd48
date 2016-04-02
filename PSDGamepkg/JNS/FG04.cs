@@ -1849,7 +1849,7 @@ namespace PSD.PSDGamepkg.JNS
         public void GIT1WinEff()
         {
             List<ushort> friends = XI.Board.Garden.Values.Where(p => p.IsAlive && p.Team ==
-                XI.Board.Rounder.Team && p.Uid != XI.Board.Rounder.Team).Select(p => p.Uid).ToList();
+                XI.Board.Rounder.Team && p.Uid != XI.Board.Rounder.Uid).Select(p => p.Uid).ToList();
             if (friends.Count > 0)
                 XI.RaiseGMessage("G0DH," + string.Join(",", friends.Select(p => p + ",0,1")));
         }
@@ -3387,7 +3387,16 @@ namespace PSD.PSDGamepkg.JNS
                     else if (delta > 0)
                         XI.RaiseGMessage("G0IB," + me + "," + delta);
                     monster.ROM.Set("iSTR", player.STR);
-                }//g0ax
+                } // IA/OA/AX
+                else if (type == 5)
+                {
+                    bool anyOther = player.Pets.Any(p => p != 0 && p != me);
+                    int iSTR = monster.ROM.GetInt("iSTR");
+                    int cSTR = anyOther ? 0 : player.STR;
+                    if (cSTR > 0)
+                        XI.RaiseGMessage("G0IB," + me + "," + cSTR);
+                    monster.ROM.Set("iSTR", cSTR);
+                }
             }
         }
         public bool GTH1ConsumeValid(Player player, int consumeType, int type, string fuse)
@@ -3404,8 +3413,18 @@ namespace PSD.PSDGamepkg.JNS
                 }
                 else if (type == 1 && monster.ROM.GetInt("iSTR") == 0 && player.STR > 0) // HL, lose others, set iSTR
                     return !anyOther;
-                else if (type == 2 || type == 3 || type == 4) // IA/OA/AX
+                else if (type == 2 || type == 3 || type == 4) // IA/OA/AX/WB
                     return !anyOther && monster.ROM.GetInt("iSTR") != player.STR;
+                else if (type == 5)
+                {
+                    string[] g0wb = fuse.Split(',');
+                    if (g0wb.Contains(me.ToString()))
+                    {
+                        int iSTR = anyOther ? 0 : player.STR;
+                        return monster.ROM.GetInt("iSTR") != iSTR || monster.ROM.GetInt("iSTR") != 0;
+                    }
+                    else return false;
+                }
             }
             return false;
         }

@@ -2155,16 +2155,15 @@ namespace PSD.ClientAo
                         break;
                     }
                 case "E0WB":
+                    for (int i = 1; i < args.Length; i += 3)
                     {
-                        ushort x = ushort.Parse(args[1]);
-                        int cur = int.Parse(args[2]);
-                        if (args.Length >= 4)
-                        {
-                            int agl = int.Parse(args[3]);
-                            VI.Cout(Uid, "{0}战力恢复为{1}，闪避恢复为{2}.", zd.Monster(x), cur, agl);
-                        }
-                        else
-                            VI.Cout(Uid, "{0}战力恢复为{1}.", zd.Monster(x), cur);
+                        ushort x = ushort.Parse(args[i]);
+                        int str = int.Parse(args[i + 1]);
+                        int agl = int.Parse(args[i + 2]);
+                        if (NMBLib.IsMonster(x))
+                            VI.Cout(Uid, "{0}战力恢复为{1}，闪避恢复为{2}.", zd.Monster(x), str, agl);
+                        else if (NMBLib.IsNPC(x))
+                            VI.Cout(Uid, "{0}战力恢复为{1}.", zd.Monster(x), str);
                     }
                     break;
                 case "E09P":

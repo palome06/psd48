@@ -1385,7 +1385,7 @@ namespace PSD.PSDGamepkg
                         //bool changed = (args[1] == "0");
                         ushort who = ushort.Parse(args[2]);
                         int heroNum = int.Parse(args[3]);
-                        Base.Card.Hero hero = LibTuple.HL.InstanceHero(heroNum);
+                        Hero hero = LibTuple.HL.InstanceHero(heroNum);
                         Player player = Board.Garden[who];
                         player.SelectHero = heroNum;
                         //if (changed)
@@ -1454,6 +1454,8 @@ namespace PSD.PSDGamepkg
                                 } }.ToMessage());
                             }
                         }
+                        if (player.Pets.Any(p => p != 0))
+                            RaiseGMessage("G0WB," + string.Join(",", player.Pets.Where(p => p != 0)));
                         if (Board.IsAttendWar(player) && Board.PoolEnabled)
                             RaiseGMessage(new Artiad.PondRefresh() { CheckHit = true }.ToMessage());
                     }
@@ -2242,36 +2244,42 @@ namespace PSD.PSDGamepkg
                     }
                 case "G0WB":
                     {
-                        ushort x = ushort.Parse(args[1]);
-                        NMB nmb = NMBLib.Decode(x, LibTuple.ML, LibTuple.NL);
-                        if (nmb.IsMonster())
+                        List<string> results = new List<string>();
+                        for (int i = 1; i < args.Length; ++i)
                         {
-                            Monster mon = (Monster)nmb;
-                            bool change = false;
-                            if (mon.mSTR != mon.STRb)
+                            ushort x = ushort.Parse(args[i]);
+                            NMB nmb = NMBLib.Decode(x, LibTuple.ML, LibTuple.NL);
+                            if (nmb.IsMonster())
                             {
-                                change |= (mon.STR != mon.STRb);
-                                mon.STR = mon.STRb;
-                                RaiseGMessage("G2WK," + string.Join(",",
-                                    CalculatePetsScore().Select(p => p.Key + "," + p.Value)));
+                                Monster mon = (Monster)nmb;
+                                bool change = false;
+                                if (mon.mSTR != mon.STRb)
+                                {
+                                    change |= (mon.STR != mon.STRb);
+                                    mon.STR = mon.STRb;
+                                    RaiseGMessage("G2WK," + string.Join(",",
+                                        CalculatePetsScore().Select(p => p.Key + "," + p.Value)));
+                                }
+                                if (mon.mAGL != mon.AGLb)
+                                {
+                                    change |= (mon.AGL != mon.AGLb);
+                                    mon.AGL = mon.AGLb;
+                                }
+                                if (change)
+                                    results.Add(x + "," + mon.STR + "," + mon.AGL);
                             }
-                            if (mon.mAGL != mon.AGLb)
+                            else if (nmb.IsNPC())
                             {
-                                change |= (mon.AGL != mon.AGLb);
-                                mon.AGL = mon.AGLb;
+                                NPC npc = (NPC)nmb;
+                                if (npc.STR != npc.STRb)
+                                {
+                                    npc.STR = npc.STRb;
+                                    results.Add(x + "," + npc.STR + ",0");
+                                }
                             }
-                            if (change)
-                                WI.BCast("E0WB," + x + "," + mon.STR + "," + mon.AGL);
                         }
-                        else if (nmb.IsNPC())
-                        {
-                            NPC npc = (NPC)nmb;
-                            if (npc.STR != npc.STRb)
-                            {
-                                npc.STR = npc.STRb;
-                                WI.BCast("E0WB," + x + "," + npc.STR);
-                            }
-                        }
+                        if (results.Count > 0)
+                            WI.BCast("E0WB," + string.Join(",", results));
                     }
                     break;
                 case "G09P":
