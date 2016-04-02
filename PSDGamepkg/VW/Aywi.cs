@@ -26,14 +26,11 @@ namespace PSD.PSDGamepkg.VW
 
         // network stream to center, to replace Pipe
         private NetworkStream cns;
-        // Action to block all U/V inputs
-        public Action OnBlockUVInputs { private set; get; }
 
         private IDictionary<ushort, Neayer> neayers;
         private IDictionary<ushort, Netcher> netchers;
         private Base.VW.IVI vi;
-        // queue to store update news in waiting stage, "AUid,Uid" pair
-        private ConcurrentQueue<string> updateNeayersInWaiting;
+
         private bool isRecvBlocked = false;
         // indicate whether the room is hanged up, thus blocking all recv action
         public bool IsHangedUp
@@ -435,44 +432,19 @@ namespace PSD.PSDGamepkg.VW
         private bool StartWaitingStage()
         {
             int timeout = 0;
-            do {
-                string news;
-                while (updateNeayersInWaiting.TryDequeue(out news))
-                {
-                    // // Totally give up, then report and back
-                    // if (string.IsNullOrEmpty(news) || news == "0") { break; }
-                    // ushort[] uts = news.Split(',').Select(p => ushort.Parse(p)).ToArray();
-                    // Send("H0BK," + uts[1], neayers.Where(p => p.Value.Alive).Select(p => p.Key).ToArray());
-                    // Live("H0BK," + uts[1]);
-                    // // Awake the neayer
-                    // if (neayers.ContainsKey(uts[1]))
-                    //     neayers[uts[1]].Alive = true;
-                    // SentByteLine(cns, "C3RA," + uts[0]);
-                    // // Check whether all members has gathered.
-                    // if (GetAliveNeayersCount() == playerCapacity)
-                    // {
-                    //     // OK, all gathered.
-                    //     BCast("H0RK,0");
-                    //     SentByteLine(cns, "C3RV,0");
-                    //     IsHangedUp = false;
-                    //     return true;
-                    // }
-                    if (GetAliveNeayersCount() == playerCapacity) { return true; }
-                }
+            while ((GetAliveNeayersCount() < playerCapacity))
+            {
                 Thread.Sleep(100);
                 ++timeout;
-                // Warning happens at 5 minuts and 7 minuts
-                // Time out time set as 8 minutes
                 if (timeout == 3000 || timeout == 4200)
                 {
                     int left = (4800 - timeout) / 10;
                     Send("H0WD," + left, neayers.Where(p => p.Value.Alive).Select(p => p.Key).ToArray());
                     Live("H0WD," + left);
                 }
-                else if (timeout == 4800) { break; }
-            } while (true);
-            OnBrokenConnection();
-            return false;
+                else if (timeout == 4800) { OnBrokenConnection(); return false; }
+            }
+            return true;
         }
         [MethodImpl(MethodImplOptions.Synchronized)]
         private void WakeTunnelInWaiting(ushort auid, ushort suid)
@@ -491,7 +463,6 @@ namespace PSD.PSDGamepkg.VW
                 SentByteLine(cns, "C3RV,0");
                 IsHangedUp = false;
             }
-            updateNeayersInWaiting.Enqueue(auid + "," + suid);
         }
         // lose the connection with $who, hoping to get echo and resume game
         private void OnLoseConnection(ushort who)
@@ -512,9 +483,7 @@ namespace PSD.PSDGamepkg.VW
                 {
                     // Start Waiting thread and init news signal queue
                     IsHangedUp = true;
-                    updateNeayersInWaiting = new ConcurrentQueue<string>();
-                    Task.Factory.StartNew(() => XI.SafeExecute(() => StartWaitingStage(),
-                        delegate(Exception e) { if (Log != null) { Log.Logger(e.ToString()); } }), ctoken.Token);
+                    StartListenTask(() => StartWaitingStage());
                 }
             }
         }

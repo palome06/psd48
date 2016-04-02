@@ -1,6 +1,4 @@
-﻿using System;
-using System.Linq;
-using PSD.Base.Utils;
+﻿using System.Linq;
 using BC = System.Collections.Concurrent.BlockingCollection<string>;
 using CQ = System.Collections.Concurrent.ConcurrentQueue<string>;
 
@@ -95,7 +93,7 @@ namespace PSD.PSDGamepkg.VW
         // Send raw message to the whole
         public void BCast(string msg)
         {
-            Send(msg, System.Linq.Enumerable.Range(1, Count - 1).Select(p => (ushort)p).ToArray());
+            Send(msg, Enumerable.Range(1, Count - 1).Select(p => (ushort)p).ToArray());
         }
         // Send direct message that won't be caught by RecvInfRecv from $me to 0
         public void SendDirect(string msg, ushort me)
