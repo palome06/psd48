@@ -635,6 +635,8 @@ namespace PSD.PSDGamepkg.JNS
                 XI.RaiseGMessage("G2IL," + target.Uid + "," + ut);
                 if (XI.Board.Monster1 == ut)
                     XI.Board.Monster1 = 0;
+                else if (XI.Board.Wang.Count > 0 && XI.Board.Wang.Peek() == ut)
+                    XI.Board.Wang.Pop();
             }
         }
         public void EscueDiscard(Player player, ushort npcUt)

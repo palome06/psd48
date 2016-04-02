@@ -72,7 +72,10 @@ namespace PSD.ClientAo
         public AoCEE A0C { private set; get; }
         public OI.AoDeal A0D { private set; get; }
         public AoOrchis A0O { private set; get; }
+        // whether the game ends w/o exception
         private bool GameGraceEnd { set; get; }
+        // whether the curren game isn't well connected, used for avoiding poster shielding
+        private bool GameInDanger { set; get; }
 
         private Auxs.FlashWindowHelper flashHelper;
         //var helper = new Auxs.FlashWindowHelper(System.Windows.Application.Current);
@@ -242,6 +245,7 @@ namespace PSD.ClientAo
             A0O = ad.yfOrchis40.Orch;
 
             GameGraceEnd = false;
+            GameInDanger = false;
         }
 
         private static ushort RoundUid(ushort uid, int delta)
@@ -4460,6 +4464,7 @@ namespace PSD.ClientAo
                         else
                             VI.Cout(Uid, "服务器被延帝抓走啦，游戏结束。");
                         ad.SetCanan(CananPaint.CananSignal.FAIL_CONNECTION);
+                        GameInDanger = true;
                     }
                     break;
                 case "H0WT":
@@ -4483,6 +4488,7 @@ namespace PSD.ClientAo
                             ad.SetCanan(CananPaint.CananSignal.LOSE_COUNTDOWN_48);
                         else if (secLeft == 60)
                             ad.SetCanan(CananPaint.CananSignal.LOSE_COUNTDOWN_12);
+                        GameInDanger = true;
                     }
                     break;
                 case "H0BK":
@@ -4498,6 +4504,7 @@ namespace PSD.ClientAo
                     break;
                 case "H0RK":
                     VI.Cout(Uid, "房间已恢复正常。");
+                    GameInDanger = false;
                     ad.SetCanan(CananPaint.CananSignal.NORMAL);
                     break;
                 case "H09F":
@@ -4681,10 +4688,11 @@ namespace PSD.ClientAo
         #region Network Report
         internal void ReportConnectionLost()
         {
-            if (!GameGraceEnd)
+            if (!GameGraceEnd && !GameInDanger)
             {
                 VI.Cout(Uid, "网络连接故障，等待重连中...");
                 ad.SetCanan(CananPaint.CananSignal.LOSE_CONNECTION);
+                GameInDanger = true;
             }
         }
         #endregion Network Report
