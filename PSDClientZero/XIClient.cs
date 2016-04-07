@@ -1229,22 +1229,25 @@ namespace PSD.ClientZero
                             int tuxCount = 0;
                             foreach (ushort ut in cards)
                             {
-                                if (Z0D[who].Weapon == ut)
-                                    Z0D[who].Weapon = 0;
-                                else if (Z0D[who].Armor == ut)
-                                    Z0D[who].Armor = 0;
-                                else if (Z0D[who].Trove == ut)
-                                    Z0D[who].Trove = 0;
-                                else if (Z0D[who].ExEquip == ut)
-                                    Z0D[who].ExEquip = 0;
-                                else if (Z0D[who].ExCards.Contains(ut))
-                                    Z0D[who].ExCards.Remove(ut);
-                                else if (Z0D[who].Fakeq.ContainsKey(ut))
-                                    Z0D[who].Fakeq.Remove(ut);
-                                else
+                                if (who == Uid)
                                     ++tuxCount;
+                                else
+                                {
+                                    if (Z0D[who].Weapon == ut)
+                                        Z0D[who].Weapon = 0;
+                                    else if (Z0D[who].Armor == ut)
+                                        Z0D[who].Armor = 0;
+                                    else if (Z0D[who].Trove == ut)
+                                        Z0D[who].Trove = 0;
+                                    else if (Z0D[who].ExEquip == ut)
+                                        Z0D[who].ExEquip = 0;
+                                    else if (Z0D[who].ExCards.Contains(ut))
+                                        Z0D[who].ExCards.Remove(ut);
+                                    else if (Z0D[who].Fakeq.ContainsKey(ut))
+                                        Z0D[who].Fakeq.Remove(ut);
+                                }
                             }
-                            if (who == Uid)
+                            if (tuxCount > 0)
                             {
                                 Z0D[who].TuxCount -= tuxCount;
                                 Z0M.Tux.RemoveAll(p => cards.Contains(p));

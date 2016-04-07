@@ -1376,7 +1376,7 @@ namespace PSD.ClientAo
                     }
                     break;
                 case "E0OT":
-                    for (int idx = 1; idx < args.Length;)
+                    for (int idx = 1; idx < args.Length; )
                     {
                         ushort who = ushort.Parse(args[idx]);
                         int type = int.Parse(args[idx + 1]);
@@ -1388,31 +1388,29 @@ namespace PSD.ClientAo
                             int tuxCount = 0;
                             foreach (ushort ut in cards)
                             {
-                                Tux tux = Tuple.TL.DecodeTux(ut);
-                                if (A0P[who].Weapon == ut)
-                                    A0P[who].Weapon = 0;
-                                else if (A0P[who].Armor == ut)
-                                    A0P[who].Armor = 0;
-                                else if (A0P[who].IsExCardsContain(ut))
-                                    A0P[who].DelExCards(ut);
-                                else if (A0P[who].Fakeq.ContainsKey(ut))
-                                    A0P[who].DelFakeq(ut);
-                                else if (A0P[who].ExEquip == ut)
-                                    A0P[who].ExEquip = 0;
-                                else if (A0P[who].Trove == ut)
-                                    A0P[who].Trove = 0;
-                                else
+                                if (who == Uid && A0M.Tux.Contains(ut))
                                     ++tuxCount;
+                                else
+                                {
+                                    if (A0P[who].Weapon == ut)
+                                        A0P[who].Weapon = 0;
+                                    else if (A0P[who].Armor == ut)
+                                        A0P[who].Armor = 0;
+                                    else if (A0P[who].IsExCardsContain(ut))
+                                        A0P[who].DelExCards(ut);
+                                    else if (A0P[who].Fakeq.ContainsKey(ut))
+                                        A0P[who].DelFakeq(ut);
+                                    else if (A0P[who].ExEquip == ut)
+                                        A0P[who].ExEquip = 0;
+                                    else if (A0P[who].Trove == ut)
+                                        A0P[who].Trove = 0;
+                                }
                             }
-                            if (who == Uid)
+                            if (tuxCount > 0)
                             {
                                 A0P[who].TuxCount -= tuxCount;
-                                //A0M.Tux.RemoveAll(p => cards.Contains(p));
                                 A0M.delTux(cards);
                             }
-                            else if (Uid >= 1000 && who == WATCHER_1ST_PERSPECT)
-                                for (int i = 0; i < tuxCount; ++i)
-                                    A0M.delTux(0);
                             idx += (n + 3);
                         }
                         else if (type == 1)
