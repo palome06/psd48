@@ -3222,62 +3222,49 @@ namespace PSD.PSDGamepkg.JNS
         {
             if (!player.RFM.GetBool("InJNH2002"))
             {
+                ushort who = 0;
                 if (type == 0) // ZB
-                {
-                    ushort who = Artiad.ClothingHelper.GetWho(fuse);
-                    return who != 0 && who != player.Uid;
-                }
+                    who = Artiad.ClothingHelper.GetWho(fuse);
                 else if (type == 1) // HD
-                    return Artiad.ObtainPet.Parse(fuse).Farmer != player.Uid;
+                    who = Artiad.ObtainPet.Parse(fuse).Farmer;
                 else if (type == 2) // IF
                 {
                     string[] g0ifs = fuse.Split(',');
-                    ushort who = ushort.Parse(g0ifs[1]);
-                    return who != player.Uid;
+                    who = ushort.Parse(g0ifs[1]);
                 }
+                return who != 0 && XI.Board.Garden[who].Team == player.OppTeam;
             }
             return false;
         }
         public void JNH2001Action(Player player, int type, string fuse, string argst)
         {
-            bool self = true; int n = 0;
-            if (type == 0)
+            ushort who = 0; int n = 0;
+            if (type == 0) // ZB
             {
-                ushort who = Artiad.ClothingHelper.GetWho(fuse);
-                self = XI.Board.Garden[who].Team == player.Team;
+                who = Artiad.ClothingHelper.GetWho(fuse);
                 n = 1;
             }
-            else if (type == 1)
+            else if (type == 1) // HD
             {
-                ushort who = Artiad.ObtainPet.Parse(fuse).Farmer;
-                self = XI.Board.Garden[who].Team == player.Team;
+                who = Artiad.ObtainPet.Parse(fuse).Farmer;
                 n = 1;
             }
-            else if (type == 2)
+            else if (type == 2) // IF
             {
                 string[] g0ifs = fuse.Split(',');
-                ushort who = ushort.Parse(g0ifs[1]);
-                self = XI.Board.Garden[who].Team == player.Team;
+                who = ushort.Parse(g0ifs[1]);
                 n = g0ifs.Length - 2;
             }
             for (int i = 0; i < n; ++i)
             {
                 XI.RaiseGMessage("G0DH," + player.Uid + ",0,1");
-                if (self)
+                string select = XI.AsyncInput(player.Uid, "#置为「魔灵」,Q1(p" +
+                    string.Join("p", player.Tux) + ")", "JNH2001", "0");
+                if (select != VI.CinSentinel)
                 {
-                    if (player.Tux.Count > 0)
-                        XI.RaiseGMessage("G0DH," + player.Uid + ",1,1");
-                }
-                else
-                {
-                    string select = XI.AsyncInput(player.Uid, "#置为「魔灵」,Q1(p" +
-                        string.Join("p", player.Tux) + ")", "JNH2001", "0");
-                    if (select != VI.CinSentinel)
-                    {
-                        ushort ut = ushort.Parse(select);
-                        XI.RaiseGMessage("G0OT," + player.Uid + "," + 1 + "," + ut);
-                        XI.RaiseGMessage("G0IJ," + player.Uid + ",4,1," + ut);
-                    }
+                    ushort ut = ushort.Parse(select);
+                    XI.RaiseGMessage("G0OT," + player.Uid + ",1," + ut);
+                    XI.RaiseGMessage("G0IJ," + player.Uid + ",4,1," + ut);
                 }
             }
         }
