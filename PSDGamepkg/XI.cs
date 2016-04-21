@@ -2158,13 +2158,9 @@ namespace PSD.PSDGamepkg
         public static void SafeExecute(Action action, Action<Exception> handler)
         {
             try { action(); }
-            catch (Exception ex)
-            {
-                if (!(ex is System.Threading.ThreadAbortException))
-                {
-                    handler(ex); Console.WriteLine(ex.ToString());
-                }
-            }
+            catch (System.Threading.ThreadAbortException) { }
+            catch (System.OperationCanceledException) { throw; }
+            catch (Exception ex) { handler(ex); Console.WriteLine(ex.ToString()); }
         }
 
         public static void Main(string[] args)

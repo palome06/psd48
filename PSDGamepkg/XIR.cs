@@ -644,6 +644,12 @@ namespace PSD.PSDGamepkg
                         break;
                 }
             }
+            if (rstage == "H0TM")
+            {
+                // 1. Don't accept reconnection request
+                // 2. Sleep for 5 minutes to terminate the room
+                // 3. Terminate the room if everyone leaves
+            }
         }
         private void RunQuadStage(string zero) { RunQuadMixedStage(zero, 0, null, null); }
         // return whether actual action has been taken

@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Net;
 
 using PSD.Base;
@@ -127,7 +127,7 @@ namespace PSD.PSDGamepkg
                 else
                     Console.WriteLine("本机目前网卡异常，仅支持本地模式。");
 
-                VW.Aywi aywi = new VW.Aywi(port, Log, HandleYMessage);
+                VW.Aywi aywi = new VW.Aywi(port, 6, Log, HandleYMessage);
                 WI = aywi;
 
                 VI.Cout(0, "Wait for others players joining");
@@ -163,7 +163,7 @@ namespace PSD.PSDGamepkg
         {
             int port = Base.NetworkCode.HALL_PORT + room;
             //string pipeName = "psd48pipe" + room;
-            VW.Aywi aywi = new VW.Aywi(port, Log, HandleYMessage);
+            VW.Aywi aywi = new VW.Aywi(port, 6, Log, HandleYMessage);
             WI = aywi;
 
             bool teamMode = (opts[0] == RuleCode.HOPE_YES);
@@ -285,7 +285,7 @@ namespace PSD.PSDGamepkg
         }
         private void HoldRoomTunnel()
         {
-            new Thread(() => XI.SafeExecute(() =>
+            Task.Factory.StartNew(() => XI.SafeExecute(() =>
             {
                 while (true)
                 {
@@ -295,14 +295,15 @@ namespace PSD.PSDGamepkg
                     { // Watcher case
                         HandleHoldOfWatcher(wuid);
                     }
-                    else // Reconnection case
+                    else if (wuid != 0) // Reconnection case
                     {
                         HandleHoldOfReconnect(wuid);
                         if (!aywi.IsHangedUp)
                             ResumeLostInputEvent();
                     }
+                    else break; // wuid = 0, termined
                 }
-            }, delegate(Exception e) { Log.Logger(e.ToString()); })).Start();
+            }, delegate(Exception e) { Log.Logger(e.ToString()); }));
         }
     }
 }

@@ -2731,9 +2731,8 @@ namespace PSD.PSDGamepkg
                         }
                         WI.RecvInfEnd();
                         WI.Live("F0WN," + cmdrst);
-                        //WriteBytes(ps, "C3TM," + cmdrst);
                         if (WI is VW.Aywi)
-                            (WI as VW.Aywi).Report("C3TM," + cmdrst);
+                            (WI as VW.Aywi).RoomGameEnd();
                         lock (jumpTareget)
                         {
                             jumpTareget = "H0TM";

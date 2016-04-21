@@ -40,8 +40,10 @@ namespace PSD.PSDGamepkg.VW
             [MethodImpl(MethodImplOptions.Synchronized)]
             get { return isRecvBlocked; }
         }
+        // indicate whether the room has exited gracefully, won't report lose connection
+        private bool IsLegecy { set; get; }
 
-        // only used in direct mode
+        // userid counter, only used in direct mode
         private ushort curCount = 1;
         private ushort watchCount = 1001;
 
@@ -304,57 +306,60 @@ namespace PSD.PSDGamepkg.VW
 		// Catch new room comer, containing watcher and reconnector
 		public ushort CatchNewRoomComer()
         {
-            if (listener != null)
-            {
-                Socket socket = listener.AcceptSocket();
-                NetworkStream ns = new NetworkStream(socket);
-                string data = ReadByteLine(ns);
-                if (data == null) { return 0; }
-                else if (data.StartsWith("C2QI,")) // Watcher case
-                {
-                    string[] blocks = data.Split(',');
-                    ushort ut = ushort.Parse(blocks[1]);
-                    if (ut == 0)
-                        ut = watchCount++;
-                    string uname = blocks[2];
-                    while (netchers.ContainsKey(ut))
-                        ++ut;
-                    Netcher nc = new Netcher(uname, ut) { Tunnel = socket };
-                    netchers.Add(ut, nc);
-                    SentByteLine(ns, "C2QJ," + ut);
-                    SentByteLine(ns, "C2SA,0");
-                    return ut;
-                }
-                else if (data.StartsWith("C4CR,")) // Reconnect case
-                {
-					// C4CR,u,i,A,cd
-					string[] blocks = data.Split(',');
-					ushort newUt = ushort.Parse(blocks[1]);
-					ushort oldUt = ushort.Parse(blocks[2]);
-					string uname = blocks[3];
-					string roomPwd = blocks[4];
-                    ushort gameUt = neayers.Values.Where(p => p.AUid == oldUt).First().Uid;
+            if (listener == null) { return 0; }
+            Socket socket;
+            try { socket = listener.AcceptSocket(); }
+            catch (SocketException) { return 0; }
 
-                    Neayer ny = new Neayer(uname, 0) // set avatar = 0, not care
-                    {
-                        AUid = newUt,
-                        Uid = gameUt,
-                        HopeTeam = 0,
-                        Tunnel = socket,
-                        Alive = false
-                    };
-                    neayers[ny.Uid] = ny;
-                    Task.Factory.StartNew(() => XI.SafeExecute(() => KeepOnListenRecv(ny),
-                        delegate(Exception e) { Log.Logger(e.ToString()); }), ctoken.Token);
-                    SentByteLine(ns, "C4CS," + ny.Uid);
-                    ny.Alive = true;
-                    WakeTunnelInWaiting(ny.AUid, ny.Uid);
-                    return ny.Uid;
-                }
-                else
-                    SentByteLine(ns, "C2CN,0");
+            NetworkStream ns = new NetworkStream(socket);
+            string data = ReadByteLine(ns);
+            if (data == null) { return 0; }
+            else if (data.StartsWith("C2QI,")) // Watcher case
+            {
+                string[] blocks = data.Split(',');
+                ushort ut = ushort.Parse(blocks[1]);
+                if (ut == 0)
+                    ut = watchCount++;
+                string uname = blocks[2];
+                while (netchers.ContainsKey(ut))
+                    ++ut;
+                Netcher nc = new Netcher(uname, ut) { Tunnel = socket };
+                netchers.Add(ut, nc);
+                SentByteLine(ns, "C2QJ," + ut);
+                SentByteLine(ns, "C2SA,0");
+                return ut;
             }
-            return 0;
+            else if (data.StartsWith("C4CR,")) // Reconnect case
+            {
+                // C4CR,u,i,A,cd
+                string[] blocks = data.Split(',');
+                ushort newUt = ushort.Parse(blocks[1]);
+                ushort oldUt = ushort.Parse(blocks[2]);
+                string uname = blocks[3];
+                string roomPwd = blocks[4];
+                ushort gameUt = neayers.Values.First(p => p.AUid == oldUt).Uid;
+
+                Neayer ny = new Neayer(uname, 0) // set avatar = 0, not care
+                {
+                    AUid = newUt,
+                    Uid = gameUt,
+                    HopeTeam = 0,
+                    Tunnel = socket,
+                    Alive = false
+                };
+                neayers[ny.Uid] = ny;
+                Task.Factory.StartNew(() => XI.SafeExecute(() => KeepOnListenRecv(ny),
+                    delegate(Exception e) { Log.Logger(e.ToString()); }), ctoken.Token);
+                SentByteLine(ns, "C4CS," + ny.Uid);
+                ny.Alive = true;
+                WakeTunnelInWaiting(ny.AUid, ny.Uid);
+                return ny.Uid;
+            }
+            else
+            {
+                SentByteLine(ns, "C2CN,0");
+                return 0;
+            }
         }
         #endregion Network of Player
         #region Communication and Tunnel
@@ -383,7 +388,7 @@ namespace PSD.PSDGamepkg.VW
                 }
                 else if (!string.IsNullOrEmpty(line) && !IsHangedUp)
                 {
-                    inf0Msgs.Add(new Base.VW.Msgs(line, ny.Uid, 0));
+                    inf0Msgs.Add(new Base.VW.Msgs(line, ny.Uid, 0), ctoken.Token);
                     //Log.Logger(0 + "<" + ny.Uid + ":" + line);
                 }
                 else
@@ -394,7 +399,7 @@ namespace PSD.PSDGamepkg.VW
         {
             while (true)
             {
-                Base.VW.Msgs msg = infNMsgs.Take();
+                Base.VW.Msgs msg = infNMsgs.Take(ctoken.Token);
                 if (msg.From == 0) // send won't be blocked
                 {
                     if (neayers.ContainsKey(msg.To) && neayers[msg.To].Alive)
@@ -413,7 +418,8 @@ namespace PSD.PSDGamepkg.VW
         // Watcher case, won't cause exception to notify leaves
         private bool KeepOnListenSendWatcher(Base.VW.Msgs msg)
         {
-            try {
+            try
+            {
                 if (netchers.ContainsKey(msg.To))
                     SentByteLine(new NetworkStream(netchers[msg.To].Tunnel), msg.Msg);
                 return true;
@@ -470,16 +476,17 @@ namespace PSD.PSDGamepkg.VW
             if (neayers.ContainsKey(who) && neayers[who].Alive)
             {
                 neayers[who].Alive = false;
-                if (vi != null) vi.Cout(0, "玩家{0}掉线，房间等待重连中.", who);
-                Send("H0WT," + who, neayers.Where(p => p.Value.Alive).Select(p => p.Key).ToArray());
-                Live("H0WT," + who);
+                if (!IsLegecy)
+                {
+                    if (vi != null) vi.Cout(0, "玩家{0}掉线，房间等待重连中.", who);
+                    Send("H0WT," + who, neayers.Where(p => p.Value.Alive).Select(p => p.Key).ToArray());
+                    Live("H0WT," + who);
 
-                // Report to Centre
-                SentByteLine(cns, "C3LS," + neayers[who].AUid);
+                    Report("C3LS," + neayers[who].AUid);
+                }
                 if (GetAliveNeayersCount() == 0 && netchers.Count == 0)
                     Bye();
-
-                if (!IsHangedUp)
+                if (!IsLegecy && !IsHangedUp)
                 {
                     // Start Waiting thread and init news signal queue
                     IsHangedUp = true;
@@ -499,8 +506,15 @@ namespace PSD.PSDGamepkg.VW
         // report to fake pipe
         public void Report(string message)
         {
-            if (cns != null)
+            if (cns != null && !IsLegecy)
                 SentByteLine(cns, message);
+        }
+        // terminate the room
+        public void RoomGameEnd()
+        {
+            Report("C3TM,0");
+            IsLegecy = true;
+            Task.Factory.StartNew(() => Thread.Sleep(300 * 1000), ctoken.Token).ContinueWith((t) => Bye());
         }
         #endregion Communication and Tunnel
 
@@ -515,8 +529,7 @@ namespace PSD.PSDGamepkg.VW
         [MethodImpl(MethodImplOptions.Synchronized)]
         private int GetAliveNeayersCount()
         {
-            lock (neayers)
-                return neayers.Values.Count(p => p.Alive);
+            lock (neayers) { return neayers.Values.Count(p => p.Alive); }
         }
         /// <summary>
         /// start an async Listening task
@@ -530,29 +543,23 @@ namespace PSD.PSDGamepkg.VW
         }
         #endregion Fake Pipe
 
-        private const int playerCapacity = 6;
-        /// <summary>
-        /// msg0Pools: message from $i to 0
-        /// msgNPools: message from 0 to $i
-        /// </summary>
-        // private BlockingCollection<string>[] msg0Pools;
+        private readonly int playerCapacity;
         // message queue of handling inf
         private BlockingCollection<Base.VW.Msgs> inf0Msgs;
         // only for send
         private BlockingCollection<Base.VW.Msgs> infNMsgs;
-        // queue for talk message, format as Y2,4,Hello
-        //private Queue<Base.VW.Msgs> talkMsgs;
-        // whether listen on or not
         // handler of Y message, inits from XI Instance.
         private Action<string, ushort> yMsgHandler;
 
-        public Aywi(int port, Log log, Action<string, ushort> yHandler)
+        public Aywi(int port, int playerCapacity, Log log, Action<string, ushort> yHandler)
         {
             this.port = port;
+            this.playerCapacity = playerCapacity;
             inf0Msgs = new BlockingCollection<Base.VW.Msgs>(new ConcurrentQueue<Base.VW.Msgs>());
             infNMsgs = new BlockingCollection<Base.VW.Msgs>(new ConcurrentQueue<Base.VW.Msgs>());
 
             IsTalkSilence = false;
+            IsLegecy = false;
             this.yMsgHandler = yHandler;
             this.Log = log;
             ctoken = new CancellationTokenSource();
@@ -610,17 +617,19 @@ namespace PSD.PSDGamepkg.VW
         // Send raw message to the whole
         public void BCast(string msg)
         {
-            foreach (ushort to in neayers.Keys)
-                Send(msg, 0, to);
-            foreach (ushort to in netchers.Keys)
-                Send(msg, 0, to);
+            Send(msg, neayers.Keys.ToArray());
+            Live(msg);
         }
         // Send direct message that won't be caught by RecvInfRecv from $me to 0
         public void SendDirect(string msg, ushort me) { }
         public void Dispose() { }
-        public void Bye()
+        private void Bye()
         {
-            SentByteLine(cns, "C3LV,0");
+            if (vi != null) vi.Cout(0, "房间已回收.");
+            Report("C3LV,0");
+            ctoken.Cancel(); ctoken.Dispose();
+            listener.Stop();
+            inf0Msgs.Dispose(); infNMsgs.Dispose();
             Environment.Exit(0);
         }
         #endregion Implementation
