@@ -79,6 +79,8 @@ namespace PSD.ClientZero
             //msgPool = new BlockingCollection<string>();
             unhandledMsg = new Queue<string>();
             GameGraceEnd = false;
+            if (WI is VW.Bywi)
+                (WI as VW.Bywi).OnLoseConnection += ReportConnectionLost;
         }
         // Constructor 1#: Used for Hall setting
         public XIClient(ushort uid, string name, int teamCode, Base.VW.IVI vi,
@@ -91,7 +93,7 @@ namespace PSD.ClientZero
             this.Room = room;
             this.port = Base.NetworkCode.HALL_PORT + room;
 
-            VW.Bywi bywi = new VW.Bywi(server, port, name, avatar, hopeTeam, uid, this);
+            VW.Bywi bywi = new VW.Bywi(server, port, name, avatar, hopeTeam, uid);
             Log = new ClLog(); Log.Start(auid, record, msglog, 0);
             bywi.Log = Log;
             if (VI is VW.Ayvi)
@@ -123,7 +125,7 @@ namespace PSD.ClientZero
             VW.Ayvi ayvi = new VW.Ayvi(totalPlayer, record, msglog);
             VI = ayvi;
             VI.Init(); ayvi.SetInGame(true);
-            VW.Bywi bywi = new VW.Bywi(server, port, name, avatar, hopeTeam, 0, this);
+            VW.Bywi bywi = new VW.Bywi(server, port, name, avatar, hopeTeam, 0);
             WI = bywi;
             
             Log = new ClLog(); Log.Start(Uid, record, msglog, 0);
@@ -155,7 +157,7 @@ namespace PSD.ClientZero
             this.Room = room;
             this.port = Base.NetworkCode.HALL_PORT + room;
             
-            VW.Bywi bywi = new VW.Bywi(server, port, name, avatar, hopeTeam = 0, newUid, this);
+            VW.Bywi bywi = new VW.Bywi(server, port, name, avatar, hopeTeam = 0, newUid);
             Log = new ClLog(); Log.Start(auid, record, msglog, 0);
             bywi.Log = Log;
             if (VI is VW.Ayvi)

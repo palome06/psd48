@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using PSD.Base;
-using System.IO;
 
 namespace PSD.ClientZero.VW
 {
@@ -20,7 +21,8 @@ namespace PSD.ClientZero.VW
             internal ushort Uid { set; get; }
         }
         public const int MSG_SIZE = 4096;
-        public Thread recvThread, sendThread;
+        // token to terminate all running thread when Aywi is closed
+        private CancellationTokenSource ctoken;
 
         private string serverName;
         private int port;
@@ -61,15 +63,10 @@ namespace PSD.ClientZero.VW
                 else if (line.StartsWith("C2SA,"))
                 {
                     stream = tcpStream;
-                    recvThread = new Thread(() => ZI.SafeExecute(() => KeepOnListenRecv(),
-                        delegate(Exception e) { Log.Logg(e.ToString()); }));
-                    recvThread.Start();
+                    StartListenTask(KeepOnListenRecv);
                     if (!watch)
                     {
-                    //    SentByteLine(tcpStream, "C2ST," + Uid);
-                        sendThread = new Thread(() => ZI.SafeExecute(() => KeepOnListenSend(),
-                            delegate(Exception e) { Log.Logg(e.ToString()); }));
-                        sendThread.Start();
+                        StartListenTask(KeepOnListenSend);
                         Send("C2ST," + Uid, Uid, 0);
                     }
                     return true;
@@ -141,15 +138,9 @@ namespace PSD.ClientZero.VW
                 else if (line.StartsWith("C2SA,"))
                 {
                     stream = tcpStream;
-                    recvThread = new Thread(() => ZI.SafeExecute(() => KeepOnListenRecv(),
-                        delegate(Exception e) { Log.Logg(e.ToString()); }));
-                    recvThread.Start();
+                    StartListenTask(KeepOnListenRecv);
                     if (!watch)
-                    {
-                        sendThread = new Thread(() => ZI.SafeExecute(() => KeepOnListenSend(),
-                            delegate(Exception e) { Log.Logg(e.ToString()); }));
-                        sendThread.Start();
-                    }
+                        StartListenTask(KeepOnListenSend);
                     return true;
                 }
                 else if (line.StartsWith("C"))
@@ -171,17 +162,11 @@ namespace PSD.ClientZero.VW
                     ushort ut = ushort.Parse(line.Substring("C4CS,".Length));
                     if (ut == 0)
                         return false;
-                    else {
-                    	Uid = ut;
-                    	stream = tcpStream;
-	                    recvThread = new Thread(() => ZI.SafeExecute(() => KeepOnListenRecv(),
-	                        delegate(Exception e) { Log.Logg(e.ToString()); }));
-	                    recvThread.Start();
-                        sendThread = new Thread(() => ZI.SafeExecute(() => KeepOnListenSend(),
-                            delegate(Exception e) { Log.Logg(e.ToString()); }));
-                        sendThread.Start();
-                    	return true;
-                    }
+                    Uid = ut;
+                    stream = tcpStream;
+                    StartListenTask(KeepOnListenRecv);
+                    StartListenTask(KeepOnListenSend);
+                    return true;
                 }
                 else if (line.StartsWith("C"))
                     return false;
@@ -215,7 +200,7 @@ namespace PSD.ClientZero.VW
             }
             catch (Exception) { return false; }
         }
-		
+
         private void KeepOnListenRecv()
         {
             try
@@ -225,19 +210,21 @@ namespace PSD.ClientZero.VW
                     string line = ReadByteLine(stream);
                     if (string.IsNullOrEmpty(line))
                     {
-                        xic.ReportConnectionLost();
+                        if (OnLoseConnection != null)
+                            OnLoseConnection();
                         stream.Close();
                         break;
                     }
                     else if (line.StartsWith("Y"))
-                        msgTalk.Add(line);
+                        msgTalk.Add(line, ctoken.Token);
                     else
-                        msgNPools.Add(line);
+                        msgNPools.Add(line, ctoken.Token);
                 }
             }
             catch (IOException)
             {
-                xic.ReportConnectionLost();
+                if (OnLoseConnection != null)
+                    OnLoseConnection();
             }
         }
         private void KeepOnListenSend()
@@ -245,30 +232,37 @@ namespace PSD.ClientZero.VW
             try
             {
                 while (true)
-                    SentByteLine(stream, msg0Pools.Take());
+                    SentByteLine(stream, msg0Pools.Take(ctoken.Token));
             }
             catch (IOException)
             {
-                xic.ReportConnectionLost();
+                if (OnLoseConnection != null)
+                    OnLoseConnection();
             }
         }
 
         #endregion Connect Issue
 
         /// <summary>
-        /// msg0Queues: message from $i to 0
-        /// msgNQueues: message from 0 to $i
+        /// msgNPools: message from 0 to $i
         /// </summary>
         private BlockingCollection<string> msgNPools;
+        /// <summary>
+        /// msg0Pools: message from $i to 0
+        /// </summary>
         private BlockingCollection<string> msg0Pools;
+        /// <summary>
+        /// msgTalk: talk and instant message
+        /// </summary>
         private BlockingCollection<string> msgTalk;
 
-        private XIClient xic;
+        public delegate void LoseConnectionDelegate();
+        public LoseConnectionDelegate OnLoseConnection;
 
         internal ClLog Log { set; get; }
         // direct true : Single Room, RM/NW exists; otherwise, hall
         public Bywi(string serverName, int port, string name,
-            int avatar, int hopeTeam, ushort uid, XIClient xic)
+            int avatar, int hopeTeam, ushort uid)
         {
             this.serverName = serverName;
             this.port = port;
@@ -282,8 +276,6 @@ namespace PSD.ClientZero.VW
             msgNPools = new BlockingCollection<string>(new ConcurrentQueue<string>());
             msg0Pools = new BlockingCollection<string>(new ConcurrentQueue<string>());
             msgTalk = new BlockingCollection<string>(new ConcurrentQueue<string>());
-
-            this.xic = xic;
         }
 
         #region Implemetation
@@ -318,14 +310,9 @@ namespace PSD.ClientZero.VW
         // Close the socket for recycling
         public void Close()
         {
-            try
-            {
-                if (recvThread != null && recvThread.IsAlive)
-                    recvThread.Abort();
-                if (sendThread != null && sendThread.IsAlive)
-                    sendThread.Abort();
-                stream.Close();
-            }
+            ctoken.Cancel(); ctoken.Dispose();
+            msg0Pools.Dispose(); msgNPools.Dispose(); msgTalk.Dispose();
+            try { stream.Close(); }
             catch (IOException) { }
         }
         //// Talk text message to others
@@ -344,6 +331,16 @@ namespace PSD.ClientZero.VW
         public void Dispose() { }
         #endregion Implementation
 
+        /// <summary>
+        /// start an async Listening task
+        /// </summary>
+        /// <param name="action">the acutal listen action</param>
+        private void StartListenTask(Action action)
+        {
+            Action<Exception> ae = (e) => { if (Log != null) Log.Logg(e.ToString()); };
+            Task.Factory.StartNew(() => ZI.SafeExecute(action, ae), ctoken.Token,
+                TaskCreationOptions.LongRunning, TaskScheduler.Default);
+        }
         private static string ReadByteLine(NetworkStream ns)
         {
             byte[] byte2 = new byte[2];

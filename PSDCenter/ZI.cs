@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Net.Sockets;
 using System.Net;
 using System.Threading;
+using System.Threading.Tasks;
 using PSD.Base.Rules;
 using System.IO;
 using System.Diagnostics;
@@ -27,6 +29,8 @@ namespace PSD.PSDCenter
         private int port;
 
         private const int playerCapacity = 6;
+        // token to terminate all running thread when closed
+        private CancellationTokenSource ctoken;
 
         public void Run()
         {
@@ -43,7 +47,8 @@ namespace PSD.PSDCenter
         {
             NetworkStream ns = new NetworkStream(socket);
             string data = ReadByteLine(ns);
-            if (data.StartsWith("C0CO,"))
+            if (data == null) { return; }
+            else if (data.StartsWith("C0CO,"))
             {
                 string[] blocks = data.Split(',');
                 string user = blocks[1];
@@ -96,18 +101,15 @@ namespace PSD.PSDCenter
                         SentByteLine(ns, "C1RM," + reqRoom.Number + members);
                         Console.WriteLine("{0} is allocated with room {1}#.", user, reqRoom.Number);
                         location[uid] = reqRoom.Number;
-                        lock (reqRoom.players)
+                        reqRoom.players.Add(uid);
+                        foreach (ushort nyru in reqRoom.players)
                         {
-                            reqRoom.players.Add(uid);
-                            foreach (ushort nyru in reqRoom.players)
-                            {
-                                Neayer nyr = neayers[nyru];
-                                SentByteLine(new NetworkStream(nyr.Tunnel),
-                                    "C1NW," + uid + "," + ny.Name + "," + avatar);
-                            }
-                            if (reqRoom.players.Count >= playerCapacity)
-                                reqRoom.Ready = true;
+                            Neayer nyr = neayers[nyru];
+                            SentByteLine(new NetworkStream(nyr.Tunnel),
+                                "C1NW," + uid + "," + ny.Name + "," + avatar);
                         }
+                        if (reqRoom.players.Count >= playerCapacity)
+                            reqRoom.Ready = true;
                     }
                     if (reqRoom.Ready)
                         reqRoom.CreateRoomPkg();
@@ -116,7 +118,7 @@ namespace PSD.PSDCenter
                     {
                         string reply = ReadByteLine(ns);
                         if (reply == null)
-                            socket.Close(); // close twice then led to IOException
+                            socket.Close(); // close twice would lead to IOException
                         else if (reply.StartsWith("C0TK,"))
                             HandleTalkInConnection(socket, reply.Substring("C0TK,".Length));
                         else if (reply.StartsWith("C1ST,"))
@@ -151,32 +153,6 @@ namespace PSD.PSDCenter
                         reqRoom.players.Remove(uid);
                         neayers.Remove(uid);
                     }
-                    //neayers.Remove(uid);
-                    //reqRoom.players.Remove(uid);
-                    //lock (reqRoom.players)
-                    //{
-                    //    if (reqRoom.players.Count > 0)
-                    //    {
-                    //        foreach (ushort ut in reqRoom.players)
-                    //        {
-                    //            Neayer nyr = neayers[ut];
-                    //            try
-                    //            {
-                    //                bool part1 = nyr.Tunnel.Poll(1000, SelectMode.SelectRead);
-                    //                bool part2 = (nyr.Tunnel.Available == 0);
-                    //                if (!part1 || !part2)
-                    //                    SentByteLine(new NetworkStream(nyr.Tunnel), "C1LV," + uid);
-                    //            }
-                    //            catch (IOException) { }
-                    //        }
-                    //    }
-                    //    else
-                    //    {
-                    //        int num = reqRoom.Number;
-                    //        rooms.Remove(reqRoom.Number);
-                    //        Console.WriteLine("Room {0}# is closed.", num);
-                    //    }
-                    //}
                 }
             }
             else if (data.StartsWith("C0QI,"))
@@ -214,7 +190,7 @@ namespace PSD.PSDCenter
             }
             else if (data.StartsWith("C4CO,")) // Reconnection Request
             {
-				bool foundOrg = false;
+                bool foundOrg = false;
                 string[] blocks = data.Split(',');
                 string user = blocks[1];
                 int wantedRoom = int.Parse(blocks[2]);
@@ -240,9 +216,9 @@ namespace PSD.PSDCenter
                                 substitudes[uid] = loser.Uid;
                                 Console.WriteLine("{0} has required for re-connection.", user);
                                 SentByteLine(ns, "C4RM," + uid + "," + loser.Uid + "," + curRoomNo + "," + user + ",#CD0");
-								foundOrg = true; break;
-								// TODO: set the room code as "#CD0" for testing.
-								
+                                foundOrg = true; break;
+                                // TODO: set the room code as "#CD0" for testing.
+                                
                                 // Accept it as substitute
                                 //location[uid] = curRoomNo;
                                 //Room curRoom = rooms[curRoomNo];
@@ -252,8 +228,8 @@ namespace PSD.PSDCenter
                         }
                     }
                 }
-				if (!foundOrg)
-					SentByteLine(ns, "C4RM,0");
+                if (!foundOrg)
+                    SentByteLine(ns, "C4RM,0");
             }
             else if (data.StartsWith("C3HI,")) // hello from pkg to replace pipestream
             {
@@ -483,6 +459,56 @@ namespace PSD.PSDCenter
             else
                 Console.WriteLine("本机目前网卡异常，仅支持本地模式。");
             new ZI(Base.NetworkCode.HALL_PORT).Run();
+            // Wangpengfei.Meme();
         }
+    }
+
+    class Wangpengfei
+    {
+        public static void Meme()
+        {
+            CancellationTokenSource cto = new CancellationTokenSource();
+            BlockingCollection<int> bc = new BlockingCollection<int>();
+            Task t1 = Task.Factory.StartNew(() => 
+            {
+                int count = 0;
+                while (true) {
+                    // try {
+                        Thread.Sleep(1000);
+                        bc.Add(count++, cto.Token);
+                    // } catch (Exception e) { Console.WriteLine(e.Message); break; }
+                }
+            }, cto.Token);
+            Task t2 = Task.Factory.StartNew(() => 
+            {
+                while (true) {
+                    // try {
+                        int ct = bc.Take(cto.Token);
+                        Console.WriteLine("Running at {0}#.", ct);
+                    // } catch (Exception e) { Console.WriteLine(e.Message); break; }
+                    //if (cto.Token.IsCancellationRequested) { break; }
+                }
+            }, cto.Token);
+            Task t3 = Task.Factory.StartNew(() =>
+            {
+                int i = 0, j = 4;
+                if (j / i == 1)
+                    ++j;
+            }, cto.Token);
+            Task.Factory.StartNew(() =>
+            {
+                Thread.Sleep(3500);
+                Console.WriteLine("3500!");
+                cto.Cancel();
+
+                Thread.Sleep(1500);
+                Console.WriteLine("t1={0},t2={1}", t1.IsCanceled, t2.IsCanceled);
+                Console.WriteLine("t1={0},t3={1}", t1.Exception == null ? "null" : t1.Exception.ToString(),
+                    t3.Exception == null ? "null" : string.Join("\n", t3.Exception.InnerExceptions));
+            });
+            Console.ReadLine();
+        }
+        // WI.BCast -> {}
+        // WI.Deliver(params[] content) -> {}
     }
 }

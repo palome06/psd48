@@ -462,15 +462,10 @@ namespace PSD.ClientZero
         }
         public static void SafeExecute(Action action, Action<Exception> handler)
         {
-            //try { action(); }
-            //catch (Exception ex) { handler(ex);
-            //while (true)
-            //{
-            //    int c = 2; c += 4;
-            //    System.Threading.Thread.Sleep(1000);
-            //}
-            //}
-            action();
+            try { action(); }
+            catch (System.Threading.ThreadAbortException) { }
+            catch (System.OperationCanceledException) { throw; }
+            catch (Exception ex) { handler(ex); Console.WriteLine(ex.ToString()); }
         }
     }
 }
