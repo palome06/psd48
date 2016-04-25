@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using Algo = PSD.Base.Utils.Algo;
 
 namespace PSD.ClientAo
@@ -1439,43 +1440,31 @@ namespace PSD.ClientAo
                     }
                     break;
                 case "E0ON":
-                    for (int idx = 1; idx < args.Length;)
                     {
-                        ushort fromZone = ushort.Parse(args[idx]);
-                        string cardType = args[idx + 1];
-                        int n = int.Parse(args[idx + 2]);
-                        if (n > 0)
+                        string cardType = args[1];
+                        string zoneType = args[2];
+                        ushort[] cards = Algo.TakeRange(args, 3, args.Length)
+                            .Select(p => ushort.Parse(p)).ToArray();
+                        string cdInfos = null;
+                        if (cardType == "C")
                         {
-                            List<ushort> cds = Algo.TakeRange(args, idx + 3, idx + 3 + n)
-                                .Select(p => ushort.Parse(p)).ToList();
-                            string cdInfos = null;
-                            if (cardType == "C")
-                            {
-                                A0F.TuxDises += n;
-                                if (fromZone == 0)
-                                    cdInfos = zd.Tux(cds);
-                            }
-                            else if (cardType == "M")
-                            {
-                                A0F.MonDises += n;
-                                if (fromZone == 0)
-                                    cdInfos = zd.Monster(cds);
-                            }
-                            else if (cardType == "E")
-                            {
-                                A0F.EveDises += n;
-                                if (fromZone == 0)
-                                    cdInfos = zd.Eve(cds);
-                            }
-                            if (cdInfos != null)
-                            {
-                                VI.Cout(Uid, "{0}被弃置进入弃牌堆.", cdInfos);
-                                List<string> cedcards = cds.Select(
-                                    p => cardType + p).ToList();
-                                A0O.FlyingGet(cedcards, 0, 0);
-                            }
+                            A0F.TuxDises += cards.Length;
+                            cdInfos = zd.Tux(cards);
                         }
-                        idx += (3 + n);
+                        else if (cardType == "M")
+                        {
+                            A0F.MonDises += cards.Length;
+                            cdInfos = zd.Monster(cards);
+                        }
+                        else if (cardType == "E")
+                        {
+                            A0F.EveDises += cards.Length;
+                            cdInfos = zd.Eve(cards);
+                        }
+                        if ((zoneType == "S" || zoneType == "E") && cdInfos != null)
+                            VI.Cout(Uid, "{0}被弃置进入弃牌堆.", cdInfos);
+                        if (zoneType == "E")
+                            A0O.FlyingGet(cards.Select(p => cardType + p), 0, 0);
                     }
                     break;
                 case "E0CN":
@@ -3004,6 +2993,9 @@ namespace PSD.ClientAo
                         VI.Cout(Uid, "{0}将{1}幻化为{2}.", zd.Player(who), zd.Tux(ill), zd.TuxDbSerial(db));
                         A0O.FlyingGet("G" + db, who, who, true);
                     }
+                    break;
+                case "E0ZZ":
+                    Task.WaitAny(Task.Factory.StartNew(() => Thread.Sleep(499)));
                     break;
             }
         }

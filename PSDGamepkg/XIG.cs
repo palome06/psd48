@@ -223,7 +223,12 @@ namespace PSD.PSDGamepkg
                                 player.Escue.Clear();
                                 RaiseGMessage("G2OL," + string.Join(",", esc.Select(
                                     p => (player.Uid + "," + p))));
-                                RaiseGMessage("G0ON," + player.Uid + ",M," + Algo.ListToString(esc));
+                                RaiseGMessage(new Artiad.Abandon()
+                                {
+                                    Zone = Artiad.CustomsHelper.ZoneType.PLAYER,
+                                    Genre = Card.Genre.NMB,
+                                    SingleUnit = new Artiad.CustomsUnit() { Source = player.Uid, Cards = esc.ToArray() }
+                                }.ToMessage());
                             }
                             if (player.Runes.Count > 0)
                                 RaiseGMessage("G0OF," + player.Uid + "," + string.Join(",", player.Runes));
@@ -442,7 +447,12 @@ namespace PSD.PSDGamepkg
                         if (cards.Count > 0)
                         {
                             cards.ForEach(p => Board.PendingTux.Remove(trigger + ",G0CC," + p));
-                            RaiseGMessage("G0ON," + provider + ",C," + cards.Count + "," + string.Join(",", cards));
+                            RaiseGMessage(new Artiad.Abandon()
+                            {
+                                Zone = Artiad.CustomsHelper.ZoneType.PLAYER,
+                                Genre = Card.Genre.Tux,
+                                SingleUnit = new Artiad.CustomsUnit() { Source = provider, Cards = cards.ToArray() }
+                            }.ToMessage());
                         }
                     }
                     break;
@@ -546,7 +556,12 @@ namespace PSD.PSDGamepkg
                         //WI.BCast("E0EV," + eveCard);
                         if (Board.Eve != 0)
                         {
-                            RaiseGMessage("G0ON,10,E,1," + Board.Eve);
+                            RaiseGMessage(new Artiad.Abandon()
+                            {
+                                Zone = Artiad.CustomsHelper.ZoneType.IMPLICIT,
+                                Genre = Card.Genre.Eve,
+                                SingleUnit = new Artiad.CustomsUnit() { SingleCard = Board.Eve }
+                            }.ToMessage());
                             RaiseGMessage("G0YM,2,0,0");
                             Board.Eve = 0;
                         }
@@ -1480,7 +1495,7 @@ namespace PSD.PSDGamepkg
                     }
                 case "G1DI":
                     {
-                        string g0on = "";
+                        List<Artiad.CustomsUnit> cus = new List<Artiad.CustomsUnit>();
                         for (int idx = 1; idx < args.Length;)
                         {
                             ushort who = ushort.Parse(args[idx]);
@@ -1489,12 +1504,21 @@ namespace PSD.PSDGamepkg
                             if (!drIn)
                             {
                                 string[] cards = Algo.TakeRange(args, idx + 4, idx + 4 + n);
-                                g0on += "," + who + ",C," + n + "," + string.Join(",", cards);
+                                cus.Add(new Artiad.CustomsUnit()
+                                {
+                                    Source = who,
+                                    Cards = cards.Select(p => ushort.Parse(p)).ToArray()
+                                });
                             }
                             idx += (4 + n);
                         }
-                        if (g0on.Length > 0)
-                            RaiseGMessage("G0ON" + g0on);
+                        if (cus.Count > 0)
+                            RaiseGMessage(new Artiad.Abandon()
+                            {
+                                Zone = Artiad.CustomsHelper.ZoneType.PLAYER,
+                                Genre = Card.Genre.Tux,
+                                List = cus
+                            }.ToMessage());
                     }
                     break;
                 case "G1IU":
@@ -1620,10 +1644,9 @@ namespace PSD.PSDGamepkg
                                 WI.Send("E0XZ," + me + ",1," + dicesType + "," + count, ExceptStaff(me));
                                 WI.Live("E0XZ," + me + ",1," + dicesType + "," + count);
                                 int pick = args.Length > 5 ? int.Parse(args[5]) : count;
-                                string dicesCode = "";
-                                if (dicesType == 1) dicesCode = "C";
-                                else if (dicesType == 2) dicesCode = "M";
-                                else if (dicesType == 3) dicesCode = "E";
+
+                                char[] diceNames = new char[] { '0', 'C', 'M', 'E' };
+                                string dicesCode = diceNames[dicesType].ToString();
                                 string serpChar = "p" + dicesCode;
                                 string order = AsyncInput(me, "X" + pick + "(" + serpChar +
                                     string.Join(serpChar, gps) + ")", "G0XZ", "0");
@@ -1662,10 +1685,13 @@ namespace PSD.PSDGamepkg
                                 {
                                     int discard = count - pick;
                                     ushort[] pops = piles.Dequeue(discard);
-                                    char[] diceNames = new char[] { '0', 'C', 'M', 'E' };
                                     RaiseGMessage("G2IN," + (dicesType - 1) + "," + discard);
-                                    RaiseGMessage("G0ON,0," + diceNames[dicesType] + "," + discard
-                                        + "," + string.Join(",", pops));
+                                    RaiseGMessage(new Artiad.Abandon()
+                                    {
+                                        Zone = Artiad.CustomsHelper.ZoneType.EXPLICIT,
+                                        Genre = Card.Char2Genre(diceNames[dicesType]),
+                                        SingleUnit = new Artiad.CustomsUnit() { Cards = pops }
+                                    }.ToMessage());
                                 }
                             }
                         }
@@ -1700,7 +1726,12 @@ namespace PSD.PSDGamepkg
                                         else
                                         {
                                             Board.PendingTux.Remove(eis.Source + ",G0ZB," + card);
-                                            RaiseGMessage("G0ON,0,C,1," + card);
+                                            RaiseGMessage(new Artiad.Abandon()
+                                            {
+                                                Zone = Artiad.CustomsHelper.ZoneType.EXPLICIT,
+                                                Genre = Card.Genre.Tux,
+                                                SingleUnit = new Artiad.CustomsUnit() { SingleCard = card }
+                                            }.ToMessage());
                                         }
                                         eisRemoves.Add(card);
                                     });
@@ -1717,7 +1748,12 @@ namespace PSD.PSDGamepkg
                                         else
                                         {
                                             Board.PendingTux.Remove(eis.Source + ",G0ZB," + card);
-                                            RaiseGMessage("G0ON,0,C,1," + card);
+                                            RaiseGMessage(new Artiad.Abandon()
+                                            {
+                                                Zone = Artiad.CustomsHelper.ZoneType.EXPLICIT,
+                                                Genre = Card.Genre.Tux,
+                                                SingleUnit = new Artiad.CustomsUnit() { SingleCard = card }
+                                            }.ToMessage());
                                         }
                                         eisRemoves.Add(card);
                                     });
@@ -1815,7 +1851,7 @@ namespace PSD.PSDGamepkg
                                     else if (te.Type == Tux.TuxType.FJ && !player.ArmorDisabled)
                                         te.InsAction(player);
                                     else if (te.Type == Tux.TuxType.XB && !player.TroveDisabled)
-                                        te.InsAction(player);   
+                                        te.InsAction(player);
                                 }
                             }
                             else if (eis.Source != eis.Who)
@@ -1823,7 +1859,12 @@ namespace PSD.PSDGamepkg
                                 if (eis.Source != 0)
                                     RaiseGMessage("G0QZ," + eis.Source + "," + card);
                                 else
-                                    RaiseGMessage("G0ON,0,C,1," + card);
+                                    RaiseGMessage(new Artiad.Abandon()
+                                    {
+                                        Zone = Artiad.CustomsHelper.ZoneType.EXPLICIT,
+                                        Genre = Card.Genre.Tux,
+                                        SingleUnit = new Artiad.CustomsUnit() { SingleCard = card }
+                                    }.ToMessage());
                             }
                             // else, leave it in eis.Who's hand
                         }
@@ -2486,7 +2527,16 @@ namespace PSD.PSDGamepkg
                                                 Recycle = false
                                             }.ToMessage());
                                         }
-                                        RaiseGMessage("G0ON," + hvp.Farmland + ",M," + Algo.ListToString(others));
+                                        RaiseGMessage(new Artiad.Abandon()
+                                        {
+                                            Zone = Artiad.CustomsHelper.ZoneType.PLAYER,
+                                            Genre = Card.Genre.NMB,
+                                            SingleUnit = new Artiad.CustomsUnit()
+                                            {
+                                                Source = hvp.Farmland,
+                                                Cards = others.ToArray()
+                                            }
+                                        }.ToMessage());
                                     }
                                 }
                                 else
@@ -2522,7 +2572,16 @@ namespace PSD.PSDGamepkg
                                                 Recycle = false
                                             }.ToMessage());
                                         }
-                                        RaiseGMessage("G0ON," + hvp.Farmland + ",M," + Algo.ListToString(others));
+                                        RaiseGMessage(new Artiad.Abandon()
+                                        {
+                                            Zone = Artiad.CustomsHelper.ZoneType.PLAYER,
+                                            Genre = Card.Genre.NMB,
+                                            SingleUnit = new Artiad.CustomsUnit()
+                                            {
+                                                Source = hvp.Farmland,
+                                                Cards = others.ToArray()
+                                            }
+                                        }.ToMessage());
                                     }
                                 }
                             }
@@ -3116,11 +3175,17 @@ namespace PSD.PSDGamepkg
                             RaiseGMessage("G0OT," + string.Join(",", actual.Select(p =>
                                 p.Key + "," + p.Value.Count + "," + string.Join(",", p.Value))));
                             foreach (var pair in actual)
-                            {
                                 WI.BCast("E0QZ," + pair.Key + "," + string.Join(",", pair.Value));
-                                RaiseGMessage("G0ON," + pair.Key + ",C,"
-                                     + pair.Value.Count + "," + string.Join(",", pair.Value));
-                            }
+                            RaiseGMessage(new Artiad.Abandon()
+                            {
+                                Zone = Artiad.CustomsHelper.ZoneType.PLAYER,
+                                Genre = Card.Genre.Tux,
+                                List = actual.Select(p => new Artiad.CustomsUnit()
+                                {
+                                    Source = p.Key,
+                                    Cards = p.Value.ToArray()
+                                }).ToList()
+                            }.ToMessage());
                         }
                         foreach (var pair in actual)
                             RaiseGMessage("G0HQ,2," + pair.Key + ",1," + pair.Value.Count);
@@ -3159,26 +3224,7 @@ namespace PSD.PSDGamepkg
                 case "G0FI":
                     Artiad.CoachingChange.Parse(cmd).Handle(this, WI); break;
                 case "G0ON":
-                    for (int idx = 1; idx < args.Length;)
-                    {
-                        //string fromZone = args[idx];
-                        string cardType = args[idx + 1];
-                        int cnt = int.Parse(args[idx + 2]);
-                        if (cnt > 0)
-                        {
-                            List<ushort> cds = Algo.TakeRange(args, idx + 3, idx + 3 + cnt)
-                                .Select(p => ushort.Parse(p)).ToList();
-                            if (cardType == "C")
-                                Board.TuxDises.AddRange(cds);
-                            else if (cardType == "M")
-                                Board.MonDises.AddRange(cds);
-                            else if (cardType == "E")
-                                Board.EveDises.AddRange(cds);
-                        }
-                        idx += (3 + cnt);
-                    }
-                    WI.BCast("E0ON," + cmdrst);
-                    break;
+                    Artiad.Abandon.Parse(cmd).Handle(this, WI); break;
                 case "G0SN":
                     {
                         ushort lugUt = ushort.Parse(args[2]);

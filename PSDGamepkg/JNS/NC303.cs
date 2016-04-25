@@ -279,7 +279,12 @@ namespace PSD.PSDGamepkg.JNS
             {
                 ushort pop = XI.Board.MonPiles.Dequeue();
                 XI.RaiseGMessage("G2IN,1,1");
-                XI.RaiseGMessage("G0ON,0,M,1," + pop);
+                XI.RaiseGMessage(new Artiad.Abandon()
+                {
+                    Zone = Artiad.CustomsHelper.ZoneType.EXPLICIT,
+                    Genre = Card.Genre.NMB,
+                    SingleUnit = new Artiad.CustomsUnit() { SingleCard = pop }
+                }.ToMessage());
             }
         }
         public void NJT2Action(Player player, string fuse, string args)
@@ -388,7 +393,12 @@ namespace PSD.PSDGamepkg.JNS
             {
                 XI.RaiseGMessage("G1OU," + string.Join(",", pops));
                 XI.RaiseGMessage("G2QU,0,C,0," + string.Join(",", pops));
-                XI.RaiseGMessage("G0ON,0,C," + pops.Count + "," + string.Join(",", pops));
+                XI.RaiseGMessage(new Artiad.Abandon()
+                {
+                    Zone = Artiad.CustomsHelper.ZoneType.EXPLICIT,
+                    Genre = Card.Genre.Tux,
+                    SingleUnit = new Artiad.CustomsUnit() { Cards = pops.ToArray() }
+                }.ToMessage());
             }
         }
         public void NJH3Action(Player player, string fuse, string args)
@@ -479,29 +489,17 @@ namespace PSD.PSDGamepkg.JNS
         }
         public void NJH7Action(Player player, string fuse, string args)
         {
-            while (XI.Board.TuxPiles.Count > 0)
+            System.Func<ushort, bool> isEq = (p) => XI.LibTuple.TL.DecodeTux(p).IsTuxEqiup();
+            List<ushort> picks = Artiad.Procedure.CardHunter(XI, Card.Genre.Tux,
+                (p) => XI.LibTuple.TL.DecodeTux(p).Type == Tux.TuxType.WQ,
+                (a, r) => a.Count(p => isEq(p)) + r.Count(p => isEq(p)) == 2, true);
+            if (picks.Count > 0)
             {
-                ushort ut = XI.DequeueOfPile(XI.Board.TuxPiles);
-                XI.RaiseGMessage("G2IN,0,1");
-                Base.Card.Tux tux = XI.LibTuple.TL.DecodeTux(ut);
-                if (tux != null)
-                {
-                    if (tux.IsTuxEqiup())
-                    {
-                        if (tux.Type == Base.Card.Tux.TuxType.WQ)
-                        {
-                            string whoStr = XI.AsyncInput(player.Uid, "#获得【" + tux.Name + "】," +
-                                AnyoneAliveString(), "NJH7", "0");
-                            ushort who = ushort.Parse(whoStr);
-                            XI.RaiseGMessage("G0HQ,2," + who + ",0,0," + ut);
-                        }
-                        else
-                            XI.RaiseGMessage("G0ON,0,C,1," + ut);
-                        break;
-                    }
-                    else
-                        XI.RaiseGMessage("G0ON,0,C,1," + ut);
-                }
+                string whoStr = XI.AsyncInput(player.Uid, string.Format("#获得【{0}】,{1}",
+                    string.Join("与", picks.Select(p => XI.LibTuple.TL.DecodeTux(p).Name)),
+                    AnyoneAliveString()), "NJH7", "0");
+                ushort who = ushort.Parse(whoStr);
+                XI.RaiseGMessage("G0HQ,2," + who + ",0,0," + string.Join(",", picks));
             }
         }
         public void NJH8Action(Player player, string fuse, string args)
@@ -643,7 +641,12 @@ namespace PSD.PSDGamepkg.JNS
         {
             player.Escue.Remove(npcUt);
             XI.RaiseGMessage("G2OL," + player.Uid + "," + npcUt);
-            XI.RaiseGMessage("G0ON," + player.Uid + ",M,1," + npcUt);
+            XI.RaiseGMessage(new Artiad.Abandon()
+            {
+                Zone = Artiad.CustomsHelper.ZoneType.PLAYER,
+                Genre = Card.Genre.NMB,
+                SingleUnit = new Artiad.CustomsUnit() { Source = player.Uid, SingleCard = npcUt }
+            }.ToMessage());
         }
         #endregion NPC Single
 

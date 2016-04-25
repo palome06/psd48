@@ -732,6 +732,32 @@ namespace PSD.ClientAo.VW
                         line = line + ",0";
                 }
             }
+            if (Version <= 159)
+            {
+                if (line.StartsWith("E0ON"))
+                {
+                    string[] args = line.Split(',');
+                    List<ushort> empList = new List<ushort>();
+                    List<ushort> nmpList = new List<ushort>();
+                    string cardType = "";
+                    string zoneType = "";
+                    for (int idx = 1; idx < args.Length;)
+                    {
+                        ushort fromZone = ushort.Parse(args[idx]);
+                        if (fromZone == 0) { zoneType = "E"; }
+                        else if (fromZone >= 1 && fromZone <= 6) { zoneType = "P"; }
+                        else { zoneType = "I"; }
+                        args[idx] = "";
+
+                        cardType = args[idx + 1]; args[idx + 1] = "";
+
+                        int n = int.Parse(args[idx + 2]); args[idx + 2] = "";
+                        idx += (3 + n);
+                    }
+                    args[0] += "," + cardType + "," + zoneType;
+                    line = string.Join(",", args.Where(p => p != ""));
+                }
+            }
         }
         #endregion Version
     }

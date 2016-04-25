@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
@@ -558,6 +558,19 @@ namespace PSD.ClientZero
             }
             return sb.ToString();
         }
+        private string NjInfo(Base.NCAction nj)
+        {
+            StringBuilder sb = new StringBuilder();
+            if (nj != null)
+            {
+                Aps(sb, "*******************");
+                Aps(sb, "  {0} {1}", nj.Name, nj.Code);
+                if (nj.Intro.Length > 0)
+                    Aps(sb, "  {0}", nj.Intro);
+                Aps(sb, "*******************");   
+            }
+            return sb.ToString();
+        }
 
         public string MonsterInfo(ushort code)
         {
@@ -622,6 +635,10 @@ namespace PSD.ClientZero
         {
             return SkillInfo(tuple.SL.EncodeSkill(name));
         }
+        public string NjInfo(string code)
+        {
+            return NjInfo(tuple.NJL.EncodeNCAction(code));
+        }
         public string GetHelp()
         {
             StringBuilder sb = new StringBuilder();
@@ -644,6 +661,7 @@ namespace PSD.ClientZero
             Aps(sb, "/IH10401：(Info-Hero)查看代码为10401的人物（南宫煌）情报");
             Aps(sb, "/IHX3W01：(Info-Hero)查看卡牌代号为X3W01的人物（南宫煌）情报");
             Aps(sb, "/ISJN10102：(Info-Skill)查看代码为JN10102的技能（飞龙探云手）情报");
+            Aps(sb, "/INNJ01：(Info-Nj)查看代码为NJ01的NPC效果（加入）情报");
             Aps(sb, "*************");
             return sb.ToString();
         }

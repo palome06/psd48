@@ -56,6 +56,7 @@
     <Compile Include="..\lib\SharedAssemblyInfo.cs">
       <Link>Properties\SharedAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="Artiad\Customs.cs" />
     <Compile Include="Artiad\BHW.cs" />
     <Compile Include="Artiad\HPIssue.cs" />
     <Compile Include="Artiad\Coaching.cs" />

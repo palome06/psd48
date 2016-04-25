@@ -407,6 +407,12 @@ namespace PSD.ClientZero
                     if (!string.IsNullOrEmpty(line))
                         VI.Cout(Uid, "{0}", line);
                 }
+                else if (tps == 'N')
+                {
+                    string line = zd.NjInfo(cmdrst);
+                    if (!string.IsNullOrEmpty(line))
+                        VI.Cout(Uid, "{0}", line);
+                }
             }
             else if (cmd.StartsWith("H"))
                 VI.Cout(Uid, "{0}", zd.GetHelp());
@@ -1277,38 +1283,29 @@ namespace PSD.ClientZero
                     }
                     break;
                 case "E0ON":
-                    for (int idx = 1; idx < args.Length; )
                     {
-                        ushort fromZone = ushort.Parse(args[idx]);
-                        string cardType = args[idx + 1];
-                        int n = int.Parse(args[idx + 2]);
-                        if (n > 0)
+                        string cardType = args[1];
+                        string zoneType = args[2];
+                        ushort[] cards = Algo.TakeRange(args, 3, args.Length)
+                            .Select(p => ushort.Parse(p)).ToArray();
+                        string cdInfos = null;
+                        if (cardType == "C")
                         {
-                            List<ushort> cds = Algo.TakeRange(args, idx + 3, idx + 3 + n)
-                                .Select(p => ushort.Parse(p)).ToList();
-                            string cdInfos = null;
-                            if (cardType == "C")
-                            {
-                                Z0P.TuxDises += n;
-                                if (fromZone == 0)
-                                    cdInfos = zd.Tux(cds);
-                            }
-                            else if (cardType == "M")
-                            {
-                                Z0P.MonDises += n;
-                                if (fromZone == 0)
-                                    cdInfos = zd.Monster(cds);
-                            }
-                            else if (cardType == "E")
-                            {
-                                Z0P.EveDises += n;
-                                if (fromZone == 0)
-                                    cdInfos = zd.Eve(cds);
-                            }
-                            if (cdInfos != null)
-                                VI.Cout(Uid, "{0}被弃置进入弃牌堆.", cdInfos);
+                            Z0P.TuxDises += cards.Length;
+                            cdInfos = zd.Tux(cards);
                         }
-                        idx += (3 + n);
+                        else if (cardType == "M")
+                        {
+                            Z0P.MonDises += cards.Length;
+                            cdInfos = zd.Monster(cards);
+                        }
+                        else if (cardType == "E")
+                        {
+                            Z0P.EveDises += cards.Length;
+                            cdInfos = zd.Eve(cards);
+                        }
+                        if ((zoneType == "S" || zoneType == "E") && cdInfos != null)
+                            VI.Cout(Uid, "{0}被弃置进入弃牌堆.", cdInfos);
                     }
                     break;
                 case "E0CN":

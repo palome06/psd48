@@ -1210,7 +1210,12 @@ namespace PSD.PSDGamepkg.JNS
             if (XI.Board.Wang.Count > 0 && XI.Board.Wang.Peek() == pop)
             {
                 XI.Board.Wang.Pop();
-                XI.RaiseGMessage("G0ON,0,M,1," + pop);
+                XI.RaiseGMessage(new Artiad.Abandon()
+                {
+                    Zone = Artiad.CustomsHelper.ZoneType.EXPLICIT,
+                    Genre = Card.Genre.NMB,
+                    SingleUnit = new Artiad.CustomsUnit() { SingleCard = pop }
+                }.ToMessage());
             }
             // XI.Board.RestNPCDises.Add(pop);
             if (XI.Board.Wang.Count > 0)
@@ -1323,34 +1328,30 @@ namespace PSD.PSDGamepkg.JNS
                 XI.RaiseGMessage("G0SN," + player.Uid + "," + lugCode
                     + ",1," + string.Join(",", cap));
                 XI.RaiseGMessage("G2TZ,0," + player.Uid + "," + string.Join(",", cap));
-                XI.RaiseGMessage("G0ON," + player.Uid + ",M," + cap.Count + ","
-                    + string.Join(",", cap.Select(p => p.Substring("M".Length))));
+                XI.RaiseGMessage(new Artiad.Abandon()
+                {
+                    Zone = Artiad.CustomsHelper.ZoneType.PLAYER,
+                    Genre = Card.Genre.NMB,
+                    SingleUnit = new Artiad.CustomsUnit()
+                    {
+                        Source = player.Uid,
+                        Cards = cap.Select(p => ushort.Parse(p.Substring("M".Length))).ToArray()
+                    }
+                }.ToMessage());
                 lug.Pull = false;
             }
         }
         public bool XBT1ConsumeValid(Player player, int consumeType, int type, string fuse) {
-            Base.Card.Luggage lug = XI.LibTuple.TL.EncodeTuxCode("XBT1") as Base.Card.Luggage;
+            Luggage lug = XI.LibTuple.TL.EncodeTuxCode("XBT1") as Luggage;
             if (lug != null && consumeType == 0 && !lug.Pull)
             {
-                if (type == 0) {
-                    if (XI.Board.InCampaign && XI.Board.Rounder.Team == player.Team) {
-                        string[] g0on = fuse.Split(',');
-                        for (int i = 1; i < g0on.Length; ) {
-                            string cardType = g0on[i + 1];
-                            int n = int.Parse(g0on[i + 2]);
-                            if (cardType == "M") {
-                                for (int j = i + 3; j < i + 3 + n; ++j)
-                                {
-                                    ushort ut = ushort.Parse(g0on[j]);
-                                    if (Base.Card.NMBLib.IsMonster(ut))
-                                        return true;
-                                }
-                            }
-                            i += (n + 3);
-                        }
-                    }
-                    return false;
-                } else if (type == 1)
+                if (type == 0 && XI.Board.InCampaign && XI.Board.Rounder.Team == player.Team)
+                {
+                    Artiad.Abandon ab = Artiad.Abandon.Parse(fuse);
+                    return ab.Genre == Card.Genre.NMB &&
+                        ab.List.Any(p => p.Cards.Any(q => NMBLib.IsMonster(q)));
+                }
+                else if (type == 1)
                     return lug.Capacities.Sum(p => XI.LibTuple.ML.Decode(
                         ushort.Parse(p.Substring("M".Length))).STR) >= 4;
             }
@@ -1358,43 +1359,23 @@ namespace PSD.PSDGamepkg.JNS
         }
         public void XBT1ConsumeAction(Player player, int consumeType, int type, string fuse, string argst)
         {
-            Base.Card.Luggage lug = XI.LibTuple.TL.EncodeTuxCode("XBT1") as Base.Card.Luggage;
+            Luggage lug = XI.LibTuple.TL.EncodeTuxCode("XBT1") as Luggage;
             ushort lugCode = XI.LibTuple.TL.UniqueEquipSerial("XBT1");
             if (lug != null && lugCode != 0 && consumeType == 0)
             {
-                if (type == 0) {
-                    List<ushort> sns = new List<ushort>();
-                    string[] g0on = fuse.Split(',');
-                    string n0on = "";
-                    for (int i = 1; i < g0on.Length; ) {
-                        string fromZone = g0on[i];
-                        string cardType = g0on[i + 1];
-                        int n = int.Parse(g0on[i + 2]);
-                        if (cardType == "M") {
-                            List<ushort> keeps = new List<ushort>();
-                            for (int j = i + 3; j < i + 3 + n; ++j)
-                            {
-                                ushort ut = ushort.Parse(g0on[j]);
-                                if (Base.Card.NMBLib.IsMonster(ut))
-                                    sns.Add(ut);
-                                else
-                                    keeps.Add(ut);
-                            }
-                            if (keeps.Count > 0)
-                                n0on += "," + fromZone + ",M," + keeps.Count + "," + string.Join(",", keeps);
-                        } else
-                            n0on += "," + string.Join(",", Algo.TakeRange(g0on, i, i + 3 + n));
-                        i += (n + 3);
-                    }
-                    if (sns.Count > 0)
-                    {
-                        string ss = string.Join(",", sns.Select(p => "M" + p));
-                        XI.RaiseGMessage("G0SN," + player.Uid + "," + lugCode + ",0," + ss);
-                        XI.RaiseGMessage("G2TZ," + player.Uid + ",0," + ss);
-                    }
-                    if (n0on.Length > 0)
-                        XI.InnerGMessage("G0ON" + n0on, 81);
-                } else if (type == 1) {
+                if (type == 0)
+                {
+                    Artiad.Abandon ab = Artiad.Abandon.Parse(fuse);
+                    ushort[] sns = ab.List.SelectMany(p => p.Cards)
+                        .Where(p => NMBLib.IsMonster(p)).ToArray();
+                    string ss = string.Join(",", sns.Select(p => "M" + p));
+                    XI.RaiseGMessage("G0SN," + player.Uid + "," + lugCode + ",0," + ss);
+                    XI.RaiseGMessage("G2TZ," + player.Uid + ",0," + ss);
+                    if (Artiad.CustomsHelper.RemoveCards(ab, sns))
+                        XI.InnerGMessage(ab.ToMessage(), 81);
+                }
+                else if (type == 1)
+                {
                     int total = lug.Capacities.Sum(p => XI.LibTuple.ML.Decode(
                         ushort.Parse(p.Substring("M".Length))).STR) / 4;
                     IDictionary<Player, int> sch = new Dictionary<Player, int>();
@@ -1433,8 +1414,16 @@ namespace PSD.PSDGamepkg.JNS
                     XI.RaiseGMessage("G2TZ,0," + player.Uid + "," + string.Join(",", cap));
                     XI.RaiseGMessage("G0SN," + player.Uid + "," + lugCode
                         + ",1," + string.Join(",", cap));
-                    XI.RaiseGMessage("G0ON," + player.Uid + ",M," + cap.Count +
-                        "," + string.Join(",", cap.Select(p => p.Substring("M".Length))));
+                    XI.RaiseGMessage(new Artiad.Abandon()
+                    {
+                        Zone = Artiad.CustomsHelper.ZoneType.PLAYER,
+                        Genre = Card.Genre.NMB,
+                        SingleUnit = new Artiad.CustomsUnit()
+                        {
+                            Source = player.Uid,
+                            Cards = cap.Select(p => ushort.Parse(p.Substring("M".Length))).ToArray()
+                        }
+                    }.ToMessage());
                     if (sch.Count > 0)
                         XI.RaiseGMessage("G0DH," + string.Join(",", sch.Select(
                             p => p.Key.Uid + ",0," + p.Value)));
@@ -1455,8 +1444,16 @@ namespace PSD.PSDGamepkg.JNS
                 XI.RaiseGMessage("G0SN," + player.Uid + "," + lugCode
                     + ",1," + string.Join(",", cap));
                 XI.RaiseGMessage("G2TZ,0," + player.Uid + "," + string.Join(",", cap));
-                XI.RaiseGMessage("G0ON," + player.Uid + ",C," + cap.Count + ","
-                    + string.Join(",", cap.Select(p => p.Substring("C".Length))));
+                XI.RaiseGMessage(new Artiad.Abandon()
+                {
+                    Zone = Artiad.CustomsHelper.ZoneType.PLAYER,
+                    Genre = Card.Genre.Tux,
+                    SingleUnit = new Artiad.CustomsUnit()
+                    {
+                        Source = player.Uid,
+                        Cards = cap.Select(p => ushort.Parse(p.Substring("C".Length))).ToArray()
+                    }
+                }.ToMessage());
             }
         }
         public void XBT2DelAction(Player player)
@@ -1566,7 +1563,12 @@ namespace PSD.PSDGamepkg.JNS
                             + ",1," + string.Join(",", subs.Select(p => "C" + p)));
                         XI.RaiseGMessage("G2TZ,0," + player.Uid + ","
                             + string.Join(",", subs.Select(p => "C" + p)));
-                        XI.RaiseGMessage("G0ON," + player.Uid + ",C," + subs.Length + "," + string.Join(",", subs));
+                        XI.RaiseGMessage(new Artiad.Abandon()
+                        {
+                            Zone = Artiad.CustomsHelper.ZoneType.PLAYER,
+                            Genre = Card.Genre.Tux,
+                            SingleUnit = new Artiad.CustomsUnit() { Source = player.Uid, Cards = subs }
+                        }.ToMessage());
                         XI.RaiseGMessage("G0SN," + player.Uid + "," + lugCode
                             + ",0," + string.Join(",", revs.Select(p => "C" + p)));
                         XI.RaiseGMessage("G2TZ," + player.Uid + ",0,"
@@ -1616,7 +1618,16 @@ namespace PSD.PSDGamepkg.JNS
                     ushort[] blocks = argst.Split(',').Select(p => ushort.Parse(p)).ToArray();
                     string ss = "C" + blocks[1] + ",C" + blocks[2];
                     XI.RaiseGMessage("G0SN," + player.Uid + "," + lugCode + ",1," + ss);
-                    XI.RaiseGMessage("G0ON," + player.Uid + ",C,2," + blocks[1] + "," + blocks[2]);
+                    XI.RaiseGMessage(new Artiad.Abandon()
+                    {
+                        Zone = Artiad.CustomsHelper.ZoneType.PLAYER,
+                        Genre = Card.Genre.Tux,
+                        SingleUnit = new Artiad.CustomsUnit()
+                        {
+                            Source = player.Uid,
+                            Cards = new ushort[] { blocks[1], blocks[2] }
+                        }
+                    }.ToMessage());
                     XI.RaiseGMessage("G2TZ,0," + player.Uid + "," + ss);
                     XI.RaiseGMessage("G2CN,0,1");
                     XI.Board.TuxDises.Remove(blocks[0]);
@@ -1727,9 +1738,17 @@ namespace PSD.PSDGamepkg.JNS
                         + cap.Count + "," + string.Join(",", cap.Select(p => p.Substring("C".Length))));
                 else
                 {
-                    string ss = string.Join(",", cap.Select(p => p.Substring("C".Length)));
-                    XI.RaiseGMessage("G0ON," + player.Uid + ",C," + cap.Count + "," + ss);
-                    XI.RaiseGMessage("G2TZ,0," + player.Uid + "," + ss);
+                    XI.RaiseGMessage(new Artiad.Abandon()
+                    {
+                        Zone = Artiad.CustomsHelper.ZoneType.PLAYER,
+                        Genre = Card.Genre.Tux,
+                        SingleUnit = new Artiad.CustomsUnit()
+                        {
+                            Source = player.Uid,
+                            Cards = cap.Select(p => ushort.Parse(p.Substring("C".Length))).ToArray()
+                        }
+                    }.ToMessage());
+                    XI.RaiseGMessage("G2TZ,0," + player.Uid + "," + string.Join(",", cap));
                 }
             }
         }
@@ -1783,7 +1802,12 @@ namespace PSD.PSDGamepkg.JNS
                             XI.RaiseGMessage("G0SN," + provider.Uid + "," + lugCode + ",1,C" + ut);
                             XI.RaiseGMessage("G2TZ,0," + provider.Uid + ",C" + ut);
                             if (!Artiad.ContentRule.IsTuxVestige(tux.Code, pt))
-                                XI.RaiseGMessage("G0ON," + provider.Uid + ",C,1," + ut);
+                                XI.RaiseGMessage(new Artiad.Abandon()
+                                {
+                                    Zone = Artiad.CustomsHelper.ZoneType.PLAYER,
+                                    Genre = Card.Genre.Tux,
+                                    SingleUnit = new Artiad.CustomsUnit() { Source = provider.Uid, SingleCard = ut }
+                                }.ToMessage());
                             else
                                 XI.Board.PendingTux.Enqueue(user.Uid + ",G0CC," + ut);
                             if (tux.Type == Base.Card.Tux.TuxType.ZP)
@@ -1870,8 +1894,16 @@ namespace PSD.PSDGamepkg.JNS
                 if (cap.Count > 0)
                 {
                     XI.RaiseGMessage("G0SN," + player.Uid + "," + lugCode + ",1," + string.Join(",", cap));
-                    XI.RaiseGMessage("G0ON," + player.Uid + ",C," + cap.Count + ","
-                        + string.Join(",", cap.Select(p => p.Substring("C".Length))));
+                    XI.RaiseGMessage(new Artiad.Abandon()
+                    {
+                        Zone = Artiad.CustomsHelper.ZoneType.PLAYER,
+                        Genre = Card.Genre.Tux,
+                        SingleUnit = new Artiad.CustomsUnit()
+                        {
+                            Source = player.Uid,
+                            Cards = cap.Select(p => ushort.Parse(p.Substring("C".Length))).ToArray()
+                        }
+                    }.ToMessage());
                     XI.RaiseGMessage("G2TZ,0," + player.Uid + "," + string.Join(",", cap));
                 }
             }
@@ -1957,7 +1989,12 @@ namespace PSD.PSDGamepkg.JNS
                     XI.RaiseGMessage("G2TZ," + player.Uid + ",0," + ss);
                 }
                 else
-                    XI.RaiseGMessage("G0ON,10,C," + tuxes.Count + "," + string.Join(",", tuxes));
+                    XI.RaiseGMessage(new Artiad.Abandon()
+                    {
+                        Zone = Artiad.CustomsHelper.ZoneType.IMPLICIT,
+                        Genre = Card.Genre.Tux,
+                        SingleUnit = new Artiad.CustomsUnit() { Cards = tuxes.ToArray() }
+                    }.ToMessage());
             }
             else if (lug != null && type == 3)
             {
@@ -1965,8 +2002,16 @@ namespace PSD.PSDGamepkg.JNS
                 string ss = string.Join(",", cap);
                 XI.RaiseGMessage("G0SN," + player.Uid + "," + lugCode + ",1," + ss);
                 XI.RaiseGMessage("G2TZ,0," + player.Uid + "," + ss);
-                XI.RaiseGMessage("G0ON," + player.Uid + ",C," + cap.Count +
-                    "," + string.Join(",", cap.Select(p => p.Substring("C".Length))));
+                XI.RaiseGMessage(new Artiad.Abandon()
+                {
+                    Zone = Artiad.CustomsHelper.ZoneType.PLAYER,
+                    Genre = Card.Genre.Tux,
+                    SingleUnit = new Artiad.CustomsUnit()
+                    {
+                        Source = player.Uid,
+                        Cards = cap.Select(p => ushort.Parse(p.Substring("C".Length))).ToArray()
+                    }
+                }.ToMessage());
                 XI.RaiseGMessage("G0IP," + player.Team + "," + cap.Count);
             }
         }
@@ -2242,7 +2287,12 @@ namespace PSD.PSDGamepkg.JNS
                     if (XI.Board.Wang.Count > 0 && XI.Board.Wang.Peek() == pop)
                     { // In case the NPC has been taken away
                         XI.Board.Wang.Pop();
-                        XI.RaiseGMessage("G0ON,0,M,1," + pop);
+                        XI.RaiseGMessage(new Artiad.Abandon()
+                        {
+                            Zone = Artiad.CustomsHelper.ZoneType.EXPLICIT,
+                            Genre = Card.Genre.NMB,
+                            SingleUnit = new Artiad.CustomsUnit() { SingleCard = pop }
+                        }.ToMessage());
                     }
                     if (XI.Board.Wang.Count > 0)
                         XI.RaiseGMessage("G0YM,3,1," + XI.Board.Wang.Pop());
@@ -2506,19 +2556,10 @@ namespace PSD.PSDGamepkg.JNS
         }
         public void JPH4Action(Player player, int type, string fuse, string argst)
         {
-            List<ushort> pops = new List<ushort>();
-            while (pops.Count < 3 && XI.Board.MonPiles.Count > 0)
-            {
-                ushort pop = XI.DequeueOfPile(XI.Board.MonPiles);
-                XI.RaiseGMessage("G2IN,1,1");
-                if (NMBLib.IsMonster(pop))
-                    pops.Add(pop);
-                else if (NMBLib.IsNPC(pop))
-                    XI.RaiseGMessage("G0ON,0,M,1," + pop);
-            }
-            int popCount = pops.Count;
-            if (popCount > 0)
-                XI.RaiseGMessage("G1IU," + string.Join(",", pops));
+            List<ushort> picks = Artiad.Procedure.CardHunter(XI, Card.Genre.NMB,
+                (p) => NMBLib.IsMonster(p), (a, r) => a.Count == 3, true);
+            if (picks.Count > 0)
+                XI.RaiseGMessage("G1IU," + string.Join(",", picks));
             Player nx = XI.Board.GetOpponenet(player);
             while (XI.Board.PZone.Count > 0)
             {

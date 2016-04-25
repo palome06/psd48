@@ -1,4 +1,4 @@
-sing PSD.Base;
+using PSD.Base;
 using PSD.Base.Card;
 using System.Linq;
 

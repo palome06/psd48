@@ -123,7 +123,12 @@ namespace PSD.PSDGamepkg.JNS
             {
                 player.Escue.Remove(which);
                 XI.RaiseGMessage("G2OL," + player.Uid + "," + which);
-                XI.RaiseGMessage("G0ON," + player.Uid + ",M,1," + which);
+                XI.RaiseGMessage(new Artiad.Abandon()
+                {
+                    Zone = Artiad.CustomsHelper.ZoneType.PLAYER,
+                    Genre = Card.Genre.NMB,
+                    SingleUnit = new Artiad.CustomsUnit() { Source = player.Uid, SingleCard = which }
+                }.ToMessage());
                 ushort side = ushort.Parse(XI.AsyncInput(player.Uid, "S", "CZ03", "0"));
                 XI.RaiseGMessage("G0IP," + side + ",1");
             }

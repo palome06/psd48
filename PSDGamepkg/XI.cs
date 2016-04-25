@@ -536,7 +536,7 @@ namespace PSD.PSDGamepkg
             string[] g1 = { "DI", "IU", "OU", "TH", "CW", "ZK", "IZ", "OZ", "WP", "SG", "HK", "WJ",
                 "XR", "EV", "CK", "7F", "YP", "NI", "GE", "LY", "UE" };
             string[] g2 = { "IN", "RN", "CN", "QC", "FU", "QU", "CL", "WK", "AK", "IL", "OL", "SW",
-                "AS", "SY", "UL" };
+                "AS", "SY", "UL", "ZZ" };
             foreach (string g0event in g0)
                 RegisterBasicSKTs(dict, "G0" + g0event, 100);
             foreach (string g1event in g1)

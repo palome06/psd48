@@ -423,7 +423,12 @@ namespace PSD.PSDGamepkg.JNS
             {
                 VI.Cout(0, "苏媚触发「狡猾」.");
                 if (XI.Board.Mon1From == 0)
-                    XI.RaiseGMessage("G0ON,0,M,1," + XI.Board.Monster1);
+                    XI.RaiseGMessage(new Artiad.Abandon()
+                    {
+                        Zone = Artiad.CustomsHelper.ZoneType.EXPLICIT,
+                        Genre = Card.Genre.NMB,
+                        SingleUnit = new Artiad.CustomsUnit() { SingleCard = XI.Board.Monster1 }
+                    }.ToMessage());
                 else
                     XI.Board.Mon1From = 0;
                 XI.Board.Monster1 = 0; XI.Board.Battler = null;
@@ -2070,7 +2075,12 @@ namespace PSD.PSDGamepkg.JNS
                         }.ToMessage());
                     }
                     else
-                        XI.RaiseGMessage("G0ON,0,M,1," + mon);
+                        XI.RaiseGMessage(new Artiad.Abandon()
+                        {
+                            Zone = Artiad.CustomsHelper.ZoneType.EXPLICIT,
+                            Genre = Card.Genre.NMB,
+                            SingleUnit = new Artiad.CustomsUnit() { SingleCard = mon }
+                        }.ToMessage());
                     if (XI.Board.MonPiles.Count <= 0)
                         break;
                 }

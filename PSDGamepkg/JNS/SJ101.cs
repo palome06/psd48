@@ -360,7 +360,12 @@ namespace PSD.PSDGamepkg.JNS
             if (XI.Board.Wang.Count > 0 && XI.Board.Wang.Peek() == pop)
             { // In case the NPC has been taken away
                 XI.Board.Wang.Pop();
-                XI.RaiseGMessage("G0ON,0,M,1," + pop);
+                XI.RaiseGMessage(new Artiad.Abandon()
+                {
+                    Zone = Artiad.CustomsHelper.ZoneType.EXPLICIT,
+                    Genre = Card.Genre.NMB,
+                    SingleUnit = new Artiad.CustomsUnit() { SingleCard = pop }
+                }.ToMessage());
             }
             if (XI.Board.Wang.Count > 0)
                 XI.RaiseGMessage("G0YM,3,1," + XI.Board.Wang.Pop());
@@ -412,7 +417,12 @@ namespace PSD.PSDGamepkg.JNS
                 if (XI.Board.Wang.Count > 0 && XI.Board.Wang.Peek() == pop)
                 {
                     XI.Board.Wang.Pop();
-                    XI.RaiseGMessage("G0ON,0,M,1," + pop);
+                    XI.RaiseGMessage(new Artiad.Abandon()
+                    {
+                        Zone = Artiad.CustomsHelper.ZoneType.EXPLICIT,
+                        Genre = Card.Genre.NMB,
+                        SingleUnit = new Artiad.CustomsUnit() { SingleCard = pop }
+                    }.ToMessage());
                 }
                 if (XI.Board.Wang.Count > 0)
                     XI.RaiseGMessage("G0YM,3,1," + XI.Board.Wang.Pop());
@@ -544,7 +554,12 @@ namespace PSD.PSDGamepkg.JNS
             ushort cardUt = XI.DequeueOfPile(XI.Board.TuxPiles);
             XI.RaiseGMessage("G2IN,0,1");
             Tux tux = XI.LibTuple.TL.DecodeTux(cardUt);
-            XI.RaiseGMessage("G0ON,0,C,1," + cardUt);
+            XI.RaiseGMessage(new Artiad.Abandon()
+            {
+                Zone = Artiad.CustomsHelper.ZoneType.EXPLICIT,
+                Genre = Card.Genre.Tux,
+                SingleUnit = new Artiad.CustomsUnit() { SingleCard = cardUt }
+            }.ToMessage());
 
             List<ushort> list = XI.Board.OrderedPlayer();
             foreach (ushort ut in list)
@@ -728,15 +743,22 @@ namespace PSD.PSDGamepkg.JNS
             foreach (var pair in inputs)
                 XI.RaiseGMessage("G0QZ," + pair.Key + "," + pair.Value);
 
-            if (XI.Board.Garden.Values.Any(p => p.Escue.Count > 0))
+            List<Player> hasEscues = XI.Board.Garden.Values.Where(p => p.Escue.Count > 0).ToList();
+            if (hasEscues.Count > 0)
             {
-                string g2ol = string.Join(",", XI.Board.Garden.Values.Where(p => p.Escue.Count > 0)
-                    .Select(p => string.Join(",", p.Escue.Select(q => p.Uid + "," + q))));
-                XI.RaiseGMessage("G2OL," + g2ol);
-                string g0on = string.Join(",", XI.Board.Garden.Values.Where(p => p.Escue.Count > 0)
-                    .Select(p => p.Uid + ",M," + p.Escue.Count + "," + string.Join(",", p.Escue)));
-                XI.RaiseGMessage("G0ON," + g0on);
-                XI.Board.Garden.Values.ToList().ForEach(p => p.Escue.Clear());
+                XI.RaiseGMessage("G2OL," + string.Join(",", hasEscues.Select(p => string.Join(",",
+                    p.Escue.Select(q => p.Uid + "," + q)))));
+                XI.RaiseGMessage(new Artiad.Abandon()
+                {
+                    Zone = Artiad.CustomsHelper.ZoneType.PLAYER,
+                    Genre = Card.Genre.NMB,
+                    List = hasEscues.Select(p => new Artiad.CustomsUnit()
+                    {
+                        Source = p.Uid,
+                        Cards = p.Escue.ToArray()
+                    }).ToList()
+                }.ToMessage());
+                hasEscues.ForEach(p => p.Escue.Clear());
             }
             foreach (Player py in XI.Board.Garden.Values)
             {

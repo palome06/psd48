@@ -210,7 +210,12 @@ namespace PSD.PSDGamepkg.Artiad
                 XI.RaiseGMessage("G2WK," + string.Join(",",
                     XI.CalculatePetsScore().Select(p => p.Key + "," + p.Value)));
                 if (Recycle)
-                    XI.RaiseGMessage("G0ON," + Owner + ",M," + Algo.ListToString(pets.ToList()));
+                    XI.RaiseGMessage(new Abandon()
+                    {
+                        Zone = CustomsHelper.ZoneType.PLAYER,
+                        Genre = Card.Genre.NMB,
+                        SingleUnit = new CustomsUnit() { Source = Owner, Cards = pets.ToArray() }
+                    }.ToMessage());
             }
         }
     }

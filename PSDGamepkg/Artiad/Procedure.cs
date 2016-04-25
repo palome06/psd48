@@ -16,18 +16,20 @@ namespace PSD.PSDGamepkg.Artiad
                 raiseG("G0OJ," + player.Uid + ",0," + player.TokenCount);
             if (player.TokenExcl.Count > 0)
             {
-                IDictionary<char, List<ushort>> allKinds = new Dictionary<char, List<ushort>>();
-                foreach (string cd in player.TokenExcl)
-                {
-                    if (cd[0] != 'H')
-                        Algo.AddToMultiMap(allKinds, cd[0], ushort.Parse(cd.Substring(1)));
-                }
+                char exclType = player.TokenExcl[0][0];
                 raiseG("G2TZ,0," + player.Uid + "," + string.Join(",", player.TokenExcl));
-                raiseG("G0OJ," + player.Uid + ",1," + player.TokenExcl.Count
-                    + "," + string.Join(",", player.TokenExcl));
-                if (allKinds.Count > 0)
-                    raiseG("G0ON," + string.Join(",", allKinds.Select(p => player.Uid +
-                        "," + p.Key + "," + p.Value.Count + "," + string.Join(",", p.Value))));
+                raiseG("G0OJ," + player.Uid + ",1," + Algo.ListToString(player.TokenExcl));
+                if (exclType != 'H')
+                    raiseG(new Abandon()
+                    {
+                        Zone = CustomsHelper.ZoneType.PLAYER,
+                        Genre = Card.Char2Genre(exclType),
+                        SingleUnit = new CustomsUnit()
+                        {
+                            Source = player.Uid,
+                            Cards = player.TokenExcl.Select(p => ushort.Parse(p.Substring(1))).ToArray()
+                        }
+                    }.ToMessage());
             }
             if (player.TokenTars.Count > 0)
                 raiseG("G0OJ," + player.Uid + ",2," + player.TokenTars.Count
@@ -39,7 +41,12 @@ namespace PSD.PSDGamepkg.Artiad
                 List<ushort> folds = player.TokenFold.ToList();
                 raiseG("G2TZ,0," + player.Uid + "," + string.Join(",", folds.Select(p => "C" + p)));
                 raiseG("G0OJ," + player.Uid + ",4," + folds.Count + "," + string.Join(",", folds));
-                raiseG("G0ON," + player.Uid + ",C," + folds.Count + "," + string.Join(",", folds));
+                raiseG(new Abandon()
+                {
+                    Zone = CustomsHelper.ZoneType.PLAYER,
+                    Genre = Card.Genre.Tux,
+                    SingleUnit = new CustomsUnit() { Source = player.Uid, Cards = folds.ToArray() }
+                }.ToMessage());
             }
             player.ResetROM(board, hero);
             // Remove others' tar token on the player
@@ -93,21 +100,18 @@ namespace PSD.PSDGamepkg.Artiad
 
         public static void LoopOfNPCUntilJoinable(XI XI, Player player)
         {
-            bool done = false;
-            do
+            ushort pop = CardHunter(XI, Card.Genre.NMB, (p) => ContentRule.IsNPCJoinable(
+                XI.LibTuple.NL.Decode(NMBLib.OriginalNPC(p)), XI), (a, r) => a.Count == 1, true).Single();
+            NPC npc = XI.LibTuple.NL.Decode(NMBLib.OriginalNPC(pop));
+            XI.RaiseGMessage("G0OY,0," + player.Uid);
+            int hp = (XI.LibTuple.HL.InstanceHero(npc.Hero).HP + 1) / 2;
+            XI.RaiseGMessage("G0IY,2," + player.Uid + "," + npc.Hero + "," + hp);
+            XI.RaiseGMessage(new Abandon()
             {
-                ushort pop = XI.Board.RestNPCPiles.Dequeue();
-                NPC npc = XI.LibTuple.NL.Decode(NMBLib.OriginalNPC(pop));
-                XI.RaiseGMessage("G1NI," + player.Uid + "," + pop);
-                if (Artiad.ContentRule.IsNPCJoinable(npc, XI))
-                {
-                    XI.RaiseGMessage("G0OY,0," + player.Uid);
-                    int hp = (XI.LibTuple.HL.InstanceHero(npc.Hero).HP + 1) / 2;
-                    XI.RaiseGMessage("G0IY,2," + player.Uid + "," + npc.Hero + "," + hp);
-                    done = true;
-                }
-                XI.RaiseGMessage("G0ON,0,M,1," + pop);
-            } while (XI.Board.RestNPCPiles.Count > 0 && !done);
+                Zone = CustomsHelper.ZoneType.SHOWBOARD,
+                Genre = Card.Genre.NMB,
+                SingleUnit = new CustomsUnit() { SingleCard = pop }
+            }.ToMessage());
         }
 
         public static void AssignCurePoint(XI XI, Player decider, int total,
@@ -248,7 +252,7 @@ namespace PSD.PSDGamepkg.Artiad
             List<ushort> pops = XI.DequeueOfPile(XI.Board.TuxPiles, count).ToList();
             XI.RaiseGMessage("G2IN,0," + count);
             XI.RaiseGMessage("G1IU," + string.Join(",", pops));
-            do 
+            do
             {
                 XI.RaiseGMessage("G2FU,0," + py.Uid + "," + rps.Count + "," + rg + ",C," + string.Join(",", pops));
                 int pubSz = XI.Board.PZone.Count;
@@ -357,6 +361,55 @@ namespace PSD.PSDGamepkg.Artiad
                 pys.ForEach(p => p.SetArmorDisabled(reason, !enabled));
             if ((eqTypeMask & 0x4) != 0)
                 pys.ForEach(p => p.SetTroveDisabled(reason, !enabled));
+        }
+        /// <summary>
+        /// hunt for specificed cards from piles
+        /// </summary>
+        /// <param name="XI">XI</param>
+        /// <param name="genre">card genre, enum of Card.Genre</param>
+        /// <param name="acceptRule">the rule func(tux-ut) for accepting a card or not</param>
+        /// <param name="finishRule">the rule func(acceptList, rejectList) for finishing the hunting</param>
+        /// <param name="acceptIncomplete">whether accept results even through finishes forcibly</param>
+        /// <return>the accepted list</return>
+        public static List<ushort> CardHunter(XI XI, Card.Genre genre, Func<ushort, bool> acceptRule,
+            Func<List<ushort>, List<ushort>, bool> finishRule, bool acceptIncomplete)
+        {
+            Base.Utils.Rueue<ushort> pile = null; // maybe get from the args
+            int pileSerial = 0; int ymSerial = 0;
+            if (genre == Card.Genre.Tux)
+            {
+                pile = XI.Board.TuxPiles; pileSerial = 0; ymSerial = 8;
+            }
+            else if (genre == Card.Genre.NMB)
+            {
+                pile = XI.Board.MonPiles; pileSerial = 1; ymSerial = 5;
+            }
+            else return new List<ushort>();
+            
+            List<ushort> accepts = new List<ushort>();
+            List<ushort> rejects = new List<ushort>();
+            while (pile.Count > 0 && !finishRule(accepts, rejects))
+            {
+                ushort ut = XI.DequeueOfPile(pile);
+                XI.RaiseGMessage("G2IN," + pileSerial + ",1");
+                XI.RaiseGMessage("G0YM," + ymSerial + "," + ut);
+                if (acceptRule(ut)) { accepts.Add(ut); }
+                else { rejects.Add(ut); }
+                XI.RaiseGMessage("G2ZZ,0");
+            }
+            if (!acceptIncomplete && !finishRule(accepts, rejects))
+            {
+                rejects.AddRange(accepts);
+                accepts.Clear();
+            }
+            if (rejects.Count > 0)
+                XI.RaiseGMessage(new Abandon()
+                {
+                    Zone = CustomsHelper.ZoneType.SHOWBOARD,
+                    Genre = genre,
+                    SingleUnit = new CustomsUnit() { Cards = rejects.ToArray() }
+                }.ToMessage());
+            return accepts;
         }
     }
 }

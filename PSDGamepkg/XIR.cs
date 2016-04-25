@@ -266,7 +266,12 @@ namespace PSD.PSDGamepkg
                                     ushort mons = DequeueOfPile(Board.MonPiles);
                                     RaiseGMessage("G2IN,1,1");
                                     WI.BCast(rstage + "7,0," + mons);
-                                    RaiseGMessage("G0ON,0,M,1," + mons);
+                                    RaiseGMessage(new Artiad.Abandon()
+                                    {
+                                        Zone = Artiad.CustomsHelper.ZoneType.EXPLICIT,
+                                        Genre = Card.Genre.NMB,
+                                        SingleUnit = new Artiad.CustomsUnit() { SingleCard = mons }
+                                    }.ToMessage());
                                 }
                                 Board.Battler = null;
                                 rstage = "R" + rounder + "ZF";
@@ -378,7 +383,12 @@ namespace PSD.PSDGamepkg
                             }
                             if (r5ed != UEchoCode.END_ACTION) // not take action, skip
                             {
-                                RaiseGMessage("G0ON,0,M,1," + Board.Monster1);
+                                RaiseGMessage(new Artiad.Abandon()
+                                {
+                                    Zone = Artiad.CustomsHelper.ZoneType.EXPLICIT,
+                                    Genre = Card.Genre.NMB,
+                                    SingleUnit = new Artiad.CustomsUnit() { SingleCard = Board.Monster1 }
+                                }.ToMessage());
                                 Board.Monster1 = 0;
                                 if (Board.MonPiles.Count > 0)
                                 {
@@ -405,7 +415,12 @@ namespace PSD.PSDGamepkg
                                 WI.BCast(rstage + "1,1");
                                 if (Board.Monster1 != 0) // In case Monster1 has been taken
                                 {
-                                    RaiseGMessage("G0ON,10,M,1," + Board.Monster1);
+                                    RaiseGMessage(new Artiad.Abandon()
+                                    {
+                                        Zone = Artiad.CustomsHelper.ZoneType.IMPLICIT,
+                                        Genre = Card.Genre.NMB,
+                                        SingleUnit = new Artiad.CustomsUnit() { SingleCard = Board.Monster1 }
+                                    }.ToMessage());
                                     Board.Monster1 = 0;
                                 }
                                 rstage = "R" + rounder + "ZF";
@@ -610,11 +625,21 @@ namespace PSD.PSDGamepkg
                                     ushort[] wangs = Board.Wang.ToArray();
                                     Board.Wang.Clear();
                                     RaiseGMessage("G0YM,3,1,0");
-                                    RaiseGMessage("G0ON,10,M," + wangs.Length + "," + string.Join(",", wangs));
+                                    RaiseGMessage(new Artiad.Abandon()
+                                    {
+                                        Zone = Artiad.CustomsHelper.ZoneType.IMPLICIT,
+                                        Genre = Card.Genre.NMB,
+                                        SingleUnit = new Artiad.CustomsUnit() { Cards = wangs }
+                                    }.ToMessage());
                                 }
                                 if (Board.Eve != 0)
                                 {
-                                    RaiseGMessage("G0ON,10,E,1," + Board.Eve);
+                                    RaiseGMessage(new Artiad.Abandon()
+                                    {
+                                        Zone = Artiad.CustomsHelper.ZoneType.IMPLICIT,
+                                        Genre = Card.Genre.Eve,
+                                        SingleUnit = new Artiad.CustomsUnit() { SingleCard = Board.Eve }
+                                    }.ToMessage());
                                     RaiseGMessage("G0YM,2,0,0");
                                     Board.Eve = 0;
                                 }
@@ -895,7 +920,12 @@ namespace PSD.PSDGamepkg
                 if (mon1 != null && Board.IsMonsterDebut)
                     mon1.Curtain();
                 if (Board.Mon1From == 0 && !Board.Garden.Values.Any(p => p.Pets.Contains(Board.Monster1)))
-                    RaiseGMessage("G0ON,10,M,1," + Board.Monster1);
+                    RaiseGMessage(new Artiad.Abandon()
+                    {
+                        Zone = Artiad.CustomsHelper.ZoneType.IMPLICIT,
+                        Genre = Card.Genre.NMB,
+                        SingleUnit = new Artiad.CustomsUnit() { SingleCard = Board.Monster1 }
+                    }.ToMessage());
                 RaiseGMessage("G0WB," + Board.Monster1);
                 RaiseGMessage("G0YM,0,0,0");
 
@@ -905,7 +935,12 @@ namespace PSD.PSDGamepkg
             if (Board.Monster2 != 0)
             { // monster 2 doesn't curtain, and mon2from always is 0
                 if (!Board.Garden.Values.Any(p => p.Pets.Contains(Board.Monster2)))
-                    RaiseGMessage("G0ON,10,M,1," + Board.Monster2);
+                    RaiseGMessage(new Artiad.Abandon()
+                    {
+                        Zone = Artiad.CustomsHelper.ZoneType.IMPLICIT,
+                        Genre = Card.Genre.NMB,
+                        SingleUnit = new Artiad.CustomsUnit() { SingleCard = Board.Monster2 }
+                    }.ToMessage());
                 RaiseGMessage("G0WB," + Board.Monster2);
                 RaiseGMessage("G0YM,1,0,0");
                 Board.Monster2 = 0;
@@ -1015,9 +1050,16 @@ namespace PSD.PSDGamepkg
                     for (int i = 2; i < pends.Length; ++i)
                         Algo.AddToMultiMap(imt, pendWho, ushort.Parse(pends[i]));
                 }
-                if (imt.Count > 0)
-                    RaiseGMessage("G0ON," + string.Join(",", imt.Select(p => p.Key + ",C," +
-                        p.Value.Count + "," + string.Join(",", p.Value))));
+                RaiseGMessage(new Artiad.Abandon()
+                {
+                    Zone = Artiad.CustomsHelper.ZoneType.PLAYER,
+                    Genre = Card.Genre.Tux,
+                    List = imt.Select(p => new Artiad.CustomsUnit()
+                    {
+                        Source = p.Key,
+                        Cards = p.Value.ToArray()
+                    }).ToList()
+                }.ToMessage());
                 Board.PendingTux.Dequeue(Board.PendingTux.Count); // Clear the pending tux
             }
         }
