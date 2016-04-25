@@ -17,18 +17,16 @@ namespace PSD.PSDGamepkg.Artiad
             if (player.TokenExcl.Count > 0)
             {
                 char exclType = player.TokenExcl[0][0];
+                Card.Genre exclGenre = Card.Char2Genre(exclType);
+                ushort[] cards = player.TokenExcl.Select(p => ushort.Parse(p.Substring(1))).ToArray();
                 raiseG("G2TZ,0," + player.Uid + "," + string.Join(",", player.TokenExcl));
                 raiseG("G0OJ," + player.Uid + ",1," + Algo.ListToString(player.TokenExcl));
-                if (exclType != 'H')
+                if (Algo.Include(exclGenre, Card.Genre.Tux, Card.Genre.NMB, Card.Genre.Eve))
                     raiseG(new Abandon()
                     {
                         Zone = CustomsHelper.ZoneType.PLAYER,
-                        Genre = Card.Char2Genre(exclType),
-                        SingleUnit = new CustomsUnit()
-                        {
-                            Source = player.Uid,
-                            Cards = player.TokenExcl.Select(p => ushort.Parse(p.Substring(1))).ToArray()
-                        }
+                        Genre = exclGenre,
+                        SingleUnit = new CustomsUnit() { Source = player.Uid, Cards = cards }
                     }.ToMessage());
             }
             if (player.TokenTars.Count > 0)

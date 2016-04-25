@@ -597,7 +597,7 @@ namespace PSD.PSDGamepkg.JNS
                 Tux tux = XI.LibTuple.TL.DecodeTux(ut);
                 if (tux == null) { return false; }
                 string tfuse = tux.IsLinked(tType) ? linkFuse : fuse;
-                return tux.Bribe(py, tType, tfuse) && tux.Valid(player, tType, tfuse);
+                return tux.Bribe(player, tType, tfuse) && tux.Valid(py, tType, tfuse);
             };
             System.Func<ushort, Player, int, int, bool> eqUsable = (ut, py, tConsume, tType) =>
             {

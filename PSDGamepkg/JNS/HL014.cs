@@ -399,15 +399,12 @@ namespace PSD.PSDGamepkg.JNS
             else if (tux.Type == Tux.TuxType.TP)
                 tar.DrTuxDisabled = true;
             else if (tux.IsTuxEqiup())
-            {
                 XI.RaiseGMessage(new Artiad.EquipStandard()
                 {
                     Who = ut,
                     Source = ut,
                     SingleCard = randomCard
                 }.ToMessage());
-                XI.RaiseGMessage("G0DH," + ut + ",0,1");
-            }
 
             if (!tux.IsTuxEqiup())
             {
@@ -685,7 +682,7 @@ namespace PSD.PSDGamepkg.JNS
             }
             else if (type == 1 || type == 2)
             {
-                player.RAM.Set("1tux", false);
+                player.RAM.Set("+1tux", false);
                 XI.RaiseGMessage("G0IP," + player.Team + ",1");
             }
             else if (type == 3)
@@ -1676,8 +1673,8 @@ namespace PSD.PSDGamepkg.JNS
             ushort[] whos = argst.Split(',').Select(p => ushort.Parse(p)).ToArray();
             TargetPlayer(player.Uid, whos);
             player.RFM.GetOrSetUshortArray("Couraged").AddRange(whos);
-            XI.RaiseGMessage("G0DH," + string.Join(",", whos.Select(p => p + ",0," +
-                System.Math.Max(XI.Board.Garden[p].GetPetCount(), 1))));
+            XI.RaiseGMessage("G0DH," + string.Join(",", whos.Select(p =>
+                p + ",0," + (XI.Board.Garden[p].GetPetCount() / 2 + 1))));
         }
         public string JNH1001Input(Player player, int type, string fuse, string prev)
         {

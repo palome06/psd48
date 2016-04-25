@@ -30,6 +30,12 @@ namespace PSD.Base.Utils
                 randomSortTable[randomSeed.NextDouble()] = someType;
             return randomSortTable.OrderBy(KVP => KVP.Key).Take(maxCount).Select(KVP => KVP.Value);
         }
+
+        public static bool Include(object @object, params object[] options)
+        {
+            return options.Contains(@object);
+        }
+
         public static string Substring(string content, int start, int end)
         {
             if (start < 0)
