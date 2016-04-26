@@ -33,13 +33,15 @@ namespace PSD.PSDGamepkg
                 {
                     sw.WriteLine("VERSION={0} ISSV=1", version);
                     sw.Flush();
+                    Stop = false;
                     while (!Stop)
                     {
                         string line = queue.Take();
                         if (!string.IsNullOrEmpty(line))
                         {
-                            sw.WriteLine(Base.LogES.DESEncrypt(line, "AKB48Show!", 
-                                (version * version).ToString()));
+                            string eline = Base.LogES.DESEncrypt(line, "AKB48Show!",
+                                (version * version).ToString());
+                            sw.WriteLine(eline);
                             sw.Flush();
                         }
                     }
@@ -47,9 +49,6 @@ namespace PSD.PSDGamepkg
             });
         }
 
-        public void Logger(String line)
-        {
-            Task.Factory.StartNew(() => { queue.Add(line); });
-        }
+        public void Logger(string line) { queue.Add(line); }
     }
 }

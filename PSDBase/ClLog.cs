@@ -43,7 +43,7 @@ namespace PSD.Base
                 {
                     using (StreamWriter sw = new StreamWriter(rName, true))
                     {
-                        while (!Stop) 
+                        while (!Stop)
                         {
                             string line = rq.Take();
                             if (!string.IsNullOrEmpty(line))
@@ -75,7 +75,7 @@ namespace PSD.Base
                             string line = lq.Take();
                             if (!string.IsNullOrEmpty(line))
                             {
-                                sw.WriteLine(LogES.DESEncrypt(line, "AKB48Show!", 
+                                sw.WriteLine(LogES.DESEncrypt(line, "AKB48Show!",
                                     (version * version).ToString()));
                                 //char[] chs = line.ToCharArray();
                                 //sw.Write(chs.Length);
@@ -88,21 +88,9 @@ namespace PSD.Base
             }
         }
 
-        public void Logg(string line)
-        {
-            if (msglog)
-            {
-                Task.Factory.StartNew(() => { lq.Add(line); });
-            }
-        }
+        public void Logg(string line) { if (msglog) lq.Add(line); }
 
-        public void Record(string line)
-        {
-            if (record)
-            {
-                Task.Factory.StartNew(() => { rq.Add(line); });
-            }
-        }
+        public void Record(string line) { if (record) rq.Add(line); }
     }
 
     public class LogES
@@ -198,11 +186,7 @@ namespace PSD.Base
                     return Encoding.UTF8.GetString(ms.ToArray());
                 }
             }
-            catch (System.Exception)
-            {
-                return "";
-            }
-
+            catch (Exception) { return ""; }
         }
     }
 }
