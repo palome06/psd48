@@ -98,9 +98,13 @@ namespace PSD.ClientZero
             bywi.Log = Log;
             if (VI is VW.Ayvi)
                 (VI as VW.Ayvi).Log = Log;
-            WI = bywi; bywi.StartConnect(watcher);
-            VI.Cout(uid, "游戏开始咯~");
-            
+            WI = bywi; 
+            if (!bywi.StartConnect(watcher))
+            {
+                VI.Cout(Uid, "哦我的上帝，真不敢想象连接竟然失败了。");
+                auid = 0; return;
+            }
+            VI.Cout(Uid, watcher ? "您开始旁观~" : "游戏开始咯~");            
             CommonConstruct();
         }
         // Constructor 2#: Used for SF setting, use decided WI and VI

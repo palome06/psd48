@@ -276,6 +276,7 @@ namespace PSD.ClientZero.VW
             msgNPools = new BlockingCollection<string>(new ConcurrentQueue<string>());
             msg0Pools = new BlockingCollection<string>(new ConcurrentQueue<string>());
             msgTalk = new BlockingCollection<string>(new ConcurrentQueue<string>());
+            ctoken = new CancellationTokenSource();
         }
 
         #region Implemetation
