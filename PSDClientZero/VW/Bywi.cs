@@ -39,12 +39,12 @@ namespace PSD.ClientZero.VW
         {
             NetworkStream tcpStream = client.GetStream();
             if (!watch)
-                SentByteLine(tcpStream, "C2CO," + Uid + "," + name + "," + avatar + "," + hopeTeam);
+                Base.VW.WHelper.SentByteLine(tcpStream, "C2CO," + Uid + "," + name + "," + avatar + "," + hopeTeam);
             else
-                SentByteLine(tcpStream, "C2QI," + Uid + "," + name);
+                Base.VW.WHelper.SentByteLine(tcpStream, "C2QI," + Uid + "," + name);
             while (true)
             {
-                string line = ReadByteLine(tcpStream);
+                string line = Base.VW.WHelper.ReadByteLine(tcpStream);
                 if (line == null)
                     return false;
                 else if (line.StartsWith("C2CN,") && !watch)
@@ -79,13 +79,13 @@ namespace PSD.ClientZero.VW
         {
             NetworkStream tcpStream = client.GetStream();
             if (!watch)
-                SentByteLine(tcpStream, "C2CO,0," + name + "," + avatar + "," + hopeTeam);
+                Base.VW.WHelper.SentByteLine(tcpStream, "C2CO,0," + name + "," + avatar + "," + hopeTeam);
             else
-                SentByteLine(tcpStream, "C2QI,0," + name);
+                Base.VW.WHelper.SentByteLine(tcpStream, "C2QI,0," + name);
             IDictionary<ushort, IchiPlayer> uidict = new Dictionary<ushort, IchiPlayer>();
             while (true)
             {
-                string line = ReadByteLine(tcpStream);
+                string line = Base.VW.WHelper.ReadByteLine(tcpStream);
                 if (line == null)
                     return false;
                 else if (line.StartsWith("C2CN,") && !watch)
@@ -151,10 +151,10 @@ namespace PSD.ClientZero.VW
         private bool ConnectDoResume(TcpClient client, ushort oldUid, string passCode)
         {
             NetworkStream tcpStream = client.GetStream();
-            SentByteLine(tcpStream, "C4CR," + Uid + "," + oldUid + "," + name + "," + passCode);
+            Base.VW.WHelper.SentByteLine(tcpStream, "C4CR," + Uid + "," + oldUid + "," + name + "," + passCode);
             while (true)
             {
-                string line = ReadByteLine(tcpStream);
+                string line = Base.VW.WHelper.ReadByteLine(tcpStream);
                 if (line == null)
                     return false;
                 else if (line.StartsWith("C4CS,"))
@@ -207,7 +207,7 @@ namespace PSD.ClientZero.VW
             {
                 while (true)
                 {
-                    string line = ReadByteLine(stream);
+                    string line = Base.VW.WHelper.ReadByteLine(stream);
                     if (string.IsNullOrEmpty(line))
                     {
                         if (OnLoseConnection != null)
@@ -232,7 +232,7 @@ namespace PSD.ClientZero.VW
             try
             {
                 while (true)
-                    SentByteLine(stream, msg0Pools.Take(ctoken.Token));
+                    Base.VW.WHelper.SentByteLine(stream, msg0Pools.Take(ctoken.Token));
             }
             catch (IOException)
             {
@@ -341,29 +341,6 @@ namespace PSD.ClientZero.VW
             Action<Exception> ae = (e) => { if (Log != null) Log.Logg(e.ToString()); };
             Task.Factory.StartNew(() => ZI.SafeExecute(action, ae), ctoken.Token,
                 TaskCreationOptions.LongRunning, TaskScheduler.Default);
-        }
-        private static string ReadByteLine(NetworkStream ns)
-        {
-            byte[] byte2 = new byte[2];
-            ns.Read(byte2, 0, 2);
-            ushort value = (ushort)((byte2[0] << 8) + byte2[1]);
-            byte[] actual = new byte[MSG_SIZE];
-            if (value > MSG_SIZE)
-                value = MSG_SIZE;
-            ns.Read(actual, 0, value);
-            return value > 0 ? Encoding.Unicode.GetString(actual, 0, value) : null;
-        }
-
-        private static void SentByteLine(NetworkStream ns, string value)
-        {
-            byte[] actual = Encoding.Unicode.GetBytes(value);
-            int al = actual.Length;
-            byte[] buf = new byte[al + 2];
-            buf[0] = (byte)(al >> 8);
-            buf[1] = (byte)(al & 0xFF);
-            actual.CopyTo(buf, 2);
-            ns.Write(buf, 0, al + 2);
-            ns.Flush();
         }
     }
 }

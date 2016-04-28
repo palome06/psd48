@@ -96,6 +96,7 @@
     <Compile Include="Utils\Diva.cs" />
     <Compile Include="Utils\Rueue.cs" />
     <Compile Include="Utils\ReadonlySQL.cs" />
+    <Compile Include="VW\Helper.cs" />
     <Compile Include="VW\IVI.cs" />
     <Compile Include="VW\IWI.cs" />
   </ItemGroup>

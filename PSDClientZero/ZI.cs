@@ -59,7 +59,7 @@ namespace PSD.ClientZero
             NetworkStream tcpStream = client.GetStream();
             int version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.Revision;
             string trainerjoin = (this.trainer != null && trainer.Length > 0) ? ("," + string.Join(",", trainer)) : "";
-            SentByteLine(tcpStream, "C0CO," + name + "," + avatar + ","
+            Base.VW.WHelper.SentByteLine(tcpStream, "C0CO," + name + "," + avatar + ","
                 + teamCode + "," + selCode + "," + levelCode + "," + version + trainerjoin);
 
             Thread msgThread = new Thread(delegate()
@@ -71,7 +71,7 @@ namespace PSD.ClientZero
                     while (readLine != null)
                     {
                         lock (tcpStream)
-                            SentByteLine(tcpStream, "C0TK," + uid + "," + readLine);
+                            Base.VW.WHelper.SentByteLine(tcpStream, "C0TK," + uid + "," + readLine);
                         readLine = VI.RequestTalk(uid);
                         //readLine = Console.ReadLine();
                     }
@@ -81,7 +81,7 @@ namespace PSD.ClientZero
             bool done = false;
             while (!done)
             {
-                string line = ReadByteLine(tcpStream);
+                string line = Base.VW.WHelper.ReadByteLine(tcpStream);
                 if (line.StartsWith("G0XV,"))
                 {
                     string expectVersion = line.Substring("C0XV,".Length);
@@ -138,7 +138,7 @@ namespace PSD.ClientZero
                 }
                 else if (line.StartsWith("C1SA,"))
                 {
-                    SentByteLine(tcpStream, "C1ST," + uid);
+                    Base.VW.WHelper.SentByteLine(tcpStream, "C1ST," + uid);
                     Console.WriteLine("Start XIClient");
                     //VI.Init();
                     VI.SetInGame(true);
@@ -171,10 +171,10 @@ namespace PSD.ClientZero
         {
             TcpClient client = new TcpClient(server, port);
             NetworkStream tcpStream = client.GetStream();
-            SentByteLine(tcpStream, "C0QI," + name);
+            Base.VW.WHelper.SentByteLine(tcpStream, "C0QI," + name);
             while (true)
             {
-                string line = ReadByteLine(tcpStream);
+                string line = Base.VW.WHelper.ReadByteLine(tcpStream);
                 if (line.StartsWith("C0QJ,"))
                 {
                     string[] splits = line.Split(',');
@@ -191,7 +191,7 @@ namespace PSD.ClientZero
                             int house = int.Parse(inputHouse);
                             if (crooms.Contains(house))
                             {
-                                SentByteLine(tcpStream, "C0QS," + house);
+                                Base.VW.WHelper.SentByteLine(tcpStream, "C0QS," + house);
                                 break;
                             }
                         } while (true);
@@ -247,12 +247,12 @@ namespace PSD.ClientZero
 
             TcpClient client = new TcpClient(server, port);
             NetworkStream tcpStream = client.GetStream();
-            SentByteLine(tcpStream, "C4CO," + name + "," + room);
+            Base.VW.WHelper.SentByteLine(tcpStream, "C4CO," + name + "," + room);
 
             bool done = false;
             while (!done)
             {
-                string line = ReadByteLine(tcpStream);
+                string line = Base.VW.WHelper.ReadByteLine(tcpStream);
                 if (line.StartsWith("C4RM,0"))
                 {
                     done = true;
@@ -279,32 +279,6 @@ namespace PSD.ClientZero
 		
         #region Utils Functions
 
-        private static string ReadByteLine(NetworkStream ns)
-        {
-            byte[] byte2 = new byte[2];
-            ns.Read(byte2, 0, 2);
-            ushort value = (ushort)((byte2[0] << 8) + byte2[1]);
-            byte[] actual = new byte[2048];
-            if (value > 2048)
-                value = 2048;
-            ns.Read(actual, 0, value);
-            return Encoding.Unicode.GetString(actual, 0, value);
-        }
-
-        private static void SentByteLine(NetworkStream ns, string value)
-        {
-            byte[] actual = Encoding.Unicode.GetBytes(value);
-            int al = actual.Length;
-            byte[] buf = new byte[al + 2];
-            buf[0] = (byte)(al >> 8);
-            buf[1] = (byte)(al & 0xFF);
-            actual.CopyTo(buf, 2);
-            ns.Write(buf, 0, al + 2);
-            ns.Flush();
-        }
-
-        #endregion Utils Functions
-
         private static string GetValue(string[] args, int index, string hint)
         {
             if (args != null && args.Length > index)
@@ -315,6 +289,8 @@ namespace PSD.ClientZero
                 return Console.ReadLine().Trim();
             }
         }
+
+        #endregion Utils Functions
 
         public static void Main(string[] args)
         {

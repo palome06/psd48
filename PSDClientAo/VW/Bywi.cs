@@ -37,12 +37,12 @@ namespace PSD.ClientAo.VW
         {
             NetworkStream tcpStream = client.GetStream();
             if (!watch)
-                SentByteLine(tcpStream, "C2CO," + Uid + "," + name + "," + avatar + "," + hopeTeam);
+                Base.VW.WHelper.SentByteLine(tcpStream, "C2CO," + Uid + "," + name + "," + avatar + "," + hopeTeam);
             else
-                SentByteLine(tcpStream, "C2QI," + Uid + "," + name);
+                Base.VW.WHelper.SentByteLine(tcpStream, "C2QI," + Uid + "," + name);
             while (true)
             {
-                string line = ReadByteLine(tcpStream);
+                string line = Base.VW.WHelper.ReadByteLine(tcpStream);
                 if (line.StartsWith("C2CN,") && !watch)
                 {
                     ushort ut = ushort.Parse(line.Substring("C2CN,".Length));
@@ -64,7 +64,7 @@ namespace PSD.ClientAo.VW
                     recvThread.Start();
                     if (!watch)
                     {
-                        //    SentByteLine(tcpStream, "C2ST," + Uid);
+                        // Base.VW.WHelper.SentByteLine(tcpStream, "C2ST," + Uid);
                         sendThread = new Thread(() => ZI.SafeExecute(() => KeepOnListenSend(),
                             delegate(Exception e) { Log.Logg(e.ToString()); }));
                         sendThread.Start();
@@ -81,13 +81,13 @@ namespace PSD.ClientAo.VW
             NetworkStream tcpStream = client.GetStream();
             VW.Cyvi cvi = vi as VW.Cyvi;
             if (!watch)
-                SentByteLine(tcpStream, "C2CO,0," + name + "," + avatar + "," + hopeTeam);
+                Base.VW.WHelper.SentByteLine(tcpStream, "C2CO,0," + name + "," + avatar + "," + hopeTeam);
             else
-                SentByteLine(tcpStream, "C2QI,0," + name);
+                Base.VW.WHelper.SentByteLine(tcpStream, "C2QI,0," + name);
             IDictionary<ushort, IchiPlayer> uidict = new Dictionary<ushort, IchiPlayer>();
             while (true)
             {
-                string line = ReadByteLine(tcpStream);
+                string line = Base.VW.WHelper.ReadByteLine(tcpStream);
                 if (line.StartsWith("C2CN,") && !watch)
                 {
                     ushort ut = ushort.Parse(line.Substring("C2CN,".Length));
@@ -158,10 +158,10 @@ namespace PSD.ClientAo.VW
         private bool ConnectDoResume(TcpClient client, ushort oldUid, string passCode)
         {
             NetworkStream tcpStream = client.GetStream();
-            SentByteLine(tcpStream, "C4CR," + Uid + "," + oldUid + "," + name + "," + passCode);
+            Base.VW.WHelper.SentByteLine(tcpStream, "C4CR," + Uid + "," + oldUid + "," + name + "," + passCode);
             while (true)
             {
-                string line = ReadByteLine(tcpStream);
+                string line = Base.VW.WHelper.ReadByteLine(tcpStream);
                 if (line.StartsWith("C4CS,"))
                 {
                     ushort ut = ushort.Parse(line.Substring("C4CS,".Length));
@@ -220,7 +220,7 @@ namespace PSD.ClientAo.VW
             {
                 while (true)
                 {
-                    string line = ReadByteLine(stream);
+                    string line = Base.VW.WHelper.ReadByteLine(stream);
                     if (line.StartsWith("Y"))
                         msgTalk.Add(line);
                     else
@@ -237,7 +237,7 @@ namespace PSD.ClientAo.VW
             try
             {
                 while (true)
-                    SentByteLine(stream, msg0Pools.Take());
+                    Base.VW.WHelper.SentByteLine(stream, msg0Pools.Take());
             }
             catch (IOException)
             {
@@ -336,29 +336,5 @@ namespace PSD.ClientAo.VW
             return talk;
         }
         #endregion Implementation
-
-        private static string ReadByteLine(NetworkStream ns)
-        {
-            byte[] byte2 = new byte[2];
-            ns.Read(byte2, 0, 2);
-            ushort value = (ushort)((byte2[0] << 8) + byte2[1]);
-            byte[] actual = new byte[MSG_SIZE];
-            if (value > MSG_SIZE)
-                value = MSG_SIZE;
-            ns.Read(actual, 0, value);
-            return Encoding.Unicode.GetString(actual, 0, value);
-        }
-
-        private static void SentByteLine(NetworkStream ns, string value)
-        {
-            byte[] actual = Encoding.Unicode.GetBytes(value);
-            int al = actual.Length;
-            byte[] buf = new byte[al + 2];
-            buf[0] = (byte)(al >> 8);
-            buf[1] = (byte)(al & 0xFF);
-            actual.CopyTo(buf, 2);
-            ns.Write(buf, 0, al + 2);
-            ns.Flush();
-        }
     }
 }

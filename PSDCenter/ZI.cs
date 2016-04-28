@@ -15,6 +15,8 @@ namespace PSD.PSDCenter
 {
     public class ZI
     {
+        public const int MSG_SIZE = 4096;
+
         private IDictionary<ushort, Neayer> neayers;
         private IDictionary<ushort, Netcher> netchers;
         private IDictionary<int, Room> rooms;
@@ -46,7 +48,7 @@ namespace PSD.PSDCenter
         public void RegisterSocket(Socket socket)
         {
             NetworkStream ns = new NetworkStream(socket);
-            string data = ReadByteLine(ns);
+            string data = Base.VW.WHelper.ReadByteLine(ns);
             if (data == null) { return; }
             else if (data.StartsWith("C0CO,"))
             {
@@ -61,7 +63,7 @@ namespace PSD.PSDCenter
                 if (blocks.Length <= 6 || int.Parse(blocks[6]) != ass.Version.Revision)
                 { // version error, report exit
                     Console.WriteLine("{0} has tried connecting with a wrong version.", user);
-                    SentByteLine(ns, "C0XV," + ass.Version.ToString());
+                    Base.VW.WHelper.SentByteLine(ns, "C0XV," + ass.Version.ToString());
                     socket.Close();
                     return;
                 }
@@ -84,7 +86,7 @@ namespace PSD.PSDCenter
                         + (socket.LocalEndPoint as IPEndPoint).Address.ToString()
                 };
                 Console.WriteLine("{0} has entered the hall.", user);
-                SentByteLine(ns, "C0CN," + uid);
+                Base.VW.WHelper.SentByteLine(ns, "C0CN," + uid);
                 neayers.Add(uid, ny);
                 //Thread lThread = new Thread(delegate() { ListenToTalkSocket(socket); });
                 //lThread.Start();
@@ -98,14 +100,14 @@ namespace PSD.PSDCenter
                             neayers[p].Uid + "," + neayers[p].Name + "," + neayers[p].Avatar)));
                         if (members.Length > 0)
                             members = "," + members;
-                        SentByteLine(ns, "C1RM," + reqRoom.Number + members);
+                        Base.VW.WHelper.SentByteLine(ns, "C1RM," + reqRoom.Number + members);
                         Console.WriteLine("{0} is allocated with room {1}#.", user, reqRoom.Number);
                         location[uid] = reqRoom.Number;
                         reqRoom.players.Add(uid);
                         foreach (ushort nyru in reqRoom.players)
                         {
                             Neayer nyr = neayers[nyru];
-                            SentByteLine(new NetworkStream(nyr.Tunnel),
+                            Base.VW.WHelper.SentByteLine(new NetworkStream(nyr.Tunnel),
                                 "C1NW," + uid + "," + ny.Name + "," + avatar);
                         }
                         if (reqRoom.players.Count >= playerCapacity)
@@ -116,7 +118,7 @@ namespace PSD.PSDCenter
                     // Wait for C1ST message to terminate the socket
                     do
                     {
-                        string reply = ReadByteLine(ns);
+                        string reply = Base.VW.WHelper.ReadByteLine(ns);
                         if (reply == null)
                             socket.Close(); // close twice would lead to IOException
                         else if (reply.StartsWith("C0TK,"))
@@ -140,7 +142,7 @@ namespace PSD.PSDCenter
                             {
                                 any = true;
                                 if (IsTunnelAlive(nyr.Tunnel))
-                                    SentByteLine(new NetworkStream(nyr.Tunnel), "C1LV," + uid);
+                                    Base.VW.WHelper.SentByteLine(new NetworkStream(nyr.Tunnel), "C1LV," + uid);
                             }
                         }
                         location.Remove(uid);
@@ -168,20 +170,20 @@ namespace PSD.PSDCenter
                         p => p.Value.Ready).Select(p => p.Key));
                     if (rms.Length > 0)
                         rms = "," + rms;
-                    SentByteLine(ns, "C0QJ," + uid + rms);
-                    string reply = ReadByteLine(ns);
+                    Base.VW.WHelper.SentByteLine(ns, "C0QJ," + uid + rms);
+                    string reply = Base.VW.WHelper.ReadByteLine(ns);
                     while (!reply.StartsWith("C0QS,"))
-                        reply = ReadByteLine(ns);
+                        reply = Base.VW.WHelper.ReadByteLine(ns);
 
                     int room = int.Parse(reply.Substring(reply.IndexOf(',') + 1));
                     if (rooms.ContainsKey(room) && rooms[room].Ready)
                     {
-                        SentByteLine(ns, "C1SQ," + room);
+                        Base.VW.WHelper.SentByteLine(ns, "C1SQ," + room);
                         netchers.Add(uid, ny);
                         rooms[room].watchers.Add(uid);
                     }
                     else
-                        SentByteLine(ns, "C1SQ,0");
+                        Base.VW.WHelper.SentByteLine(ns, "C1SQ,0");
                 }
                 catch (IOException)
                 {
@@ -215,7 +217,7 @@ namespace PSD.PSDCenter
                                 neayers[uid] = ny;
                                 substitudes[uid] = loser.Uid;
                                 Console.WriteLine("{0} has required for re-connection.", user);
-                                SentByteLine(ns, "C4RM," + uid + "," + loser.Uid + "," + curRoomNo + "," + user + ",#CD0");
+                                Base.VW.WHelper.SentByteLine(ns, "C4RM," + uid + "," + loser.Uid + "," + curRoomNo + "," + user + ",#CD0");
                                 foundOrg = true; break;
                                 // TODO: set the room code as "#CD0" for testing.
                                 
@@ -229,7 +231,7 @@ namespace PSD.PSDCenter
                     }
                 }
                 if (!foundOrg)
-                    SentByteLine(ns, "C4RM,0");
+                    Base.VW.WHelper.SentByteLine(ns, "C4RM,0");
             }
             else if (data.StartsWith("C3HI,")) // hello from pkg to replace pipestream
             {
@@ -242,11 +244,11 @@ namespace PSD.PSDCenter
                         foreach (ushort nyru in reqRoom.players)
                         {
                             Neayer nyr = neayers[nyru];
-                            SentByteLine(new NetworkStream(nyr.Tunnel), "C1SA,0");
+                            Base.VW.WHelper.SentByteLine(new NetworkStream(nyr.Tunnel), "C1SA,0");
                         }
                     }
                     string line;
-                    while (!string.IsNullOrEmpty(line = ReadByteLine(ns)))
+                    while (!string.IsNullOrEmpty(line = Base.VW.WHelper.ReadByteLine(ns)))
                     {
                         if (line.StartsWith("C3LV")) // Terminate unexpected
                         {
@@ -309,7 +311,7 @@ namespace PSD.PSDCenter
                     lock (rm.players)
                     {
                         foreach (ushort py in rm.players)
-                            SentByteLine(new NetworkStream(neayers[py].Tunnel),
+                            Base.VW.WHelper.SentByteLine(new NetworkStream(neayers[py].Tunnel),
                                 "C1TK," + nick + "," + content);
                     }
                 }
@@ -332,7 +334,7 @@ namespace PSD.PSDCenter
         //    try
         //    {
         //        NetworkStream ns = new NetworkStream(socket);
-        //        string data = ReadByteLine(ns);
+        //        string data = Base.VW.WHelper.ReadByteLine(ns);
         //        while (data != null && data.StartsWith("C0TK,"))
         //        {
         //            int i1 = "C0TK".Length;
@@ -348,12 +350,12 @@ namespace PSD.PSDCenter
         //                    lock (rm.players)
         //                    {
         //                        foreach (ushort py in rm.players)
-        //                            SentByteLine(new NetworkStream(neayers[py].Tunnel),
+        //                            Base.VW.WHelper.SentByteLine(new NetworkStream(neayers[py].Tunnel),
         //                                "C1TK," + nick + "," + content);
         //                    }
         //                }
         //            }
-        //            data = ReadByteLine(ns);
+        //            data = Base.VW.WHelper.ReadByteLine(ns);
         //        }
         //    }
         //    catch (IOException) { }
@@ -411,30 +413,6 @@ namespace PSD.PSDCenter
             losers = new HashSet<Neayer>();
             substitudes = new Dictionary<ushort, ushort>();
             location = new Dictionary<ushort, int>();
-        }
-
-        private static string ReadByteLine(NetworkStream ns)
-        {
-            byte[] byte2 = new byte[2];
-            ns.Read(byte2, 0, 2);
-            ushort value = (ushort)((byte2[0] << 8) + byte2[1]);
-            byte[] actual = new byte[2048];
-            if (value > 2048)
-                value = 2048;
-            ns.Read(actual, 0, value);
-            return value > 0 ? Encoding.Unicode.GetString(actual, 0, value) : null;
-        }
-
-        private static void SentByteLine(NetworkStream ns, string value)
-        {
-            byte[] actual = Encoding.Unicode.GetBytes(value);
-            int al = actual.Length;
-            byte[] buf = new byte[al + 2];
-            buf[0] = (byte)(al >> 8);
-            buf[1] = (byte)(al & 0xFF);
-            actual.CopyTo(buf, 2);
-            ns.Write(buf, 0, al + 2);
-            ns.Flush();
         }
         #endregion Constructor and Utils
 

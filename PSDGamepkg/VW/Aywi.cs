@@ -54,7 +54,7 @@ namespace PSD.PSDGamepkg.VW
         private void ConnectDo(Socket socket, List<ushort> valids, IDictionary<ushort, Neayer> n1)
         {
             NetworkStream ns = new NetworkStream(socket);
-            string data = ReadByteLine(ns);
+            string data = Base.VW.WHelper.ReadByteLine(ns);
             //string addr = (socket.RemoteEndPoint as IPEndPoint).Address.ToString();
             if (data == null) { return; }
             else if (data.StartsWith("C2CO,"))
@@ -79,7 +79,7 @@ namespace PSD.PSDGamepkg.VW
                 //    uHope = 0;
 
                 if (n1 == null)
-                    SentByteLine(ns, "C2CN,0");
+                    Base.VW.WHelper.SentByteLine(ns, "C2CN,0");
 
                 if (valids != null)
                 {
@@ -94,10 +94,10 @@ namespace PSD.PSDGamepkg.VW
                         };
                         n1.Add(ut, ny);
                         vi.Cout(0, "[{0}]{1} joined.", ny.AUid, uname);
-                        SentByteLine(ns, "C2CN," + ny.AUid);
+                        Base.VW.WHelper.SentByteLine(ns, "C2CN," + ny.AUid);
                     }
                     else
-                        SentByteLine(ns, "C2CN,0");
+                        Base.VW.WHelper.SentByteLine(ns, "C2CN,0");
                 }
                 else // In Direct mode, exit isn't allowed, AUid isn't useful.
                 {
@@ -114,13 +114,13 @@ namespace PSD.PSDGamepkg.VW
                     foreach (Neayer nyr in n1.Values)
                     {
                         c2rm += "," + nyr.Uid + "," + nyr.Name + "," + nyr.Avatar;
-                        SentByteLine(new NetworkStream(nyr.Tunnel), c2nw);
+                        Base.VW.WHelper.SentByteLine(new NetworkStream(nyr.Tunnel), c2nw);
                     }
                     n1.Add(ny.Uid, ny);
                     vi.Cout(0, "[{0}]{1} joined.", ny.Uid, uname);
-                    SentByteLine(ns, "C2CN," + ny.Uid);
+                    Base.VW.WHelper.SentByteLine(ns, "C2CN," + ny.Uid);
                     if (c2rm.Length > 0)
-                        SentByteLine(ns, "C2RM" + c2rm);
+                        Base.VW.WHelper.SentByteLine(ns, "C2RM" + c2rm);
                 }
             }
             else if (data.StartsWith("C2QI,"))
@@ -132,7 +132,7 @@ namespace PSD.PSDGamepkg.VW
                     ++ut;
                 Netcher nc = new Netcher(uname, ut) { Tunnel = socket }; 
                 netchers.Add(ut, nc);
-                SentByteLine(ns, "C2QJ," + ut);
+                Base.VW.WHelper.SentByteLine(ns, "C2QJ," + ut);
             }
         }
         public void TcpListenerStart()
@@ -175,12 +175,12 @@ namespace PSD.PSDGamepkg.VW
             foreach (var pair in neayers)
             {
                 StartListenTask(() => KeepOnListenRecv(pair.Value));
-                SentByteLine(new NetworkStream(pair.Value.Tunnel), "C2SA,0");
+                Base.VW.WHelper.SentByteLine(new NetworkStream(pair.Value.Tunnel), "C2SA,0");
             }
             foreach (var pair in netchers)
             {
                 StartListenTask(() => KeepOnListenRecv(pair.Value));
-                SentByteLine(new NetworkStream(pair.Value.Tunnel), "C2SA,0");
+                Base.VW.WHelper.SentByteLine(new NetworkStream(pair.Value.Tunnel), "C2SA,0");
             }
             StartListenTask(() => KeepOnListenSend());
             return newGarden;
@@ -312,7 +312,7 @@ namespace PSD.PSDGamepkg.VW
             catch (SocketException) { return 0; }
 
             NetworkStream ns = new NetworkStream(socket);
-            string data = ReadByteLine(ns);
+            string data = Base.VW.WHelper.ReadByteLine(ns);
             if (data == null) { return 0; }
             else if (data.StartsWith("C2QI,")) // Watcher case
             {
@@ -325,8 +325,8 @@ namespace PSD.PSDGamepkg.VW
                     ++ut;
                 Netcher nc = new Netcher(uname, ut) { Tunnel = socket };
                 netchers.Add(ut, nc);
-                SentByteLine(ns, "C2QJ," + ut);
-                SentByteLine(ns, "C2SA,0");
+                Base.VW.WHelper.SentByteLine(ns, "C2QJ," + ut);
+                Base.VW.WHelper.SentByteLine(ns, "C2SA,0");
                 return ut;
             }
             else if (data.StartsWith("C4CR,")) // Reconnect case
@@ -348,16 +348,15 @@ namespace PSD.PSDGamepkg.VW
                     Alive = false
                 };
                 neayers[ny.Uid] = ny;
-                Task.Factory.StartNew(() => XI.SafeExecute(() => KeepOnListenRecv(ny),
-                    delegate(Exception e) { Log.Logger(e.ToString()); }), ctoken.Token);
-                SentByteLine(ns, "C4CS," + ny.Uid);
+                StartListenTask(() => KeepOnListenRecv(ny));
+                Base.VW.WHelper.SentByteLine(ns, "C4CS," + ny.Uid);
                 ny.Alive = true;
                 WakeTunnelInWaiting(ny.AUid, ny.Uid);
                 return ny.Uid;
             }
             else
             {
-                SentByteLine(ns, "C2CN,0");
+                Base.VW.WHelper.SentByteLine(ns, "C2CN,0");
                 return 0;
             }
         }
@@ -375,7 +374,7 @@ namespace PSD.PSDGamepkg.VW
                 string line = "";
                 try
                 {
-                    line = ReadByteLine(new NetworkStream(ny.Tunnel));
+                    line = Base.VW.WHelper.ReadByteLine(new NetworkStream(ny.Tunnel));
                     if (line == null) { ny.Tunnel.Close(); OnLoseConnection(ny.Uid); break; }
                 }
                 catch (IOException) { OnLoseConnection(ny.Uid); break; }
@@ -405,7 +404,7 @@ namespace PSD.PSDGamepkg.VW
                     if (neayers.ContainsKey(msg.To) && neayers[msg.To].Alive)
                     {
                         Log.Logger(0 + ">" + msg.To + ";" + msg.Msg);
-                        try { SentByteLine(new NetworkStream(neayers[msg.To].Tunnel), msg.Msg); }
+                        try { Base.VW.WHelper.SentByteLine(new NetworkStream(neayers[msg.To].Tunnel), msg.Msg); }
                         catch (IOException) { OnLoseConnection(msg.To); break; }
                     }
                     else
@@ -421,7 +420,7 @@ namespace PSD.PSDGamepkg.VW
             try
             {
                 if (netchers.ContainsKey(msg.To))
-                    SentByteLine(new NetworkStream(netchers[msg.To].Tunnel), msg.Msg);
+                    Base.VW.WHelper.SentByteLine(new NetworkStream(netchers[msg.To].Tunnel), msg.Msg);
                 return true;
             }
             catch (IOException)
@@ -460,13 +459,13 @@ namespace PSD.PSDGamepkg.VW
             // Awake the neayer
             if (neayers.ContainsKey(suid))
                 neayers[suid].Alive = true;
-            SentByteLine(cns, "C3RA," + auid);
+            Base.VW.WHelper.SentByteLine(cns, "C3RA," + auid);
             // Check whether all members has gathered.
             if (GetAliveNeayersCount() == playerCapacity)
             {
                 // OK, all gathered.
                 BCast("H0RK,0");
-                SentByteLine(cns, "C3RV,0");
+                Base.VW.WHelper.SentByteLine(cns, "C3RV,0");
                 IsHangedUp = false;
             }
         }
@@ -507,7 +506,7 @@ namespace PSD.PSDGamepkg.VW
         public void Report(string message)
         {
             if (cns != null && !IsLegecy)
-                SentByteLine(cns, message);
+                Base.VW.WHelper.SentByteLine(cns, message);
         }
         // terminate the room
         public void RoomGameEnd()
@@ -523,7 +522,7 @@ namespace PSD.PSDGamepkg.VW
         {
             TcpClient client = new TcpClient("127.0.0.1", Base.NetworkCode.HALL_PORT);
             NetworkStream tcpStream = client.GetStream();
-            SentByteLine(tcpStream, "C3HI," + roomNum);
+            Base.VW.WHelper.SentByteLine(tcpStream, "C3HI," + roomNum);
             cns = tcpStream;
         }
         [MethodImpl(MethodImplOptions.Synchronized)]
@@ -633,43 +632,5 @@ namespace PSD.PSDGamepkg.VW
             Environment.Exit(0);
         }
         #endregion Implementation
-
-        #region Stream Utils
-        // Read from Socket Tunnel
-        private static string ReadByteLine(NetworkStream ns)
-        {
-            if (ns != null)
-            {
-                byte[] byte2 = new byte[2];
-                try
-                {
-                    ns.Read(byte2, 0, 2);
-                    ushort value = (ushort)((byte2[0] << 8) + byte2[1]);
-                    byte[] actual = new byte[MSG_SIZE];
-                    if (value > MSG_SIZE)
-                        value = MSG_SIZE;
-                    ns.Read(actual, 0, value);
-                    return value > 0 ? Encoding.Unicode.GetString(actual, 0, value) : null;
-                }
-                catch (IOException) { return ""; }
-            }
-            else return "";
-        }
-        // Write into Socket Tunnel
-        private static void SentByteLine(NetworkStream ns, string value)
-        {
-            if (ns != null)
-            {
-                byte[] actual = Encoding.Unicode.GetBytes(value);
-                    int al = actual.Length;
-                byte[] buf = new byte[al + 2];
-                buf[0] = (byte)(al >> 8);
-                buf[1] = (byte)(al & 0xFF);
-                actual.CopyTo(buf, 2);
-                ns.Write(buf, 0, al + 2);
-                ns.Flush();
-            }
-        }
-        #endregion Stream Utils
     }
 }
