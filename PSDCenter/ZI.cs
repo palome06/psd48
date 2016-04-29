@@ -32,7 +32,7 @@ namespace PSD.PSDCenter
 
         private const int playerCapacity = 6;
         // token to terminate all running thread when closed
-        private CancellationTokenSource ctoken;
+        // private CancellationTokenSource ctoken;
 
         public void Run()
         {

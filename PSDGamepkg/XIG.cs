@@ -2718,19 +2718,19 @@ namespace PSD.PSDGamepkg
                 case "G0WN":
                     {
                         WI.RecvInfTermin();
-                        WI.Send("F0WN," + cmdrst, Board.Garden.Keys.ToArray());
+                        PushIntoLastUV(Board.Garden.Keys, "F0WN," + cmdrst);
+                        WI.BCast("F0WN," + cmdrst);
                         int count = Board.Garden.Keys.Count;
                         WI.RecvInfStart();
                         while (count > 0)
                         {
                             Base.VW.Msgs msg = WI.RecvInfRecvPending();
-                            if (msg.Msg.StartsWith("F0WN"))
+                            if (msg.Msg.StartsWith("F0WN") && MatchedPopFromLastUV(msg.From, "F0WN"))
                                 --count;
                             else
                                 WI.Send("F0WN," + cmdrst, 0, msg.From);
                         }
                         WI.RecvInfEnd();
-                        WI.Live("F0WN," + cmdrst);
                         if (WI is VW.Aywi)
                             (WI as VW.Aywi).RoomGameEnd();
                         lock (jumpTareget)

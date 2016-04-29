@@ -8,17 +8,23 @@ namespace PSD.Base.VW
 {
     public static class WHelper
     {
-        public const int MSG_SIZE = 4096;
+        // public const int MSG_SIZE = 4096;
         // Read from Socket Tunnel
         public static string ReadByteLine(NetworkStream ns)
         {
             try
             {
                 byte[] byteInt = new byte[sizeof(int)];
+                // read raw size from the remote stream
                 ns.Read(byteInt, 0, sizeof(int));
-                int clen = Math.Min(BitConverter.ToInt32(byteInt, 0), MSG_SIZE);
-                byte[] actual = new byte[MSG_SIZE];
+                // convert it into network form
+                int clenN2H = BitConverter.ToInt32(byteInt, 0);
+                // convert in into local host form
+                int clen = IPAddress.NetworkToHostOrder(clenN2H);
+                // read actual messge string
+                byte[] actual = new byte[clen];
                 ns.Read(actual, 0, clen);
+                // convert byte arrya to string
                 return clen > 0 ? Encoding.Unicode.GetString(actual, 0, clen) : null;
             }
             catch (IOException) { return ""; }
@@ -26,12 +32,19 @@ namespace PSD.Base.VW
         // Write into Socket Tunnel
         public static void SentByteLine(NetworkStream ns, string value)
         {
-            byte[] buf = new byte[MSG_SIZE];
-            byte[] actual = Encoding.Unicode.GetBytes(value);
-            int al = actual.Length;
-            BitConverter.GetBytes(al).CopyTo(buf, 0);
-            actual.CopyTo(buf, sizeof(int));
-            ns.Write(buf, 0, al + sizeof(int));
+            // copy string to a byte array
+            byte[] dataArray = Encoding.Unicode.GetBytes(value);
+            // get string length
+            int reqLen = dataArray.Length;
+            // convert string length value to network order
+            int reqLenH2N = IPAddress.HostToNetworkOrder(reqLen);
+            // get string length value into a byte array
+            byte[] reqLenArray = BitConverter.GetBytes(reqLenH2N);
+            // send the length value
+            ns.Write(reqLenArray, 0, sizeof(int));
+            // send the string array
+            ns.Write(dataArray, 0, reqLen);
+            // flush the stream
             ns.Flush();
         }
     }
