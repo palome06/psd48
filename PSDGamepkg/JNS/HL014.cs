@@ -627,8 +627,7 @@ namespace PSD.PSDGamepkg.JNS
         #region HL004 - YeFengling
         public bool JNH0401Valid(Player player, int type, string fuse)
         {
-            return XI.Board.IsAttendWar(player) && player.Tux.Count >= 2 &&
-                player.Team == XI.Board.Rounder.Team;
+            return player.Tux.Count >= 2 && player.Team == XI.Board.Rounder.Team;
         }
         public void JNH0401Action(Player player, int type, string fuse, string argst)
         {

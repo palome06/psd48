@@ -82,7 +82,7 @@ namespace PSD.PSDGamepkg.JNS
                 XI.RaiseGMessage("G0OY,0," + to);
 
             int hp = 2 * tuxCount;
-            if ((reason.StartsWith("JP") || reason.StartsWith("EV")) && hp > 3)
+            if ((reason.StartsWith("JP") || reason.StartsWith("SJ")) && hp > 3)
                 hp = 3;
             else if (reason.StartsWith("XBT6"))
             {

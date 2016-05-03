@@ -168,10 +168,13 @@ namespace PSD.PSDGamepkg
         }
         private void ResumeLostInputEvent()
         {
-            foreach (var pair in LastUVs)
+            if (LastUVs != null)
             {
-                if (pair.Value != null)
-                    WI.Send(pair.Value, 0, pair.Key);
+                foreach (var pair in LastUVs)
+                {
+                    if (pair.Value != null)
+                        WI.Send(pair.Value, 0, pair.Key);
+                }
             }
         }
 
