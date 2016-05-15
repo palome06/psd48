@@ -221,6 +221,10 @@ namespace PSD.ClientAo.VW
                 while (true)
                 {
                     string line = Base.VW.WHelper.ReadByteLine(stream);
+                    if (string.IsNullOrEmpty(line))
+                    {
+                        visi.ReportConnectionLost(); break;
+                    }
                     if (line.StartsWith("Y"))
                         msgTalk.Add(line);
                     else

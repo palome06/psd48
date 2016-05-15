@@ -375,7 +375,7 @@ namespace PSD.PSDGamepkg.VW
                 try
                 {
                     line = Base.VW.WHelper.ReadByteLine(new NetworkStream(ny.Tunnel));
-                    if (line == null) { ny.Tunnel.Close(); OnLoseConnection(ny.Uid); break; }
+                    if (string.IsNullOrEmpty(line)) { ny.Tunnel.Close(); OnLoseConnection(ny.Uid); break; }
                 }
                 catch (IOException) { OnLoseConnection(ny.Uid); break; }
                 // Always return, Keep on find survivors if game not end, otherwise...

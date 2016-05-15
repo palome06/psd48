@@ -103,13 +103,13 @@ namespace PSD.PSDCenter
                         Base.VW.WHelper.SentByteLine(ns, "C1RM," + reqRoom.Number + members);
                         Console.WriteLine("{0} is allocated with room {1}#.", user, reqRoom.Number);
                         location[uid] = reqRoom.Number;
-                        reqRoom.players.Add(uid);
                         foreach (ushort nyru in reqRoom.players)
                         {
                             Neayer nyr = neayers[nyru];
                             Base.VW.WHelper.SentByteLine(new NetworkStream(nyr.Tunnel),
                                 "C1NW," + uid + "," + ny.Name + "," + avatar);
                         }
+                        reqRoom.players.Add(uid);
                         if (reqRoom.players.Count >= playerCapacity)
                             reqRoom.Ready = true;
                     }
@@ -119,8 +119,11 @@ namespace PSD.PSDCenter
                     do
                     {
                         string reply = Base.VW.WHelper.ReadByteLine(ns);
-                        if (reply == null)
+                        if (string.IsNullOrEmpty(reply))
+                        {
                             socket.Close(); // close twice would lead to IOException
+                            SomeoneHasLeave(uid, reqRoom); break;
+                        }
                         else if (reply.StartsWith("C0TK,"))
                             HandleTalkInConnection(socket, reply.Substring("C0TK,".Length));
                         else if (reply.StartsWith("C1ST,"))
@@ -128,34 +131,7 @@ namespace PSD.PSDCenter
                     } while (true);
                     socket.Close();
                 }
-                catch (IOException)
-                {
-                    neayers[uid].Alive = false;
-                    Console.WriteLine("Player {0}#[{1}] left the hall.", uid, neayers[uid].Name);
-                    lock (reqRoom.players)
-                    {
-                        bool any = false;
-                        foreach (ushort ut in reqRoom.players)
-                        {
-                            Neayer nyr = neayers[ut];
-                            if (nyr.Alive)
-                            {
-                                any = true;
-                                if (IsTunnelAlive(nyr.Tunnel))
-                                    Base.VW.WHelper.SentByteLine(new NetworkStream(nyr.Tunnel), "C1LV," + uid);
-                            }
-                        }
-                        location.Remove(uid);
-                        if (!any)
-                        {
-                            int num = reqRoom.Number;
-                            rooms.Remove(reqRoom.Number);
-                            Console.WriteLine("Room {0}# is closed.", num);
-                        }
-                        reqRoom.players.Remove(uid);
-                        neayers.Remove(uid);
-                    }
-                }
+                catch (IOException) { SomeoneHasLeave(uid, reqRoom); }
             }
             else if (data.StartsWith("C0QI,"))
             {
@@ -295,6 +271,35 @@ namespace PSD.PSDCenter
                         }
                     }
                 }
+            }
+        }
+
+        private void SomeoneHasLeave(ushort uid, Room reqRoom)
+        {
+            neayers[uid].Alive = false;
+            Console.WriteLine("Player {0}#[{1}] left the hall.", uid, neayers[uid].Name);
+            lock (reqRoom.players)
+            {
+                bool any = false;
+                foreach (ushort ut in reqRoom.players)
+                {
+                    Neayer nyr = neayers[ut];
+                    if (nyr.Alive)
+                    {
+                        any = true;
+                        if (IsTunnelAlive(nyr.Tunnel))
+                            Base.VW.WHelper.SentByteLine(new NetworkStream(nyr.Tunnel), "C1LV," + uid);
+                    }
+                }
+                location.Remove(uid);
+                if (!any)
+                {
+                    int num = reqRoom.Number;
+                    rooms.Remove(reqRoom.Number);
+                    Console.WriteLine("Room {0}# is closed.", num);
+                }
+                reqRoom.players.Remove(uid);
+                neayers.Remove(uid);
             }
         }
 
