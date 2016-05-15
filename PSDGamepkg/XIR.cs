@@ -919,13 +919,16 @@ namespace PSD.PSDGamepkg
                 Monster mon1 = LibTuple.ML.Decode(NMBLib.OriginalMonster(Board.Monster1));
                 if (mon1 != null && Board.IsMonsterDebut)
                     mon1.Curtain();
-                if (Board.Mon1From == 0 && !Board.Garden.Values.Any(p => p.Pets.Contains(Board.Monster1)))
-                    RaiseGMessage(new Artiad.Abandon()
-                    {
-                        Zone = Artiad.CustomsHelper.ZoneType.IMPLICIT,
-                        Genre = Card.Genre.NMB,
-                        SingleUnit = new Artiad.CustomsUnit() { SingleCard = Board.Monster1 }
-                    }.ToMessage());
+                if (Board.Mon1From == 0)
+                {
+                    if (!Artiad.ContentRule.FindCardExistance(Board.Monster1, Card.Genre.NMB, this, false))
+                        RaiseGMessage(new Artiad.Abandon()
+                        {
+                            Zone = Artiad.CustomsHelper.ZoneType.IMPLICIT,
+                            Genre = Card.Genre.NMB,
+                            SingleUnit = new Artiad.CustomsUnit() { SingleCard = Board.Monster1 }
+                        }.ToMessage());
+                }
                 RaiseGMessage("G0WB," + Board.Monster1);
                 RaiseGMessage("G0YM,0,0,0");
 
@@ -934,7 +937,7 @@ namespace PSD.PSDGamepkg
             }
             if (Board.Monster2 != 0)
             { // monster 2 doesn't curtain, and mon2from always is 0
-                if (!Board.Garden.Values.Any(p => p.Pets.Contains(Board.Monster2)))
+                if (!Artiad.ContentRule.FindCardExistance(Board.Monster2, Card.Genre.NMB, this, false))
                     RaiseGMessage(new Artiad.Abandon()
                     {
                         Zone = Artiad.CustomsHelper.ZoneType.IMPLICIT,

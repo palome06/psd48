@@ -3441,29 +3441,8 @@ namespace PSD.PSDGamepkg.JNS
                 {
                     //ushort cardId = XI.LibTuple.TL.EncodeTuxCode("WQ02").DBSerial; = 48;
                     ushort cardId = (XI.LibTuple.TL.EncodeTuxCode("WQ02") as TuxEqiup).SingleEntry;
-                    if (XI.Board.TuxDises.Contains(cardId))
+                    if (Artiad.ContentRule.FindCardExistance(cardId, Card.Genre.Tux, XI, true))
                         return true;
-                    foreach (Player py in XI.Board.Garden.Values.Where(p => p.IsTared))
-                    {
-                        foreach (ushort eq in py.ListOutAllEquips())
-                        {
-                            if (eq == cardId)
-                                return true;
-                            Tux tux = XI.LibTuple.TL.DecodeTux(eq);
-                            if (tux.IsTuxEqiup())
-                            {
-                                TuxEqiup tue = tux as TuxEqiup;
-                                if (tue.IsLuggage())
-                                {
-                                    Luggage lg = tue as Luggage;
-                                    if (lg.Capacities.Contains("C" + cardId))
-                                        return true;
-                                }
-                            }
-                        }
-                        if (py.TokenExcl.Contains("C" + cardId))
-                            return true;
-                    }
                 }
             }
             return false;

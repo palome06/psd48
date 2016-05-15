@@ -98,6 +98,58 @@ namespace PSD.PSDGamepkg.Artiad
             Player py = xi.Board.Garden.Values.SingleOrDefault(p => p.ListOutAllEquips().Contains(ut));
             return py != null ? py.Uid : (ushort)0;
         }
+        public static bool FindCardExistance(ushort ut, Card.Genre genre, XI xi, bool tared)
+        {
+            if (genre == Card.Genre.Tux)
+            {
+                if (xi.Board.TuxDises.Contains(ut))
+                    return true;
+                foreach (Player py in xi.Board.Garden.Values.Where(p => !tared || p.IsTared))
+                {
+                    foreach (ushort eq in py.ListOutAllEquips())
+                    {
+                        if (eq == ut)
+                            return true;
+                        Tux tux = xi.LibTuple.TL.DecodeTux(eq);
+                        if (tux.IsTuxEqiup())
+                        {
+                            TuxEqiup tue = tux as TuxEqiup;
+                            if (tue.IsLuggage())
+                            {
+                                Luggage lg = tue as Luggage;
+                                if (lg.Capacities.Contains("C" + ut))
+                                    return true;
+                            }
+                        }
+                    }
+                    if (py.TokenExcl.Contains("C" + ut))
+                        return true;
+                }
+            }
+            else if (genre == Card.Genre.NMB)
+            {
+                if (xi.Board.MonDises.Contains(ut))
+                    return true;
+                foreach (Player py in xi.Board.Garden.Values.Where(p => !tared || p.IsTared))
+                {
+                    if (py.Pets.Contains(ut)) return true;
+                    if (py.Escue.Contains(ut)) return true;
+                    foreach (ushort eq in py.ListOutAllBaseEquip())
+                    {
+                        TuxEqiup tue = xi.LibTuple.TL.DecodeTux(eq) as TuxEqiup;
+                        if (tue.IsLuggage())
+                        {
+                            Luggage lg = tue as Luggage;
+                            if (lg.Capacities.Contains("M" + ut))
+                                return true;
+                        }
+                    }
+                    if (py.TokenExcl.Contains("M" + ut))
+                        return true;
+                }
+            }
+            return false;
+        }
 
         #region Sparse Base Rules
 
