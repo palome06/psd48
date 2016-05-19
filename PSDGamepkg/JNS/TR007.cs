@@ -3353,7 +3353,7 @@ namespace PSD.PSDGamepkg.JNS
         public bool JNT2702Valid(Player player, int type, string fuse)
         {
             if (type == 0 || type == 1) // ZB/OT
-                return player.GetBaseEquipCount() != player.RFM.GetInt("Cloth");
+                return player.GetBaseEquipCount() != player.ROM.GetInt("Cloth");
             else if (type == 2 || type == 3) // IS/OS
                 return IsMathISOS("JNT2702", player, fuse) && player.GetBaseEquipCount() > 0;
             else if (type == 4) // Give up
@@ -3369,20 +3369,20 @@ namespace PSD.PSDGamepkg.JNS
             if (type == 0 || type == 1)
             {
                 int now = player.GetBaseEquipCount();
-                int delta = now - player.RFM.GetInt("Cloth");
-                player.RFM.Set("Cloth", now);
+                int delta = now - player.ROM.GetInt("Cloth");
+                player.ROM.Set("Cloth", now);
                 player.TuxLimit += delta;
             }
             else if (type == 2)
             {
                 int now = player.GetBaseEquipCount();
-                player.RFM.Set("Cloth", now);
+                player.ROM.Set("Cloth", now);
                 player.TuxLimit += now;
             }
             else if (type == 3)
             {
                 player.TuxLimit -= player.GetBaseEquipCount();
-                player.RFM.Set("Cloth", null);
+                player.ROM.Set("Cloth", null);
             }
             else if (type == 4)
                 XI.RaiseGMessage("G0DH," + player.Uid + ",0,2");

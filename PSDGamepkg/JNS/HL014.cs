@@ -487,25 +487,26 @@ namespace PSD.PSDGamepkg.JNS
         }
         public void JNH0302Action(Player player, int type, string fuse, string argst)
         {
-            System.Action<Player> rotation = (p) =>
+            System.Action<Player, bool> rotation = (py, rst) =>
             {
-                int delta = p.STRh - p.DEXh;
+                int delta = py.STRh - py.DEXh;
+                if (rst) { delta = -delta; }
                 if (delta > 0)
                 {
-                    XI.RaiseGMessage("G0IX," + p.Uid + ",0," + delta);
-                    XI.RaiseGMessage("G0OA," + p.Uid + ",0," + delta);
+                    XI.RaiseGMessage("G0IX," + py.Uid + ",0," + delta);
+                    XI.RaiseGMessage("G0OA," + py.Uid + ",0," + delta);
                 }
                 else if (delta < 0)
                 {
-                    XI.RaiseGMessage("G0OX," + p.Uid + ",0," + (-delta));
-                    XI.RaiseGMessage("G0IA," + p.Uid + ",0," + (-delta));
+                    XI.RaiseGMessage("G0OX," + py.Uid + ",0," + (-delta));
+                    XI.RaiseGMessage("G0IA," + py.Uid + ",0," + (-delta));
                 }
             };
             if (type == 0)
             {
                 if (player.TokenTars.Count == 0)
                 {
-                    rotation(player);
+                    rotation(player, false);
                     // Reverse Ordered Player
                     XI.RaiseGMessage("G0HR,0,1");
                     string another = XI.AsyncInput(player.Uid, "#另一名,/T1" +
@@ -515,20 +516,20 @@ namespace PSD.PSDGamepkg.JNS
                         ushort to = ushort.Parse(another);
                         XI.RaiseGMessage("G0IJ," + player.Uid + ",2,1," + to);
                         Player py = XI.Board.Garden[to];
-                        rotation(py);
+                        rotation(py, false);
                     }
                     else
                         XI.RaiseGMessage("G0IJ," + player.Uid + ",2,1," + player.Uid);
                 }
                 else
                 {
-                    rotation(player);
+                    rotation(player, true);
                     // Reverse Ordered Player
                     XI.RaiseGMessage("G0HR,0,1");
                     if (player.SingleTokenTar != player.Uid)
                     {
                         Player py = XI.Board.Garden[player.SingleTokenTar];
-                        rotation(py);
+                        rotation(py, true);
                     }
                     XI.RaiseGMessage("G0OJ," + player.Uid + ",2,1," + player.SingleTokenTar);
                 }
@@ -541,7 +542,7 @@ namespace PSD.PSDGamepkg.JNS
                 XI.RaiseGMessage("G0IJ," + player.Uid + ",2,1," + player.Uid);
             }
             else if (type == 3) // still fold the one taking same change
-                rotation(XI.Board.Garden[player.SingleTokenTar]);
+                rotation(XI.Board.Garden[player.SingleTokenTar], false);
             else if (type == 4)
             {
                 Artiad.InnateChange ic = Artiad.InnateChange.Parse(fuse);
