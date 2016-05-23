@@ -211,13 +211,19 @@ namespace PSD.PSDGamepkg
                                 spsb += "J1(p" + string.Join("p", Board.PosSupporters) + ")";
                             else
                                 spsb = "/";
-                            string decision = MajorAsyncInput(Board.Rounder.Uid, spsm + spsb, sMember.Except(
-                                new ushort[] { Board.Rounder.Uid }), spsn + spsb, (advUt, advStr) =>
-                                {
-                                    WI.Send(rstage + "3," + advUt + "," + advStr, sMember);
-                                    WI.Send(rstage + "3," + advUt, ExceptStaff(sMember));
-                                    WI.Live(rstage + "3," + advUt);
-                                });
+                            string decision;
+                            if (Board.Rounder.IsMyOpt)
+                                decision = NFSAsyncInput(Board.Rounder.Uid, sMember, spsm + spsb);
+                            else
+                            {
+                                decision = MayorAsyncInput(Board.Rounder.Uid, spsm + spsb, sMember.Except(
+                                    new ushort[] { Board.Rounder.Uid }), spsn + spsb, (advUt, advStr) =>
+                                    {
+                                        WI.Send(rstage + "3," + advUt + "," + advStr, sMember);
+                                        WI.Send(rstage + "3," + advUt, ExceptStaff(sMember));
+                                        WI.Live(rstage + "3," + advUt);
+                                    });
+                            }
                             ushort sprUid = 0;
                             if (decision.StartsWith("T"))
                             {
@@ -292,13 +298,18 @@ namespace PSD.PSDGamepkg
                                     hnsb += "J1(p" + string.Join("p", Board.PosHinders) + ")";
                                 else
                                     hnsb = "/";
-                                decision = MajorAsyncInput(Board.Opponent.Uid, hnsm + hnsb, hMember.Except(
-                                    new ushort[] { Board.Opponent.Uid }), hnsn + hnsb, (advUt, advStr) =>
-                                    {
-                                        WI.Send(rstage + "3," + advUt + "," + advStr, hMember);
-                                        WI.Send(rstage + "3," + advUt, ExceptStaff(hMember));
-                                        WI.Live(rstage + "3," + advUt);
-                                    });
+                                if (Board.Opponent.IsMyOpt)
+                                    decision = NFSAsyncInput(Board.Opponent.Uid, hMember, hnsm + hnsb);
+                                else
+                                {
+                                    decision = MayorAsyncInput(Board.Opponent.Uid, hnsm + hnsb, hMember.Except(
+                                        new ushort[] { Board.Opponent.Uid }), hnsn + hnsb, (advUt, advStr) =>
+                                        {
+                                            WI.Send(rstage + "3," + advUt + "," + advStr, hMember);
+                                            WI.Send(rstage + "3," + advUt, ExceptStaff(hMember));
+                                            WI.Live(rstage + "3," + advUt);
+                                        });
+                                }
                                 ushort hndUid = 0;
                                 if (decision.StartsWith("T"))
                                 {

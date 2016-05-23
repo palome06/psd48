@@ -79,7 +79,7 @@ namespace PSD.ClientAo.Login
             int tick = -1;
             int nickIdx = nick.LastIndexOf('_');
             string nickPure;
-            if (int.TryParse(nick.Substring(nickIdx + 1), out tick))
+            if (nickIdx > 0 && int.TryParse(nick.Substring(nickIdx + 1), out tick))
                 nickPure = nick.Substring(0, nickIdx);
             else nickPure = nick;
             int ava = 0;

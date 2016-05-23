@@ -616,38 +616,38 @@ namespace PSD.PSDGamepkg
             }
             return result;
         }
-        // Major Query Case, $citizens contains who can vote for advice and its input format
+        // Mayor Query Case, $citizens contains who can vote for advice and its input format
         // $handleCitizenAdvices tell how to handle with advice.
-        // return the major's decision.
-        public string MajorAsyncInput(ushort major, string majorMsg,
+        // return the mayor's decision.
+        public string MayorAsyncInput(ushort mayor, string mayorMsg,
             IDictionary<ushort, string> citizens, Action<ushort, string> handleCitizenAdvices)
         {
-            string mV2 = "V2," + major + "," + majorMsg;
-            PushIntoLastUV(major, mV2);
-            WI.Send(mV2, 0, major);
+            string mV2 = "V2," + mayor + "," + mayorMsg;
+            PushIntoLastUV(mayor, mV2);
+            WI.Send(mV2, 0, mayor);
             foreach (var pair in citizens)
             {
-                mV2 = "V2," + major + "," + pair.Value;
+                mV2 = "V2," + mayor + "," + pair.Value;
                 PushIntoLastUV(pair.Key, mV2);
                 WI.Send(mV2, 0, pair.Key);
             }
-            List<ushort> invs = citizens.Keys.ToList(); invs.Add(major);
-            WI.Send("V3," + major, ExceptStaff(invs.ToArray()));
-            WI.Live("V3," + major);
+            List<ushort> invs = citizens.Keys.ToList(); invs.Add(mayor);
+            WI.Send("V3," + mayor, ExceptStaff(invs.ToArray()));
+            WI.Live("V3," + mayor);
             WI.RecvInfStart();
             while (true)
             {
                 Base.VW.Msgs msg = WI.RecvInfRecvPending();
                 if (string.IsNullOrEmpty(msg.Msg))
                     break;
-                if (msg.From == major)
+                if (msg.From == mayor)
                 {
                     if (MatchedPopFromLastUV(msg.From, msg.Msg))
                     {
                         string decision = msg.Msg.Substring("V4,".Length);
-                        if (MatchedPopFromLastUV(ExceptStaff(major), "V5,0"))
+                        if (MatchedPopFromLastUV(ExceptStaff(mayor), "V5,0"))
                         {
-                            WI.Send("V5,0", ExceptStaff(major));
+                            WI.Send("V5,0", ExceptStaff(mayor));
                             WI.Live("V5,0");
                         }
                         return decision;
@@ -661,14 +661,53 @@ namespace PSD.PSDGamepkg
             }
             return "";
         }
-        public string MajorAsyncInput(ushort major, string majorMsg, IEnumerable<ushort> citizens,
+        public string MayorAsyncInput(ushort mayor, string mayorMsg, IEnumerable<ushort> citizens,
             string citizenMsg, Action<ushort, string> handleCitizenAdvices)
         {
-        	IDictionary<ushort, string> citizenDict = new Dictionary<ushort, string>();
-        	foreach (ushort ut in citizens)
-        		citizenDict[ut] = citizenMsg;
-    		return MajorAsyncInput(major, majorMsg, citizenDict, handleCitizenAdvices);
+            IDictionary<ushort, string> citizenDict = new Dictionary<ushort, string>();
+            foreach (ushort ut in citizens)
+                citizenDict[ut] = citizenMsg;
+            return MayorAsyncInput(mayor, mayorMsg, citizenDict, handleCitizenAdvices);
         }
+        // Need For Speed Query Case, the first one in $citizens could make the decision.
+        // return the decision.
+        public string NFSAsyncInput(ushort mayor, IDictionary<ushort, string> citizens)
+        {
+            foreach (var pair in citizens)
+            {
+                string mV2 = "V2," + pair.Key + "," + pair.Value;
+                PushIntoLastUV(pair.Key, mV2);
+                WI.Send(mV2, 0, pair.Key);
+            }
+            WI.Send("V3," + mayor, ExceptStaff(citizens.Keys.ToArray()));
+            WI.Live("V3," + mayor);
+            WI.RecvInfStart();
+            while (true)
+            {
+                Base.VW.Msgs msg = WI.RecvInfRecvPending();
+                if (string.IsNullOrEmpty(msg.Msg))
+                    break;
+                if (MatchedPopFromLastUV(msg.From, msg.Msg))
+                {
+                    string decision = msg.Msg.Substring("V4,".Length);
+                    if (MatchedPopFromLastUV(ExceptStaff(msg.From), "V5,0"))
+                    {
+                        WI.Send("V5,0", ExceptStaff(msg.From));
+                        WI.Live("V5,0");
+                    }
+                    return decision;
+                }
+            }
+            return "";
+        }
+        public string NFSAsyncInput(ushort mayor, IEnumerable<ushort> citizens, string citizenMsg)
+        {
+            IDictionary<ushort, string> citizenDict = new Dictionary<ushort, string>();
+            foreach (ushort ut in citizens)
+                citizenDict[ut] = citizenMsg;
+            return NFSAsyncInput(mayor, citizenDict);
+        }
+
         private void HandleYMessage(string msg, ushort who)
         {
             if (msg.StartsWith("Y1,"))
@@ -692,6 +731,10 @@ namespace PSD.PSDGamepkg
                         Board.Garden[who].IsTPOpt = true;
                     else if (opt == 4)
                         Board.Garden[who].IsTPOpt = false;
+                    else if (opt == 5)
+                        Board.Garden[who].IsMyOpt = true;
+                    else if (opt == 6)
+                        Board.Garden[who].IsMyOpt = false;
                     WI.Send("Y4," + opt, 0, who);
                 }
             }

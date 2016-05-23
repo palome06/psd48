@@ -136,14 +136,24 @@
                 <TextBlock x:Name="skillExtText6" FontSize="10"
                            Text="{Binding Path=ExtSkill6, Converter={StaticResource sknmConv}}"/>
             </Button>
-            <StackPanel Orientation="Vertical" Canvas.Right="0" Canvas.Bottom="0">
-                <CheckBox FontFamily="Simsun" Checked="SkOptChecked"
-                          Unchecked="SkOptUnchecked" IsChecked="True">技能优化</CheckBox>
-                <CheckBox FontFamily="Simsun" Checked="TpOptChecked"
-                          Unchecked="TpOptUnchecked" IsChecked="True">卡牌优化</CheckBox>
-            </StackPanel>
-            <Button Background="{StaticResource smoothOpIcon}" Height="20" Width="20"
+            <Grid Canvas.Right="0" Canvas.Bottom="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+                <Button Background="{StaticResource smoothOpIcon}" Grid.Row="0" Grid.Column="0" Visibility="Collapsed"
                     Canvas.Left="137" Canvas.Bottom="0" Click="SmoothForceClick" ToolTip="润滑"/>
+                <CheckBox FontFamily="Simsun" Grid.Row="1" Grid.Column="1" ToolTip="是否不在一些发动可能性极低的时机依然询问技能发动。"
+                          Checked="SkOptChecked" Unchecked="SkOptUnchecked" IsChecked="True">技能优化</CheckBox>
+                <CheckBox FontFamily="Simsun" Grid.Row="0" Grid.Column="1"  ToolTip="是否在无该牌或发动时机不合适时仍然询问使用卡牌。"
+                          Checked="TpOptChecked" Unchecked="TpOptUnchecked" IsChecked="True">卡牌优化</CheckBox>
+                <CheckBox FontFamily="Simsun" Grid.Row="1" Grid.Column="0"  ToolTip="是否在选择阵容时给予队友决定权还是只给予队友建议权。"
+                          Checked="MyOptChecked" Unchecked="MyOptUnchecked" IsChecked="True">共决优化</CheckBox>
+            </Grid>
         </Canvas>
     </Grid>
 </UserControl>

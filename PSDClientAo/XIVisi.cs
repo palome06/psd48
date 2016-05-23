@@ -4560,6 +4560,10 @@ namespace PSD.ClientAo
                     VI.Cout(Uid, "切换为启用特殊牌优化模式。");
                 else if (opt == 4)
                     VI.Cout(Uid, "切换为禁用特殊牌优化模式。");
+                else if (opt == 5)
+                    VI.Cout(Uid, "切换为启用队友决定权优化模式。");
+                else if (opt == 6)
+                    VI.Cout(Uid, "切换为禁用队友决定权优化模式。");
             }
         }
         #endregion Y

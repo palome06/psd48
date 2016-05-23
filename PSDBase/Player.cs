@@ -173,6 +173,7 @@ namespace PSD.Base
         //public bool IsVip { set; get; }
         public bool IsTPOpt { set; get; }
         public bool IsSKOpt { set; get; }
+        public bool IsMyOpt { set; get; }
         #endregion PlayerOptions
 
         public Player(string name, ushort avatar, ushort uid)
@@ -217,6 +218,7 @@ namespace PSD.Base
 
             IsTPOpt = true;
             IsSKOpt = true;
+            IsMyOpt = true;
 
             IsReal = isReal;
             Skills = new HashSet<string>();

@@ -186,6 +186,18 @@ namespace PSD.ClientAo
             if (input != null)
                 input("@#4");
         }
+
+        private void MyOptChecked(object sender, RoutedEventArgs e)
+        {
+            if (input != null)
+                input("@#5");
+        }
+
+        private void MyOptUnchecked(object sender, RoutedEventArgs e)
+        {
+            if (input != null)
+                input("@#6");
+        }
         // Force An input of Cancel(0) in case of fatal struck.
         private void SmoothForceClick(object sender, RoutedEventArgs e)
         {
