@@ -30,6 +30,7 @@ namespace PSD.PSDGamepkg
 
         private void StartRoom(string[] args)
         {
+            VI = new VW.Djvi(6, Log);
             string netMode = GetValue(args, 1, "联机模式(SF:单机/NT:联网)").Trim().ToUpper();
             if (netMode != "SF") netMode = "NT";
             string sel = GetValue(args, 2, "选人模式(31:三选一/RM:随机/" +
@@ -161,7 +162,8 @@ namespace PSD.PSDGamepkg
         // invs: players' uid
         private void StartRoom(int room, int[] opts, ushort[] invs, string[] trainer)
         {
-            int port = Base.NetworkCode.HALL_PORT + room;
+            VI = new VW.Ajvi();
+            int port = NetworkCode.HALL_PORT + room;
             //string pipeName = "psd48pipe" + room;
             VW.Aywi aywi = new VW.Aywi(port, 6, Log, HandleYMessage);
             WI = aywi;
@@ -214,7 +216,8 @@ namespace PSD.PSDGamepkg
             Run(opts[2], opts[1] == Base.Rules.RuleCode.MODE_00);
         }
         
-        private void HandleHoldOfWatcher(ushort wuid) {
+        private void HandleHoldOfWatcher(ushort wuid)
+        {
             WI.Send("H0SM," + SelCode + "," + PCS.Level, 0, wuid);
             if (Board.RoundIN != "H0PR")
             {

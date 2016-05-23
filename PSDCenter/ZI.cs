@@ -193,7 +193,8 @@ namespace PSD.PSDCenter
                                 neayers[uid] = ny;
                                 substitudes[uid] = loser.Uid;
                                 Console.WriteLine("{0} has required for re-connection.", user);
-                                Base.VW.WHelper.SentByteLine(ns, "C4RM," + uid + "," + loser.Uid + "," + curRoomNo + "," + user + ",#CD0");
+                                Base.VW.WHelper.SentByteLine(ns, "C4RM," + uid + "," +
+                                    loser.Uid + "," + curRoomNo + "," + user + ",#CD0");
                                 foundOrg = true; break;
                                 // TODO: set the room code as "#CD0" for testing.
                                 
@@ -207,7 +208,10 @@ namespace PSD.PSDCenter
                     }
                 }
                 if (!foundOrg)
+                {
+                    Console.WriteLine("{0} is rejected when re-connecting.", user);
                     Base.VW.WHelper.SentByteLine(ns, "C4RM,0");
+                }
             }
             else if (data.StartsWith("C3HI,")) // hello from pkg to replace pipestream
             {

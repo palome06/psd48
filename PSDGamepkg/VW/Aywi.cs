@@ -428,8 +428,8 @@ namespace PSD.PSDGamepkg.VW
                 // On Leave of watcher, don't care.
                 Log.Logger("%%Watcher(" + msg.To + ") Leaves.");
                 netchers.Remove(msg.To);
-                if (GetAliveNeayersCount() == 0 && netchers.Count == 0)
-                    Environment.Exit(0);
+                //if (GetAliveNeayersCount() == 0 && netchers.Count == 0)
+                //    Environment.Exit(0);
                 return false;
             }
         }
@@ -437,6 +437,8 @@ namespace PSD.PSDGamepkg.VW
         private bool StartWaitingStage()
         {
             int timeout = 0;
+            if (GetAliveNeayersCount() == 0)
+                timeout = 1800;
             while ((GetAliveNeayersCount() < playerCapacity))
             {
                 Thread.Sleep(100);
@@ -483,8 +485,8 @@ namespace PSD.PSDGamepkg.VW
 
                     Report("C3LS," + neayers[who].AUid);
                 }
-                if (GetAliveNeayersCount() == 0 && netchers.Count == 0)
-                    Bye();
+                //if (GetAliveNeayersCount() == 0 && netchers.Count == 0)
+                //    Bye();
                 if (!IsLegecy && !IsHangedUp)
                 {
                     // Start Waiting thread and init news signal queue
@@ -499,8 +501,7 @@ namespace PSD.PSDGamepkg.VW
             if (vi != null) vi.Cout(0, "房间严重损坏，本场游戏终结.");
             Send("H0LT,0", neayers.Where(p => p.Value.Alive).Select(p => p.Key).ToArray());
             Live("H0LT,0");
-            if (GetAliveNeayersCount() == 0 && netchers.Count == 0)
-                Bye();
+            Bye();
         }
         // report to fake pipe
         public void Report(string message)
@@ -513,7 +514,7 @@ namespace PSD.PSDGamepkg.VW
         {
             Report("C3TM,0");
             IsLegecy = true;
-            Task.Factory.StartNew(() => Thread.Sleep(300 * 1000), ctoken.Token).ContinueWith((t) => Bye());
+            Task.Factory.StartNew(() => { Thread.Sleep(300 * 1000); Bye(); });
         }
         #endregion Communication and Tunnel
 

@@ -126,7 +126,6 @@ namespace PSD.PSDGamepkg
         public XI()
         {
             Log = new Log();
-            VI = new VW.Djvi(6, Log);
             LibTuple = new LibGroup();
             Board = new Board();
             Casting = null; SelCode = 0;
