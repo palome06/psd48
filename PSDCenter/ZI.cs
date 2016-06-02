@@ -331,10 +331,10 @@ namespace PSD.PSDCenter
         {
             try
             {
-                bool part1 = socket.Poll(1000, SelectMode.SelectRead);
-                bool part2 = (socket.Available == 0);
-                return !part1 && part2;
+                return socket.Available == 0 && !socket.Poll(1000, SelectMode.SelectRead);
             }
+            catch (SocketException) { return false; }
+            catch (ObjectDisposedException) { return false; }
             catch (IOException) { return false; }
         }
 

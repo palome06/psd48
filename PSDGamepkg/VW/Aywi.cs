@@ -514,7 +514,16 @@ namespace PSD.PSDGamepkg.VW
         {
             Report("C3TM,0");
             IsLegecy = true;
-            Task.Factory.StartNew(() => { Thread.Sleep(300 * 1000); Bye(); });
+            Task.Factory.StartNew(() =>
+            {
+                for (int i = 0; i < 10; ++i)
+                {
+                    Thread.Sleep(30 * 1000);
+                    if (vi != null)
+                        vi.Cout(0, "完赛的房间残留期权剩余：{0}", i);
+                }
+                Bye();
+            });
         }
         #endregion Communication and Tunnel
 
