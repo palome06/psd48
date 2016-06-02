@@ -4753,7 +4753,7 @@ namespace PSD.PSDGamepkg.JNS
                     return false;
                 int avatar = int.Parse(p);
                 Hero hero = XI.LibTuple.HL.InstanceHero(avatar);
-                return hero != null && Artiad.ContentRule.IsHeroJoinable(hero, XI);
+                return hero != null && Artiad.ContentRule.IsHeroCallable(hero, XI);
                 // check whether the hero is joinable or not (e.g. HL005)
             };
             return XI.Board.Garden.Values.Any(p => p.Team == player.Team && p.IsTared &&
@@ -4794,7 +4794,7 @@ namespace PSD.PSDGamepkg.JNS
                     return new List<Hero>();
                 int avatar = int.Parse(p);
                 Hero hero = XI.LibTuple.HL.InstanceHero(avatar);
-                return Artiad.ContentRule.GetJoinableHeroChain(hero, XI);
+                return Artiad.ContentRule.GetCallableHeroChain(hero, XI);
             };
             Func<string, bool> joinable = (p) => chain(p).Count > 0;
             if (prev == "")

@@ -55,28 +55,23 @@ namespace PSD.ClientZero.VW
                 }
                 else
                 {
-                    if (mInGame)
+                    line = line.Trim().ToUpper();
+                    if (line.StartsWith("/"))
                     {
-                        line = line.Trim().ToUpper();
-                        if (line.StartsWith("@#"))
-                        {
-                            lock (tkQueues)
-                                tkQueues.Enqueue("Y3," + line.Substring("@#".Length));
-                        }
-                        else if (line.StartsWith("/"))
-                        {
-                            lock (hpQueues)
-                                hpQueues.Enqueue(line.Substring("/".Length));
-                        }
-                        else
-                        {
-                            if (cinGate)
-                                lock (cvQueues)
-                                {
-                                    cvQueues.Enqueue(line);
-                                }
-                            ++shuzi;
-                        }
+                        lock (hpQueues)
+                            hpQueues.Enqueue(line.Substring("/".Length));
+                    }
+                    else if (mInGame && line.StartsWith("@#"))
+                    {
+                        lock (tkQueues)
+                            tkQueues.Enqueue("Y3," + line.Substring("@#".Length));
+                    }
+                    else if (mInGame)
+                    {
+                        if (cinGate)
+                            lock (cvQueues)
+                                cvQueues.Enqueue(line);
+                        ++shuzi;
                     }
                 }
             } while (line != null);

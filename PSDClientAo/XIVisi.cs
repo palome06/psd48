@@ -1784,7 +1784,7 @@ namespace PSD.ClientAo
                             VI.Cout(Uid, msgBase, zd.Eve(ravs));
                     }
                     else if (args[1].Equals("1"))
-                        VI.Cout(Uid, "{0}张牌被移离观看区.", args[2]);
+                        VI.Cout(Uid, "{0}张牌被移离观看区.", args[3]);
                     else if (args[1].Equals("2"))
                         VI.Cout(Uid, "观看区被清空.");
                     break;

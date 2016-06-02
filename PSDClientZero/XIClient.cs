@@ -1559,7 +1559,7 @@ namespace PSD.ClientZero
                             VI.Cout(Uid, msgBase, zd.Eve(ravs));
                     }
                     else if (args[1].Equals("1"))
-                        VI.Cout(Uid, "{0}张牌被移离观看区.", args[2]);
+                        VI.Cout(Uid, "{0}张牌被移离观看区.", args[3]);
                     else if (args[1].Equals("2"))
                         VI.Cout(Uid, "观看区被清空.");
                     break;
@@ -3674,7 +3674,9 @@ namespace PSD.ClientZero
                             .Where(p => p.SelectHero != 0)
                             .Select(p => p.Uid + ":" + zd.Hero(p.SelectHero))));
                         Z0F = new ZeroField(this);
-                        Z0M = new ZeroMe(this) { SelectHero = Z0D[Uid].SelectHero };
+                        Z0M = new ZeroMe(this);
+                        if (Uid > 0 && Uid < 1000) // not watcher
+                            Z0M.SelectHero = Z0D[Uid].SelectHero;
                     }
                     break;
                 case "H0DP":

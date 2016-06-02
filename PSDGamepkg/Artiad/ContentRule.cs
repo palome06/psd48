@@ -15,13 +15,21 @@ namespace PSD.PSDGamepkg.Artiad
             return npc.Skills.Contains("NJ01") &&
                 IsHeroJoinable(xi.LibTuple.HL.InstanceHero(npc.Hero), xi);
         }
-
+        // whether the hero can be called out directly
+        public static bool IsHeroCallable(Hero hero, XI xi)
+        {
+            return hero != null && xi.PCS.ListAllSeleableHeros().Contains(hero) &&
+                !IsHeroPhantomExist(hero, xi);
+        }
+        // whether the hero can join the team via NPC action
         public static bool IsHeroJoinable(Hero hero, XI xi)
         {
-            if (hero == null)
-                return false;
-            if (!xi.PCS.ListAllSeleableHeros().Contains(hero))
-                return false;
+            return hero != null && xi.PCS.ListAllJoinableHeroes().Contains(hero) &&
+                !IsHeroPhantomExist(hero, xi);
+        }
+        // Whether a hero's self/iso/banned exist in the field
+        private static bool IsHeroPhantomExist(Hero hero, XI xi)
+        {
             HeroLib hl = xi.LibTuple.HL;
             Board board = xi.Board;
             Hero hrc = hl.InstanceHero(hero.Archetype);
@@ -30,47 +38,47 @@ namespace PSD.PSDGamepkg.Artiad
                 if (py.SelectHero == 0)
                     continue;
                 if (py.SelectHero == hero.Avatar && py.IsAlive)
-                    return false;
+                    return true;
                 foreach (int isoId in hero.Isomorphic)
                 {
                     if (isoId == py.SelectHero && py.IsAlive) // hero=10202,isoId=10203,py.Sel=10203
-                        return false;
+                        return true;
                 }
                 Hero hpy = hl.InstanceHero(py.SelectHero);
                 if (hrc != null && hpy.Avatar == hrc.Avatar)
-                    return false;
+                    return true;
                 else if (hpy.Archetype == hero.Avatar)
-                    return false;
+                    return true;
             }
             foreach (int ib in board.BannedHero)
             {
                 if (ib == hero.Avatar)
-                    return false;
+                    return true;
                 foreach (int isoId in hero.Isomorphic)
                 {
                     if (isoId == ib)
-                        return false;
+                        return true;
                 }
                 Hero hpy = hl.InstanceHero(ib);
                 if (hrc != null && hpy.Avatar == hrc.Avatar)
-                    return false;
+                    return true;
                 else if (hpy.Archetype == hero.Avatar)
-                    return false;
+                    return true;
             }
-            return true;
+            return false;
         }
 
-        public static List<Hero> GetJoinableHeroChain(Hero hero, XI xi)
+        public static List<Hero> GetCallableHeroChain(Hero hero, XI xi)
         {
             List<Hero> heros = new List<Hero>();
             if (hero == null)
                 return heros;
-            if (IsHeroJoinable(hero, xi))
+            if (IsHeroCallable(hero, xi))
                 heros.Add(hero);
             foreach (int isoId in hero.Isomorphic)
             {
                 Hero iso = xi.LibTuple.HL.InstanceHero(isoId);
-                if (iso != null && IsHeroJoinable(iso, xi))
+                if (iso != null && IsHeroCallable(iso, xi))
                     heros.Add(iso);
             }
             return heros;
