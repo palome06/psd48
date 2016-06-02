@@ -2729,7 +2729,7 @@ namespace PSD.PSDGamepkg.JNS
             foreach (Player player in XI.Board.Garden.Values)
             {
                 if (player.IsAlive && !XI.Board.IsAttendWar(player))
-                    player.DrTuxDisabled = true;
+                    player.SetAllTuxDisabled("GSH2", true);
             }
             XI.Board.EscueBanned.Add("GSH2Debut");
         }
@@ -2738,7 +2738,7 @@ namespace PSD.PSDGamepkg.JNS
             foreach (Player player in XI.Board.Garden.Values)
             {
                 if (player.IsAlive && !XI.Board.IsAttendWar(player))
-                    player.DrTuxDisabled = false;
+                    player.SetAllTuxDisabled("GSH2", false);
             }
             XI.Board.EscueBanned.Remove("GSH2Debut");
         }
@@ -2786,19 +2786,19 @@ namespace PSD.PSDGamepkg.JNS
                         p.Role == Artiad.CoachingHelper.PType.HINDER)
                     {
                         if (p.Elder != 0 && p.Elder < 1000)
-                            XI.Board.Garden[p.Elder].DrTuxDisabled = true;
+                            XI.Board.Garden[p.Elder].SetAllTuxDisabled("GSH2", true);
                         if (p.Stepper != 0 && p.Stepper < 1000)
-                            XI.Board.Garden[p.Stepper].DrTuxDisabled = false;
+                            XI.Board.Garden[p.Stepper].SetAllTuxDisabled("GSH2", false);
                     }
                     else if (p.Role == Artiad.CoachingHelper.PType.EX_ENTER)
                     {
                         if (p.Stepper != 0 && p.Stepper < 1000)
-                            XI.Board.Garden[p.Stepper].DrTuxDisabled = false;
+                            XI.Board.Garden[p.Stepper].SetAllTuxDisabled("GSH2", false);
                     }
                     else if (p.Role == Artiad.CoachingHelper.PType.EX_EXIT)
                     {
                         if (p.Elder != 0 && p.Elder < 1000)
-                            XI.Board.Garden[p.Elder].DrTuxDisabled = true;
+                            XI.Board.Garden[p.Elder].SetAllTuxDisabled("GSH2", true);
                     }
                 });
             }

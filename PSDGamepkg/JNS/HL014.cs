@@ -221,7 +221,7 @@ namespace PSD.PSDGamepkg.JNS
             {
                 if (player.SingleTokenTar != 0)
                 {
-                    XI.Board.Garden[player.SingleTokenTar].DrTuxDisabled = false;
+                    XI.Board.Garden[player.SingleTokenTar].SetAllTuxDisabled("JNH0206", false);
                     XI.RaiseGMessage("G0OJ," + player.Uid + ",2,1," + player.SingleTokenTar);
                 }
             }
@@ -397,7 +397,7 @@ namespace PSD.PSDGamepkg.JNS
             else if (tux.Type == Tux.TuxType.ZP)
                 XI.RaiseGMessage("G0OA," + ut + ",1,2");
             else if (tux.Type == Tux.TuxType.TP)
-                tar.DrTuxDisabled = true;
+                tar.SetAllTuxDisabled("JNH0206", true);
             else if (tux.IsTuxEqiup())
                 XI.RaiseGMessage(new Artiad.EquipStandard()
                 {
@@ -678,7 +678,7 @@ namespace PSD.PSDGamepkg.JNS
             {
                 XI.RaiseGMessage("G0IJ," + player.Uid + ",3");
                 player.RAM.Set("+1tux", true);
-                player.RestZP = 0;
+                player.SetZPDisabled("JNH0402", true);
             }
             else if (type == 1 || type == 2)
             {
@@ -688,6 +688,7 @@ namespace PSD.PSDGamepkg.JNS
             else if (type == 3)
             {
                 XI.RaiseGMessage("G0OJ," + player.Uid + ",3");
+                player.SetZPDisabled("JNH0402", false);
                 if (player.RAM.GetBool("+1tux"))
                     XI.RaiseGMessage("G0DH," + player.Uid + ",0,1");
                 player.RAM.Set("+1tux", null);
@@ -2076,11 +2077,13 @@ namespace PSD.PSDGamepkg.JNS
             {
                 foreach (Tux tux in XI.LibTuple.TL.Firsts.Where(p => p.Type == Tux.TuxType.ZP))
                     player.AddToPrice(tux.Code, false, "JNH1401", '=', 1);
+                //player.SetZPDisabled("JNH1401", true);
             }
             else if (type == 1)
             {
                 foreach (Tux tux in XI.LibTuple.TL.Firsts.Where(p => p.Type == Tux.TuxType.ZP))
                     player.RemoveFromPrice(tux.Code, false, "JNH1401");
+                //player.SetZPDisabled("JNH1401", false);
             }
             else if (type == 2)
             {

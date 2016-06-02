@@ -78,7 +78,6 @@ namespace PSD.Base
 
         #region Status
         // cause reason (GL04) / mask code (3)
-        // TODO: consider to handle with non-equip, too.
         private IDictionary<string, int> cardDisabled;
 
         public bool IsAlive { set; get; }
@@ -97,10 +96,6 @@ namespace PSD.Base
         public bool PetDisabled { set; get; }
         // How many ZPs the player can still use
         public int RestZP { set; get; }
-        // Whether player is disabled to use ZP
-        public bool ZPDisabled { set; get; }
-        // Whether player can use tux from hand directly or not
-        public bool DrTuxDisabled { set; get; }
         // Extend Equip Mask, 0 = disabled, 1 = weapon, 2 = armor, 4 = trove
         public int ExMask { set; get; }
         // Lost Basic Equip Mask, 0 = full, 1 = weapon, 2 = armor, 4 = trove
@@ -108,7 +103,7 @@ namespace PSD.Base
         public List<ushort> Runes { private set; get; }
         public List<string> ExSpouses { private set; get; }
 
-        private void SetEquipDisabled(string tag, bool value, int maskCode)
+        private void SetTuxDisabledLevel(string tag, bool value, int maskCode)
         {
             if (value)
             {
@@ -127,21 +122,23 @@ namespace PSD.Base
                 }
             }
         }
-        private int GetEquipDisabled()
+        private int GetTuxDisabledLevel()
         {
-            int maskAll = 0;
-            foreach (int mask in cardDisabled.Values)
-                maskAll |= mask;
-            return maskAll;
+            return cardDisabled.Values.Aggregate(0, (acc, x) => acc | x);
         }
-        public bool EquipDisabled { get { return (GetEquipDisabled() & 7) != 0; } }
-        public void SetEquipDisabled(string tag, bool value) { SetEquipDisabled(tag, value, 7); }
-        public bool WeaponDisabled { get { return (GetEquipDisabled() & 1) != 0; } }
-        public void SetWeaponDisabled(string tag, bool value) { SetEquipDisabled(tag, value, 1); }
-        public bool ArmorDisabled { get { return (GetEquipDisabled() & 2) != 0; } }
-        public void SetArmorDisabled(string tag, bool value) { SetEquipDisabled(tag, value, 2); }
-        public bool TroveDisabled { get { return (GetEquipDisabled() & 4) != 0; } }
-        public void SetTroveDisabled(string tag, bool value) { SetEquipDisabled(tag, value, 4); }
+        public bool EquipDisabled { get { return (GetTuxDisabledLevel() & 7) != 0; } }
+        public void SetEquipDisabled(string tag, bool value) { SetTuxDisabledLevel(tag, value, 7); }
+        public bool WeaponDisabled { get { return (GetTuxDisabledLevel() & 1) != 0; } }
+        public void SetWeaponDisabled(string tag, bool value) { SetTuxDisabledLevel(tag, value, 1); }
+        public bool ArmorDisabled { get { return (GetTuxDisabledLevel() & 2) != 0; } }
+        public void SetArmorDisabled(string tag, bool value) { SetTuxDisabledLevel(tag, value, 2); }
+        public bool TroveDisabled { get { return (GetTuxDisabledLevel() & 4) != 0; } }
+        public void SetTroveDisabled(string tag, bool value) { SetTuxDisabledLevel(tag, value, 4); }
+
+        public bool ZPDisabled { get { return (GetTuxDisabledLevel() & 0x8) != 0; } }
+        public void SetZPDisabled(string tag, bool value) { SetTuxDisabledLevel(tag, value, 0x8); }
+        public bool AllTuxDisabled { get { return (GetTuxDisabledLevel() & 0xF) != 0; } }
+        public void SetAllTuxDisabled(string tag, bool value) { SetTuxDisabledLevel(tag, value, 0xF); }
         // whether the player is rounder and dead to cause continuous procedure
         public bool IsRan { set; get; }
         // whether the player is added and needed push back to pocket
@@ -210,11 +207,9 @@ namespace PSD.Base
             Immobilized = false;
             cardDisabled = new Dictionary<string, int>();
             PetDisabled = false;
-            ZPDisabled = false;
             IsAlive = false;
             Nineteen = false;
             Loved = false;
-            DrTuxDisabled = false;
 
             IsTPOpt = true;
             IsSKOpt = true;
@@ -245,8 +240,6 @@ namespace PSD.Base
 
         public void ResetRAM(int hero = 0)
         {
-            ZPDisabled = false;
-            DrTuxDisabled = false;
             Utils.Diva newDiva = new Utils.Diva();
             if (hero != 0)
             {

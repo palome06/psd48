@@ -3101,8 +3101,8 @@ namespace PSD.PSDGamepkg.JNS
             List<ushort> picks = Artiad.Procedure.CardHunter(XI, Card.Genre.Tux,
                 (p) => gayaTux.IsSameType(XI.LibTuple.TL.DecodeTux(p)), (a, r) => a.Count == 2, true);
             if (picks.Count > 0)
-            { 
-                XI.RaiseGMessage("G0HQ,2," + player.Uid + ",0,0," + picks[0] + "," + picks[1]);
+            {
+                XI.RaiseGMessage("G0HQ,2," + player.Uid + ",0,0," + string.Join(",", picks));
                 while (picks.Count > 0)
                 {
                     string select = XI.AsyncInput(player.Uid, "#分配的,/Q" + (picks.Count == 2 ? "1~2" : "1") +

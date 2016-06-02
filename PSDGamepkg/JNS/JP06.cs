@@ -452,10 +452,10 @@ namespace PSD.PSDGamepkg.JNS
             if (type == 0)
             {
                 Player r = XI.Board.Rounder;
-                return r != null && r.Uid == player.Uid && !r.DrTuxDisabled;
+                return r != null && r.Uid == player.Uid && !r.AllTuxDisabled;
             }
             else
-                return !player.DrTuxDisabled;
+                return !player.AllTuxDisabled;
         }
         public void TP02Action(Player player, int type, string fuse, string args)
         {
@@ -999,10 +999,10 @@ namespace PSD.PSDGamepkg.JNS
             if (type == 0)
             {
                 Player r = XI.Board.Rounder;
-                return r != null && r.Uid == player.Uid && !r.DrTuxDisabled;
+                return r != null && r.Uid == player.Uid && !r.AllTuxDisabled;
             }
             else
-                return !player.DrTuxDisabled;
+                return !player.AllTuxDisabled;
         }
         public void TPT2Vestige(Player player, int type, string fuse, ushort it)
         {
@@ -2974,11 +2974,11 @@ namespace PSD.PSDGamepkg.JNS
         #region Tux Util
         private bool GeneralTuxBribe(Player player)
         {
-            return !player.DrTuxDisabled;
+            return !player.AllTuxDisabled;
         }
         private bool GeneralZPBribe(Player player)
         {
-            return player.RestZP > 0 && !player.ZPDisabled && !player.DrTuxDisabled;
+            return player.RestZP > 0 && !player.ZPDisabled && !player.AllTuxDisabled;
         }
         private bool GeneralEquipmentBribe(Player player, Tux.TuxType tuxType)
         {

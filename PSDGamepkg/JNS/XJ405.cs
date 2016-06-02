@@ -3134,12 +3134,16 @@ namespace PSD.PSDGamepkg.JNS
                 ushort target = ushort.Parse(argst);
                 TargetPlayer(player.Uid, target);
                 XI.RaiseGMessage("G0IJ," + player.Uid + ",2,1," + target);
-                XI.Board.Garden[target].ZPDisabled = true;
+                XI.Board.Garden[target].SetZPDisabled("JNS0501", true);
             }
             else if (type == 1)
             {
                 if (player.SingleTokenTar != 0)
-                    XI.RaiseGMessage("G0OJ," + player.Uid + ",2,1," + player.SingleTokenTar);
+                {
+                    ushort target = player.SingleTokenTar;
+                    XI.RaiseGMessage("G0OJ," + player.Uid + ",2,1," + target);
+                    XI.Board.Garden[target].SetZPDisabled("JNS0501", false);
+                }
             }
         }
         public string JNS0501Input(Player player, int type, string fuse, string prev)
