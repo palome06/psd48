@@ -102,9 +102,10 @@ namespace PSD.PSDGamepkg.JNS
                 harms.RemoveAll(p => player.Uid == p.Who && p.N > 0 && p.Source != player.Uid && p.Element == FiveElement.A);
             else
                 XI.RaiseGMessage("G0DH," + player.Uid + ",0,1");
-            Cure(player, player, 1);
             if (harms.Count > 0)
-                XI.InnerGMessage(Artiad.Harm.ToMessage(harms), -149);
+                XI.InnerGMessage(Artiad.Harm.ToMessage(harms), -150);
+            if (player.IsAlive)
+                Cure(player, player, 1);
         }
         public bool SF05Valid(Player player, string fuse)
         {

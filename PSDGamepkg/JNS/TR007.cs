@@ -3205,7 +3205,7 @@ namespace PSD.PSDGamepkg.JNS
                 List<Artiad.Harm> harms = Artiad.Harm.Parse(fuse);
                 harms.RemoveAll(p => p.Who == tar && p.Element.Elem2Int() == elem);
                 if (harms.Count > 0)
-                    XI.InnerGMessage(Artiad.Harm.ToMessage(harms), -9);
+                    XI.InnerGMessage(Artiad.Harm.ToMessage(harms), -7);
             }
             else if (type == 1)
             {
