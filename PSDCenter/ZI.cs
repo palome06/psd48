@@ -273,6 +273,10 @@ namespace PSD.PSDCenter
                         {
                             Console.WriteLine("Room {0}# is recovered.", reqRoom.Number);
                         }
+                        //else if (line.StartsWith("C3BR")) // Bury, just notify the recycle of old rooms
+                        //{
+                        //    Console.WriteLine("Room " + reqRoom.Number + "# is recycled.");
+                        //}
                     }
                 }
             }

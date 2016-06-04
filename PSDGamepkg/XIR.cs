@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using Algo = PSD.Base.Utils.Algo;
 
 namespace PSD.PSDGamepkg
@@ -649,6 +650,22 @@ namespace PSD.PSDGamepkg
                 // 1. Don't accept reconnection request
                 // 2. Sleep for 5 minutes to terminate the room
                 // 3. Terminate the room if everyone leaves
+                if (WI is VW.Aywi)
+                    (WI as VW.Aywi).RoomGameEnd();
+                Task lastFive = Task.Factory.StartNew(() =>
+                {
+                    for (int i = 0; i < 10; ++i)
+                    {
+                        Thread.Sleep(6 * 1000);
+                        // Thread.Sleep(30 * 1000);
+                        VI.Cout(0, "完赛的房间残留期权剩余：{0}", i);
+                    }
+                });
+                lastFive.Wait();
+                VI.Cout(0, "天若有情天亦老，我为长着续一秒.");
+                if (WI is VW.Aywi)
+                    (WI as VW.Aywi).RoomBury();
+                Environment.Exit(0);
             }
         }
         private void RunQuadStage(string zero) { RunQuadMixedStage(zero, 0, null, null); }

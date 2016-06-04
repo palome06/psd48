@@ -437,12 +437,15 @@ namespace PSD.PSDGamepkg.VW
         private bool StartWaitingStage()
         {
             int timeout = 0;
-            if (GetAliveNeayersCount() == 0)
-                timeout = 1800;
             while ((GetAliveNeayersCount() < playerCapacity))
             {
+                if (GetAliveNeayersCount() == 0 && timeout < 1800)
+                {
+                    if (vi != null) vi.Cout(0, "Run for Escape - 全员离线中.");
+                    timeout = 1800;
+                }
                 Thread.Sleep(100);
-                ++timeout;
+                timeout += 10;
                 if (timeout == 3000 || timeout == 4200)
                 {
                     int left = (4800 - timeout) / 10;
@@ -514,16 +517,14 @@ namespace PSD.PSDGamepkg.VW
         {
             Report("C3TM,0");
             IsLegecy = true;
-            Task.Factory.StartNew(() =>
-            {
-                for (int i = 0; i < 10; ++i)
-                {
-                    Thread.Sleep(30 * 1000);
-                    if (vi != null)
-                        vi.Cout(0, "完赛的房间残留期权剩余：{0}", i);
-                }
-                Bye();
-            });
+        }
+        // bury the room
+        public void RoomBury()
+        {
+            // Report("C3BR,0");
+            ctoken.Cancel(); ctoken.Dispose();
+            listener.Stop();
+            inf0Msgs.Dispose(); infNMsgs.Dispose();
         }
         #endregion Communication and Tunnel
 

@@ -2731,8 +2731,6 @@ namespace PSD.PSDGamepkg
                                 WI.Send("F0WN," + cmdrst, 0, msg.From);
                         }
                         WI.RecvInfEnd();
-                        if (WI is VW.Aywi)
-                            (WI as VW.Aywi).RoomGameEnd();
                         lock (jumpTareget)
                         {
                             jumpTareget = "H0TM";
