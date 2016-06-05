@@ -137,8 +137,8 @@ namespace PSD.Base
 
         public bool ZPDisabled { get { return (GetTuxDisabledLevel() & 0x8) != 0; } }
         public void SetZPDisabled(string tag, bool value) { SetTuxDisabledLevel(tag, value, 0x8); }
-        public bool AllTuxDisabled { get { return (GetTuxDisabledLevel() & 0xF) != 0; } }
-        public void SetAllTuxDisabled(string tag, bool value) { SetTuxDisabledLevel(tag, value, 0xF); }
+        public bool AllTuxDisabled { get { return (GetTuxDisabledLevel() & 0x10) != 0; } }
+        public void SetAllTuxDisabled(string tag, bool value) { SetTuxDisabledLevel(tag, value, 0x10); }
         // whether the player is rounder and dead to cause continuous procedure
         public bool IsRan { set; get; }
         // whether the player is added and needed push back to pocket
