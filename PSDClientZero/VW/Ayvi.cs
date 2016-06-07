@@ -21,7 +21,7 @@ namespace PSD.ClientZero.VW
 
         private int shuzi = 0;
 
-        internal Base.Log Log { set; get; }
+        internal Base.ClLog Log { set; get; }
 
         public Ayvi(int count, bool record, bool msgLog)
         {

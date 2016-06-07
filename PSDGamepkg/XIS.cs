@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Net;
-using System.IO.Pipes;
 
 using PSD.Base;
 using PSD.Base.Rules;
@@ -16,8 +15,6 @@ namespace PSD.PSDGamepkg
     public partial class XI
     {
         private const int playerCapacity = 6;
-
-        private NamedPipeClientStream ps = null;
 
         private static string GetValue(string[] args, int index, string hint)
         {
@@ -33,6 +30,7 @@ namespace PSD.PSDGamepkg
 
         private void StartRoom(string[] args)
         {
+            VI = new VW.Djvi(6, Log);
             string netMode = GetValue(args, 1, "联机模式(SF:单机/NT:联网)").Trim().ToUpper();
             if (netMode != "SF") netMode = "NT";
             string sel = GetValue(args, 2, "选人模式(31:三选一/RM:随机/" +
@@ -130,7 +128,7 @@ namespace PSD.PSDGamepkg
                 else
                     Console.WriteLine("本机目前网卡异常，仅支持本地模式。");
 
-                VW.Aywi aywi = new VW.Aywi(port, Log, HandleYMessage);
+                VW.Aywi aywi = new VW.Aywi(port, 6, Log, HandleYMessage);
                 WI = aywi;
 
                 VI.Cout(0, "Wait for others players joining");
@@ -138,7 +136,6 @@ namespace PSD.PSDGamepkg
 
                 Log.Start();
                 aywi.TcpListenerStart();
-                aywi.OnReconstructRoom = ResumeLostInputEvent;
                 Board.Garden = aywi.Connect(VI, teamMode, null);
 
                 WI.RecvInfStart();
@@ -165,10 +162,10 @@ namespace PSD.PSDGamepkg
         // invs: players' uid
         private void StartRoom(int room, int[] opts, ushort[] invs, string[] trainer)
         {
-            int port = Base.NetworkCode.HALL_PORT + room;
-            string pipeName = "psd48pipe" + room;
-            //string piperName = "psd48piper" + room;
-            VW.Aywi aywi = new VW.Aywi(port, Log, HandleYMessage);
+            VI = new VW.Ajvi();
+            int port = NetworkCode.HALL_PORT + room;
+            //string pipeName = "psd48pipe" + room;
+            VW.Aywi aywi = new VW.Aywi(port, 6, Log, HandleYMessage);
             WI = aywi;
 
             bool teamMode = (opts[0] == RuleCode.HOPE_YES);
@@ -176,11 +173,14 @@ namespace PSD.PSDGamepkg
             VI.Init(); // VI inits here?
             Log.Start();
             aywi.TcpListenerStart();
-            aywi.OnReconstructRoom = ResumeLostInputEvent;
-            ps = new NamedPipeClientStream(pipeName);
-            ps.Connect();
-            aywi.Ps = ps;
-            WriteBytes(ps, "C3RD," + room);
+
+            aywi.StartFakePipe(room);
+
+            // TcpClient::::::
+            // ps = new NamedPipeClientStream(pipeName);
+            // ps.Connect();
+            // aywi.Ps = ps;
+            // WriteBytes(ps, "C3RD," + room);
             //sw = new StreamWriter(ps);
             //aywi.Sw = sw;
             //sw.Write("C3RD," + room);
@@ -216,7 +216,8 @@ namespace PSD.PSDGamepkg
             Run(opts[2], opts[1] == Base.Rules.RuleCode.MODE_00);
         }
         
-		private void HandleHoldOfWatcher(ushort wuid) {
+        private void HandleHoldOfWatcher(ushort wuid)
+        {
             WI.Send("H0SM," + SelCode + "," + PCS.Level, 0, wuid);
             if (Board.RoundIN != "H0PR")
             {
@@ -266,7 +267,7 @@ namespace PSD.PSDGamepkg
                     }
                 }
             }
-		}
+        }
         private void HandleHoldOfReconnect(ushort wuid)
         {
             VI.Cout(0, "{0}#玩家恢复连接。", wuid);
@@ -282,50 +283,30 @@ namespace PSD.PSDGamepkg
                 string h09p = Board.GenerateSerialFieldMessage();
                 WI.Send("H09P," + h09p + "," + string.Join(",",
                     CalculatePetsScore().Select(p => p.Key + "," + p.Value)), 0, wuid);
-                // TODO: remove the score field, calculate on the demand
                 WI.Send("H09F," + Board.GeneratePrivateMessage(wuid), 0, wuid);
             }
-            // TODO: needs private data (e.g. Tux) in such connection
         }
         private void HoldRoomTunnel()
         {
-            new Thread(() => XI.SafeExecute(() =>
+            Task.Factory.StartNew(() => XI.SafeExecute(() =>
             {
                 while (true)
                 {
-                    ushort wuid = (WI as VW.Aywi).CatchNewRoomComer();
-                    if (wuid > 1000) // Watcher case
-						HandleHoldOfWatcher(wuid);
-                    else // Reconnection case
-						HandleHoldOfReconnect(wuid);
+                    VW.Aywi aywi = WI as VW.Aywi;
+                    ushort wuid = aywi.CatchNewRoomComer();
+                    if (wuid > 1000)
+                    { // Watcher case
+                        HandleHoldOfWatcher(wuid);
+                    }
+                    else if (wuid != 0) // Reconnection case
+                    {
+                        HandleHoldOfReconnect(wuid);
+                        if (!aywi.IsHangedUp)
+                            ResumeLostInputEvent();
+                    }
+                    else break; // wuid = 0, termined
                 }
-            }, delegate(Exception e) { Log.Logger(e.ToString()); })).Start();
+            }, delegate(Exception e) { Log.Logger(e.ToString()); }));
         }
-        #region Stream Utils
-        private static string ReadBytes(NamedPipeClientStream ps)
-        {
-            if (ps != null)
-            {
-                byte[] byte2 = new byte[4096];
-                int readCount = ps.Read(byte2, 0, 4096);
-                if (readCount > 0)
-                    return Encoding.Unicode.GetString(byte2, 0, readCount);
-                else
-                    return "";
-            }
-            else
-                return "";
-        }
-        private static void WriteBytes(NamedPipeClientStream ps, string value)
-        {
-            if (ps != null)
-            {
-                byte[] byte2 = Encoding.Unicode.GetBytes(value);
-                if (byte2.Length > 0)
-                    ps.Write(byte2, 0, byte2.Length);
-                ps.Flush();
-            }
-        }
-        #endregion Stream Utils
     }
 }

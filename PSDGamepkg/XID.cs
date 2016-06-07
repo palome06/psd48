@@ -70,7 +70,7 @@ namespace PSD.PSDGamepkg
             //10501, 15005, 19016, 19007, 10603, 17029
             //10602, 17040, 10203, 10503, 17007, 10603,
             //10603, 10605, 17030, 17027, 17029, 17034,
-            17042, 10107, 10605, 10106, 10505, 17001
+            17024, 10107, 10605, 10106, 10504, 17001
         };
 
         private void DebugCondition()
@@ -280,11 +280,11 @@ namespace PSD.PSDGamepkg
             //RaiseGMessage("G0HQ,2,1,0,0,30,33");
             //RaiseGMessage("G0HQ,2,1,0,0,10,37,50");
             //RaiseGMessage("G0HQ,2,4,0,0,33,35");
-            RaiseGMessage("G0HQ,2,1,0,0,137,131");
+            RaiseGMessage("G0HQ,2,1,0,0,100");
             //RaiseGMessage("G0HQ,2,2,0,0,90,89");
             //RaiseGMessage("G0HQ,2,2,0,0,96,59");
             //RaiseGMessage("G0HQ,2,1,0,0,96,18");
-            RaiseGMessage("G0HQ,2,5,0,0,127");
+            //RaiseGMessage("G0HQ,2,5,0,0,127");
             //RaiseGMessage("G0HQ,2,1,0,0,71,37,95");
             //RaiseGMessage("G0HQ,2,1,0,0,50,51,110,111,109");
             //RaiseGMessage("G0HQ,2,1,0,0,55,73,95,1,5");
@@ -415,8 +415,8 @@ namespace PSD.PSDGamepkg
             //RaiseGMessage("G0IF,4,1,2,3,4");
             //RaiseGMessage("G0IF,1,2");
             //RaiseGMessage("G0IF,4,4");
-            foreach (Player player in Board.Garden.Values)
-               RaiseGMessage("G0HQ,2," + player.Uid + ",1,3");
+            //foreach (Player player in Board.Garden.Values)
+            //   RaiseGMessage("G0HQ,2," + player.Uid + ",1,3");
             //RaiseGMessage("G0HQ,2,4,1,8");
             //RaiseGMessage("G0HQ,2,6,1,2");
             //RaiseGMessage("G0HQ,2,1,1,1");

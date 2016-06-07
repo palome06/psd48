@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using Algo = PSD.Base.Utils.Algo;
 
 namespace PSD.PSDGamepkg
@@ -37,6 +38,7 @@ namespace PSD.PSDGamepkg
             MappingSksp(out sk02, out sk03, levelCode);
             mt01 = new JNS.MonsterCottage(this, VI).RegisterDelegates(LibTuple.ML);
 
+            Board.RoundIN = "H0ST";
             foreach (Player player in garden.Values)
             {
                 Base.Card.Hero hero = LibTuple.HL.InstanceHero(player.SelectHero);
@@ -49,7 +51,6 @@ namespace PSD.PSDGamepkg
                 if (hero.Skills.Count > 0)
                     RaiseGMessage("G0IS," + player.Uid + ",0," + string.Join(",", hero.Skills));
             }
-            Board.RoundIN = "H0ST";
             RunQuadStage("H0ST"); // Game start stage
             if (inDebug)
                 DebugCondition();
@@ -679,6 +680,23 @@ namespace PSD.PSDGamepkg
                         }
                         break;
                 }
+            }
+            if (rstage == "H0TM")
+            {
+                // 1. Don't accept reconnection request
+                // 2. Sleep for 5 minutes to terminate the room
+                // 3. Terminate the room if everyone leaves
+                if (WI is VW.Aywi)
+                    (WI as VW.Aywi).RoomGameEnd();
+                Task lastFive = Task.Factory.StartNew(() =>
+                {
+                    Thread.Sleep(5 * 60 * 1000);
+                }, TaskCreationOptions.LongRunning);
+                lastFive.Wait();
+                // VI.Cout(0, "天若有情天亦老，我为长者续一秒.");
+                if (WI is VW.Aywi)
+                    (WI as VW.Aywi).RoomBury();
+                Environment.Exit(0);
             }
         }
         private void RunQuadStage(string zero) { RunQuadMixedStage(zero, 0, null, null); }

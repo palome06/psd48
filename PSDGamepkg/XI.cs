@@ -126,7 +126,6 @@ namespace PSD.PSDGamepkg
         public XI()
         {
             Log = new Log();
-            VI = new VW.Djvi(6, Log);
             LibTuple = new LibGroup();
             Board = new Board();
             Casting = null; SelCode = 0;
@@ -2158,13 +2157,9 @@ namespace PSD.PSDGamepkg
         public static void SafeExecute(Action action, Action<Exception> handler)
         {
             try { action(); }
-            catch (Exception ex)
-            {
-                if (!(ex is System.Threading.ThreadAbortException))
-                {
-                    handler(ex); Console.WriteLine(ex.ToString());
-                }
-            }
+            catch (System.Threading.ThreadAbortException) { }
+            catch (System.OperationCanceledException) { throw; }
+            catch (Exception ex) { handler(ex); Console.WriteLine(ex.ToString()); }
         }
 
         public static void Main(string[] args)

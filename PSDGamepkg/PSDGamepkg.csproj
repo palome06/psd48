@@ -80,6 +80,7 @@
     <Compile Include="JNS\TR007.cs" />
     <Compile Include="JNS\XJ405.cs" />
     <Compile Include="Log.cs" />
+    <Compile Include="VW\Ajvi.cs" />
     <Compile Include="VW\Aywi.cs" />
     <Compile Include="VW\Neayer.cs" />
     <Compile Include="XID.cs" />

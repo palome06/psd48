@@ -92,7 +92,7 @@ namespace PSD.ClientAo
 
         private Queue<string> unhandledMsg;
 
-        public Log Log { private set; get; }
+        public ClLog Log { private set; get; }
         // Constructor 1#: Used for Hall setting
         public XIVisi(ushort uid, string name, int teamCode, Base.VW.IVI vi,
             string server, int room, bool record, bool logmsg, bool watcher, AoDisplay ad)
@@ -106,7 +106,7 @@ namespace PSD.ClientAo
 
             this.ad = ad;
             VW.Bywi bywi = new VW.Bywi(server, port, name, avatar, hopeTeam, uid, this);
-            Log = new Log(); Log.Start(auid, record, logmsg, 0);
+            Log = new ClLog(); Log.Start(auid, record, logmsg, 0);
             bywi.Log = Log;
             CommonConstruct();
             //if (VI is VW.Ayvi)
@@ -131,7 +131,7 @@ namespace PSD.ClientAo
             WI = bywi;
 
             this.ad = ad;
-            Log = new Log(); Log.Start(Uid, record, msglog, 0);
+            Log = new ClLog(); Log.Start(Uid, record, msglog, 0);
             CommonConstruct();
             if (!bywi.StartConnectDirect(watcher, VI))
             {
@@ -161,7 +161,7 @@ namespace PSD.ClientAo
             WI = eywi;
 
             this.ad = ad;
-            Log = new Log(); Log.Start(Uid, false, false, 0);
+            Log = new ClLog(); Log.Start(Uid, false, false, 0);
             CommonConstruct();
             this.auid = eywi.Uid;
             isReplay = true;
@@ -179,7 +179,7 @@ namespace PSD.ClientAo
             this.ad = ad;
 
             VW.Bywi bywi = new VW.Bywi(server, port, name, avatar, hopeTeam = 0, newUid, this);
-            Log = new Log(); Log.Start(auid, record, msglog, 0);
+            Log = new ClLog(); Log.Start(auid, record, msglog, 0);
             bywi.Log = Log; VI.Log = Log;
             WI = bywi;
             CommonConstruct();

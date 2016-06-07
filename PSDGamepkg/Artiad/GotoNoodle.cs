@@ -27,20 +27,21 @@ namespace PSD.PSDGamepkg.Artiad
             WI.RecvInfTermin();
             // Reset board information
             XI.Board.UseCardRound = 0;
-            new GotoFire() { Terminal = Terminal }.Telegraph(WI.BCast);
+            GotoFire gotoFire = new GotoFire() { Terminal = Terminal };
+            gotoFire.Telegraph((p) => XI.PushIntoLastUV(XI.Board.Garden.Keys, p));
+            gotoFire.Telegraph(WI.BCast);
             // count how many players have received the F0JM message
             int count = XI.Board.Garden.Keys.Count;
             WI.RecvInfStart();
             while (count > 0)
             {
                 Base.VW.Msgs msg = WI.RecvInfRecvPending();
-                if (msg.Msg.StartsWith("F0JM"))
+                if (msg.Msg.StartsWith("F0JM") && XI.MatchedPopFromLastUV(msg.From, "F0JM"))
                     --count;
                 else
-                    new GotoFire() { Terminal = Terminal }.Telegraph(p => WI.Send(p, 0, msg.From));
+                    gotoFire.Telegraph(p => WI.Send(p, 0, msg.From));
             }
             WI.RecvInfEnd();
-            new GotoFire() { Terminal = Terminal }.Telegraph(WI.Live);
             XI.BlockSetJumpTable(Terminal, "H0TM");
             System.Threading.Thread.CurrentThread.Abort();
         }

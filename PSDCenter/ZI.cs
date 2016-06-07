@@ -1,19 +1,22 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Net.Sockets;
 using System.Net;
 using System.Threading;
+using System.Threading.Tasks;
 using PSD.Base.Rules;
 using System.IO;
 using System.Diagnostics;
-using System.IO.Pipes;
 
 namespace PSD.PSDCenter
 {
     public class ZI
     {
+        public const int MSG_SIZE = 4096;
+
         private IDictionary<ushort, Neayer> neayers;
         private IDictionary<ushort, Netcher> netchers;
         private IDictionary<int, Room> rooms;
@@ -28,6 +31,8 @@ namespace PSD.PSDCenter
         private int port;
 
         private const int playerCapacity = 6;
+        // token to terminate all running thread when closed
+        // private CancellationTokenSource ctoken;
 
         public void Run()
         {
@@ -43,8 +48,9 @@ namespace PSD.PSDCenter
         public void RegisterSocket(Socket socket)
         {
             NetworkStream ns = new NetworkStream(socket);
-            string data = ReadByteLine(ns);
-            if (data.StartsWith("C0CO,"))
+            string data = Base.VW.WHelper.ReadByteLine(ns);
+            if (data == null) { return; }
+            else if (data.StartsWith("C0CO,"))
             {
                 string[] blocks = data.Split(',');
                 string user = blocks[1];
@@ -56,8 +62,8 @@ namespace PSD.PSDCenter
                 var ass = System.Reflection.Assembly.GetExecutingAssembly().GetName();
                 if (blocks.Length <= 6 || int.Parse(blocks[6]) != ass.Version.Revision)
                 { // version error, report exit
-                    Console.WriteLine(user + " has tried connecting with a wrong version.");
-                    SentByteLine(ns, "C0XV," + ass.Version.ToString());
+                    Console.WriteLine("{0} has tried connecting with a wrong version.", user);
+                    Base.VW.WHelper.SentByteLine(ns, "C0XV," + ass.Version.ToString());
                     socket.Close();
                     return;
                 }
@@ -79,8 +85,8 @@ namespace PSD.PSDCenter
                     Ip = (socket.RemoteEndPoint as IPEndPoint).Address.ToString() + "|"
                         + (socket.LocalEndPoint as IPEndPoint).Address.ToString()
                 };
-                Console.WriteLine(user + " has entered the hall.");
-                SentByteLine(ns, "C0CN," + uid);
+                Console.WriteLine("{0} has entered the hall.", user);
+                Base.VW.WHelper.SentByteLine(ns, "C0CN," + uid);
                 neayers.Add(uid, ny);
                 //Thread lThread = new Thread(delegate() { ListenToTalkSocket(socket); });
                 //lThread.Start();
@@ -94,165 +100,38 @@ namespace PSD.PSDCenter
                             neayers[p].Uid + "," + neayers[p].Name + "," + neayers[p].Avatar)));
                         if (members.Length > 0)
                             members = "," + members;
-                        SentByteLine(ns, "C1RM," + reqRoom.Number + members);
-                        Console.WriteLine(user + " is allocated with room " + reqRoom.Number + "#.");
+                        Base.VW.WHelper.SentByteLine(ns, "C1RM," + reqRoom.Number + members);
+                        Console.WriteLine("{0} is allocated with room {1}#.", user, reqRoom.Number);
                         location[uid] = reqRoom.Number;
-                        lock (reqRoom.players)
+                        foreach (ushort nyru in reqRoom.players)
                         {
-                            reqRoom.players.Add(uid);
-                            foreach (ushort nyru in reqRoom.players)
-                            {
-                                Neayer nyr = neayers[nyru];
-                                SentByteLine(new NetworkStream(nyr.Tunnel),
-                                    "C1NW," + uid + "," + ny.Name + "," + avatar);
-                            }
-                            if (reqRoom.players.Count >= playerCapacity)
-                                reqRoom.Ready = true;
+                            Neayer nyr = neayers[nyru];
+                            Base.VW.WHelper.SentByteLine(new NetworkStream(nyr.Tunnel),
+                                "C1NW," + uid + "," + ny.Name + "," + avatar);
                         }
+                        reqRoom.players.Add(uid);
+                        if (reqRoom.players.Count >= playerCapacity)
+                            reqRoom.Ready = true;
                     }
                     if (reqRoom.Ready)
+                        reqRoom.CreateRoomPkg();
+                    // Wait for C1ST message to terminate the socket
+                    do
                     {
-                        //if (lThread != null && lThread.IsAlive)
-                        //    lThread.Abort();
-                        string ag = "1 " + reqRoom.ConvToString() + " " +
-                            string.Join(",", reqRoom.players);
-                        string pg = "psd48pipe" + reqRoom.Number;
-                        //string pgr = "psd48piper" + reqRoom.Number;
-                        new Thread(delegate()
+                        string reply = Base.VW.WHelper.ReadByteLine(ns);
+                        if (string.IsNullOrEmpty(reply))
                         {
-                            Thread.Sleep(1000);
-                            Process.Start("PSDGamepkg.exe", ag);
-                        }).Start();
-                        reqRoom.Ps = new NamedPipeServerStream(pg, PipeDirection.InOut);
-                        var ps = reqRoom.Ps;
-                        ps.WaitForConnection();
-                        string line;
-                        while ((line = ReadBytes(ps)) != "")
-                        {
-                            if (line.StartsWith("C3RD"))
-                            {
-                                lock (reqRoom.players)
-                                {
-                                    foreach (ushort nyru in reqRoom.players)
-                                    {
-                                        Neayer nyr = neayers[nyru];
-                                        SentByteLine(new NetworkStream(nyr.Tunnel), "C1SA,0");
-                                    }
-                                }
-                            }
-                            else if (line.StartsWith("C3LV")) // Terminate unexpected
-                            {
-                                Console.WriteLine("Room " + reqRoom.Number + "# is forced closed.");
-                                rooms.Remove(reqRoom.Number);
-                                //reqRoom.Ps.Close(); // TODO: LV don't termintate directly
-                                break;
-                            }
-                            else if (line.StartsWith("C3TM")) // Terminate gracefully
-                            {
-                                Console.WriteLine("Room " + reqRoom.Number + "# terminates gracefully.");
-                                rooms.Remove(reqRoom.Number);
-                                // reqRoom.Ps.Close(); // TODO: LV don't termintate directly
-                                break;
-                            }
-                            else if (line.StartsWith("C3LS"))
-                            {
-                                ushort ut = ushort.Parse(line.Substring("C3LS,".Length));
-                                Console.WriteLine("Player " + ut + "#[" +
-                                    neayers[ut].Name + "] loses connection with Room " + reqRoom.Number + "#.");
-                                // $ut is the old uid
-                                if (rooms.ContainsKey(reqRoom.Number) && neayers.ContainsKey(ut))
-                                    losers.Add(neayers[ut]);
-                            }
-                            else if (line.StartsWith("C3RA"))
-                            {
-                                ushort ut = ushort.Parse(line.Substring("C3RA,".Length));
-                                if (substitudes.ContainsKey(ut))
-                                {
-                                    ushort subsut = substitudes[ut];
-                                    location[ut] = reqRoom.Number;
-                                    Neayer rny = neayers[subsut];
-                                    losers.Remove(rny);
-                                    if (neayers.ContainsKey(subsut))
-                                        neayers.Remove(subsut);
-                                    substitudes.Remove(ut);
-                                }
-                                Console.WriteLine("Player " + ut + "#[" +
-                                    neayers[ut].Name + "] has been back to Room " + reqRoom.Number + "#.");
-                            }
-                            else if (line.StartsWith("C3RV"))
-                            {
-                                Console.WriteLine("Room " + reqRoom.Number + "# is recovered.");
-                            }
+                            socket.Close(); // close twice would lead to IOException
+                            SomeoneHasLeave(uid, reqRoom); break;
                         }
-                    }
-                    else
-                    {
-                        // Wait for C1ST message to terminate the socket
-                        string reply = ReadByteLine(ns);
-                        while (true)
-                        {
-                            if (reply.StartsWith("C0TK,"))
-                                HandleTalkInConnection(socket, reply.Substring("C0TK,".Length));
-                            else if (reply.StartsWith("C1ST,"))
-                                break;
-                            reply = ReadByteLine(ns);
-                        }
-                    }
+                        else if (reply.StartsWith("C0TK,"))
+                            HandleTalkInConnection(socket, reply.Substring("C0TK,".Length));
+                        else if (reply.StartsWith("C1ST,"))
+                            break;
+                    } while (true);
                     socket.Close();
                 }
-                catch (IOException)
-                {
-                    neayers[uid].Alive = false;
-                    lock (reqRoom.players)
-                    {
-                        bool any = false;
-                        foreach (ushort ut in reqRoom.players)
-                        {
-                            Neayer nyr = neayers[ut];
-                            if (nyr.Alive)
-                            {
-                                any = true;
-                                if (IsTunnelAlive(nyr.Tunnel))
-                                    SentByteLine(new NetworkStream(nyr.Tunnel), "C1LV," + uid);
-                            }
-                        }
-                        location.Remove(uid);
-                        if (!any)
-                        {
-                            int num = reqRoom.Number;
-                            rooms.Remove(reqRoom.Number);
-                            Console.WriteLine("Room {0}# is closed.", num);
-                        }
-                        reqRoom.players.Remove(uid);
-                        neayers.Remove(uid);
-                    }
-                    //neayers.Remove(uid);
-                    //reqRoom.players.Remove(uid);
-                    //lock (reqRoom.players)
-                    //{
-                    //    if (reqRoom.players.Count > 0)
-                    //    {
-                    //        foreach (ushort ut in reqRoom.players)
-                    //        {
-                    //            Neayer nyr = neayers[ut];
-                    //            try
-                    //            {
-                    //                bool part1 = nyr.Tunnel.Poll(1000, SelectMode.SelectRead);
-                    //                bool part2 = (nyr.Tunnel.Available == 0);
-                    //                if (!part1 || !part2)
-                    //                    SentByteLine(new NetworkStream(nyr.Tunnel), "C1LV," + uid);
-                    //            }
-                    //            catch (IOException) { }
-                    //        }
-                    //    }
-                    //    else
-                    //    {
-                    //        int num = reqRoom.Number;
-                    //        rooms.Remove(reqRoom.Number);
-                    //        Console.WriteLine("Room {0}# is closed.", num);
-                    //    }
-                    //}
-                }
+                catch (IOException) { SomeoneHasLeave(uid, reqRoom); }
             }
             else if (data.StartsWith("C0QI,"))
             {
@@ -267,20 +146,20 @@ namespace PSD.PSDCenter
                         p => p.Value.Ready).Select(p => p.Key));
                     if (rms.Length > 0)
                         rms = "," + rms;
-                    SentByteLine(ns, "C0QJ," + uid + rms);
-                    string reply = ReadByteLine(ns);
+                    Base.VW.WHelper.SentByteLine(ns, "C0QJ," + uid + rms);
+                    string reply = Base.VW.WHelper.ReadByteLine(ns);
                     while (!reply.StartsWith("C0QS,"))
-                        reply = ReadByteLine(ns);
+                        reply = Base.VW.WHelper.ReadByteLine(ns);
 
                     int room = int.Parse(reply.Substring(reply.IndexOf(',') + 1));
                     if (rooms.ContainsKey(room) && rooms[room].Ready)
                     {
-                        SentByteLine(ns, "C1SQ," + room);
+                        Base.VW.WHelper.SentByteLine(ns, "C1SQ," + room);
                         netchers.Add(uid, ny);
                         rooms[room].watchers.Add(uid);
                     }
                     else
-                        SentByteLine(ns, "C1SQ,0");
+                        Base.VW.WHelper.SentByteLine(ns, "C1SQ,0");
                 }
                 catch (IOException)
                 {
@@ -289,7 +168,7 @@ namespace PSD.PSDCenter
             }
             else if (data.StartsWith("C4CO,")) // Reconnection Request
             {
-				bool foundOrg = false;
+                bool foundOrg = false;
                 string[] blocks = data.Split(',');
                 string user = blocks[1];
                 int wantedRoom = int.Parse(blocks[2]);
@@ -313,11 +192,12 @@ namespace PSD.PSDCenter
                                 };
                                 neayers[uid] = ny;
                                 substitudes[uid] = loser.Uid;
-                                Console.WriteLine(user + " has required for re-connection.");
-                                SentByteLine(ns, "C4RM," + uid + "," + loser.Uid + "," + curRoomNo + "," + user + ",#CD0");
-								foundOrg = true; break;
-								// TODO: set the room code as "#CD0" for testing.
-								
+                                Console.WriteLine("{0} has required for re-connection.", user);
+                                Base.VW.WHelper.SentByteLine(ns, "C4RM," + uid + "," +
+                                    loser.Uid + "," + curRoomNo + "," + user + ",#CD0");
+                                foundOrg = true; break;
+                                // TODO: set the room code as "#CD0" for testing.
+                                
                                 // Accept it as substitute
                                 //location[uid] = curRoomNo;
                                 //Room curRoom = rooms[curRoomNo];
@@ -327,8 +207,107 @@ namespace PSD.PSDCenter
                         }
                     }
                 }
-				if (!foundOrg)
-					SentByteLine(ns, "C4RM,0");
+                if (!foundOrg)
+                {
+                    Console.WriteLine("{0} is rejected when re-connecting.", user);
+                    Base.VW.WHelper.SentByteLine(ns, "C4RM,0");
+                }
+            }
+            else if (data.StartsWith("C3HI,")) // hello from pkg to replace pipestream
+            {
+                ushort roomNum = ushort.Parse(data.Substring("C3HI,".Length));
+                Room reqRoom = rooms[roomNum];
+                if (reqRoom != null)
+                {
+                    lock (reqRoom.players)
+                    {
+                        foreach (ushort nyru in reqRoom.players)
+                        {
+                            Neayer nyr = neayers[nyru];
+                            Base.VW.WHelper.SentByteLine(new NetworkStream(nyr.Tunnel), "C1SA,0");
+                        }
+                    }
+                    string line;
+                    while (!string.IsNullOrEmpty(line = Base.VW.WHelper.ReadByteLine(ns)))
+                    {
+                        if (line.StartsWith("C3LV")) // Terminate unexpected
+                        {
+                            Console.WriteLine("Room " + reqRoom.Number + "# is forced closed.");
+                            rooms.Remove(reqRoom.Number);
+                            //reqRoom.Ps.Close(); // TODO: LV don't termintate directly
+                            break;
+                        }
+                        else if (line.StartsWith("C3TM")) // Terminate gracefully
+                        {
+                            Console.WriteLine("Room " + reqRoom.Number + "# terminates gracefully.");
+                            rooms.Remove(reqRoom.Number);
+                            // reqRoom.Ps.Close(); // TODO: LV don't termintate directly
+                            break;
+                        }
+                        else if (line.StartsWith("C3LS"))
+                        {
+                            ushort ut = ushort.Parse(line.Substring("C3LS,".Length));
+                            Console.WriteLine("Player {0}#[{1}] loses connection with Room {2}#.",
+                                ut, neayers[ut].Name, reqRoom.Number);
+                            // $ut is the old uid
+                            if (rooms.ContainsKey(reqRoom.Number) && neayers.ContainsKey(ut))
+                                losers.Add(neayers[ut]);
+                        }
+                        else if (line.StartsWith("C3RA"))
+                        {
+                            ushort ut = ushort.Parse(line.Substring("C3RA,".Length));
+                            if (substitudes.ContainsKey(ut))
+                            {
+                                ushort subsut = substitudes[ut];
+                                location[ut] = reqRoom.Number;
+                                Neayer rny = neayers[subsut];
+                                losers.Remove(rny);
+                                if (neayers.ContainsKey(subsut))
+                                    neayers.Remove(subsut);
+                                substitudes.Remove(ut);
+                            }
+                            Console.WriteLine("Player {0}#[{1}] has been back to Room Room {2}#.",
+                                ut, neayers[ut].Name, reqRoom.Number);
+                        }
+                        else if (line.StartsWith("C3RV"))
+                        {
+                            Console.WriteLine("Room {0}# is recovered.", reqRoom.Number);
+                        }
+                        //else if (line.StartsWith("C3BR")) // Bury, just notify the recycle of old rooms
+                        //{
+                        //    Console.WriteLine("Room " + reqRoom.Number + "# is recycled.");
+                        //}
+                    }
+                }
+            }
+        }
+
+        private void SomeoneHasLeave(ushort uid, Room reqRoom)
+        {
+            neayers[uid].Alive = false;
+            Console.WriteLine("Player {0}#[{1}] left the hall.", uid, neayers[uid].Name);
+            lock (reqRoom.players)
+            {
+                bool any = false;
+                foreach (ushort ut in reqRoom.players)
+                {
+                    Neayer nyr = neayers[ut];
+                    if (nyr.Alive)
+                    {
+                        any = true;
+                        if (IsTunnelAlive(nyr.Tunnel))
+                            Base.VW.WHelper.SentByteLine(new NetworkStream(nyr.Tunnel), "C1LV," + uid);
+                    }
+                }
+                location.Remove(uid);
+                if (!any)
+                {
+                    int num = reqRoom.Number;
+                    rooms.Remove(reqRoom.Number);
+                    Console.WriteLine("Room {0}# is closed.", num);
+                }
+                reqRoom.players.Remove(uid);
+                neayers.Remove(uid);
             }
         }
 
@@ -345,7 +324,7 @@ namespace PSD.PSDCenter
                     lock (rm.players)
                     {
                         foreach (ushort py in rm.players)
-                            SentByteLine(new NetworkStream(neayers[py].Tunnel),
+                            Base.VW.WHelper.SentByteLine(new NetworkStream(neayers[py].Tunnel),
                                 "C1TK," + nick + "," + content);
                     }
                 }
@@ -356,10 +335,10 @@ namespace PSD.PSDCenter
         {
             try
             {
-                bool part1 = socket.Poll(1000, SelectMode.SelectRead);
-                bool part2 = (socket.Available == 0);
-                return !part1 && part2;
+                return socket.Available == 0 && !socket.Poll(1000, SelectMode.SelectRead);
             }
+            catch (SocketException) { return false; }
+            catch (ObjectDisposedException) { return false; }
             catch (IOException) { return false; }
         }
 
@@ -368,7 +347,7 @@ namespace PSD.PSDCenter
         //    try
         //    {
         //        NetworkStream ns = new NetworkStream(socket);
-        //        string data = ReadByteLine(ns);
+        //        string data = Base.VW.WHelper.ReadByteLine(ns);
         //        while (data != null && data.StartsWith("C0TK,"))
         //        {
         //            int i1 = "C0TK".Length;
@@ -384,12 +363,12 @@ namespace PSD.PSDCenter
         //                    lock (rm.players)
         //                    {
         //                        foreach (ushort py in rm.players)
-        //                            SentByteLine(new NetworkStream(neayers[py].Tunnel),
+        //                            Base.VW.WHelper.SentByteLine(new NetworkStream(neayers[py].Tunnel),
         //                                "C1TK," + nick + "," + content);
         //                    }
         //                }
         //            }
-        //            data = ReadByteLine(ns);
+        //            data = Base.VW.WHelper.ReadByteLine(ns);
         //        }
         //    }
         //    catch (IOException) { }
@@ -448,52 +427,11 @@ namespace PSD.PSDCenter
             substitudes = new Dictionary<ushort, ushort>();
             location = new Dictionary<ushort, int>();
         }
-
-        private static string ReadByteLine(NetworkStream ns)
-        {
-            byte[] byte2 = new byte[2];
-            ns.Read(byte2, 0, 2);
-            ushort value = (ushort)((byte2[0] << 8) + byte2[1]);
-            byte[] actual = new byte[2048];
-            if (value > 2048)
-                value = 2048;
-            ns.Read(actual, 0, value);
-            return Encoding.Unicode.GetString(actual, 0, value);
-        }
-
-        private static void SentByteLine(NetworkStream ns, string value)
-        {
-            byte[] actual = Encoding.Unicode.GetBytes(value);
-            int al = actual.Length;
-            byte[] buf = new byte[al + 2];
-            buf[0] = (byte)(al >> 8);
-            buf[1] = (byte)(al & 0xFF);
-            actual.CopyTo(buf, 2);
-            ns.Write(buf, 0, al + 2);
-            ns.Flush();
-        }
-
-        private static string ReadBytes(NamedPipeServerStream ps)
-        {
-            byte[] byte2 = new byte[4096];
-            int readCount = ps.Read(byte2, 0, 4096);
-            if (readCount > 0)
-                return Encoding.Unicode.GetString(byte2, 0, readCount);
-            else
-                return "";
-        }
-        private static void WriteBytes(NamedPipeServerStream ps, string value)
-        {
-            byte[] byte2 = Encoding.Unicode.GetBytes(value);
-            if (byte2.Length > 0)
-                ps.Write(byte2, 0, byte2.Length);
-            ps.Flush();
-        }
         #endregion Constructor and Utils
 
         public static void Main(string[] args)
         {
-            Console.WriteLine("PSDCenter スタート.");
+            Console.WriteLine("PSDCenter Launched.");
             IPAddress[] ipHost = Dns.GetHostAddresses(Dns.GetHostName());
             if (ipHost.Length > 0)
             {
@@ -512,6 +450,56 @@ namespace PSD.PSDCenter
             else
                 Console.WriteLine("本机目前网卡异常，仅支持本地模式。");
             new ZI(Base.NetworkCode.HALL_PORT).Run();
+            // Wangpengfei.Meme();
         }
+    }
+
+    class Wangpengfei
+    {
+        public static void Meme()
+        {
+            CancellationTokenSource cto = new CancellationTokenSource();
+            BlockingCollection<int> bc = new BlockingCollection<int>();
+            Task t1 = Task.Factory.StartNew(() => 
+            {
+                int count = 0;
+                while (true) {
+                    // try {
+                        Thread.Sleep(1000);
+                        bc.Add(count++, cto.Token);
+                    // } catch (Exception e) { Console.WriteLine(e.Message); break; }
+                }
+            }, cto.Token);
+            Task t2 = Task.Factory.StartNew(() => 
+            {
+                while (true) {
+                    // try {
+                        int ct = bc.Take(cto.Token);
+                        Console.WriteLine("Running at {0}#.", ct);
+                    // } catch (Exception e) { Console.WriteLine(e.Message); break; }
+                    //if (cto.Token.IsCancellationRequested) { break; }
+                }
+            }, cto.Token);
+            Task t3 = Task.Factory.StartNew(() =>
+            {
+                int i = 0, j = 4;
+                if (j / i == 1)
+                    ++j;
+            }, cto.Token);
+            Task.Factory.StartNew(() =>
+            {
+                Thread.Sleep(3500);
+                Console.WriteLine("3500!");
+                cto.Cancel();
+
+                Thread.Sleep(1500);
+                Console.WriteLine("t1={0},t2={1}", t1.IsCanceled, t2.IsCanceled);
+                Console.WriteLine("t1={0},t3={1}", t1.Exception == null ? "null" : t1.Exception.ToString(),
+                    t3.Exception == null ? "null" : string.Join("\n", t3.Exception.InnerExceptions));
+            });
+            Console.ReadLine();
+        }
+        // WI.BCast -> {}
+        // WI.Deliver(params[] content) -> {}
     }
 }

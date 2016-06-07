@@ -79,8 +79,8 @@
     <Compile Include="Card\NMB.cs" />
     <Compile Include="Card\Npc.cs" />
     <Compile Include="Card\Exsp.cs" />
+    <Compile Include="ClLog.cs" />
     <Compile Include="LibGroup.cs" />
-    <Compile Include="Log.cs" />
     <Compile Include="NCAction.cs" />
     <Compile Include="NetworkCode.cs" />
     <Compile Include="Operation.cs" />
@@ -96,6 +96,7 @@
     <Compile Include="Utils\Diva.cs" />
     <Compile Include="Utils\Rueue.cs" />
     <Compile Include="Utils\ReadonlySQL.cs" />
+    <Compile Include="VW\Helper.cs" />
     <Compile Include="VW\IVI.cs" />
     <Compile Include="VW\IWI.cs" />
   </ItemGroup>
