@@ -136,6 +136,8 @@ namespace PSD.ClientAo
 
         private void Init()
         {
+            ToolTipService.ShowDurationProperty.OverrideMetadata(
+                typeof(DependencyObject), new FrameworkPropertyMetadata(Int32.MaxValue));
             PlayerBoard[] allBoards = new PlayerBoard[]{ yfPlayerO1,yfPlayerO2,
                 yfPlayerO3, yfPlayerR1,yfPlayerR2,yfPlayerR3};
 

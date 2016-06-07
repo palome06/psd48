@@ -2653,7 +2653,7 @@ namespace PSD.PSDGamepkg.JNS
             if (type == 0 && player.Tux.Count > 0)
             {
                 return XI.Board.Garden.Values.Any(p => p.IsTared && p.Uid != player.Uid &&
-                    player.RFM.GetOrSetDiva("@15002").GetOrSetUshortArray("Dreamed").Contains(p.Uid));
+                    !player.RFM.GetOrSetDiva("@15002").GetOrSetUshortArray("Dreamed").Contains(p.Uid));
             }
             else if (type == 1 || type == 2)
             {
