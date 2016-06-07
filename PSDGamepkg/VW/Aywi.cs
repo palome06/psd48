@@ -445,7 +445,7 @@ namespace PSD.PSDGamepkg.VW
                     timeout = 1800;
                 }
                 Thread.Sleep(100);
-                timeout += 10;
+                ++timeout;
                 if (timeout == 3000 || timeout == 4200)
                 {
                     int left = (4800 - timeout) / 10;
@@ -504,6 +504,7 @@ namespace PSD.PSDGamepkg.VW
             if (vi != null) vi.Cout(0, "房间严重损坏，本场游戏终结.");
             Send("H0LT,0", neayers.Where(p => p.Value.Alive).Select(p => p.Key).ToArray());
             Live("H0LT,0");
+            Thread.Sleep(1000); // Wait for sending out H0LT before Bye()
             Bye();
         }
         // report to fake pipe

@@ -654,15 +654,10 @@ namespace PSD.PSDGamepkg
                     (WI as VW.Aywi).RoomGameEnd();
                 Task lastFive = Task.Factory.StartNew(() =>
                 {
-                    for (int i = 0; i < 10; ++i)
-                    {
-                        Thread.Sleep(6 * 1000);
-                        // Thread.Sleep(30 * 1000);
-                        VI.Cout(0, "完赛的房间残留期权剩余：{0}", i);
-                    }
-                });
+                    Thread.Sleep(5 * 60 * 1000);
+                }, TaskCreationOptions.LongRunning);
                 lastFive.Wait();
-                VI.Cout(0, "天若有情天亦老，我为长着续一秒.");
+                // VI.Cout(0, "天若有情天亦老，我为长者续一秒.");
                 if (WI is VW.Aywi)
                     (WI as VW.Aywi).RoomBury();
                 Environment.Exit(0);
