@@ -38,12 +38,17 @@ namespace PSDDorm
             Tuple = new LibGroup();
             dict = new Dictionary<int, string>();
             var ass = System.Reflection.Assembly.GetExecutingAssembly().GetName();
-            Title = ass.Name + " v" + ass.Version + " 录像转换器";
+            Title = ass.Name + " v" + ass.Version + " 录像控制台";
+            CurrentMode = RunMode.NORMAL;
 
             if (File.Exists("PSDDorm.AKB48Show!"))
-                convCheckBox.Visibility = Visibility.Visible;
+            {
+                TransTab.Visibility = Visibility.Visible;
+                mainAngleCheckBox.Checked += (s, e) => mainAngleNumber.IsEnabled = true;
+                mainAngleCheckBox.Unchecked += (s, e) => mainAngleNumber.IsEnabled = false;
+            }
             else
-                convCheckBox.Visibility = Visibility.Collapsed;
+                TransTab.Visibility = Visibility.Collapsed;
         }
 
         private void FileDrop(object sender, DragEventArgs e)
@@ -53,7 +58,8 @@ namespace PSDDorm
 
             // Obtain the dragged file
             string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
-            if (files == null)
+            ListBox box = sender as ListBox;
+            if (files == null || box == null)
                 return;
 
             if (files.Length > 0 &&
@@ -73,16 +79,16 @@ namespace PSDDorm
                     if (e.Effects == DragDropEffects.Copy && destFile.EndsWith(".psg"))
                     {
                         string title = GetTitleName(destFile);
-                        orgListBox.Items.Add(new RoundItem()
+                        box.Items.Add(new RoundItem()
                         {
                             Name = title,
                             Path = destFile
                         });
                         anySuccess = true;
                     }
-                    else if (e.Effects == DragDropEffects.Copy && convCheckBox.IsChecked == true && destFile.EndsWith(".log"))
+                    else if (e.Effects == DragDropEffects.Copy && CurrentMode == RunMode.TRANSLATE && destFile.EndsWith(".log"))
                     {
-                        orgListBox.Items.Add(new RoundItem()
+                        box.Items.Add(new RoundItem()
                         {
                             Name = "log+" + System.IO.Path.GetFileName(file),
                             Path = destFile
@@ -114,6 +120,7 @@ namespace PSDDorm
             List<string> friends = new List<string>();
             List<string> enemies = new List<string>();
             IEnumerator<string> iter = File.ReadLines(fileName).GetEnumerator();
+            bool encrypted = true;
             if (iter.MoveNext())
             {
                 string firstLine = iter.Current;
@@ -122,12 +129,15 @@ namespace PSDDorm
                     version = ushort.Parse(firsts[0].Substring("VERSION=".Length));
                 if (firsts[1].StartsWith("UID="))
                     me = ushort.Parse(firsts[1].Substring("UID=".Length));
+                if (firsts.Length > 2 && firsts[2] == "ENCRY=0")
+                    encrypted = false;
             }
             while (iter.MoveNext())
             {
                 string line = iter.Current;
-                line = PSD.Base.LogES.DESDecrypt(line, "AKB48Show!",
-                            (version * version).ToString());
+                if (encrypted)
+                    line = PSD.Base.LogES.DESDecrypt(line, "AKB48Show!",
+                                (version * version).ToString());
                 string[] firsts = line.Split(',');
 
                 if (line.StartsWith("<H0SD"))
@@ -189,11 +199,45 @@ namespace PSDDorm
                 result, string.Join("", enemies), filePureName);
         }
 
-        private void Encrypt(string path, string name)
+        private int GetTrueAUid(string fileName, int angel)
+        {
+            if (angel == 0)
+                return 0;
+            int version = 0;
+            IEnumerator<string> iter = File.ReadLines(fileName).GetEnumerator();
+            if (iter.MoveNext())
+            {
+                string firstLine = iter.Current;
+                string[] firsts = firstLine.Split(' ');
+                if (firsts[0].StartsWith("VERSION="))
+                    version = ushort.Parse(firsts[0].Substring("VERSION=".Length));
+            }
+            while (iter.MoveNext())
+            {
+                string line = iter.Current;
+                line = PSD.Base.LogES.DESDecrypt(line, "AKB48Show!",
+                            (version * version).ToString());
+                string[] firsts = line.Split(',');
+
+                if (line.StartsWith("0>" + angel + ":H0SD") || line.StartsWith("0>" + angel + ";H0SD"))
+                {
+                    for (int i = 1; i < firsts.Length; i += 3)
+                    {
+                        ushort seat = ushort.Parse(firsts[i]);
+                        ushort joinid = ushort.Parse(firsts[i + 1]);
+                        if (seat == angel)
+                            return joinid;
+                    }
+                }
+            }
+            return 0;
+        }
+
+        private void Encrypt(string path, string name, int angel, int angelUid)
         {
             if (!Directory.Exists("./mosh"))
                 Directory.CreateDirectory("./mosh");
-            string lName = "./mosh/" + name + ".txt";
+            string lName = "./mosh/" + name + (angelUid != 0 ? ("(" + angelUid + ").psg") : ".txt");
 
             var iter = System.IO.File.ReadLines(path).GetEnumerator();
             int version = 0, uid = 0; bool issv = false;
@@ -210,7 +254,9 @@ namespace PSDDorm
             }
             using (System.IO.StreamWriter sw = new System.IO.StreamWriter(lName, true))
             {
-                if (issv)
+                if (issv && angelUid != 0)
+                    sw.WriteLine("VERSION={0} UID={1} ENCRY=0", version, angelUid);
+                else if (issv)
                     sw.WriteLine("VERSION={0} ISSV=1", version);
                 else
                     sw.WriteLine("VERSION={0} UID={1}", version, uid);
@@ -223,7 +269,13 @@ namespace PSDDorm
                         line = PSD.Base.LogES.DESDecrypt(line, "AKB48Show!",
                             (version * version).ToString());
                     }
-                    sw.WriteLine(line);
+                    if (issv && angelUid != 0)
+                    {
+                        if (line.StartsWith("0>" + angel + ":") || line.StartsWith("0>" + angel + ";"))
+                            sw.WriteLine("<" + line.Substring("0>?:".Length));
+                    }
+                    else
+                        sw.WriteLine(line);
                 }
             };
         }
@@ -236,6 +288,7 @@ namespace PSDDorm
 
             IEnumerator<string> iter = File.ReadLines(path).GetEnumerator();
             int version = 0; ushort playerId = 0;
+            bool encrypted = true;
             if (iter.MoveNext())
             {
                 string firstLine = iter.Current;
@@ -244,6 +297,8 @@ namespace PSDDorm
                     version = ushort.Parse(firsts[0].Substring("VERSION=".Length));
                 if (firsts[1].StartsWith("UID="))
                     playerId = ushort.Parse(firsts[1].Substring("UID=".Length));
+                if (firsts.Length > 2 && firsts[2] == "ENCRY=0")
+                    encrypted = false;
             }
             using (StreamWriter sw = new StreamWriter(lName, true))
             {
@@ -252,8 +307,9 @@ namespace PSDDorm
                 while (iter.MoveNext())
                 {
                     string line = iter.Current;
-                    line = PSD.Base.LogES.DESDecrypt(line, "AKB48Show!",
-                                (version * version).ToString());
+                    if (encrypted)
+                        line = PSD.Base.LogES.DESDecrypt(line, "AKB48Show!",
+                                    (version * version).ToString());
 
                     if (line.StartsWith("<H0SD"))
                     {
@@ -271,39 +327,60 @@ namespace PSDDorm
 
         private void ButtonOKClick(object sender, RoutedEventArgs e)
         {
-            if (orgListBox.SelectedItems.Count > 0)
+            if (CurrentMode == RunMode.NORMAL)
             {
-                if (convCheckBox.IsChecked != true)
+                foreach (var orgItem in orgListBox.SelectedItems)
                 {
-                    foreach (var orgItem in orgListBox.SelectedItems)
-                    {
-                        RoundItem item = orgItem as RoundItem;
-                        if (item != null)
-                            Save(item.Path, item.Name);
-                    }
-                    MessageBox.Show("录像转化完毕。");
+                    RoundItem item = orgItem as RoundItem;
+                    if (item != null)
+                        Save(item.Path, item.Name);
                 }
-                else
+                MessageBox.Show("录像转化完毕。");
+            }
+            else if (CurrentMode == RunMode.TRANSLATE)
+            {
+                int angel = 0;
+                if (mainAngleCheckBox.IsChecked == true)
+                    int.TryParse(mainAngleNumber.Text, out angel);
+                foreach (var orgItem in transListBox.SelectedItems)
                 {
-                    foreach (var orgItem in orgListBox.SelectedItems)
-                    {
-                        RoundItem item = orgItem as RoundItem;
-                        if (item != null)
-                            Encrypt(item.Path, item.Name);
-                    }
-                    MessageBox.Show("录像翻译完毕。");
+                    RoundItem item = orgItem as RoundItem;
+                    if (item != null)
+                        Encrypt(item.Path, item.Name, angel, GetTrueAUid(item.Path, angel));
                 }
+                MessageBox.Show("录像翻译完毕。");
             }
         }
 
         private void ButtonResetClick(object sender, RoutedEventArgs e)
         {
-            orgListBox.UnselectAll();
+            if (CurrentMode == RunMode.NORMAL)
+                orgListBox.UnselectAll();
+            if (CurrentMode == RunMode.TRANSLATE)
+                transListBox.UnselectAll();
         }
 
         private void ButtonAllClick(object sender, RoutedEventArgs e)
         {
-            orgListBox.SelectAll();
+            if (CurrentMode == RunMode.NORMAL)
+                orgListBox.SelectAll();
+            if (CurrentMode == RunMode.TRANSLATE)
+                transListBox.SelectAll();
+        }
+
+        public enum RunMode { NORMAL, TRANSLATE };
+
+        private RunMode CurrentMode { set; get; }
+
+        private void TabControlSelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var item = sender as TabControl;
+            var selected = item.SelectedItem as TabItem;
+
+            if (selected == NormalTab)
+                CurrentMode = RunMode.NORMAL;
+            else if (selected == TransTab)
+                CurrentMode = RunMode.TRANSLATE;
         }
     }
 }

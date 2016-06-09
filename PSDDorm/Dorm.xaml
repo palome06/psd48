@@ -2,32 +2,56 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="录像转换器" Height="380" Width="450">
-    <Grid>
-        <StackPanel Orientation="Vertical">
-            <GroupBox Height="300">
-                <GroupBox.Header>
+    <StackPanel Orientation="Vertical">
+        <TabControl Height="300" SelectionChanged="TabControlSelectionChanged">
+            <TabItem x:Name="NormalTab" FontFamily="KaiTi" FontSize="18">
+                <TabItem.Header>
+                    <TextBlock FontFamily="LiSu" Margin="5,5,5,5">录像转换</TextBlock>
+                </TabItem.Header>
+                <Grid>
+                    <ListBox x:Name="orgListBox" SelectionMode="Multiple" AllowDrop="True" Margin="2"
+                                  FontSize="16" FontFamily="KaiTi" Drop="FileDrop"/>
+                    <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"
+                               Foreground="LightGray" FontSize="50" IsHitTestVisible="False">
+                        拖拽至此...
+                    </TextBlock>
+                </Grid>
+            </TabItem>
+            <TabItem x:Name="TransTab" FontFamily="KaiTi" FontSize="18">
+                <TabItem.Header>
+                    <TextBlock FontFamily="LiSu" Margin="5,5,5,5">录像转译</TextBlock>
+                </TabItem.Header>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="1*"/>
+                    </Grid.RowDefinitions>
                     <StackPanel Orientation="Horizontal">
-                        <Label FontSize="20" FontFamily="LiSu" VerticalAlignment="Top">拖拽至此</Label>
-                        <CheckBox x:Name="convCheckBox" VerticalAlignment="Center" Visibility="Collapsed">Check it now!</CheckBox>
+                        <CheckBox x:Name="mainAngleCheckBox" Width="100">主视角：</CheckBox>
+                        <TextBox x:Name="mainAngleNumber" Width="80"></TextBox>
                     </StackPanel>
-                </GroupBox.Header>
-                <ListBox x:Name="orgListBox" SelectionMode="Multiple" AllowDrop="True" Margin="2"
-                          FontSize="16" FontFamily="KaiTi" Drop="FileDrop"/>
-            </GroupBox>
-            <Grid Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="3">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="1*"/>
-                    <ColumnDefinition Width="3*"/>
-                    <ColumnDefinition Width="1*"/>
-                    <ColumnDefinition Width="3*"/>
-                    <ColumnDefinition Width="1*"/>
-                    <ColumnDefinition Width="3*"/>
-                    <ColumnDefinition Width="1*"/>
-                </Grid.ColumnDefinitions>
-                <Button Grid.Column="1" FontSize="20" FontFamily="LiSu" Click="ButtonOKClick">确定</Button>
-                <Button Grid.Column="3" FontSize="20" FontFamily="LiSu" Click="ButtonAllClick">全选</Button>
-                <Button Grid.Column="5" FontSize="20" FontFamily="LiSu" Click="ButtonResetClick">重置</Button>
-            </Grid>
-        </StackPanel>
-    </Grid>
+                    <ListBox x:Name="transListBox" SelectionMode="Multiple" AllowDrop="True" Margin="2"
+                                  FontSize="16" FontFamily="KaiTi" Drop="FileDrop" Grid.Row="1"/>
+                    <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"
+                               Foreground="LightGray" FontSize="50" IsHitTestVisible="False" Grid.Row="1">
+                        拖拽至此...
+                    </TextBlock>
+                </Grid>
+            </TabItem>
+        </TabControl>
+        <Grid Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="3">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="3*"/>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="3*"/>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="3*"/>
+                <ColumnDefinition Width="1*"/>
+            </Grid.ColumnDefinitions>
+            <Button Grid.Column="1" FontSize="20" FontFamily="LiSu" Click="ButtonOKClick">确定</Button>
+            <Button Grid.Column="3" FontSize="20" FontFamily="LiSu" Click="ButtonAllClick">全选</Button>
+            <Button Grid.Column="5" FontSize="20" FontFamily="LiSu" Click="ButtonResetClick">重置</Button>
+        </Grid>
+    </StackPanel>
 </Window>

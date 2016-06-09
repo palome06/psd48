@@ -14,6 +14,7 @@ namespace PSD.ClientAo.VW
 
         public int Version { set; get; }
         public ushort Uid { set; get; }
+        public bool Encryed { set; get; }
 
         private float[] magnification;
         private string[] magnificationstr;
@@ -61,6 +62,10 @@ namespace PSD.ClientAo.VW
                     Version = int.Parse(firsts[0].Substring("VERSION=".Length));
                 if (firsts[1].StartsWith("UID="))
                     Uid = ushort.Parse(firsts[1].Substring("UID=".Length));
+                if (firsts.Length > 2 && firsts[2].StartsWith("ENCRY=0"))
+                    Encryed = false;
+                else
+                    Encryed = true;
             }
             magnification = new float[] { 0.25f, 0.5f, 1, 2, 4, 8 };
             magnificationstr = new string[] { "0.25", "0.5", "1", "2", "4", "8" };
@@ -84,7 +89,7 @@ namespace PSD.ClientAo.VW
                     string prefix = (dixitCursor + 1 < dixits.Count &&
                          IsClogFreeUIEvent(dixits[dixitCursor + 1])) ? "<|>" : "";
                     ++dixitCursor;
-                    if (Version >= 99)
+                    if (Version >= 99 && Encryed)
                     {
                         line = Base.LogES.DESDecrypt(line, "AKB48Show!",
                             (Version * Version).ToString());

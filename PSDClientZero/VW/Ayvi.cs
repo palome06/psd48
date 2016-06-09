@@ -135,11 +135,11 @@ namespace PSD.ClientZero.VW
         public void CloseCinTunnel(ushort me)
         {
             //cinGate = false;
-            //while (cinReqCount > 0)
-            //{
-            //    cvQueues.Enqueue(CinSentinel);
-            //    --cinReqCount;
-            //}
+            while (cinReqCount > 0)
+            {
+                cvQueues.Enqueue(CinSentinel);
+                --cinReqCount;
+            }
             //lock (cinGate)
             //{
             //    cinGate[me] = false;
