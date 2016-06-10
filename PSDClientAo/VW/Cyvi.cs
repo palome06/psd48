@@ -668,7 +668,7 @@ namespace PSD.ClientAo.VW
         // only display hidden message, used in debug mode
         public void Cout0(ushort me, string msg) { }
         // Request in Client
-        public string Request(ushort me) { return ""; }
+        public string RequestHelp(ushort me) { return ""; }
         public string RequestTalk(ushort me)
         {
             string msg = null;

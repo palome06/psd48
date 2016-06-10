@@ -126,7 +126,7 @@ namespace PSD.ClientZero
             this.name = name; this.avatar = avatar;
             this.hopeTeam = hopeTeam;
 
-            VW.Ayvi ayvi = new VW.Ayvi(totalPlayer, record, msglog);
+            VW.Ayvi ayvi = new VW.Ayvi();
             VI = ayvi;
             VI.Init(); ayvi.SetInGame(true);
             VW.Bywi bywi = new VW.Bywi(server, port, name, avatar, hopeTeam, 0);
@@ -188,7 +188,7 @@ namespace PSD.ClientZero
             {
                 while (true)
                 {
-                    string acmd = VI.Request(Uid);
+                    string acmd = VI.RequestHelp(Uid);
                     if (acmd != null)
                         OnRequestLocalCmd(acmd);
                 }
@@ -3532,11 +3532,10 @@ namespace PSD.ClientZero
                         cinCalled = StartCinEtc();
                         while ((Uid % 2 == 0 && !cc.DecidedAo) || (Uid % 2 == 1 && !cc.DecidedAka))
                         {
-
                             List<int> xuanR = (Uid % 2 == 0) ? cc.XuanAo : cc.XuanAka;
                             if (VI is ClientZero.VW.Ayvi)
                             {
-                                string op = (VI as ClientZero.VW.Ayvi).Cin48(Uid);
+                                string op = VI.Cin(Uid, null);
                                 op = op.Trim().ToUpper();
                                 int selAva;
                                 bool has = cc.Ding[Uid] != 0;
@@ -3577,7 +3576,7 @@ namespace PSD.ClientZero
                                 //List<int> xuanR = (Uid % 2 == 0) ? cc.XuanAo : cc.XuanAka;
                                 if (VI is ClientZero.VW.Ayvi)
                                 {
-                                    string op = (VI as ClientZero.VW.Ayvi).Cin48(Uid);
+                                    string op = VI.Cin(Uid, null);
                                     op = op.Trim().ToUpper();
                                     //bool has = cc.Ding[Uid] != 0;
                                     if (op == "X")

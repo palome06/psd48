@@ -27,7 +27,7 @@ namespace PSD.PSDGamepkg.VW
 
         public void OpenCinTunnel(ushort me) { }
 
-        public string Request(ushort me)
+        public string RequestHelp(ushort me)
         {
             throw new NotImplementedException();
         }

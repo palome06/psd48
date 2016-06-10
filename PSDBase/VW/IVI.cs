@@ -30,7 +30,7 @@ namespace PSD.Base.VW
         string CinSentinel { get; }
 
         // Request in Client
-        string Request(ushort me);
+        string RequestHelp(ushort me);
         // Talk in Client
         string RequestTalk(ushort me);
         //// Display the chat message send from the others after room
