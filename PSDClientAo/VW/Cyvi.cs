@@ -112,13 +112,6 @@ namespace PSD.ClientAo.VW
             }
             else return false;
         }
-        public void ReportNoServer(string ipAddress)
-        {
-            AD.Dispatcher.BeginInvoke((Action)(() =>
-            {
-                Auxs.MessageHouse.Show("找不到远端服务器", ipAddress + "对您一开始是拒绝的。");
-            }));
-        }
         public void ReportWrongVersion(string version)
         {
             AD.Dispatcher.BeginInvoke((Action)(() =>

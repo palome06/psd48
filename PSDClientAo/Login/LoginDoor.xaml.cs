@@ -44,7 +44,7 @@ namespace PSD.ClientAo.Login
 
             SetSelTrigger();
             SetLvTrigger();
-            SetTeamTrigger();
+            //SetTeamTrigger();
             LoadFromConfig();
         }
 
@@ -113,7 +113,8 @@ namespace PSD.ClientAo.Login
                         if (PkgMode == 4 && LvTryTuxCheckBox.IsChecked == true) { PkgMode = 5; }
                         level = ((PkgMode << 1) | (LvTestCheckBox.IsChecked == true ? 1 : 0));
                     }
-                    int team = IsHallTeamEnabled ? HallTeamMode : Base.Rules.RuleCode.DEF_CODE;
+                    //int team = IsHallTeamEnabled ? HallTeamMode : Base.Rules.RuleCode.DEF_CODE;
+                    int team = Base.Rules.RuleCode.HOPE_IP; // set hope ip as the main rule
                     string[] trainer = (LvTestCheckBox.IsChecked == true && LvRingText.Text.Length > 0) ?
                         LvRingText.Text.Split(',') : null;
                     SaveToConfig("THEATER", SecertCodeDoor.Text, "IP", addrTextBox.Text, "NICK", nickPure,
@@ -188,13 +189,13 @@ namespace PSD.ClientAo.Login
             //(teamRadioPanel.Children[0] as RadioButton).IsChecked = true;
             HallSelModeCB.IsChecked = null;
             HallPkgCB.IsChecked = null;
-            HallTeamCB.IsChecked = null;
+            //HallTeamCB.IsChecked = null;
             DirTeamCB.IsChecked = null;
             HallLevelCB.IsChecked = null;
 
             HallSelModeCB.IsChecked = true;
             HallPkgCB.IsChecked = false;
-            HallTeamCB.IsChecked = false;
+            //HallTeamCB.IsChecked = false;
             DirTeamCB.IsChecked = false;
             HallLevelCB.IsChecked = true;
         }
@@ -299,16 +300,16 @@ namespace PSD.ClientAo.Login
             IsHallLevelEnabled = false;
             HallTesterPanel.IsEnabled = false;
         }
-        private void HallTeamEnabled(object sender, RoutedEventArgs e)
-        {
-            HallTeamPanel.IsEnabled = true;
-            IsHallTeamEnabled = true;
-        }
-        private void HallTeamDisabled(object sender, RoutedEventArgs e)
-        {
-            HallTeamPanel.IsEnabled = false;
-            IsHallTeamEnabled = false;
-        }
+        //private void HallTeamEnabled(object sender, RoutedEventArgs e)
+        //{
+        //    HallTeamPanel.IsEnabled = true;
+        //    IsHallTeamEnabled = true;
+        //}
+        //private void HallTeamDisabled(object sender, RoutedEventArgs e)
+        //{
+        //    HallTeamPanel.IsEnabled = false;
+        //    IsHallTeamEnabled = false;
+        //}
         private void HallMsgLogChecked(object sender, RoutedEventArgs e)
         {
             IsHallMsgLogEnabled = true;
@@ -381,16 +382,16 @@ namespace PSD.ClientAo.Login
             HallPkgCB.IsChecked = true;
         }
 
-        private int HallTeamMode { set; get; }
-        private void SetTeamTrigger()
-        {
-            HallTeamMode = RuleCode.HOPE_IP;
-            TeamNo.Checked += (s, r) => HallTeamMode = RuleCode.HOPE_NO;
-            TeamIP.Checked += (s, r) => HallTeamMode = RuleCode.HOPE_IP;
-            TeamYes.Checked += (s, r) => HallTeamMode = RuleCode.HOPE_YES;
-            TeamAka.Checked += (s, r) => HallTeamMode = RuleCode.HOPE_AKA;
-            TeamAo.Checked += (s, r) => HallTeamMode = RuleCode.HOPE_AO;
-        }
+        //private int HallTeamMode { set; get; }
+        //private void SetTeamTrigger()
+        //{
+        //    HallTeamMode = RuleCode.HOPE_IP;
+        //    TeamNo.Checked += (s, r) => HallTeamMode = RuleCode.HOPE_NO;
+        //    TeamIP.Checked += (s, r) => HallTeamMode = RuleCode.HOPE_IP;
+        //    TeamYes.Checked += (s, r) => HallTeamMode = RuleCode.HOPE_YES;
+        //    TeamAka.Checked += (s, r) => HallTeamMode = RuleCode.HOPE_AKA;
+        //    TeamAo.Checked += (s, r) => HallTeamMode = RuleCode.HOPE_AO;
+        //}
         #endregion Options
         #region Dir Checkbox
         private bool IsDirWatched { set; get; }
@@ -581,24 +582,24 @@ namespace PSD.ClientAo.Login
                         LvTestCheckBox.IsChecked = true;
                         LvRingText.Text = value.ToUpper();
                         break;
-                    case "TEAM":
-                        {
-                            int ivalue = int.Parse(value);
-                            RadioButton[] buttons = { TeamNo, TeamIP, TeamYes, TeamAka, TeamAo };
-                            int[] modes = { RuleCode.HOPE_NO, RuleCode.HOPE_IP, RuleCode.HOPE_YES,
-                                RuleCode.HOPE_AKA, RuleCode.HOPE_AO };
-                            bool anySet = false;
-                            for (int i = 0; i < modes.Length; ++i)
-                                if (ivalue == modes[i])
-                                {
-                                    HallTeamCB.IsChecked = true;
-                                    buttons[i].IsChecked = true;
-                                    anySet = true; break;
-                                }
-                            if (!anySet)
-                                HallTeamCB.IsChecked = false;
-                        }
-                        break;
+                    //case "TEAM":
+                    //    {
+                    //        int ivalue = int.Parse(value);
+                    //        RadioButton[] buttons = { TeamNo, TeamIP, TeamYes, TeamAka, TeamAo };
+                    //        int[] modes = { RuleCode.HOPE_NO, RuleCode.HOPE_IP, RuleCode.HOPE_YES,
+                    //            RuleCode.HOPE_AKA, RuleCode.HOPE_AO };
+                    //        bool anySet = false;
+                    //        for (int i = 0; i < modes.Length; ++i)
+                    //            if (ivalue == modes[i])
+                    //            {
+                    //                HallTeamCB.IsChecked = true;
+                    //                buttons[i].IsChecked = true;
+                    //                anySet = true; break;
+                    //            }
+                    //        if (!anySet)
+                    //            HallTeamCB.IsChecked = false;
+                    //    }
+                    //    break;
                 }
             }
         }

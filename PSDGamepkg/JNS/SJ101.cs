@@ -976,10 +976,11 @@ namespace PSD.PSDGamepkg.JNS
         }
         public void SJH11(Player rd)
         {
-            IDictionary<ushort, string> dict = XI.Board.Garden.Values.Where(p => p.IsAlive && p.Team == rd.OppTeam &&
-                p.Tux.Count > 3 && XI.Board.Facer(p).IsAlive).ToDictionary(p => p.Uid,
+            IDictionary<ushort, string> dict = XI.Board.Garden.Values.Where(p => p.IsAlive &&
+                p.Team == rd.OppTeam && p.Tux.Count > 3 && XI.Board.Facer(p).IsAlive).ToDictionary(p => p.Uid,
                 p => ("#交予对方的,Q" + (p.Tux.Count - 3) + "(p" + string.Join("p", p.Tux) + ")"));
-            List<Player> lesss = XI.Board.Garden.Values.Where(p => p.Tux.Count < 3 && p.Tux.Count > 0).ToList();
+            List<Player> lesss = XI.Board.Garden.Values.Where(p => p.IsAlive &&
+                p.Team == rd.OppTeam && p.Tux.Count < 3 && p.Tux.Count > 0).ToList();
             if (dict.Count > 0)
             {
                 IDictionary<ushort, string> ans = XI.MultiAsyncInput(dict);

@@ -55,23 +55,28 @@ namespace PSD.ClientZero.VW
                 }
                 else
                 {
-                    line = line.Trim().ToUpper();
-                    if (line.StartsWith("/"))
+                    if (mInGame)
                     {
-                        lock (hpQueues)
-                            hpQueues.Enqueue(line.Substring("/".Length));
-                    }
-                    else if (mInGame && line.StartsWith("@#"))
-                    {
-                        lock (tkQueues)
-                            tkQueues.Enqueue("Y3," + line.Substring("@#".Length));
-                    }
-                    else if (mInGame)
-                    {
-                        if (cinGate)
-                            lock (cvQueues)
-                                cvQueues.Enqueue(line);
-                        ++shuzi;
+                        line = line.Trim().ToUpper();
+                        if (line.StartsWith("@#"))
+                        {
+                            lock (tkQueues)
+                                tkQueues.Enqueue("Y3," + line.Substring("@#".Length));
+                        }
+                        else if (line.StartsWith("/"))
+                        {
+                            lock (hpQueues)
+                                hpQueues.Enqueue(line.Substring("/".Length));
+                        }
+                        else
+                        {
+                            if (cinGate)
+                                lock (cvQueues)
+                                {
+                                    cvQueues.Enqueue(line);
+                                }
+                            ++shuzi;
+                        }
                     }
                 }
             } while (line != null);
@@ -135,11 +140,11 @@ namespace PSD.ClientZero.VW
         public void CloseCinTunnel(ushort me)
         {
             //cinGate = false;
-            while (cinReqCount > 0)
-            {
-                cvQueues.Enqueue(CinSentinel);
-                --cinReqCount;
-            }
+            //while (cinReqCount > 0)
+            //{
+            //    cvQueues.Enqueue(CinSentinel);
+            //    --cinReqCount;
+            //}
             //lock (cinGate)
             //{
             //    cinGate[me] = false;
