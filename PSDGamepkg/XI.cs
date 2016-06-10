@@ -533,8 +533,8 @@ namespace PSD.PSDGamepkg
                 "HI", "HL", "IC", "OC", "HT", "HG", "QR", "HZ", "TT", "T7", "JM", "WN", "IJ", "OJ",
                 "IE", "OE", "IS", "OS", "LA", "IV", "OV", "PB", "YM", "HR", "FI", "ON", "SN", "MA",
                 "ZJ", "IF", "OF", "PQ" };
-            string[] g1 = { "DI", "IU", "OU", "TH", "CW", "ZK", "IZ", "OZ", "WP", "SG", "HK", "WJ",
-                "XR", "EV", "CK", "7F", "YP", "NI", "GE", "LY", "UE" };
+            string[] g1 = { "CH", "DI", "IU", "OU", "TH", "CW", "ZK", "IZ", "OZ", "WP", "SG", "HK",
+                "WJ", "XR", "EV", "CK", "7F", "YP", "NI", "GE", "LY", "UE" };
             string[] g2 = { "IN", "RN", "CN", "QC", "FU", "QU", "CL", "WK", "AK", "IL", "OL", "SW",
                 "AS", "SY", "UL", "ZZ" };
             foreach (string g0event in g0)

@@ -226,7 +226,7 @@ namespace PSDDorm
                         ushort seat = ushort.Parse(firsts[i]);
                         ushort joinid = ushort.Parse(firsts[i + 1]);
                         if (seat == angel)
-                            return joinid;
+                            return joinid != 0 ? joinid : angel;
                     }
                 }
             }

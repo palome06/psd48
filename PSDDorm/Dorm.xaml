@@ -28,7 +28,7 @@
                     </Grid.RowDefinitions>
                     <StackPanel Orientation="Horizontal">
                         <CheckBox x:Name="mainAngleCheckBox" Width="100">主视角：</CheckBox>
-                        <TextBox x:Name="mainAngleNumber" Width="80"></TextBox>
+                        <TextBox x:Name="mainAngleNumber" Width="80" IsEnabled="False"></TextBox>
                     </StackPanel>
                     <ListBox x:Name="transListBox" SelectionMode="Multiple" AllowDrop="True" Margin="2"
                                   FontSize="16" FontFamily="KaiTi" Drop="FileDrop" Grid.Row="1"/>

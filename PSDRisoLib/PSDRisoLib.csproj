@@ -1060,6 +1060,8 @@
     <Resource Include="Resources\Card\Eve\SJH06.png" />
     <Resource Include="Resources\Card\Eve\SJH07.png" />
     <Resource Include="Resources\Card\Eve\SJH09.png" />
+    <Resource Include="Resources\Card\Eve\SJH10.png" />
+    <Resource Include="Resources\Card\Eve\SJH11.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Card\NMB\GFT3.png" />

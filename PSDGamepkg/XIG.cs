@@ -1188,12 +1188,13 @@ namespace PSD.PSDGamepkg
                             }
                         }
                         if (cures.Any(p => p.N != 0))
-                        {
-                            Artiad.HpIssueSemaphore.Telegraph(WI.BCast, cures.Where(p => p.N != 0).Select(p => 
-                                new Artiad.HpIssueSemaphore(p.Who, false, p.Element, p.N, Board.Garden[p.Who].HP)));
-                        }
+                            RaiseGMessage(Artiad.CureResult.ToMessage(cures.Where(p => p.N != 0).ToList()));
                         break;
                     }
+                case "G1CH":
+                    Artiad.HpIssueSemaphore.Telegraph(WI.BCast, Artiad.Cure.Parse(cmd).Select(p =>
+                        new Artiad.HpIssueSemaphore(p.Who, false, p.Element, p.N, Board.Garden[p.Who].HP)));
+                    break;
                 case "G0ZH": // cmdrst of G0ZH won't affect the operations.
                     {
                         IDictionary<ushort, int> loses = new Dictionary<ushort, int>();

@@ -515,6 +515,8 @@
     <Image x:Key="eveCardSJH06" Source="Card/Eve/SJH06.png"/>
     <Image x:Key="eveCardSJH07" Source="Card/Eve/SJH07.png"/>
     <Image x:Key="eveCardSJH09" Source="Card/Eve/SJH09.png"/>
+    <Image x:Key="eveCardSJH10" Source="Card/Eve/SJH10.png"/>
+    <Image x:Key="eveCardSJH11" Source="Card/Eve/SJH11.png"/>
 
     <BitmapImage x:Key="monCard000src" UriSource="Card/Mon00.png"/>
     <Image x:Key="monCard000" Source="Card/Mon00.png"/>

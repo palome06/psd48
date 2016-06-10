@@ -260,6 +260,17 @@ namespace PSD.Base
             op.Reverse();
             return op.FirstOrDefault(p => p != rounder && Garden[p].IsAlive);
         }
+        public List<ushort> ReOrderedPlayers(IEnumerable<ushort> players)
+        {
+            List<ushort> order = OrderedPlayer();
+            List<ushort> result = new List<ushort>();
+            foreach (ushort py in order)
+            {
+                if (players.Contains(py))
+                    result.Add(py);
+            }
+            return result;
+        }
 
         public Board()
         {

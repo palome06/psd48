@@ -86,7 +86,11 @@ namespace PSD.PSDGamepkg.Artiad
 
         public static string ToMessage(Cure cure)
         {
-            return "G0IH," + cure.Who + "," + cure.Source + "," +
+            return "G0IH," + ToRawMessage(cure);
+        }
+        public static string ToRawMessage(Cure cure)
+        {
+            return cure.Who + "," + cure.Source + "," +
                 cure.Element.Elem2Int() + "," + cure.N + "," + cure.Mask;
         }
         public static string ToMessage(IEnumerable<Cure> cures)
@@ -113,6 +117,15 @@ namespace PSD.PSDGamepkg.Artiad
                 list.Add(new Cure(who, src, elem, n, mask));
             }
             return list;
+        }
+    }
+    // only for the result, just give the covertion
+    public static class CureResult
+    {
+        public static string ToMessage(Cure cure) { return "G1CH," + Cure.ToRawMessage(cure); }
+        public static string ToMessage(IEnumerable<Cure> cures)
+        {
+            return "G1CH," + string.Join(",", cures.Select(p => Cure.ToRawMessage(p)));
         }
     }
 
