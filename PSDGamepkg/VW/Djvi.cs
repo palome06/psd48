@@ -83,6 +83,13 @@ namespace PSD.PSDGamepkg.VW
 
         public void OpenCinTunnel(ushort me) { }
         public void TerminCinTunnel(ushort me) { }
+
+        public void Close()
+        {
+            ctoken.Cancel(); ctoken.Dispose();
+            foreach (Ayvi ayvi in ayvis)
+                ayvi.Close();
+        }
         /// <summary>
         /// start an async Listening task
         /// </summary>

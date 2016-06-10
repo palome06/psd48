@@ -54,7 +54,7 @@ namespace PSD.ClientAo
 
         public void StartHall()
         {
-            VW.Cyvi cyvi = new VW.Cyvi(AD, record, msglog);
+            VW.Cyvi cyvi = new VW.Cyvi(AD);
             VI = cyvi; VI.Init(); VI.SetInGame(false);
 
             TcpClient client = new TcpClient(server, port);
@@ -257,7 +257,7 @@ namespace PSD.ClientAo
         }
         public void ResumeHall()
         {
-            VW.Cyvi cyvi = new VW.Cyvi(AD, record, msglog);
+            VW.Cyvi cyvi = new VW.Cyvi(AD);
             VI = cyvi; VI.Init(); VI.SetInGame(true);
 
             TcpClient client = new TcpClient(server, port);

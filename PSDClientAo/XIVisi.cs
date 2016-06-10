@@ -121,7 +121,7 @@ namespace PSD.ClientAo
             this.name = name; this.avatar = avatar;
             this.hopeTeam = hopeTeam;
 
-            VI = new VW.Cyvi(ad, record, msglog);
+            VI = new VW.Cyvi(ad);
             VI.Init(); VI.SetInGame(true);
             VW.Bywi bywi = new VW.Bywi(server, port, name, avatar, hopeTeam, 0, this);
             WI = bywi;
@@ -151,7 +151,7 @@ namespace PSD.ClientAo
         // Constructor 3#: Used for Replay mode
         public XIVisi(string fileName, AoDisplay ad)
         {
-            VI = new VW.Cyvi(ad, false, false);
+            VI = new VW.Cyvi(ad);
             VI.Init(); VI.SetInGame(true);
             VW.Eywi eywi = new VW.Eywi(fileName);
             WI = eywi;
@@ -382,7 +382,7 @@ namespace PSD.ClientAo
         private bool StartCinEtc()
         {
             SingleThreadMessageStart();
-            VI.OpenCinTunnel(Uid);
+            // VI.OpenCinTunnel(Uid);
             flashHelper.AFlashApplicationWindow(ad);
             return true;
         }
@@ -390,7 +390,7 @@ namespace PSD.ClientAo
         public void CancelThread()
         {
             if (VI != null)
-                VI.AbortCinThread();
+                VI.Close();
             if (WI != null)
                 WI.Close();
             foreach (var td in listOfThreads)
@@ -1659,7 +1659,7 @@ namespace PSD.ClientAo
                             invs.ForEach(p =>
                             {
                                 string heroCode = Tuple.HL.InstanceHero(A0P[p].SelectHero).Ofcode;
-                                ad.yfSoundTracker.AV.Speak(heroCode + "-ZW");
+                                ad.yfSoundTracker.AV?.Speak(heroCode + "-ZW");
                             });
                         }
                     }
@@ -1685,7 +1685,7 @@ namespace PSD.ClientAo
                                 A0P[who].ClearStatus();
                                 VI.Cout(Uid, "{1}加入到{0}#位置.", who, zd.Hero(hero));
                                 string heroCode = Tuple.HL.InstanceHero(A0P[who].SelectHero).Ofcode;
-                                ad.yfSoundTracker.AV.Speak(heroCode + "-IY");
+                                ad.yfSoundTracker.AV?.Speak(heroCode + "-IY");
                             }
                             A0P[who].UpdateExCardSpTitle();
                         }
@@ -1892,7 +1892,15 @@ namespace PSD.ClientAo
                             ushort[] ravs = new ushort[args.Length - 4];
                             for (int i = 4; i < args.Length; ++i)
                                 ravs[i - 4] = ushort.Parse(args[i]);
-                            VI.Cout(Uid, "{0}调整{1}的新顺序为{2}.", zd.Player(py), dd[args[3]], string.Join(",", ravs));
+                            if (ravs.Length == 2)
+                            {
+                                if (ravs[0] == 1 && ravs[1] == 2)
+                                    VI.Cout(Uid, "{0}未调整牌堆顺序.", zd.Player(py));
+                                else if (ravs[0] == 2 && ravs[1] == 1)
+                                    VI.Cout(Uid, "{0}交换了牌堆顶两张牌的顺序.", zd.Player(py));
+                            }
+                            else
+                                VI.Cout(Uid, "{0}调整{1}的新顺序为{2}.", zd.Player(py), dd[args[3]], string.Join(",", ravs));
                         }
                         else if (type == 4)
                             VI.Cout(Uid, "{0}不调整牌堆顺序.", zd.Player(py));
@@ -3010,7 +3018,7 @@ namespace PSD.ClientAo
         #region F
         private void HandleF0Message(string readLine)
         {
-            VI.TerminCinTunnel(Uid);
+            // VI.TerminCinTunnel(Uid);
             lock (listOfThreads)
             {
                 foreach (Thread td in listOfThreads)
@@ -3216,7 +3224,7 @@ namespace PSD.ClientAo
                 {
                     int idx = mai.IndexOf(',');
                     string title = Algo.Substring(mai, 0, idx);
-                    ad.yfSoundTracker.AV.Speak(title, int.Parse(inType));
+                    ad.yfSoundTracker.AV?.Speak(title, int.Parse(inType));
                 }
             }
             return false;
@@ -4274,7 +4282,7 @@ namespace PSD.ClientAo
                                 cc.DecidedAo = true;
                             else
                                 cc.DecidedAka = true;
-                            VI.TerminCinTunnel(Uid);
+                            // VI.TerminCinTunnel(Uid);
                             ad.yfArena.AoArena.Shutdown();
                             string msg = "我方选择结果为：";
                             for (int i = 1; i < args.Length; i += 2)

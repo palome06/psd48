@@ -99,9 +99,13 @@ namespace PSD.ClientZero.VW
 
         public string RequestTalk(ushort me) { return tkQueue.Take(ctoken.Token); }
 
-        // Is them still useful??
-        public void OpenCinTunnel(ushort me) { }
-        public void TerminCinTunnel(ushort me) { }
+        public void Close()
+        {
+            ctoken.Cancel(); ctoken.Dispose();
+            hpQueue.Dispose();
+            tkQueue.Dispose();
+            cvQueue.Dispose();
+        }
         /// <summary>
         /// start an async Listening task
         /// </summary>

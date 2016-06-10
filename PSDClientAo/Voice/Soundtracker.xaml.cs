@@ -32,7 +32,7 @@ namespace PSD.ClientAo.Voice
             iconMuteButton.Visibility = Visibility.Visible;
             iconPlayButton.Visibility = Visibility.Collapsed;
             // mute
-            AV.Mute();
+            AV?.Mute();
         }
 
         public void Play()
@@ -40,7 +40,7 @@ namespace PSD.ClientAo.Voice
             iconMuteButton.Visibility = Visibility.Collapsed;
             iconPlayButton.Visibility = Visibility.Visible;
             // play
-            AV.Resume();
+            AV?.Resume();
         }
 
         private void iconPlayButton_Click(object sender, RoutedEventArgs e)

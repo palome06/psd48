@@ -17,15 +17,10 @@ namespace PSD.Base.VW
         void Cout(ushort me, string msgFormat, params object[] args);
         // require input from $me, with hint as $hint
         string Cin(ushort me, string hintFormat, params object[] args);
-        //// TODO:DEBUG: only display hidden message
+        //// DEBUG: only display hidden message
         //void Cout0(ushort me, string msg);
-
-        // Open Cin Tunnel
-        void OpenCinTunnel(ushort me);
         // Close Cin Tunnel
         void CloseCinTunnel(ushort me);
-        // Terminate Cin Tunnel, give pending Cin CinSentinel as result
-        void TerminCinTunnel(ushort me);
         // sentinel value that pending close Cin would return
         string CinSentinel { get; }
 
@@ -33,9 +28,9 @@ namespace PSD.Base.VW
         string RequestHelp(ushort me);
         // Talk in Client
         string RequestTalk(ushort me);
-        //// Display the chat message send from the others after room
-        //void Chat(Msgs msg);
         // Display the chat message send from the others before room
         void Chat(string msg, string nick);
+        // close and recycle resources
+        void Close();
     }
 }
