@@ -1925,7 +1925,9 @@ namespace PSD.PSDGamepkg
             else if (selCode == RuleCode.MODE_SS)
             {
                 if (prpr <= 0) prpr = 16;
-                else if (prpr % 2 != 0) ++prpr;
+                if (prpr % 2 != 0) ++prpr;
+                if (PCS.ListAllSeleableHeros().Length > 72)
+                    prpr -= 2;
                 List<Base.Card.Hero> heros = PCS.AllocateHerosRM(prpr).ToList();
                 CastingPublic cp = new CastingPublic(heros.Select(p => p.Avatar).ToList());
                 Casting = cp;
