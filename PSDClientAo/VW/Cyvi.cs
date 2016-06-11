@@ -79,11 +79,13 @@ namespace PSD.ClientAo.VW
 
         public void Chat(string msg, string nick)
         {
-            AD?.DisplayChat(nick, msg);
+            if (AD != null)
+                AD.DisplayChat(nick, msg);
         }
 
         public string Cin(ushort me, string hintFormat, params object[] args)
         {
+            PreCinClearup();
             AD.Dispatcher.BeginInvoke((Action)(() =>
             {
                 AD.yfMigi.IncrText("===> " + string.Format(hintFormat, args));
@@ -98,8 +100,11 @@ namespace PSD.ClientAo.VW
         }
         private void PreCinClearup()
         {
-            curToken?.Cancel();
-            curToken?.Dispose();
+            if (curToken != null)
+            {
+                curToken.Cancel();
+                curToken.Dispose();
+            }
             curToken = new CancellationTokenSource();
             while (cvQueue.Count > 0)
                 cvQueue.Take();
@@ -110,8 +115,11 @@ namespace PSD.ClientAo.VW
         {
             CancellationTokenSource token = curToken;
             curToken = null;
-            token?.Cancel();
-            token?.Dispose();
+            if (token != null)
+            {
+                token.Cancel();
+                token.Dispose();
+            }
             ResetAllInputs();
         }
 
@@ -123,7 +131,8 @@ namespace PSD.ClientAo.VW
                 AD.yfMigi.IncrText(msg);
                 AD.yfMigi.svText.ScrollToEnd();
             }));
-            Log?.Record(msg);
+            if (Log != null)
+                Log.Record(msg);
         }
 
         public string RequestHelp(ushort me) { return hpQueue.Take(ctoken.Token); }
@@ -143,7 +152,7 @@ namespace PSD.ClientAo.VW
         /// <param name="action">the acutal listen action</param>
         private void StartListenTask(Action action)
         {
-            Action<Exception> ae = (e) => { Log?.Logg(e.ToString()); };
+            Action<Exception> ae = (e) => { if (Log != null) Log.Logg(e.ToString()); };
             Task.Factory.StartNew(() => ZI.SafeExecute(action, ae), ctoken.Token,
                 TaskCreationOptions.LongRunning, TaskScheduler.Default);
         }

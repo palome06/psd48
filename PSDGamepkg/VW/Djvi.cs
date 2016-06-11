@@ -96,7 +96,7 @@ namespace PSD.PSDGamepkg.VW
         /// <param name="action">the acutal listen action</param>
         private void StartListenTask(Action action)
         {
-            Action<Exception> ae = (e) => { Log?.Logger(e.ToString()); };
+            Action<Exception> ae = (e) => { if (Log != null) Log.Logger(e.ToString()); };
             Task.Factory.StartNew(() => XI.SafeExecute(action, ae), ctoken.Token,
                 TaskCreationOptions.LongRunning, TaskScheduler.Default);
         }

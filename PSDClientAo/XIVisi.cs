@@ -1659,7 +1659,8 @@ namespace PSD.ClientAo
                             invs.ForEach(p =>
                             {
                                 string heroCode = Tuple.HL.InstanceHero(A0P[p].SelectHero).Ofcode;
-                                ad.yfSoundTracker.AV?.Speak(heroCode + "-ZW");
+                                if (ad.yfSoundTracker.AV != null)
+                                    ad.yfSoundTracker.AV.Speak(heroCode + "-ZW");
                             });
                         }
                     }
@@ -1685,7 +1686,8 @@ namespace PSD.ClientAo
                                 A0P[who].ClearStatus();
                                 VI.Cout(Uid, "{1}加入到{0}#位置.", who, zd.Hero(hero));
                                 string heroCode = Tuple.HL.InstanceHero(A0P[who].SelectHero).Ofcode;
-                                ad.yfSoundTracker.AV?.Speak(heroCode + "-IY");
+                                if (ad.yfSoundTracker.AV != null)
+                                    ad.yfSoundTracker.AV.Speak(heroCode + "-IY");
                             }
                             A0P[who].UpdateExCardSpTitle();
                         }
@@ -3224,7 +3226,8 @@ namespace PSD.ClientAo
                 {
                     int idx = mai.IndexOf(',');
                     string title = Algo.Substring(mai, 0, idx);
-                    ad.yfSoundTracker.AV?.Speak(title, int.Parse(inType));
+                    if (ad.yfSoundTracker.AV != null)
+                        ad.yfSoundTracker.AV.Speak(title, int.Parse(inType));
                 }
             }
             return false;

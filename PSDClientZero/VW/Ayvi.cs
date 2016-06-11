@@ -69,8 +69,11 @@ namespace PSD.ClientZero.VW
 
         public string Cin(ushort me, string hintFormat, params object[] args)
         {
-            curToken?.Cancel();
-            curToken?.Dispose();
+            if (curToken != null)
+            {
+                curToken.Cancel();
+                curToken.Dispose();
+            }
             curToken = new CancellationTokenSource();
             while (cvQueue.Count > 0)
                 cvQueue.Take();
@@ -84,15 +87,19 @@ namespace PSD.ClientZero.VW
         {
             CancellationTokenSource token = curToken;
             curToken = null;
-            token?.Cancel();
-            token?.Dispose();
+            if (token != null)
+            {
+                token.Cancel();
+                token.Dispose();
+            }
         }
 
         public void Cout(ushort me, string msgFormat, params object[] args)
         {
             string msg = string.Format(msgFormat, args);
             Console.WriteLine(msg);
-            Log?.Record(msg);
+            if (Log != null)
+                Log.Record(msg);
         }
 
         public string RequestHelp(ushort me) { return hpQueue.Take(ctoken.Token); }
@@ -112,7 +119,7 @@ namespace PSD.ClientZero.VW
         /// <param name="action">the acutal listen action</param>
         private void StartListenTask(Action action)
         {
-            Action<Exception> ae = (e) => { Log?.Logg(e.ToString()); };
+            Action<Exception> ae = (e) => { if (Log != null) Log.Logg(e.ToString()); };
             Task.Factory.StartNew(() => ZI.SafeExecute(action, ae), ctoken.Token,
                 TaskCreationOptions.LongRunning, TaskScheduler.Default);
         }
