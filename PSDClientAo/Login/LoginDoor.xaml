@@ -79,17 +79,15 @@
                                     <RowDefinition Height="Auto"/>
                                     <RowDefinition Height="10"/>
                                     <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="10"/>
-                                    <RowDefinition Height="Auto"/>
                                 </Grid.RowDefinitions>
                                 <CheckBox x:Name="HallSelModeCB" Grid.Column="0" Grid.Row="0"
                                           Checked="HallSelModeEnabled" Unchecked="HallSelModeDisabled">
                                     指定选将模式：</CheckBox>
                                 <WrapPanel x:Name="HallSelModePanel" Grid.Column="1" Grid.Row="0">
                                     <RadioButton Content="标准竞技" Width="120" GroupName="SelOptGroup" x:Name="SelSS" IsChecked="True"
-                                                 ToolTip="总共亮出16名角色，由双方队长依次禁选一名角色，然后按照一名-两名-两名的顺序依次选取人物。最后队长将我方已选人物中选出三名作为我方上场人物。"/>
+                                                 ToolTip="总共亮出16名角色(至尊场为14名)，由双方队长依次禁选一名角色，然后按照一名-两名-两名的顺序依次选取人物。最后队长将我方已选人物中选出三名作为我方上场人物。"/>
                                     <RadioButton Content="欢乐三选一" Width="120" GroupName="SelOptGroup" x:Name="Sel31"
-                                                 ToolTip="每人随机发给三个人物从中选择一名作为上场人物，如不满意可用一名随机新角色随机替换一名待选人物。"/>
+                                                 ToolTip="每人随机发给三个人物(至尊场为四名)，从中选择一名作为上场人物，如不满意可用一名随机新角色随机替换一名待选人物。"/>
                                     <RadioButton Content="对位轮选" Width="120" GroupName="SelOptGroup" x:Name="SelZY"
                                                  ToolTip="双方第一名玩家执行三选一，然后同时亮出；由第二名玩家执行四选一，同理第三名玩家执行五选一。"/>
                                     <RadioButton Content="禁选(BP)" Width="120" GroupName="SelOptGroup" x:Name="SelBP" Visibility="Collapsed"
@@ -169,7 +167,7 @@
                                         </CheckBox>
                                     </StackPanel>
                                 </StackPanel>
-
+                                <!--
                                 <CheckBox x:Name="HallTeamCB" Grid.Column="0" Grid.Row="6"
                                           Checked="HallTeamEnabled" Unchecked="HallTeamDisabled">
                                     选队倾向：</CheckBox>
@@ -183,7 +181,7 @@
                                         <RadioButton Content="蜀山派" Width="120" GroupName="TeamOptGroup" x:Name="TeamAka"/>
                                         <RadioButton Content="琼华派" Width="120" GroupName="TeamOptGroup" x:Name="TeamAo"/>
                                     </WrapPanel>
-                                </StackPanel>
+                                </StackPanel>-->
                             </Grid>
                             <Grid x:Name="RoomListGrid" Height="180" Visibility="Collapsed">
                                 <ScrollViewer>

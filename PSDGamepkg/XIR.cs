@@ -263,10 +263,13 @@ namespace PSD.PSDGamepkg
 
                             if (!isFight)
                             {
-                                RaiseGMessage(new Artiad.CoachingSign() { SingleUnit = new Artiad.CoachingSignUnit()
+                                RaiseGMessage(new Artiad.CoachingSign()
                                 {
-                                    Role = Artiad.CoachingHelper.PType.GIVEUP
-                                } }.ToMessage());
+                                    SingleUnit = new Artiad.CoachingSignUnit()
+                                    {
+                                        Role = Artiad.CoachingHelper.PType.GIVEUP
+                                    }
+                                }.ToMessage());
                                 // Ensure XI.Board.Mon1From == 0
                                 if (Board.Mon1From == 0 || Board.Monster1 == 0)
                                 {
@@ -285,10 +288,14 @@ namespace PSD.PSDGamepkg
                             }
                             else
                             {
-                                RaiseGMessage(new Artiad.CoachingSign() { SingleUnit = new Artiad.CoachingSignUnit()
+                                RaiseGMessage(new Artiad.CoachingSign()
                                 {
-                                    Role = Artiad.CoachingHelper.PType.SUPPORTER, Coach = sprUid
-                                } }.ToMessage());
+                                    SingleUnit = new Artiad.CoachingSignUnit()
+                                    {
+                                        Role = Artiad.CoachingHelper.PType.SUPPORTER,
+                                        Coach = sprUid
+                                    }
+                                }.ToMessage());
                                 // Hinder side
                                 isFight = false; // decide to show fight or just pass
                                 string hnsm = "#妨碍者(决定)", hnsn = "#妨碍者(建议)";
@@ -343,10 +350,14 @@ namespace PSD.PSDGamepkg
                                 }
                                 else if (decision.StartsWith("/"))
                                     hndUid = 0;
-                                RaiseGMessage(new Artiad.CoachingSign() { SingleUnit = new Artiad.CoachingSignUnit()
+                                RaiseGMessage(new Artiad.CoachingSign()
                                 {
-                                    Role = Artiad.CoachingHelper.PType.HINDER, Coach = hndUid
-                                } }.ToMessage());
+                                    SingleUnit = new Artiad.CoachingSignUnit()
+                                    {
+                                        Role = Artiad.CoachingHelper.PType.HINDER,
+                                        Coach = hndUid
+                                    }
+                                }.ToMessage());
                                 //WI.BCast(rstage + "7,2," + Board.Hinder.Uid);
                                 rstage = "R" + rounder + "ZU";
                             }
@@ -462,11 +473,17 @@ namespace PSD.PSDGamepkg
                         rstage = "R" + rounder + "CC"; break;
                     case "CC":
                         WI.BCast(rstage + ",0");
-                        RunQuadStage(rstage);
+                        RunQuadMixedStage(rstage, 0,
+                            new int[] { -10, 100 },
+                            new Action[] { () =>
+                            {
+                                if (!string.IsNullOrEmpty((Board.Battler as Monster).DebutText))
+                                    Board.IsMonsterDebut = true;
+                            }, () => {
+                                if (Board.IsMonsterDebut) // Enable Curtain
+                                    LibTuple.ML.Decode(Board.Monster1).Debut();
+                            } });
                         WI.BCast(rstage + ",1");
-                        //Board.Battler.Debut();
-                        Board.IsMonsterDebut = true; // Enable Curtain
-                        LibTuple.ML.Decode(Board.Monster1).Debut();
                         rstage = "R" + rounder + "PD"; break;
                     case "PD":
                         RunQuadStage(rstage);
@@ -499,7 +516,7 @@ namespace PSD.PSDGamepkg
                         //}
                         //else
                         //    RunQuadStage(rstage, 1);
-                        RunSeperateStage(rstage, 1, delegate(Board bd)
+                        RunSeperateStage(rstage, 1, delegate (Board bd)
                             { return bd.IsRounderBattleWin(); });
                         WI.BCast(rstage + ",1");
                         rstage = "R" + rounder + "ZN"; break;
@@ -589,10 +606,14 @@ namespace PSD.PSDGamepkg
                         RaiseGMessage("G1HK,1");
                         rstage = "R" + rounder + "ZZ"; break;
                     case "ZZ":
-                        RaiseGMessage(new Artiad.CoachingSign() { SingleUnit = new Artiad.CoachingSignUnit()
+                        RaiseGMessage(new Artiad.CoachingSign()
                         {
-                            Role = Artiad.CoachingHelper.PType.DONE, Coach = rounder
-                        } }.ToMessage());
+                            SingleUnit = new Artiad.CoachingSignUnit()
+                            {
+                                Role = Artiad.CoachingHelper.PType.DONE,
+                                Coach = rounder
+                            }
+                        }.ToMessage());
                         RunQuadStage(rstage);
                         rstage = "R" + rounder + "BC";
                         break;

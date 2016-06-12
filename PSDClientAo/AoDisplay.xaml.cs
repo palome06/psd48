@@ -63,7 +63,7 @@ namespace PSD.ClientAo
             InitializeComponent();
             Init();
             mzi = null; mvisi = null;
-            VW.Cyvi vi = new VW.Cyvi(this, record, msglog);
+            VW.Cyvi vi = new VW.Cyvi(this);
             visiThread = new Thread(delegate()
             {
                 int port = Base.NetworkCode.HALL_PORT + room;

@@ -154,6 +154,7 @@ namespace PSD.PSDGamepkg
             Board.RoundIN = "H0PR";
             if (WI is VW.Aywi)
                 HoldRoomTunnel();
+            VI.SetInGame(true);
             if (selCode == RuleCode.MODE_00)
                 levelCode = 0;
             SelectHero(selCode, levelCode, trainer);

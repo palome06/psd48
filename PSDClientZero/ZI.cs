@@ -51,7 +51,7 @@ namespace PSD.ClientZero
 
         public void StartHall()
         {
-            VW.Ayvi ayvi = new VW.Ayvi(playerCapactity, record, msglog);
+            VW.Ayvi ayvi = new VW.Ayvi();
             VI = ayvi;
             VI.Init(); VI.SetInGame(false);
 
@@ -209,7 +209,7 @@ namespace PSD.ClientZero
                     if (room != 0)
                     {
                         Console.WriteLine("Start XIClient For Watcher");
-                        VW.Ayvi ayvi = new VW.Ayvi(playerCapactity, record, msglog);
+                        VW.Ayvi ayvi = new VW.Ayvi();
                         VI = ayvi; VI.Init();
                         XIClient xic = new XIClient(uid, name, teamCode,
                             VI, server, room, record, msglog, true);
@@ -241,7 +241,7 @@ namespace PSD.ClientZero
 		}
         public void ResumeHall()
         {
-            VW.Ayvi ayvi = new VW.Ayvi(playerCapactity, record, msglog);
+            VW.Ayvi ayvi = new VW.Ayvi();
             VI = ayvi;
             VI.Init(); VI.SetInGame(false);
 

@@ -769,47 +769,44 @@ namespace PSD.PSDGamepkg.JNS
 
         public void SJH04(Player rd)
         {
-            int n = rd.GetPetCount();
-            bool done = false;
-            while (!done)
+            ushort pop = XI.Board.RestMonPiles.Dequeue();
+            Monster mon = XI.LibTuple.ML.Decode(pop);
+            XI.RaiseGMessage("G0YM,5," + pop);
+            XI.RaiseGMessage("G0TT," + rd.Uid);
+            if (XI.Board.DiceValue + rd.STR > mon.STR)
             {
-                List<Player> commer = XI.Board.Garden.Values.Where(p => p.IsAlive && p.GetPetCount() > n).ToList();
-                string selT = XI.AsyncInput(rd.Uid, commer.Count > 0 ? ("/T1(p" + string.Join("p",
-                    commer.Select(p => p.Uid)) + ")") : "/", "SJH04", "0");
-                if (!selT.StartsWith("/") && !selT.Contains(VI.CinSentinel))
+                bool done = false;
+                while (!done)
                 {
-                    ushort st = ushort.Parse(selT);
-                    Player py = XI.Board.Garden[st];
-
-                    string selM = XI.AsyncInput(rd.Uid, "/M1(p" + string.Join(
-                        "p", py.Pets.Where(p => p != 0)) + ")", "SJH04", "1");
-                    if (!selM.StartsWith("/") && !selM.Contains(VI.CinSentinel))
+                    List<Player> commer = XI.Board.Garden.Values.Where(p => p.IsAlive && p.GetPetCount() > rd.GetPetCount() &&
+                    p.Pets.Any(q => q != 0 && XI.LibTuple.ML.Decode(q).STR <= mon.STR)).ToList();
+                    string selT = XI.AsyncInput(rd.Uid, commer.Count > 0 ? ("#弃置宠物,/T1(p" + string.Join("p",
+                        commer.Select(p => p.Uid)) + ")") : "/", "SJH04", "0");
+                    if (!selT.StartsWith("/") && !selT.Contains(VI.CinSentinel))
                     {
-                        ushort sm = ushort.Parse(selM);
-                        Monster pet = XI.LibTuple.ML.Decode(sm);
-                        XI.RaiseGMessage("G0TT," + rd.Uid);
-                        if (XI.Board.DiceValue + rd.STR > pet.STR)
+                        ushort who = ushort.Parse(selT);
+                        List<ushort> pets = XI.Board.Garden[who].Pets.Where(p => p != 0 &&
+                            XI.LibTuple.ML.Decode(p).STR <= mon.STR).ToList();
+                        string selM = XI.AsyncInput(rd.Uid, pets.Count > 0 ?
+                            ("#弃置宠物,/M1(p" + string.Join("p", pets) + ")") : "/", "SJH04", "1");
+                        if (!selM.StartsWith("/") && !selM.Contains(VI.CinSentinel))
                         {
                             XI.RaiseGMessage(new Artiad.LosePet()
                             {
-                                Owner = st,
-                                SinglePet = sm
+                                Owner = who,
+                                SinglePet = ushort.Parse(selM)
                             }.ToMessage());
+                            done = true;
                         }
-                        else
-                        {
-                            XI.RaiseGMessage(Artiad.Harm.ToMessage(
-                                new Artiad.Harm(rd.Uid, (sm + 1000), pet.Element, n + 2, 0)));
-                        }
-                        done = true;
                     }
+                    else if (selT.StartsWith("/"))
+                        done = true;
                 }
-                else if (selT.StartsWith("/"))
-                {
-                    if (n > 0)
-                        XI.RaiseGMessage(Artiad.Harm.ToMessage(new Artiad.Harm(rd.Uid, 0, FiveElement.A, n, 0)));
-                    done = true;
-                }
+            }
+            else
+            {
+                XI.RaiseGMessage(Artiad.Harm.ToMessage(
+                    new Artiad.Harm(rd.Uid, (pop + 1000), mon.Element, rd.GetPetCount() + 1, 0)));
             }
         }
 
@@ -891,6 +888,108 @@ namespace PSD.PSDGamepkg.JNS
             }
             if (count > 0)
                 Harm(null, rd, count);
+        }
+        public void SJH10(Player rd)
+        {
+            List<ushort> possible = new List<ushort>();
+            if (rd.Tux.Count > 0)
+                possible.Add(0);
+            if (rd.GetEquipCount() > 0)
+                possible.Add(1);
+            if (rd.Runes.Count > 0)
+                possible.Add(2);
+            if (rd.Escue.Count > 0)
+                possible.Add(3);
+            string[] name = { "手牌", "装备牌", "标记", "助战NPC" };
+            if (possible.Count > 0)
+            {
+                string select = XI.AsyncInput(rd.Uid, "#请选择要全部弃置的牌类型##" +
+                    string.Join("##", possible.Select(p => name[p])) + ",Y" + possible.Count, "SJH10", "0");
+                if (select != VI.CinSentinel)
+                {
+                    ushort pick = possible[int.Parse(select) - 1];
+                    if (pick == 0)
+                    {
+                        XI.RaiseGMessage("G0DH," + rd.Uid + ",2," + rd.Tux.Count);
+                        XI.RaiseGMessage("G0DH," + rd.Uid + ",0,1");
+                    }
+                    if (pick == 1)
+                    {
+                        XI.RaiseGMessage("G0QZ," + rd.Uid + "," + string.Join(",", rd.ListOutAllEquips()));
+                        System.Func<ushort, bool> isEq = (p) => XI.LibTuple.TL.DecodeTux(p).IsTuxEqiup();
+                        List<ushort> picks = Artiad.Procedure.CardHunter(XI, Card.Genre.Tux,
+                            (p) => isEq(p), (a, r) => a.Any(p => isEq(p)), false);
+                        if (picks.Count > 0)
+                            XI.RaiseGMessage("G0HQ,2," + rd.Uid + ",0,0," + picks.Single());
+                    }
+                    else if (pick == 2)
+                    {
+                        XI.RaiseGMessage("G0OF," + rd.Uid + "," + string.Join(",", rd.Runes));
+                        string obtain = XI.AsyncInput(rd.Uid, "#获得标记,F1(p" + string.Join("p",
+                            XI.LibTuple.RL.GetFullAppendableList()) +")", "SJH10", "1");
+                        if (!obtain.StartsWith(VI.CinSentinel))
+                            XI.RaiseGMessage("G0IF," + rd.Uid + "," + obtain);
+                    }
+                    else if (pick == 3)
+                    {
+                        XI.RaiseGMessage("G2OL," + string.Join(",", rd.Escue.Select(p => rd.Uid + "," + p)));
+                        XI.RaiseGMessage(new Artiad.Abandon()
+                        {
+                            Zone = Artiad.CustomsHelper.ZoneType.PLAYER,
+                            Genre = Card.Genre.NMB,
+                            SingleUnit = new Artiad.CustomsUnit()
+                            {
+                                Source = rd.Uid,
+                                Cards = rd.Escue.ToArray()
+                            }
+                        }.ToMessage());
+                        rd.Escue.Clear();
+
+                        ushort pop = XI.Board.RestNPCPiles.Dequeue();
+                        NPC npc = XI.LibTuple.NL.Decode(NMBLib.OriginalNPC(pop));
+                        XI.RaiseGMessage("G0YM,3,0," + pop);
+                        XI.RaiseGMessage("G1NI," + rd.Uid + "," + pop);
+                        XI.Board.Wang.Push(pop);
+                        UEchoCode r5ed = XI.HandleWithNPCEffect(rd, npc, "SJH10");
+                        if (r5ed == UEchoCode.NO_OPTIONS)
+                            XI.AsyncInput(rd.Uid, "//", "SJH10", "2");
+                        if (r5ed == UEchoCode.END_ACTION)
+                            XI.RaiseGMessage("G1YP," + rd.Uid + "," + pop);
+
+                        if (XI.Board.Wang.Count > 0 && XI.Board.Wang.Peek() == pop)
+                        { // In case the NPC has been taken away
+                            XI.Board.Wang.Pop();
+                            XI.RaiseGMessage(new Artiad.Abandon()
+                            {
+                                Zone = Artiad.CustomsHelper.ZoneType.EXPLICIT,
+                                Genre = Card.Genre.NMB,
+                                SingleUnit = new Artiad.CustomsUnit() { SingleCard = pop }
+                            }.ToMessage());
+                        }
+                        if (XI.Board.Wang.Count > 0)
+                            XI.RaiseGMessage("G0YM,3,1," + XI.Board.Wang.Pop());
+                        else
+                            XI.RaiseGMessage("G0YM,3,1,0"); // actual just remove one Wang, it should show the rests
+                    }
+                }
+            }
+        }
+        public void SJH11(Player rd)
+        {
+            IDictionary<ushort, string> dict = XI.Board.Garden.Values.Where(p => p.IsAlive &&
+                p.Team == rd.OppTeam && p.Tux.Count > 3 && XI.Board.Facer(p).IsAlive).ToDictionary(p => p.Uid,
+                p => ("#交予对方的,Q" + (p.Tux.Count - 3) + "(p" + string.Join("p", p.Tux) + ")"));
+            List<Player> lesss = XI.Board.Garden.Values.Where(p => p.IsAlive &&
+                p.Team == rd.OppTeam && p.Tux.Count < 3 && p.Tux.Count > 0).ToList();
+            if (dict.Count > 0)
+            {
+                IDictionary<ushort, string> ans = XI.MultiAsyncInput(dict);
+                ans.ToList().ForEach(p => XI.RaiseGMessage("G0HQ,0," + XI.Board.Facer(XI.Board.Garden[p.Key]).Uid +
+                    "," + string.Join(",", p.Key + ",1," + p.Value.Split(',').Length + "," + p.Value)));
+                XI.RaiseGMessage("G0DH," + string.Join(",", ans.Select(p => p.Key + ",0," + (2 * p.Value.Split(',').Length))));
+            }
+            if (lesss.Count > 0)
+                XI.RaiseGMessage("G0DH," + string.Join(",", lesss.Select(p => p.Uid + ",1," + (3 - p.Tux.Count))));
         }
         #endregion Holiday
 

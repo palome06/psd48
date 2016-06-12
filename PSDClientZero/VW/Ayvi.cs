@@ -1,242 +1,127 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using PSD.Base.VW;
-using System.Text.RegularExpressions;
 using System.Threading;
+using System.Collections.Concurrent;
+using System.Threading.Tasks;
 
 namespace PSD.ClientZero.VW
 {
     public class Ayvi : IVI
     {
-        // queue for command code, help and talk respectively
-        private Queue<string> cvQueues, hpQueues, tkQueues;
+        // help message (e.g. /h)
+        private BlockingCollection<string> hpQueue;
+        // chat and setting message
+        private BlockingCollection<string> tkQueue;
+        // main queue
+        private BlockingCollection<string> cvQueue;
 
-        private int cinReqCount;
-
-        private Boolean cinGate;
-
-        private Thread cinListenThread;
-
-        private int shuzi = 0;
+        public string CinSentinel { get { return "\\"; } }
+        // general ctoken for moniter upstream
+        private CancellationTokenSource ctoken;
+        // token for Cin, would be cancelled and refreshed when notified
+        private CancellationTokenSource curToken;
 
         internal Base.ClLog Log { set; get; }
-
-        public Ayvi(int count, bool record, bool msgLog)
-        {
-            //this.count = count;
-            //Log = new Base.Log(); Log.Start(312, record, msgLog, 0);
-            this.cvQueues = new Queue<string>();
-            this.cinReqCount = 0;
-            this.cinGate = false;
-            this.hpQueues = new Queue<string>();
-            this.tkQueues = new Queue<string>();
-            cinListenThread = new Thread(() => ZI.SafeExecute(() => CinListenStarts(),
-                delegate(Exception e) { if (Log != null) Log.Logg(e.ToString()); }));
-        }
-
-        public void Init() { cinListenThread.Start(); }
         // Set whether the game is started or still in preparation
         // thus whether operations can be accepted or not
         public void SetInGame(bool value) { mInGame = value; }
         private bool mInGame;
 
-        private void CinListenStarts()
+        public Ayvi()
         {
-            string line;
-            do
+            hpQueue = new BlockingCollection<string>();
+            tkQueue = new BlockingCollection<string>();
+            ctoken = new CancellationTokenSource();
+            curToken = null;
+            cvQueue = new BlockingCollection<string>();
+        }
+
+        public void Init()
+        {
+            StartListenTask(() =>
             {
-                line = Console.ReadLine();
-                if (line.StartsWith("@@"))
-                {
-                    lock (tkQueues)
-                        tkQueues.Enqueue("Y1," + line.Substring("@@".Length));
-                }
-                else
-                {
-                    line = line.Trim().ToUpper();
-                    if (line.StartsWith("/"))
-                    {
-                        lock (hpQueues)
-                            hpQueues.Enqueue(line.Substring("/".Length));
-                    }
-                    else if (mInGame && line.StartsWith("@#"))
-                    {
-                        lock (tkQueues)
-                            tkQueues.Enqueue("Y3," + line.Substring("@#".Length));
-                    }
-                    else if (mInGame)
-                    {
-                        if (cinGate)
-                            lock (cvQueues)
-                                cvQueues.Enqueue(line);
-                        ++shuzi;
-                    }
-                }
-            } while (line != null);
+                string line;
+                while ((line = Console.ReadLine()) != null)
+                    Offer(line);
+            });
         }
-
-        private void FCout(ushort me, string msg)
+        // accept the line from console or other places
+        public void Offer(string line)
         {
-            Console.WriteLine(msg);
-            if (Log != null) 
-                Log.Record(msg);
-        }
-        public void Cout(ushort me, string msgFormat, params object[] args)
-        {
-            FCout(me, string.Format(msgFormat, args));
-        }
-        private string FCin(ushort me, string hint)
-        {
-            Console.WriteLine("===> " + hint);
-            int count = cinReqCount;
-            for (int i = 0; i < count; ++i)
-                cvQueues.Enqueue(CinSentinel);
-            while (cinReqCount > 0)
-                Thread.Sleep(50);
-            while (cvQueues.Count > 0 && cvQueues.Peek() == CinSentinel)
-                cvQueues.Dequeue();
-
-            ++cinReqCount;
-            cinGate = true;
-            string msg = null;
-            do
+            if (line.StartsWith("@@")) // Chat
+                tkQueue.Add("Y1," + line.Substring("@@".Length));
+            else if (line.StartsWith("@#")) // Setting
             {
-                lock (cvQueues)
-                {
-                    if (cvQueues.Count > 0)
-                        msg = cvQueues.Dequeue();
-                }
-                Thread.Sleep(100);
-            } while (msg == null);
-            //if (msg != CinSentinel)
-            --cinReqCount;
-
-            if (cinReqCount == 0)
-                cinGate = false;
-            return msg;
+                if (mInGame)
+                    tkQueue.Add("Y3," + line.Substring("@#".Length));
+            }
+            else
+            {
+                line = line.Trim().ToUpper();
+                if (line.StartsWith("/"))
+                    hpQueue.Add(line.Substring("/".Length));
+                else if (mInGame)
+                    cvQueue.Add(line);
+            }
         }
+
+        public void Chat(string msg, string nick) { Console.WriteLine("**[{0}]:{1}**", msg, nick); }
+
         public string Cin(ushort me, string hintFormat, params object[] args)
         {
-            return FCin(me, string.Format(hintFormat, args));
+            if (curToken != null)
+            {
+                curToken.Cancel();
+                curToken.Dispose();
+            }
+            curToken = new CancellationTokenSource();
+            while (cvQueue.Count > 0)
+                cvQueue.Take();
+            if (!string.IsNullOrEmpty(hintFormat))
+                Console.WriteLine("===> " + string.Format(hintFormat, args));
+            try { return cvQueue.Take(curToken.Token); }
+            catch (OperationCanceledException) { return CinSentinel; }
         }
 
-        // Open Cin Tunnel
-        public void OpenCinTunnel(ushort me)
-        {
-            //cinGate = true;
-            //lock (cinGate)
-            //{
-                //cinGate[me] = true;
-            //}
-        }
-        // Close Cin Tunnel
         public void CloseCinTunnel(ushort me)
         {
-            //cinGate = false;
-            //while (cinReqCount > 0)
-            //{
-            //    cvQueues.Enqueue(CinSentinel);
-            //    --cinReqCount;
-            //}
-            //lock (cinGate)
-            //{
-            //    cinGate[me] = false;
-            //    while (cinReqCount[me] > 0)
-            //    {
-            //        cvQueues[me].Enqueue(CinSentinel);
-            //        --cinReqCount[me];
-            //    }
-            //}
-        }
-        // Terminate Cin Tunnel, give pending Cin CinSentinel as result
-        public void TerminCinTunnel(ushort me)
-        {
-            int count = cinReqCount;
-            for (int i = 0; i < count; ++i)
-                cvQueues.Enqueue(CinSentinel);
-            while (cinReqCount > 0)
-                Thread.Sleep(50);
-        }
-        // Reset Cin Tunnel, clean all pending input request
-        public void ResetCinTunnel(ushort me) { cinReqCount = 0; }
-        public string CinSentinel { get { return "\\"; } }
-
-        // TODO:DEBUG: only display hidden message
-        public void Cout0(ushort me, string msg)
-        {
-            //if (me == 0 || me == 1 || me == 2)
-            //    Console.WriteLine(me + "~" + msg);
-        }
-        // Request in Client
-        public string Request(ushort me)
-        {
-            string msg = null;
-            do
+            CancellationTokenSource token = curToken;
+            curToken = null;
+            if (token != null)
             {
-                lock (hpQueues)
-                {
-                    if (hpQueues.Count > 0)
-                        msg = hpQueues.Dequeue().ToString();
-                }
-                Thread.Sleep(100);
-            } while (msg == null);
-            return msg;
-        }
-        // Talk in Client
-        public string RequestTalk(ushort me)
-        {
-            string msg = null;
-            do
-            {
-                lock (tkQueues)
-                {
-                    if (tkQueues.Count > 0)
-                        msg = tkQueues.Dequeue().ToString();
-                }
-                Thread.Sleep(100);
-            } while (msg == null);
-            return msg;
-        }
-        //public void Chat(Msgs msg)
-        //{
-        //    Console.WriteLine("**" + msg.From + "#:" + msg.Msg + "**");
-        //}
-        public void Chat(string msg, string nick)
-        {
-            Console.WriteLine("**[" + nick + "]:" + msg + "**");
+                token.Cancel();
+                token.Dispose();
+            }
         }
 
-        #region Sepcial Zone
-        // Cin without prefix "===>" signal
-        public string Cin48(ushort ut)
+        public void Cout(ushort me, string msgFormat, params object[] args)
         {
-            int count = cinReqCount;
-            for (int i = 0; i < count; ++i)
-                cvQueues.Enqueue(CinSentinel);
-            while (cinReqCount > 0)
-                Thread.Sleep(50);
-
-            ++cinReqCount;
-            cinGate = true;
-            string msg = null;
-            do
-            {
-                lock (cvQueues)
-                {
-                    if (cvQueues.Count > 0)
-                        msg = cvQueues.Dequeue();
-                }
-                Thread.Sleep(100);
-            } while (msg == null);
-            //if (msg != CinSentinel)
-            --cinReqCount;
-
-            if (cinReqCount == 0)
-                cinGate = false;
-            return msg;
+            string msg = string.Format(msgFormat, args);
+            Console.WriteLine(msg);
+            if (Log != null)
+                Log.Record(msg);
         }
-        #endregion Special Zone
+
+        public string RequestHelp(ushort me) { return hpQueue.Take(ctoken.Token); }
+
+        public string RequestTalk(ushort me) { return tkQueue.Take(ctoken.Token); }
+
+        public void Close()
+        {
+            ctoken.Cancel(); ctoken.Dispose();
+            hpQueue.Dispose();
+            tkQueue.Dispose();
+            cvQueue.Dispose();
+        }
+        /// <summary>
+        /// start an async Listening task
+        /// </summary>
+        /// <param name="action">the acutal listen action</param>
+        private void StartListenTask(Action action)
+        {
+            Action<Exception> ae = (e) => { if (Log != null) Log.Logg(e.ToString()); };
+            Task.Factory.StartNew(() => ZI.SafeExecute(action, ae), ctoken.Token,
+                TaskCreationOptions.LongRunning, TaskScheduler.Default);
+        }
     }
 }

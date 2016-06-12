@@ -2697,11 +2697,11 @@ namespace PSD.PSDGamepkg.JNS
         public void GSH1WinEff()
         {
             Player rd = XI.Board.Rounder;
-            if (rd.GetAllCardsCount() > 0)
+            int n = rd.Tux.Count();
+            if (n > 0)
             {
-                int n = rd.GetAllCardsCount();
                 string dises = XI.AsyncInput(rd.Uid, "#弃置以补牌,/Q1" + (n > 1 ? ("~" + n) : "") + "(p" + 
-                    string.Join("p", rd.ListOutAllCards()) + "),#补牌,/T1" + AOthers(rd), "GSH1WinEff", "0");
+                    string.Join("p", rd.Tux) + "),#补牌,/T1" + AOthers(rd), "GSH1WinEff", "0");
                 if (!dises.StartsWith("/") && !dises.Contains(VI.CinSentinel))
                 {
                     ushort[] uts = dises.Split(',').Select(p => ushort.Parse(p)).ToArray();
@@ -2713,9 +2713,27 @@ namespace PSD.PSDGamepkg.JNS
         }
         public void GSH1LoseEff()
         {
-            Harm("GSH1", XI.Board.Rounder, 2);
+            Player rd = XI.Board.Rounder;
+            Harm("GSH1", rd, 2);
             if (XI.Board.Hinder.IsValidPlayer())
                 Cure("GSH1", XI.Board.Hinder, 2);
+            if (rd.HasAnyEquips() || rd.GetPetCount() > 0)
+            {
+                string dises = XI.AsyncInput(rd.Uid, "#是否弃置所有装备及宠物##是##否,Y2", "GSH1LoseEff", "0");
+                if (dises == "1")
+                {
+                    if (rd.HasAnyEquips())
+                        XI.RaiseGMessage("G0QZ," + rd.Uid + "," + string.Join(",", rd.ListOutAllEquips()));
+                    if (rd.GetPetCount() > 0)
+                    {
+                        XI.RaiseGMessage(new Artiad.LosePet()
+                        {
+                            Owner = rd.Uid,
+                            Pets = rd.Pets.Where(p => p != 0).ToArray()
+                        }.ToMessage());
+                    }
+                }
+            }
         }
         public void GSH1ConsumeAction(Player player, int consumeType, int type, string fuse, string argst)
         {
@@ -3292,7 +3310,7 @@ namespace PSD.PSDGamepkg.JNS
             Player rd = XI.Board.Rounder;
             XI.RaiseGMessage("G0DH," + rd.Uid + ",0,1");
             int saturn = FiveElement.SATURN.Elem2Index();
-            if (rd.Pets[saturn] != 0)
+            if (rd.Pets[saturn] != 0 && XI.LibTuple.ML.Decode(rd.Pets[saturn]).Level == Monster.ClLevel.WEAK)
             {
                 ushort gth1code = XI.LibTuple.ML.Encode("GTH1");
                 XI.RaiseGMessage(new Artiad.HarvestPet()
@@ -3339,92 +3357,22 @@ namespace PSD.PSDGamepkg.JNS
                 }
             }
         }
-        public void GTH1IncrAction(Player player)
-        {
-            ushort me = XI.LibTuple.ML.Encode("GTH1");
-            if (!player.Pets.Any(p => p != 0 && p != me))
-            {
-                Monster monster = XI.LibTuple.ML.Decode(me) as Monster;
-                int delta = player.STR - monster.ROM.GetInt("iSTR");
-                if (delta < 0)
-                    XI.RaiseGMessage("G0OB," + me + "," + (-delta));
-                else if (delta > 0)
-                    XI.RaiseGMessage("G0IB," + me + "," + delta);
-                monster.ROM.Set("iSTR", player.STR);
-            }
-        }
-        public void GTH1DecrAction(Player player)
-        {
-            ushort me = XI.LibTuple.ML.Encode("GTH1");
-            Monster monster = XI.LibTuple.ML.Decode(me) as Monster;
-            if (monster.ROM.GetInt("iSTR") != 0)
-            {
-                XI.RaiseGMessage("G0OB," + me + "," + monster.ROM.GetInt("iSTR"));
-                monster.ROM.Set("iSTR", null);
-            }
-        }
         public void GTH1ConsumeAction(Player player, int consumeType, int type, string fuse, string args)
         {
             if (consumeType == 0)
             {
                 ushort me = XI.LibTuple.ML.Encode("GTH1");
                 Monster monster = XI.LibTuple.ML.Decode(me) as Monster;
-                if (type == 0)
-                {
-                    XI.RaiseGMessage("G0OB," + me + "," + monster.ROM.GetInt("iSTR"));
-                    monster.ROM.Set("iSTR", 0);
-                }
-                else if (type == 1)
-                {
-                    XI.RaiseGMessage("G0IB," + me + "," + player.STR);
-                    monster.ROM.Set("iSTR", player.STR);
-                }
-                else if (type == 2 || type == 3 || type == 4)
-                {
-                    int delta = player.STR - monster.ROM.GetInt("iSTR");
-                    if (delta < 0)
-                        XI.RaiseGMessage("G0OB," + me + "," + (-delta));
-                    else if (delta > 0)
-                        XI.RaiseGMessage("G0IB," + me + "," + delta);
-                    monster.ROM.Set("iSTR", player.STR);
-                } // IA/OA/AX
-                else if (type == 5)
-                {
-                    bool anyOther = player.Pets.Any(p => p != 0 && p != me);
-                    int iSTR = monster.ROM.GetInt("iSTR");
-                    int cSTR = anyOther ? 0 : player.STR;
-                    if (cSTR > 0)
-                        XI.RaiseGMessage("G0IB," + me + "," + cSTR);
-                    monster.ROM.Set("iSTR", cSTR);
-                }
+                XI.RaiseGMessage("G0IB," + me + "," + player.STR);
             }
         }
         public bool GTH1ConsumeValid(Player player, int consumeType, int type, string fuse)
         {
-            if (consumeType == 0) // HD:gain others, set iSTR = 0
+            if (consumeType == 0)
             {
                 ushort me = XI.LibTuple.ML.Encode("GTH1");
                 Monster monster = XI.LibTuple.ML.Decode(me) as Monster;
-                bool anyOther = player.Pets.Any(p => p != 0 && p != me);
-                if (type == 0 && monster.ROM.GetInt("iSTR") != 0 && player.STR > 0) // HD, obtain others, set iSTR = 0
-                {
-                    Artiad.ObtainPet otp = Artiad.ObtainPet.Parse(fuse);
-                    return otp.Farmer == player.Uid && otp.Pets.Any(p => p != me);
-                }
-                else if (type == 1 && monster.ROM.GetInt("iSTR") == 0 && player.STR > 0) // HL, lose others, set iSTR
-                    return !anyOther;
-                else if (type == 2 || type == 3 || type == 4) // IA/OA/AX/WB
-                    return !anyOther && monster.ROM.GetInt("iSTR") != player.STR;
-                else if (type == 5)
-                {
-                    string[] g0wb = fuse.Split(',');
-                    if (g0wb.Contains(me.ToString()))
-                    {
-                        int iSTR = anyOther ? 0 : player.STR;
-                        return monster.ROM.GetInt("iSTR") != iSTR || monster.ROM.GetInt("iSTR") != 0;
-                    }
-                    else return false;
-                }
+                return player.Pets.Any(p => p != 0 && p != me) && player.STR > 0;
             }
             return false;
         }

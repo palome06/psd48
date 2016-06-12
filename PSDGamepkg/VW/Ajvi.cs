@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text.RegularExpressions;
-using System.Threading;
 
 namespace PSD.PSDGamepkg.VW
 {
@@ -16,6 +13,8 @@ namespace PSD.PSDGamepkg.VW
             throw new NotImplementedException();
         }
 
+        public void Close() { }
+
         public void CloseCinTunnel(ushort me) { }
 
         public void Cout(ushort me, string msgFormat, params object[] args)
@@ -25,9 +24,7 @@ namespace PSD.PSDGamepkg.VW
 
         public void Init() { }
 
-        public void OpenCinTunnel(ushort me) { }
-
-        public string Request(ushort me)
+        public string RequestHelp(ushort me)
         {
             throw new NotImplementedException();
         }
@@ -38,7 +35,5 @@ namespace PSD.PSDGamepkg.VW
         }
 
         public void SetInGame(bool value) { }
-
-        public void TerminCinTunnel(ushort me) { }
     }
 }

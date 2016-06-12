@@ -6,7 +6,7 @@ namespace PSD.ClientAo
 {
     public static class Util
     {
-        public delegate bool InputMessageHandler(string input);
+        public delegate void InputMessageHandler(string input);
 
         public delegate void RubanMoveHandler(int oI, int oJ, int idx, int jdx);
     }

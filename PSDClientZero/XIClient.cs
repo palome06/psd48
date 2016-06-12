@@ -126,7 +126,7 @@ namespace PSD.ClientZero
             this.name = name; this.avatar = avatar;
             this.hopeTeam = hopeTeam;
 
-            VW.Ayvi ayvi = new VW.Ayvi(totalPlayer, record, msglog);
+            VW.Ayvi ayvi = new VW.Ayvi();
             VI = ayvi;
             VI.Init(); ayvi.SetInGame(true);
             VW.Bywi bywi = new VW.Bywi(server, port, name, avatar, hopeTeam, 0);
@@ -188,7 +188,7 @@ namespace PSD.ClientZero
             {
                 while (true)
                 {
-                    string acmd = VI.Request(Uid);
+                    string acmd = VI.RequestHelp(Uid);
                     if (acmd != null)
                         OnRequestLocalCmd(acmd);
                 }
@@ -304,7 +304,7 @@ namespace PSD.ClientZero
             //if (unhandledMsg.Count > 0)
             //    unhandledMsg.Dequeue();
             SingleThreadMessageStart();
-            VI.OpenCinTunnel(Uid);
+            //VI.OpenCinTunnel(Uid);
             return true;
         }
         #endregion Basic Members
@@ -1658,7 +1658,15 @@ namespace PSD.ClientZero
                             ushort[] ravs = new ushort[args.Length - 4];
                             for (int i = 4; i < args.Length; ++i)
                                 ravs[i - 4] = ushort.Parse(args[i]);
-                            VI.Cout(Uid, "{0}调整{1}的新顺序为{2}.", zd.Player(py), dd[args[3]], string.Join(",", ravs));
+                            if (ravs.Length == 2)
+                            {
+                                if (ravs[0] == 1 && ravs[1] == 2)
+                                    VI.Cout(Uid, "{0}未调整牌堆顺序.", zd.Player(py));
+                                else if (ravs[0] == 2 && ravs[1] == 1)
+                                    VI.Cout(Uid, "{0}交换了牌堆顶两张牌的顺序.", zd.Player(py));
+                            }
+                            else
+                                VI.Cout(Uid, "{0}调整{1}的新顺序为{2}.", zd.Player(py), dd[args[3]], string.Join(",", ravs));
                         }
                         else if (type == 4)
                             VI.Cout(Uid, "{0}不调整牌堆顺序.", zd.Player(py));
@@ -2640,7 +2648,7 @@ namespace PSD.ClientZero
             // start a new task to send back the feedback and start a new single message thread w/ new token
             // Cancel all tokens
             // Reset Cin Count
-            VI.TerminCinTunnel(Uid);
+            // VI.TerminCinTunnel(Uid);
             WI.Send(readLine, Uid, 0);
             string[] args = readLine.Split(',');
             switch (args[0])
@@ -3085,7 +3093,7 @@ namespace PSD.ClientZero
                         //    Z0F.Hinder = h;
                         //}
                     }
-                    VI.TerminCinTunnel(Uid);
+                    // VI.TerminCinTunnel(Uid);
                     break;
                 case "ZM1":
                     {
@@ -3531,11 +3539,10 @@ namespace PSD.ClientZero
                         cinCalled = StartCinEtc();
                         while ((Uid % 2 == 0 && !cc.DecidedAo) || (Uid % 2 == 1 && !cc.DecidedAka))
                         {
-
                             List<int> xuanR = (Uid % 2 == 0) ? cc.XuanAo : cc.XuanAka;
                             if (VI is ClientZero.VW.Ayvi)
                             {
-                                string op = (VI as ClientZero.VW.Ayvi).Cin48(Uid);
+                                string op = VI.Cin(Uid, null);
                                 op = op.Trim().ToUpper();
                                 int selAva;
                                 bool has = cc.Ding[Uid] != 0;
@@ -3576,7 +3583,7 @@ namespace PSD.ClientZero
                                 //List<int> xuanR = (Uid % 2 == 0) ? cc.XuanAo : cc.XuanAka;
                                 if (VI is ClientZero.VW.Ayvi)
                                 {
-                                    string op = (VI as ClientZero.VW.Ayvi).Cin48(Uid);
+                                    string op = VI.Cin(Uid, null);
                                     op = op.Trim().ToUpper();
                                     //bool has = cc.Ding[Uid] != 0;
                                     if (op == "X")
@@ -3659,7 +3666,7 @@ namespace PSD.ClientZero
                                 cc.DecidedAo = true;
                             else
                                 cc.DecidedAka = true;
-                            VI.TerminCinTunnel(Uid);
+                            // VI.TerminCinTunnel(Uid);
                             string msg = "我方选择结果为：";
                             for (int i = 1; i < args.Length; i += 2)
                             {

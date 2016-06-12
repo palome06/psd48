@@ -647,7 +647,7 @@ namespace PSD.PSDGamepkg
                     if (MatchedPopFromLastUV(msg.From, msg.Msg))
                     {
                         string decision = msg.Msg.Substring("V4,".Length);
-                        if (MatchedPopFromLastUV(ExceptStaff(mayor), "V5,0"))
+                        if (MatchedPopFromLastUV(ExceptStaff(mayor), "V5,0")) // TODO: check it out!
                         {
                             WI.Send("V5,0", ExceptStaff(mayor));
                             WI.Live("V5,0");
@@ -692,9 +692,10 @@ namespace PSD.PSDGamepkg
                 if (MatchedPopFromLastUV(msg.From, msg.Msg))
                 {
                     string decision = msg.Msg.Substring("V4,".Length);
-                    if (MatchedPopFromLastUV(ExceptStaff(msg.From), "V5,0"))
+                    ushort[] silentMajority = citizens.Keys.Except(new ushort[] { msg.From }).ToArray();
+                    if (MatchedPopFromLastUV(silentMajority, "V5,0"))
                     {
-                        WI.Send("V5,0", ExceptStaff(msg.From));
+                        WI.Send("V5,0", silentMajority);
                         WI.Live("V5,0");
                     }
                     return decision;

@@ -54,14 +54,11 @@ namespace PSD.ClientAo
 
         public void StartHall()
         {
-            VW.Cyvi cyvi = new VW.Cyvi(AD, record, msglog);
+            VW.Cyvi cyvi = new VW.Cyvi(AD);
             VI = cyvi; VI.Init(); VI.SetInGame(false);
 
             TcpClient client = null;
-            try
-            {
-                client = new TcpClient(server, port);
-            }
+            try { client = new TcpClient(server, port); }
             catch (SocketException) { cyvi.ReportNoServer(server); return; }
             NetworkStream tcpStream = client.GetStream();
             string trainerjoin = (this.trainer != null && trainer.Length > 0) ? ("," + string.Join(",", trainer)) : "";
@@ -262,7 +259,7 @@ namespace PSD.ClientAo
         }
         public void ResumeHall()
         {
-            VW.Cyvi cyvi = new VW.Cyvi(AD, record, msglog);
+            VW.Cyvi cyvi = new VW.Cyvi(AD);
             VI = cyvi; VI.Init(); VI.SetInGame(true);
 
             TcpClient client = new TcpClient(server, port);

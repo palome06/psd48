@@ -500,6 +500,7 @@
     <Resource Include="Resources\Token\TKE0204.png" />
     <Resource Include="Resources\Token\TKE0205.png" />
     <Resource Include="Resources\Token\TRE04.png" />
+    <Resource Include="Resources\Token\TAE05.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Card\Eve\S3W01.png" />
@@ -1060,6 +1061,8 @@
     <Resource Include="Resources\Card\Eve\SJH06.png" />
     <Resource Include="Resources\Card\Eve\SJH07.png" />
     <Resource Include="Resources\Card\Eve\SJH09.png" />
+    <Resource Include="Resources\Card\Eve\SJH10.png" />
+    <Resource Include="Resources\Card\Eve\SJH11.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Card\NMB\GFT3.png" />
@@ -1203,6 +1206,7 @@
     <Resource Include="Resources\NameBar\Name000.png" />
     <Resource Include="Resources\NameBar\NameEX408.png" />
     <Resource Include="Resources\NameBar\NameEX506.png" />
+    <Resource Include="Resources\NameBar\NameEX515.png" />
     <Resource Include="Resources\NameBar\NameHL001.png" />
     <Resource Include="Resources\NameBar\NameHL002.png" />
     <Resource Include="Resources\NameBar\NameHL003.png" />
@@ -1383,6 +1387,7 @@
     <Resource Include="Resources\Heros\18002.png" />
     <Resource Include="Resources\Heros\18003.png" />
     <Resource Include="Resources\Heros\18004.png" />
+    <Resource Include="Resources\Heros\18005.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Heros\19001.png" />
@@ -1414,6 +1419,7 @@
     <Resource Include="Resources\Card\Heros\EX301.png" />
     <Resource Include="Resources\Card\Heros\EX408.png" />
     <Resource Include="Resources\Card\Heros\EX506.png" />
+    <Resource Include="Resources\Card\Heros\EX515.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Card\Heros\HL001.png" />

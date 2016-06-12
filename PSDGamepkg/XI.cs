@@ -532,8 +532,8 @@ namespace PSD.PSDGamepkg
                 "HI", "HL", "IC", "OC", "HT", "HG", "QR", "HZ", "TT", "T7", "JM", "WN", "IJ", "OJ",
                 "IE", "OE", "IS", "OS", "LA", "IV", "OV", "PB", "YM", "HR", "FI", "ON", "SN", "MA",
                 "ZJ", "IF", "OF", "PQ" };
-            string[] g1 = { "DI", "IU", "OU", "TH", "CW", "ZK", "IZ", "OZ", "WP", "SG", "HK", "WJ",
-                "XR", "EV", "CK", "7F", "YP", "NI", "GE", "LY", "UE" };
+            string[] g1 = { "CH", "DI", "IU", "OU", "TH", "CW", "ZK", "IZ", "OZ", "WP", "SG", "HK",
+                "WJ", "XR", "EV", "CK", "7F", "YP", "NI", "GE", "LY", "UE" };
             string[] g2 = { "IN", "RN", "CN", "QC", "FU", "QU", "CL", "WK", "AK", "IL", "OL", "SW",
                 "AS", "SY", "UL", "ZZ" };
             foreach (string g0event in g0)
@@ -1924,7 +1924,9 @@ namespace PSD.PSDGamepkg
             else if (selCode == RuleCode.MODE_SS)
             {
                 if (prpr <= 0) prpr = 16;
-                else if (prpr % 2 != 0) ++prpr;
+                if (prpr % 2 != 0) ++prpr;
+                if (PCS.ListAllSeleableHeros().Length > 72)
+                    prpr -= 2;
                 List<Base.Card.Hero> heros = PCS.AllocateHerosRM(prpr).ToList();
                 CastingPublic cp = new CastingPublic(heros.Select(p => p.Avatar).ToList());
                 Casting = cp;

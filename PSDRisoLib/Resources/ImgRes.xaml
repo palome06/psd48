@@ -229,6 +229,7 @@
     <Image x:Key="heroHead18002" Source="Heros/18002.png"/>
     <Image x:Key="heroHead18003" Source="Heros/18003.png"/>
     <Image x:Key="heroHead18004" Source="Heros/18004.png"/>
+    <Image x:Key="heroHead18005" Source="Heros/18005.png"/>
 
     <Image x:Key="heroHead19001" Source="Heros/19001.png"/>
     <Image x:Key="heroHead19002" Source="Heros/19002.png"/>
@@ -338,6 +339,7 @@
 
     <ImageBrush x:Key="nameBarEX408" ImageSource="NameBar/NameEX408.png"/>
     <ImageBrush x:Key="nameBarEX506" ImageSource="NameBar/NameEX506.png"/>
+    <ImageBrush x:Key="nameBarEX515" ImageSource="NameBar/NameEX515.png"/>
 
     <ImageBrush x:Key="nameBarHL001" ImageSource="NameBar/NameHL001.png"/>
     <ImageBrush x:Key="nameBarHL002" ImageSource="NameBar/NameHL002.png"/>
@@ -440,6 +442,7 @@
     <BitmapImage x:Key="snapTKEX301_4" UriSource="Token/TKE0204.png"/>
     <BitmapImage x:Key="snapTKEX301_5" UriSource="Token/TKE0205.png"/>
     <BitmapImage x:Key="snapTREX506" UriSource="Token/TRE04.png"/>
+    <BitmapImage x:Key="snapTAEX515" UriSource="Token/TAE05.png"/>
 
     <Image x:Key="exspCard1" Source="Card/ExSp/EP001.png"/>
     <Image x:Key="exspCard2" Source="Card/ExSp/EP002.png"/>
@@ -515,6 +518,8 @@
     <Image x:Key="eveCardSJH06" Source="Card/Eve/SJH06.png"/>
     <Image x:Key="eveCardSJH07" Source="Card/Eve/SJH07.png"/>
     <Image x:Key="eveCardSJH09" Source="Card/Eve/SJH09.png"/>
+    <Image x:Key="eveCardSJH10" Source="Card/Eve/SJH10.png"/>
+    <Image x:Key="eveCardSJH11" Source="Card/Eve/SJH11.png"/>
 
     <BitmapImage x:Key="monCard000src" UriSource="Card/Mon00.png"/>
     <Image x:Key="monCard000" Source="Card/Mon00.png"/>
@@ -865,6 +870,7 @@
     <Image x:Key="hroCardEX301" Source="Card/Heros/EX301.png"/>
     <Image x:Key="hroCardEX408" Source="Card/Heros/EX408.png"/>
     <Image x:Key="hroCardEX506" Source="Card/Heros/EX506.png"/>
+    <Image x:Key="hroCardEX515" Source="Card/Heros/EX515.png"/>
 
     <Image x:Key="hroCardHL001" Source="Card/Heros/HL001.png"/>
     <Image x:Key="hroCardHL002" Source="Card/Heros/HL002.png"/>
