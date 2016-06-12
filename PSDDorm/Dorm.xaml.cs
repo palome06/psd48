@@ -272,13 +272,23 @@ namespace PSDDorm
                     if (issv && angelUid != 0)
                     {
                         if (line.StartsWith("0>" + angel + ":") || line.StartsWith("0>" + angel + ";"))
-                            sw.WriteLine("<" + line.Substring("0>?:".Length));
+                        {
+                            string content = line.Substring("0>?:".Length);
+                            int idx = content.IndexOf(',');
+                            string head = idx < 0 ? content : content.Substring(0, idx);
+                            if (!h0Namelist.Contains(head) || h0SetOccur.Add(head))
+                                sw.WriteLine("<" + line.Substring("0>?:".Length));
+                        }
                     }
                     else
                         sw.WriteLine(line);
                 }
             };
         }
+
+        private ISet<string> h0SetOccur = new HashSet<string>();
+        private static readonly ISet<string> h0Namelist =
+            new HashSet<string>() { "H0SM", "H09N", "H09G", "H09P", "H09F" };
 
         private void Save(string path, string name)
         {
