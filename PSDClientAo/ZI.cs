@@ -57,7 +57,9 @@ namespace PSD.ClientAo
             VW.Cyvi cyvi = new VW.Cyvi(AD);
             VI = cyvi; VI.Init(); VI.SetInGame(false);
 
-            TcpClient client = new TcpClient(server, port);
+            TcpClient client = null;
+            try { client = new TcpClient(server, port); }
+            catch (SocketException) { cyvi.ReportNoServer(server); return; }
             NetworkStream tcpStream = client.GetStream();
             string trainerjoin = (this.trainer != null && trainer.Length > 0) ? ("," + string.Join(",", trainer)) : "";
             int version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.Revision;

@@ -97,6 +97,7 @@ namespace PSD.ClientAo.VW
         {
             try { return cvQueue.Take(curToken.Token); }
             catch (OperationCanceledException) { return CinSentinel; }
+            catch (ObjectDisposedException) { return CinSentinel; }
         }
         private void PreCinClearup()
         {
