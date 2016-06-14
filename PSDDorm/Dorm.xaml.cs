@@ -238,6 +238,7 @@ namespace PSDDorm
             if (!Directory.Exists("./mosh"))
                 Directory.CreateDirectory("./mosh");
             string lName = "./mosh/" + name + (angelUid != 0 ? ("(" + angelUid + ").psg") : ".txt");
+            h0SetOccur.Clear();
 
             var iter = System.IO.File.ReadLines(path).GetEnumerator();
             int version = 0, uid = 0; bool issv = false;
@@ -277,7 +278,7 @@ namespace PSDDorm
                             int idx = content.IndexOf(',');
                             string head = idx < 0 ? content : content.Substring(0, idx);
                             if (!h0Namelist.Contains(head) || h0SetOccur.Add(head))
-                                sw.WriteLine("<" + line.Substring("0>?:".Length));
+                                sw.WriteLine("<" + content);
                         }
                     }
                     else

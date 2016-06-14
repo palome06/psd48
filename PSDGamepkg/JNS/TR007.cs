@@ -1573,7 +1573,7 @@ namespace PSD.PSDGamepkg.JNS
                 {
                     ushort me = ushort.Parse(args[i]);
                     Player py = XI.Board.Garden[me];
-                    string input = XI.AsyncInput(me, "#获得补牌的,T1" + ATeammates(player), "G0ZW", "0");
+                    string input = XI.AsyncInput(me, "#获得补牌的,T1" + ATeammates(py), "G0ZW", "0");
                     XI.RaiseGMessage("G0HG," + input + ",2");
                 }
             XI.InnerGMessage(fuse, 301);
@@ -3840,31 +3840,20 @@ namespace PSD.PSDGamepkg.JNS
             {
                 int count = XI.Board.Garden.Values.Count(p => p.IsAlive && XI.Board.IsAttendWar(p) &&
                     XI.LibTuple.HL.InstanceHero(p.SelectHero).Bio.Contains("K"));
-                if (type == 0)
-                    return count > 0;
-                else
-                    return count != player.RAM.GetInt("Ghost");
+                return count != player.RAM.GetInt("Ghost");
             }
             else return false;
         }
         public void JNT3402Action(Player player, int type, string fuse, string args)
         {
             int count = XI.Board.Garden.Values.Count(p => p.IsAlive && XI.Board.IsAttendWar(p) &&
-                XI.LibTuple.HL.InstanceHero(p.SelectHero).Bio.Contains("K") );
-            if (type == 0)
-            {
-                player.RAM.Set("Ghost", count);
-                XI.RaiseGMessage("G0IA," + player.Uid + ",1," + count * 2);
-            }
-            else
-            {
-                int delta = count - player.RAM.GetInt("Ghost");
-                player.RAM.Set("Ghost", count);
-                if (delta > 0)
-                    XI.RaiseGMessage("G0IA," + player.Uid + ",1," + delta * 2);
-                else if (delta < 0)
-                    XI.RaiseGMessage("G0OA," + player.Uid + ",1," + (-delta) * 2);
-            }
+            XI.LibTuple.HL.InstanceHero(p.SelectHero).Bio.Contains("K") );
+            int delta = count - player.RAM.GetInt("Ghost");
+            player.RAM.Set("Ghost", count);
+            if (delta > 0)
+                XI.RaiseGMessage("G0IA," + player.Uid + ",1," + delta * 2);
+            else if (delta < 0)
+                XI.RaiseGMessage("G0OA," + player.Uid + ",1," + (-delta) * 2);
         }
         public bool JNT3403Valid(Player player, int type, string fuse)
         {
