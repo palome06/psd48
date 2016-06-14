@@ -2961,7 +2961,7 @@ namespace PSD.PSDGamepkg.JNS
                 {
                     Action = Artiad.AnnouceCard.Type.SHOW,
                     Officer = who,
-                    Genre = Card.Genre.Five,
+                    Genre = Card.Genre.Tux,
                     SingleCard = card
                 }.ToMessage());
                 player.RFM.Set("protected", card);

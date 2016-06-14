@@ -3120,15 +3120,9 @@ namespace PSD.PSDGamepkg.JNS
         {
             if (type == 0)
             {
-                if (XI.Board.IsAttendWar(player) && player.TokenCount > 0)
-                {
-                    if (XI.Board.Rounder.Team == player.Team)
-                        return XI.Board.Hinder.IsTared && XI.Board.Hinder.Gender == 'M';
-                    else
-                        return (XI.Board.Supporter.IsTared && XI.Board.Supporter.Gender == 'M') ||
-                            (XI.Board.Rounder.IsTared && XI.Board.Rounder.Gender == 'M');
-                }
-                else return false;
+                return (XI.Board.Supporter.Uid == player.Uid || XI.Board.Hinder.Uid == player.Uid) &&
+                    player.TokenCount > 0 && XI.Board.Garden.Values.Any(p => p.IsTared &&
+                    p.Team == player.OppTeam && XI.Board.IsAttendWar(p) && p.Gender == 'M');
             }
             else if (type == 1 || type == 2)
             {
@@ -3192,17 +3186,8 @@ namespace PSD.PSDGamepkg.JNS
         {
             if (type == 0 && prev == "")
             {
-                if (XI.Board.Rounder.Team == player.Team)
-                    return "/T1(p" + XI.Board.Hinder.Uid + ")";
-                else
-                {
-                    List<ushort> invs = new List<ushort>();
-                    if (XI.Board.Rounder.IsTared && XI.Board.Rounder.Gender == 'M')
-                        invs.Add(XI.Board.Rounder.Uid);
-                    if (XI.Board.Supporter.IsTared && XI.Board.Supporter.Gender == 'M')
-                        invs.Add(XI.Board.Supporter.Uid);
-                    return "/T1(p" + string.Join("p", invs) + ")";
-                }
+                return "/T1" + FormatPlayers(p => p.IsTared && p.Team == player.OppTeam &&
+                    XI.Board.IsAttendWar(p) && p.Gender == 'M');
             }
             else return "";
         }
