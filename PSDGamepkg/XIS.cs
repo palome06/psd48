@@ -174,36 +174,27 @@ namespace PSD.PSDGamepkg
             VI.Init(); // VI inits here?
             Log.Start();
             aywi.TcpListenerStart();
-
             aywi.StartFakePipe(room);
-
-            // TcpClient::::::
-            // ps = new NamedPipeClientStream(pipeName);
-            // ps.Connect();
-            // aywi.Ps = ps;
-            // WriteBytes(ps, "C3RD," + room);
-            //sw = new StreamWriter(ps);
-            //aywi.Sw = sw;
-            //sw.Write("C3RD," + room);
-            //using (var pipeStream = new System.IO.Pipes.NamedPipeClientStream(piperName))
-            //{
-            //    pipeStream.Connect();
-            //    using (var sw = new System.IO.StreamWriter(pipeStream))
-            //    {
-            //        sw.Write("C3RD," + room);
-            //    }
-            //} // :[
-            Board.Garden = aywi.Connect(VI, teamMode, invs.ToList());
-
-            int count = Board.Garden.Count;
-            while (count > 0)
+            
+            Task readyTask = Task.Factory.StartNew(() =>
             {
-                Base.VW.Msgs msg = WI.RecvInfRecvPending();
-                Console.WriteLine("We received message : " + msg.Msg);
-                if (msg.Msg.StartsWith("C2ST,"))
-                    --count;
+                Board.Garden = aywi.Connect(VI, teamMode, invs.ToList());
+                int count = Board.Garden.Count;
+                while (count > 0)
+                {
+                    Base.VW.Msgs msg = WI.RecvInfRecvPending();
+                    Console.WriteLine("We received message : " + msg.Msg);
+                    if (msg.Msg.StartsWith("C2ST,"))
+                        --count;
+                }
+                WI.RecvInfEnd();
+            });
+            bool allReady = readyTask.Wait(Constants.ROOM_READY_TIMEOUT);
+            if (!allReady)
+            {
+                aywi.ShutdownFakePipe(room);
+                return;
             }
-            WI.RecvInfEnd();
             isFinished = false;
             WI.BCast("H0SD," + string.Join(",", Board.Garden.Values.Select(
                 p => p.Uid + "," + p.AUid + "," + p.Name)));

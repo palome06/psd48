@@ -71,6 +71,8 @@ namespace PSD.ClientZero.VW
                     }
                     return true;
                 }
+                else if (line.StartsWith("C2SB,"))
+                    return false;
                 else if (line.StartsWith("C"))
                     return false;
             }

@@ -60,18 +60,20 @@ namespace PSD.ClientAo.VW
                 {
                     stream = tcpStream;
                     recvThread = new Thread(() => ZI.SafeExecute(() => KeepOnListenRecv(),
-                        delegate(Exception e) { Log.Logg(e.ToString()); }));
+                        delegate (Exception e) { Log.Logg(e.ToString()); }));
                     recvThread.Start();
                     if (!watch)
                     {
                         // Base.VW.WHelper.SentByteLine(tcpStream, "C2ST," + Uid);
                         sendThread = new Thread(() => ZI.SafeExecute(() => KeepOnListenSend(),
-                            delegate(Exception e) { Log.Logg(e.ToString()); }));
+                            delegate (Exception e) { Log.Logg(e.ToString()); }));
                         sendThread.Start();
                         Send("C2ST," + Uid, Uid, 0);
                     }
                     return true;
                 }
+                else if (line.StartsWith("C2SB,"))
+                    return false;
                 else if (line.StartsWith("C"))
                     return false;
             }

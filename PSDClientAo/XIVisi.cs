@@ -111,10 +111,12 @@ namespace PSD.ClientAo
             CommonConstruct();
             //if (VI is VW.Ayvi)
             //    (VI as VW.Ayvi).Log = Log;
-            WI = bywi; bywi.StartConnect(watcher);
+            WI = bywi;
+            if (!bywi.StartConnect(watcher))
+                (vi as VW.Cyvi).ReportFlashQuitError();
             if (watcher)
                 Uid = bywi.Uid;
-            VI.Cout(uid, "游戏开始咯~");
+            VI.Cout(uid, watcher ? "您开始旁观~" : "游戏开始咯~");
             isReplay = false;
         }
         // Constructor 2#: Used for Direct Connection

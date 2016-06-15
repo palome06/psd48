@@ -1206,6 +1206,8 @@ namespace PSD.PSDGamepkg.JNS
                     return user != 0 && user != player.Uid && XI.Board.Garden[user].Team == player.OppTeam
                         && (blocks[3] == "JP01" || blocks[3] == "JP06");
                 }
+                else if (type == 7)
+                    return Artiad.Harm.Parse(fuse).Any(p => p.Who == player.Uid && p.Element == FiveElement.YINN);
             }
             return basecon;
         }
@@ -2228,7 +2230,9 @@ namespace PSD.PSDGamepkg.JNS
                         && (blocks[2] == "JP01" || blocks[2] == "JP06");
                 }
                 else if (type == 7) // G0ZH,0
-                    return true;
+                    return XI.Board.Garden.Values.Any(p => p.IsAlive && p.HP == 0 && p.Team == player.Team);
+                else if (type == 8)
+                    return Artiad.Harm.Parse(fuse).Any(p => p.Who == player.Uid && p.Element == FiveElement.YINN);
             }
             return basecon;
         }

@@ -1132,6 +1132,8 @@ namespace PSD.PSDGamepkg
                 case "G0OH":
                     {
                         List<Artiad.Harm> harms = Artiad.Harm.Parse(cmd);
+                        harms.RemoveAll(p => p.Element == FiveElement.YINN &&
+                            !HPEvoMask.IMMUNE_INVAO.IsSet(p.Mask) && Board.Garden[p.Who].Tux.Count == 0);
                         // FiveElement.YINN
                         List<Artiad.Harm> yinns = harms.Where(p => p.Element == FiveElement.YINN &&
                             !HPEvoMask.IMMUNE_INVAO.IsSet(p.Mask)).ToList();
