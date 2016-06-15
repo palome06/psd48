@@ -232,16 +232,14 @@ namespace PSD.PSDCenter
                     {
                         if (line.StartsWith("C3LV")) // Terminate unexpected
                         {
-                            Console.WriteLine("Room " + reqRoom.Number + "# is forced closed.");
+                            Console.WriteLine("Room {0}# is forced closed.", reqRoom.Number);
                             rooms.Remove(reqRoom.Number);
-                            //reqRoom.Ps.Close(); // TODO: LV don't termintate directly
                             break;
                         }
                         else if (line.StartsWith("C3TM")) // Terminate gracefully
                         {
-                            Console.WriteLine("Room " + reqRoom.Number + "# terminates gracefully.");
+                            Console.WriteLine("Room {0}# terminates gracefully.", reqRoom.Number);
                             rooms.Remove(reqRoom.Number);
-                            // reqRoom.Ps.Close(); // TODO: LV don't termintate directly
                             break;
                         }
                         else if (line.StartsWith("C3LS"))
@@ -266,17 +264,19 @@ namespace PSD.PSDCenter
                                     neayers.Remove(subsut);
                                 substitudes.Remove(ut);
                             }
-                            Console.WriteLine("Player {0}#[{1}] has been back to Room Room {2}#.",
+                            Console.WriteLine("Player {0}#[{1}] has been back to Room {2}#.",
                                 ut, neayers[ut].Name, reqRoom.Number);
                         }
                         else if (line.StartsWith("C3RV"))
                         {
                             Console.WriteLine("Room {0}# is recovered.", reqRoom.Number);
                         }
-                        //else if (line.StartsWith("C3BR")) // Bury, just notify the recycle of old rooms
-                        //{
-                        //    Console.WriteLine("Room " + reqRoom.Number + "# is recycled.");
-                        //}
+                        else if (line.StartsWith("C3HX"))
+                        {
+                            Console.WriteLine("Room {0}# has shutdown before getting ready.", reqRoom.Number);
+                            rooms.Remove(reqRoom.Number);
+                            break;
+                        }
                     }
                 }
             }

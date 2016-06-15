@@ -30,6 +30,8 @@ namespace PSD.PSDGamepkg.VW
         private IDictionary<ushort, Neayer> neayers;
         private IDictionary<ushort, Netcher> netchers;
         private Base.VW.IVI vi;
+        // alive before C2AS confirmation
+        private IDictionary<ushort, Neayer> n1;
 
         private bool isRecvBlocked = false;
         // indicate whether the room is hanged up, thus blocking all recv action
@@ -143,7 +145,7 @@ namespace PSD.PSDGamepkg.VW
         // Hall path of construct Aywi, successors is the list player to join, null when indirect
         public IDictionary<ushort, Player> Connect(Base.VW.IVI vi, bool selTeam, List<ushort> valids)
         {
-            IDictionary<ushort, Neayer> n1 = new Dictionary<ushort, Neayer>();
+            n1 = new Dictionary<ushort, Neayer>();
             neayers = new Dictionary<ushort, Neayer>();
             netchers = new Dictionary<ushort, Netcher>();
             this.vi = vi;
@@ -177,7 +179,7 @@ namespace PSD.PSDGamepkg.VW
                 StartListenTask(() => KeepOnListenRecv(pair.Value));
                 Base.VW.WHelper.SentByteLine(new NetworkStream(pair.Value.Tunnel), "C2SA,0");
             }
-            foreach (var pair in netchers)
+            foreach (var pair in netchers.ToList())
             {
                 StartListenTask(() => KeepOnListenRecv(pair.Value));
                 Base.VW.WHelper.SentByteLine(new NetworkStream(pair.Value.Tunnel), "C2SA,0");
@@ -537,6 +539,26 @@ namespace PSD.PSDGamepkg.VW
             Base.VW.WHelper.SentByteLine(tcpStream, "C3HI," + roomNum);
             cns = tcpStream;
         }
+        /// <summary>
+        /// shutdown the room and the pipe, happens when C2ST not gathered ready
+        /// </summary>
+        /// <param name="roomNum">the room number/param>
+        public void ShutdownFakePipe(int roomNum)
+        {
+            Base.VW.WHelper.SentByteLine(cns, "C3HX," + roomNum);
+            // TODO: notify users that has joined the room
+            // QUESTION: how to know who has died yet
+            if (n1 != null)
+            {
+                foreach (Neayer ny in n1.Values)
+                {
+                    try { Base.VW.WHelper.SentByteLine(new NetworkStream(ny.Tunnel), "C2SB,0"); }
+                    catch (SocketException) { }
+                    catch (ObjectDisposedException) { }
+                }
+            }
+            Environment.Exit(0);
+        }
         [MethodImpl(MethodImplOptions.Synchronized)]
         private int GetAliveNeayersCount()
         {
@@ -614,16 +636,12 @@ namespace PSD.PSDGamepkg.VW
         // Send raw message to multiple $to
         public void Send(string msg, ushort[] tos)
         {
-            foreach (ushort to in tos)
-            {
-                if (neayers.ContainsKey(to))
-                    Send(msg, 0, to);
-            }
+            tos.Where(p => neayers.ContainsKey(p)).ToList().ForEach(p => Send(msg, 0, p));
         }
         public void Live(string msg)
         {
-            foreach (ushort to in netchers.Keys)
-                Send(msg, 0, to);
+            List<ushort> nets = netchers.Keys.ToList();
+            nets.ForEach(p => Send(msg, 0, p));
         }
         // Send raw message to the whole
         public void BCast(string msg)

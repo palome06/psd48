@@ -187,6 +187,13 @@ namespace PSD.ClientAo.VW
                 Auxs.MessageHouse.Show("PSDClientAo 版本不符", "远端服务器版本为" + version + "，请进行调整。");
             }));
         }
+        public void ReportFlashQuitError()
+        {
+            AD.Dispatcher.BeginInvoke((Action)(() =>
+            {
+                Auxs.MessageHouse.Show("房间匹配失败", "看起来是有其他玩家秒退快闪了。");
+            }));
+        }
         // Reset All Input UI, not handled with kernel I/O work flow
         private void ResetAllInputs()
         {
