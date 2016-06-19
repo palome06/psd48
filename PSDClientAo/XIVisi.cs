@@ -549,11 +549,11 @@ namespace PSD.ClientAo
                     string input;
                     if (idx >= 1)
                     {
-                        int r1 = int.Parse(Substring(arg, 1, idx));
-                        int r2 = int.Parse(Substring(arg, idx + 1, jdx));
+                        int r1 = int.Parse(Algo.Substring(arg, 1, idx));
+                        int r2 = int.Parse(Algo.Substring(arg, idx + 1, jdx));
                         if (jdx >= 0)
                         {
-                            string[] argv = Substring(arg, jdx + "(p".Length, kdx).Split('p');
+                            string[] argv = Algo.Substring(arg, jdx + "(p".Length, kdx).Split('p');
                             // TODO: consider of empty bracket
                             var uss = argv.Select(p => ushort.Parse(p)).ToList();
                             if (argv.Length < r1)
@@ -575,10 +575,10 @@ namespace PSD.ClientAo
                     }
                     else
                     {
-                        int r = int.Parse(Substring(arg, 1, jdx));
+                        int r = int.Parse(Algo.Substring(arg, 1, jdx));
                         if (jdx >= 0)
                         {
-                            string[] argv = Substring(arg, jdx + "(p".Length, kdx).Split('p');
+                            string[] argv = Algo.Substring(arg, jdx + "(p".Length, kdx).Split('p');
                             var uss = argv.Select(p => ushort.Parse(p));
                             if (argv.Length < r)
                                 r = argv.Length;
@@ -604,12 +604,12 @@ namespace PSD.ClientAo
                     string input;
                     if (idx >= 1)
                     {
-                        int r1 = int.Parse(Substring(arg, 1, idx));
-                        int r2 = int.Parse(Substring(arg, idx + 1, jdx));
+                        int r1 = int.Parse(Algo.Substring(arg, 1, idx));
+                        int r2 = int.Parse(Algo.Substring(arg, idx + 1, jdx));
                         string inst;
                         if (jdx >= 0)
                         {
-                            string[] argv = Substring(arg, jdx + "(p".Length, kdx).Split('p');
+                            string[] argv = Algo.Substring(arg, jdx + "(p".Length, kdx).Split('p');
                             List<ushort> uss = argv.Select(p => ushort.Parse(p)).ToList();
                             if (argv.Length < r1)
                             {
@@ -632,10 +632,10 @@ namespace PSD.ClientAo
                     }
                     else
                     {
-                        int r = int.Parse(Substring(arg, 1, jdx));
+                        int r = int.Parse(Algo.Substring(arg, 1, jdx));
                         if (jdx >= 0)
                         {
-                            string[] argv = Substring(arg, jdx + "(p".Length, kdx).Split('p');
+                            string[] argv = Algo.Substring(arg, jdx + "(p".Length, kdx).Split('p');
                             List<ushort> uss = argv.Select(p => ushort.Parse(p)).ToList();
                             if (argv.Length < r)
                                 r = argv.Length;
@@ -660,12 +660,12 @@ namespace PSD.ClientAo
                     string input;
                     if (idx >= 1)
                     {
-                        int r1 = int.Parse(Substring(arg, 1, idx));
-                        int r2 = int.Parse(Substring(arg, idx + 1, jdx));
+                        int r1 = int.Parse(Algo.Substring(arg, 1, idx));
+                        int r2 = int.Parse(Algo.Substring(arg, idx + 1, jdx));
                         string inst;
                         if (jdx >= 0)
                         {
-                            string[] argv = Substring(arg, jdx + "(p".Length, kdx).Split('p');
+                            string[] argv = Algo.Substring(arg, jdx + "(p".Length, kdx).Split('p');
                             List<ushort> uss = argv.Select(p => ushort.Parse(p)).ToList();
                             if (argv.Length < r1)
                             {
@@ -688,10 +688,10 @@ namespace PSD.ClientAo
                     }
                     else
                     {
-                        int r = int.Parse(Substring(arg, 1, jdx));
+                        int r = int.Parse(Algo.Substring(arg, 1, jdx));
                         if (jdx >= 0)
                         {
-                            string[] argv = Substring(arg, jdx + "(p".Length, kdx).Split('p');
+                            string[] argv = Algo.Substring(arg, jdx + "(p".Length, kdx).Split('p');
                             List<ushort> uss = argv.Select(p => ushort.Parse(p)).ToList();
                             if (argv.Length < r)
                                 r = argv.Length;
@@ -716,11 +716,11 @@ namespace PSD.ClientAo
                     string input;
                     if (idx >= 1)
                     {
-                        int r1 = int.Parse(Substring(arg, 1, idx));
-                        int r2 = int.Parse(Substring(arg, idx + 1, jdx));
+                        int r1 = int.Parse(Algo.Substring(arg, 1, idx));
+                        int r2 = int.Parse(Algo.Substring(arg, idx + 1, jdx));
                         if (jdx >= 0)
                         {
-                            string[] argv = Substring(arg, jdx + "(p".Length, kdx).Split('p');
+                            string[] argv = Algo.Substring(arg, jdx + "(p".Length, kdx).Split('p');
                             var uss = argv.Select(p => ushort.Parse(p));
                             if (argv.Length < r1)
                             {
@@ -737,10 +737,10 @@ namespace PSD.ClientAo
                     }
                     else
                     {
-                        int r = int.Parse(Substring(arg, 1, jdx));
+                        int r = int.Parse(Algo.Substring(arg, 1, jdx));
                         if (jdx >= 0)
                         {
-                            string[] argv = Substring(arg, jdx + "(p".Length, kdx).Split('p');
+                            string[] argv = Algo.Substring(arg, jdx + "(p".Length, kdx).Split('p');
                             var uss = argv.Select(p => ushort.Parse(p));
                             input = VI.CinZ(Uid, prevComment, r, r, uss, cancellable, keep);
                             inputValid &= input.Split(',').Intersect(argv).Any();
@@ -760,11 +760,11 @@ namespace PSD.ClientAo
                     string input;
                     if (idx >= 1)
                     {
-                        int r1 = int.Parse(Substring(arg, 1, idx));
-                        int r2 = int.Parse(Substring(arg, idx + 1, jdx));
+                        int r1 = int.Parse(Algo.Substring(arg, 1, idx));
+                        int r2 = int.Parse(Algo.Substring(arg, idx + 1, jdx));
                         if (jdx >= 0)
                         {
-                            string[] argv = Substring(arg, jdx + "(p".Length, kdx).Split('p');
+                            string[] argv = Algo.Substring(arg, jdx + "(p".Length, kdx).Split('p');
                             List<ushort> uss = argv.Select(p => ushort.Parse(p)).ToList();
                             string inst;
                             if (argv.Length < r1)
@@ -786,10 +786,10 @@ namespace PSD.ClientAo
                     }
                     else
                     {
-                        int r = int.Parse(Substring(arg, 1, jdx));
+                        int r = int.Parse(Algo.Substring(arg, 1, jdx));
                         if (jdx >= 0)
                         {
-                            string[] argv = Substring(arg, jdx + "(p".Length, kdx).Split('p');
+                            string[] argv = Algo.Substring(arg, jdx + "(p".Length, kdx).Split('p');
                             List<ushort> uss = argv.Select(p => ushort.Parse(p)).ToList();
                             if (argv.Length < r)
                                 r = argv.Length;
@@ -817,15 +817,15 @@ namespace PSD.ClientAo
                     int r1, r2;
                     if (idx >= 1)
                     {
-                        r1 = int.Parse(Substring(arg, 1, idx));
-                        r2 = int.Parse(Substring(arg, idx + 1, jdx));
+                        r1 = int.Parse(Algo.Substring(arg, 1, idx));
+                        r2 = int.Parse(Algo.Substring(arg, idx + 1, jdx));
                     }
                     else
-                        r1 = r2 = int.Parse(Substring(arg, 1, jdx));
+                        r1 = r2 = int.Parse(Algo.Substring(arg, 1, jdx));
 
                     if (jdx >= 0)
                     {
-                        string[] argv = Substring(arg, jdx + "(p".Length, kdx).Split('p');
+                        string[] argv = Algo.Substring(arg, jdx + "(p".Length, kdx).Split('p');
                         List<string> uss = argv.Select(p => p.Substring("I".Length)).ToList();
                         input = VI.CinI(Uid, prevComment, r1, r2, argv, cancellable, keep);
                         inputValid &= input.Split(',').Intersect(uss).Any();
@@ -903,11 +903,11 @@ namespace PSD.ClientAo
                     int r1, r2;
                     if (idx >= 1)
                     {
-                        r1 = int.Parse(Substring(arg, 1, idx));
-                        r2 = int.Parse(Substring(arg, idx + 1, jdx));
+                        r1 = int.Parse(Algo.Substring(arg, 1, idx));
+                        r2 = int.Parse(Algo.Substring(arg, idx + 1, jdx));
                     }
                     else
-                        r1 = r2 = int.Parse(Substring(arg, 1, jdx));
+                        r1 = r2 = int.Parse(Algo.Substring(arg, 1, jdx));
                     string eachInput = VI.CinD(Uid, r1, r2, coma, cancellable);
                     while (eachInput == "6+")
                     {
@@ -933,12 +933,12 @@ namespace PSD.ClientAo
                     string input;
                     if (idx >= 1)
                     {
-                        int r1 = int.Parse(Substring(arg, 1, idx));
-                        int r2 = int.Parse(Substring(arg, idx + 1, jdx));
+                        int r1 = int.Parse(Algo.Substring(arg, 1, idx));
+                        int r2 = int.Parse(Algo.Substring(arg, idx + 1, jdx));
                         string inst;
                         if (jdx >= 0)
                         {
-                            string[] argv = Substring(arg, jdx + "(p".Length, kdx).Split('p');
+                            string[] argv = Algo.Substring(arg, jdx + "(p".Length, kdx).Split('p');
                             ushort[] uss = argv.Select(p => ushort.Parse(p)).ToArray();
                             if (argv.Length < r1)
                             {
@@ -959,10 +959,10 @@ namespace PSD.ClientAo
                     }
                     else
                     {
-                        int r = int.Parse(Substring(arg, 1, jdx));
+                        int r = int.Parse(Algo.Substring(arg, 1, jdx));
                         if (jdx >= 0)
                         {
-                            string[] argv = Substring(arg, jdx + "(p".Length, kdx).Split('p');
+                            string[] argv = Algo.Substring(arg, jdx + "(p".Length, kdx).Split('p');
                             ushort[] uss = argv.Select(p => ushort.Parse(p)).ToArray();
                             if (argv.Length < r)
                                 r = argv.Length;
@@ -987,9 +987,9 @@ namespace PSD.ClientAo
                     string input;
                     if (idx >= 1)
                     {
-                        int r1 = int.Parse(Substring(arg, 1, idx));
-                        int r2 = int.Parse(Substring(arg, idx + 1, jdx));
-                        string[] argv = Substring(arg, jdx + "(p".Length, kdx).Split('p');
+                        int r1 = int.Parse(Algo.Substring(arg, 1, idx));
+                        int r2 = int.Parse(Algo.Substring(arg, idx + 1, jdx));
+                        string[] argv = Algo.Substring(arg, jdx + "(p".Length, kdx).Split('p');
 
                         List<string> judgeArgv = argv.Select(p => p.StartsWith("T") ? p.Substring("T".Length) : p).ToList();
                         if (argv.Length < r1)
@@ -1008,8 +1008,8 @@ namespace PSD.ClientAo
                     }
                     else
                     {
-                        int r = int.Parse(Substring(arg, 1, jdx));
-                        string[] argv = Substring(arg, jdx + "(p".Length, kdx).Split('p');
+                        int r = int.Parse(Algo.Substring(arg, 1, jdx));
+                        string[] argv = Algo.Substring(arg, jdx + "(p".Length, kdx).Split('p');
                         List<string> judgeArgv = argv.Select(p => p.StartsWith("T") ? p.Substring("T".Length) : p).ToList();
                         if (argv.Length < r)
                             r = argv.Length;
@@ -1032,12 +1032,12 @@ namespace PSD.ClientAo
                     string input;
                     if (idx >= 1)
                     {
-                        int r1 = int.Parse(Substring(arg, 1, idx));
-                        int r2 = int.Parse(Substring(arg, idx + 1, jdx));
+                        int r1 = int.Parse(Algo.Substring(arg, 1, idx));
+                        int r2 = int.Parse(Algo.Substring(arg, idx + 1, jdx));
                         string inst;
                         if (jdx >= 0)
                         {
-                            string[] argv = Substring(arg, jdx + "(p".Length, kdx).Split('p');
+                            string[] argv = Algo.Substring(arg, jdx + "(p".Length, kdx).Split('p');
                             ushort[] uss = argv.Select(p => ushort.Parse(p)).ToArray();
                             if (argv.Length < r1)
                             {
@@ -1058,10 +1058,10 @@ namespace PSD.ClientAo
                     }
                     else
                     {
-                        int r = int.Parse(Substring(arg, 1, jdx));
+                        int r = int.Parse(Algo.Substring(arg, 1, jdx));
                         if (jdx >= 0)
                         {
-                            string[] argv = Substring(arg, jdx + "(p".Length, kdx).Split('p');
+                            string[] argv = Algo.Substring(arg, jdx + "(p".Length, kdx).Split('p');
                             ushort[] uss = argv.Select(p => ushort.Parse(p)).ToArray();
                             if (argv.Length < r)
                                 r = argv.Length;
@@ -1085,11 +1085,11 @@ namespace PSD.ClientAo
                     string input;
                     if (idx >= 1)
                     {
-                        int r1 = int.Parse(Substring(arg, 1, idx));
-                        int r2 = int.Parse(Substring(arg, idx + 1, jdx));
+                        int r1 = int.Parse(Algo.Substring(arg, 1, idx));
+                        int r2 = int.Parse(Algo.Substring(arg, idx + 1, jdx));
                         if (jdx >= 0)
                         {
-                            string[] argv = Substring(arg, jdx + "(p".Length, kdx).Split('p');
+                            string[] argv = Algo.Substring(arg, jdx + "(p".Length, kdx).Split('p');
                             List<ushort> uss = argv.Select(p => ushort.Parse(p)).ToList();
                             string inst;
                             if (argv.Length < r1)
@@ -1111,10 +1111,10 @@ namespace PSD.ClientAo
                     }
                     else
                     {
-                        int r = int.Parse(Substring(arg, 1, jdx));
+                        int r = int.Parse(Algo.Substring(arg, 1, jdx));
                         if (jdx >= 0)
                         {
-                            string[] argv = Substring(arg, jdx + "(p".Length, kdx).Split('p');
+                            string[] argv = Algo.Substring(arg, jdx + "(p".Length, kdx).Split('p');
                             List<ushort> uss = argv.Select(p => ushort.Parse(p)).ToList();
                             if (argv.Length < r)
                                 r = argv.Length;
@@ -1140,12 +1140,12 @@ namespace PSD.ClientAo
                     string input;
                     if (idx >= 1)
                     {
-                        int r1 = int.Parse(Substring(arg, 1, idx));
-                        int r2 = int.Parse(Substring(arg, idx + 1, jdx));
+                        int r1 = int.Parse(Algo.Substring(arg, 1, idx));
+                        int r2 = int.Parse(Algo.Substring(arg, idx + 1, jdx));
                         string inst;
                         if (jdx >= 0)
                         {
-                            string[] argv = Substring(arg, jdx + "(p".Length, kdx).Split('p');
+                            string[] argv = Algo.Substring(arg, jdx + "(p".Length, kdx).Split('p');
                             ushort[] uss = argv.Select(p => ushort.Parse(p)).ToArray();
                             if (argv.Length < r1)
                             {
@@ -1166,10 +1166,10 @@ namespace PSD.ClientAo
                     }
                     else
                     {
-                        int r = int.Parse(Substring(arg, 1, jdx));
+                        int r = int.Parse(Algo.Substring(arg, 1, jdx));
                         if (jdx >= 0)
                         {
-                            string[] argv = Substring(arg, jdx + "(p".Length, kdx).Split('p');
+                            string[] argv = Algo.Substring(arg, jdx + "(p".Length, kdx).Split('p');
                             ushort[] uss = argv.Select(p => ushort.Parse(p)).ToArray();
                             if (argv.Length < r)
                                 r = argv.Length;
@@ -1195,15 +1195,15 @@ namespace PSD.ClientAo
                 //    int r1, r2;
                 //    if (idx >= 1)
                 //    {
-                //        r1 = int.Parse(Substring(arg, 1, idx));
-                //        r2 = int.Parse(Substring(arg, idx + 1, jdx));
+                //        r1 = int.Parse(Algo.Substring(arg, 1, idx));
+                //        r2 = int.Parse(Algo.Substring(arg, idx + 1, jdx));
                 //    }
                 //    else
-                //        r1 = r2 = int.Parse(Substring(arg, 1, jdx));
+                //        r1 = r2 = int.Parse(Algo.Substring(arg, 1, jdx));
 
                 //    if (jdx >= 0)
                 //    {
-                //        string[] argv = Substring(arg, jdx + "(p".Length, kdx).Split('p');
+                //        string[] argv = Algo.Substring(arg, jdx + "(p".Length, kdx).Split('p');
                 //        List<ushort> uss = argv.Select(p => ushort.Parse(p)).ToList();
                 //        input = VI.CinH(Uid, prevComment, r1, r2, uss, false, false);
                 //        inputValid &= input.Split(',').Intersect(argv).Any();
@@ -1223,12 +1223,12 @@ namespace PSD.ClientAo
                     string input;
                     if (idx >= 1)
                     {
-                        int r1 = int.Parse(Substring(arg, 1, idx));
-                        int r2 = int.Parse(Substring(arg, idx + 1, jdx));
+                        int r1 = int.Parse(Algo.Substring(arg, 1, idx));
+                        int r2 = int.Parse(Algo.Substring(arg, idx + 1, jdx));
                         string inst;
                         if (jdx >= 0)
                         {
-                            string[] argv = Substring(arg, jdx + "(p".Length, kdx).Split('p');
+                            string[] argv = Algo.Substring(arg, jdx + "(p".Length, kdx).Split('p');
                             ushort[] uss = argv.Select(p => ushort.Parse(p)).ToArray();
                             if (argv.Length < r1)
                             {
@@ -1249,10 +1249,10 @@ namespace PSD.ClientAo
                     }
                     else
                     {
-                        int r = int.Parse(Substring(arg, 1, jdx));
+                        int r = int.Parse(Algo.Substring(arg, 1, jdx));
                         if (jdx >= 0)
                         {
-                            string[] argv = Substring(arg, jdx + "(p".Length, kdx).Split('p');
+                            string[] argv = Algo.Substring(arg, jdx + "(p".Length, kdx).Split('p');
                             ushort[] uss = argv.Select(p => ushort.Parse(p)).ToArray();
                             if (argv.Length < r)
                                 r = argv.Length;
@@ -3308,7 +3308,7 @@ namespace PSD.ClientAo
         {
             int idx = readLine.IndexOf(',');
             ushort rounder = (ushort)(readLine[1] - '0');
-            string cop = Substring(readLine, "R0".Length, idx);
+            string cop = Algo.Substring(readLine, "R0".Length, idx);
             string para = idx >= 0 ? readLine.Substring(idx + 1) : "";
 
             bool cinCalled = false;
@@ -4572,45 +4572,19 @@ namespace PSD.ClientAo
             else if (cop.StartsWith("Y4"))
             {
                 string grp = cop.Substring("Y4,".Length);
-                ushort opt = ushort.Parse(grp);
-                if (opt == 1)
-                    VI.Cout(Uid, "切换为启用技能优化模式。");
-                else if (opt == 2)
-                    VI.Cout(Uid, "切换为禁用技能优化模式。");
-                else if (opt == 3)
-                    VI.Cout(Uid, "切换为启用特殊牌优化模式。");
-                else if (opt == 4)
-                    VI.Cout(Uid, "切换为禁用特殊牌优化模式。");
-                else if (opt == 5)
-                    VI.Cout(Uid, "切换为启用队友决定权优化模式。");
-                else if (opt == 6)
-                    VI.Cout(Uid, "切换为禁用队友决定权优化模式。");
+                int opt = int.Parse(grp) - 1;
+                string[] eventName = new string[] { "启用", "禁用" };
+                string[] modeName = new string[] { "技能", "特殊牌", "队友决定权" };
+                VI.Cout(Uid, "切换为{0}{1}优化模式。", eventName[opt % 2], modeName[opt / 2]);
             }
         }
         #endregion Y
 
         #region Utils
 
-        private static string Substring(string @string, int start, int end)
-        {
-            if (end >= 0)
-                return @string.Substring(start, end - start);
-            else
-                return @string.Substring(start);
-        }
-
         private static int CountItemFromComma(string line)
         {
-            if (string.IsNullOrEmpty(line))
-                return 0;
-            int count = 1;
-            int idx = line.IndexOf(',');
-            while (idx < line.Length && idx >= 0)
-            {
-                ++count;
-                idx = line.IndexOf(',', idx + 1);
-            }
-            return count;
+            return string.IsNullOrEmpty(line) ? 0 : (line.Count(p => p == ',') + 1);
         }
 
         private bool IsUtAka() { return Uid % 2 == 1 && Uid > 0 && Uid < 1000; }
