@@ -139,6 +139,27 @@ namespace PSD.Base.Utils
         {
             return list.Count != 0 ? (list.Count + "," + string.Join(",", list)) : "0";
         }
+        public static void RemoveFromMultiMap<K, T>(IDictionary<K, List<T>> map, K key, T value)
+        {
+            if (map.ContainsKey(key))
+            {
+                List<T> list = map[key];
+                list.Remove(value);
+                if (list.Count == 0)
+                    map.Remove(key);
+            }
+        }
+        public static void RemoveFromMultiMap<K, T>(IDictionary<K, List<T>> map,
+            K key, Predicate<T> match)
+        {
+            if (map.ContainsKey(key))
+            {
+                List<T> list = map[key];
+                list.RemoveAll(match);
+                if (list.Count == 0)
+                    map.Remove(key);
+            }
+        }
 
         public static void LongMessageParse(string[] lines, Action<ushort> setWho,
             Action<ushort, string, object> assign, string[] keys)

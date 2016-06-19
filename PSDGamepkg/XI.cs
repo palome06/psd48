@@ -1115,38 +1115,32 @@ namespace PSD.PSDGamepkg
             for (int i = 0; i < skill.Occurs.Length; ++i)
             {
                 string occur = skill.Occurs[i];
+                Predicate<SkTriple> match = p => p.Name == skill.Code && p.Owner == ut;
                 if (occur.StartsWith("%") || occur.StartsWith("&"))
                     paraInTypes.Add(i);
                 else if (occur.Contains('#'))
                 {
                     string oc = occur.Replace("#", ut.ToString());
-                    if (dict.ContainsKey(oc))
-                        dict[oc].RemoveAll(p => (p.Name == skill.Code && p.Owner == ut));
+                    Algo.RemoveFromMultiMap(dict, oc, match);
                 }
                 else if (occur.Contains('$'))
                 {
-                    foreach (ushort ky in Board.Garden.Keys)
-                        if (ky != ut)
-                        {
-                            string oc = occur.Replace("$", ky.ToString());
-                            if (dict.ContainsKey(oc))
-                                dict[oc].RemoveAll(p => (p.Name == skill.Code && p.Owner == ut));
-                        }
+                    foreach (ushort ky in Board.Garden.Keys.Where(p => p != ut))
+                    {
+                        string oc = occur.Replace("$", ky.ToString());
+                        Algo.RemoveFromMultiMap(dict, oc, match);
+                    }
                 }
                 else if (occur.Contains('*'))
                 {
                     foreach (ushort ky in Board.Garden.Keys)
                     {
                         string oc = occur.Replace("*", ky.ToString());
-                        if (dict.ContainsKey(oc))
-                            dict[oc].RemoveAll(p => (p.Name == skill.Code && p.Owner == ut));
+                        Algo.RemoveFromMultiMap(dict, oc, match);
                     }
                 }
                 else
-                {
-                    if (dict.ContainsKey(occur))
-                        dict[occur].RemoveAll(p => (p.Name == skill.Code && p.Owner == ut));
-                }
+                    Algo.RemoveFromMultiMap(dict, occur, match);
             }
             if (paraInTypes.Count > 0)
             {
@@ -1173,23 +1167,13 @@ namespace PSD.PSDGamepkg
                     foreach (string term in theAlias)
                     {
                         if (links.ContainsKey(term))
-                        {
-                            links[term].Remove(skill.Code + "," + inType);
-                            if (links[term].Count == 0)
-                                links.Remove(term);
-                        }
+                            Algo.RemoveFromMultiMap(links, term, skill.Code + "," + inType);
                         if (invTable.ContainsKey(term))
                         {
-                            List<string> ocs = invTable[term];
-                            foreach (string oc in ocs)
+                            foreach (string oc in invTable[term])
                             {
-                                if (dict.ContainsKey(oc))
-                                {
-                                    dict[oc].RemoveAll(p => p.Name == skill.Code &&
-                                        p.InType == inType && p.Owner == ut);
-                                    if (dict[oc].Count == 0)
-                                        dict.Remove(oc);
-                                }
+                                Algo.RemoveFromMultiMap(dict, oc, p => p.Name ==
+                                    skill.Code && p.InType == inType && p.Owner == ut);
                             }
                         }
                     }
