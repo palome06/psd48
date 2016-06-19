@@ -1,18 +1,9 @@
 ﻿using PSD.Base;
 using PSD.Base.Card;
-using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace PSDDorm
 {
@@ -253,7 +244,7 @@ namespace PSDDorm
                 else if (firsts[1].StartsWith("ISSV="))
                     issv = true;
             }
-            using (System.IO.StreamWriter sw = new System.IO.StreamWriter(lName, true))
+            using (System.IO.StreamWriter sw = new System.IO.StreamWriter(lName, false))
             {
                 if (issv && angelUid != 0)
                     sw.WriteLine("VERSION={0} UID={1} ENCRY=0", version, angelUid);
@@ -311,7 +302,7 @@ namespace PSDDorm
                 if (firsts.Length > 2 && firsts[2] == "ENCRY=0")
                     encrypted = false;
             }
-            using (StreamWriter sw = new StreamWriter(lName, true))
+            using (StreamWriter sw = new StreamWriter(lName, false))
             {
                 sw.WriteLine("VERSION={0} UID={1}", version, playerId);
                 sw.Flush();

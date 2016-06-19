@@ -849,7 +849,7 @@ namespace PSD.PSDGamepkg.JNS
         {
             foreach (ushort ut in XI.Board.OrderedPlayer(rd.Uid))
             {
-                if (rd.Tux.Count == 0) { break; }
+                if (rd.GetAllCardsCount() == 0) { break; }
                 Player py = XI.Board.Garden[ut];
                 if (ut == rd.Uid || !py.IsAlive) { continue; }
                 TargetPlayer(rd.Uid, ut);

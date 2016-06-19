@@ -706,19 +706,16 @@ namespace PSD.PSDGamepkg
         // return whether actual action has been taken
         private bool RunQuadMixedStage(string zero, int sina, int[] silentPriority, Action[] silentAction)
         {
-            sina |= 0x2; // seems weired, when did sina = 0 happens?
-            var garden = Board.Garden;
-            if (!sk02.ContainsKey(zero)) // no special SKT registered
+            if (!sk02.ContainsKey(zero) || sk02[zero].Count == 0) // no special SKT registered
             {
                 foreach (Player py in Board.Garden.Values)
                     py.IsZhu = false;
                 if (silentAction != null) // still take silent action
-                {
-                    foreach (Action action in silentAction)
-                        action();
-                }
+                    Array.ForEach(silentAction, p => p());
                 return false;
             }
+            sina |= 0x2; // seems weired, when did sina = 0 happens?
+            var garden = Board.Garden;
             List<SKE> pocket = ParseFromSKTriples(sk02[zero], zero, (sina & 4) != 0);
 
             bool[] involved = new bool[garden.Count + 1];
