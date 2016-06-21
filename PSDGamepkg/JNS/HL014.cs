@@ -606,23 +606,21 @@ namespace PSD.PSDGamepkg.JNS
             if (XI.Board.DiceValue != 6)
             {
                 int total = player.GetPetCount() + player.ListOutAllCards().Count;
-                ushort who = ushort.Parse(XI.AsyncInput(player.Uid,
-                    "#HP-" + total + ",T1" + AOthersTared(player), "JNH0303", "0"));
-                Harm(player, XI.Board.Garden[who], total, FiveElement.A, (long)HPEvoMask.TUX_INAVO);
-                XI.SendOutUAMessage(player.Uid, "JNH0303," + who, "0");
+                string select = XI.AsyncInput(player.Uid, "#受伤或弃牌,T1" + AOthersTared(player) +
+                    ",#请选择『千栗鬼噬』执行项##HP-2##弃所有牌,Y2", "JNH0303", "0");
+                int idx = select.IndexOf(',');
+                string opt = Algo.Substring(select, idx + 1, -1);
+                ushort who = ushort.Parse(Algo.Substring(select, 0, idx));
+                if (opt == "1")
+                    Harm(player, XI.Board.Garden[who], 2, FiveElement.A, (long)HPEvoMask.TUX_INAVO);
+                else
+                    XI.RaiseGMessage("G0DH," + who + ",3");
             }
             //XI.InnerGMessage("G0OY,2," + player.Uid, 81);
         }
         public bool JNH0303Valid(Player player, int type, string fuse)
         {
-            int total = player.GetPetCount() + player.ListOutAllCards().Count;
-            if (total == 0)
-                return false;
-            string[] blocks = fuse.Split(',');
-            for (int i = 1; i < blocks.Length; ++i)
-                if (blocks[i] == player.Uid.ToString())
-                    return true;
-            return false;
+            return Algo.TakeRange(fuse.Split(','), 1, -1).Any(p => p == player.Uid.ToString());
         }
         #endregion HL003 - YangTai
         #region HL004 - YeFengling
@@ -3929,6 +3927,7 @@ namespace PSD.PSDGamepkg.JNS
         {
             string select = XI.AsyncInput(player.Uid, "#请选择『洞察』执行项##战力+2##出场无效,Y2",
                 "JNE0501", "0");
+            XI.SendOutUAMessage(player.Uid, "JNE0501," + select, "0");
             if (select == "2")
                 XI.Board.IsMonsterDebut = false;
             else

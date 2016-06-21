@@ -200,7 +200,7 @@ namespace PSD.PSDGamepkg.Artiad
             {
                 harms.Remove(rotation);
                 if (flatten && HPEvoMask.TERMIN_AT.IsSet(rotation.Mask))
-                    rotation.Mask = HPEvoMask.TERMIN_AT.Reset(rotation.Mask);
+                    rotation.Mask = HPEvoMask.FINAL_MASK.Reset(rotation.Mask);
                 rotation.N = valFunc(rotation.N);
                 foreach (Artiad.Harm harm in harms)
                 {

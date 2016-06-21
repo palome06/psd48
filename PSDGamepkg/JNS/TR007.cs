@@ -299,6 +299,7 @@ namespace PSD.PSDGamepkg.JNS
             int card = int.Parse(argst.Substring(0, idx));
             ushort to = ushort.Parse(argst.Substring(idx + 1));
 
+            TargetPlayer(player.Uid, to);
             XI.RaiseGMessage("G0OJ," + player.Uid + ",1,1,I" + card);
             XI.RaiseGMessage("G2TZ,0," + player.Uid + ",I" + card);
             XI.RaiseGMessage("G0DH," + to + ",0,1");

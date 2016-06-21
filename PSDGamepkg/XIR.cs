@@ -399,7 +399,7 @@ namespace PSD.PSDGamepkg
                             UEchoCode r5ed = HandleWithNPCEffect(Board.Rounder, npc, rstage);
                             if (r5ed == UEchoCode.NO_OPTIONS) // cannot take any action, check whether finished
                             {
-                                AsyncInput(Board.Rounder.Uid, "//", rstage, "1");
+                                AsyncInput(Board.Rounder.Uid, "#无法执行,//", rstage, "1");
                                 if (Board.MonPiles.Count <= 0)
                                     RaiseGMessage("G1WJ,0");
                             }
@@ -716,7 +716,7 @@ namespace PSD.PSDGamepkg
             }
             sina |= 0x2; // seems weired, when did sina = 0 happens?
             var garden = Board.Garden;
-            List<SKE> pocket = ParseFromSKTriples(sk02[zero], zero, (sina & 4) != 0);
+            List<SKE> pocket = ParseFromSKTriples(zero, (sina & 4) != 0);
 
             bool[] involved = new bool[garden.Count + 1];
             string[] pris = new string[garden.Count + 1];
@@ -798,7 +798,7 @@ namespace PSD.PSDGamepkg
                     if (actualAction && ((sina & 4) != 0))
                         break;
                     if (echo == UEchoCode.END_TERMIN) // skill updated
-                        pocket = ParseFromSKTriples(sk02[zero], zero, (sina & 4) != 0);
+                        pocket = ParseFromSKTriples(zero, (sina & 4) != 0);
                 } while (!IsAllClear(involved, false));
                 ++priorty;
             } while (!isAllThrough);
@@ -817,13 +817,13 @@ namespace PSD.PSDGamepkg
         private bool RunSeperateStage(string zero, int sina, Func<Board, bool> judge)
         {
             var garden = Board.Garden;
-            if (!sk02.ContainsKey(zero))
+            if (!sk02.ContainsKey(zero) || sk02[zero].Count == 0)
             {
                 foreach (Player py in Board.Garden.Values)
                     py.IsZhu = false;
                 return false;
             }
-            List<SKE> pocket = ParseFromSKTriples(sk02[zero], zero, false);
+            List<SKE> pocket = ParseFromSKTriples(zero, false);
 
             bool[] involved = new bool[garden.Count + 1];
             string[] pris = new string[garden.Count + 1];
@@ -899,7 +899,7 @@ namespace PSD.PSDGamepkg
                         break;
                     }
                     if (echo == UEchoCode.END_TERMIN) // skill updated
-                        pocket = ParseFromSKTriples(sk02[zero], zero, false);
+                        pocket = ParseFromSKTriples(zero, false);
                 } while (!IsAllClear(involved, false));
                 if (!actualAction)
                 {

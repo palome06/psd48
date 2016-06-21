@@ -158,6 +158,19 @@ namespace PSD.ClientAo.VW
                 HideTip();
             return any;
         }
+        internal string Cin01(ushort uid, string hint)
+        {
+            string tip = "请确定。";
+            if (!string.IsNullOrWhiteSpace(hint))
+                tip = hint + "，" + tip;
+            ShowTip(tip);
+            AD.yfJoy.DecideMessage = "0";
+            AD.yfJoy.CEE.DecideValid = true;
+            string any = Cin(uid);
+            if (any != CinSentinel)
+                HideTip();
+            return any;
+        }
         // specific input
         internal string Cin48(ushort uid, string hint, params string[] pars)
         {

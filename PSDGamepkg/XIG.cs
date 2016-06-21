@@ -47,7 +47,7 @@ namespace PSD.PSDGamepkg
                     py.IsZhu = false;
                 return;
             }
-            List<SKE> pocket = ParseFromSKTriples(_pocket, cmd, false);
+            List<SKE> pocket = ParseFromSKTriples(zero, false);
 
             bool[] involved = new bool[Board.Garden.Count + 1];
             string[] roads = new string[Board.Garden.Count + 1];
@@ -2768,7 +2768,7 @@ namespace PSD.PSDGamepkg
                 case "G0TT":
                     {
                         ushort who = ushort.Parse(args[1]);
-                        AsyncInput(who, "//", "G0TT", "0");
+                        AsyncInput(who, "#掷骰判定中,//", "G0TT", "0");
                         int number = randomSeed.Next(6);
                         if (number == 0) number = 6;
                         WI.BCast("E0TT," + who + "," + number);

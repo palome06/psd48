@@ -1061,8 +1061,7 @@ namespace PSD.PSDGamepkg.JNS
         }
         public bool JN40302Valid(Player player, int type, string fuse)
         {
-            return XI.Board.Garden.Values.Select(p => p.Uid != player.Uid &&
-                p.IsAlive && p.Team == player.Team && p.Tux.Count > 0).Any();
+            return XI.Board.Garden.Values.Any(p => p.IsAlive && p.Team == player.Team && p.Tux.Count > 0);
         }
         public void JN40302Action(Player player, int type, string fuse, string argst)
         {

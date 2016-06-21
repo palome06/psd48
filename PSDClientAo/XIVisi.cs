@@ -501,31 +501,27 @@ namespace PSD.ClientAo
                 bool keep = false;
                 bool cancellable = false;
                 string roundInput = "";
+
+                if (block.StartsWith("#"))
+                {
+                    prevComment = block.Substring(1); continue;
+                }
                 if (block.StartsWith("/"))
                 {
                     if (block.Equals("//"))
                     {
-                        //var helper = new Auxs.FlashWindowHelper(System.Windows.Application.Current);
-                        //// Flashes the window and taskbar 5 times and stays solid 
-                        //// colored until user focuses the main window
-                        //ad.Dispatcher.BeginInvoke((Action)(() =>
-                        //{
-                        //    helper.FlashApplicationWindow(ad);
-                        //}));
-                        //VI.Cin(uid, "请按任意键继续.");
-                        VI.Cin01(Uid);
+                        VI.Cin01(Uid, prevComment);
                         roundInput = "0";
                     }
                     else if (block.Length > 1)
                     {
                         arg = block.Substring(1);
-                        cancel = "(0为取消发动)";
+                        cancel = "(可取消)";
                         cancellable = true;
                     }
                     else
                     {
                         VI.Cin00(Uid);
-                        //VI.Cin(uid, "不能指定合法目标.");
                         roundInput = "0";
                     }
                 }
@@ -534,10 +530,6 @@ namespace PSD.ClientAo
                     keep = true;
                     arg = arg.Substring(1);
                     keepList.Add(arg[0]);
-                }
-                if (arg.StartsWith("#"))
-                {
-                    prevComment = arg.Substring(1); continue;
                 }
                 if (arg[0] == 'T')
                 {
@@ -559,18 +551,14 @@ namespace PSD.ClientAo
                             if (argv.Length < r1)
                             {
                                 r1 = r2 = argv.Length;
-                                //input = VI.Cin(uid, "请选择{0}名角色为{1}目标，可选{2}{3}.", argv.Length, prevComment, zd.Tux(uss), cancel);
                                 input = VI.CinT(Uid, uss, r1, r2, string.Format("请选择{0}名角色为{1}目标.", r1, prevComment), cancellable, keep);
                             }
                             else
-                                //input = VI.Cin(uid, "请选择{0}至{1}名角色为{2}目标，可选{3}{4}.", r1, r2, prevComment, zd.Player(uss), cancel);
                                 input = VI.CinT(Uid, uss, r1, r2, string.Format("请选择{0}至{1}名角色为{2}目标.", r1, r2, prevComment), cancellable, keep);
-                            //input = VI.CinT(uid, uss, r1, r2, prevComment, cancellable);
-                            inputValid &= input.Split(',').Intersect(argv).Any();
+                            inputValid &= Algo.IsSubSet(input.Split(','), argv);
                         }
                         else
                             input = VI.CinT(Uid, null, r1, r2, string.Format("请选择{0}至{1}名角色为{2}目标.", r1, r2, prevComment), cancellable, keep);
-                        //input = VI.Cin(uid, "请选择{0}至{1}名角色为{2}目标{3}.", r1, r2, prevComment, cancel);
                         inputValid &= !(CountItemFromComma(input) < r1 || CountItemFromComma(input) > r2);
                     }
                     else
@@ -582,14 +570,10 @@ namespace PSD.ClientAo
                             var uss = argv.Select(p => ushort.Parse(p));
                             if (argv.Length < r)
                                 r = argv.Length;
-                            //input = VI.CinT(uid, uss, r, r, prevComment, cancellable);
-                            //input = VI.Cin(uid, "请选择{0}名角色为{1}目标，可选{2}{3}.", r, prevComment, zd.Player(uss), cancel);
                             input = VI.CinT(Uid, uss, r, r, string.Format("请选择{0}名角色为{1}目标.", r, prevComment), cancellable, keep);
-                            inputValid &= input.Split(',').Intersect(argv).Any();
+                            inputValid &= Algo.IsSubSet(input.Split(','), argv);
                         }
                         else
-                            //input = VI.Cin(uid, "请选择{0}名角色为{1}目标{2}.", r, prevComment, cancel);
-                            //input = VI.CinT(uid, null, r, r, prevComment, cancellable);
                             input = VI.CinT(Uid, null, r, r, string.Format("请选择{0}名角色为{1}目标.", r, prevComment), cancellable, keep);
                         inputValid &= CountItemFromComma(input) == r;
                     }
@@ -621,7 +605,7 @@ namespace PSD.ClientAo
                             int zero = uss.Count(p => p == 0);
                             uss.RemoveAll(p => p == 0);
                             input = VI.CinC(Uid, inst, r1, r2, uss, zero, cancellable, keep);
-                            inputValid &= input.Split(',').Intersect(argv).Any();
+                            inputValid &= Algo.IsSubSet(input.Split(','), argv);
                         }
                         else
                         {
@@ -643,7 +627,7 @@ namespace PSD.ClientAo
                             int zero = uss.Count(p => p == 0);
                             uss.RemoveAll(p => p == 0);
                             input = VI.CinC(Uid, inst, r, r, uss, zero, cancellable, keep);
-                            inputValid &= input.Split(',').Intersect(argv).Any();
+                            inputValid &= Algo.IsSubSet(input.Split(','), argv);
                         }
                         else
                             input = VI.Cin(Uid, "请选择{0}张卡牌为{1}目标{2}.", r, prevComment, cancel);
@@ -677,7 +661,7 @@ namespace PSD.ClientAo
                             int zero = uss.Count(p => p == 0);
                             uss.RemoveAll(p => p == 0);
                             input = VI.CinQ(Uid, inst, r1, r2, uss, zero, cancellable, keep);
-                            inputValid &= input.Split(',').Intersect(argv).Any();
+                            inputValid &= Algo.IsSubSet(input.Split(','), argv);
                         }
                         else
                         {
@@ -699,7 +683,7 @@ namespace PSD.ClientAo
                             int zero = uss.Count(p => p == 0);
                             uss.RemoveAll(p => p == 0);
                             input = VI.CinQ(Uid, inst, r, r, uss, zero, cancellable, keep);
-                            inputValid &= input.Split(',').Intersect(argv).Any();
+                            inputValid &= Algo.IsSubSet(input.Split(','), argv);
                         }
                         else
                             input = VI.Cin(Uid, "请选择{0}张卡牌为{1}目标{2}.", r, prevComment, cancel);
@@ -729,7 +713,7 @@ namespace PSD.ClientAo
                             }
                             else
                                 input = VI.CinZ(Uid, prevComment, r1, r2, uss, cancellable, keep);
-                            inputValid &= input.Split(',').Intersect(argv).Any();
+                            inputValid &= Algo.IsSubSet(input.Split(','), argv);
                         }
                         else
                             input = VI.CinZ(Uid, prevComment, r1, r2, null, cancellable, keep);
@@ -743,7 +727,7 @@ namespace PSD.ClientAo
                             string[] argv = Algo.Substring(arg, jdx + "(p".Length, kdx).Split('p');
                             var uss = argv.Select(p => ushort.Parse(p));
                             input = VI.CinZ(Uid, prevComment, r, r, uss, cancellable, keep);
-                            inputValid &= input.Split(',').Intersect(argv).Any();
+                            inputValid &= Algo.IsSubSet(input.Split(','), argv);
                         }
                         else
                             input = VI.CinZ(Uid, prevComment, r, r, null, cancellable, keep);
@@ -775,7 +759,7 @@ namespace PSD.ClientAo
                             else
                                 inst = string.Format("请选择{0}至{1}张怪物牌为{2}目标。", r1, r2, prevComment);
                             input = VI.CinM(Uid, inst, r1, r2, uss, cancellable, keep);
-                            inputValid &= input.Split(',').Intersect(argv).Any();
+                            inputValid &= Algo.IsSubSet(input.Split(','), argv);
                         }
                         else
                         {
@@ -795,7 +779,7 @@ namespace PSD.ClientAo
                                 r = argv.Length;
                             string inst = string.Format("请选择{0}张怪物牌为{1}目标。", r, prevComment);
                             input = VI.CinM(Uid, inst, r, r, uss, cancellable, keep);
-                            inputValid &= input.Split(',').Intersect(argv).Any();
+                            inputValid &= Algo.IsSubSet(input.Split(','), argv);
                         }
                         else
                         {
@@ -828,7 +812,7 @@ namespace PSD.ClientAo
                         string[] argv = Algo.Substring(arg, jdx + "(p".Length, kdx).Split('p');
                         List<string> uss = argv.Select(p => p.Substring("I".Length)).ToList();
                         input = VI.CinI(Uid, prevComment, r1, r2, argv, cancellable, keep);
-                        inputValid &= input.Split(',').Intersect(uss).Any();
+                        inputValid &= Algo.IsSubSet(input.Split(','), argv);
                     }
                     else { input = ""; inputValid = false; }
                     inputValid &= !(CountItemFromComma(input) < r1 || CountItemFromComma(input) > r2);
@@ -868,7 +852,7 @@ namespace PSD.ClientAo
                     //List<string> ussnm = argv.Select(p => "M" + p).ToList();
                     List<string> ussnm = argv.Select(p => p.Substring(1)).ToList();
                     roundInput = VI.CinX(Uid, rest, rest, argv.ToList(), cancellable, keep);
-                    inputValid &= roundInput.Split(',').Intersect(ussnm).Any();
+                    inputValid &= Algo.IsSubSet(roundInput.Split(','), ussnm);
                     prevComment = ""; cancel = "";
                 }
                 //else if (arg[0] == 'W') // Arrangement
@@ -878,7 +862,7 @@ namespace PSD.ClientAo
                 //    string[] argv = Algo.Substring(arg, jdx + "(p".Length, kdx).Split('p');
                 //    var uss = argv.Select(p => ushort.Parse(p));
                 //    roundInput = VI.Cin(uid, "请重排以下{0}卡牌{1}{2}.", prevComment, zd.Tux(uss), cancel);
-                //    inputValid &= roundInput.Split(',').Intersect(argv).Any();
+                //    inputValid &= Algo.IsSubSet(roundInput.Split(','), argv);
                 //    prevComment = ""; cancel = "";
                 //}
                 else if (arg[0] == 'S')
@@ -948,7 +932,7 @@ namespace PSD.ClientAo
                             else
                                 inst = string.Format("请选择{0}至{1}种卡牌为{2}目标.", r1, r2, prevComment);
                             input = VI.CinG(Uid, inst, r1, r2, uss, cancellable, keep);
-                            inputValid &= input.Split(',').Intersect(argv).Any();
+                            inputValid &= Algo.IsSubSet(input.Split(','), argv);
                         }
                         else
                         {
@@ -968,7 +952,7 @@ namespace PSD.ClientAo
                                 r = argv.Length;
                             string inst = string.Format("请选择{0}张卡牌为{1}目标.", r, prevComment);
                             input = VI.CinG(Uid, inst, r, r, uss, cancellable, keep);
-                            inputValid &= input.Split(',').Intersect(argv).Any();
+                            inputValid &= Algo.IsSubSet(input.Split(','), argv);
                         }
                         else
                             input = VI.Cin(Uid, "请选择{0}张卡牌为{1}目标{2}.", r, prevComment, cancel);
@@ -1003,7 +987,7 @@ namespace PSD.ClientAo
                             string hint = string.Format("请以{0}至{1}人{2}.", r1, r2, prevComment);
                             input = VI.CinTP(Uid, argv, hint, cancellable, false);
                         }
-                        inputValid &= input.Split(',').Intersect(judgeArgv).Any();
+                        inputValid &= Algo.IsSubSet(input.Split(','), judgeArgv);
                         inputValid &= !(CountItemFromComma(input) < r1 || CountItemFromComma(input) > r2);
                     }
                     else
@@ -1015,7 +999,7 @@ namespace PSD.ClientAo
                             r = argv.Length;
                         string hint = string.Format("请以{0}人{1}.", r, prevComment);
                         input = VI.CinTP(Uid, argv, hint, cancellable, false);
-                        inputValid &= input.Split(',').Intersect(judgeArgv).Any();
+                        inputValid &= Algo.IsSubSet(input.Split(','), judgeArgv);
                         inputValid &= CountItemFromComma(input) == r;
                     }
                     // T-ed non 0 target
@@ -1047,7 +1031,7 @@ namespace PSD.ClientAo
                             else
                                 inst = string.Format("请选择{0}至{1}枚标记为{2}目标.", r1, r2, prevComment);
                             input = VI.CinF(Uid, inst, r1, r2, uss, cancellable, keep);
-                            inputValid &= input.Split(',').Intersect(argv).Any();
+                            inputValid &= Algo.IsSubSet(input.Split(','), argv);
                         }
                         else
                         {
@@ -1067,7 +1051,7 @@ namespace PSD.ClientAo
                                 r = argv.Length;
                             string inst = string.Format("请选择{0}枚标记为{1}目标.", r, prevComment);
                             input = VI.CinF(Uid, inst, r, r, uss, cancellable, keep);
-                            inputValid &= input.Split(',').Intersect(argv).Any();
+                            inputValid &= Algo.IsSubSet(input.Split(','), argv);
                         }
                         else
                             input = VI.Cin(Uid, "请选择{0}枚标记为{1}目标{2}.", r, prevComment, cancel);
@@ -1100,7 +1084,7 @@ namespace PSD.ClientAo
                             else
                                 inst = string.Format("请选择{0}至{1}张事件牌为{2}目标。", r1, r2, prevComment);
                             input = VI.CinE(Uid, inst, r1, r2, uss, cancellable, keep);
-                            inputValid &= input.Split(',').Intersect(argv).Any();
+                            inputValid &= Algo.IsSubSet(input.Split(','), argv);
                         }
                         else
                         {
@@ -1120,7 +1104,7 @@ namespace PSD.ClientAo
                                 r = argv.Length;
                             string inst = string.Format("请选择{0}张事件牌为{1}目标。", r, prevComment);
                             input = VI.CinE(Uid, inst, r, r, uss, cancellable, keep);
-                            inputValid &= input.Split(',').Intersect(argv).Any();
+                            inputValid &= Algo.IsSubSet(input.Split(','), argv);
                         }
                         else
                         {
@@ -1155,7 +1139,7 @@ namespace PSD.ClientAo
                             else
                                 inst = string.Format("请选择{0}至{1}名角色为{2}目标.", r1, r2, prevComment);
                             input = VI.CinH(Uid, inst, r1, r2, uss, cancellable, keep);
-                            inputValid &= input.Split(',').Intersect(argv).Any();
+                            inputValid &= Algo.IsSubSet(input.Split(','), argv);
                         }
                         else
                         {
@@ -1175,7 +1159,7 @@ namespace PSD.ClientAo
                                 r = argv.Length;
                             string inst = string.Format("请选择{0}名角色为{1}目标.", r, prevComment);
                             input = VI.CinH(Uid, inst, r, r, uss, cancellable, keep);
-                            inputValid &= input.Split(',').Intersect(argv).Any();
+                            inputValid &= Algo.IsSubSet(input.Split(','), argv);
                         }
                         else
                             input = VI.Cin(Uid, "请选择{0}名角色为{1}目标{2}.", r, prevComment, cancel);
@@ -1206,7 +1190,7 @@ namespace PSD.ClientAo
                 //        string[] argv = Algo.Substring(arg, jdx + "(p".Length, kdx).Split('p');
                 //        List<ushort> uss = argv.Select(p => ushort.Parse(p)).ToList();
                 //        input = VI.CinH(Uid, prevComment, r1, r2, uss, false, false);
-                //        inputValid &= input.Split(',').Intersect(argv).Any();
+                //        inputValid &= Algo.IsSubSet(input.Split(','), argv);
                 //    }
                 //    else { input = ""; inputValid = false; }
                 //    //else
@@ -1238,7 +1222,7 @@ namespace PSD.ClientAo
                             else
                                 inst = string.Format("请选择{0}至{1}种属性为{2}目标.", r1, r2, prevComment);
                             input = VI.CinV(Uid, inst, r1, r2, uss, cancellable, keep);
-                            inputValid &= input.Split(',').Intersect(argv).Any();
+                            inputValid &= Algo.IsSubSet(input.Split(','), argv);
                         }
                         else
                         {
@@ -1258,7 +1242,7 @@ namespace PSD.ClientAo
                                 r = argv.Length;
                             string inst = string.Format("请选择{0}种属性为{1}目标.", r, prevComment);
                             input = VI.CinV(Uid, inst, r, r, uss, cancellable, keep);
-                            inputValid &= input.Split(',').Intersect(argv).Any();
+                            inputValid &= Algo.IsSubSet(input.Split(','), argv);
                         }
                         else
                             input = VI.Cin(Uid, "请选择{0}种属性为{1}目标{2}.", r, prevComment, cancel);

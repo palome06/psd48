@@ -1203,7 +1203,7 @@ namespace PSD.PSDGamepkg.JNS
             XI.Board.Wang.Push(pop);
             UEchoCode r5ed = XI.HandleWithNPCEffect(XI.Board.Garden[to], npc, "JPT5");
             if (r5ed == UEchoCode.NO_OPTIONS)
-                XI.AsyncInput(to, "//", "JPT5", "1");
+                XI.AsyncInput(to, "#无法执行,//", "JPT5", "1");
             else if (r5ed == UEchoCode.END_ACTION)
                 XI.RaiseGMessage("G1YP," + player.Uid + "," + pop);
 
@@ -2280,7 +2280,7 @@ namespace PSD.PSDGamepkg.JNS
                     XI.Board.Wang.Push(pop);
                     UEchoCode r5ed = XI.HandleWithNPCEffect(player, npc, "XBT6");
                     if (r5ed == UEchoCode.NO_OPTIONS)
-                        XI.AsyncInput(player.Uid, "//", "XBT6ConsumeAction", "0");
+                        XI.AsyncInput(player.Uid, "#无法执行,//", "XBT6ConsumeAction", "0");
                     if (r5ed == UEchoCode.END_ACTION)
                         XI.RaiseGMessage("G1YP," + player.Uid + "," + pop);
 
