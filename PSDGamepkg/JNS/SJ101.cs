@@ -917,7 +917,7 @@ namespace PSD.PSDGamepkg.JNS
                     {
                         XI.RaiseGMessage("G0QZ," + rd.Uid + "," + string.Join(",", rd.ListOutAllEquips()));
                         System.Func<ushort, bool> isEq = (p) => XI.LibTuple.TL.DecodeTux(p).IsTuxEqiup();
-                        List<ushort> picks = Artiad.Procedure.CardHunter(XI, Card.Genre.Tux,
+                        List<ushort> picks = Artiad.Procedure.CardHunter(XI, Card.PileGenre.Tux,
                             (p) => isEq(p), (a, r) => a.Any(p => isEq(p)), false);
                         if (picks.Count > 0)
                             XI.RaiseGMessage("G0HQ,2," + rd.Uid + ",0,0," + picks.Single());

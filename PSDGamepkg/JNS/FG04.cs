@@ -995,28 +995,16 @@ namespace PSD.PSDGamepkg.JNS
         public void GLT1WinEff()
         {
             Player r = XI.Board.Rounder;
-            if (r.ListOutAllEquips().Count > 0)
+            string ts = XI.AsyncInput(r.Uid, "#弃置以令任意一人补2张牌的,/Q1(p" +
+                string.Join("p", r.ListOutAllEquips()) + "),#获得2张牌的,/T1" +
+                FormatPlayers(p => p.IsAlive), "GLT1WinEff", "0");
+            if (!ts.StartsWith("/") && !ts.Contains(VI.CinSentinel))
             {
-                bool done = false;
-                while (!done)
-                {
-                    string ts = XI.AsyncInput(r.Uid, "#弃置以令任意一人补2张牌的,/Q1(p" +
-                            string.Join("p", r.ListOutAllEquips()) + ")", "GSL1WinEff", "0");
-                    if (ts != "/0")
-                    {
-                        string tr = XI.AsyncInput(r.Uid, "#获得2张牌的,/T1(p" +
-                            string.Join("p", XI.Board.Garden.Values.Where(p => p.IsAlive).Select(p => p.Uid))
-                            + ")", "GSL1WinEff", "0");
-                        if (tr != "/0")
-                        {
-                            XI.RaiseGMessage("G0QZ," + r.Uid + "," + ts);
-                            XI.RaiseGMessage("G0DH," + tr + ",0,2");
-                            done = true;
-                        }
-                    }
-                    else
-                        done = true;
-                }
+                int idx = ts.IndexOf(',');
+                ushort tx = ushort.Parse(ts.Substring(0, idx));
+                ushort tp = ushort.Parse(ts.Substring(idx + 1));
+                XI.RaiseGMessage("G0QZ," + r.Uid + "," + tx);
+                XI.RaiseGMessage("G0DH," + tp + ",0,2");
             }
         }
         public void GLT1LoseEff()
@@ -2994,7 +2982,12 @@ namespace PSD.PSDGamepkg.JNS
         public void GHH2ConsumeAction(Player player, int consumeType, int type, string fuse, string argst)
         {
             if (consumeType == 1)
-                Harm("GHH2", XI.Board.Garden.Values.Where(p => p.IsAlive && p.Team == player.OppTeam), 2);
+            {
+                List<Player> enemies = XI.Board.Garden.Values.Where(p =>
+                    p.IsAlive && p.Team == player.OppTeam).ToList();
+                TargetPlayer(player.Uid, enemies.Select(p => p.Uid));
+                Harm("GHH2", enemies, 2);
+            }
         }
         public bool GHH2ConsumeValid(Player player, int consumeType, int type, string fuse)
         {
@@ -3351,7 +3344,7 @@ namespace PSD.PSDGamepkg.JNS
             {
                 ushort me = XI.LibTuple.ML.Encode("GTH1");
                 Monster monster = XI.LibTuple.ML.Decode(me) as Monster;
-                return player.Pets.Any(p => p != 0 && p != me) && player.STR > 0;
+                return !player.Pets.Any(p => p != 0 && p != me) && player.STR > 0;
             }
             return false;
         }

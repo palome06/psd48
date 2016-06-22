@@ -66,5 +66,7 @@ namespace PSD.Base.Card
                 default: return Genre.NIL;
             }
         }
+        // genre of piles/dices
+        public enum PileGenre { Tux, NMB, Eve, UH, UM, UN }
     }
 }

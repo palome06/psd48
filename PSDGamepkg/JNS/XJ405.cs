@@ -452,10 +452,7 @@ namespace PSD.PSDGamepkg.JNS
             {
                 List<ushort> cands = player.Tux.Where(p =>
                     XI.LibTuple.TL.DecodeTux(p).Type == Base.Card.Tux.TuxType.TP).ToList();
-                if (cands.Count > 0)
-                    return "/Q1(p" + string.Join("p", cands) + ")";
-                else
-                    return "/";
+                return cands.Count > 0 ? "#当作【冰心诀】,/Q1(p" + string.Join("p", cands) + ")" : "/";
             }
             else
                 return "";

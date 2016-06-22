@@ -2620,7 +2620,7 @@ namespace PSD.ClientAo
                     {
                         ushort[] mons = Algo.TakeRange(args, 2, args.Length)
                             .Select(p => ushort.Parse(p)).ToArray();
-                        VI.Cout(Uid, "翻出怪物牌为【{0}】.", zd.Monster(mons));
+                        VI.Cout(Uid, "翻出怪牌为【{0}】.", zd.Monster(mons));
                         A0O.FlyingGet(mons.Select(p => "M" + p).ToList(), 0, 0, true);
                     }
                     else if (args[1] == "6")

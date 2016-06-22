@@ -890,6 +890,9 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Card\NMB\NCR01.png" />
+    <Resource Include="Resources\Card\NMB\NCR02.png" />
+    <Resource Include="Resources\Card\NMB\NCR03.png" />
+    <Resource Include="Resources\Card\NMB\NCR04.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\PetsSnap\NC506.png" />
@@ -1414,6 +1417,9 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Heros\20001.png" />
+    <Resource Include="Resources\Heros\20002.png" />
+    <Resource Include="Resources\Heros\20003.png" />
+    <Resource Include="Resources\Heros\20004.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Card\Heros\EX301.png" />
@@ -1445,7 +1451,10 @@
     <Resource Include="Resources\Card\Heros\HL021.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Resources\Card\Heros\RE001.png" />
+    <Resource Include="Resources\Card\Heros\R5Q05.png" />
+    <Resource Include="Resources\Card\Heros\RM302.png" />
+    <Resource Include="Resources\Card\Heros\RM202.png" />
+    <Resource Include="Resources\Card\Heros\R3W01.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Guard\L0.png" />

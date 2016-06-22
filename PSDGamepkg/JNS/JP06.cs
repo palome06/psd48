@@ -2556,7 +2556,7 @@ namespace PSD.PSDGamepkg.JNS
         }
         public void JPH4Action(Player player, int type, string fuse, string argst)
         {
-            List<ushort> picks = Artiad.Procedure.CardHunter(XI, Card.Genre.NMB,
+            List<ushort> picks = Artiad.Procedure.CardHunter(XI, Card.PileGenre.NMB,
                 (p) => NMBLib.IsMonster(p), (a, r) => a.Count == 3, true);
             if (picks.Count > 0)
                 XI.RaiseGMessage("G1IU," + string.Join(",", picks));

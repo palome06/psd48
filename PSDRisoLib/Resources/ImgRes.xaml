@@ -254,6 +254,9 @@
     <Image x:Key="heroHead19021" Source="Heros/19021.png"/>
 
     <Image x:Key="heroHead20001" Source="Heros/20001.png"/>
+    <Image x:Key="heroHead20002" Source="Heros/20002.png"/>
+    <Image x:Key="heroHead20003" Source="Heros/20003.png"/>
+    <Image x:Key="heroHead20004" Source="Heros/20004.png"/>
 
     <ImageBrush x:Key="nameBar000Brush" ImageSource="NameBar/Name000.png"/>
     <ImageBrush x:Key="nameBarXJ101" ImageSource="NameBar/NameXJ101.png"/>
@@ -687,6 +690,9 @@
     <Image x:Key="monCardNCH12" Source="Card/NMB/NCH12.png"/>
 
     <Image x:Key="monCardNCR01" Source="Card/NMB/NCR01.png"/>
+    <Image x:Key="monCardNCR02" Source="Card/NMB/NCR02.png"/>
+    <Image x:Key="monCardNCR03" Source="Card/NMB/NCR03.png"/>
+    <Image x:Key="monCardNCR04" Source="Card/NMB/NCR04.png"/>
 
     <Image x:Key="tuxCard000" Source="Card/Tux00.png"/>
     <Image x:Key="tuxCardJP01" Source="Card/Tux/JP01.png"/>
@@ -894,7 +900,10 @@
     <Image x:Key="hroCardHL020" Source="Card/Heros/HL020.png"/>
     <Image x:Key="hroCardHL021" Source="Card/Heros/HL021.png"/>
 
-    <Image x:Key="hroCardRE001" Source="Card/Heros/RE001.png"/>
+    <Image x:Key="hroCardR5Q05" Source="Card/Heros/R5Q05.png"/>
+    <Image x:Key="hroCardRM302" Source="Card/Heros/RM302.png"/>
+    <Image x:Key="hroCardRM202" Source="Card/Heros/RM202.png"/>
+    <Image x:Key="hroCardR3W01" Source="Card/Heros/R3W01.png"/>
 
     <ImageBrush x:Key="dt01Bg" ImageSource="Logo/DT01.png" Opacity="0.9"/>
     <ImageBrush x:Key="dt02Bg" ImageSource="Logo/DT02.png" Opacity="0.9"/>

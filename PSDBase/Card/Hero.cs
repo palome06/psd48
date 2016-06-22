@@ -30,8 +30,20 @@ namespace PSD.Base.Card
         public List<string> RelatedSkills { set; get; }
         // spouses, (e.g.) {30501,!2}
         public List<string> Spouses { private set; get; }
+        // isomorphic list, e.g. XJ304.Isomorphic = XJ303
         public List<int> Isomorphic { private set; get; }
-        public int Archetype { private set; get; }
+        // private values
+        private int archetype;
+        // archetype, e.g. SP001.Archetype = XJ101
+        public int Archetype
+        {
+            private set { archetype = value; }
+            get { return archetype != 0 ? archetype : Antecessor; }
+        }
+        // antecessor, e.g. RM202.Antecessor = XJ202
+        public int Antecessor { private set; get; }
+        // pioneer, e.g. XJ202.Pioneer = RM202
+        public int Pioneer { internal set; get; }
 
         public char Gender { private set; get; }
         public string Bio { private set; get; }
@@ -46,14 +58,16 @@ namespace PSD.Base.Card
         public string GuestAlias { set; get; }
 
         public Hero(string name, int avatar, int group, int genre, char gender, ushort hp, ushort str, ushort dex,
-            List<string> spouses, List<int> isomorphic, int archetype, List<string> skills, string bio)
+            List<string> spouses, List<int> isomorphic, int archetype, int antecessor, List<string> skills, string bio)
         {
             this.Name = name; this.Avatar = avatar;
             this.Group = group; this.Genre = genre;
             this.Gender = gender;
             this.HP = hp; this.STR = str; this.DEX = dex;
             this.Spouses = spouses; this.Skills = skills;
-            this.Isomorphic = isomorphic; this.Archetype = archetype;
+            this.Isomorphic = isomorphic;
+            this.Archetype = archetype;
+            this.Antecessor = antecessor;
             this.Bio = bio;
         }
         internal void SetAvailableParam(string groupString)
@@ -129,12 +143,14 @@ namespace PSD.Base.Card
                 List<string> spouse = string.IsNullOrEmpty(spouses) ?
                     new List<string>() : spouses.Split(',').ToList();
                 string isoStr = (string)data["ISO"];
-                int archetype = 0;
+                int archetype = 0, antecessor = 0;
                 List<int> isos = new List<int>();
                 foreach (string isosr in isoStr.Split(','))
                 {
                     if (isosr.StartsWith("@"))
                         archetype = int.Parse(isosr.Substring("@".Length));
+                    else if (isosr.StartsWith("^"))
+                        antecessor = int.Parse(isosr.Substring("^".Length));
                     else if (!string.IsNullOrEmpty(isosr))
                         isos.Add(int.Parse(isosr));
                 }
@@ -172,7 +188,8 @@ namespace PSD.Base.Card
                     }
                 }
                 string bio = data["BIO"] as string ?? "";
-                Hero hero = new Hero(name, code, group, genre, gender, hp, str, dex, spouse, isos, archetype, skill, bio)
+                Hero hero = new Hero(name, code, group, genre, gender, hp, str, dex,
+                    spouse, isos, archetype, antecessor, skill, bio)
                 {
                     Ofcode = data["OFCODE"] as string,
                     TokenAlias = alias[0],
@@ -187,6 +204,11 @@ namespace PSD.Base.Card
                 hero.SetAvailableParam(gs);
                 dicts.Add(code, hero);
             }
+            foreach (Hero hero in dicts.Values)
+            {
+                if (hero.Antecessor != 0 && dicts.ContainsKey(hero.Antecessor))
+                    dicts[hero.Antecessor].Pioneer = hero.Avatar;
+            }
         }
 
         public List<Hero> ListAllJoinableHeroes(int groups)
@@ -199,10 +221,13 @@ namespace PSD.Base.Card
         public List<Hero> ListAllSeleable(int groups)
         {
             List<Hero> first = ListAllJoinableHeroes(groups);
-            if (first.Any(p => p.Ofcode == "XJ505") && first.Any(p => p.Ofcode == "TR011"))
-                first.RemoveAll(p => p.Ofcode == "XJ505");
-            if (first.Any(p => p.Ofcode == "RE001"))
-                first.RemoveAll(p => p.Ofcode == "TR012");
+            string[] pair = { "XJ505", "TR011", "TR012", "R5Q05", "XJ302", "RM302", "XJ202", "RM202",
+                "X3W01", "R3W01" };
+            for (int i = 0; i < pair.Length; i += 2)
+            {
+                if (first.Any(p => p.Ofcode == pair[i + 1]))
+                    first.RemoveAll(p => p.Ofcode == pair[i]);
+            }
             return first;
         }
         public List<Hero> ListAllHeros(int groups)

@@ -3099,7 +3099,7 @@ namespace PSD.PSDGamepkg.JNS
             ushort gayaUt = ushort.Parse(argst);
             XI.RaiseGMessage("G0QZ," + player.Uid + "," + gayaUt);
             Tux gayaTux = XI.LibTuple.TL.DecodeTux(gayaUt);
-            List<ushort> picks = Artiad.Procedure.CardHunter(XI, Card.Genre.Tux,
+            List<ushort> picks = Artiad.Procedure.CardHunter(XI, Card.PileGenre.Tux,
                 (p) => gayaTux.IsSameType(XI.LibTuple.TL.DecodeTux(p)), (a, r) => a.Count == 2, true);
             if (picks.Count > 0)
             {
@@ -4025,6 +4025,22 @@ namespace PSD.PSDGamepkg.JNS
                     mon.Element == FiveElement.SOLARIS) && XI.Board.Garden.Values.Any(p =>
                     p.IsAlive && p.Team == player.Team && XI.Board.IsAttendWar(p));
             }
+            else if (type == 3)
+            { // GOIY,0/1,A,S
+                string[] blocks = fuse.Split(',');
+                ushort who = ushort.Parse(blocks[2]);
+                return who != player.Uid && (who + player.Uid) % 2 == 0 && blocks[1] != "1";
+            }
+            else if (type == 4)
+            { // GOOY,0/1,A
+                string[] blocks = fuse.Split(',');
+                for (int i = 1; i < blocks.Length; i += 2)
+                {
+                    ushort who = ushort.Parse(blocks[i + 1]);
+                    if (who != player.Uid && (who + player.Uid) % 2 == 0 && blocks[i] != "1")
+                        return true;
+                }
+            }
             return false;
         }
         public void JNT3601Action(Player player, int type, string fuse, string argst)
@@ -4049,6 +4065,22 @@ namespace PSD.PSDGamepkg.JNS
             {
                 XI.RaiseGMessage("G0DH," + string.Join(",", XI.Board.Garden.Values.Where(p => p.IsAlive &&
                     p.Team == player.Team && XI.Board.IsAttendWar(p)).Select(p => p.Uid + ",0,1")));
+            }
+            else if (type == 3)
+            {
+                string[] blocks = fuse.Split(',');
+                ushort who = ushort.Parse(blocks[2]);
+                ++XI.Board.Garden[who].TuxLimit;
+            }
+            else if (type == 4)
+            {
+                string[] blocks = fuse.Split(',');
+                for (int i = 1; i < blocks.Length; i += 2)
+                {
+                    ushort who = ushort.Parse(blocks[i + 1]);
+                    if (who != player.Uid && (who + player.Uid) % 2 == 0 && blocks[i] != "1")
+                        ++XI.Board.Garden[who].TuxLimit;
+                }
             }
         }
         public bool JNT3602Valid(Player player, int type, string fuse)
@@ -4137,7 +4169,8 @@ namespace PSD.PSDGamepkg.JNS
         }
         public bool JNT3703Valid(Player player, int type, string fuse)
         {
-            return player.Runes.Count > 0 && XI.Board.Garden.Values.Any(p => p.IsTared && p.Uid != player.Uid);
+            return player.Runes.Count > 0 && XI.Board.Garden.Values.Any(p => p.IsTared &&
+                p.Uid != player.Uid && !player.RAM.GetOrSetUshortArray("Reader").Contains(p.Uid));
         }
         public void JNT3703Action(Player player, int type, string fuse, string argst)
         {
@@ -4146,11 +4179,13 @@ namespace PSD.PSDGamepkg.JNS
             ushort to = ushort.Parse(argst.Substring(idx + 1));
             XI.RaiseGMessage("G0OF," + player.Uid + "," + rune);
             XI.RaiseGMessage("G0IF," + to + "," + rune);
+            player.RAM.GetOrSetUshortArray("Reader").Add(to);
         }
         public string JNT3703Input(Player player, int type, string fuse, string prev)
         {
             if (prev == "")
-                return "/F1(p" + string.Join("p", player.Runes) + "),/T1" + AOthersTared(player);
+                return "/F1(p" + string.Join("p", player.Runes) + "),/T1" + FormatPlayers(p => p.IsTared &&
+                    p.Uid != player.Uid && !player.RAM.GetOrSetUshortArray("Reader").Contains(p.Uid));
             else
                 return "";
         }
@@ -4790,8 +4825,8 @@ namespace PSD.PSDGamepkg.JNS
             if (prev == "")
             {
                 return "#进行变身,/T1" + FormatPlayers(p => p.Team == player.Team && p.IsTared &&
-                    !player.ROM.GetOrSetUshortArray("Changed").Contains(p.Uid)) + ",#倾慕者,/T1"
-                    + FormatPlayers(p => p.IsTared && XI.LibTuple.HL.InstanceHero(p.SelectHero).Spouses.Any(q => joinable(q)));
+                    !player.ROM.GetOrSetUshortArray("Changed").Contains(p.Uid)) + ",#倾慕者,/T1" +
+                    FormatPlayers(p => p.IsTared && XI.LibTuple.HL.InstanceHero(p.SelectHero).Spouses.Any(joinable));
             }
             else if (prev.IndexOf(',', (prev.IndexOf(',') + 1)) < 0)
             {
