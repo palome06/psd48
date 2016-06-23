@@ -452,10 +452,7 @@ namespace PSD.PSDGamepkg.JNS
             {
                 List<ushort> cands = player.Tux.Where(p =>
                     XI.LibTuple.TL.DecodeTux(p).Type == Base.Card.Tux.TuxType.TP).ToList();
-                if (cands.Count > 0)
-                    return "/Q1(p" + string.Join("p", cands) + ")";
-                else
-                    return "/";
+                return cands.Count > 0 ? "#当作【冰心诀】,/Q1(p" + string.Join("p", cands) + ")" : "/";
             }
             else
                 return "";
@@ -1061,8 +1058,7 @@ namespace PSD.PSDGamepkg.JNS
         }
         public bool JN40302Valid(Player player, int type, string fuse)
         {
-            return XI.Board.Garden.Values.Select(p => p.Uid != player.Uid &&
-                p.IsAlive && p.Team == player.Team && p.Tux.Count > 0).Any();
+            return XI.Board.Garden.Values.Any(p => p.IsAlive && p.Team == player.Team && p.Tux.Count > 0);
         }
         public void JN40302Action(Player player, int type, string fuse, string argst)
         {

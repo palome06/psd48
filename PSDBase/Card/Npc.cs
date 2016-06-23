@@ -119,8 +119,12 @@ namespace PSD.Base.Card
         public List<ushort> ListAllSeleable(int groups)
         {
             List<ushort> all = ListAllNPC(groups);
-            if (all.Any(p => dicts[p].Code == "NCR01"))
-                all.RemoveAll(p => dicts[p].Code == "NCT12");
+            string[] pair = { "NCR01", "NCT12", "NCR02", "NC302", "NCR03", "NC202", "NCR04", "N3W01" };
+            for (int i = 0; i < pair.Length; i += 2)
+            {
+                if (all.Any(p => dicts[p].Code == pair[i]))
+                    all.RemoveAll(p => dicts[p].Code == pair[i + 1]);
+            }
             return all;
         }
         public List<ushort> ListAllNPC(int groups)

@@ -26,7 +26,7 @@ namespace PSD.Base.Card
         // SOL: 0111
 
         FINAL_MASK = 0x7 << 4,
-        ALIVE = 0x1 << 4, ALIVE_HARD = 0x2 << 5, TERMIN_AT = 0x4 << 4,
+        ALIVE = 0x1 << 4, ALIVE_HARD = 0x2 << 4, TERMIN_AT = 0x4 << 4,
 
         SRC_MASK = 0x3 << 7,
         FROM_JP = 0x1 << 7, FROM_SK = 0x2 << 7, FROM_NMB = 0x3 << 7,

@@ -73,6 +73,13 @@ namespace PSD.PSDGamepkg.Artiad
             List<Hero> heros = new List<Hero>();
             if (hero == null)
                 return heros;
+            if (hero.Pioneer != 0) // maybe sustitiude it with its pioneer
+            {
+                Console.WriteLine("Here comes a pioneer " + hero.Pioneer + "(" + hero.Avatar + ")");
+                Hero pioneer = xi.LibTuple.HL.InstanceHero(hero.Pioneer);
+                if (pioneer != null && xi.PCS.ListAllSeleableHeros().Contains(pioneer))
+                    hero = pioneer;
+            }
             if (IsHeroCallable(hero, xi))
                 heros.Add(hero);
             foreach (int isoId in hero.Isomorphic)

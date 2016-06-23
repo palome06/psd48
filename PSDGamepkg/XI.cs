@@ -572,10 +572,14 @@ namespace PSD.PSDGamepkg
             Algo.AddToMultiMap(dict, name, new SkTriple() { Name = "~" + priorty, Priorty = priorty, Occur = name });
         }
 
-        private List<SKE> ParseSingleFromSKTriples(List<SkTriple> list,
-            string zero, bool ucr, ushort puid, Skill skill)
+        private List<SKE> ParseSingleFromSKTriples(string zero, bool ucr, ushort puid, Skill skill)
         {
             List<SKE> result = new List<SKE>();
+            if (!sk02.ContainsKey(zero))
+                return result;
+            List<SkTriple> list = sk02[zero];
+            if (list.Count == 0)
+                return result;
             ucr &= (Board.UseCardRound != 0);
             if (ucr && Board.Garden[puid].Team != Board.UseCardRound)
                 return result;
@@ -600,11 +604,8 @@ namespace PSD.PSDGamepkg
                 foreach (string skillStr in player.Skills)
                 {
                     Skill skill = LibTuple.SL.EncodeSkill(skillStr);
-                    if (!pocket.Any(p => p.Name == skill.Code))
-                    {
-                        pocket.AddRange(ParseSingleFromSKTriples(
-                            sk02[zero], zero, cond, player.Uid, skill));
-                    }
+                    if (skill != null && !pocket.Any(p => p.Name == skill.Code))
+                        pocket.AddRange(ParseSingleFromSKTriples(zero, cond, player.Uid, skill));
                 }
                 player.IsZhu = false;
             }
@@ -612,9 +613,14 @@ namespace PSD.PSDGamepkg
 
         // Parse from SKTriple list to SKT list
         // $ucr: user's round, old controller for R*ZD.
-        private List<SKE> ParseFromSKTriples(List<SkTriple> list, string zero, bool ucr)
+        private List<SKE> ParseFromSKTriples(string zero, bool ucr)
         {
             List<SKE> result = new List<SKE>();
+            if (!sk02.ContainsKey(zero))
+                return result;
+            List<SkTriple> list = sk02[zero];
+            if (list.Count == 0)
+                return result;
             ucr &= (Board.UseCardRound != 0);
             List<ushort> pys = ucr ? Board.Garden.Values.Where(p => p.Team == Board.UseCardRound)
                 .Select(p => p.Uid).ToList() : Board.Garden.Keys.ToList();

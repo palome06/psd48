@@ -69,8 +69,8 @@ namespace PSD.ClientAo.Request
             lg = new Base.LibGroup();
             InitializeComponent();
             string[] genreName = new string[] { "稻草人", "标准包", "凤鸣玉誓", "SP", "EX",
-                "三世轮回", "云来奇缘", "含笑九泉", "界限突破", "宿命篇" };
-            int[] genreIndex = new int[] { 1, 2, 3, 5, 6, 4, 7, 9 };
+                "三世轮回", "云来奇缘", "含笑九泉", "界限突破", "宿命篇", "重铸之心" };
+            int[] genreIndex = new int[] { 1, 2, 3, 5, 6, 4, 7, 9, 10 };
             wrapPanels = new WrapPanel[genreName.Length];
             foreach (int index in genreIndex)
             {
@@ -110,7 +110,7 @@ namespace PSD.ClientAo.Request
             foreach (Tux tux in lg.TL.ListAllTuxs(0))
                 AddContent("G", tux.DBSerial, tux.Package.All(p => !IsGenreNotAvailable(p)) ? 0 : 8, tux.Genre, false);
 
-            genreIndex = new int[] { 1, 5, 6, 7, 9 };
+            genreIndex = new int[] { 1, 5, 6, 7, 9, 10 };
             foreach (int index in genreIndex)
             {
                 GroupBox gb = new GroupBox()

@@ -353,7 +353,7 @@ namespace PSD.PSDGamepkg.JNS
             XI.Board.Wang.Push(pop);
             UEchoCode r5ed = XI.HandleWithNPCEffect(py, npc, "SJT07");
             if (r5ed == UEchoCode.NO_OPTIONS)
-                XI.AsyncInput(rd.Uid, "//", "SJT07", "1");
+                XI.AsyncInput(rd.Uid, "#无法执行,//", "SJT07", "1");
             if (r5ed == UEchoCode.END_ACTION)
                 XI.RaiseGMessage("G1YP," + py.Uid + "," + pop);
             
@@ -917,7 +917,7 @@ namespace PSD.PSDGamepkg.JNS
                     {
                         XI.RaiseGMessage("G0QZ," + rd.Uid + "," + string.Join(",", rd.ListOutAllEquips()));
                         System.Func<ushort, bool> isEq = (p) => XI.LibTuple.TL.DecodeTux(p).IsTuxEqiup();
-                        List<ushort> picks = Artiad.Procedure.CardHunter(XI, Card.Genre.Tux,
+                        List<ushort> picks = Artiad.Procedure.CardHunter(XI, Card.PileGenre.Tux,
                             (p) => isEq(p), (a, r) => a.Any(p => isEq(p)), false);
                         if (picks.Count > 0)
                             XI.RaiseGMessage("G0HQ,2," + rd.Uid + ",0,0," + picks.Single());
@@ -952,7 +952,7 @@ namespace PSD.PSDGamepkg.JNS
                         XI.Board.Wang.Push(pop);
                         UEchoCode r5ed = XI.HandleWithNPCEffect(rd, npc, "SJH10");
                         if (r5ed == UEchoCode.NO_OPTIONS)
-                            XI.AsyncInput(rd.Uid, "//", "SJH10", "2");
+                            XI.AsyncInput(rd.Uid, "#无法执行,//", "SJH10", "2");
                         if (r5ed == UEchoCode.END_ACTION)
                             XI.RaiseGMessage("G1YP," + rd.Uid + "," + pop);
 

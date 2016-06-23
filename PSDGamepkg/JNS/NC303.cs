@@ -490,7 +490,7 @@ namespace PSD.PSDGamepkg.JNS
         public void NJH7Action(Player player, string fuse, string args)
         {
             System.Func<ushort, bool> isEq = (p) => XI.LibTuple.TL.DecodeTux(p).IsTuxEqiup();
-            List<ushort> picks = Artiad.Procedure.CardHunter(XI, Card.Genre.Tux,
+            List<ushort> picks = Artiad.Procedure.CardHunter(XI, Card.PileGenre.Tux,
                 (p) => XI.LibTuple.TL.DecodeTux(p).Type == Tux.TuxType.WQ,
                 (a, r) => a.Count(p => isEq(p)) + r.Count(p => isEq(p)) == 2, true);
             if (picks.Count > 0)

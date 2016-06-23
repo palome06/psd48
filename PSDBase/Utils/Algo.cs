@@ -84,8 +84,14 @@ namespace PSD.Base.Utils
             else
                 dict.Add(key, delta);
         }
+        public static T[] TakeRange<T>(T[] blocks, int start)
+        {
+            return TakeRange(blocks, start, blocks.Length);
+        }
         public static T[] TakeRange<T>(T[] blocks, int jdx, int kdx)
         {
+            if (kdx == -1)
+                kdx = blocks.Length;
             if (jdx <= kdx && kdx <= blocks.Length)
             {
                 T[] result = new T[kdx - jdx];
@@ -159,6 +165,10 @@ namespace PSD.Base.Utils
                 if (list.Count == 0)
                     map.Remove(key);
             }
+        }
+        public static bool IsSubSet<T>(IEnumerable<T> subset, IEnumerable<T> set)
+        {
+            return subset.Intersect(set).Count() == subset.Count();
         }
 
         public static void LongMessageParse(string[] lines, Action<ushort> setWho,

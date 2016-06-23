@@ -242,10 +242,13 @@ namespace PSD.ClientAo.VW
             return any;
         }
         // any input
-        internal string Cin01(ushort uid)
+        internal string Cin01(ushort uid, string hint)
         {
             PreCinClearup();
-            ShowTip("请确定。");
+            string tip = "请确定。";
+            if (!string.IsNullOrWhiteSpace(hint))
+                tip = hint + "，" + tip;
+            ShowTip(tip);
             AD.yfJoy.DecideMessage = "0";
             AD.yfJoy.CEE.DecideValid = true;
             string any = Cin(uid);
