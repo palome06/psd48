@@ -208,6 +208,10 @@ namespace PSD.ClientZero
             Base.Card.Exsp exsp = tuple.ESL.Encode("I" + code);
             return (exsp != null) ? (code + ":" + exsp.Name) : "0:喵";
         }
+        internal string ExspI(IEnumerable<int> codes)
+        {
+            return "{" + string.Join(",", codes.Select(p => ExspI(p))) + "}";
+        }
         internal string ExspIWithCode(int code)
         {
             return code + ":" + ExspI(code);

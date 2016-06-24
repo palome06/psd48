@@ -309,14 +309,14 @@ namespace PSD.ClientAo
                         {
                             unhandledMsg.Enqueue(readLine);
                         }
-                        if (isReplay && WI is VW.Eywi)
-                        {
-                            VW.Eywi eywi = WI as VW.Eywi;
-                            if (!clogfree)
-                                Thread.Sleep(eywi.Duration);
-                            while (!eywi.InProcess)
-                                Thread.Sleep(80);
-                        }
+                        //if (isReplay && WI is VW.Eywi)
+                        //{
+                        //    VW.Eywi eywi = WI as VW.Eywi;
+                        //    if (!clogfree)
+                        //        Thread.Sleep(eywi.Duration);
+                        //    while (!eywi.InProcess)
+                        //        Thread.Sleep(80);
+                        //}
                     }
                     else
                         Thread.Sleep(100);
@@ -369,6 +369,13 @@ namespace PSD.ClientAo
                         //else if (unhandledMsg.Count > 0)
                         //    unhandledMsg.Dequeue();
                         peek = unhandledMsg.Dequeue();
+                        if (WI is VW.Eywi)
+                        {
+                            VW.Eywi eywi = WI as VW.Eywi;
+                            Thread.Sleep(eywi.Duration);
+                            while (!eywi.InProcess)
+                                Thread.Sleep(80);
+                        }
                     }
                     else
                         peek = "";
@@ -810,7 +817,6 @@ namespace PSD.ClientAo
                     if (jdx >= 0)
                     {
                         string[] argv = Algo.Substring(arg, jdx + "(p".Length, kdx).Split('p');
-                        List<string> uss = argv.Select(p => p.Substring("I".Length)).ToList();
                         input = VI.CinI(Uid, prevComment, r1, r2, argv, cancellable, keep);
                         inputValid &= Algo.IsSubSet(input.Split(','), argv);
                     }
@@ -2979,7 +2985,12 @@ namespace PSD.ClientAo
                     }
                     break;
                 case "E0ZZ":
-                    Task.WaitAny(Task.Factory.StartNew(() => Thread.Sleep(499)));
+                    {
+                        int duration = 499;
+                        if (WI is VW.Eywi)
+                            duration = (WI as VW.Eywi).SleepDuration * 5 / 2;
+                        Task.WaitAny(Task.Factory.StartNew(() => Thread.Sleep(duration)));
+                    }
                     break;
             }
         }
