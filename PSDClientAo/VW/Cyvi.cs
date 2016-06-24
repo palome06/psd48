@@ -271,7 +271,7 @@ namespace PSD.ClientAo.VW
         {
             PreCinClearup();
             ShowTip(prevComment);
-            AD.yfDeal.Deal.Show(uss, null, r1, r2, cancellable, keep);
+            AD.yfDeal.Deal.Show(uss.Select(p => "I" + p), null, r1, r2, cancellable, keep);
             string result = Cin(uid);
             if (result != CinSentinel)
                 HideTip();

@@ -824,8 +824,8 @@ namespace PSD.PSDGamepkg
             WI.RecvInfEnd();
             if (silentPriority != null)
             {
-                for (int i = silentIdx; i < silentPriority.Length; ++i)
-                    silentAction[silentIdx]();
+                while (silentIdx < silentPriority.Length)
+                    silentAction[silentIdx++]();
             }
             return actualAction;
         }

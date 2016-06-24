@@ -278,7 +278,7 @@ namespace PSD.PSDGamepkg.JNS
                             player.TokenExcl.Contains("I" + harm.Element.Elem2Int()))
                         cands.Add(harm.Element.Elem2Int());
                 }
-                return "/I1(p" + string.Join("p", cands.Select(p => "I" + p)) + "),#转移,/T1" + AAllTareds(player);
+                return "/I1(p" + string.Join("p", cands) + "),#转移,/T1" + AAllTareds(player);
             }
             else
                 return "";
@@ -317,8 +317,7 @@ namespace PSD.PSDGamepkg.JNS
                 Base.Card.Monster mon2 = XI.LibTuple.ML.Decode(XI.Board.Monster2);
                 if (mon2 != null && player.TokenExcl.Contains("I" + mon2.Element.Elem2Int()))
                     sets.Add(mon2.Element.Elem2Int());
-                return "/I1(p" + string.Join("p", sets.Select(p => "I" + p)) + "),#获得补牌,/T1(p" +
-                    string.Join("p", XI.Board.Garden.Values.Where(p => p.IsAlive).Select(p => p.Uid)) + ")";
+                return "/I1(p" + string.Join("p", sets) + "),#获得补牌,/T1" + AAlls(player);
             }
             else
                 return "";
@@ -767,8 +766,8 @@ namespace PSD.PSDGamepkg.JNS
             // Always ask for select new one
             if (player.TokenExcl.Count > 0)
             {
-                string input = XI.AsyncInput(player.Uid, "I1(p" +
-                    string.Join("p", player.TokenExcl) + ")", "JNT0702", "0");
+                string input = XI.AsyncInput(player.Uid, "I1(p" + string.Join("p",
+                    player.TokenExcl.Select(p => p.Substring("I".Length))) + ")", "JNT0702", "0");
                 ushort iNo = ushort.Parse(input);
                 if (im.ContainsKey(iNo))
                 {
@@ -2692,7 +2691,7 @@ namespace PSD.PSDGamepkg.JNS
         public string JNT2001Input(Player player, int type, string fuse, string prev)
         {
             if (type == 0 && prev == "")
-                return "I1(p" + string.Join("p", player.TokenExcl)　+ ")";
+                return "/I1(p" + string.Join("p", player.TokenExcl.Select(p => p.Substring("I".Length))) + ")";
             else
                 return "";
         }

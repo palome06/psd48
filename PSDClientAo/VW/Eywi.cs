@@ -16,7 +16,7 @@ namespace PSD.ClientAo.VW
         public ushort Uid { set; get; }
         public bool Encryed { set; get; }
 
-        private float[] magnification;
+        private float[] magnification, magnificationFlat;
         private string[] magnificationstr;
         private int mMagIndex;
         [STAThread]
@@ -49,6 +49,7 @@ namespace PSD.ClientAo.VW
             get { return mInProcess; }
         }
         public int Duration { get { return (int)(200 / magnification[MagIndex]); } }
+        public int SleepDuration { get { return (int)(200 / magnificationFlat[MagIndex]); } }
         public string CurrentMagi { get { return magnificationstr[MagIndex]; } }
 
         public Eywi(string fileName)
@@ -68,6 +69,7 @@ namespace PSD.ClientAo.VW
                     Encryed = true;
             }
             magnification = new float[] { 0.25f, 0.5f, 1, 2, 4, 8 };
+            magnificationFlat = new float[] { 0.75f, 0.9f, 1, 1.25f, 1.75f, 2.5f };
             magnificationstr = new string[] { "0.25", "0.5", "1", "2", "4", "8" };
             mMagIndex = 2;
             mInProcess = true;

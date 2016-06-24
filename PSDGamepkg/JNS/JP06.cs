@@ -2701,7 +2701,7 @@ namespace PSD.PSDGamepkg.JNS
                 XI.RaiseGMessage("G0HQ,4," + player.Uid + "," + rd.Uid + "," + ptc + "," + rtc +
                     (ptc > 0 ? ("," + string.Join(",", player.Tux)) : "") +
                     (rtc > 0 ? ("," + string.Join(",", rd.Tux)) : ""));
-                if (ptc <= rtc - 3)
+                if (player.Team != rd.Team && ptc <= rtc - 3)
                 {
                     XI.RaiseGMessage("G0DS," + player.Uid + ",0,1");
                     Harm(player, player, 2);

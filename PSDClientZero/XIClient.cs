@@ -790,17 +790,17 @@ namespace PSD.ClientZero
                         r1 = r2 = int.Parse(Algo.Substring(arg, 1, jdx));
 
                     string[] argv = Algo.Substring(arg, jdx + "(p".Length, kdx).Split('p');
-                    List<string> uss = argv.Select(p => p.Substring("I".Length)).ToList();
+                    var uss = argv.Select(p => int.Parse(p));
                     if (argv.Length < r1)
                         r1 = r2 = argv.Length;
                     if (r1 != r2)
                         input = VI.Cin(Uid, "请选择{0}至{1}张专属牌为{2}目标，可选{3}{4}.",
-                            r1, r2, prevComment, zd.MixedCards(argv), cancel);
+                            r1, r2, prevComment, zd.ExspI(uss), cancel);
                     else
                         input = VI.Cin(Uid, "请选择{0}张专属牌为{1}目标，可选{2}{3}.",
-                            r1, prevComment, zd.MixedCards(argv), cancel);
+                            r1, prevComment, zd.ExspI(uss), cancel);
                     inputValid &= !(CountItemFromComma(input) < r1 || CountItemFromComma(input) > r2);
-                    inputValid &= Algo.IsSubSet(input.Split(','), uss);
+                    inputValid &= Algo.IsSubSet(input.Split(','), argv);
                     prevComment = ""; cancel = "";
                     roundInput = input;
                 }

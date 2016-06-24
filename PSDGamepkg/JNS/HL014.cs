@@ -2380,7 +2380,7 @@ namespace PSD.PSDGamepkg.JNS
         public string JNH1601Input(Player player, int type, string fuse, string prev)
         {
             if (type == 2 && prev == "")
-                return "/I1(p" + string.Join("p", player.TokenExcl) + ")";
+                return "/I1(p" + string.Join("p", player.TokenExcl.Select(p => p.Substring("I".Length))) + ")";
             else
                 return "";
         }
@@ -3697,11 +3697,10 @@ namespace PSD.PSDGamepkg.JNS
         public string JNE0302Input(Player player, int type, string fuse, string prev)
         {
             if (prev == "")
-                return "#请选择调整怪物闪避方式.##闪避增加##闪避减少,/Y2";
-            else if (prev.IndexOf(',') < 0)
-            {
-                string head = "/I1" + (player.TokenExcl.Count > 1 ? ("~" + player.TokenExcl.Count) : "");
-                return head + "(p" + string.Join("p", player.TokenExcl) + ")";
+            { 
+                return "#请选择调整怪物闪避方式.##闪避增加##闪避减少,/Y2,#弃置,/C1" + (player.TokenExcl.Count > 1 ?
+                    ("~" + player.TokenExcl.Count) : "") + "(p" + string.Join("p", player.TokenExcl.Select(
+                    p => p.Substring("C".Length))) + ")";
             }
             else
                 return "";
@@ -4034,6 +4033,32 @@ namespace PSD.PSDGamepkg.JNS
                 return "";
         }
         #endregion EX515 - Qingshi
+        #region EX119 - Jisanniang
+        public bool JNE0701Valid(Player player, int type, string fuse)
+        {
+            return XI.Board.IsAttendWarSucc(player) && XI.Board.Garden.Values.Any(p =>
+                p.Team == player.OppTeam && p.IsTared && XI.Board.IsAttendWar(p) && p.Tux.Count > 0);
+        }
+        public void JNE0701Action(Player player, int type, string fuse, string argst)
+        {
+            string whoStr = XI.AsyncInput(player.Uid, "#弃牌,T1" + FormatPlayers(p => p.Team == player.OppTeam &&
+                p.IsTared && XI.Board.IsAttendWar(p) && p.Tux.Count > 0), "JNE0701", "0");
+            ushort who = ushort.Parse(whoStr);
+            TargetPlayer(player.Uid, who);
+            string c0 = Algo.RepeatString("p0", XI.Board.Garden[who].Tux.Count);
+            XI.AsyncInput(player.Uid, "#获得的,C1(" + c0 + ")", "JNE0701", "1");
+            XI.RaiseGMessage("G0DH," + who + ",2,1");
+        }
+        public bool JNE0702Valid(Player player, int type, string fuse)
+        {
+            Artiad.Abandon ab = Artiad.Abandon.Parse(fuse);
+            return ab.Genre == Card.Genre.NMB && ab.List.Any(p => p.Cards.Any(q => NMBLib.IsMonster(q)));
+        }
+        public void JNE0702Action(Player player, int type, string fuse, string argst)
+        {
+            XI.RaiseGMessage("G0DH," + player.Uid + ",0,1");
+        }
+        #endregion EX119 - Jisanniang
 
         #region RM302 - TangXuejian
         public bool JNR0201Valid(Player player, int type, string fuse)
