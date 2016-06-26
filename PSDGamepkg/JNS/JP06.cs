@@ -2179,9 +2179,9 @@ namespace PSD.PSDGamepkg.JNS
                     Tux zp04 = XI.LibTuple.TL.EncodeTuxCode("ZP04");
                     return zp04 != null && zp04.Bribe(provider, type, fuse) && zp04.Valid(user, type, fuse);
                 }
-                else if (type == 1 && xbt5.ILAS != null)
+                else if ((type == 1 || type == 2) && xbt5.ILAS != null)
                     return true;
-                else if (type == 2 && xbt5.ILAS == "FJT1" && !user.ArmorDisabled)
+                else if (type == 3 && xbt5.ILAS == "FJT1" && !user.ArmorDisabled)
                 {
                     TuxEqiup fjt1 = XI.LibTuple.TL.EncodeTuxCode("FJT1") as TuxEqiup;
                     return fjt1.ConsumeValid(user, 0, 0, fuse);
@@ -2202,9 +2202,9 @@ namespace PSD.PSDGamepkg.JNS
                     XI.RaiseGMessage("G0CC," + provider.Uid + ",0," + user.Uid + ",ZP04," + argst + ";0," + fuse);
                     XI.RaiseGMessage("G0CZ,0," + provider.Uid);
                 }
-                else if (type == 1)
+                else if (type == 1 || type == 2)
                     GeneralDecrIllusion(user, "XBT5");
-                else if (type == 2)
+                else if (type == 3)
                 {
                     TuxEqiup fjt1 = XI.LibTuple.TL.EncodeTuxCode("FJT1") as TuxEqiup;
                     fjt1.ConsumeAction(user, 0, 0, fuse, argst);
@@ -2218,7 +2218,7 @@ namespace PSD.PSDGamepkg.JNS
             {
                 if (type == 0 && prev == "")
                     return "/Q1(p" + string.Join("p", provider.Tux) + ")";
-                else if (type == 2)
+                else if (type == 3)
                 {
                     TuxEqiup fjt1 = XI.LibTuple.TL.EncodeTuxCode("FJT1") as TuxEqiup;
                     return fjt1.ConsumeInput(user, 0, 0, fuse, prev);
@@ -2237,18 +2237,18 @@ namespace PSD.PSDGamepkg.JNS
             if (consumeType == 0)
             {
                 Illusion xbt6 = XI.LibTuple.TL.EncodeTuxCode("XBT6") as Illusion;
-                if (type == 0)
+                if (type == 0 && xbt6.ILAS == null)
                 {
                     return XI.Board.RestNPCPiles.Count > 0 && Artiad.Harm.Parse(fuse).Any(p => p.N > 0 &&
                         p.Who != player.Uid && XI.Board.Garden[p.Who].Team == player.Team);
                 }
-                else if (type == 1)
+                else if (type == 1 && xbt6.ILAS == null)
                 {
                     string[] g0zw = fuse.Split(',');
                     return Algo.TakeRange(g0zw, 1, g0zw.Length).Any(p =>
                         XI.Board.Garden[ushort.Parse(p)].IsAlive);
                 }
-                else if (type == 2 && xbt6.ILAS != null)
+                else if ((type == 2 || type == 3) && xbt6.ILAS != null)
                     return true;
                 else
                     return false;
@@ -2299,7 +2299,7 @@ namespace PSD.PSDGamepkg.JNS
                     else
                         XI.RaiseGMessage("G0YM,3,1,0"); // actual just remove one Wang, it should show the rests
                 }
-                else if (type == 2)
+                else if (type == 2 || type == 3)
                     GeneralDecrIllusion(player, "XBT6");
             }
             else if (consumeType == 1)
@@ -2357,7 +2357,7 @@ namespace PSD.PSDGamepkg.JNS
                         }
                     }
                 }
-                else if (type == 2 && xbt7.ILAS != null)
+                else if ((type == 2 || type == 3) && xbt7.ILAS != null)
                     return true;
                 return false;
             }
@@ -2394,7 +2394,7 @@ namespace PSD.PSDGamepkg.JNS
                         tux.Code + "," + uts + ";" + pureType + "," + pureFuse);
                     provider.RFM.GetOrSetDiva("XBT7").Set("Used", true);
                 }
-                else if (type == 2)
+                else if (type == 2 || type == 3)
                     GeneralDecrIllusion(user, "XBT7");
             }
             else if (consumeType == 1)
