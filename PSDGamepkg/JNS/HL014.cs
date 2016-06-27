@@ -527,15 +527,19 @@ namespace PSD.PSDGamepkg.JNS
                     // Reverse Ordered Player
                     XI.RaiseGMessage("G0HR,0,1");
                     if (player.SingleTokenTar != player.Uid)
-                    {
-                        Player py = XI.Board.Garden[player.SingleTokenTar];
-                        rotation(py, true);
-                    }
+                        rotation(XI.Board.Garden[player.SingleTokenTar], true);
                     XI.RaiseGMessage("G0OJ," + player.Uid + ",2,1," + player.SingleTokenTar);
                 }
             }
             else if (type == 1) // Leave of myself
+            {
                 XI.RaiseGMessage("G0HR,0,1");
+                if (player.SingleTokenTar != 0)
+                {
+                    rotation(XI.Board.Garden[player.SingleTokenTar], true);
+                    XI.RaiseGMessage("G0OJ," + player.Uid + ",2,1," + player.SingleTokenTar);
+                }
+            }
             else if (type == 2) // Leave of the target
             {
                 XI.RaiseGMessage("G0OJ," + player.Uid + ",2,1," + player.SingleTokenTar);

@@ -995,16 +995,19 @@ namespace PSD.PSDGamepkg.JNS
         public void GLT1WinEff()
         {
             Player r = XI.Board.Rounder;
-            string ts = XI.AsyncInput(r.Uid, "#弃置以令任意一人补2张牌的,/Q1(p" +
-                string.Join("p", r.ListOutAllEquips()) + "),#获得2张牌的,/T1" +
-                FormatPlayers(p => p.IsAlive), "GLT1WinEff", "0");
-            if (!ts.StartsWith("/") && !ts.Contains(VI.CinSentinel))
+            if (r.HasAnyEquips())
             {
-                int idx = ts.IndexOf(',');
-                ushort tx = ushort.Parse(ts.Substring(0, idx));
-                ushort tp = ushort.Parse(ts.Substring(idx + 1));
-                XI.RaiseGMessage("G0QZ," + r.Uid + "," + tx);
-                XI.RaiseGMessage("G0DH," + tp + ",0,2");
+                string ts = XI.AsyncInput(r.Uid, "#弃置以令任意一人补2张牌的,/Q1(p" +
+                    string.Join("p", r.ListOutAllEquips()) + "),#获得2张牌的,/T1" +
+                    FormatPlayers(p => p.IsAlive), "GLT1WinEff", "0");
+                if (!ts.StartsWith("/") && !ts.Contains(VI.CinSentinel))
+                {
+                    int idx = ts.IndexOf(',');
+                    ushort tx = ushort.Parse(ts.Substring(0, idx));
+                    ushort tp = ushort.Parse(ts.Substring(idx + 1));
+                    XI.RaiseGMessage("G0QZ," + r.Uid + "," + tx);
+                    XI.RaiseGMessage("G0DH," + tp + ",0,2");
+                }
             }
         }
         public void GLT1LoseEff()
@@ -1037,14 +1040,14 @@ namespace PSD.PSDGamepkg.JNS
             if (pys.Count > 0)
             {
                 bool done = false;
+                Player r = XI.Board.Rounder;
                 while (!done)
                 {
-                    string ts = XI.AsyncInput(XI.Board.Rounder.Uid, "#弃置装备的,/T1(p" +
-                        string.Join("p", pys.Select(p => p.Uid)) + ")", "GLT2WinEff", "0");
+                    string ts = XI.AsyncInput(r.Uid, "#弃置装备,/T1" + AAlls(r), "GLT2WinEff", "0");
                     if (ts != "/0")
                     {
                         ushort who = ushort.Parse(ts);
-                        string tu = XI.AsyncInput(XI.Board.Rounder.Uid, "#弃置的,/C1(p" +
+                        string tu = XI.AsyncInput(XI.Board.Rounder.Uid, "#弃置,/C1(p" +
                             string.Join("p", XI.Board.Garden[who].ListOutAllEquips()) + ")", "GLT2WinEff", "0");
                         if (tu != "/0")
                         {
