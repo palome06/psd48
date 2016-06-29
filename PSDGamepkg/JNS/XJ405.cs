@@ -2949,6 +2949,25 @@ namespace PSD.PSDGamepkg.JNS
             else
                 return false;
         }
+        public bool JNS0802Valid(Player player, int type, string fuse)
+        {
+            if (type == 0)
+            {
+                string[] g0ce = fuse.Substring(0, fuse.IndexOf(';')).Split(',');
+                bool byOp = XI.Board.Garden[ushort.Parse(g0ce[1])].Team == player.OppTeam || !player.IsSKOpt;
+                return (player.Tux.Count > 0 || XI.Board.Garden.Values.Any(p => p.IsTared &&
+                    p.Team == player.Team && p.HasAnyEquips())) && (byOp &&
+                    g0ce[3] == "0" && (g0ce[4] == "JP01" || g0ce[4] == "JP06"));
+            }
+            else if (type == 1)
+            {
+                string[] g0ce = fuse.Substring(0, fuse.IndexOf(';')).Split(',');
+                bool byOp = XI.Board.Garden[ushort.Parse(g0ce[1])].Team == player.OppTeam || !player.IsSKOpt;
+                return XI.Board.ProtectedTux.Contains(player.RAM.GetUshort("protected")) &&
+                    (byOp && g0ce[3] == "0" && (g0ce[4] == "JP01" || g0ce[4] == "JP06"));
+            }
+            else return false;
+        }
         public void JNS0802Action(Player player, int type, string fuse, string argst)
         {
             if (type == 0)
@@ -2964,37 +2983,13 @@ namespace PSD.PSDGamepkg.JNS
                     Genre = Card.Genre.Tux,
                     SingleCard = card
                 }.ToMessage());
-                player.RFM.Set("protected", card);
+                player.RAM.Set("protected", card);
             }
             else if (type == 1)
             {
-                XI.Board.ProtectedTux.Remove(player.RFM.GetUshort("protected"));
-                player.RFM.Set("protected", null);
+                XI.Board.ProtectedTux.Remove(player.RAM.GetUshort("protected"));
+                player.RAM.Set("protected", null);
             }
-        }
-        public bool JNS0802Valid(Player player, int type, string fuse)
-        {
-            if (type == 0)
-            {
-                // G0CD,A,T,KN,x1,x2;TF
-                bool basecon = player.Tux.Count > 0 || XI.Board.Garden.Values.Where(p => p.IsTared &&
-                    p.Team == player.Team && p.HasAnyEquips()).Any();
-                if (basecon)
-                {
-                    string[] blocks = fuse.Substring(0, fuse.IndexOf(';')).Split(',');
-                    return blocks[3] == "JP01" || blocks[3] == "JP06";
-                }
-                else
-                    return false;
-            }
-            else if (type == 1)
-            {
-                // G0CE,A,T,0,KN,y,z;TF
-                string[] blocks = fuse.Substring(0, fuse.IndexOf(';')).Split(',');
-                Player py = XI.Board.Garden[ushort.Parse(blocks[1])];
-                return py.Team == player.OppTeam && blocks[3] == "0" && (blocks[4] == "JP01" || blocks[4] == "JP06");
-            }
-            else return false;
         }
         public string JNS0802Input(Player player, int type, string fuse, string prev)
         {

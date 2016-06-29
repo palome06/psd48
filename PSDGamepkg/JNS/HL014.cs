@@ -1908,7 +1908,7 @@ namespace PSD.PSDGamepkg.JNS
                         XI.InnerGMessage("G0CC," + provider + ",1," + second +
                             "," + tux.Code + "," + it + ";" + sktInType + "," + sktFuse, 101);
                     }
-                    XI.InnerGMessage(cdFuse, 106);
+                    XI.InnerGMessage(cdFuse, 101);
                 }
             }
             else if (type == 3)
