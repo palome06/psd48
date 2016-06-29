@@ -595,7 +595,7 @@ namespace PSD.PSDGamepkg
                         Board.RPoolGain.Clear(); Board.OPoolGain.Clear();
                         RecycleMonster();
                         if (Board.Battler as Monster != null && (Board.Battler as Monster).IsSilence())
-                            Board.Silence.Add(Board.Battler.Code);
+                            Board.Silence.Remove(Board.Battler.Code);
                         foreach (Player player in Board.Garden.Values)
                             RaiseGMessage("G0AX," + player.Uid);
                         RunQuadStage(rstage);
