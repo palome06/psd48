@@ -1917,18 +1917,18 @@ namespace PSD.PSDGamepkg.JNS
                 {
                     // G0CC,A,0,B,TP02,17,36
                     string[] args = fuse.Split(',');
-                    ushort ust = ushort.Parse(args[1]);
+                    ushort hst = ushort.Parse(args[3]);
                     string cardname = args[4];
                     int hdx = fuse.IndexOf(';');
 
-                    Base.Card.Tux tuxBase = XI.LibTuple.TL.EncodeTuxCode(cardname);
+                    Tux tuxBase = XI.LibTuple.TL.EncodeTuxCode(cardname);
                     if (tuxBase.Type == Tux.TuxType.ZP)
                     {
                         string[] argv = fuse.Substring(0, hdx).Split(',');
-                        List<Base.Card.Tux> cards = Algo.TakeRange(argv, 5, argv.Length).Select(p =>
+                        List<Tux> cards = Algo.TakeRange(argv, 5, argv.Length).Select(p =>
                             ushort.Parse(p)).Where(p => p > 0).Select(
                             p => XI.LibTuple.TL.DecodeTux(p)).ToList();
-                        if (XI.Board.Garden[ust].Team == player.Team &&
+                        if (XI.Board.Garden[hst].Team == player.Team &&
                                 cards.Count > 0 && !cards.Any(p => p.Type != Tux.TuxType.ZP))
                             return true;
                     }
@@ -2747,7 +2747,7 @@ namespace PSD.PSDGamepkg.JNS
         {
             string tuxName = XI.LibTuple.TL.EncodeTuxCode("ZPH3").Name;
             string ai = XI.AsyncInput(player.Uid, "#【" + tuxName + "】作用,T1" +
-                FormatPlayers(p => p.IsTared && p.GetPetCount() > 0), "ZPH3", "0");
+                FormatPlayers(p => p.IsTared && XI.Board.IsAttendWar(p) && p.GetPetCount() > 0), "ZPH3", "0");
             ushort to = ushort.Parse(ai);
             TargetPlayer(player.Uid, to);
             Player py = XI.Board.Garden[to];
@@ -2770,7 +2770,7 @@ namespace PSD.PSDGamepkg.JNS
         }
         public bool ZHP3Valid(Player player, int type, string fuse)
         {
-            return XI.Board.Garden.Values.Any(p => p.IsTared && p.GetPetCount() > 0);
+            return XI.Board.Garden.Values.Any(p => p.IsTared && XI.Board.IsAttendWar(p) && p.GetPetCount() > 0);
         }
 
         public bool WQH1ConsumeValidHolder(Player provider, Player user, int consumeType, int type, string fuse)
