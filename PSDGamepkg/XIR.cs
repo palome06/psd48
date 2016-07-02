@@ -599,11 +599,11 @@ namespace PSD.PSDGamepkg
                             Board.Silence.Remove(Board.Battler.Code);
                         foreach (Player player in Board.Garden.Values)
                             RaiseGMessage("G0AX," + player.Uid);
-                        RunQuadStage(rstage);
                         Board.CleanBattler();
                         Board.InCampaign = false;
                         RaiseGMessage("G1ZK,1");
                         RaiseGMessage("G1HK,1");
+                        RunQuadStage(rstage);
                         rstage = "R" + rounder + "ZZ"; break;
                     case "ZZ":
                         RaiseGMessage(new Artiad.CoachingSign()
