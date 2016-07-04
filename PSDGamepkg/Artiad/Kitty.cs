@@ -61,6 +61,12 @@ namespace PSD.PSDGamepkg.Artiad
                 TreatyAct = (mask & 0x3) == 1 ? Treaty.KOKAN : ((mask & 0x3) == 2 ? Treaty.ACTIVE : Treaty.PASSIVE)
             };
         }
+        public string ToPrompt(XI XI, string language)
+        {
+            if (language == "ZH")
+                return XI.DisplayPlayer(Farmer) + "将获得" + XI.DisplayMonster(Pets);
+            return "";
+        }
     }
     // trade the pet between two players
     public class TradePet

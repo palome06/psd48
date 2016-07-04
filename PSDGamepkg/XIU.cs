@@ -534,18 +534,23 @@ namespace PSD.PSDGamepkg
                 return "";
         }
 
-        public void SendOutU1Message(bool[] invs, string[] mais, int sina)
+        public void SendOutU1Message(bool[] invs, string[] mais, int sina, string prompt)
         {
-            SendOutU1Message(invs, mais, Algo.RepeatToArray(sina, invs.Length));
+            SendOutU1Message(invs, mais, Algo.RepeatToArray(sina, invs.Length), prompt);
         }
-        public void SendOutU1Message(bool[] invs, string[] mais, int[] sina)
+        public void SendOutU1Message(bool[] invs, string[] mais, int[] sina, string prompt)
         {
             string inv = string.Join(",", Board.Garden.Keys.Where(p => invs[p]));
             foreach (ushort ut in Board.Garden.Keys)
             {
                 string mU1;
                 if (mais[ut] != "" && mais[ut] != "0")
-                    mU1 = "U1," + inv + ";;" + mais[ut];
+                {
+                    if (string.IsNullOrEmpty(prompt))
+                        mU1 = "U1," + inv + ";;" + mais[ut];
+                    else
+                        mU1 = "U1," + inv + ";;#" + prompt + "#" + mais[ut];
+                }
                 else if (Board.Garden[ut].IsAlive)
                     mU1 = "U1," + inv + ";;0," + sina[ut];
                 else

@@ -570,10 +570,10 @@ namespace PSD.ClientAo.VW
                 HideTip();
             return any;
         }
-        internal string CinCMD(ushort uid, List<string> optLst, bool cancellable)
+        internal string CinCMD(ushort uid, string prompt, List<string> optLst, bool cancellable)
         {
             PreCinClearup();
-            ShowTip("请响应.");
+            ShowTip((!string.IsNullOrEmpty(prompt) ? prompt : "") + "请响应.");
             List<ushort> txs = new List<ushort>();
             List<string> njs = new List<string>();
             List<ushort> pts = new List<ushort>();

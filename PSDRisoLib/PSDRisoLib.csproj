@@ -476,6 +476,15 @@
     <Resource Include="Resources\Token\TKH0106.png" />
     <Resource Include="Resources\Token\TKH0107.png" />
     <Resource Include="Resources\Token\TKH0108.png" />
+    <Resource Include="Resources\Token\TKH0901.png" />
+    <Resource Include="Resources\Token\TKH0902.png" />
+    <Resource Include="Resources\Token\TKH0903.png" />
+    <Resource Include="Resources\Token\TKH0904.png" />
+    <Resource Include="Resources\Token\TKH0905.png" />
+    <Resource Include="Resources\Token\TKH0906.png" />
+    <Resource Include="Resources\Token\TKH0907.png" />
+    <Resource Include="Resources\Token\TKH0908.png" />
+    <Resource Include="Resources\Token\TKH0909.png" />
     <Resource Include="Resources\Token\TKH1901.png" />
     <Resource Include="Resources\Token\TKH1902.png" />
     <Resource Include="Resources\Token\TKH1903.png" />
@@ -493,6 +502,7 @@
     <Resource Include="Resources\Token\TAH0401.png" />
     <Resource Include="Resources\Token\TAH0501.png" />
     <Resource Include="Resources\Token\TAH0601.png" />
+    <Resource Include="Resources\Token\TAH1101.png" />
     <Resource Include="Resources\Token\TAH1401.png" />
     <Resource Include="Resources\Token\TKE0201.png" />
     <Resource Include="Resources\Token\TKE0202.png" />

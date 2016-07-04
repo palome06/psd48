@@ -37,8 +37,10 @@ namespace PSD.PSDGamepkg
         {
             if (string.IsNullOrEmpty(cmd) || !cmd.StartsWith("G"))
                 return;
-            //if (past == null)
-            //    past = new HashSet<string>();
+            string prompt = null;
+            if (cmd.StartsWith("G0HC")) // hack only for G0HC, to put into NGT sooner
+                prompt = Artiad.HarvestPet.Parse(cmd).ToPrompt(this, "ZH");
+
             string zero = Algo.Substring(cmd, 0, cmd.IndexOf(','));
             List<SkTriple> _pocket;
             if (!sk02.TryGetValue(zero, out _pocket) || _pocket.Count == 0)
@@ -129,7 +131,7 @@ namespace PSD.PSDGamepkg
                     sinaG[0] = 2;
                     for (ushort i = 1; i <= Board.Garden.Count; ++i)
                         sinaG[i] = Board.Garden[i].IsTPOpt ? 2 : 3;
-                    SendOutU1Message(involved, roads, sinaG);
+                    SendOutU1Message(involved, roads, sinaG, prompt);
                     UEchoCode echo = UKEvenMessage(involved, purse, roads, sinaG);
                     if (echo == UEchoCode.END_TERMIN)
                         isTermini = true;
