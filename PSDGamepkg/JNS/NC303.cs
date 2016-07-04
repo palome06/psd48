@@ -580,10 +580,9 @@ namespace PSD.PSDGamepkg.JNS
         public void NCH07Debut(Player trigger)
         {
             List<ushort> nmbs = new List<ushort>();
-            ushort pop = XI.Board.RestNPCPiles.Dequeue();
-            if (pop > 0)
-                nmbs.Add(pop);
-            ushort[] pops = XI.Board.RestMonPiles.Dequeue(2);
+            ushort[] pops = XI.Board.RestNPCPiles.Dequeue(2);
+            nmbs.AddRange(pops);
+            pops = XI.Board.RestMonPiles.Dequeue(2);
             nmbs.AddRange(pops);
             if (nmbs.Count > 0)
             {

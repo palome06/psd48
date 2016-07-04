@@ -443,9 +443,9 @@ namespace PSD.PSDGamepkg.JNS
         #region HL003 - YangTai
         public bool JNH0301Valid(Player player, int type, string fuse)
         {
-            return Artiad.Harm.Parse(fuse).Any(p => p.Who == player.Uid && player.GetAllCardsCount() > 0 &&
-                p.N - 1 <= player.GetAllCardsCount() && !HPEvoMask.DECR_INVAO.IsSet(p.Mask) &&
-                !HPEvoMask.TERMIN_AT.IsSet(p.Mask)) && XI.Board.Garden.Values.Any(p => p.Uid != player.Uid && p.IsTared);
+            return Artiad.Harm.Parse(fuse).Any(p => p.Who == player.Uid && p.N <= player.GetAllCardsCount() &&
+                !HPEvoMask.DECR_INVAO.IsSet(p.Mask) && !HPEvoMask.TERMIN_AT.IsSet(p.Mask)) &&
+                XI.Board.Garden.Values.Any(p => p.Uid != player.Uid && p.IsTared);
         }
         public void JNH0301Action(Player player, int type, string fuse, string argst)
         {
@@ -479,7 +479,6 @@ namespace PSD.PSDGamepkg.JNS
                         !HPEvoMask.TERMIN_AT.IsSet(harm.Mask))
                         n = harm.N;
                 }
-                if (--n == 0) n = 1;
                 return "/Q" + n + "(p" + string.Join("p", player.ListOutAllCards()) + ")";
             }
             else
@@ -1613,17 +1612,29 @@ namespace PSD.PSDGamepkg.JNS
             }
             else if (type == 3) // R*TM
                 return player.RFM.GetInt("MemoryCount") > player.HP;
+            else if (type == 4) // R*ED
+                return player.TokenCount > 0;
             else return false;
         }
         public void JNH0903Action(Player player, int type, string fuse, string argst)
         {
+            System.Action<int> add = n =>
+            {
+                int now = player.RFM.GetInt("MemoryCount") + n;
+                player.RFM.Set("MemoryCount", now);
+                if (now > 8 && player.TokenCount <= 8)
+                    XI.RaiseGMessage("G0IJ," + player.Uid + ",0," + (9 - player.TokenCount));
+                else
+                    XI.RaiseGMessage("G0IJ," + player.Uid + ",0," + n);
+            };
+
             if (type == 0)
             {
                 string[] g0cc = Algo.Substring(fuse, 0, fuse.IndexOf(';')).Split(',');
                 int n = g0cc.Length - 5;
                 if (g0cc[5] == "0")
                     --n;
-                player.RFM.Set("MemoryCount", player.RFM.GetInt("MemoryCount") + n);
+                add(n);
             }
             else if (type == 1)
             {
@@ -1634,19 +1645,22 @@ namespace PSD.PSDGamepkg.JNS
                     bool drIn = g1di[idx + 1] == "0";
                     int n = int.Parse(g1di[idx + 2]);
                     if (who == player.Uid && !drIn && n > 0)
-                        player.RFM.Set("MemoryCount", player.RFM.GetInt("MemoryCount") + n);
+                        add(n);
                     idx += (4 + n);
                 }
             }
             else if (type == 2)
-                player.RFM.Set("MemoryCount", player.RFM.GetInt("MemoryCount") + 1);
+                add(1);
             else if (type == 3)
             {
+                XI.RaiseGMessage("G0OJ," + player.Uid + ",0," + player.TokenCount);
                 XI.RaiseGMessage("G0OY,1," + player.Uid);
                 XI.RaiseGMessage("G0OS," + player.Uid + ",0,JNH0901,JNH0902,JNH0903");
                 XI.RaiseGMessage("G0IY,1," + player.Uid + ",19015");
                 XI.RaiseGMessage("G0IS," + player.Uid + ",0,JNH1501,JNH1502");
             }
+            else if (type == 4)
+                XI.RaiseGMessage("G0OJ," + player.Uid + ",0," + player.TokenCount);
         }
         #endregion HL009 - Lingjian
         #region HL010 - ShuiLingjing
@@ -1677,7 +1691,7 @@ namespace PSD.PSDGamepkg.JNS
             TargetPlayer(player.Uid, whos);
             player.RFM.GetOrSetUshortArray("Couraged").AddRange(whos);
             XI.RaiseGMessage("G0DH," + string.Join(",", whos.Select(p =>
-                p + ",0," + (XI.Board.Garden[p].GetPetCount() / 2 + 1))));
+                p + ",0," + (XI.Board.Garden[p].GetPetCount() >= 2 ? 2 : 1))));
         }
         public string JNH1001Input(Player player, int type, string fuse, string prev)
         {
@@ -1854,11 +1868,13 @@ namespace PSD.PSDGamepkg.JNS
                 if (sc == 2)
                 {
                     player.RAM.Set("Scared", 1);
+                    XI.RaiseGMessage("G0IJ," + player.Uid + ",3");
                     XI.InnerGMessage(fuse, 91);
                 }
                 else if (sc == 1)
                 {
                     player.RAM.Set("Scared", 0);
+                    XI.RaiseGMessage("G0OJ," + player.Uid + ",3");
                     int hdx = fuse.IndexOf(';');
                     string[] g0ce = Algo.Substring(fuse, 0, hdx).Split(',');
                     int kdx = fuse.IndexOf(',', hdx);
@@ -1883,11 +1899,13 @@ namespace PSD.PSDGamepkg.JNS
                 if (sc == 2)
                 {
                     player.RAM.Set("Scared", 1);
+                    XI.RaiseGMessage("G0IJ," + player.Uid + ",3");
                     XI.InnerGMessage(fuse, 81);
                 }
                 else if (sc == 1)
                 {
                     player.RAM.Set("Scared", 0);
+                    XI.RaiseGMessage("G0OJ," + player.Uid + ",3");
                     int fdx = fuse.IndexOf(';');
                     int hdx = fuse.IndexOf(';', fdx + 1);
                     int idx = fuse.IndexOf(',', hdx);
@@ -1920,6 +1938,8 @@ namespace PSD.PSDGamepkg.JNS
                     XI.RaiseGMessage("G0IT," + player.Uid + "," + ijs.Count + "," + string.Join(",", ijs));
                 }
                 player.RAM.Set("Scared", 0);
+                if (player.TokenAwake)
+                    XI.RaiseGMessage("G0OJ," + player.Uid + ",3");
                 // Artiad.Procedure.SetPlayerAllEqEnable(XI, new Player[] { player }, 0x1, "JNH1102");
             }
         }
@@ -3084,7 +3104,7 @@ namespace PSD.PSDGamepkg.JNS
         #region HL019 - Kongxiu
         public bool JNH1901Valid(Player player, int type, string fuse)
         {
-            if (type == 0) // Gain the Token in 6'
+            if (type == 0) // Gain the Token in 5'
                 return IsMathISOS("JNH1901", player, fuse);
             else if (type == 1 || type == 2)
                 return player.TokenCount == 0;
@@ -3094,7 +3114,7 @@ namespace PSD.PSDGamepkg.JNS
         public void JNH1901Action(Player player, int type, string fuse, string argst)
         {
             if (type == 0)
-                XI.RaiseGMessage("G0IJ," + player.Uid + ",0,6");
+                XI.RaiseGMessage("G0IJ," + player.Uid + ",0,5");
             else if (type == 1 || type == 2)
                 XI.RaiseGMessage("G0ZW," + player.Uid);
         }

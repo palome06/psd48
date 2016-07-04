@@ -3097,24 +3097,20 @@ namespace PSD.ClientAo
                 {
                     IDictionary<string, string> skTable = new Dictionary<string, string>();
                     cinCalled = StartCinEtc();
+                    string prompt = "";
+                    if (mai.StartsWith("#"))
+                    {
+                        int promptIdx = mai.IndexOf('#', 1);
+                        prompt = Algo.Substring(mai, "#".Length, promptIdx) + "，";
+                        mai = Algo.Substring(mai, promptIdx + "#".Length, -1);
+                    }
                     string[] blocks = mai.Split(';');
-                    //string opt = "您可以发动";
                     List<string> optlst = new List<string>();
                     foreach (string block in blocks)
                     {
-                        //int jdx = -1;
-                        //if (block.StartsWith("JN") || block.StartsWith("CZ") || block.StartsWith("NJ"))
-                        //    jdx = block.IndexOf(',');
-                        //else
-                        //{
-                        //    int kdx = block.IndexOf(',');
-                        //    if (kdx >= 0)
-                        //        jdx = block.IndexOf(',', kdx + 1);
-                        //}
                         int jdx = block.IndexOf(',');
                         if (jdx < 0)
                         {
-                            //opt += zd.SKTXCZ(block) + ";";
                             optlst.Add(block);
                             skTable.Add(block, "^");
                         }
@@ -3122,14 +3118,13 @@ namespace PSD.ClientAo
                         {
                             string name = block.Substring(0, jdx);
                             string rest = block.Substring(jdx + 1);
-                            //opt += zd.SKTXCZ(name) + ";";
                             optlst.Add(name);
                             skTable.Add(name, rest);
                         }
                     }
                     //VI.Cout(uid, string.Join("&", optlst));
                     ShowProgresses(invs);
-                    string inputBase = VI.CinCMD(Uid, optlst, true);
+                    string inputBase = VI.CinCMD(Uid, prompt, optlst, true);
                     if (inputBase == VI.CinSentinel)
                         return false;
                     VI.CloseCinTunnel(Uid);

@@ -1289,7 +1289,7 @@ namespace PSD.PSDGamepkg
         {
             if (!mons.Any())
                 return "{}";
-            return "{" + string.Join(",", mons.Select(p => DisplayMonster(p)) + "}");
+            return "{" + string.Join(",", mons.Select(p => DisplayMonster(p))) + "}";
         }
         public string DisplayEve(ushort eve)
         {
@@ -1299,7 +1299,7 @@ namespace PSD.PSDGamepkg
         {
             if (!eves.Any())
                 return "{}";
-            return "{" + string.Join(",", eves.Select(p => DisplayEve(p)) + "}");
+            return "{" + string.Join(",", eves.Select(p => DisplayEve(p))) + "}";
         }
         public string DisplayProp(ushort prop)
         {

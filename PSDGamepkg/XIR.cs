@@ -792,7 +792,7 @@ namespace PSD.PSDGamepkg
                     foreach (ushort ut in Board.Garden.Keys)
                         if (pris[ut] != "")
                             pris[ut] = pris[ut].Substring(1);
-                    SendOutU1Message(involved, pris, sina);
+                    SendOutU1Message(involved, pris, sina, null);
                     UEchoCode echo = UKEvenMessage(involved, purse, pris, sina);
                     actualAction |= (echo == UEchoCode.END_ACTION);
                     if (actualAction && ((sina & 4) != 0))
@@ -888,7 +888,7 @@ namespace PSD.PSDGamepkg
                     foreach (ushort ut in Board.Garden.Keys)
                         if (pris[ut] != "")
                             pris[ut] = pris[ut].Substring(1);
-                    SendOutU1Message(involved, pris, sina);
+                    SendOutU1Message(involved, pris, sina, null);
                     UEchoCode echo = UKEvenMessage(involved, purse, pris, sina);
                     actualAction |= (echo == UEchoCode.END_ACTION);
                     // if actualAction happens, force back to insstage = 0;
@@ -1022,7 +1022,7 @@ namespace PSD.PSDGamepkg
                 involved[rd] = true;
                 if (reason == "R" + Board.Rounder.Uid + "NP")
                     RaiseGMessage("G1SG,0");
-                SendOutU1Message(involved, pris, 0);
+                SendOutU1Message(involved, pris, 0, null);
                 WI.RecvInfStart();
                 while (r5ed != UEchoCode.END_ACTION && r5ed != UEchoCode.END_TERMIN && involved[rd])
                 {

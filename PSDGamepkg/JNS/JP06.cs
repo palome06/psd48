@@ -2646,50 +2646,60 @@ namespace PSD.PSDGamepkg.JNS
         }
         public void TPH2Action(Player player, int type, string fuse, string argst)
         {
-            Artiad.ObtainPet opt = Artiad.ObtainPet.Parse(fuse);
+            Artiad.HarvestPet hpt = Artiad.HarvestPet.Parse(fuse);
             ushort which;
-            if (opt.Pets.Length > 1)
+            if (hpt.Pets.Length > 1)
             {
                 string whichSel = XI.AsyncInput(player.Uid, "#弃置,M1(p" +
-                    string.Join("p", opt.Pets) + ")", "TPH2", "0");
+                    string.Join("p", hpt.Pets) + ")", "TPH2", "0");
                 which = ushort.Parse(whichSel);
             }
             else
-                which = opt.Pets[0];
-            TargetPlayer(player.Uid, opt.Farmer);
+                which = hpt.Pets[0];
+            TargetPlayer(player.Uid, hpt.Farmer);
             Monster monster = XI.LibTuple.ML.Decode(which);
             int pts = 0;
             if (monster.Level == Monster.ClLevel.WEAK) pts = 2;
             else if (monster.Level == Monster.ClLevel.STRONG) pts = 4;
             else if (monster.Level == Monster.ClLevel.BOSS) pts = 6;
-            XI.RaiseGMessage(new Artiad.LosePet() { Owner = opt.Farmer, SinglePet = which }.ToMessage());
+            // monster1/2 -> remove it direclty
+            // from other places -> discard it
+            if (hpt.Farmland != 0)
+                XI.RaiseGMessage(new Artiad.LosePet() { Owner = hpt.Farmland, SinglePet = which }.ToMessage());
+            else
+                XI.RaiseGMessage(new Artiad.Abandon()
+                {
+                    Zone = Artiad.CustomsHelper.ZoneType.EXPLICIT,
+                    Genre = Card.Genre.NMB,
+                    SingleUnit = new Artiad.CustomsUnit() { SingleCard = which }
+                }.ToMessage());
             while (pts > 0)
             {
-                string incrSel = XI.AsyncInput(opt.Farmer, "#获得标记(剩余" + pts + "枚),/T1" +
+                string incrSel = XI.AsyncInput(hpt.Farmer, "#获得标记(剩余" + pts + "枚),/T1" +
                     AAlls(player) + "),#获得标记(剩余" + pts + "枚),/F1" + StdRunes(), "TPH2", "1");
                 if (incrSel.StartsWith("/"))
                     break;
                 else if (incrSel != VI.CinSentinel)
                 {
                     int idx = incrSel.IndexOf(',');
-                    ushort optTar = ushort.Parse(incrSel.Substring(0, idx));
-                    ushort optRune = ushort.Parse(incrSel.Substring(idx + 1));
-                    TargetPlayer(opt.Farmer, optTar);
-                    XI.RaiseGMessage("G0IF," + optTar + "," + optRune);
+                    ushort hptTar = ushort.Parse(incrSel.Substring(0, idx));
+                    ushort hptRune = ushort.Parse(incrSel.Substring(idx + 1));
+                    TargetPlayer(hpt.Farmer, hptTar);
+                    XI.RaiseGMessage("G0IF," + hptTar + "," + hptRune);
                     --pts;
                 }
             }
-            List<ushort> rests = opt.Pets.Where(p => p != which).ToList();
+            List<ushort> rests = hpt.Pets.Where(p => p != which).ToList();
             if (rests.Count > 0)
             {
-                opt.Pets = rests.ToArray();
-                XI.InnerGMessage(opt.ToMessage(), 190);
+                hpt.Pets = rests.ToArray();
+                XI.InnerGMessage(hpt.ToMessage(), 70);
             }
         }
         public bool TPH2Valid(Player player, int type, string fuse)
         {
-            Artiad.ObtainPet opt = Artiad.ObtainPet.Parse(fuse);
-            return XI.Board.Garden[opt.Farmer].IsTared && opt.Trophy;
+            Artiad.HarvestPet hpt = Artiad.HarvestPet.Parse(fuse);
+            return XI.Board.Garden[hpt.Farmer].IsTared && hpt.Trophy;
         }
         public void TPH3Action(Player player, int type, string fuse, string argst)
         {

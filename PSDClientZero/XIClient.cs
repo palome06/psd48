@@ -2679,34 +2679,32 @@ namespace PSD.ClientZero
             {
                 IDictionary<string, string> skTable = new Dictionary<string, string>();
                 cinCalled = StartCinEtc();
+                string prompt = "";
+                if (mai.StartsWith("#"))
+                {
+                    int promptIdx = mai.IndexOf('#', 1);
+                    prompt = Algo.Substring(mai, "#".Length, promptIdx) + "，";
+                    mai = mai.Substring(promptIdx + "#".Length);
+                }
                 string[] blocks = mai.Split(';');
-                string opt = "您可以发动";
+                List<string> opts = new List<string>();
                 foreach (string block in blocks)
                 {
-                    //int jdx = -1;
-                    //if (block.StartsWith("JN") || block.StartsWith("CZ") || block.StartsWith("NJ"))
-                    //    jdx = block.IndexOf(',');
-                    //else
-                    //{
-                    //    int kdx = block.IndexOf(',');
-                    //    if (kdx >= 0)
-                    //        jdx = block.IndexOf(',', kdx + 1);
-                    //}
                     int jdx = block.IndexOf(',');
                     if (jdx < 0)
                     {
-                        opt += zd.SKTXCZ(block) + ";";
+                        opts.Add(zd.SKTXCZ(block));
                         skTable.Add(block, "^");
                     }
                     else
                     {
                         string name = block.Substring(0, jdx);
                         string rest = block.Substring(jdx + 1);
-                        opt += zd.SKTXCZ(name) + ";";
+                        opts.Add(zd.SKTXCZ(name));
                         skTable.Add(name, rest);
                     }
                 }
-                VI.Cout(Uid, opt.Substring(0, opt.Length - 1));
+                VI.Cout(Uid, "{0}您可以发动{1}", prompt, string.Join(";", opts));
                 string inputBase = VI.Cin(Uid, "请做出您的选择，0为放弃行动:");
                 if (inputBase == VI.CinSentinel)
                     decided = true;
