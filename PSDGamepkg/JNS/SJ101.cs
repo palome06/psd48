@@ -58,9 +58,10 @@ namespace PSD.PSDGamepkg.JNS
         }
         public void SJ102(Player rd)
         {
-            string msg = AffichePlayers(p => p.IsAlive && p.GetPetCount() == 0, p => p.Uid + ",0,1");
-            if (msg != null)
-                XI.RaiseGMessage("G0DH," + msg);
+            List<ushort> invs = XI.Board.Garden.Values.Where(p =>
+                p.IsAlive && p.GetPetCount() == 0).Select(p => p.Uid).ToList();
+            if (invs.Count > 0)
+                XI.RaiseGMessage("G0DH," + string.Join(",", invs.Select(p => p + ",0,1")));
         }
         public void SJ103(Player rd)
         {
