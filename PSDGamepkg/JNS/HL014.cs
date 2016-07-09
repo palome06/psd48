@@ -1068,7 +1068,7 @@ namespace PSD.PSDGamepkg.JNS
         }
         public bool JNH0602Valid(Player player, int type, string fuse)
         {
-            if (type == 0)
+            if (type == 0) // HarmResult
                 return !player.TokenAwake && Artiad.Harm.Parse(fuse).Any(p => p.N > 0);
             else if (type == 1)
             {
@@ -1624,7 +1624,7 @@ namespace PSD.PSDGamepkg.JNS
                 player.RFM.Set("MemoryCount", now);
                 if (now > 8 && player.TokenCount <= 8)
                     XI.RaiseGMessage("G0IJ," + player.Uid + ",0," + (9 - player.TokenCount));
-                else
+                else if (player.TokenCount <= 8)
                     XI.RaiseGMessage("G0IJ," + player.Uid + ",0," + n);
             };
 
