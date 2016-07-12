@@ -623,14 +623,21 @@ namespace PSD.PSDGamepkg.VW
                 infNMsgs.Add(new Base.VW.Msgs(msg, me, to));
         }
         // Send raw message to multiple $to
-        public void Send(string msg, ushort[] tos)
+        public void Send(string msg, IEnumerable<ushort> tos)
         {
-            tos.Where(p => neayers.ContainsKey(p)).ToList().ForEach(p => Send(msg, 0, p));
+            tos.Intersect(neayers.Keys).ToList().ForEach(p => Send(msg, 0, p));
         }
         // send in general, might get combined results
         public void Send(IDictionary<ushort, string> table, string live)
         {
             table.ToList().ForEach(p => Send(p.Value, 0, p.Key));
+            Live(live);
+        }
+        // send $msg to who and nofify the others with live
+        public void Focus(ushort who, string msg, string live)
+        {
+            Send(msg, 0, who);
+            Send(live, neayers.Keys.Except(new ushort[] { who }));
             Live(live);
         }
         public void Live(string msg)

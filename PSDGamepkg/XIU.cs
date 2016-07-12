@@ -528,23 +528,23 @@ namespace PSD.PSDGamepkg
         {
             if (!string.IsNullOrEmpty(mai))
             {
-                WI.Send("U9," + who + ";;" + prev + ";;" + inType, ExceptStaff(who));
-                WI.Live("U9," + who + ";;" + prev + ";;" + inType);
-                string mU7 = "U7," + who + ";;" + mai + ";;" + prev + ";;" + inType;
+                int uvsn = AcquireUVSN();
+                string mU7 = "U7," + uvsn + ";;" + who + ";;" + mai + ";;" + prev + ";;" + inType;
+                string mUD = "UD," + who + ";;" + prev + ";;" + inType;
                 PushIntoLastUV(who, mU7);
-                WI.Send(mU7, 0, who);
-                string input = WI.Recv(0, who);
-                while (input == null || !input.StartsWith("U8,"))
+                WI.Focus(who, mU7, mUD);
+                do
                 {
-                    input = WI.Recv(0, who);
-                    System.Threading.Thread.Sleep(100);
-                }
-                // Format: U8,K,x2,y2
-                MatchedPopFromLastUV(who, input);
-                string result = input.Substring("U8,".Length);
-                return result.Substring(prev.Length + 1);
-            } else
-                return "";
+                    string input = WI.Recv(0, who);
+                    if (input.Contains(VI.CinSentinel)) break;
+                    if (input == null || !input.StartsWith("U8,")) continue;
+                    int idx = "U8,".Length, jdx = input.IndexOf(',', idx);
+                    int ruvsn = int.Parse(Algo.Substring(input, idx, jdx));
+                    if (ruvsn != uvMsgSerialNum) continue;
+                    return Algo.Substring(input, jdx + prev.Length + 2, -1);
+                } while (true);
+            }
+            return "";
         }
 
         public void SendOutU1Message(bool[] invs, string[] mais, int sina, string prompt)
@@ -553,6 +553,7 @@ namespace PSD.PSDGamepkg
         }
         public void SendOutU1Message(bool[] invs, string[] mais, int[] sina, string prompt)
         {
+            int uvsn = AcquireUVSN();
             string inv = string.Join(",", Board.Garden.Keys.Where(p => invs[p]));
             string head = "U1," + uvsn + ";;" + inv + ";;";
             IDictionary<ushort, string> lookup = Board.Garden.Keys.ToDictionary(p => p, ut => {
@@ -572,12 +573,12 @@ namespace PSD.PSDGamepkg
             WI.Send(lookup, head + "0," + (sina[0] & (~1)));
         }
         public void ResendU1Message(ushort who, bool[] invs,
-            string[] mais, int uvsn, bool critical, int sina)
+            string[] mais, bool critical, int sina)
         {
-            ResendU1Message(who, invs, mais, uvsn, critical, Algo.RepeatToArray(sina, invs.Length));
+            ResendU1Message(who, invs, mais, critical, Algo.RepeatToArray(sina, invs.Length));
         }
         public void ResendU1Message(ushort who, bool[] invs,
-            string[] mais, int uvsn, bool critical, int[] sina)
+            string[] mais, bool critical, int[] sina)
         {
             if (critical && !invs[who])
             {
@@ -586,6 +587,7 @@ namespace PSD.PSDGamepkg
             }
             if (invs[who])
             {
+                int uvsn = AcquireUVSN();
                 string inv = string.Join(",", Board.Garden.Keys.Where(p => invs[p]));
                 string mU1;
                 if (mais[who] != "" && mais[who] != "0")
@@ -609,24 +611,29 @@ namespace PSD.PSDGamepkg
             IDictionary<ushort, string> result = new Dictionary<ushort, string>();
             if (dicts != null && dicts.Count > 0)
             {
-                foreach (var pair in dicts)
+                int uvsn = AcquireUVSN();
+                IDictionary<ushort, string> lookup = Board.Garden.Keys.ToDictionary(p => p, ut =>
                 {
-                    string mV0 = "V0," + dicts.Count + "," + string.Join(",", dicts.Keys) + "," + pair.Value;
-                    PushIntoLastUV(pair.Key, mV0);
-                    WI.Send(mV0, 0, pair.Key);
-                }
-                // notify the others of waiting
-                WI.Send("V3," + string.Join(",", dicts.Keys),
-                    ExceptStaff(dicts.Keys.ToArray()));
-                WI.Live("V3," + string.Join(",", dicts.Keys));
+                    if (dicts.ContainsKey(ut))
+                        return "V0," + uvsn + ";;" + string.Join(",", dicts.Keys) + ";;" + dicts[ut];
+                    else
+                        return "V3," + string.Join(",", dicts.Keys);
+                });
+                PushIntoLastUV(lookup);
+                WI.Send(lookup, "V3," + string.Join(",", dicts.Keys));
                 while (dicts.Count > 0)
                 {
                     Base.VW.Msgs msg = WI.RecvInfRecv();
                     if (MatchedPopFromLastUV(msg.From, msg.Msg) && msg.Msg.StartsWith("V1"))
                     {
-                        result.Add(msg.From, msg.Msg.Substring("V1,".Length));
-                        dicts.Remove(msg.From);
-                        RaiseGMessage("G2AS," + msg.From);
+                        int idx = "V1,".Length, jdx = msg.Msg.IndexOf(',', idx);
+                        int ruvsn = int.Parse(Algo.Substring(msg.Msg, idx, jdx));
+                        if (ruvsn == uvMsgSerialNum)
+                        {
+                            result[msg.From] = Algo.Substring(msg.Msg, jdx + 1, -1);
+                            dicts.Remove(msg.From);
+                            RaiseGMessage("G2AS," + msg.From);
+                        }
                     }
                 }
             }

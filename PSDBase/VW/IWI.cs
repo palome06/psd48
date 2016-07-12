@@ -37,13 +37,15 @@ namespace PSD.Base.VW
         // Send raw message from $me to $to
         void Send(string msg, ushort me, ushort to);
         // Send raw message to multiple $to
-        void Send(string msg, ushort[] tos);
+        void Send(string msg, IEnumerable<ushort> tos);
         // live message to all watchers
         void Live(string msg);
         // Send raw message to the whole
         void BCast(string msg);
         // send in general, might get combined results
         void Send(IDictionary<ushort, string> table, string live);
+        // send $msg to who and nofify the others with live
+        void Focus(ushort who, string msg, string live);
     }
 
     public interface IWICL : System.IDisposable

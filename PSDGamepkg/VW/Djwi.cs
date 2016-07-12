@@ -78,7 +78,7 @@ namespace PSD.PSDGamepkg.VW
                 msg0Pools[me].Add(msg);
         }
         // Send raw message to multiple $to
-        public void Send(string msg, ushort[] tos)
+        public void Send(string msg, IEnumerable<ushort> tos)
         {
             foreach (ushort to in tos)
                 Send(msg, 0, to);
@@ -87,6 +87,13 @@ namespace PSD.PSDGamepkg.VW
         public void Send(IDictionary<ushort, string> table, string live)
         {
             table.ToList().ForEach(p => Send(p.Value, 0, p.Key));
+            Live(live);
+        }
+        // send $msg to who and nofify the others with live
+        public void Focus(ushort who, string msg, string live)
+        {
+            Send(msg, 0, who);
+            Send(live, AllPlayers.Except(new ushort[] { who }));
             Live(live);
         }
 

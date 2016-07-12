@@ -450,10 +450,8 @@ namespace PSD.ClientAo
                         return HandleU3Message(int.Parse(blocks[0]), blocks[1], blocks[2], blocks[3]);
                     case '5':
                         return HandleU5Message(blocks[0], blocks[1], blocks[2]);
-                    case '7':
-                        return HandleU7Message(blocks[0], blocks[1], blocks[2], blocks[3]);
-                    case '9':
-                        return HandleU9Message(blocks[0], blocks[1], blocks[2]);
+                    case '7': // AsyncInput
+                        return HandleU7Message(int.Parse(blocks[0]), blocks[1], blocks[2], blocks[3], blocks[4]);
                     case 'A':
                         return HandleUAMessage(blocks[0], blocks[1], blocks[2]);
                     case 'B':
@@ -465,6 +463,8 @@ namespace PSD.ClientAo
                             ad.HideProgressBar(ut);
                             return false;
                         }
+                    case 'D': // AsyncInput-Notify
+                        return HandleUDMessage(blocks[0], blocks[1], blocks[2]);
                 }
                 return true;
             }
@@ -3217,7 +3217,7 @@ namespace PSD.ClientAo
             }
             return false;
         }
-        private bool HandleU7Message(string inv, string mai, string prev, string inType)
+        private bool HandleU7Message(int uvsn, string inv, string mai, string prev, string inType)
         {
             bool cinCalled = false;
             ushort owner = ushort.Parse(inv);
@@ -3232,11 +3232,11 @@ namespace PSD.ClientAo
                 if (input == VI.CinSentinel)
                     return false;
                 VI.CloseCinTunnel(Uid);
-                WI.Send("U8," + prev + "," + input, Uid, 0);
+                WI.Send("U8," + uvsn + "," + prev + "," + input, Uid, 0);
             }
             return cinCalled;
         }
-        private bool HandleU9Message(string inv, string prev, string inType)
+        private bool HandleUDMessage(string inv, string prev, string inType)
         {
             ushort owner = ushort.Parse(inv);
             VI.Cout(Uid, "等待{0}响应中:{1}...", zd.Player(owner), zd.SKTXCZ(prev));
@@ -3259,16 +3259,14 @@ namespace PSD.ClientAo
             if (!isReplay)
             {
                 StartCinEtc();
-                string[] blocks = cmdrst.Split(',');
-                int invCount = int.Parse(blocks[0]);
-                for (int i = 0; i < invCount; ++i)
-                    ad.ShowProgressBar(ushort.Parse(blocks[i + 1]));
-                string input = FormattedInputWithCancelFlag(string.Join(
-                    ",", Algo.TakeRange(blocks, 1 + invCount, blocks.Length)));
+                string[] blocks = Algo.Splits(cmdrst, ";;"); // uvsn;;invs;;msg
+                blocks[1].Split(',').Select(p => ushort.Parse(p))
+                    .ToList().ForEach(p => ad.ShowProgressBar(p));
+                string input = FormattedInputWithCancelFlag(blocks[2]);
                 if (input == VI.CinSentinel)
                     return false;
                 VI.CloseCinTunnel(Uid);
-                WI.Send("V1," + input, Uid, 0);
+                WI.Send("V1," + blocks[0] + "," + input, Uid, 0);
                 return true;
             }
             else

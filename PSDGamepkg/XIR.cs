@@ -950,7 +950,7 @@ namespace PSD.PSDGamepkg
                     //isUK5Received = true;
                     return next;
                 else if (next == UEchoCode.RE_REQUEST)
-                    ResendU1Message(msg.From, involved, pris, AcquireUVSN(), false, sina);
+                    ResendU1Message(msg.From, involved, pris, false, sina);
             }
             return UEchoCode.END_CANCEL;
             //return isUK5Received;
@@ -1044,10 +1044,10 @@ namespace PSD.PSDGamepkg
                     Base.VW.Msgs msg = WI.RecvInfRecv();
                     r5ed = HandleUMessage(msg.Msg, purse, msg.From, involved, 0);
                     if (r5ed == UEchoCode.RE_REQUEST)
-                        ResendU1Message(msg.From, involved, pris, uvsn, false, 0);
+                        ResendU1Message(msg.From, involved, pris, false, 0);
                     else if (r5ed == UEchoCode.END_CANCEL && Board.MonPiles.Count <= 0
                             && msg.From == player.Uid)
-                        ResendU1Message(player.Uid, involved, pris, uvsn, true, 0);
+                        ResendU1Message(player.Uid, involved, pris, true, 0);
                     // critical, must take action.
                 }
             }
