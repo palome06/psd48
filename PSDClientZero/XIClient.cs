@@ -200,7 +200,7 @@ namespace PSD.ClientZero
                     {
                         string say = VI.RequestTalk(Uid);
                         if (say != null && WI != null)
-                            WI.SendDirect(say, Uid);
+                            WI.Send(say, Uid, 0);
                     }
                 }, delegate(Exception e) { Log.Logg(e.ToString()); })).Start();
             SingleThreadMessageStart();
@@ -453,13 +453,13 @@ namespace PSD.ClientZero
             else if (cop.StartsWith("U"))
             {
                 char rank = cop[1];
-                string[] blocks = Algo.Splits(readLine.Substring("U1,".Length), ";;");
+                string[] blocks = Algo.Splits(readLine.Substring("UX,".Length), ";;");
                 switch (rank)
                 {
                     case '1':
-                        return HandleU1Message(blocks[0], blocks[1]);
+                        return HandleU1Message(int.Parse(blocks[0]), blocks[1], blocks[2]);
                     case '3':
-                        return HandleU3Message(blocks[0], blocks[1], blocks[2]);
+                        return HandleU3Message(int.Parse(blocks[0]), blocks[1], blocks[2], blocks[3]);
                     case '5':
                         return HandleU5Message(blocks[0], blocks[1], blocks[2]);
                     case '7':
@@ -2671,7 +2671,7 @@ namespace PSD.ClientZero
         }
         #endregion F
         #region U
-        private bool HandleU1Message(string inv, string mai)
+        private bool HandleU1Message(int uvsn, string inv, string mai)
         {
             bool cinCalled = false;
             ushort[] invs = inv.Split(',').Select(p => ushort.Parse(p)).ToArray();
@@ -2684,13 +2684,13 @@ namespace PSD.ClientZero
                     cinCalled = StartCinEtc();
                     string input = VI.Cin(Uid, "您无法行动，输入任意键声明行动结束.");
                     if (input != VI.CinSentinel)
-                        WI.Send("U2,0," + sina, Uid, 0);
+                        WI.Send("U2," + uvsn + ",0", Uid, 0);
                     VI.CloseCinTunnel(Uid);
                     return cinCalled;
                 }
                 else
                 {
-                    WI.Send("U2,0," + sina, Uid, 0);
+                    WI.Send("U2," + uvsn + ",0", Uid, 0);
                     VI.CloseCinTunnel(Uid);
                     return false;
                 }
@@ -2734,14 +2734,14 @@ namespace PSD.ClientZero
                 {
                     decided = true;
                     VI.Cout(Uid, "您决定放弃行动.");
-                    WI.Send("U2,0", Uid, 0);
+                    WI.Send("U2," + uvsn + ",0", Uid, 0);
                 }
                 else if (skTable.ContainsKey(inputBase))
                 {
                     if (skTable[inputBase] == "^")
                     {
                         decided = true;
-                        WI.Send("U2," + inputBase, Uid, 0);
+                        WI.Send("U2," + uvsn + "," + inputBase, Uid, 0);
                     }
                     else
                     {
@@ -2751,7 +2751,7 @@ namespace PSD.ClientZero
                             decided = true;
                             if (input != "")
                                 input = "," + input;
-                            WI.Send("U2," + inputBase + input, Uid, 0);
+                            WI.Send("U2," + uvsn + "," + inputBase + input, Uid, 0);
                         }
                     }
                     // otherwise, cancel and not action immediately, still wait
@@ -2759,7 +2759,7 @@ namespace PSD.ClientZero
             }
             return cinCalled;
         }
-        private bool HandleU3Message(string mai, string prev, string inType)
+        private bool HandleU3Message(int uvsn, string mai, string prev, string inType)
         {
             bool cinCalled = false;
             cinCalled = StartCinEtc();
@@ -2768,9 +2768,9 @@ namespace PSD.ClientZero
             string input = FormattedInputWithCancelFlag(mai);
             VI.CloseCinTunnel(Uid);
             if (!input.StartsWith("/") && input != "")
-                WI.Send("U4," + prev + "," + input, Uid, 0);
+                WI.Send("U4," + uvsn + "," + prev + "," + input, Uid, 0);
             else
-                WI.Send("U4,0", Uid, 0);
+                WI.Send("U4," + uvsn + ",0", Uid, 0);
             return cinCalled;
         }
         private bool HandleU5Message(string involved, string mai, string inType)
@@ -2796,7 +2796,7 @@ namespace PSD.ClientZero
             VI.Cout(Uid, "{0}{1}{2}过程中，请继续：", zd.Player(owner), action, zd.SKTXCZ(prev));
             string input = FormattedInputWithCancelFlag(mai);
             VI.CloseCinTunnel(Uid);
-            WI.SendDirect("U8," + prev + "," + input, Uid);
+            WI.Send("U8," + prev + "," + input, Uid, 0);
             return cinCalled;
         }
         private bool HandleU9Message(string inv, string prev, string inType)

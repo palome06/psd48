@@ -1354,11 +1354,10 @@ namespace PSD.PSDGamepkg
                 for (int i = 0; i < garden.Count; ++i)
                     WI.Send("H0RM," + cp.ToMessage(staff[i]), 0, staff[i]);
                 List<ushort> replied = staff.ToList();
-                WI.RecvInfStart();
                 while (replied.Count > 0)
                 {
                     bool suc = false;
-                    Base.VW.Msgs msgs = WI.RecvInfRecvPending();
+                    Base.VW.Msgs msgs = WI.RecvInfRecv();
                     if (msgs.Msg.StartsWith("H0RN,"))
                     {
                         int selectAva = int.Parse(msgs.Msg.Substring("H0RN,".Length));
@@ -1390,7 +1389,6 @@ namespace PSD.PSDGamepkg
                             WI.Send("H0RM," + cp.ToMessage(msgs.From), 0, msgs.From);
                     }
                 }
-                WI.RecvInfEnd();
             }
             else if ((selCode == RuleCode.MODE_31 && PCS.ListAllSeleableAndTestedHeros().Count < 24) || selCode == RuleCode.MODE_NM)
             {
@@ -1408,11 +1406,10 @@ namespace PSD.PSDGamepkg
                     WI.Send("H0RM," + cp.ToMessage(staff[i]), 0, staff[i]);
                 // $staff[i] reply their selections
                 List<ushort> replied = staff.ToList();
-                WI.RecvInfStart();
                 while (replied.Count > 0)
                 {
                     bool suc = false;
-                    Base.VW.Msgs msgs = WI.RecvInfRecvPending();
+                    Base.VW.Msgs msgs = WI.RecvInfRecv();
                     if (msgs.Msg.StartsWith("H0RN,"))
                     {
                         int selectAva = int.Parse(msgs.Msg.Substring("H0RN,".Length));
@@ -1430,7 +1427,6 @@ namespace PSD.PSDGamepkg
                     if (!suc)
                         WI.Send("H0RM," + cp.ToMessage(msgs.From), 0, msgs.From);
                 }
-                WI.RecvInfEnd();
             }
             else if (selCode == RuleCode.MODE_CJ) // No Casting in Mode of CJ
             {
@@ -1441,10 +1437,9 @@ namespace PSD.PSDGamepkg
                     WI.Send("H0RM," + string.Join(",", hts), 0, ut);
                 List<ushort> replied = staff.ToList();
                 IDictionary<int, List<ushort>> table = new Dictionary<int, List<ushort>>();
-                WI.RecvInfStart();
                 while (replied.Count > 0)
                 {
-                    Base.VW.Msgs msgs = WI.RecvInfRecvPending();
+                    Base.VW.Msgs msgs = WI.RecvInfRecv();
                     if (msgs.Msg.StartsWith("H0RN,"))
                     {
                         int selectAva = int.Parse(msgs.Msg.Substring("H0RN,".Length));
@@ -1457,7 +1452,6 @@ namespace PSD.PSDGamepkg
                         WI.Live("H0RO,0," + msgs.From);
                     }
                 }
-                WI.RecvInfEnd();
                 hts.Shuffle();
                 foreach (var pair in table)
                 {
@@ -1594,7 +1588,6 @@ namespace PSD.PSDGamepkg
                 for (int i = 0; i < staff.Count; i += 2)
                 {
                     ushort ud = staff[i], ut = staff[i + 1];
-                    WI.RecvInfStart();
                     WI.Send("H0RM," + cp.ToMessage(ud), 0, ud);
                     WI.Send("H0RM," + cp.ToMessage(ut), 0, ut);
                     WI.BCast("H0SW,0," + ud + "," + ut);
@@ -1603,7 +1596,7 @@ namespace PSD.PSDGamepkg
                     while (replied.Count > 0)
                     {
                         bool suc = false;
-                        Base.VW.Msgs msgs = WI.RecvInfRecvPending();
+                        Base.VW.Msgs msgs = WI.RecvInfRecv();
                         if (replied.Contains(msgs.From) && msgs.Msg.StartsWith("H0RN,"))
                         {
                             int selectAva = int.Parse(msgs.Msg.Substring("H0RN,".Length));
@@ -1627,7 +1620,6 @@ namespace PSD.PSDGamepkg
                         WI.Send(pair.Value, ExceptStaff(pair.Key));
                         WI.Live(pair.Value);
                     }
-                    WI.RecvInfEnd();
                 }
             }
             else if (selCode == RuleCode.MODE_CP)
@@ -1656,10 +1648,9 @@ namespace PSD.PSDGamepkg
                     string.Join(",", staff.Select(p => p + ",0")), staff.Where(p => p % 2 == 0).ToArray());
 
                 List<ushort> decided = new ushort[] { 3, 4 }.ToList();
-                WI.RecvInfStart();
                 while (decided.Count > 0)
                 {
-                    Base.VW.Msgs msgs = WI.RecvInfRecvPending();
+                    Base.VW.Msgs msgs = WI.RecvInfRecv();
                     ushort[] teamates = staff.Where(p => (p % 2 == msgs.From % 2)).ToArray();
                     if (msgs.Msg.StartsWith("H0CN,"))
                     {
@@ -1690,7 +1681,6 @@ namespace PSD.PSDGamepkg
                             WI.Send("H0CE,0", 0, msgs.From);
                     }
                 }
-                WI.RecvInfEnd();
                 if (WI is VW.Aywi)
                     (WI as VW.Aywi).IsTalkSilence = false;
                 foreach (var pair in cc.Ding)
@@ -1991,10 +1981,9 @@ namespace PSD.PSDGamepkg
                 WI.Live("H0CI," + cc.ToMessage(true, true));
 
                 List<ushort> decided = new ushort[] { 3, 4 }.ToList();
-                WI.RecvInfStart();
                 while (decided.Count > 0)
                 {
-                    Base.VW.Msgs msgs = WI.RecvInfRecvPending();
+                    Base.VW.Msgs msgs = WI.RecvInfRecv();
                     ushort[] teamates = staff.Where(p => (p % 2 == msgs.From % 2)).ToArray();
                     if (msgs.Msg.StartsWith("H0CN,"))
                     {
@@ -2026,7 +2015,6 @@ namespace PSD.PSDGamepkg
                             WI.Send("H0CE,0", 0, msgs.From);
                     }
                 }
-                WI.RecvInfEnd();
                 if (WI is VW.Aywi)
                     (WI as VW.Aywi).IsTalkSilence = false;
                 foreach (var pair in cc.Ding)
@@ -2091,10 +2079,9 @@ namespace PSD.PSDGamepkg
                 WI.Live("H0CI," + cc.ToMessage(true, true));
 
                 List<ushort> decided = new ushort[] { 3, 4 }.ToList();
-                WI.RecvInfStart();
                 while (decided.Count > 0)
                 {
-                    Base.VW.Msgs msgs = WI.RecvInfRecvPending();
+                    Base.VW.Msgs msgs = WI.RecvInfRecv();
                     ushort[] teamates = staff.Where(p => (p % 2 == msgs.From % 2)).ToArray();
                     if (msgs.Msg.StartsWith("H0CN,"))
                     {
@@ -2126,7 +2113,6 @@ namespace PSD.PSDGamepkg
                             WI.Send("H0CE,0", 0, msgs.From);
                     }
                 }
-                WI.RecvInfEnd();
                 if (WI is VW.Aywi)
                     (WI as VW.Aywi).IsTalkSilence = false;
                 foreach (var pair in cc.Ding)

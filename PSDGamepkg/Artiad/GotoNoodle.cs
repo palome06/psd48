@@ -24,7 +24,7 @@ namespace PSD.PSDGamepkg.Artiad
                 XI.ResetAllPlayerRAM();
             XI.ClearLeftPendingTux();
             // TODO: raise new ON event (e.g. Use WQ04 as ZP01 and then jump to R*Z2}), check the risk
-            WI.RecvInfTermin();
+            // WI.RecvInfTermin();
             // Reset board information
             XI.Board.UseCardRound = 0;
             GotoFire gotoFire = new GotoFire() { Terminal = Terminal };
@@ -32,16 +32,14 @@ namespace PSD.PSDGamepkg.Artiad
             gotoFire.Telegraph(WI.BCast);
             // count how many players have received the F0JM message
             int count = XI.Board.Garden.Keys.Count;
-            WI.RecvInfStart();
             while (count > 0)
             {
-                Base.VW.Msgs msg = WI.RecvInfRecvPending();
+                Base.VW.Msgs msg = WI.RecvInfRecv();
                 if (msg.Msg.StartsWith("F0JM") && XI.MatchedPopFromLastUV(msg.From, "F0JM"))
                     --count;
                 else
                     gotoFire.Telegraph(p => WI.Send(p, 0, msg.From));
             }
-            WI.RecvInfEnd();
             XI.BlockSetJumpTable(Terminal, "H0TM");
             System.Threading.Thread.CurrentThread.Abort();
         }

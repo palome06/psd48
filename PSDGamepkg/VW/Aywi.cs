@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using PSD.Base;
@@ -612,21 +611,11 @@ namespace PSD.PSDGamepkg.VW
             }
             return null;
         }
-        // infinite process starts
-        public void RecvInfStart() { }
         // receive each message during the process
         public Base.VW.Msgs RecvInfRecv()
         {
             return inf0Msgs.Take();
         }
-        public Base.VW.Msgs RecvInfRecvPending()
-        {
-            return RecvInfRecv();
-        }
-        // infinite process ends
-        public void RecvInfEnd() { }
-        // reset the terminal flag to 0, start new stage
-        public void RecvInfTermin() { }
         // Send raw message from $me to $to
         public void Send(string msg, ushort me, ushort to)
         {
@@ -637,6 +626,12 @@ namespace PSD.PSDGamepkg.VW
         public void Send(string msg, ushort[] tos)
         {
             tos.Where(p => neayers.ContainsKey(p)).ToList().ForEach(p => Send(msg, 0, p));
+        }
+        // send in general, might get combined results
+        public void Send(IDictionary<ushort, string> table, string live)
+        {
+            table.ToList().ForEach(p => Send(p.Value, 0, p.Key));
+            Live(live);
         }
         public void Live(string msg)
         {
@@ -649,9 +644,11 @@ namespace PSD.PSDGamepkg.VW
             Send(msg, neayers.Keys.ToArray());
             Live(msg);
         }
-        // Send direct message that won't be caught by RecvInfRecv from $me to 0
-        public void SendDirect(string msg, ushort me) { }
-        public void Dispose() { }
+        public void Shutdown()
+        {
+            ctoken.Cancel(); ctoken.Dispose();
+            listener.Stop();
+        }
         private void Bye()
         {
             if (vi != null) vi.Cout(0, "房间已回收.");
@@ -661,6 +658,8 @@ namespace PSD.PSDGamepkg.VW
             inf0Msgs.Dispose(); infNMsgs.Dispose();
             Environment.Exit(0);
         }
+
+        public void Dispose() { }
         #endregion Implementation
     }
 }

@@ -1,4 +1,4 @@
-﻿using PSD.Base;
+using PSD.Base;
 using PSD.Base.Card;
 using System;
 using System.Collections.Generic;
@@ -24,6 +24,7 @@ namespace PSD.PSDGamepkg
         {
             var garden = Board.Garden;
             LastUVs = new Dictionary<ushort, string>();
+            uvMsgSerialNum = 0;
             ConstructPiles(levelCode);
             WI.BCast(string.Format("H0DP,{0},{1},{2}",
                 Board.TuxPiles.Count, Board.MonPiles.Count, Board.EvePiles.Count));
@@ -742,7 +743,6 @@ namespace PSD.PSDGamepkg
             bool actualAction = false;
             int priorty = int.MinValue; int silentIdx = 0;
             bool isAllThrough = false;
-            WI.RecvInfStart();
             do
             {
                 do
@@ -811,6 +811,7 @@ namespace PSD.PSDGamepkg
                         if (pris[ut] != "")
                             pris[ut] = pris[ut].Substring(1);
                     SendOutU1Message(involved, pris, sina, null);
+                    // put u1 and u2 together
                     UEchoCode echo = UKEvenMessage(involved, purse, pris, sina);
                     actualAction |= (echo == UEchoCode.END_ACTION);
                     if (actualAction && ((sina & 4) != 0))
@@ -821,7 +822,6 @@ namespace PSD.PSDGamepkg
                 ++priorty;
             } while (!isAllThrough);
             RaiseGMessage("G2AS,0");
-            WI.RecvInfEnd();
             if (silentPriority != null)
             {
                 while (silentIdx < silentPriority.Length)
@@ -846,7 +846,6 @@ namespace PSD.PSDGamepkg
             bool[] involved = new bool[garden.Count + 1];
             string[] pris = new string[garden.Count + 1];
 
-            WI.RecvInfStart();
             int insstage = 0; // 0: ichi=F, 1: ichi=T,ni=F, 2:ni=T
             ushort rounder = (ushort)(zero[1] - '0');
             while (insstage < 2)
@@ -928,7 +927,6 @@ namespace PSD.PSDGamepkg
                 }
             }
             RaiseGMessage("G2AS,0");
-            WI.RecvInfEnd();
             return true;
         }
         private UEchoCode UKEvenMessage(bool[] involved,
@@ -946,13 +944,13 @@ namespace PSD.PSDGamepkg
             //while (!isUK5Received && !IsAllClear(involved, false))
             while (!IsAllClear(involved, false))
             {
-                Base.VW.Msgs msg = WI.RecvInfRecvPending();
+                Base.VW.Msgs msg = WI.RecvInfRecv();
                 UEchoCode next = HandleUMessage(msg.Msg, purse, msg.From, involved, sina);
                 if (next == UEchoCode.END_ACTION || next == UEchoCode.END_TERMIN)
                     //isUK5Received = true;
                     return next;
                 else if (next == UEchoCode.RE_REQUEST)
-                    ResendU1Message(msg.From, involved, pris, false, sina);
+                    ResendU1Message(msg.From, involved, pris, AcquireUVSN(), false, sina);
             }
             return UEchoCode.END_CANCEL;
             //return isUK5Received;
@@ -1041,19 +1039,17 @@ namespace PSD.PSDGamepkg
                 if (reason == "R" + Board.Rounder.Uid + "NP")
                     RaiseGMessage("G1SG,0");
                 SendOutU1Message(involved, pris, 0, null);
-                WI.RecvInfStart();
                 while (r5ed != UEchoCode.END_ACTION && r5ed != UEchoCode.END_TERMIN && involved[rd])
                 {
-                    Base.VW.Msgs msg = WI.RecvInfRecvPending();
+                    Base.VW.Msgs msg = WI.RecvInfRecv();
                     r5ed = HandleUMessage(msg.Msg, purse, msg.From, involved, 0);
                     if (r5ed == UEchoCode.RE_REQUEST)
-                        ResendU1Message(msg.From, involved, pris, false, 0);
+                        ResendU1Message(msg.From, involved, pris, uvsn, false, 0);
                     else if (r5ed == UEchoCode.END_CANCEL && Board.MonPiles.Count <= 0
                             && msg.From == player.Uid)
-                        ResendU1Message(player.Uid, involved, pris, true, 0);
+                        ResendU1Message(player.Uid, involved, pris, uvsn, true, 0);
                     // critical, must take action.
                 }
-                WI.RecvInfEnd();
             }
             else
                 r5ed = UEchoCode.NO_OPTIONS; // cannot take any action, seem as skip

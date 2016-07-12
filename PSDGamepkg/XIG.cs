@@ -2790,20 +2790,18 @@ namespace PSD.PSDGamepkg
                     Artiad.Goto.Parse(cmd).Handle(this, WI); break;
                 case "G0WN":
                     {
-                        WI.RecvInfTermin();
+                        // WI.RecvInfTermin();
                         PushIntoLastUV(Board.Garden.Keys, "F0WN," + cmdrst);
                         WI.BCast("F0WN," + cmdrst);
                         int count = Board.Garden.Keys.Count;
-                        WI.RecvInfStart();
                         while (count > 0)
                         {
-                            Base.VW.Msgs msg = WI.RecvInfRecvPending();
+                            Base.VW.Msgs msg = WI.RecvInfRecv();
                             if (msg.Msg.StartsWith("F0WN") && MatchedPopFromLastUV(msg.From, "F0WN"))
                                 --count;
                             else
                                 WI.Send("F0WN," + cmdrst, 0, msg.From);
                         }
-                        WI.RecvInfEnd();
                         lock (jumpTareget)
                         {
                             jumpTareget = "H0TM";

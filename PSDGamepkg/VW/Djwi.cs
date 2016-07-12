@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using BC = System.Collections.Concurrent.BlockingCollection<string>;
 using CQ = System.Collections.Concurrent.ConcurrentQueue<string>;
 
@@ -8,6 +9,9 @@ namespace PSD.PSDGamepkg.VW
     public class Djwi : Base.VW.IWISV, Base.VW.IWICL
     {
         private int Count { set; get; }
+        private ushort[] mAllPlayers;
+        private ushort[] AllPlayers { get { return mAllPlayers; } }
+
         private Log Log { set; get; }
         /// <summary>
         /// msg0Queues: message from $i to 0
@@ -21,6 +25,7 @@ namespace PSD.PSDGamepkg.VW
         public Djwi(int count, Log log)
         {
             Count = count + 1;
+            mAllPlayers = Enumerable.Range(1, Count - 1).Select(p => (ushort)p).ToArray();
             //msg0Queues = new Queue<string>[this.count];
             msg0Pools = new BC[Count];
             msgNPools = new BC[Count];
@@ -49,8 +54,6 @@ namespace PSD.PSDGamepkg.VW
             else
                 return null;
         }
-        // infinite process starts
-        public void RecvInfStart() { }
         // receive each message during the process
         public Base.VW.Msgs RecvInfRecv()
         {
@@ -63,14 +66,6 @@ namespace PSD.PSDGamepkg.VW
             }
             else return null;
         }
-        public Base.VW.Msgs RecvInfRecvPending()
-        {
-            return RecvInfRecv();
-        }
-        // infinite process ends
-        public void RecvInfEnd() { }
-        // reset the terminal flag to 0, start new stage
-        public void RecvInfTermin() { }
         // Send raw message from $me to $to
         public void Send(string msg, ushort me, ushort to)
         {
@@ -88,30 +83,30 @@ namespace PSD.PSDGamepkg.VW
             foreach (ushort to in tos)
                 Send(msg, 0, to);
         }
+        // send in general, might get combined results
+        public void Send(IDictionary<ushort, string> table, string live)
+        {
+            table.ToList().ForEach(p => Send(p.Value, 0, p.Key));
+            Live(live);
+        }
 
         public void Live(string msg) { }
         // Send raw message to the whole
         public void BCast(string msg)
         {
-            Send(msg, Enumerable.Range(1, Count - 1).Select(p => (ushort)p).ToArray());
-        }
-        // Send direct message that won't be caught by RecvInfRecv from $me to 0
-        public void SendDirect(string msg, ushort me)
-        {
-            msg0Pools[me].Add(msg);
+            Send(msg, AllPlayers);
         }
         // Do not support Talk and Hear in Djwi mode
         public string Hear() { return ""; }
 
-        public void Close() { }
-
-        public void Dispose()
+        public void Shutdown()
         {
             foreach (BC bc in msg0Pools)
                 bc.Dispose();
             foreach (BC bc in msgNPools)
                 bc.Dispose();
         }
+        public void Dispose() { }
         #endregion Implementation
     }
 }

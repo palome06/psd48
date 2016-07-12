@@ -308,13 +308,8 @@ namespace PSD.ClientAo.VW
                 msg0Pools.Add(msg);
             }
         }
-        // Send direct message that won't be caught by RecvInfRecv from $me to 0
-        public void SendDirect(string msg, ushort me)
-        {
-            Send(msg, me, 0);
-        }
         // Close the socket for recycling
-        public void Close()
+        public void Shutdown()
         {
             try
             {
@@ -326,13 +321,6 @@ namespace PSD.ClientAo.VW
             }
             catch (IOException) { }
         }
-
-        public void Dispose() { }
-        //// Talk text message to others
-        //public void Talk(string msg)
-        //{
-        //    SendDirect("Y1," + msg, Uid);
-        //}
         // Hear any text message from others
         public string Hear()
         {
@@ -341,6 +329,7 @@ namespace PSD.ClientAo.VW
                 Log.Logg("<" + talk);
             return talk;
         }
+        public void Dispose() { }
         #endregion Implementation
     }
 }
