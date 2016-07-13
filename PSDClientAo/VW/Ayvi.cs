@@ -26,7 +26,7 @@ namespace PSD.ClientAo.VW
 
         private bool record;
 
-        internal Log Log { set; get; }
+        internal ClLog Log { set; get; }
 
         public Cyvi(AoDisplay ad, bool record)
         {

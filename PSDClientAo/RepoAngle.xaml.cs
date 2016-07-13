@@ -1,16 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace PSD.ClientAo
 {
@@ -19,7 +11,7 @@ namespace PSD.ClientAo
     /// </summary>
     public partial class RepoAngle : UserControl
     {
-        public VW.Cyvi VI { set; get; }
+        public event Util.InputMessageHandler input;
 
         public RepoAngle()
         {
@@ -33,13 +25,13 @@ namespace PSD.ClientAo
                     if (text.StartsWith("\\\\"))
                     {
                         string cmd = text.Substring("\\\\".Length).ToUpper().Trim();
-                        lock (VI.InputCommand)
-                            VI.InputCommand.Enqueue(cmd);
+                        if (input != null)
+                            input(cmd);
                     }
                     else
                     {
-                        lock (VI.InputTalk)
-                            VI.InputTalk.Enqueue("@@" + migiInputBox.Text);
+                        if (input != null)
+                            input("@@" + migiInputBox.Text);
                     }
                     migiInputBox.Text = "";
                 }

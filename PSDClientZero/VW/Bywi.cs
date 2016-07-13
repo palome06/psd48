@@ -1,12 +1,13 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
-using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using PSD.Base;
-using System.IO;
 
 namespace PSD.ClientZero.VW
 {
@@ -19,8 +20,9 @@ namespace PSD.ClientZero.VW
             internal int Avatar { set; get; }
             internal ushort Uid { set; get; }
         }
-
-        public Thread recvThread, sendThread;
+        public const int MSG_SIZE = 4096;
+        // token to terminate all running thread when Aywi is closed
+        private CancellationTokenSource ctoken;
 
         private string serverName;
         private int port;
@@ -37,13 +39,15 @@ namespace PSD.ClientZero.VW
         {
             NetworkStream tcpStream = client.GetStream();
             if (!watch)
-                SentByteLine(tcpStream, "C2CO," + Uid + "," + name + "," + avatar + "," + hopeTeam);
+                Base.VW.WHelper.SentByteLine(tcpStream, "C2CO," + Uid + "," + name + "," + avatar + "," + hopeTeam);
             else
-                SentByteLine(tcpStream, "C2QI," + Uid + "," + name);
+                Base.VW.WHelper.SentByteLine(tcpStream, "C2QI," + Uid + "," + name);
             while (true)
             {
-                string line = ReadByteLine(tcpStream);
-                if (line.StartsWith("C2CN,") && !watch)
+                string line = Base.VW.WHelper.ReadByteLine(tcpStream);
+                if (line == null)
+                    return false;
+                else if (line.StartsWith("C2CN,") && !watch)
                 {
                     ushort ut = ushort.Parse(line.Substring("C2CN,".Length));
                     if (ut == 0)
@@ -59,19 +63,16 @@ namespace PSD.ClientZero.VW
                 else if (line.StartsWith("C2SA,"))
                 {
                     stream = tcpStream;
-                    recvThread = new Thread(() => ZI.SafeExecute(() => KeepOnListenRecv(),
-                        delegate(Exception e) { Log.Logg(e.ToString()); }));
-                    recvThread.Start();
+                    StartListenTask(KeepOnListenRecv);
                     if (!watch)
                     {
-                    //    SentByteLine(tcpStream, "C2ST," + Uid);
-                        sendThread = new Thread(() => ZI.SafeExecute(() => KeepOnListenSend(),
-                            delegate(Exception e) { Log.Logg(e.ToString()); }));
-                        sendThread.Start();
+                        StartListenTask(KeepOnListenSend);
                         Send("C2ST," + Uid, Uid, 0);
                     }
                     return true;
                 }
+                else if (line.StartsWith("C2SB,"))
+                    return false;
                 else if (line.StartsWith("C"))
                     return false;
             }
@@ -80,14 +81,16 @@ namespace PSD.ClientZero.VW
         {
             NetworkStream tcpStream = client.GetStream();
             if (!watch)
-                SentByteLine(tcpStream, "C2CO,0," + name + "," + avatar + "," + hopeTeam);
+                Base.VW.WHelper.SentByteLine(tcpStream, "C2CO,0," + name + "," + avatar + "," + hopeTeam);
             else
-                SentByteLine(tcpStream, "C2QI,0," + name);
+                Base.VW.WHelper.SentByteLine(tcpStream, "C2QI,0," + name);
             IDictionary<ushort, IchiPlayer> uidict = new Dictionary<ushort, IchiPlayer>();
             while (true)
             {
-                string line = ReadByteLine(tcpStream);
-                if (line.StartsWith("C2CN,") && !watch)
+                string line = Base.VW.WHelper.ReadByteLine(tcpStream);
+                if (line == null)
+                    return false;
+                else if (line.StartsWith("C2CN,") && !watch)
                 {
                     ushort ut = ushort.Parse(line.Substring("C2CN,".Length));
                     if (ut == 0)
@@ -137,15 +140,9 @@ namespace PSD.ClientZero.VW
                 else if (line.StartsWith("C2SA,"))
                 {
                     stream = tcpStream;
-                    recvThread = new Thread(() => ZI.SafeExecute(() => KeepOnListenRecv(),
-                        delegate(Exception e) { Log.Logg(e.ToString()); }));
-                    recvThread.Start();
+                    StartListenTask(KeepOnListenRecv);
                     if (!watch)
-                    {
-                        sendThread = new Thread(() => ZI.SafeExecute(() => KeepOnListenSend(),
-                            delegate(Exception e) { Log.Logg(e.ToString()); }));
-                        sendThread.Start();
-                    }
+                        StartListenTask(KeepOnListenSend);
                     return true;
                 }
                 else if (line.StartsWith("C"))
@@ -156,26 +153,22 @@ namespace PSD.ClientZero.VW
         private bool ConnectDoResume(TcpClient client, ushort oldUid, string passCode)
         {
             NetworkStream tcpStream = client.GetStream();
-            SentByteLine(tcpStream, "C4CR," + Uid + "," + oldUid + "," + name + "," + passCode);
+            Base.VW.WHelper.SentByteLine(tcpStream, "C4CR," + Uid + "," + oldUid + "," + name + "," + passCode);
             while (true)
             {
-                string line = ReadByteLine(tcpStream);
-                if (line.StartsWith("C4CS,"))
+                string line = Base.VW.WHelper.ReadByteLine(tcpStream);
+                if (line == null)
+                    return false;
+                else if (line.StartsWith("C4CS,"))
                 {
                     ushort ut = ushort.Parse(line.Substring("C4CS,".Length));
                     if (ut == 0)
                         return false;
-                    else {
-                    	Uid = ut;
-                    	stream = tcpStream;
-	                    recvThread = new Thread(() => ZI.SafeExecute(() => KeepOnListenRecv(),
-	                        delegate(Exception e) { Log.Logg(e.ToString()); }));
-	                    recvThread.Start();
-                        sendThread = new Thread(() => ZI.SafeExecute(() => KeepOnListenSend(),
-                            delegate(Exception e) { Log.Logg(e.ToString()); }));
-                        sendThread.Start();
-                    	return true;
-                    }
+                    Uid = ut;
+                    stream = tcpStream;
+                    StartListenTask(KeepOnListenRecv);
+                    StartListenTask(KeepOnListenSend);
+                    return true;
                 }
                 else if (line.StartsWith("C"))
                     return false;
@@ -209,36 +202,31 @@ namespace PSD.ClientZero.VW
             }
             catch (Exception) { return false; }
         }
-		
+
         private void KeepOnListenRecv()
         {
-            byte[] recv = new byte[2048];
             try
             {
                 while (true)
                 {
-                    string line = ReadByteLine(stream);
-                    //Console.WriteLine("=============>>>> Do Receive:" + line);
-                    if (line.StartsWith("\\D"))
+                    string line = Base.VW.WHelper.ReadByteLine(stream);
+                    if (string.IsNullOrEmpty(line))
                     {
-                        line = line.Substring("\\D".Length);
-                        msgNQueues.Enqueue(line);
+                        if (OnLoseConnection != null)
+                            OnLoseConnection();
+                        stream.Close();
+                        break;
                     }
-                    else if (line.StartsWith("\\I"))
-                    {
-                        line = line.Substring("\\I".Length);
-                        if (line.StartsWith("Y"))
-                            msgTalk.Enqueue(line);
-                        else
-                            msgNQueues.Enqueue(line);
-                    }
+                    else if (line.StartsWith("Y"))
+                        msgTalk.Add(line, ctoken.Token);
                     else
-                        Thread.Sleep(100);
+                        msgNPools.Add(line, ctoken.Token);
                 }
             }
             catch (IOException)
             {
-                xic.ReportConnectionLost();
+                if (OnLoseConnection != null)
+                    OnLoseConnection();
             }
         }
         private void KeepOnListenSend()
@@ -246,45 +234,37 @@ namespace PSD.ClientZero.VW
             try
             {
                 while (true)
-                {
-                    if (msg0Queues.Count > 0)
-                    {
-                        string msgs = msg0Queues.Dequeue();
-                        //Base.VW.Msgs msg = new Base.VW.Msgs(msgs, Uid, 0);
-                        //byte[] sent = Encoding.Unicode.GetBytes(msg.Msg);
-                        //stream.Write(sent, 0, sent.Length);
-                        //StreamWriter sw = new StreamWriter(stream); //Encoding.Unicode
-                        //sw.WriteLine(msgs);
-                        //sw.Flush();
-                        SentByteLine(stream, msgs);
-                        //Thread.Sleep(20);
-                    }
-                    else
-                        Thread.Sleep(100);
-                }
+                    Base.VW.WHelper.SentByteLine(stream, msg0Pools.Take(ctoken.Token));
             }
             catch (IOException)
             {
-                xic.ReportConnectionLost();
+                if (OnLoseConnection != null)
+                    OnLoseConnection();
             }
         }
 
         #endregion Connect Issue
 
         /// <summary>
-        /// msg0Queues: message from $i to 0
-        /// msgNQueues: message from 0 to $i
+        /// msgNPools: message from 0 to $i
         /// </summary>
-        private Queue<string> msgNQueues;
-        private Queue<string> msg0Queues;
-        private Queue<string> msgTalk;
+        private BlockingCollection<string> msgNPools;
+        /// <summary>
+        /// msg0Pools: message from $i to 0
+        /// </summary>
+        private BlockingCollection<string> msg0Pools;
+        /// <summary>
+        /// msgTalk: talk and instant message
+        /// </summary>
+        private BlockingCollection<string> msgTalk;
 
-        private XIClient xic;
+        public delegate void LoseConnectionDelegate();
+        public LoseConnectionDelegate OnLoseConnection;
 
-        internal Log Log { set; get; }
+        internal ClLog Log { set; get; }
         // direct true : Single Room, RM/NW exists; otherwise, hall
         public Bywi(string serverName, int port, string name,
-            int avatar, int hopeTeam, ushort uid, XIClient xic)
+            int avatar, int hopeTeam, ushort uid)
         {
             this.serverName = serverName;
             this.port = port;
@@ -295,11 +275,10 @@ namespace PSD.ClientZero.VW
             if (uid != 0)
                 Uid = uid;
 
-            msg0Queues = new Queue<string>();
-            msgNQueues = new Queue<string>();
-            msgTalk = new Queue<string>();
-
-            this.xic = xic;
+            msgNPools = new BlockingCollection<string>(new ConcurrentQueue<string>());
+            msg0Pools = new BlockingCollection<string>(new ConcurrentQueue<string>());
+            msgTalk = new BlockingCollection<string>(new ConcurrentQueue<string>());
+            ctoken = new CancellationTokenSource();
         }
 
         #region Implemetation
@@ -309,27 +288,12 @@ namespace PSD.ClientZero.VW
         {
             if (from == 0)
             {
-                bool valid = false;
-                string rvDeq = null;
-                while (!valid)
-                {
-                    lock (msgNQueues)
-                    {
-                        valid = msgNQueues.Count != 0;
-                        if (valid)
-                        {
-                            rvDeq = msgNQueues.Dequeue();
-                            break;
-                        }
-                    }
-                    Thread.Sleep(100);
-                }
+                string rvDeq = msgNPools.Take();
                 if (rvDeq != null)
                     Log.Logg("<" + rvDeq);
                 return rvDeq;
             }
-            else
-                return null;
+            else return null;
         }
         // Send raw message from $me to $to
         public void Send(string msg, ushort me, ushort to)
@@ -338,33 +302,20 @@ namespace PSD.ClientZero.VW
             {
                 if (Log != null)
                     Log.Logg(">" + msg);
-                lock (msg0Queues)
-                {
-                    msg0Queues.Enqueue("\\I" + msg);
-                }
+                msg0Pools.Add(msg);
             }
         }
         // Send direct message that won't be caught by RecvInfRecv from $me to 0
         public void SendDirect(string msg, ushort me)
         {
-            if (Log != null)
-                Log.Logg(">" + msg);
-            lock (msg0Queues)
-            {
-                msg0Queues.Enqueue("\\D" + msg);
-            }
+            Send(msg, me, 0);
         }
         // Close the socket for recycling
         public void Close()
         {
-            try
-            {
-                if (recvThread != null && recvThread.IsAlive)
-                    recvThread.Abort();
-                if (sendThread != null && sendThread.IsAlive)
-                    sendThread.Abort();
-                stream.Close();
-            }
+            ctoken.Cancel(); ctoken.Dispose();
+            msg0Pools.Dispose(); msgNPools.Dispose(); msgTalk.Dispose();
+            try { stream.Close(); }
             catch (IOException) { }
         }
         //// Talk text message to others
@@ -375,47 +326,23 @@ namespace PSD.ClientZero.VW
         // Hear any text message from others
         public string Hear()
         {
-            string talk = null;
-            while (true)
-            {
-                lock (msgTalk)
-                {
-                    if (msgTalk.Count > 0)
-                    {
-                        talk = msgTalk.Dequeue();
-                        break;
-                    }
-                }
-                Thread.Sleep(100);
-            }
+            string talk = msgTalk.Take();
             if (talk != null)
                 Log.Logg("<" + talk);
             return talk;
         }
+        public void Dispose() { }
         #endregion Implementation
 
-        private static string ReadByteLine(NetworkStream ns)
+        /// <summary>
+        /// start an async Listening task
+        /// </summary>
+        /// <param name="action">the acutal listen action</param>
+        private void StartListenTask(Action action)
         {
-            byte[] byte2 = new byte[2];
-            ns.Read(byte2, 0, 2);
-            ushort value = (ushort)((byte2[0] << 8) + byte2[1]);
-            byte[] actual = new byte[2048];
-            if (value > 2048)
-                value = 2048;
-            ns.Read(actual, 0, value);
-            return Encoding.Unicode.GetString(actual, 0, value);
-        }
-
-        private static void SentByteLine(NetworkStream ns, string value)
-        {
-            byte[] actual = Encoding.Unicode.GetBytes(value);
-            int al = actual.Length;
-            byte[] buf = new byte[al + 2];
-            buf[0] = (byte)(al >> 8);
-            buf[1] = (byte)(al & 0xFF);
-            actual.CopyTo(buf, 2);
-            ns.Write(buf, 0, al + 2);
-            ns.Flush();
+            Action<Exception> ae = (e) => { if (Log != null) Log.Logg(e.ToString()); };
+            Task.Factory.StartNew(() => ZI.SafeExecute(action, ae), ctoken.Token,
+                TaskCreationOptions.LongRunning, TaskScheduler.Default);
         }
     }
 }

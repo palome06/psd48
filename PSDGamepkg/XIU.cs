@@ -125,7 +125,7 @@ namespace PSD.PSDGamepkg
         /// </summary>
         public IDictionary<ushort, string> LastUVs { private set; get; }
 
-        private void PushIntoLastUV(ushort who, string msg)
+        internal void PushIntoLastUV(ushort who, string msg)
         {
             // U5, U7, V3, V5 is not accepted
             //if (!LastUVs.ContainsKey(who))
@@ -133,12 +133,12 @@ namespace PSD.PSDGamepkg
             //LastUVs[who].Push(msg);
             LastUVs[who] = msg;
         }
-        private void PushIntoLastUV(IEnumerable<ushort> whos, string msg)
+        internal void PushIntoLastUV(IEnumerable<ushort> whos, string msg)
         {
             foreach (ushort ut in whos)
                 PushIntoLastUV(ut, msg);
         }
-        private bool MatchedPopFromLastUV(ushort who, string msg)
+        internal bool MatchedPopFromLastUV(ushort who, string msg)
         {
             if (LastUVs.ContainsKey(who) && LastUVs[who] != null)
             {
@@ -150,7 +150,8 @@ namespace PSD.PSDGamepkg
                 bool v1 = msg.StartsWith("V1") && lsg.StartsWith("V0");
                 bool v4 = msg.StartsWith("V4") && lsg.StartsWith("V2");
                 bool v5 = msg.StartsWith("V5") && lsg.StartsWith("V2");
-                if (u2 || u4 || u24 || u8 || v1 || v4 || v5)
+                bool f0 = msg.StartsWith("F0") && lsg.StartsWith("F0") && (msg.Substring(0, 4) == lsg.Substring(0, 4));
+                if (u2 || u4 || u24 || u8 || v1 || v4 || v5 || f0)
                 {
                     //LastUVs[who].Pop();
                     LastUVs[who] = null;
@@ -159,13 +160,14 @@ namespace PSD.PSDGamepkg
             }
             return false;
         }
-        private bool MatchedPopFromLastUV(IEnumerable<ushort> whos, string msg)
+        internal bool MatchedPopFromLastUV(IEnumerable<ushort> whos, string msg)
         {
             bool ans = true;
             foreach (ushort ut in whos)
                 ans &= MatchedPopFromLastUV(ut, msg);
             return ans;
         }
+        // Action to notify the finish of reconstructing the room
         private void ResumeLostInputEvent()
         {
             if (LastUVs != null)

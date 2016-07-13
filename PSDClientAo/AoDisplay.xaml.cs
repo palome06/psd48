@@ -63,7 +63,7 @@ namespace PSD.ClientAo
             InitializeComponent();
             Init();
             mzi = null; mvisi = null;
-            VW.Cyvi vi = new VW.Cyvi(this, record, msglog);
+            VW.Cyvi vi = new VW.Cyvi(this);
             visiThread = new Thread(delegate()
             {
                 int port = Base.NetworkCode.HALL_PORT + room;
@@ -171,12 +171,13 @@ namespace PSD.ClientAo
 
         private void WindowClosed(object sender, EventArgs e)
         {
-            Environment.Exit(0);
             if (visiThread != null && visiThread.IsAlive)
                 visiThread.Abort();
             if (VISI != null)
                 VISI.CancelThread();
             yfOrchis40.Close();
+            Environment.Exit(0);
+            // TODO: it leads to assert error in AoVoice, to change to a better way
         }
         //visi.RunAsync();
 

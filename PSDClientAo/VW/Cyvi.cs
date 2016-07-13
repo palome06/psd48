@@ -4,71 +4,162 @@ using System.Linq;
 using PSD.Base.VW;
 using System.Threading;
 using Algo = PSD.Base.Utils.Algo;
+using System.Collections.Concurrent;
+using System.Threading.Tasks;
 
 namespace PSD.ClientAo.VW
 {
     public class Cyvi : IVI
     {
-        private AoDisplay ad;
-        // queue for command code, and talk respectively
-        private Queue<string> cvQueues, tkQueues;
+        // help message (e.g. /h)
+        private BlockingCollection<string> hpQueue;
+        // chat and setting message
+        private BlockingCollection<string> tkQueue;
+        // main queue
+        private BlockingCollection<string> cvQueue;
 
-        private int cinReqCount;
-        private Boolean cinGate;
+        public string CinSentinel { get { return "\\"; } }
+        // general ctoken for moniter upstream
+        private CancellationTokenSource ctoken;
+        // token for Cin, would be cancelled and refreshed when notified
+        private CancellationTokenSource curToken;
 
-        private Thread cinListenThread, talkListenThread;
-
-        //private int shuzi = 0;
-        //private int activeCin = 0;
-
-        internal Base.Log Log { set; get; }
-
-        public Cyvi(AoDisplay ad, bool record, bool msglog)
-        {
-            //this.count = count;
-            //Log = new Base.Log(); Log.Start(312, record, msglog, 0);
-            this.ad = ad;
-            this.cvQueues = new Queue<string>();
-            this.cinReqCount = 0;
-            this.cinGate = false;
-            tkQueues = new Queue<string>();
-            InputCommand = new Queue<string>();
-            InputTalk = new Queue<string>();
-            cinListenThread = new Thread(() => ZI.SafeExecute(() => CinListenStarts(),
-                delegate(Exception e) { if (Log != null) { Log.Logg(e.ToString()); } }));
-            talkListenThread = new Thread(() => ZI.SafeExecute(() => TalkListenStarts(),
-                delegate(Exception e) { if (Log != null) { Log.Logg(e.ToString()); } }));
-        }
-
-        public void Init()
-        {
-            cinListenThread.Start();
-            talkListenThread.Start();
-            AD.yfMinami.input += InsertMessage;
-            AD.yfDeal.input += InsertMessage;
-            AD.yfJoy.input += InsertMessage;
-            AD.yfArena.input += InsertMessage;
-            AD.yfMigi.VI = this;
-        }
+        internal Base.ClLog Log { set; get; }
         // Set whether the game is started or still in preparation
         // thus whether operations can be accepted or not
         public void SetInGame(bool value) { mInGame = value; }
         private bool mInGame;
 
-        public void AbortCinThread()
+        public Cyvi(AoDisplay ad)
         {
-            if (cinListenThread != null && cinListenThread.IsAlive)
-                cinListenThread.Abort();
-            if (talkListenThread != null && talkListenThread.IsAlive)
-                talkListenThread.Abort();
+            hpQueue = new BlockingCollection<string>();
+            tkQueue = new BlockingCollection<string>();
+            ctoken = new CancellationTokenSource();
+            curToken = null;
+            cvQueue = new BlockingCollection<string>();
+            AD = ad;
         }
 
+        private AoDisplay AD { set; get; }
+
+        #region Implements
+        public void Init()
+        {
+            AD.yfMinami.input += Offer;
+            AD.yfDeal.input += Offer;
+            AD.yfJoy.input += Offer;
+            AD.yfArena.input += Offer;
+            AD.yfMigi.input += Offer;
+        }
+        // accept the line from console or other places
+        public void Offer(string line)
+        {
+            Task.Factory.StartNew(() =>
+            {
+                if (!string.IsNullOrEmpty(line) && line != CinSentinel)
+                {
+                    if (line.StartsWith("@@")) // Chat
+                        tkQueue.Add("Y1," + line.Substring("@@".Length));
+                    else if (line.StartsWith("@#")) // Setting
+                    {
+                        if (mInGame)
+                            tkQueue.Add("Y3," + line.Substring("@#".Length));
+                    }
+                    else
+                    {
+                        line = line.Trim().ToUpper();
+                        if (line.StartsWith("/"))
+                            hpQueue.Add(line.Substring("/".Length));
+                        else if (mInGame)
+                            cvQueue.Add(line);
+                    }
+                }
+            });
+        }
+
+        public void Chat(string msg, string nick)
+        {
+            if (AD != null)
+                AD.DisplayChat(nick, msg);
+        }
+
+        public string Cin(ushort me, string hintFormat, params object[] args)
+        {
+            PreCinClearup();
+            AD.Dispatcher.BeginInvoke((Action)(() =>
+            {
+                AD.yfMigi.IncrText("===> " + string.Format(hintFormat, args));
+                AD.yfMigi.svText.ScrollToEnd();
+            }));
+            return Cin(me);
+        }
+        private string Cin(ushort me)
+        {
+            try { return cvQueue.Take(curToken.Token); }
+            catch (OperationCanceledException) { return CinSentinel; }
+            catch (ObjectDisposedException) { return CinSentinel; }
+        }
+        private void PreCinClearup()
+        {
+            if (curToken != null)
+            {
+                curToken.Cancel();
+                curToken.Dispose();
+            }
+            curToken = new CancellationTokenSource();
+            while (cvQueue.Count > 0)
+                cvQueue.Take();
+            ResetAllInputs();
+        }
+
+        public void CloseCinTunnel(ushort me)
+        {
+            CancellationTokenSource token = curToken;
+            curToken = null;
+            if (token != null)
+            {
+                token.Cancel();
+                token.Dispose();
+            }
+            ResetAllInputs();
+        }
+
+        public void Cout(ushort me, string msgFormat, params object[] args)
+        {
+            string msg = string.Format(msgFormat, args);
+            AD.Dispatcher.BeginInvoke((Action)(() =>
+            {
+                AD.yfMigi.IncrText(msg);
+                AD.yfMigi.svText.ScrollToEnd();
+            }));
+            if (Log != null)
+                Log.Record(msg);
+        }
+
+        public string RequestHelp(ushort me) { return hpQueue.Take(ctoken.Token); }
+
+        public string RequestTalk(ushort me) { return tkQueue.Take(ctoken.Token); }
+
+        public void Close()
+        {
+            ctoken.Cancel(); ctoken.Dispose();
+            hpQueue.Dispose();
+            tkQueue.Dispose();
+            cvQueue.Dispose();
+        }
+        /// <summary>
+        /// start an async Listening task
+        /// </summary>
+        /// <param name="action">the acutal listen action</param>
+        private void StartListenTask(Action action)
+        {
+            Action<Exception> ae = (e) => { if (Log != null) Log.Logg(e.ToString()); };
+            Task.Factory.StartNew(() => ZI.SafeExecute(action, ae), ctoken.Token,
+                TaskCreationOptions.LongRunning, TaskScheduler.Default);
+        }
+        #endregion Implements
+
         #region Message Flow Section
-
-        public AoDisplay AD { get { return ad; } }
-        public Queue<string> InputCommand { private set; get; }
-        public Queue<string> InputTalk { private set; get; }
-
         public void SetRoom(int room)
         {
             AD.SetRoom(room);
@@ -82,35 +173,12 @@ namespace PSD.ClientAo.VW
             aps[pos].IsAlive = true;
             //aps[pos].SelectHero = avatar;
         }
-        private bool InsertMessage(string line)
+        public void ReportNoServer(string ipAddress)
         {
-            if (!string.IsNullOrEmpty(line) && line != CinSentinel)
+            AD.Dispatcher.BeginInvoke((Action)(() =>
             {
-                if (line.StartsWith("@@"))
-                {
-                    lock (tkQueues)
-                        tkQueues.Enqueue("Y1," + line.Substring("@@".Length));
-                }
-                else
-                {
-                    line = line.ToUpper().Trim();
-                    if (line.StartsWith("@#"))
-                    {
-                        lock (tkQueues)
-                            tkQueues.Enqueue("Y3," + line.Substring("@#".Length));
-                    }
-                    else
-                    {
-                        if (cinGate)
-                            lock (cvQueues)
-                            {
-                                cvQueues.Enqueue(line);
-                            }
-                    }
-                }
-                return true;
-            }
-            else return false;
+                Auxs.MessageHouse.Show("找不到远端服务器", ipAddress + "对您一开始是拒绝的。");
+            }));
         }
         public void ReportWrongVersion(string version)
         {
@@ -118,6 +186,30 @@ namespace PSD.ClientAo.VW
             {
                 Auxs.MessageHouse.Show("PSDClientAo 版本不符", "远端服务器版本为" + version + "，请进行调整。");
             }));
+        }
+        public void ReportFlashQuitError()
+        {
+            AD.Dispatcher.BeginInvoke((Action)(() =>
+            {
+                Auxs.MessageHouse.Show("房间匹配失败", "看起来是有其他玩家秒退快闪了。");
+            }));
+        }
+        // Reset All Input UI, not handled with kernel I/O work flow
+        private void ResetAllInputs()
+        {
+            HideTip();
+            AD.yfBag.Me.ResumeTux();
+            AD.yfPlayerR2.AoPlayer.ResumeExCards();
+            AD.yfPlayerR2.AoPlayer.ResumePets();
+            AD.yfPlayerR2.AoPlayer.DisableWeapon();
+            AD.yfPlayerR2.AoPlayer.DisableArmor();
+            AD.yfPlayerR2.AoPlayer.DisableTrove();
+            AD.yfPlayerR2.AoPlayer.DisableExEquip();
+            AD.yfPlayerR2.AoPlayer.ResumeRunes();
+            // Disable pets
+            AD.yfJoy.CEE.ResetHightlight();
+            AD.Mix.FinishSelectTarget();
+            AD.ResetAllSelectedList();
         }
         #endregion Message Flow Section
         #region Detail Cin Events
@@ -130,6 +222,7 @@ namespace PSD.ClientAo.VW
         internal void HideTip() { AD.yfMinami.Minami.HideTip(); }
         internal string CinY(ushort uid, int count, bool cancellable, params string[] names)
         {
+            PreCinClearup();
             AD.yfMinami.Minami.Show(count, names);
             if (cancellable)
                 AD.yfJoy.CEE.CancelValid = true;
@@ -140,6 +233,7 @@ namespace PSD.ClientAo.VW
         // Invalid, only cancel
         internal string Cin00(ushort uid)
         {
+            PreCinClearup();
             ShowTip("不能指定合法目标.");
             AD.yfJoy.CEE.CancelValid = true;
             string any = Cin(uid);
@@ -148,18 +242,9 @@ namespace PSD.ClientAo.VW
             return any;
         }
         // any input
-        internal string Cin01(ushort uid)
-        {
-            ShowTip("请确定。");
-            AD.yfJoy.DecideMessage = "0";
-            AD.yfJoy.CEE.DecideValid = true;
-            string any = Cin(uid);
-            if (any != CinSentinel)
-                HideTip();
-            return any;
-        }
         internal string Cin01(ushort uid, string hint)
         {
+            PreCinClearup();
             string tip = "请确定。";
             if (!string.IsNullOrWhiteSpace(hint))
                 tip = hint + "，" + tip;
@@ -174,6 +259,7 @@ namespace PSD.ClientAo.VW
         // specific input
         internal string Cin48(ushort uid, string hint, params string[] pars)
         {
+            PreCinClearup();
             ShowTip(hint, pars);
             string any = Cin(uid);
             if (any != CinSentinel)
@@ -183,6 +269,7 @@ namespace PSD.ClientAo.VW
         internal string CinI(ushort uid, string prevComment,
             int r1, int r2, IEnumerable<string> uss, bool cancellable, bool keep)
         {
+            PreCinClearup();
             ShowTip(prevComment);
             AD.yfDeal.Deal.Show(uss.Select(p => "I" + p), null, r1, r2, cancellable, keep);
             string result = Cin(uid);
@@ -198,6 +285,7 @@ namespace PSD.ClientAo.VW
         internal string CinH(ushort uid, string prevComment,
             int r1, int r2, IEnumerable<ushort> heros, bool cancellable, bool keep)
         {
+            PreCinClearup();
             ShowTip(prevComment);
             AD.yfDeal.Deal.Show(heros.Select(p => "H" + p), null, r1, r2, cancellable, keep);
             string result = Cin(uid);
@@ -209,6 +297,7 @@ namespace PSD.ClientAo.VW
         internal string CinC(ushort uid, string prevComment, int r1, int r2,
             List<ushort> uss, int zero, bool cancellable, bool keep)
         {
+            PreCinClearup();
             ShowTip(prevComment);
             if (zero > 0)
             {
@@ -233,6 +322,7 @@ namespace PSD.ClientAo.VW
         internal string CinM(ushort uid, string prevComment, int r1, int r2,
             List<ushort> uss, bool cancellable, bool keep)
         {
+            PreCinClearup();
             ShowTip(prevComment);
             AD.yfDeal.Deal.Show(uss.Select(p => "M" + p), null, r1, r2, cancellable, keep);
             string result = Cin(uid);
@@ -249,6 +339,7 @@ namespace PSD.ClientAo.VW
         internal string CinQ(ushort uid, string comment, int r1, int r2,
             List<ushort> uss, int zero, bool cancellable, bool keep)
         {
+            PreCinClearup();
             ShowTip(comment);
             AD.Mix.StartSelectQard(uss.ToList(), r1, r2);
             if (cancellable)
@@ -273,6 +364,7 @@ namespace PSD.ClientAo.VW
         internal string CinT(ushort uid, IEnumerable<ushort> targets, int r1,
             int r2, string comment, bool cancellable, bool keep)
         {
+            PreCinClearup();
             ShowTip(comment);
             AD.Mix.StartSelectTarget(targets.ToList(), r1, r2);
             if (cancellable)
@@ -298,6 +390,7 @@ namespace PSD.ClientAo.VW
         internal string CinZ(ushort uid, string prevComment, int r1, int r2,
             IEnumerable<ushort> uss, bool cancellable, bool keep)
         {
+            PreCinClearup();
             string comment = (r1 != r2) ?
                 (string.Format("请选择{0}-{1}张卡牌为{2}目标。", r1, r2, prevComment)) :
                 (string.Format("请选择{0}张卡牌为{1}目标。", r1, prevComment));
@@ -317,6 +410,7 @@ namespace PSD.ClientAo.VW
         internal string CinX(ushort uid, int r1, int r2, List<string> ussnm,
             bool cancellable, bool keep)
         {
+            PreCinClearup();
             bool single = (r1 == r2 && r1 == ussnm.Count);
             string comment;
             if (ussnm.Count == 1)
@@ -335,6 +429,7 @@ namespace PSD.ClientAo.VW
 
         internal string CinD(ushort uid, int r1, int r2, string prevComment, bool cancellable)
         {
+            PreCinClearup();
             ShowTip(prevComment);
             List<int> uss;
             if (r2 <= 6)
@@ -354,6 +449,7 @@ namespace PSD.ClientAo.VW
         internal string CinG(ushort uid, string prevComment, int r1, int r2,
             IEnumerable<ushort> dbSerials, bool cancellable, bool keep)
         {
+            PreCinClearup();
             ShowTip(prevComment);
             AD.yfDeal.Deal.Show(dbSerials.Select(p => "G" + p),
                 null, r1, r2, cancellable, keep);
@@ -370,6 +466,7 @@ namespace PSD.ClientAo.VW
         internal string CinF(ushort uid, string prevComment, int r1, int r2,
             IEnumerable<ushort> runes, bool cancellable, bool keep)
         {
+            PreCinClearup();
             ShowTip(prevComment);
             AD.yfDeal.Deal.Show(runes.Select(p => "R" + p),
                 null, r1, r2, cancellable, keep);
@@ -386,6 +483,7 @@ namespace PSD.ClientAo.VW
         internal string CinE(ushort uid, string prevComment, int r1, int r2,
             List<ushort> uss, bool cancellable, bool keep)
         {
+            PreCinClearup();
             ShowTip(prevComment);
             AD.yfDeal.Deal.Show(uss.Select(p => "E" + p), null, r1, r2, cancellable, keep);
             string result = Cin(uid);
@@ -401,6 +499,7 @@ namespace PSD.ClientAo.VW
         internal string CinV(ushort uid, string prevComment, int r1, int r2,
           IEnumerable<ushort> uss, bool cancellable, bool keep)
         {
+            PreCinClearup();
             ShowTip(prevComment);
             AD.yfDeal.Deal.Show(uss.Select(p => "V" + p), null, r1, r2, cancellable, keep);
             string result = Cin(uid);
@@ -428,6 +527,7 @@ namespace PSD.ClientAo.VW
         internal string CinTP(ushort uid, IEnumerable<string> uss, string comment,
             bool cancellable, bool keep)
         {
+            PreCinClearup();
             ShowTip(comment);
             List<ushort> pets = uss.Where(p => p.StartsWith("PT")).Select(
                 p => ushort.Parse(p.Substring("PT".Length))).ToList();
@@ -461,6 +561,7 @@ namespace PSD.ClientAo.VW
 
         internal string CinCMD0(ushort uid)
         {
+            PreCinClearup();
             ShowTip("您无法行动，请放弃行动.");
             //AD.yfJoy.CEE.ResetHightlight();
             AD.yfJoy.CEE.CancelValid = true;
@@ -471,6 +572,7 @@ namespace PSD.ClientAo.VW
         }
         internal string CinCMD(ushort uid, string prompt, List<string> optLst, bool cancellable)
         {
+            PreCinClearup();
             ShowTip((!string.IsNullOrEmpty(prompt) ? prompt : "") + "请响应.");
             List<ushort> txs = new List<ushort>();
             List<string> njs = new List<string>();
@@ -506,7 +608,7 @@ namespace PSD.ClientAo.VW
             {
                 IDictionary<string, string> encoding = new Dictionary<string, string>();
                 foreach (string nj in njs)
-                    encoding.Add(ad.Tuple.NJL.EncodeNCAction(nj).Name, nj);
+                    encoding.Add(AD.Tuple.NJL.EncodeNCAction(nj).Name, nj);
                 AD.yfMinami.Minami.ShowWithEncoding(njs.Count, "请选择执行NPC效果或取消.", encoding);
             }
             if (pts.Count > 0)
@@ -542,165 +644,16 @@ namespace PSD.ClientAo.VW
 
         #endregion Detail Cin Events
 
-        #region Implementation
-
-        private void CinListenStarts()
-        {
-            string line = "";
-            do
-            {
-                lock (InputCommand)
-                {
-                    if (InputCommand.Count > 0)
-                        line = InputCommand.Dequeue();
-                    else
-                        line = "";
-                }
-                if (line == "" || !InsertMessage(line))
-                    Thread.Sleep(350);
-            } while (line != null);
-        }
-
-        private void TalkListenStarts()
-        {
-            string line;
-            do
-            {
-                lock (InputTalk)
-                {
-                    if (InputTalk.Count > 0)
-                        line = InputTalk.Dequeue();
-                    else
-                        line = "";
-                }
-                if (line == "" || !InsertMessage(line))
-                    Thread.Sleep(350);
-            } while (line != null);
-        }
-
-        private void FCout(ushort me, string msg)
-        {
-            ad.Dispatcher.BeginInvoke((Action)(() =>
-            {
-                ad.yfMigi.IncrText(msg);
-                ad.yfMigi.svText.ScrollToEnd();
-            }));
-            if (Log != null)
-                Log.Record(msg);
-        }
-
-        public void Cout(ushort me, string msgFormat, params object[] args)
-        {
-            FCout(me, string.Format(msgFormat, args));
-        }
-
-        private string Cin(ushort me)
-        {
-            // SetSentialToPendingTunnel();
-            ++cinReqCount;
-            cinGate = true;
-            string msg = null;
-            do
-            {
-                lock (cvQueues)
-                {
-                    if (cvQueues.Count > 0)
-                        msg = cvQueues.Dequeue();
-                }
-                if (msg == null)
-                    Thread.Sleep(100);
-            } while (msg == null);
-            //if (msg != CinSentinel)
-            --cinReqCount;
-            //if (msg == CinSentinel) // suicide now
-            //    System.Threading.Thread.CurrentThread.Abort();
-
-            //if (cinReqCount == 0)
-            //    cinGate = false;
-            return msg;
-        }
-        public string Cin(ushort me, string hintFormat, params object[] args)
-        {
-            ad.Dispatcher.BeginInvoke((Action)(() =>
-            {
-                ad.yfMigi.IncrText("===> " + string.Format(hintFormat, args));
-                ad.yfMigi.svText.ScrollToEnd();
-            }));
-            return Cin(me);
-        }
-        private void SetSentialToPendingTunnel()
-        {
-            int count = cinReqCount;
-            for (int i = 0; i < count; ++i)
-                cvQueues.Enqueue(CinSentinel);
-            while (cinReqCount > 0)
-                Thread.Sleep(50);
-            // it should never happends, possibly add a signal here.
-            //while (cvQueues.Count > 0 && cvQueues.Peek() == CinSentinel)
-            //    cvQueues.Dequeue();
-        }
-        // Reset All Input UI, not handled with kernel I/O work flow
-        private void ResetAllInputs()
-        {
-            HideTip();
-            ad.yfBag.Me.ResumeTux();
-            ad.yfPlayerR2.AoPlayer.ResumeExCards();
-            ad.yfPlayerR2.AoPlayer.ResumePets();
-            ad.yfPlayerR2.AoPlayer.DisableWeapon();
-            ad.yfPlayerR2.AoPlayer.DisableArmor();
-            ad.yfPlayerR2.AoPlayer.DisableTrove();
-            ad.yfPlayerR2.AoPlayer.DisableExEquip();
-            ad.yfPlayerR2.AoPlayer.ResumeRunes();
-            // Disable pets
-            ad.yfJoy.CEE.ResetHightlight();
-            ad.Mix.FinishSelectTarget();
-            ad.ResetAllSelectedList();
-        }
-        // Open Cin Tunnel
-        public void OpenCinTunnel(ushort me) {
-            SetSentialToPendingTunnel();
-            cinGate = true;
-            ResetAllInputs();
-        }
-        // Close Cin Tunnel
-        public void CloseCinTunnel(ushort me)
-        {
-            cinGate = false;
-            ResetAllInputs();
-            ad.HideProgressBar(me);
-        }
-        // Terminate Cin Tunnel, give pending Cin CinSentinel as result
-        public void TerminCinTunnel(ushort me)
-        {
-            cinGate = false;
-            SetSentialToPendingTunnel();
-            ResetAllInputs();
-        }
-        public string CinSentinel { get { return "\\"; } }
-
-        // only display hidden message, used in debug mode
-        public void Cout0(ushort me, string msg) { }
-        // Request in Client
-        public string Request(ushort me) { return ""; }
-        public string RequestTalk(ushort me)
-        {
-            string msg = null;
-            do
-            {
-                lock (tkQueues)
-                {
-                    if (tkQueues.Count > 0)
-                        msg = tkQueues.Dequeue().ToString();
-                }
-                Thread.Sleep(100);
-            } while (msg == null);
-            return msg;
-        }
-        public void Chat(string msg, string nick)
-        {
-            if (AD != null)
-                AD.DisplayChat(nick, msg);
-        }
-        #endregion Implementation
+        //private void SetSentialToPendingTunnel()
+        //{
+        //    int count = cinReqCount;
+        //    for (int i = 0; i < count; ++i)
+        //        cvQueues.Enqueue(CinSentinel);
+        //    while (cinReqCount > 0)
+        //        Thread.Sleep(50);
+        //    // it should never happends, possibly add a signal here.
+        //    //while (cvQueues.Count > 0 && cvQueues.Peek() == CinSentinel)
+        //    //    cvQueues.Dequeue();
+        //}
     }
 }

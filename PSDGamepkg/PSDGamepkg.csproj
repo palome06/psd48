@@ -67,6 +67,7 @@
     <Compile Include="Artiad\Kitty.cs" />
     <Compile Include="Artiad\Pond.cs" />
     <Compile Include="Artiad\Procedure.cs" />
+    <Compile Include="Constants.cs" />
     <Compile Include="DS\PriorityQueue.cs" />
     <Compile Include="DS\UFSet.cs" />
     <Compile Include="JNS\CZ02.cs" />
@@ -80,6 +81,7 @@
     <Compile Include="JNS\TR007.cs" />
     <Compile Include="JNS\XJ405.cs" />
     <Compile Include="Log.cs" />
+    <Compile Include="VW\Ajvi.cs" />
     <Compile Include="VW\Aywi.cs" />
     <Compile Include="VW\Neayer.cs" />
     <Compile Include="XID.cs" />

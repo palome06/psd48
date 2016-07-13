@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -60,14 +61,14 @@ namespace PSD.ClientZero
         public IDictionary<ushort, ZeroPlayer> Z0D { private set; get; }
 
         private bool GameGraceEnd { set; get; }
-
         //public IDictionary<ushort, int> Heros { private set; get; }
         // list of running threads handling events
         private List<Thread> listOfThreads;
+        //private BlockingCollection<string> msgPool;
 
         private Queue<string> unhandledMsg;
 
-        public Log Log { private set; get; }
+        public ClLog Log { private set; get; }
 
         private void CommonConstruct()
         {
@@ -75,8 +76,11 @@ namespace PSD.ClientZero
             listOfThreads = new List<Thread>();
             zd = new ZeroDisplay(this);
             Z0D = new Dictionary<ushort, ZeroPlayer>();
+            //msgPool = new BlockingCollection<string>();
             unhandledMsg = new Queue<string>();
             GameGraceEnd = false;
+            if (WI is VW.Bywi)
+                (WI as VW.Bywi).OnLoseConnection += ReportConnectionLost;
         }
         // Constructor 1#: Used for Hall setting
         public XIClient(ushort uid, string name, int teamCode, Base.VW.IVI vi,
@@ -89,14 +93,18 @@ namespace PSD.ClientZero
             this.Room = room;
             this.port = Base.NetworkCode.HALL_PORT + room;
 
-            VW.Bywi bywi = new VW.Bywi(server, port, name, avatar, hopeTeam, uid, this);
-            Log = new Log(); Log.Start(auid, record, msglog, 0);
+            VW.Bywi bywi = new VW.Bywi(server, port, name, avatar, hopeTeam, uid);
+            Log = new ClLog(); Log.Start(auid, record, msglog, 0);
             bywi.Log = Log;
             if (VI is VW.Ayvi)
                 (VI as VW.Ayvi).Log = Log;
-            WI = bywi; bywi.StartConnect(watcher);
-            VI.Cout(uid, "游戏开始咯~");
-            
+            WI = bywi; 
+            if (!bywi.StartConnect(watcher))
+            {
+                VI.Cout(Uid, "哦我的上帝，真不敢想象连接竟然失败了。");
+                auid = 0; return;
+            }
+            VI.Cout(Uid, watcher ? "您开始旁观~" : "游戏开始咯~");            
             CommonConstruct();
         }
         // Constructor 2#: Used for SF setting, use decided WI and VI
@@ -106,7 +114,7 @@ namespace PSD.ClientZero
             this.auid = this.Uid = uid;
             WI = wi; VI = vi;
             this.hopeTeam = 0;
-            Log = new Log(); Log.Start(auid, false, false, 0);
+            Log = new ClLog(); Log.Start(auid, false, false, 0);
             CommonConstruct();
         }
         // Constructor 3#: Used for Direct Connection
@@ -118,13 +126,13 @@ namespace PSD.ClientZero
             this.name = name; this.avatar = avatar;
             this.hopeTeam = hopeTeam;
 
-            VW.Ayvi ayvi = new VW.Ayvi(totalPlayer, record, msglog);
+            VW.Ayvi ayvi = new VW.Ayvi();
             VI = ayvi;
             VI.Init(); ayvi.SetInGame(true);
-            VW.Bywi bywi = new VW.Bywi(server, port, name, avatar, hopeTeam, 0, this);
+            VW.Bywi bywi = new VW.Bywi(server, port, name, avatar, hopeTeam, 0);
             WI = bywi;
             
-            Log = new Log(); Log.Start(Uid, record, msglog, 0);
+            Log = new ClLog(); Log.Start(Uid, record, msglog, 0);
             if (!bywi.StartConnectDirect(watcher, VI))
             {
                 VI.Cout(Uid, "咦，您是不是掉线或者连错人了:-(");
@@ -142,7 +150,7 @@ namespace PSD.ClientZero
             return new XIClient(server, port, name, avatar, hopeTeam, record, msglog, watcher);
         }
         // Constructor 4#: Used for ResumeHall
-		// passCode is the password for a settled room
+        // passCode is the password for a settled room
         private XIClient(ushort newUid, ushort oldUid, string name, Base.VW.IVI vi,
             string server, int room, string passCode, bool record, bool msglog)
         {
@@ -153,8 +161,8 @@ namespace PSD.ClientZero
             this.Room = room;
             this.port = Base.NetworkCode.HALL_PORT + room;
             
-            VW.Bywi bywi = new VW.Bywi(server, port, name, avatar, hopeTeam = 0, newUid, this);
-            Log = new Log(); Log.Start(auid, record, msglog, 0);
+            VW.Bywi bywi = new VW.Bywi(server, port, name, avatar, hopeTeam = 0, newUid);
+            Log = new ClLog(); Log.Start(auid, record, msglog, 0);
             bywi.Log = Log;
             if (VI is VW.Ayvi)
                 (VI as VW.Ayvi).Log = Log;
@@ -180,7 +188,7 @@ namespace PSD.ClientZero
             {
                 while (true)
                 {
-                    string acmd = VI.Request(Uid);
+                    string acmd = VI.RequestHelp(Uid);
                     if (acmd != null)
                         OnRequestLocalCmd(acmd);
                 }
@@ -211,6 +219,8 @@ namespace PSD.ClientZero
                 while (true)
                 {
                     string readLine = WI.Recv(Uid, 0);
+                    // if (!string.IsNullOrEmpty(readLine))
+                    //     msgPool.Add(readLine);
                     //if (uid == 1)
                     //VI.Cout(uid, "★●▲■" + readLine + "★●▲■");
                     if (!string.IsNullOrEmpty(readLine))
@@ -294,7 +304,7 @@ namespace PSD.ClientZero
             //if (unhandledMsg.Count > 0)
             //    unhandledMsg.Dequeue();
             SingleThreadMessageStart();
-            VI.OpenCinTunnel(Uid);
+            //VI.OpenCinTunnel(Uid);
             return true;
         }
         #endregion Basic Members
@@ -1651,7 +1661,15 @@ namespace PSD.ClientZero
                             ushort[] ravs = new ushort[args.Length - 4];
                             for (int i = 4; i < args.Length; ++i)
                                 ravs[i - 4] = ushort.Parse(args[i]);
-                            VI.Cout(Uid, "{0}调整{1}的新顺序为{2}.", zd.Player(py), dd[args[3]], string.Join(",", ravs));
+                            if (ravs.Length == 2)
+                            {
+                                if (ravs[0] == 1 && ravs[1] == 2)
+                                    VI.Cout(Uid, "{0}未调整牌堆顺序.", zd.Player(py));
+                                else if (ravs[0] == 2 && ravs[1] == 1)
+                                    VI.Cout(Uid, "{0}交换了牌堆顶两张牌的顺序.", zd.Player(py));
+                            }
+                            else
+                                VI.Cout(Uid, "{0}调整{1}的新顺序为{2}.", zd.Player(py), dd[args[3]], string.Join(",", ravs));
                         }
                         else if (type == 4)
                             VI.Cout(Uid, "{0}不调整牌堆顺序.", zd.Player(py));
@@ -2618,18 +2636,22 @@ namespace PSD.ClientZero
         #region F
         private void HandleF0Message(string readLine)
         {
-            lock (listOfThreads)
-            {
-                foreach (Thread td in listOfThreads)
-                {
-                    if (td != Thread.CurrentThread && td.IsAlive)
-                        td.Abort();
-                }
-                listOfThreads.Clear();
-                listOfThreads.Add(Thread.CurrentThread);
-            }
+            Console.WriteLine("Now dealing with F0 Msg: " + readLine + "...");
+            // lock (listOfThreads)
+            // {
+            //     foreach (Thread td in listOfThreads)
+            //     {
+            //         if (td != Thread.CurrentThread && td.IsAlive)
+            //             td.Abort();
+            //     }
+            //     listOfThreads.Clear();
+            //     listOfThreads.Add(Thread.CurrentThread);
+            // }
+            // TODO: New Solution-->
+            // start a new task to send back the feedback and start a new single message thread w/ new token
+            // Cancel all tokens
             // Reset Cin Count
-            VI.TerminCinTunnel(Uid);
+            // VI.TerminCinTunnel(Uid);
             WI.Send(readLine, Uid, 0);
             string[] args = readLine.Split(',');
             switch (args[0])
@@ -3072,7 +3094,7 @@ namespace PSD.ClientZero
                         //    Z0F.Hinder = h;
                         //}
                     }
-                    VI.TerminCinTunnel(Uid);
+                    // VI.TerminCinTunnel(Uid);
                     break;
                 case "ZM1":
                     {
@@ -3518,11 +3540,10 @@ namespace PSD.ClientZero
                         cinCalled = StartCinEtc();
                         while ((Uid % 2 == 0 && !cc.DecidedAo) || (Uid % 2 == 1 && !cc.DecidedAka))
                         {
-
                             List<int> xuanR = (Uid % 2 == 0) ? cc.XuanAo : cc.XuanAka;
                             if (VI is ClientZero.VW.Ayvi)
                             {
-                                string op = (VI as ClientZero.VW.Ayvi).Cin48(Uid);
+                                string op = VI.Cin(Uid, null);
                                 op = op.Trim().ToUpper();
                                 int selAva;
                                 bool has = cc.Ding[Uid] != 0;
@@ -3563,7 +3584,7 @@ namespace PSD.ClientZero
                                 //List<int> xuanR = (Uid % 2 == 0) ? cc.XuanAo : cc.XuanAka;
                                 if (VI is ClientZero.VW.Ayvi)
                                 {
-                                    string op = (VI as ClientZero.VW.Ayvi).Cin48(Uid);
+                                    string op = VI.Cin(Uid, null);
                                     op = op.Trim().ToUpper();
                                     //bool has = cc.Ding[Uid] != 0;
                                     if (op == "X")
@@ -3646,7 +3667,7 @@ namespace PSD.ClientZero
                                 cc.DecidedAo = true;
                             else
                                 cc.DecidedAka = true;
-                            VI.TerminCinTunnel(Uid);
+                            // VI.TerminCinTunnel(Uid);
                             string msg = "我方选择结果为：";
                             for (int i = 1; i < args.Length; i += 2)
                             {
@@ -3747,7 +3768,16 @@ namespace PSD.ClientZero
                                 case "tr": zp.Trove = (ushort)value; break;
                                 case "exq": zp.ExEquip = (ushort)value; break;
                                 case "lug":
-                                    zp.Treasures[zp.Trove].AddRange((string[])value); break;
+                                {
+                                    string[] lugs = (string[])value;
+                                    if (lugs.Length > 0 && zp.Trove != 0)
+                                    {
+                                        if (!zp.Treasures.ContainsKey(zp.Trove))
+                                            zp.Treasures[zp.Trove] = new List<string>();
+                                        zp.Treasures[zp.Trove].AddRange(lugs);
+                                    }
+                                    break;
+                                }
                                 case "guard": zp.Guardian = (ushort)value; break;
                                 case "coss": zp.Coss = (ushort)value; break;
                                 case "pet":

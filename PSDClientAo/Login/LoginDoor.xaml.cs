@@ -202,11 +202,12 @@ namespace PSD.ClientAo.Login
 
         private void WindowClosed(object sender, EventArgs e)
         {
-            //Environment.Exit(0);
             if (ziThread != null && ziThread.IsAlive)
                 ziThread.Abort();
             if (voiceEntry != null)
                 voiceEntry.Stop();
+            // Environment.Exit(0);
+            // TODO: it leads to assert error in AoVoice, to change to a better way
         }
 
         private Random random = new Random();
