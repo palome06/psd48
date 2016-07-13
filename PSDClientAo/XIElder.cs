@@ -13,7 +13,11 @@ namespace PSD.ClientAo
             int version = (WI as VW.Eywi).Version;
             string[] args = readLine.Split(',');
             string header = args[0]; ushort rrounder = 0;
-            if (header.StartsWith("R")) { rrounder = (ushort)(header[1] - '0'); header = "R#" + header.Substring(2); }
+            if (header.StartsWith("R"))
+            {
+                rrounder = (ushort)(header[1] - '0');
+                header = "R#" + header.Substring(2);
+            }
             switch (args[0])
             {
                 case "H09G":

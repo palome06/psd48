@@ -645,40 +645,48 @@ namespace PSD.PSDGamepkg
         public string MayorAsyncInput(ushort mayor, string mayorMsg,
             IDictionary<ushort, string> citizens, Action<ushort, string> handleCitizenAdvices)
         {
-            string mV2 = "V2," + mayor + "," + mayorMsg;
-            PushIntoLastUV(mayor, mV2);
-            WI.Send(mV2, 0, mayor);
-            foreach (var pair in citizens)
+            int uvsn = AcquireUVSN();
+            IDictionary<ushort, string> lookup = Board.Garden.Keys.ToDictionary(p => p, ut =>
             {
-                mV2 = "V2," + mayor + "," + pair.Value;
-                PushIntoLastUV(pair.Key, mV2);
-                WI.Send(mV2, 0, pair.Key);
-            }
-            List<ushort> invs = citizens.Keys.ToList(); invs.Add(mayor);
-            WI.Send("V3," + mayor, ExceptStaff(invs.ToArray()));
-            WI.Live("V3," + mayor);
+                if (citizens.ContainsKey(ut))
+                    return "V2," + uvsn + ";;" + mayor + ";;" + citizens[ut];
+                else
+                    return "V3," + mayor;
+            });
+            PushIntoLastUV(lookup);
+            WI.Send(lookup, "V3," + mayor);
             while (true)
             {
                 Base.VW.Msgs msg = WI.RecvInfRecv();
                 if (string.IsNullOrEmpty(msg.Msg))
                     break;
-                if (msg.From == mayor)
+                else if (msg.From == mayor)
                 {
                     if (MatchedPopFromLastUV(msg.From, msg.Msg))
                     {
-                        string decision = msg.Msg.Substring("V4,".Length);
-                        if (MatchedPopFromLastUV(ExceptStaff(mayor), "V5,0")) // TODO: check it out!
+                        int idx = "V4,".Length, jdx = msg.Msg.IndexOf(',', idx);
+                        int ruvsn = int.Parse(Algo.Substring(msg.Msg, idx, jdx));
+                        if (ruvsn == uvMsgSerialNum)
                         {
-                            WI.Send("V5,0", ExceptStaff(mayor));
-                            WI.Live("V5,0");
+                            string decision = Algo.Substring(msg.Msg, jdx + 1, -1);
+                            if (MatchedPopFromLastUV(ExceptStaff(mayor), "V5,0")) // TODO: check it out!
+                            {
+                                WI.Send("V5,0", ExceptStaff(mayor));
+                                WI.Live("V5,0");
+                            }
+                            return decision;
                         }
-                        return decision;
                     }
                 }
                 else if (citizens.ContainsKey(msg.From))
                 {
-                    string advice = msg.Msg.Substring("V4,".Length);
-                    handleCitizenAdvices(msg.From, advice);
+                    int idx = "V4,".Length, jdx = msg.Msg.IndexOf(',', idx);
+                    int ruvsn = int.Parse(Algo.Substring(msg.Msg, idx, jdx));
+                    if (ruvsn == uvMsgSerialNum)
+                    {
+                        string advice = Algo.Substring(msg.Msg, jdx + 1, -1);
+                        handleCitizenAdvices(msg.From, advice);
+                    }
                 }
             }
             return "";
@@ -686,49 +694,50 @@ namespace PSD.PSDGamepkg
         public string MayorAsyncInput(ushort mayor, string mayorMsg, IEnumerable<ushort> citizens,
             string citizenMsg, Action<ushort, string> handleCitizenAdvices)
         {
-            IDictionary<ushort, string> citizenDict = new Dictionary<ushort, string>();
-            foreach (ushort ut in citizens)
-                citizenDict[ut] = citizenMsg;
-            return MayorAsyncInput(mayor, mayorMsg, citizenDict, handleCitizenAdvices);
+            return MayorAsyncInput(mayor, mayorMsg, citizens.ToDictionary(
+                p => p, p => citizenMsg), handleCitizenAdvices);
         }
         // Need For Speed Query Case, the first one in $citizens could make the decision.
         // return the decision.
         public string NFSAsyncInput(ushort mayor, IDictionary<ushort, string> citizens)
         {
-            foreach (var pair in citizens)
+            int uvsn = AcquireUVSN();
+            IDictionary<ushort, string> lookup = Board.Garden.Keys.ToDictionary(p => p, ut =>
             {
-                string mV2 = "V2," + pair.Key + "," + pair.Value;
-                PushIntoLastUV(pair.Key, mV2);
-                WI.Send(mV2, 0, pair.Key);
-            }
-            WI.Send("V3," + mayor, ExceptStaff(citizens.Keys.ToArray()));
-            WI.Live("V3," + mayor);
-            WI.RecvInfStart();
+                if (citizens.ContainsKey(ut))
+                    return "V2," + uvsn + ";;" + mayor + ";;" + citizens[ut];
+                else
+                    return "V3," + mayor;
+            });
+            PushIntoLastUV(lookup);
+            WI.Send(lookup, "V3," + mayor);
             while (true)
             {
-                Base.VW.Msgs msg = WI.RecvInfRecvPending();
+                Base.VW.Msgs msg = WI.RecvInfRecv();
                 if (string.IsNullOrEmpty(msg.Msg))
                     break;
-                if (MatchedPopFromLastUV(msg.From, msg.Msg))
+                else if (MatchedPopFromLastUV(msg.From, msg.Msg))
                 {
-                    string decision = msg.Msg.Substring("V4,".Length);
-                    ushort[] silentMajority = citizens.Keys.Except(new ushort[] { msg.From }).ToArray();
-                    if (MatchedPopFromLastUV(silentMajority, "V5,0"))
+                    int idx = "V4,".Length, jdx = msg.Msg.IndexOf(',', idx);
+                    int ruvsn = int.Parse(Algo.Substring(msg.Msg, idx, jdx));
+                    if (ruvsn == uvMsgSerialNum)
                     {
-                        WI.Send("V5,0", silentMajority);
-                        WI.Live("V5,0");
+                        string decision = Algo.Substring(msg.Msg, jdx + 1, -1);
+                        ushort[] silentMajority = citizens.Keys.Except(new ushort[] { msg.From }).ToArray();
+                        if (MatchedPopFromLastUV(silentMajority, "V5,0"))
+                        {
+                            WI.Send("V5,0", silentMajority);
+                            WI.Live("V5,0");
+                        }
+                        return decision;
                     }
-                    return decision;
                 }
             }
             return "";
         }
         public string NFSAsyncInput(ushort mayor, IEnumerable<ushort> citizens, string citizenMsg)
         {
-            IDictionary<ushort, string> citizenDict = new Dictionary<ushort, string>();
-            foreach (ushort ut in citizens)
-                citizenDict[ut] = citizenMsg;
-            return NFSAsyncInput(mayor, citizenDict);
+            return NFSAsyncInput(mayor, citizens.ToDictionary(p => p, p => citizenMsg));
         }
 
         private void HandleYMessage(string msg, ushort who)

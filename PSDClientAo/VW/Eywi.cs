@@ -765,6 +765,26 @@ namespace PSD.ClientAo.VW
                     line = string.Join(",", args.Where(p => p != ""));
                 }
             }
+            if (Version <= 168)
+            {
+                if (line.StartsWith("U1") || line.StartsWith("U3") || line.StartsWith("U7"))
+                    line = line.Substring(0, "UX".Length) + ",0;;" + line.Substring("UX,".Length);
+                else if (line.StartsWith("U9"))
+                    line = "UD" + line.Substring("U9".Length);
+                else if (line.StartsWith("V0"))
+                {
+                    string[] v0s = line.Split(',');
+                    int invCount = int.Parse(v0s[1]);
+                    string[] invs = Algo.TakeRange(v0s, 2, 2 + invCount);
+                    string mai = string.Join(",", Algo.TakeRange(v0s, 2 + invCount, v0s.Length));
+                    line = "V0,0;;" + string.Join(",", invs) + ";;" + mai;
+                }
+                else if (line.StartsWith("V2"))
+                {
+                    string[] v2s = line.Split(',');
+                    line = "V2,0;;" + v2s[1] + ";;" + v2s[2];
+                }
+            }
         }
         #endregion Version
     }

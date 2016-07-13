@@ -478,12 +478,15 @@ namespace PSD.ClientZero
             else if (cop.StartsWith("V"))
             {
                 char rank = cop[1];
+                string[] blocks = Algo.Splits(readLine.Substring("VX,".Length), ";;");
                 switch (rank)
                 {
-                    case '0': return HandleV0Message(readLine.Substring("V0,".Length));
-                    case '2': return HandleV2Message(readLine.Substring("V2,".Length));
-                    case '3': return HandleV3Message(readLine.Substring("V3,".Length));
-                    case '5': return HandleV5Message(readLine.Substring("V5,".Length));
+                    case '0':
+                        return HandleV0Message(int.Parse(blocks[0]), blocks[1], blocks[2]);
+                    case '2':
+                        return HandleV2Message(int.Parse(blocks[0]), ushort.Parse(blocks[1]), blocks[2]);
+                    case '3': return HandleV3Message(blocks[0]);
+                    case '5': return HandleV5Message();
                     default: return true;
                 }
             }
@@ -566,7 +569,7 @@ namespace PSD.ClientZero
                         }
                         else
                             input = VI.Cin(Uid, "请选择{0}至{1}名角色为{2}目标{3}.", r1, r2, prevComment, cancel);
-                        inputValid &= !(CountItemFromComma(input) < r1 || CountItemFromComma(input) > r2);
+                        inputValid &= !(Algo.CountItemFromComma(input) < r1 || Algo.CountItemFromComma(input) > r2);
                     }
                     else
                     {
@@ -582,7 +585,7 @@ namespace PSD.ClientZero
                         }
                         else
                             input = VI.Cin(Uid, "请选择{0}名角色为{1}目标{2}.", r, prevComment, cancel);
-                        inputValid &= CountItemFromComma(input) == r;
+                        inputValid &= Algo.CountItemFromComma(input) == r;
                     }
                     prevComment = ""; cancel = "";
                     roundInput = input;
@@ -612,7 +615,7 @@ namespace PSD.ClientZero
                         }
                         else
                             input = VI.Cin(Uid, "请选择{0}至{1}张卡牌为{2}目标{3}.", r1, r2, prevComment, cancel);
-                        inputValid &= !(CountItemFromComma(input) < r1 || CountItemFromComma(input) > r2);
+                        inputValid &= !(Algo.CountItemFromComma(input) < r1 || Algo.CountItemFromComma(input) > r2);
                     }
                     else
                     {
@@ -628,7 +631,7 @@ namespace PSD.ClientZero
                         }
                         else
                             input = VI.Cin(Uid, "请选择{0}张卡牌为{1}目标{2}.", r, prevComment, cancel);
-                        inputValid &= CountItemFromComma(input) == r;
+                        inputValid &= Algo.CountItemFromComma(input) == r;
                     }
                     prevComment = ""; cancel = "";
                     roundInput = input;
@@ -658,7 +661,7 @@ namespace PSD.ClientZero
                         }
                         else
                             input = VI.Cin(Uid, "请选择{0}至{1}张卡牌为{2}目标{3}.", r1, r2, prevComment, cancel);
-                        inputValid &= !(CountItemFromComma(input) < r1 || CountItemFromComma(input) > r2);
+                        inputValid &= !(Algo.CountItemFromComma(input) < r1 || Algo.CountItemFromComma(input) > r2);
                     }
                     else
                     {
@@ -674,7 +677,7 @@ namespace PSD.ClientZero
                         }
                         else
                             input = VI.Cin(Uid, "请选择{0}张卡牌为{1}目标{2}.", r, prevComment, cancel);
-                        inputValid &= CountItemFromComma(input) == r;
+                        inputValid &= Algo.CountItemFromComma(input) == r;
                     }
                     prevComment = ""; cancel = "";
                     roundInput = input;
@@ -706,7 +709,7 @@ namespace PSD.ClientZero
                         }
                         else
                             input = VI.Cin(Uid, "请选择{0}至{1}张卡牌为{2}目标{3}.", r1, r2, prevComment, cancel);
-                        inputValid &= !(CountItemFromComma(input) < r1 || CountItemFromComma(input) > r2);
+                        inputValid &= !(Algo.CountItemFromComma(input) < r1 || Algo.CountItemFromComma(input) > r2);
                     }
                     else
                     {
@@ -724,7 +727,7 @@ namespace PSD.ClientZero
                         else
                             input = VI.Cin(Uid, "请选择{0}张公共卡牌为{1}目标{2}.",
                                 r, prevComment, cancel);
-                        inputValid &= CountItemFromComma(input) == r;
+                        inputValid &= Algo.CountItemFromComma(input) == r;
                     }
                     prevComment = ""; cancel = "";
                     roundInput = input;
@@ -753,7 +756,7 @@ namespace PSD.ClientZero
                         }
                         else
                             input = VI.Cin(Uid, "请选择{0}至{1}张怪物牌为{2}目标{3}.", r1, r2, prevComment, cancel);
-                        inputValid &= !(CountItemFromComma(input) < r1 || CountItemFromComma(input) > r2);
+                        inputValid &= !(Algo.CountItemFromComma(input) < r1 || Algo.CountItemFromComma(input) > r2);
                     }
                     else
                     {
@@ -769,7 +772,7 @@ namespace PSD.ClientZero
                         }
                         else
                             input = VI.Cin(Uid, "请选择{0}张怪物牌为{1}目标{2}.", r, prevComment, cancel);
-                        inputValid &= (CountItemFromComma(input) == r);
+                        inputValid &= (Algo.CountItemFromComma(input) == r);
                     }
                     prevComment = ""; cancel = "";
                     roundInput = input;
@@ -799,7 +802,7 @@ namespace PSD.ClientZero
                     else
                         input = VI.Cin(Uid, "请选择{0}张专属牌为{1}目标，可选{2}{3}.",
                             r1, prevComment, zd.ExspI(uss), cancel);
-                    inputValid &= !(CountItemFromComma(input) < r1 || CountItemFromComma(input) > r2);
+                    inputValid &= !(Algo.CountItemFromComma(input) < r1 || Algo.CountItemFromComma(input) > r2);
                     inputValid &= Algo.IsSubSet(input.Split(','), argv);
                     prevComment = ""; cancel = "";
                     roundInput = input;
@@ -908,7 +911,7 @@ namespace PSD.ClientZero
                         }
                         else
                             input = VI.Cin(Uid, "请选择{0}至{1}种卡牌为{2}目标{3}.", r1, r2, prevComment, cancel);
-                        inputValid &= !(CountItemFromComma(input) < r1 || CountItemFromComma(input) > r2);
+                        inputValid &= !(Algo.CountItemFromComma(input) < r1 || Algo.CountItemFromComma(input) > r2);
                     }
                     else
                     {
@@ -925,7 +928,7 @@ namespace PSD.ClientZero
                         }
                         else
                             input = VI.Cin(Uid, "请选择{0}种卡牌为{1}目标{2}.", r, prevComment, cancel);
-                        inputValid &= CountItemFromComma(input) == r;
+                        inputValid &= Algo.CountItemFromComma(input) == r;
                     }
                     prevComment = ""; cancel = "";
                     roundInput = input;
@@ -959,7 +962,7 @@ namespace PSD.ClientZero
                         }
                         else
                             input = VI.Cin(Uid, "请以{0}至{1}人{2}{3}.", r1, r2, prevComment, cancel);
-                        inputValid &= !(CountItemFromComma(input) < r1 || CountItemFromComma(input) > r2);
+                        inputValid &= !(Algo.CountItemFromComma(input) < r1 || Algo.CountItemFromComma(input) > r2);
                     }
                     else
                     {
@@ -976,7 +979,7 @@ namespace PSD.ClientZero
                         }
                         else
                             input = VI.Cin(Uid, "请以{0}人{1}{2}.", r, prevComment, cancel);
-                        inputValid &= CountItemFromComma(input) == r;
+                        inputValid &= Algo.CountItemFromComma(input) == r;
                     }
                     // T-ed non 0 target
                     if (input.Length > 0 && input != "0" && Char.IsDigit(input[0]))
@@ -1011,7 +1014,7 @@ namespace PSD.ClientZero
                         }
                         else
                             input = VI.Cin(Uid, "请选择{0}至{1}枚标记为{2}目标{3}.", r1, r2, prevComment, cancel);
-                        inputValid &= !(CountItemFromComma(input) < r1 || CountItemFromComma(input) > r2);
+                        inputValid &= !(Algo.CountItemFromComma(input) < r1 || Algo.CountItemFromComma(input) > r2);
                     }
                     else
                     {
@@ -1028,7 +1031,7 @@ namespace PSD.ClientZero
                         }
                         else
                             input = VI.Cin(Uid, "请选择{0}枚标记为{1}目标{2}.", r, prevComment, cancel);
-                        inputValid &= CountItemFromComma(input) == r;
+                        inputValid &= Algo.CountItemFromComma(input) == r;
                     }
                     prevComment = ""; cancel = "";
                     roundInput = input;
@@ -1058,7 +1061,7 @@ namespace PSD.ClientZero
                         }
                         else
                             input = VI.Cin(Uid, "请选择{0}至{1}张事件牌为{2}目标{3}.", r1, r2, prevComment, cancel);
-                        inputValid &= !(CountItemFromComma(input) < r1 || CountItemFromComma(input) > r2);
+                        inputValid &= !(Algo.CountItemFromComma(input) < r1 || Algo.CountItemFromComma(input) > r2);
                     }
                     else
                     {
@@ -1074,7 +1077,7 @@ namespace PSD.ClientZero
                         }
                         else
                             input = VI.Cin(Uid, "请选择{0}张事件牌为{1}目标{2}.", r, prevComment, cancel);
-                        inputValid &= CountItemFromComma(input) == r;
+                        inputValid &= Algo.CountItemFromComma(input) == r;
                     }
                     prevComment = ""; cancel = "";
                     roundInput = input;
@@ -1104,7 +1107,7 @@ namespace PSD.ClientZero
                         }
                         else
                             input = VI.Cin(Uid, "请选择{0}至{1}种属性为{2}目标{3}.", r1, r2, prevComment, cancel);
-                        inputValid &= !(CountItemFromComma(input) < r1 || CountItemFromComma(input) > r2);
+                        inputValid &= !(Algo.CountItemFromComma(input) < r1 || Algo.CountItemFromComma(input) > r2);
                     }
                     else
                     {
@@ -1120,7 +1123,7 @@ namespace PSD.ClientZero
                         }
                         else
                             input = VI.Cin(Uid, "请选择{0}种属性为{1}目标{2}.", r, prevComment, cancel);
-                        inputValid &= CountItemFromComma(input) == r;
+                        inputValid &= Algo.CountItemFromComma(input) == r;
                     }
                     prevComment = ""; cancel = "";
                     roundInput = input;
@@ -1152,7 +1155,7 @@ namespace PSD.ClientZero
                         }
                         else
                             input = VI.Cin(Uid, "请选择{0}至{1}名角色为{2}目标{3}.", r1, r2, prevComment, cancel);
-                        inputValid &= !(CountItemFromComma(input) < r1 || CountItemFromComma(input) > r2);
+                        inputValid &= !(Algo.CountItemFromComma(input) < r1 || Algo.CountItemFromComma(input) > r2);
                     }
                     else
                     {
@@ -1169,7 +1172,7 @@ namespace PSD.ClientZero
                         }
                         else
                             input = VI.Cin(Uid, "请选择{0}名角色为{1}目标{2}.", r, prevComment, cancel);
-                        inputValid &= CountItemFromComma(input) == r;
+                        inputValid &= Algo.CountItemFromComma(input) == r;
                     }
                     prevComment = ""; cancel = "";
                     roundInput = input;
@@ -2815,29 +2818,26 @@ namespace PSD.ClientZero
         }
         #endregion U
         #region V
-        public bool HandleV0Message(string cmdrst)
+        public bool HandleV0Message(int uvsn, string invs, string mai)
         {
             StartCinEtc();
-            string[] blocks = Algo.Splits(cmdrst, ";;"); // uvsn;;invs;;msg
-            string input = FormattedInputWithCancelFlag(blocks[2]);
+            string input = FormattedInputWithCancelFlag(mai);
             VI.CloseCinTunnel(Uid);
-            WI.Send("V1," + blocks[0] + "," + input, Uid, 0);
+            WI.Send("V1," + uvsn + "," + input, Uid, 0);
             return true;
         }
-        public bool HandleV2Message(string cmdrst)
+        public bool HandleV2Message(int uvsn, ushort mayor, string mai)
         {
             StartCinEtc();
-            int idx = cmdrst.IndexOf(',');
-            //ushort major = ushort.Parse(cmdrst.Substring(0, idx));
             bool decided = false;
             while (!decided)
             {
-                string input = FormattedInputWithCancelFlag(cmdrst.Substring(idx + 1));
+                string input = FormattedInputWithCancelFlag(mai);
                 if (input == VI.CinSentinel)
                     decided = true;
                 else
                 {
-                    WI.Send("V4," + input, Uid, 0);
+                    WI.Send("V4," + uvsn + "," + input, Uid, 0);
                     decided = true;
                     return true;
                 }
@@ -2852,7 +2852,7 @@ namespace PSD.ClientZero
             VI.Cout(Uid, "等待{0}响应.", zd.Player(invs));
             return false;
         }
-        public bool HandleV5Message(string cmdrst)
+        public bool HandleV5Message()
         {
             VI.CloseCinTunnel(Uid);
             return false;
@@ -3941,11 +3941,6 @@ namespace PSD.ClientZero
             }
         }
         #endregion Y
-
-        private static int CountItemFromComma(string line)
-        {
-            return string.IsNullOrEmpty(line) ? 0 : (line.Count(p => p == ',') + 1);
-        }
 
         private bool IsUtAka() { return Uid % 2 == 1 && Uid > 0 && Uid < 1000; }
         private bool IsUtAo() { return Uid % 2 == 0 && Uid > 0 && Uid < 1000; }
