@@ -310,7 +310,7 @@ namespace PSD.PSDGamepkg.JNS
         {
             if (prev == "")
             {
-                List<int> sets = new List<int>();
+                ISet<int> sets = new HashSet<int>();
                 Base.Card.Monster mon1 = XI.LibTuple.ML.Decode(XI.Board.Monster1);
                 if (mon1 != null && player.TokenExcl.Contains("I" + mon1.Element.Elem2Int()))
                     sets.Add(mon1.Element.Elem2Int());
