@@ -536,8 +536,8 @@ namespace PSD.PSDGamepkg
                 do
                 {
                     string input = WI.Recv(0, who);
-                    if (input.Contains(VI.CinSentinel)) break;
                     if (input == null || !input.StartsWith("U8,")) continue;
+                    if (input.Contains(VI.CinSentinel)) break;
                     int idx = "U8,".Length, jdx = input.IndexOf(',', idx);
                     int ruvsn = int.Parse(Algo.Substring(input, idx, jdx));
                     if (ruvsn != uvMsgSerialNum) continue;
