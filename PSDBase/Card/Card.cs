@@ -47,10 +47,10 @@ namespace PSD.Base.Card
             return pkgs;
         }
 
-        public enum Genre { NIL, Tux, NMB, Eve, TuxSerial, Rune, Five, Exsp }
+        public enum Genre { NIL, Tux, NMB, Eve, TuxSerial, Rune, Five, Exsp, NPC }
         public static char Genre2Char(this Genre genre)
         {
-            return new char[] { ' ', 'C', 'M', 'E', 'G', 'F', 'V', 'I' }[(int)genre];
+            return new char[] { ' ', 'C', 'M', 'E', 'G', 'F', 'V', 'I', 'N' }[(int)genre];
         }
         public static Genre Char2Genre(this char @char)
         {
@@ -63,6 +63,7 @@ namespace PSD.Base.Card
                 case 'F': return Genre.Rune;
                 case 'V': return Genre.Five;
                 case 'I': return Genre.Exsp;
+                case 'N': return Genre.NPC; // npc specified only
                 default: return Genre.NIL;
             }
         }

@@ -1,4 +1,4 @@
-﻿using PSD.Base;
+using PSD.Base;
 using PSD.Base.Card;
 using System;
 using System.Collections.Generic;
@@ -2575,7 +2575,7 @@ namespace PSD.ClientAo
                     }
                     break;
                 case "E0YM":
-                    if (args[1] == "0")
+                    if (args[1] == "0") // M1
                     {
                         ushort mons = ushort.Parse(args[2]);
                         if (mons != 0)
@@ -2583,7 +2583,7 @@ namespace PSD.ClientAo
                         A0F.Mon1From = ushort.Parse(args[3]);
                         A0F.Monster1 = mons;
                     }
-                    else if (args[1] == "1")
+                    else if (args[1] == "1") // M2
                     {
                         ushort mons = ushort.Parse(args[2]);
                         if (mons != 0)
@@ -2591,7 +2591,7 @@ namespace PSD.ClientAo
                         A0F.Mon2From = ushort.Parse(args[3]);
                         A0F.Monster2 = mons;
                     }
-                    else if (args[1] == "2")
+                    else if (args[1] == "2") // E
                     {
                         ushort eve = ushort.Parse(args[2]);
                         if (eve != 0)
@@ -2599,7 +2599,7 @@ namespace PSD.ClientAo
                         A0F.Eve1From = ushort.Parse(args[3]);
                         A0F.Eve1 = eve;
                     }
-                    else if (args[1] == "3")
+                    else if (args[1] == "3") // W,SB(M)
                     {
                         ushort npc = ushort.Parse(args[3]);
                         if (args[2] == "0" && npc != 0) // New output of npc
@@ -2609,7 +2609,7 @@ namespace PSD.ClientAo
                         }
                         A0F.Wang = npc;
                     }
-                    else if (args[1] == "4")
+                    else if (args[1] == "4") // SB(H)
                     {
                         int hro = ushort.Parse(args[2]);
                         if (hro != 0)
@@ -2618,14 +2618,14 @@ namespace PSD.ClientAo
                             A0O.FlyingGet("H" + hro, 0, 0, true);
                         }
                     }
-                    else if (args[1] == "5")
+                    else if (args[1] == "5") // SB(M)
                     {
                         ushort[] mons = Algo.TakeRange(args, 2, args.Length)
                             .Select(p => ushort.Parse(p)).ToArray();
                         VI.Cout(Uid, "翻出怪牌为【{0}】.", zd.Monster(mons));
                         A0O.FlyingGet(mons.Select(p => "M" + p).ToList(), 0, 0, true);
                     }
-                    else if (args[1] == "6")
+                    else if (args[1] == "6") // SB(M0,M[PutBack operation??]) <- Put back, SB(0)
                     {
                         int position = int.Parse(args[2]);
                         if (args[3] == "0")
@@ -2643,14 +2643,14 @@ namespace PSD.ClientAo
                             A0F.MonCount += mons.Count;
                         }
                     }
-                    else if (args[1] == "7")
+                    else if (args[1] == "7") // SB(M0) <- Put back, SB(0)
                     {
                         int count = int.Parse(args[2]);
                         VI.Cout(Uid, "{0}张怪物牌/NPC牌被置入怪物牌堆.", count);
                         A0O.FlyingGet(Enumerable.Repeat("M0", count).ToList(), 0, 0, true);
                         A0F.MonCount += count;
                     }
-                    else if (args[1] == "8")
+                    else if (args[1] == "8") // SB(T)
                     {
                         ushort[] tuxes = Algo.TakeRange(args, 2, args.Length)
                             .Select(p => ushort.Parse(p)).ToArray();
