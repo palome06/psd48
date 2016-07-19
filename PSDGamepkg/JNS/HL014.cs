@@ -101,9 +101,13 @@ namespace PSD.PSDGamepkg.JNS
             Monster mon1 = XI.LibTuple.ML.Decode(XI.Board.Monster1);
             if (NMBLib.IsMonster(mon2ut))
             {
-                Monster mon2 = XI.LibTuple.ML.Decode(mon2ut);
                 XI.WI.BCast("E0HZ,1," + who + "," + mon2ut);
-                XI.RaiseGMessage("G0YM,1," + mon2ut + ",0");
+                XI.RaiseGMessage(new Artiad.ImperialLeft()
+                {
+                    Zone = Artiad.ImperialLeft.ZoneType.M2,
+                    Card = mon2ut
+                }.ToMessage());
+                Monster mon2 = XI.LibTuple.ML.Decode(XI.Board.Monster2);
                 if (mon2.STR >= mon1.STR)
                 {
                     mon1.Curtain();
@@ -126,7 +130,11 @@ namespace PSD.PSDGamepkg.JNS
                             SingleUnit = new Artiad.CustomsUnit() { SingleCard = XI.Board.Monster1 }
                         }.ToMessage());
                     }
-                    XI.RaiseGMessage("G0YM,0,0,0");
+                    XI.RaiseGMessage(new Artiad.ImperialLeft()
+                    {
+                        Zone = Artiad.ImperialLeft.ZoneType.M1,
+                        IsReset = true
+                    }.ToMessage());
                     XI.Board.Monster1 = 0;
 
                     XI.RaiseGMessage("G1GE,W," + mon2);
@@ -137,7 +145,11 @@ namespace PSD.PSDGamepkg.JNS
                         Genre = Card.Genre.NMB,
                         SingleUnit = new Artiad.CustomsUnit() { SingleCard = XI.Board.Monster2 }
                     }.ToMessage());
-                    XI.RaiseGMessage("G0YM,1,0,0");
+                    XI.RaiseGMessage(new Artiad.ImperialLeft()
+                    {
+                        Zone = Artiad.ImperialLeft.ZoneType.M2,
+                        IsReset = true
+                    }.ToMessage());
                     XI.Board.Monster2 = 0;
 
                     XI.RaiseGMessage("G0IA," + player.Uid + ",2");
@@ -159,7 +171,11 @@ namespace PSD.PSDGamepkg.JNS
                     Genre = Card.Genre.NMB,
                     SingleUnit = new Artiad.CustomsUnit() { SingleCard = XI.Board.Monster2 }
                 }.ToMessage());
-                XI.RaiseGMessage("G0YM,1,0,0");
+                XI.RaiseGMessage(new Artiad.ImperialLeft()
+                {
+                    Zone = Artiad.ImperialLeft.ZoneType.M2,
+                    IsReset = true
+                }.ToMessage());
                 XI.Board.Monster2 = 0;
                 XI.InnerGMessage(fuse, 301);
             }
@@ -346,7 +362,11 @@ namespace PSD.PSDGamepkg.JNS
                 {
                     if (Artiad.ContentRule.IsTuxUsableEveryWhere(tux) && tux.Valid(player, 0, fuse))
                     {
-                        XI.RaiseGMessage("G0YM,8," + ut);
+                        XI.RaiseGMessage(new Artiad.ImperialCentre()
+                        {
+                            Genre = Card.Genre.Tux,
+                            SingleCard = ut
+                        }.ToMessage());
                         string msg = "#是否要使用【" + tux.Name + "】##是##否,Y2";
                         string use = XI.AsyncInput(player.Uid, msg, "JNH0205", "0");
                         if (use == "1")
@@ -2026,8 +2046,12 @@ namespace PSD.PSDGamepkg.JNS
             if (type == 0)
             {
                 ushort pop = XI.Board.RestMonPiles.Dequeue();
+                XI.RaiseGMessage(new Artiad.ImperialCentre()
+                {
+                    Genre = Card.Genre.NMB,
+                    SingleCard = pop
+                }.ToMessage());
                 Monster mon = XI.LibTuple.ML.Decode(pop);
-                XI.RaiseGMessage("G0YM,5," + pop);
                 int delta = mon.STR / 2;
                 if (delta > 0)
                     XI.RaiseGMessage("G0IA," + player.Uid + ",1," + delta);
@@ -3007,7 +3031,11 @@ namespace PSD.PSDGamepkg.JNS
                 List<ushort> mons = XI.Board.MonPiles.Dequeue(monCnt).ToList();
                 XI.RaiseGMessage("G2IN,1," + monCnt);
                 // show the monsters to the trigger
-                XI.RaiseGMessage("G0YM,5," + string.Join(",", mons));
+                XI.RaiseGMessage(new Artiad.ImperialCentre()
+                {
+                    Genre = Card.Genre.NMB,
+                    Cards = mons.ToArray()
+                }.ToMessage());
 
                 ushort newTangle = 0, bomb = 0, owner = 0;
                 do
@@ -3064,13 +3092,15 @@ namespace PSD.PSDGamepkg.JNS
 
                     ushort who = ushort.Parse(g0hz[1]);
                     if (NMBLib.IsMonster(newTangle))
-                    {
                         XI.WI.BCast("E0HZ,1," + who + "," + newTangle);
-                        XI.RaiseGMessage("G0YM,1," + newTangle + ",0");
-                    }
                     else if (NMBLib.IsNPC(newTangle))
                         XI.WI.BCast("E0HZ,2," + who + "," + newTangle);
-                    XI.InnerGMessage("G0HZ," + who + "," + newTangle, 221);
+                    XI.RaiseGMessage(new Artiad.ImperialLeft()
+                    {
+                        Zone = Artiad.ImperialLeft.ZoneType.M2,
+                        Card = newTangle
+                    }.ToMessage());
+                    XI.InnerGMessage("G0HZ," + who + "," + XI.Board.Monster2, 221);
                 }
                 else
                 {
@@ -3345,8 +3375,12 @@ namespace PSD.PSDGamepkg.JNS
                 ushort pop = ushort.Parse(args[0]);
                 XI.Board.MonDises.Remove(pop);
                 XI.RaiseGMessage("G2CN,1,1");
-                XI.RaiseGMessage("G0PB,0,1," + player.Uid + ",1," + pop);
-                XI.RaiseGMessage("G0YM,5," + pop);
+                XI.RaiseGMessage(new Artiad.ImperialRight()
+                {
+                    Encrypted = false,
+                    Genre = Card.Genre.NMB,
+                    SingleItem = new Artiad.ImperialRightUnit() { Source = 0, SingleCard = pop }
+                }.ToMessage());
             }
             else if (type == 3)
             {

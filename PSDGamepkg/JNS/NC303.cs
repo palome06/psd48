@@ -586,8 +586,12 @@ namespace PSD.PSDGamepkg.JNS
             nmbs.AddRange(pops);
             if (nmbs.Count > 0)
             {
-                XI.Board.MonPiles.PushBack(nmbs);
-                XI.RaiseGMessage("G0YM,7," + nmbs.Count);
+                XI.RaiseGMessage(new Artiad.ImperialRight()
+                {
+                    Genre = Card.Genre.NMB,
+                    Encrypted = true,
+                    SingleItem = new Artiad.ImperialRightUnit() { Source = 0, Cards = nmbs.ToArray() }
+                }.ToMessage());
                 XI.Board.MonPiles.Shuffle();
             }
         }
@@ -633,7 +637,13 @@ namespace PSD.PSDGamepkg.JNS
                 if (XI.Board.Monster1 == ut)
                     XI.Board.Monster1 = 0;
                 else if (XI.Board.Wang.Count > 0 && XI.Board.Wang.Peek() == ut)
-                    XI.Board.Wang.Pop();
+                {
+                    XI.RaiseGMessage(new Artiad.ImperialLeft()
+                    {
+                        Zone = Artiad.ImperialLeft.ZoneType.W,
+                        IsReset = true
+                    }.ToMessage());
+                }
             }
         }
         public void EscueDiscard(Player player, ushort npcUt)

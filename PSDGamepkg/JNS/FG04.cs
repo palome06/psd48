@@ -2717,7 +2717,12 @@ namespace PSD.PSDGamepkg.JNS
             ushort me = XI.LibTuple.ML.Encode("GSH1");
             XI.Board.Mon1From = player.Uid;
             XI.Board.Monster1 = me;
-            XI.RaiseGMessage("G0YM,0," + me + "," + player.Uid);
+            XI.RaiseGMessage(new Artiad.ImperialLeft()
+            {
+                Zone = Artiad.ImperialLeft.ZoneType.M1,
+                Source = me,
+                Card = player.Uid
+            }.ToMessage());
         }
         public void GSH2Debut()
         {
@@ -3275,7 +3280,12 @@ namespace PSD.PSDGamepkg.JNS
                     {
                         ushort tuxUt = ushort.Parse(sel);
                         XI.RaiseGMessage("G0OT," + put + ",1," + tuxUt);
-                        XI.RaiseGMessage("G0PB,0,0," + put + ",1," + tuxUt);
+                        XI.RaiseGMessage(new Artiad.ImperialRight()
+                        {
+                            Encrypted = false,
+                            Genre = Card.Genre.Tux,
+                            SingleItem = new Artiad.ImperialRightUnit() { Source = put, SingleCard = tuxUt }
+                        }.ToMessage());
                     }
                 }
             }
@@ -3470,7 +3480,12 @@ namespace PSD.PSDGamepkg.JNS
                         }
                         XI.DequeueOfPile(XI.Board.TuxPiles);
                         XI.RaiseGMessage("G2IN,0,1");
-                        XI.RaiseGMessage("G0YM,8," + ut);
+                        XI.RaiseGMessage(new Artiad.ImperialCentre()
+                        {
+                            Genre = Card.Genre.Tux,
+                            Encrypted = false,
+                            SingleCard = ut
+                        }.ToMessage());
                         if (tux.IsTuxEqiup())
                             XI.RaiseGMessage("G1UE," + player.Uid + ",0," + ut);
                         else

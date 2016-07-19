@@ -377,11 +377,22 @@ namespace PSD.PSDGamepkg
                                 ushort mons = DequeueOfPile(Board.MonPiles);
                                 RaiseGMessage("G2IN,1,1");
                                 // actually judge who wins won't happens here
-                                //if (mons == 0) { rstage = "H0TM"; break; }
                                 Board.Monster1 = mons;
                             }
-                            WI.BCast("R" + rounder + "ZM1," + Board.Monster1);
-                            RaiseGMessage("G0YM,0," + Board.Monster1 + "," + Board.Mon1From);
+                            if (Board.Monster2 != 0)
+                            {
+                                RaiseGMessage(new Artiad.ImperialLeft()
+                                {
+                                    Zone = Artiad.ImperialLeft.ZoneType.M2,
+                                    IsReset = true
+                                }.ToMessage());
+                            }
+                            RaiseGMessage(new Artiad.ImperialLeft()
+                            {
+                                Zone = Artiad.ImperialLeft.ZoneType.M1,
+                                Source = Board.Mon1From,
+                                Card = Board.Monster1
+                            }.ToMessage());
                             Board.Battler = NMBLib.Decode(Board.Monster1, LibTuple.ML, LibTuple.NL);
                             RunQuadStage(rstage);
                             if (NMBLib.IsNPC(Board.Monster1))
@@ -413,23 +424,13 @@ namespace PSD.PSDGamepkg
                                     Genre = Card.Genre.NMB,
                                     SingleUnit = new Artiad.CustomsUnit() { SingleCard = Board.Monster1 }
                                 }.ToMessage());
-                                Board.Monster1 = 0;
-                                if (Board.MonPiles.Count > 0)
+                                RaiseGMessage(new Artiad.ImperialLeft()
                                 {
-                                    ushort mons = DequeueOfPile(Board.MonPiles);
-                                    RaiseGMessage("G2IN,1,1");
-                                    Board.Monster1 = mons; Board.Mon1From = 0;
-                                    Board.Battler = NMBLib.Decode(Board.Monster1,
-                                        LibTuple.ML, LibTuple.NL);
-                                    WI.BCast(rstage + "2," + Board.Monster1);
-                                    RaiseGMessage("G0YM,0," + Board.Monster1 + "," + Board.Mon1From);
-                                    if (NMBLib.IsNPC(Board.Monster1))
-                                        rstage = "R" + rounder + "NP";
-                                    else if (NMBLib.IsMonster(Board.Monster1))
-                                        rstage = "R" + rounder + "Z1";
-                                    else
-                                        rstage = "H0TM";
-                                }
+                                    Zone = Artiad.ImperialLeft.ZoneType.M1,
+                                    IsReset = true
+                                }.ToMessage());
+                                if (Board.MonPiles.Count > 0)
+                                    rstage = "R" + rounder + "ZM";
                                 else
                                     RaiseGMessage("G1WJ,0");
                             }
@@ -658,7 +659,11 @@ namespace PSD.PSDGamepkg
                                 {
                                     ushort[] wangs = Board.Wang.ToArray();
                                     Board.Wang.Clear();
-                                    RaiseGMessage("G0YM,3,1,0");
+                                    RaiseGMessage(new Artiad.ImperialLeft()
+                                    {
+                                        Zone = Artiad.ImperialLeft.ZoneType.W,
+                                        IsReset = true
+                                    }.ToMessage());
                                     RaiseGMessage(new Artiad.Abandon()
                                     {
                                         Zone = Artiad.CustomsHelper.ZoneType.IMPLICIT,
@@ -674,7 +679,11 @@ namespace PSD.PSDGamepkg
                                         Genre = Card.Genre.Eve,
                                         SingleUnit = new Artiad.CustomsUnit() { SingleCard = Board.Eve }
                                     }.ToMessage());
-                                    RaiseGMessage("G0YM,2,0,0");
+                                    RaiseGMessage(new Artiad.ImperialLeft()
+                                    {
+                                        Zone = Artiad.ImperialLeft.ZoneType.E,
+                                        IsReset = true
+                                    }.ToMessage());
                                     Board.Eve = 0;
                                 }
                                 foreach (Player player in Board.Garden.Values)
@@ -975,10 +984,11 @@ namespace PSD.PSDGamepkg
                         }.ToMessage());
                 }
                 RaiseGMessage("G0WB," + Board.Monster1);
-                RaiseGMessage("G0YM,0,0,0");
-
-                Board.Mon1From = 0;
-                Board.Monster1 = 0;
+                RaiseGMessage(new Artiad.ImperialLeft()
+                {
+                    Zone = Artiad.ImperialLeft.ZoneType.M1,
+                    IsReset = true
+                }.ToMessage());
             }
             if (Board.Monster2 != 0)
             { // monster 2 doesn't curtain, and mon2from always is 0
@@ -990,8 +1000,11 @@ namespace PSD.PSDGamepkg
                         SingleUnit = new Artiad.CustomsUnit() { SingleCard = Board.Monster2 }
                     }.ToMessage());
                 RaiseGMessage("G0WB," + Board.Monster2);
-                RaiseGMessage("G0YM,1,0,0");
-                Board.Monster2 = 0;
+                RaiseGMessage(new Artiad.ImperialLeft()
+                {
+                    Zone = Artiad.ImperialLeft.ZoneType.M2,
+                    IsReset = true
+                }.ToMessage());
             }
             Board.IsMonsterDebut = false;
         }

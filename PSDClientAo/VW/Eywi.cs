@@ -785,6 +785,53 @@ namespace PSD.ClientAo.VW
                     line = "V2,0;;" + v2s[1] + ";;" + v2s[2];
                 }
             }
+            if (Version <= 169)
+            {
+                if (line.StartsWith("E0PB"))
+                {
+                    string[] args = line.Split(',');
+                    string[] genreMap = new string[] { "C", "M", "E" };
+                    args[0] = "E0YB";
+                    args[1] = genreMap[int.Parse(args[1])] + ",0";
+                    line = string.Join(",", args);
+                }
+                else if (line.StartsWith("E0YM"))
+                {
+                    string[] args = line.Split(',');
+                    // send("E0YM," + (ShowText ? 0 : 1) + "," + Source + "," + Zone + "," + Card);
+                    if (args[1] == "0") // M1
+                        line = "E0YM,0,M1," + args[3] + "," + args[2];
+                    else if (args[1] == "1") // M2
+                        line = "E0YM,0,M2," + args[3] + "," + args[2];
+                    else if (args[1] == "2") // E
+                        line = "E0YM,0,E," + args[3] + "," + args[2];
+                    else if (args[1] == "3") // W
+                    {
+                        line = "E0YM,0,W,0," + args[3];
+                        if (args[2] == "0")
+                            line += "|||E0YZ,M,0," + args[3];
+                    }
+                    else if (args[1] == "4") // SB(H)
+                        line = "E0YZ,H,0,1," + args[2];
+                    else if (args[1] == "5") // SB(M)
+                        line = "E0YZ,M,0," + string.Join(",", Algo.TakeRange(args, 2, args.Length));
+                    else if (args[1] == "6")
+                        line = "E0YB,N," + args[1] + ",0,1,1|||E0YZ,M,1,1"; // offset
+                    else if (args[1] == "7") // SB(M0) <- Put back, SB(0)
+                        line = "E0YB,M,0,0,1," + args[2] + "|||E0YZ,M,1," + args[2]; // count
+                    else if (args[1] == "8") // SB(T)
+                        line = "E0YZ,C,0," + string.Join(",", Algo.TakeRange(args, 2, args.Length));
+                }
+                else if (line.StartsWith("E0HZ"))
+                {
+                    string[] args = line.Split(',');
+                    if (args[1] == "2")
+                    {
+                        args[1] = "1";
+                        line = string.Join(",", args);
+                    }
+                }
+            }
         }
         #endregion Version
     }

@@ -385,22 +385,22 @@ namespace PSD.PSDGamepkg.Artiad
             Func<List<ushort>, List<ushort>, bool> finishRule, bool acceptIncomplete)
         {
             Base.Utils.Rueue<ushort> pile = null;
-            int pileSerial = -1; int ymSerial = -1;
+            int pileSerial = -1;
             Card.Genre cardGenre;
             if (genre == Card.PileGenre.Tux)
             {
                 pile = XI.Board.TuxPiles; cardGenre = Card.Genre.Tux;
-                pileSerial = 0; ymSerial = 8;
+                pileSerial = 0;
             }
             else if (genre == Card.PileGenre.NMB)
             {
                 pile = XI.Board.MonPiles; cardGenre = Card.Genre.NMB;
-                pileSerial = 1; ymSerial = 5;
+                pileSerial = 1;
             }
             else if (genre == Card.PileGenre.UN)
             {
                 pile = XI.Board.RestNPCPiles; cardGenre = Card.Genre.NMB;
-                pileSerial = -1; ymSerial = 5;
+                pileSerial = -1;
             }
             else return new List<ushort>();
             
@@ -411,7 +411,11 @@ namespace PSD.PSDGamepkg.Artiad
                 ushort ut = XI.DequeueOfPile(pile);
                 if (pileSerial >= 0)
                     XI.RaiseGMessage("G2IN," + pileSerial + ",1");
-                XI.RaiseGMessage("G0YM," + ymSerial + "," + ut);
+                XI.RaiseGMessage(new Artiad.ImperialCentre()
+                {
+                    Genre = cardGenre,
+                    SingleCard = ut
+                }.ToMessage());
                 if (acceptRule(ut)) { accepts.Add(ut); }
                 else { rejects.Add(ut); }
                 XI.RaiseGMessage("G2ZZ,0");

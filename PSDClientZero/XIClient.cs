@@ -2065,7 +2065,7 @@ namespace PSD.ClientZero
                         ushort who = ushort.Parse(args[2]);
                         VI.Cout(Uid, "{0}放弃触发混战.", zd.Player(who));
                     }
-                    else if (args[1] == "1" || args[1] == "2")
+                    else if (args[1] == "1")
                     {
                         ushort who = ushort.Parse(args[2]);
                         ushort mon = ushort.Parse(args[3]);
@@ -2316,75 +2316,6 @@ namespace PSD.ClientZero
                         VI.Cout(Uid, "{0}宠物效果{1}.", zd.Monster(pets), args[0] == "E0OE" ? "失效" : "生效");
                     }
                     break;
-                case "E0YM":
-                    if (args[1] == "0")
-                    {
-                        ushort mons = ushort.Parse(args[2]);
-                        if (mons != 0)
-                            VI.Cout(Uid, "本场战斗怪物为【{0}】.", zd.Monster(mons));
-                        Z0F.Monster1 = mons;
-                    }
-                    else if (args[1] == "1")
-                    {
-                        ushort mons = ushort.Parse(args[2]);
-                        if (mons != 0)
-                            VI.Cout(Uid, "混战结果为【{0}】.", zd.Monster(mons));
-                        Z0F.Monster2 = mons;
-                    }
-                    else if (args[1] == "2")
-                    {
-                        ushort eve = ushort.Parse(args[2]);
-                        if (eve != 0)
-                            VI.Cout(Uid, "执行事件牌为【{0}】.", zd.Eve(eve));
-                        Z0F.Eve1 = eve;
-                    }
-                    else if (args[1] == "3")
-                    {
-                        ushort npc = ushort.Parse(args[3]);
-                        if (args[2] == "0" && npc != 0)
-                            VI.Cout(Uid, "翻出的NPC牌为【{0}】.", zd.Monster(npc));
-                        // Z0F.Wang = npc;
-                    }
-                    else if (args[1] == "4")
-                    {
-                        int hro = int.Parse(args[2]);
-                        if (hro != 0)
-                            VI.Cout(Uid, "翻出的角色牌为【{0}】.", zd.Hero(hro));
-                    }
-                    else if (args[1] == "5")
-                    {
-                        ushort[] mons = Algo.TakeRange(args, 2, args.Length)
-                            .Select(p => ushort.Parse(p)).ToArray();
-                        VI.Cout(Uid, "翻出怪牌为【{0}】.", zd.Monster(mons));
-                    }
-                    else if (args[1] == "6")
-                    {
-                        int position = int.Parse(args[2]);
-                        if (args[3] == "0")
-                        {
-                            VI.Cout(Uid, "一张NPC牌被插入放置于牌堆顶第{0}张.", (position + 1));
-                            ++Z0P.MonCount;
-                        }
-                        else {
-                            List<ushort> mons = Algo.TakeRange(args, 3, args.Length)
-                                .Select(p => ushort.Parse(p)).ToList();
-                            VI.Cout(Uid, "NPC牌【{0}】被插入放置于牌堆顶第{1}张.", mons, (position + 1));
-                            Z0P.MonCount += mons.Count;
-                        }
-                    }
-                    else if (args[1] == "7")
-                    {
-                        int count = int.Parse(args[2]);
-                        VI.Cout(Uid, "{0}张怪物牌/NPC牌被置入怪物牌堆.", count);
-                        Z0P.MonCount += count;
-                    }
-                    else if (args[1] == "8")
-                    {
-                        ushort[] tuxes = Algo.TakeRange(args, 2, args.Length)
-                            .Select(p => ushort.Parse(p)).ToArray();
-                        VI.Cout(Uid, "翻出手牌为【{0}】.", zd.Tux(tuxes));
-                    }
-                    break;
                 case "E0IS":
                     {
                         ushort ut = ushort.Parse(args[1]);
@@ -2439,54 +2370,6 @@ namespace PSD.ClientZero
                         Z0D[ut].Coss = next;
                         if (ut == Uid)
                             Z0M.Coss = 0;
-                    }
-                    break;
-                case "E0PB":
-                    for (int i = 2; i < args.Length; )
-                    {
-                        ushort who = ushort.Parse(args[i]);
-                        ushort hind = ushort.Parse(args[i + 1]);
-                        int n = ushort.Parse(args[i + 2]);
-                        if (hind == 0)
-                        {
-                            List<ushort> cards = Algo.TakeRange(args, i + 3, i + 3 + n)
-                                .Select(p => ushort.Parse(p)).ToList();
-                            if (args[1] == "0")
-                            {
-                                VI.Cout(Uid, "{0}将{1}放回手牌堆顶.", zd.Player(who), zd.Tux(cards));
-                                Z0P.TuxCount += n;
-                            }
-                            else if (args[1] == "1")
-                            {
-                                VI.Cout(Uid, "{0}将{1}放回怪牌堆顶.", zd.Player(who), zd.Monster(cards));
-                                Z0P.MonCount += n;
-                            }
-                            else if (args[1] == "2")
-                            {
-                                VI.Cout(Uid, "{0}将{1}放回事件牌堆顶.", zd.Player(who), zd.Eve(cards));
-                                Z0P.EveCount += n;
-                            }
-                            i += (3 + n);
-                        }
-                        else if (hind == 1)
-                        {
-                            if (args[1] == "0")
-                            {
-                                VI.Cout(Uid, "{0}将{1}张牌放回手牌堆顶.", zd.Player(who), n);
-                                Z0P.TuxCount += n;
-                            }
-                            else if (args[1] == "1")
-                            {
-                                VI.Cout(Uid, "{0}将{1}张牌放回怪牌堆顶.", zd.Player(who), n);
-                                Z0P.MonCount += n;
-                            }
-                            else if (args[1] == "2")
-                            {
-                                VI.Cout(Uid, "{0}将{1}张牌放回事件牌堆顶.", zd.Player(who), n);
-                                Z0P.EveCount += n;
-                            }
-                            i += 3;
-                        }
                     }
                     break;
                 case "E0HR":
@@ -2631,6 +2514,95 @@ namespace PSD.ClientZero
                         ushort ill = ushort.Parse(args[2]);
                         ushort db = ushort.Parse(args[3]);
                         VI.Cout(Uid, "{0}将{1}幻化为{2}.", zd.Player(who), zd.Tux(ill), zd.TuxDbSerial(db));
+                    }
+                    break;
+                case "E0YM":
+                    {
+                        // send("E0YM," + (ShowText ? 0 : 1) + "," + Zone + "," + Card);
+                        bool showText = args[1] != "1";
+                        string zone = args[2];
+                        ushort src = ushort.Parse(args[3]);
+                        ushort ut = ushort.Parse(args[4]);
+                        if (zone == "M1")
+                        {
+                            if (ut != 0 && showText)
+                                VI.Cout(Uid, "本场战斗怪物为【{0}】.", zd.Monster(ut));
+                            // Z0F.Mon1From = src;
+                            Z0F.Monster1 = ut;
+                        }
+                        else if (zone == "M2")
+                        {
+                            if (ut != 0 && showText)
+                                VI.Cout(Uid, "混战结果为【{0}】.", zd.Monster(ut));
+                            // Z0F.Mon2From = src;
+                            Z0F.Monster2 = ut;
+                        }
+                        else if (zone == "E")
+                        {
+                            if (ut != 0 && showText)
+                                VI.Cout(Uid, "执行事件为【{0}】.", zd.Eve(ut));
+                            // Z0F.Eve1From = src;
+                            Z0F.Eve1 = ut;
+                        }
+                        else if (zone == "W")
+                        {
+                            if (ut != 0 && showText)
+                                VI.Cout(Uid, "额外翻出NPC为【{0}】.", zd.Monster(ut));
+                            // Z0F.Wang = ut;
+                        }
+                    }
+                    break;
+                case "E0YB":
+                    {
+                        Card.Genre genre = Card.Char2Genre(args[1][0]);
+                        int offsetValue = int.Parse(args[2]);
+                        string offset = offsetValue > 0 ? ("第" + offsetValue + "张") : "";
+                        for (int i = 3; i < args.Length;)
+                        {
+                            ushort who = ushort.Parse(args[i]);
+                            ushort hind = ushort.Parse(args[i + 1]);
+                            int n = ushort.Parse(args[i + 2]);
+                            if (hind == 0)
+                            {
+                                List<ushort> cards = Algo.TakeRange(args, i + 3, i + 3 + n)
+                                    .Select(p => ushort.Parse(p)).ToList();
+                                if (genre == Card.Genre.Tux)
+                                {
+                                    VI.Cout(Uid, "{0}将{1}放回手牌堆顶{2}.", zd.Player(who), zd.Tux(cards), offset);
+                                    Z0P.TuxCount += n;
+                                }
+                                else if (genre == Card.Genre.NMB || genre == Card.Genre.NPC)
+                                {
+                                    VI.Cout(Uid, "{0}将{1}放回怪牌堆顶{2}.", zd.Player(who), zd.Monster(cards), offset);
+                                    Z0P.MonCount += n;
+                                }
+                                else if (genre == Card.Genre.Eve)
+                                {
+                                    VI.Cout(Uid, "{0}将{1}放回事件牌堆顶{2}.", zd.Player(who), zd.Eve(cards), offset);
+                                    Z0P.EveCount += n;
+                                }
+                                i += (3 + n);
+                            }
+                            else if (hind == 1)
+                            {
+                                if (genre == Card.Genre.Tux)
+                                {
+                                    VI.Cout(Uid, "{0}将{1}张牌放回手牌堆顶{2}.", zd.Player(who), n, offset);
+                                    Z0P.TuxCount += n;
+                                }
+                                else if (genre == Card.Genre.NMB)
+                                {
+                                    VI.Cout(Uid, "{0}将{1}张牌放回怪牌堆顶{2}.", zd.Player(who), n, offset);
+                                    Z0P.MonCount += n;
+                                }
+                                else if (genre == Card.Genre.Eve)
+                                {
+                                    VI.Cout(Uid, "{0}将{1}张牌放回事件牌堆顶{2}.", zd.Player(who), n, offset);
+                                    Z0P.EveCount += n;
+                                }
+                                i += 3;
+                            }
+                        }
                     }
                     break;
             }
@@ -3094,14 +3066,6 @@ namespace PSD.ClientZero
                     }
                     // VI.TerminCinTunnel(Uid);
                     break;
-                case "ZM1":
-                    {
-                        Z0F.Monster1 = 0; Z0F.Monster2 = 0;
-                        //ushort mons = ushort.Parse(para);
-                        //VI.Cout(Uid, "本场战斗怪物为【{0}】.", zd.Monster(mons));
-                        //Z0F.Monster1 = mons;
-                        break;
-                    }
                 case "NP1":
                     if (para == "0")
                         VI.Cout(Uid, "{0}NPC响应开始.", zd.Player(rounder));

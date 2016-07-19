@@ -475,13 +475,15 @@ namespace PSD.PSDGamepkg
                         ushort mon = Board.Monster2;
                         if (mon == 0)
                             WI.BCast("E0HZ,0," + who);
-                        else if (NMBLib.IsMonster(mon))
+                        else if (NMBLib.IsMonster(mon) || NMBLib.IsNPC(mon))
                         {
-                            WI.BCast("E0HZ,1," + who + "," + mon);
-                            RaiseGMessage("G0YM,1," + mon + ",0");
+                            RaiseGMessage(new Artiad.ImperialLeft()
+                            {
+                                Zone = Artiad.ImperialLeft.ZoneType.M2,
+                                Card = mon
+                            }.ToMessage());
+                            WI.BCast("E0HZ,1," + who + "," + Board.Monster2);
                         }
-                        else if (NMBLib.IsNPC(mon))
-                            WI.BCast("E0HZ,2," + who + "," + mon);
                     }
                     else if (priority == 300)
                     {
@@ -530,7 +532,6 @@ namespace PSD.PSDGamepkg
                                 }
                                 else
                                     RaiseGMessage("G0IP," + Board.Rounder.Team + "," + npc.STR);
-                                RaiseGMessage("G0YM,1," + mon + ",0");
                             }
                         }
                     }
@@ -564,12 +565,18 @@ namespace PSD.PSDGamepkg
                                 Genre = Card.Genre.Eve,
                                 SingleUnit = new Artiad.CustomsUnit() { SingleCard = Board.Eve }
                             }.ToMessage());
-                            RaiseGMessage("G0YM,2,0,0");
-                            Board.Eve = 0;
+                            RaiseGMessage(new Artiad.ImperialLeft()
+                            {
+                                Zone = Artiad.ImperialLeft.ZoneType.E,
+                                IsReset = true
+                            }.ToMessage());
                         }
-                        Board.Eve = eveCard;
-                        RaiseGMessage("G0YM,2," + Board.Eve + ",0");
-                        Base.Card.Evenement eve = LibTuple.EL.DecodeEvenement(Board.Eve);
+                        RaiseGMessage(new Artiad.ImperialLeft()
+                        {
+                            Zone = Artiad.ImperialLeft.ZoneType.E,
+                            Card = eveCard
+                        }.ToMessage());
+                        Evenement eve = LibTuple.EL.DecodeEvenement(Board.Eve);
                         if (eve != null && eve.IsSilence())
                             Board.Silence.Add(eve.Code);
                     }
@@ -3051,9 +3058,6 @@ namespace PSD.PSDGamepkg
                             WI.BCast("E0PB," + piletype + word0);
                     }
                     break;
-                case "G0YM":
-                    WI.BCast("E0YM," + cmdrst);
-                    break;
                 case "G1XR":
                     if (args[1] == "0" || args[1] == "2")
                     {
@@ -3431,6 +3435,12 @@ namespace PSD.PSDGamepkg
                             idx += n;
                         }
                     }
+                    break;
+                case "G0YM":
+                    Artiad.ImperialLeft.Parse(cmd).Handle(this, WI);
+                    break;
+                case "G0YB":
+                    Artiad.ImperialRight.Parse(cmd).Handle(this, WI);
                     break;
             }
         }

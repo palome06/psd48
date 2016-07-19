@@ -348,19 +348,27 @@ namespace PSD.PSDGamepkg.JNS
             Player py = (lr <= or) ? rd : XI.Board.GetOpponenet(rd);
 
             ushort pop = XI.Board.RestNPCPiles.Dequeue();
-            NPC npc = XI.LibTuple.NL.Decode(NMBLib.OriginalNPC(pop));
-            XI.RaiseGMessage("G0YM,3,0," + pop);
-            XI.RaiseGMessage("G1NI," + rd.Uid + "," + pop);
-            XI.Board.Wang.Push(pop);
+            XI.RaiseGMessage(new Artiad.ImperialLeft()
+            {
+                Zone = Artiad.ImperialLeft.ZoneType.W,
+                Card = pop
+            }.ToMessage());
+            ushort wang = XI.Board.Wang.Peek();
+            NPC npc = XI.LibTuple.NL.Decode(NMBLib.OriginalNPC(wang));
+            XI.RaiseGMessage("G1NI," + rd.Uid + "," + wang);
             UEchoCode r5ed = XI.HandleWithNPCEffect(py, npc, "SJT07");
             if (r5ed == UEchoCode.NO_OPTIONS)
                 XI.AsyncInput(rd.Uid, "#无法执行,//", "SJT07", "1");
             if (r5ed == UEchoCode.END_ACTION)
-                XI.RaiseGMessage("G1YP," + py.Uid + "," + pop);
+                XI.RaiseGMessage("G1YP," + py.Uid + "," + wang);
             
-            if (XI.Board.Wang.Count > 0 && XI.Board.Wang.Peek() == pop)
+            if (XI.Board.Wang.Count > 0 && XI.Board.Wang.Peek() == wang)
             { // In case the NPC has been taken away
-                XI.Board.Wang.Pop();
+                XI.RaiseGMessage(new Artiad.ImperialLeft()
+                {
+                    Zone = Artiad.ImperialLeft.ZoneType.W,
+                    IsReset = true
+                }.ToMessage());
                 XI.RaiseGMessage(new Artiad.Abandon()
                 {
                     Zone = Artiad.CustomsHelper.ZoneType.EXPLICIT,
@@ -368,10 +376,6 @@ namespace PSD.PSDGamepkg.JNS
                     SingleUnit = new Artiad.CustomsUnit() { SingleCard = pop }
                 }.ToMessage());
             }
-            if (XI.Board.Wang.Count > 0)
-                XI.RaiseGMessage("G0YM,3,1," + XI.Board.Wang.Pop());
-            else
-                XI.RaiseGMessage("G0YM,3,1,0"); // actual just remove one Wang, it should show the rests
         }
         public void SJT08(Player rd)
         {
@@ -405,30 +409,34 @@ namespace PSD.PSDGamepkg.JNS
             if (XI.Board.RestNPCPiles.Count > 0)
             {
                 ushort pop = XI.Board.RestNPCPiles.Dequeue();
-                NPC npc = XI.LibTuple.NL.Decode(NMBLib.OriginalNPC(pop));
-                XI.RaiseGMessage("G0YM,3,0," + pop);
-                XI.RaiseGMessage("G1NI," + rd.Uid + "," + pop);
-                XI.Board.Wang.Push(pop);
+                XI.RaiseGMessage(new Artiad.ImperialLeft()
+                {
+                    Zone = Artiad.ImperialLeft.ZoneType.W,
+                    Card = pop
+                }.ToMessage());
+                ushort wang = XI.Board.Wang.Peek();
+                NPC npc = XI.LibTuple.NL.Decode(NMBLib.OriginalNPC(wang));
+                XI.RaiseGMessage("G1NI," + rd.Uid + "," + wang);
                 int sr = npc.STR < 5 ? npc.STR : 5;
                 if (rd.Tux.Count > sr)
                     XI.RaiseGMessage("G0DH," + rd.Uid + ",1," + (rd.Tux.Count - sr));
                 else if (rd.Tux.Count < sr)
                     XI.RaiseGMessage("G0DH," + rd.Uid + ",0," + (sr - rd.Tux.Count));
                 //XI.Board.RestNPCDises.Add(pop);
-                if (XI.Board.Wang.Count > 0 && XI.Board.Wang.Peek() == pop)
+                if (XI.Board.Wang.Count > 0 && XI.Board.Wang.Peek() == wang)
                 {
-                    XI.Board.Wang.Pop();
+                    XI.RaiseGMessage(new Artiad.ImperialLeft()
+                    {
+                        Zone = Artiad.ImperialLeft.ZoneType.W,
+                        IsReset = true
+                    }.ToMessage());
                     XI.RaiseGMessage(new Artiad.Abandon()
                     {
                         Zone = Artiad.CustomsHelper.ZoneType.EXPLICIT,
                         Genre = Card.Genre.NMB,
-                        SingleUnit = new Artiad.CustomsUnit() { SingleCard = pop }
+                        SingleUnit = new Artiad.CustomsUnit() { SingleCard = wang }
                     }.ToMessage());
                 }
-                if (XI.Board.Wang.Count > 0)
-                    XI.RaiseGMessage("G0YM,3,1," + XI.Board.Wang.Pop());
-                else
-                    XI.RaiseGMessage("G0YM,3,1,0");
             }
         }
         #endregion Package 5#
@@ -774,9 +782,13 @@ namespace PSD.PSDGamepkg.JNS
         public void SJH04(Player rd)
         {
             ushort pop = XI.Board.RestMonPiles.Dequeue();
-            Monster mon = XI.LibTuple.ML.Decode(pop);
-            XI.RaiseGMessage("G0YM,5," + pop);
+            XI.RaiseGMessage(new Artiad.ImperialCentre()
+            {
+                Genre = Card.Genre.NMB,
+                SingleCard = pop
+            }.ToMessage());
             XI.RaiseGMessage("G0TT," + rd.Uid);
+            Monster mon = XI.LibTuple.ML.Decode(pop);
             if (XI.Board.DiceValue + rd.STR > mon.STR)
             {
                 bool done = false;
@@ -950,30 +962,34 @@ namespace PSD.PSDGamepkg.JNS
                         rd.Escue.Clear();
 
                         ushort pop = XI.Board.RestNPCPiles.Dequeue();
-                        NPC npc = XI.LibTuple.NL.Decode(NMBLib.OriginalNPC(pop));
-                        XI.RaiseGMessage("G0YM,3,0," + pop);
-                        XI.RaiseGMessage("G1NI," + rd.Uid + "," + pop);
-                        XI.Board.Wang.Push(pop);
+                        XI.RaiseGMessage(new Artiad.ImperialLeft()
+                        {
+                            Zone = Artiad.ImperialLeft.ZoneType.W,
+                            Card = pop
+                        }.ToMessage());
+                        ushort wang = XI.Board.Wang.Peek();
+                        NPC npc = XI.LibTuple.NL.Decode(NMBLib.OriginalNPC(wang));
+                        XI.RaiseGMessage("G1NI," + rd.Uid + "," + wang);
                         UEchoCode r5ed = XI.HandleWithNPCEffect(rd, npc, "SJH10");
                         if (r5ed == UEchoCode.NO_OPTIONS)
                             XI.AsyncInput(rd.Uid, "#无法执行,//", "SJH10", "2");
                         if (r5ed == UEchoCode.END_ACTION)
-                            XI.RaiseGMessage("G1YP," + rd.Uid + "," + pop);
+                            XI.RaiseGMessage("G1YP," + rd.Uid + "," + wang);
 
-                        if (XI.Board.Wang.Count > 0 && XI.Board.Wang.Peek() == pop)
+                        if (XI.Board.Wang.Count > 0 && XI.Board.Wang.Peek() == wang)
                         { // In case the NPC has been taken away
-                            XI.Board.Wang.Pop();
+                            XI.RaiseGMessage(new Artiad.ImperialLeft()
+                            {
+                                Zone = Artiad.ImperialLeft.ZoneType.W,
+                                IsReset = true
+                            }.ToMessage());
                             XI.RaiseGMessage(new Artiad.Abandon()
                             {
                                 Zone = Artiad.CustomsHelper.ZoneType.EXPLICIT,
                                 Genre = Card.Genre.NMB,
-                                SingleUnit = new Artiad.CustomsUnit() { SingleCard = pop }
+                                SingleUnit = new Artiad.CustomsUnit() { SingleCard = wang }
                             }.ToMessage());
                         }
-                        if (XI.Board.Wang.Count > 0)
-                            XI.RaiseGMessage("G0YM,3,1," + XI.Board.Wang.Pop());
-                        else
-                            XI.RaiseGMessage("G0YM,3,1,0"); // actual just remove one Wang, it should show the rests
                     }
                 }
             }

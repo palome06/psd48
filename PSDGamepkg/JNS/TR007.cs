@@ -1443,50 +1443,6 @@ namespace PSD.PSDGamepkg.JNS
         }
         #endregion TR008 - XiahouJinxuan
         #region TR009 - Xia
-        //public void JNT0901Action(Player player, int type, string fuse, string argst)
-        //{
-        //    XI.RaiseGMessage("G0HQ,2," + player.Uid + ",1,1");
-        //    XI.RaiseGMessage("G0PB,1,0," + player.Uid + ",1," + argst);
-        //}
-        //public bool JNT0901Valid(Player player, int type, string fuse)
-        //{
-        //    if (player.Tux.Count > 0 && XI.Board.RoundIN != "R" + XI.Board.Rounder.Uid + "EV")
-        //    {
-        //        string[] args = fuse.Split(',');
-        //        for (int i = 1; i < args.Length; )
-        //        {
-        //            ushort me = ushort.Parse(args[i]);
-        //            ushort lose = ushort.Parse(args[i + 1]);
-        //            if (lose == 0) // Get Card
-        //            {
-        //                Player py = XI.Board.Garden[me];
-        //                if ((py.Team == player.Team) && (py.Uid != player.Uid || !player.IsSKOpt))
-        //                {
-        //                    int n = int.Parse(args[i + 2]);
-        //                    if (n > 0)
-        //                        return true;
-        //                }
-        //                i += 3;
-        //            }
-        //            else if (lose == 1)
-        //                i += 3;
-        //            else if (lose == 2)
-        //                i += 3;
-        //            else if (lose == 3)
-        //                i += 2;
-        //            else
-        //                break;
-        //        }
-        //    }
-        //    return false;
-        //}
-        //public string JNT0901Input(Player player, int type, string fuse, string prev)
-        //{
-        //    if (prev == "")
-        //        return "#交换,/Q1(p" + string.Join("p", player.Tux) + ")";
-        //    else
-        //        return "";
-        //}
         public void JNT0901Action(Player player, int type, string fuse, string argst)
         {
             HashSet<ushort> invs = new HashSet<ushort>();
@@ -2708,20 +2664,14 @@ namespace PSD.PSDGamepkg.JNS
             string selection = argst.Substring(idx + 1);
             XI.RaiseGMessage("G0QZ," + player.Uid + "," + tuxCode);
             ushort pop = XI.Board.RestNPCPiles.Dequeue();
-            if (selection == "1") // Put ahead
+            int offset = selection == "2" ? 1 : 0;
+            XI.RaiseGMessage(new Artiad.ImperialRight()
             {
-                // Consider Change it back into G0PB,0,who,...
-                XI.Board.MonPiles.PushBack(pop);
-                XI.RaiseGMessage("G0YM,6,0,0");
-            }
-            else // Put at next position
-            {
-                List<ushort> list = new List<ushort>();
-                ushort first = XI.Board.MonPiles.Dequeue();
-                list.Add(first); list.Add(pop);
-                XI.Board.MonPiles.PushBack(list);
-                XI.RaiseGMessage("G0YM,6,1,0");
-            }
+                Encrypted = true,
+                Genre = Card.Genre.NPC,
+                Offset = offset,
+                SingleItem = new Artiad.ImperialRightUnit() { Source = 0, SingleCard = pop }
+            }.ToMessage());
         }
         public string JNT2002Input(Player player, int type, string fuse, string prev)
         {
@@ -2979,7 +2929,11 @@ namespace PSD.PSDGamepkg.JNS
                 ushort[] pops = XI.Board.RestMonPiles.Dequeue(4);
                 if (pops.Length > 0)
                 {
-                    XI.RaiseGMessage("G0YM,5," + string.Join(",", pops));
+                    XI.RaiseGMessage(new Artiad.ImperialCentre()
+                    {
+                        Genre = Card.Genre.NMB,
+                        Cards = pops.ToArray()
+                    }.ToMessage());
                     string mjoint = string.Join(",", pops.Select(p => "M" + p));
                     XI.RaiseGMessage("G2TZ," + player.Uid + ",0," + mjoint);
                     XI.RaiseGMessage("G0IJ," + player.Uid + ",1," + pops.Length + "," + mjoint);
@@ -3945,12 +3899,18 @@ namespace PSD.PSDGamepkg.JNS
                     ut + "p" + XI.Board.Eve + ")", "JNT3501", "0");
                 if (wouldChange == ut.ToString())
                 {
-                    XI.RaiseGMessage("G0YM,2,0,0");
+                    XI.RaiseGMessage(new Artiad.ImperialLeft()
+                    {
+                        Zone = Artiad.ImperialLeft.ZoneType.E,
+                        IsReset = true
+                    }.ToMessage());
                     XI.RaiseGMessage("G0IJ," + player.Uid + ",1,1,E" + XI.Board.Eve);
                     XI.RaiseGMessage("G2TZ," + player.Uid + ",0,E" + XI.Board.Eve);
-
-                    XI.Board.Eve = ut;
-                    XI.RaiseGMessage("G0YM,2," + ut + ",0");
+                    XI.RaiseGMessage(new Artiad.ImperialLeft()
+                    {
+                        Zone = Artiad.ImperialLeft.ZoneType.E,
+                        Card = ut
+                    }.ToMessage());
                 }
                 else
                 {
@@ -3962,7 +3922,11 @@ namespace PSD.PSDGamepkg.JNS
             else if (type == 1 || type == 2)
             {
                 XI.AsyncInput(player.Uid, "#收入「改命」,E1(p" + XI.Board.Eve + ")", "JNT3501", "1");
-                XI.RaiseGMessage("G0YM,2,0,0");
+                XI.RaiseGMessage(new Artiad.ImperialLeft()
+                {
+                    Zone = Artiad.ImperialLeft.ZoneType.E,
+                    IsReset = true
+                }.ToMessage());
                 XI.RaiseGMessage("G0IJ," + player.Uid + ",1,1,E" + XI.Board.Eve);
                 XI.RaiseGMessage("G2TZ," + player.Uid + ",0,E" + XI.Board.Eve);
                 XI.Board.Eve = 0;

@@ -530,12 +530,12 @@ namespace PSD.PSDGamepkg
                 "OY", "DS", "CC", "CD", "CE", "XZ", "ZB", "ZC", "ZI", "ZS", "ZL", "IA", "OA", "IX",
                 "OX", "AX", "IB", "OB", "IW", "OW", "WB", "9P", "IP", "OP", "CZ", "HC", "HD", "HH",
                 "HI", "HL", "IC", "OC", "HT", "HG", "QR", "HZ", "TT", "T7", "JM", "WN", "IJ", "OJ",
-                "IE", "OE", "IS", "OS", "LA", "IV", "OV", "PB", "YM", "HR", "FI", "ON", "SN", "MA",
-                "ZJ", "IF", "OF", "PQ" };
+                "IE", "OE", "IS", "OS", "LA", "IV", "OV", "HR", "FI", "ON", "SN", "MA", "ZJ", "IF",
+                "OF", "PQ", "YM", "YB" };
             string[] g1 = { "CH", "DI", "IU", "OU", "TH", "CW", "ZK", "IZ", "OZ", "WP", "SG", "HK",
                 "WJ", "XR", "EV", "CK", "7F", "YP", "NI", "GE", "LY", "UE" };
             string[] g2 = { "IN", "RN", "CN", "QC", "FU", "QU", "CL", "WK", "AK", "IL", "OL", "SW",
-                "AS", "SY", "UL", "ZZ" };
+                "AS", "SY", "UL", "ZZ", "YZ" };
             foreach (string g0event in g0)
                 RegisterBasicSKTs(dict, "G0" + g0event, 100);
             foreach (string g1event in g1)

@@ -11,6 +11,8 @@ namespace PSD.PSDGamepkg.Artiad
         public enum ZoneType { NIL, M1, M2, E, W };
         public ZoneType Zone { set; get; }
         public bool IsReset { set; get; }
+        // where the card comes from
+        public ushort Source { set; get; }
         private ushort mCard;
         public ushort Card
         {
@@ -18,14 +20,16 @@ namespace PSD.PSDGamepkg.Artiad
             get { return IsReset ? (ushort)0 : mCard; } 
         }
 
+        public ImperialLeft() { IsReset = false; Source = 0; }
         public string ToMessage()
         {
-            return "G0YM," + Zone + "," + (IsReset ? 0 : Card);
+            return "G0YM," + Zone + "," + Source + "," + (IsReset ? 0 : Card);
         }
         public static ImperialLeft Parse(string line)
         {
             string[] g0ym = line.Split(',');
-            ushort card = ushort.Parse(g0ym[2]);
+            ushort source = ushort.Parse(g0ym[2]);
+            ushort card = ushort.Parse(g0ym[3]);
             ZoneType zone;
             switch (g0ym[1])
             {
@@ -39,20 +43,13 @@ namespace PSD.PSDGamepkg.Artiad
             {
                 Zone = zone,
                 IsReset = card == 0,
+                Source = source,
                 Card = card
             };
         }
-        public bool Legal()
-        {
-            return IsReset || Card != 0;
-        }
+        public bool Legal() { return IsReset || Card != 0; }
         public void Handle(XI XI, Base.VW.IWISV WI)
         {
-            new Artiad.ImperialLeftSemaphore()
-            {
-                Zone = Zone,
-                Card = Card
-            }.Telegraph(WI.BCast);
             if (Zone == ZoneType.W && !IsReset)
             {
                 XI.RaiseGMessage(new Artiad.ImperialCentre()
@@ -63,18 +60,28 @@ namespace PSD.PSDGamepkg.Artiad
             }
             switch (Zone)
             {
-                case ZoneType.M1: XI.Board.Monster1 = Card; break;
+                case ZoneType.M1:
+                    XI.Board.Monster1 = Card;
+                    if (IsReset)
+                        XI.Board.Mon1From = 0;
+                    else
+                        XI.Board.Mon1From = Source;
+                    break;
                 case ZoneType.M2: XI.Board.Monster2 = Card; break;
                 case ZoneType.E: XI.Board.Eve = Card; break;
                 case ZoneType.W:
-                {
                     if (IsReset && XI.Board.Wang.Count > 0)
                         XI.Board.Wang.Pop();
                     else
                         XI.Board.Wang.Push(Card);
                     break;
-                }
             }
+            new Artiad.ImperialLeftSemaphore()
+            {
+                Zone = Zone,
+                Source = Source,
+                Card = (Zone == ZoneType.W && IsReset && XI.Board.Wang.Count > 0) ? XI.Board.Wang.Peek() : Card
+            }.Telegraph(WI.BCast);
         }
     }
 
@@ -83,6 +90,7 @@ namespace PSD.PSDGamepkg.Artiad
         public Card.Genre Genre { set; get; } // Genre Actually
         public bool Encrypted { set; get; }
         public ushort[] Cards { set; get; } // valid when Encrypted = false
+        public ushort SingleCard { set { Cards = new ushort[] { value }; } }
         public int CardCount { set; get; } // valid when Encrypted = true
 
         public string ToMessage()
@@ -90,6 +98,9 @@ namespace PSD.PSDGamepkg.Artiad
             return "G2YZ," + Card.Genre2Char(Genre) + "," +
                 (!Encrypted ? ("0," + string.Join(",", Cards)) : ("1," + CardCount));
         }
+        public bool Legal() { return Cards != null && Cards.Length > 0; }
+
+        public ImperialCentre() { Encrypted = false; }
         public static ImperialCentre Parse(string line)
         {
             string[] g0yz = line.Split(',');
@@ -108,37 +119,54 @@ namespace PSD.PSDGamepkg.Artiad
                 return new ImperialCentre() { Genre = genre, Encrypted = false, CardCount = int.Parse(g0yz[3]) };
         }
     }
-
-    public class ImperialRight // YB, Push back
+    /// <summary>
+    /// YB, put card back to piles, DO NOT consider the source opeartion
+    /// </summary>
+    public class ImperialRight
     {
         public bool Encrypted { set; get; }
         public Card.Genre Genre { set; get; }
+        public int Offset { set; get; } // where to put the cards, 0 = peek, 1 = next
         public List<ImperialRightUnit> Items { set; get; }
+        public ImperialRightUnit SingleItem
+        {
+            set { Items = new ImperialRightUnit[] { value }.ToList(); }
+        }
         public string ToMessage()
         {
-            return "G0YB," + (Encrypted ? 1 : 0) + "," + Card.Genre2Char(Genre) + "," +
-                string.Join(",", Items.Select(p => p.ToRawMessage()));
+            return "G0YB," + Card.Genre2Char(Genre) + "," + Offset + "," + (Encrypted ? 1 : 0) +
+                "," + string.Join(",", Items.Select(p => p.ToRawMessage()));
         }
+        public bool Legal() { return Items != null && Items.Count > 0; }
         public static ImperialRight Parse(string line)
         {
             string[] piru = line.Split(',');
             return new ImperialRight()
             {
-                Encrypted = piru[1] == "1",
-                Genre = Card.Char2Genre(piru[2][0]),
-                Items = ImperialRightUnit.ParseFromLine(line)
+                Encrypted = piru[3] == "1",
+                Offset = int.Parse(piru[2]),
+                Genre = Card.Char2Genre(piru[1][0]),
+                Items = ImperialRightUnit.ParseFromLine(line, 4)
             };
         }
         public void Handle(XI XI, Base.VW.IWISV WI)
         {
+            System.Action<Base.Utils.Rueue<ushort>, ushort[]> action = (piles, cards) =>
+            {
+                List<ushort> list = new List<ushort>();
+                list.AddRange(piles.Dequeue(Offset));
+                list.AddRange(cards);
+                piles.PushBack(list);
+            };
+
             foreach (ImperialRightUnit iri in Items)
             {
                 if (Genre == Card.Genre.Tux)
-                    XI.Board.TuxPiles.PushBack(iri.Cards);
+                    action(XI.Board.TuxPiles, iri.Cards);
                 else if (Genre == Card.Genre.NMB || Genre == Card.Genre.NPC)
-                    XI.Board.MonPiles.PushBack(iri.Cards);
+                    action(XI.Board.MonPiles, iri.Cards);
                 else if (Genre == Card.Genre.Eve)
-                    XI.Board.EvePiles.PushBack(iri.Cards);
+                    action(XI.Board.EvePiles, iri.Cards);
             }
             if (!Encrypted)
             {
@@ -165,6 +193,7 @@ namespace PSD.PSDGamepkg.Artiad
                     p => new ImperialRightSemaphore()
                     {
                         Genre = Genre,
+                        Offset = Offset,
                         Items = Items.Select(q => new ImperialRightSemaphoreUnit()
                         {
                             Encrypted = q.Source != p,
@@ -175,6 +204,7 @@ namespace PSD.PSDGamepkg.Artiad
                     }), new ImperialRightSemaphore()
                     {
                         Genre = Genre,
+                        Offset = Offset,
                         Items = Items.Select(p => new ImperialRightSemaphoreUnit()
                         {
                             Encrypted = true,
@@ -197,15 +227,16 @@ namespace PSD.PSDGamepkg.Artiad
     {
         public ushort Source { set; get; }
         public ushort[] Cards { set; get; }
+        public ushort SingleCard { set { Cards = new ushort[] { value }; } }
         public string ToRawMessage()
         {
             return Source + "," + Algo.ListToString(Cards);
         }
-        public static List<ImperialRightUnit> ParseFromLine(string line)
+        public static List<ImperialRightUnit> ParseFromLine(string line, int startIdx)
         {
             List<ImperialRightUnit> irus = new List<ImperialRightUnit>();
             string[] piru = line.Split(',');
-            for (int idx = 3; idx < piru.Length;)
+            for (int idx = startIdx; idx < piru.Length;)
             {
                 ushort source = ushort.Parse(piru[idx++]);
                 ushort[] cards = Algo.TakeArrayWithSize(piru, idx, out idx);
@@ -222,16 +253,18 @@ namespace PSD.PSDGamepkg.Artiad
     public class ImperialLeftSemaphore
     {
         public ImperialLeft.ZoneType Zone { set; get; }
+        public ushort Source { set; get; }
         public ushort Card { set; get; }
         public bool ShowText { set; get; }
         public void Telegraph(System.Action<string> send)
         {
-            send("E0YM," + (ShowText ? 0 : 1) + "," + Zone + "," + Card);
+            send("E0YM," + (ShowText ? 0 : 1) + "," + Zone + "," + Source + "," + Card);
         }
     }
     public class ImperialRightSemaphore
     {
         public Card.Genre Genre { set; get; }
+        public int Offset { set; get; }
         public List<ImperialRightSemaphoreUnit> Items { set; get; }
         public static ImperialRightSemaphore Merge(IEnumerable<ImperialRightSemaphore> sources)
         {
@@ -249,7 +282,7 @@ namespace PSD.PSDGamepkg.Artiad
         }
         public void Telegraph(System.Action<string> send)
         {
-            send("E0YB," + Card.Genre2Char(Genre) + "," +
+            send("E0YB," + Card.Genre2Char(Genre) + "," + Offset + "," +
                 string.Join(",", Items.Select(p => p.ToRawMessage())));
         }
         public static void Send(Base.VW.IWISV WI,
