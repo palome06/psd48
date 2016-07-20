@@ -13,6 +13,8 @@ namespace PSD.PSDGamepkg.Artiad
         public bool IsReset { set; get; }
         // where the card comes from
         public ushort Source { set; get; }
+        // trigger
+        public ushort Trigger { set; get; }
         private ushort mCard;
         public ushort Card
         {
@@ -20,16 +22,18 @@ namespace PSD.PSDGamepkg.Artiad
             get { return IsReset ? (ushort)0 : mCard; } 
         }
 
-        public ImperialLeft() { IsReset = false; Source = 0; }
+        public ImperialLeft() { IsReset = false; Source = 0; Trigger = 0; }
         public string ToMessage()
         {
-            return "G0YM," + Zone + "," + Source + "," + (IsReset ? 0 : Card);
+            return "G0YM," + Zone + "," + Trigger + "," +
+                Source + "," + (IsReset ? 0 : Card);
         }
         public static ImperialLeft Parse(string line)
         {
             string[] g0ym = line.Split(',');
-            ushort source = ushort.Parse(g0ym[2]);
-            ushort card = ushort.Parse(g0ym[3]);
+            ushort trigger = ushort.Parse(g0ym[2]);
+            ushort source = ushort.Parse(g0ym[3]);
+            ushort card = ushort.Parse(g0ym[4]);
             ZoneType zone;
             switch (g0ym[1])
             {
@@ -43,12 +47,20 @@ namespace PSD.PSDGamepkg.Artiad
             {
                 Zone = zone,
                 IsReset = card == 0,
+                Trigger = trigger,
                 Source = source,
                 Card = card
             };
         }
         public bool Legal() { return IsReset || Card != 0; }
-        public void Handle(XI XI, Base.VW.IWISV WI)
+        public void Handle(XI XI, Base.VW.IWISV WI, int priority)
+        {
+            if (priority == 100)
+                Handle100(XI, WI);
+            else if (priority == 200)
+                Handle200(XI);
+        }
+        private void Handle100(XI XI, Base.VW.IWISV WI)
         {
             if (Zone == ZoneType.W && !IsReset)
             {
@@ -79,9 +91,22 @@ namespace PSD.PSDGamepkg.Artiad
             new Artiad.ImperialLeftSemaphore()
             {
                 Zone = Zone,
+                ShowText = !IsReset,
                 Source = Source,
-                Card = (Zone == ZoneType.W && IsReset && XI.Board.Wang.Count > 0) ? XI.Board.Wang.Peek() : Card
+                Card = (Zone == ZoneType.W && IsReset &&
+                    XI.Board.Wang.Count > 0) ? XI.Board.Wang.Peek() : Card
             }.Telegraph(WI.BCast);
+        }
+        private void Handle200(XI XI)
+        {
+            if (!IsReset && (Zone == ZoneType.M1 || Zone == ZoneType.M2 || Zone == ZoneType.W))
+            {
+                if (Base.Card.NMBLib.IsNPC(Card) && Trigger != 0)
+                {
+                    NPC npc = XI.LibTuple.NL.Decode(Base.Card.NMBLib.OriginalNPC(Card));
+                    npc.Debut(XI.Board.Garden[Trigger]);
+                }
+            }
         }
     }
 
@@ -266,7 +291,7 @@ namespace PSD.PSDGamepkg.Artiad
         public Card.Genre Genre { set; get; }
         public int Offset { set; get; }
         public List<ImperialRightSemaphoreUnit> Items { set; get; }
-        public static ImperialRightSemaphore Merge(IEnumerable<ImperialRightSemaphore> sources)
+        public static ImperialRightSemaphore Annex(IEnumerable<ImperialRightSemaphore> sources)
         {
             if (!sources.Any()) return null;
             Card.Genre genre = sources.First().Genre;
@@ -288,7 +313,7 @@ namespace PSD.PSDGamepkg.Artiad
         public static void Send(Base.VW.IWISV WI,
             IDictionary<ushort, ImperialRightSemaphore> lookup, ImperialRightSemaphore live)
         {
-            lookup.ToList().ForEach(p => p.Value.Telegraph(q => WI.Send(q, p.Key, 0)));
+            lookup.ToList().ForEach(p => p.Value.Telegraph(q => WI.Send(q, 0, p.Key)));
             live.Telegraph(WI.Live);
         }
     }

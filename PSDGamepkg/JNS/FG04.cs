@@ -2720,6 +2720,7 @@ namespace PSD.PSDGamepkg.JNS
             XI.RaiseGMessage(new Artiad.ImperialLeft()
             {
                 Zone = Artiad.ImperialLeft.ZoneType.M1,
+                Trigger = player.Uid,
                 Source = me,
                 Card = player.Uid
             }.ToMessage());

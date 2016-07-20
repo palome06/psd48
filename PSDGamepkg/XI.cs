@@ -533,7 +533,7 @@ namespace PSD.PSDGamepkg
                 "IE", "OE", "IS", "OS", "LA", "IV", "OV", "HR", "FI", "ON", "SN", "MA", "ZJ", "IF",
                 "OF", "PQ", "YM", "YB" };
             string[] g1 = { "CH", "DI", "IU", "OU", "TH", "CW", "ZK", "IZ", "OZ", "WP", "SG", "HK",
-                "WJ", "XR", "EV", "CK", "7F", "YP", "NI", "GE", "LY", "UE" };
+                "WJ", "XR", "EV", "CK", "7F", "YP", "GE", "LY", "UE" };
             string[] g2 = { "IN", "RN", "CN", "QC", "FU", "QU", "CL", "WK", "AK", "IL", "OL", "SW",
                 "AS", "SY", "UL", "ZZ", "YZ" };
             foreach (string g0event in g0)
@@ -555,6 +555,7 @@ namespace PSD.PSDGamepkg
             RegisterBasicSKTs(dict, "G0CC", 400);
             RegisterBasicSKTs(dict, "G0HZ", 200);
             RegisterBasicSKTs(dict, "G0HZ", 300);
+            RegisterBasicSKTs(dict, "G0YM", 200);
             RegisterBasicSKTs(dict, "G1EV", 200);
             RegisterBasicSKTs(dict, "G1WJ", 200);
             

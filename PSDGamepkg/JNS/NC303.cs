@@ -495,8 +495,8 @@ namespace PSD.PSDGamepkg.JNS
                 (a, r) => a.Count(p => isEq(p)) + r.Count(p => isEq(p)) == 2, true);
             if (picks.Count > 0)
             {
-                string whoStr = XI.AsyncInput(player.Uid, string.Format("#获得【{0}】,{1}",
-                    string.Join("与", picks.Select(p => XI.LibTuple.TL.DecodeTux(p).Name)),
+                string whoStr = XI.AsyncInput(player.Uid, string.Format("#获得{0},{1}",
+                    string.Join("与", picks.Select(p => "【" + XI.LibTuple.TL.DecodeTux(p).Name + "】")),
                     AnyoneAliveString()), "NJH7", "0");
                 ushort who = ushort.Parse(whoStr);
                 XI.RaiseGMessage("G0HQ,2," + who + ",0,0," + string.Join(",", picks));
@@ -552,6 +552,35 @@ namespace PSD.PSDGamepkg.JNS
                 XI.InnerGMessage("G0ZH,0", -15);
         }
         #region NPC Single
+        public void NCT27Debut(Player trigger)
+        {
+            ushort me = NMBLib.CodeOfNPC(XI.LibTuple.NL.Encode("NCT27"));
+            List<ushort> restNpc = XI.Board.MonDises.Where(p => NMBLib.IsNPC(p)).ToList();
+            if (restNpc.Count > 0)
+            {
+                string pick = XI.AsyncInput(trigger.Uid, "#替换,/M1(p" +
+                    string.Join("p", restNpc) + ")", "NCT27Debut", "0");
+                if (!pick.StartsWith("/"))
+                {
+                    ushort substitude = ushort.Parse(pick);
+                    XI.RaiseGMessage(new Artiad.Abandon()
+                    {
+                        Zone = Artiad.CustomsHelper.ZoneType.EXPLICIT,
+                        Genre = Card.Genre.NMB,
+                        SingleUnit = new Artiad.CustomsUnit() { SingleCard = me }
+                    }.ToMessage());
+
+                    XI.Board.MonDises.Remove(substitude);
+                    XI.RaiseGMessage("G2CN,1,1");
+                    XI.RaiseGMessage(new Artiad.ImperialLeft()
+                    {
+                        Zone = Artiad.ImperialLeft.ZoneType.M2,
+                        Trigger = trigger.Uid,
+                        Card = substitude
+                    }.ToMessage());
+                }
+            }
+        }
         public void NCT32Debut(Player trigger)
         {
             if (XI.Board.InCampaign)

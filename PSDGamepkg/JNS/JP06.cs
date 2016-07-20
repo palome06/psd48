@@ -922,6 +922,7 @@ namespace PSD.PSDGamepkg.JNS
                         XI.RaiseGMessage(new Artiad.ImperialLeft()
                         {
                             Zone = Artiad.ImperialLeft.ZoneType.M1,
+                            Trigger = player.Uid,
                             Source = who,
                             Card = mon
                         }.ToMessage());
@@ -1203,11 +1204,11 @@ namespace PSD.PSDGamepkg.JNS
             XI.RaiseGMessage(new Artiad.ImperialLeft()
             {
                 Zone = Artiad.ImperialLeft.ZoneType.W,
+                Trigger = to,
                 Card = pop
             }.ToMessage());
             ushort wang = XI.Board.Wang.Peek();
             NPC npc = XI.LibTuple.NL.Decode(NMBLib.OriginalNPC(wang));
-            XI.RaiseGMessage("G1NI," + to + "," + wang);
             UEchoCode r5ed = XI.HandleWithNPCEffect(XI.Board.Garden[to], npc, "JPT5");
             if (r5ed == UEchoCode.NO_OPTIONS)
                 XI.AsyncInput(to, "#无法执行,//", "JPT5", "1");
@@ -2285,11 +2286,11 @@ namespace PSD.PSDGamepkg.JNS
                     XI.RaiseGMessage(new Artiad.ImperialLeft()
                     {
                         Zone = Artiad.ImperialLeft.ZoneType.W,
+                        Trigger = player.Uid,
                         Card = pop
                     }.ToMessage());
                     ushort wang = XI.Board.Wang.Peek();
                     NPC npc = XI.LibTuple.NL.Decode(NMBLib.OriginalNPC(wang));
-                    XI.RaiseGMessage("G1NI," + player.Uid + "," + wang);
                     UEchoCode r5ed = XI.HandleWithNPCEffect(player, npc, "XBT6");
                     if (r5ed == UEchoCode.NO_OPTIONS)
                         XI.AsyncInput(player.Uid, "#无法执行,//", "XBT6ConsumeAction", "0");

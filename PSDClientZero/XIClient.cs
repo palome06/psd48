@@ -2552,11 +2552,23 @@ namespace PSD.ClientZero
                         }
                     }
                     break;
+                case "E0YZ": // E0YZ only considers Tux
+                    {
+                        Card.Genre genre = Card.Char2Genre(args[1][0]);
+                        bool encrypted = args[2] == "1";
+                        if (!encrypted)
+                        {
+                            ushort[] cards = Algo.TakeRange(args, 3, args.Length).Select(p => ushort.Parse(p)).ToArray();
+                            if (genre == Card.Genre.Tux)
+                                VI.Cout(Uid, "翻出手牌为【{0}】.", zd.Tux(cards));
+                        }
+                    }
+                    break;
                 case "E0YB":
                     {
                         Card.Genre genre = Card.Char2Genre(args[1][0]);
                         int offsetValue = int.Parse(args[2]);
-                        string offset = offsetValue > 0 ? ("第" + offsetValue + "张") : "";
+                        string offset = offsetValue > 0 ? ("下" + offsetValue + "张") : "";
                         for (int i = 3; i < args.Length;)
                         {
                             ushort who = ushort.Parse(args[i]);
@@ -2568,17 +2580,20 @@ namespace PSD.ClientZero
                                     .Select(p => ushort.Parse(p)).ToList();
                                 if (genre == Card.Genre.Tux)
                                 {
-                                    VI.Cout(Uid, "{0}将{1}放回手牌堆顶{2}.", zd.Player(who), zd.Tux(cards), offset);
+                                    VI.Cout(Uid, (who != 0 ? "{0}将" : "") + "{1}放回手牌堆顶{2}.",
+                                        zd.Player(who), zd.Tux(cards), offset);
                                     Z0P.TuxCount += n;
                                 }
                                 else if (genre == Card.Genre.NMB || genre == Card.Genre.NPC)
                                 {
-                                    VI.Cout(Uid, "{0}将{1}放回怪牌堆顶{2}.", zd.Player(who), zd.Monster(cards), offset);
+                                    VI.Cout(Uid, (who != 0 ? "{0}将" : "") + "{1}放回怪牌堆顶{2}.",
+                                        zd.Player(who), zd.Monster(cards), offset);
                                     Z0P.MonCount += n;
                                 }
                                 else if (genre == Card.Genre.Eve)
                                 {
-                                    VI.Cout(Uid, "{0}将{1}放回事件牌堆顶{2}.", zd.Player(who), zd.Eve(cards), offset);
+                                    VI.Cout(Uid, (who != 0 ? "{0}将" : "") + "{1}放回事件牌堆顶{2}.",
+                                        zd.Player(who), zd.Eve(cards), offset);
                                     Z0P.EveCount += n;
                                 }
                                 i += (3 + n);
@@ -2587,17 +2602,20 @@ namespace PSD.ClientZero
                             {
                                 if (genre == Card.Genre.Tux)
                                 {
-                                    VI.Cout(Uid, "{0}将{1}张牌放回手牌堆顶{2}.", zd.Player(who), n, offset);
+                                    VI.Cout(Uid, (who != 0 ? "{0}将" : "") + "{1}张牌放回手牌堆顶{2}.",
+                                        zd.Player(who), n, offset);
                                     Z0P.TuxCount += n;
                                 }
                                 else if (genre == Card.Genre.NMB)
                                 {
-                                    VI.Cout(Uid, "{0}将{1}张牌放回怪牌堆顶{2}.", zd.Player(who), n, offset);
+                                    VI.Cout(Uid, (who != 0 ? "{0}将" : "") + "{1}张牌放回怪牌堆顶{2}.",
+                                        zd.Player(who), n, offset);
                                     Z0P.MonCount += n;
                                 }
                                 else if (genre == Card.Genre.Eve)
                                 {
-                                    VI.Cout(Uid, "{0}将{1}张牌放回事件牌堆顶{2}.", zd.Player(who), n, offset);
+                                    VI.Cout(Uid, (who != 0 ? "{0}将" : "") + "{1}张牌放回事件牌堆顶{2}.",
+                                        zd.Player(who), n, offset);
                                     Z0P.EveCount += n;
                                 }
                                 i += 3;

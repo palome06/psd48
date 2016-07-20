@@ -351,11 +351,11 @@ namespace PSD.PSDGamepkg.JNS
             XI.RaiseGMessage(new Artiad.ImperialLeft()
             {
                 Zone = Artiad.ImperialLeft.ZoneType.W,
+                Trigger = rd.Uid,
                 Card = pop
             }.ToMessage());
             ushort wang = XI.Board.Wang.Peek();
             NPC npc = XI.LibTuple.NL.Decode(NMBLib.OriginalNPC(wang));
-            XI.RaiseGMessage("G1NI," + rd.Uid + "," + wang);
             UEchoCode r5ed = XI.HandleWithNPCEffect(py, npc, "SJT07");
             if (r5ed == UEchoCode.NO_OPTIONS)
                 XI.AsyncInput(rd.Uid, "#无法执行,//", "SJT07", "1");
@@ -412,11 +412,11 @@ namespace PSD.PSDGamepkg.JNS
                 XI.RaiseGMessage(new Artiad.ImperialLeft()
                 {
                     Zone = Artiad.ImperialLeft.ZoneType.W,
+                    Trigger = rd.Uid,
                     Card = pop
                 }.ToMessage());
                 ushort wang = XI.Board.Wang.Peek();
                 NPC npc = XI.LibTuple.NL.Decode(NMBLib.OriginalNPC(wang));
-                XI.RaiseGMessage("G1NI," + rd.Uid + "," + wang);
                 int sr = npc.STR < 5 ? npc.STR : 5;
                 if (rd.Tux.Count > sr)
                     XI.RaiseGMessage("G0DH," + rd.Uid + ",1," + (rd.Tux.Count - sr));
@@ -965,11 +965,11 @@ namespace PSD.PSDGamepkg.JNS
                         XI.RaiseGMessage(new Artiad.ImperialLeft()
                         {
                             Zone = Artiad.ImperialLeft.ZoneType.W,
+                            Trigger = rd.Uid,
                             Card = pop
                         }.ToMessage());
                         ushort wang = XI.Board.Wang.Peek();
                         NPC npc = XI.LibTuple.NL.Decode(NMBLib.OriginalNPC(wang));
-                        XI.RaiseGMessage("G1NI," + rd.Uid + "," + wang);
                         UEchoCode r5ed = XI.HandleWithNPCEffect(rd, npc, "SJH10");
                         if (r5ed == UEchoCode.NO_OPTIONS)
                             XI.AsyncInput(rd.Uid, "#无法执行,//", "SJH10", "2");

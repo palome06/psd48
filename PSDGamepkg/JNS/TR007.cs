@@ -3909,6 +3909,7 @@ namespace PSD.PSDGamepkg.JNS
                     XI.RaiseGMessage(new Artiad.ImperialLeft()
                     {
                         Zone = Artiad.ImperialLeft.ZoneType.E,
+                        Trigger = trigger,
                         Card = ut
                     }.ToMessage());
                 }

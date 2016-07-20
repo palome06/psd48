@@ -480,6 +480,7 @@ namespace PSD.PSDGamepkg
                             RaiseGMessage(new Artiad.ImperialLeft()
                             {
                                 Zone = Artiad.ImperialLeft.ZoneType.M2,
+                                Trigger = who,
                                 Card = mon
                             }.ToMessage());
                             WI.BCast("E0HZ,1," + who + "," + Board.Monster2);
@@ -498,7 +499,6 @@ namespace PSD.PSDGamepkg
                             }
                             else if (NMBLib.IsNPC(mon))
                             {
-                                RaiseGMessage("G1NI," + Board.Rounder.Uid + "," + mon);
                                 NPC npc = LibTuple.NL.Decode(NMBLib.OriginalNPC(mon));
                                 bool doubled = false;
                                 Hero nho = LibTuple.HL.InstanceHero(npc.Hero);
@@ -574,6 +574,7 @@ namespace PSD.PSDGamepkg
                         RaiseGMessage(new Artiad.ImperialLeft()
                         {
                             Zone = Artiad.ImperialLeft.ZoneType.E,
+                            Trigger = ushort.Parse(args[1]),
                             Card = eveCard
                         }.ToMessage());
                         Evenement eve = LibTuple.EL.DecodeEvenement(Board.Eve);
@@ -588,6 +589,9 @@ namespace PSD.PSDGamepkg
                         if (eve != null && eve.IsSilence())
                             Board.Silence.Remove(eve.Code);
                     }
+                    break;
+                case "G0YM":
+                    Artiad.ImperialLeft.Parse(cmd).Handle(this, WI, priority);
                     break;
                 default:
                     if (priority == 100)
@@ -3346,17 +3350,6 @@ namespace PSD.PSDGamepkg
                         }
                     }
                     break;
-                case "G1NI":
-                    {
-                        ushort who = ushort.Parse(args[1]);
-                        ushort ut = ushort.Parse(args[2]);
-                        if (ut > 0)
-                        {
-                            NPC npc = LibTuple.NL.Decode(NMBLib.OriginalNPC(ut));
-                            npc.Debut(Board.Garden[who]);
-                        }
-                    }
-                    break;
                 case "G0IF":
                     {
                         ushort who = ushort.Parse(args[1]);
@@ -3435,9 +3428,6 @@ namespace PSD.PSDGamepkg
                             idx += n;
                         }
                     }
-                    break;
-                case "G0YM":
-                    Artiad.ImperialLeft.Parse(cmd).Handle(this, WI);
                     break;
                 case "G0YB":
                     Artiad.ImperialRight.Parse(cmd).Handle(this, WI);

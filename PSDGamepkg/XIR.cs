@@ -390,6 +390,7 @@ namespace PSD.PSDGamepkg
                             RaiseGMessage(new Artiad.ImperialLeft()
                             {
                                 Zone = Artiad.ImperialLeft.ZoneType.M1,
+                                Trigger = Board.Rounder.Uid,
                                 Source = Board.Mon1From,
                                 Card = Board.Monster1
                             }.ToMessage());
@@ -407,7 +408,6 @@ namespace PSD.PSDGamepkg
                         {
                             WI.BCast(rstage + "1,0");
                             ushort npcut = Board.Monster1;
-                            RaiseGMessage("G1NI," + Board.Rounder.Uid + "," + npcut);
                             NPC npc = LibTuple.NL.Decode(NMBLib.OriginalNPC(npcut));
                             UEchoCode r5ed = HandleWithNPCEffect(Board.Rounder, npc, rstage);
                             if (r5ed == UEchoCode.NO_OPTIONS) // cannot take any action, check whether finished

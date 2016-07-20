@@ -140,7 +140,7 @@ namespace PSD.PSDGamepkg
             //Board.MonPiles.PushBack(1106);
             //Board.EvePiles.PushBack(35);
             ////Board.EvePiles.PushBack(1);
-            Board.EvePiles.PushBack(27);
+            //Board.EvePiles.PushBack(27);
             //Board.EvePiles.PushBack(42);
             //Board.EveDises.Add(Board.EvePiles.Dequeue());
             //Board.EveDises.Add(Board.EvePiles.Dequeue());
@@ -151,9 +151,10 @@ namespace PSD.PSDGamepkg
             //Board.EvePiles.PushBack(9);
             //Board.RestNPCPiles.PushBack(1068);
             //oard.RestNPCPiles.PushBack(1077);
-            //Board.RestNPCPiles.PushBack(1102);
+            Board.RestNPCPiles.PushBack(1109);
+            //Board.MonDises.Add(1107);
             // Board.HeroPiles.PushBack(19003);
-            //Board.EvePiles.PushBack(31);
+            Board.EvePiles.PushBack(27);
             //while (Board.MonPiles.Count > 0)
             //    Board.MonPiles.Dequeue();
             //Board.MonPiles.PushBack(74);
@@ -163,8 +164,9 @@ namespace PSD.PSDGamepkg
             //Board.MonPiles.PushBack(65);
             //Board.MonPiles.PushBack(13);
             //Board.MonPiles.PushBack(1019);
+            Board.MonPiles.PushBack(1061);
             //Board.MonPiles.PushBack(1022);
-            //Board.MonPiles.PushBack(7);
+            Board.MonPiles.PushBack(7);
             //Board.MonPiles.PushBack(1015);
             //Board.MonPiles.PushBack(28);
             //Board.MonPiles.PushBack(1013);
@@ -204,7 +206,7 @@ namespace PSD.PSDGamepkg
             //Board.MonPiles.PushBack(44);
             //Board.MonPiles.PushBack(50);
             //Board.MonPiles.PushBack(49);
-            Board.RestNPCPiles.PushBack(1109);
+            //Board.RestNPCPiles.PushBack(1109);
             //Board.MonPiles.PushBack(1112);
             //Board.MonPiles.PushBack(1111);
             //Board.MonPiles.Dequeue();
@@ -256,7 +258,7 @@ namespace PSD.PSDGamepkg
             //RaiseGMessage("G0HQ,2,3,0,0,84");
             //RaiseGMessage("G0HQ,2,1,0,0,74,98,99,100");
             //RaiseGMessage("G0HQ,2,1,0,0,123,101");
-            //RaiseGMessage("G0HQ,2,1,0,0,90,92");
+            //RaiseGMessage("G0HQ,2,1,0,0,18,19");
             //RaiseGMessage("G0HQ,2,1,0,0,101,127");
             //RaiseGMessage("G0HQ,2,4,0,0,49,2");
             //RaiseGMessage("G0HQ,2,1,0,0,77,99");
@@ -286,7 +288,7 @@ namespace PSD.PSDGamepkg
             //RaiseGMessage("G0HQ,2,2,0,0,90,89");
             //RaiseGMessage("G0HQ,2,2,0,0,96,59");
             //RaiseGMessage("G0HQ,2,1,0,0,96,18");
-            RaiseGMessage("G0HQ,2,5,0,0,102");
+            //RaiseGMessage("G0HQ,2,5,0,0,102");
             //RaiseGMessage("G0HQ,2,1,0,0,71,37,95");
             //RaiseGMessage("G0HQ,2,1,0,0,50,51,110,111,109");
             //RaiseGMessage("G0HQ,2,1,0,0,55,73,95,1,5");

@@ -101,10 +101,11 @@ namespace PSD.PSDGamepkg.JNS
             Monster mon1 = XI.LibTuple.ML.Decode(XI.Board.Monster1);
             if (NMBLib.IsMonster(mon2ut))
             {
-                XI.WI.BCast("E0HZ,1," + who + "," + mon2ut);
+                // XI.WI.BCast("E0HZ,1," + who + "," + mon2ut);
                 XI.RaiseGMessage(new Artiad.ImperialLeft()
                 {
                     Zone = Artiad.ImperialLeft.ZoneType.M2,
+                    Trigger = player.Uid,
                     Card = mon2ut
                 }.ToMessage());
                 Monster mon2 = XI.LibTuple.ML.Decode(XI.Board.Monster2);
@@ -148,6 +149,7 @@ namespace PSD.PSDGamepkg.JNS
                     XI.RaiseGMessage(new Artiad.ImperialLeft()
                     {
                         Zone = Artiad.ImperialLeft.ZoneType.M2,
+                        Trigger = player.Uid,
                         IsReset = true
                     }.ToMessage());
                     XI.Board.Monster2 = 0;
@@ -164,7 +166,7 @@ namespace PSD.PSDGamepkg.JNS
             }
             else if (NMBLib.IsNPC(mon2ut))
             {
-                XI.WI.BCast("E0HZ,2," + who + "," + mon2ut);
+                // XI.WI.BCast("E0HZ,2," + who + "," + mon2ut);
                 XI.RaiseGMessage(new Artiad.Abandon()
                 {
                     Zone = Artiad.CustomsHelper.ZoneType.EXPLICIT,
@@ -3091,13 +3093,12 @@ namespace PSD.PSDGamepkg.JNS
                     XI.Board.Monster2 = newTangle;
 
                     ushort who = ushort.Parse(g0hz[1]);
-                    if (NMBLib.IsMonster(newTangle))
+                    if (NMBLib.IsMonster(newTangle) || NMBLib.IsNPC(newTangle))
                         XI.WI.BCast("E0HZ,1," + who + "," + newTangle);
-                    else if (NMBLib.IsNPC(newTangle))
-                        XI.WI.BCast("E0HZ,2," + who + "," + newTangle);
                     XI.RaiseGMessage(new Artiad.ImperialLeft()
                     {
                         Zone = Artiad.ImperialLeft.ZoneType.M2,
+                        Trigger = who,
                         Card = newTangle
                     }.ToMessage());
                     XI.InnerGMessage("G0HZ," + who + "," + XI.Board.Monster2, 221);
@@ -4091,6 +4092,76 @@ namespace PSD.PSDGamepkg.JNS
                 return "";
         }
         #endregion EX515 - Qingshi
+        #region EX312 - ZhaoWuyan
+        public bool JNE0601Valid(Player player, int type, string fuse)
+        {
+            if (type == 0) // G0IS/OS
+                return IsMathISOS("JNE0601", player, fuse);
+            else if (type == 1)
+                return IsMathISOS("JNE0601", player, fuse) && player.TokenExcl.Count > 0;
+            return false;
+        }
+        public void JNE0601Action(Player player, int type, string fuse, string argst)
+        {
+            if (type == 0)
+            {
+                ushort[] pops = XI.Board.RestNPCPiles.Dequeue(5);
+                XI.RaiseGMessage("G0IJ," + player.Uid + ",1,5," + string.Join(",", pops.Select(p => "M" + p)));
+                XI.RaiseGMessage(new Artiad.InnateChange()
+                {
+                    Item = Artiad.InnateChange.Prop.HP,
+                    Who = player.Uid,
+                    NewValue = player.HPb + 5
+                }.ToMessage());
+                Cure(player, player, 5);
+                int female = pops.Count(p => XI.LibTuple.NL.Decode(NMBLib.OriginalNPC(p)) != null);
+                if (female > 0)
+                    XI.RaiseGMessage("G0IA," + player.Uid + ",0," + female);
+            }
+            else if (type == 1)
+            {
+                int all = player.TokenExcl.Count;
+                XI.RaiseGMessage(new Artiad.InnateChange()
+                {
+                    Item = Artiad.InnateChange.Prop.HP,
+                    Who = player.Uid,
+                    NewValue = player.HPb - all
+                }.ToMessage());
+                if (player.IsAlive)
+                {
+                    int female = player.TokenExcl.Count(p => XI.LibTuple.NL.Decode(NMBLib.OriginalNPC(
+                        ushort.Parse(p.Substring("M".Length)))) != null);
+                    if (female > 0)
+                        XI.RaiseGMessage("G0OA," + player.Uid + ",0," + female);
+                }
+                XI.RaiseGMessage("G0OJ," + player.Uid + ",1," + Algo.ListToString(player.TokenExcl));
+            }
+        }
+        public bool JNE0603Valid(Player player, int type, string fuse)
+        {
+            return Artiad.Harm.Parse(fuse).Any(p => XI.Board.Garden[p.Who].IsAlive &&
+                XI.Board.Garden[p.Who].Gender == 'F' && p.N > 0 && !HPEvoMask.CHAIN_INVAO.IsSet(p.Mask));
+        }
+        public void JNE0603Action(Player player, int type, string fuse, string argst)
+        {
+            bool moreHarm = argst == "1";
+            if (moreHarm)
+            {
+                List<Artiad.Harm> harms = Artiad.Harm.Parse(fuse);
+                harms.ForEach(p => ++p.N);
+                XI.InnerGMessage(Artiad.Harm.ToMessage(harms), 92);
+            }
+            else
+            {
+                Cure(player, player, 1);
+                XI.InnerGMessage(fuse, 92);
+            }
+        }
+        public string JNE0603Input(Player player, int type, string fuse, string prev)
+        {
+            return prev == "" ? "#请选择『生发』执行项##伤害值+1##您HP+1,Y2" : "";
+        }
+        #endregion EX312 - ZhaoWuyan
         #region EX119 - Jisanniang
         public bool JNE0701Valid(Player player, int type, string fuse)
         {
