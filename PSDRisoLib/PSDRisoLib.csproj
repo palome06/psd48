@@ -1221,10 +1221,12 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\NameBar\Name000.png" />
+    <Resource Include="Resources\NameBar\NameE3W07.png" />
     <Resource Include="Resources\NameBar\NameEX408.png" />
     <Resource Include="Resources\NameBar\NameEX506.png" />
     <Resource Include="Resources\NameBar\NameEX515.png" />
     <Resource Include="Resources\NameBar\NameEX119.png" />
+    <Resource Include="Resources\NameBar\NameEX312.png" />
     <Resource Include="Resources\NameBar\NameHL001.png" />
     <Resource Include="Resources\NameBar\NameHL002.png" />
     <Resource Include="Resources\NameBar\NameHL003.png" />
@@ -1402,11 +1404,13 @@
     <Resource Include="Resources\PetsSnap\TPT3.png" />
   </ItemGroup>
   <ItemGroup>
+    <Resource Include="Resources\Heros\18001.png" />
     <Resource Include="Resources\Heros\18002.png" />
     <Resource Include="Resources\Heros\18003.png" />
     <Resource Include="Resources\Heros\18004.png" />
     <Resource Include="Resources\Heros\18005.png" />
     <Resource Include="Resources\Heros\18007.png" />
+    <Resource Include="Resources\Heros\18008.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Heros\19001.png" />
@@ -1439,11 +1443,13 @@
     <Resource Include="Resources\Heros\20005.png" />
   </ItemGroup>
   <ItemGroup>
+    <Resource Include="Resources\Card\Heros\E3W07.png" />
     <Resource Include="Resources\Card\Heros\EX119.png" />
     <Resource Include="Resources\Card\Heros\EX301.png" />
     <Resource Include="Resources\Card\Heros\EX408.png" />
     <Resource Include="Resources\Card\Heros\EX506.png" />
     <Resource Include="Resources\Card\Heros\EX515.png" />
+    <Resource Include="Resources\Card\Heros\EX312.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Card\Heros\HL001.png" />

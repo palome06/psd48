@@ -19,7 +19,7 @@ namespace PSD.PSDGamepkg.Artiad
         public ushort Card
         {
             set { mCard = value; if (value == 0) { IsReset = true; } }
-            get { return IsReset ? (ushort)0 : mCard; } 
+            get { return IsReset ? (ushort)0 : mCard; }
         }
 
         public ImperialLeft() { IsReset = false; Source = 0; Trigger = 0; }
@@ -60,7 +60,7 @@ namespace PSD.PSDGamepkg.Artiad
             else if (priority == 200)
                 Handle200(XI);
         }
-        private void Handle100(XI XI, Base.VW.IWISV WI)
+        public void Handle100(XI XI, Base.VW.IWISV WI)
         {
             if (Zone == ZoneType.W && !IsReset)
             {
@@ -99,15 +99,19 @@ namespace PSD.PSDGamepkg.Artiad
         }
         private void Handle200(XI XI)
         {
-            if (!IsReset && (Zone == ZoneType.M1 || Zone == ZoneType.M2 || Zone == ZoneType.W))
+            if (IsNPCRelated() && Trigger != 0)
             {
-                if (Base.Card.NMBLib.IsNPC(Card) && Trigger != 0)
-                {
-                    NPC npc = XI.LibTuple.NL.Decode(Base.Card.NMBLib.OriginalNPC(Card));
-                    npc.Debut(XI.Board.Garden[Trigger]);
-                }
+                NPC npc = XI.LibTuple.NL.Decode(Base.Card.NMBLib.OriginalNPC(Card));
+                npc.Debut(XI.Board.Garden[Trigger]);
             }
         }
+        #region Aux
+        public bool IsNPCRelated()
+        {
+            return (Zone == ZoneType.M1 || Zone == ZoneType.M2 || Zone == ZoneType.W) &&
+                !IsReset && NMBLib.IsNPC(Card);
+        }
+        #endregion Aux
     }
 
     public class ImperialCentre // YZ, Show only

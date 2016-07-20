@@ -14,6 +14,8 @@ namespace PSD.Base.Card
         public string Code { private set; get; }
         // group, e.g. 1 for standard, 0 for test, 2 for SP, etc.
         public int Group { private set; get; }
+        // M or F
+        public char Gender { private set; get; }
         public int Genre { private set; get; }
 
         private int mSTR;
@@ -42,12 +44,13 @@ namespace PSD.Base.Card
 
         public ushort ROMUshort { set; get; }
         // public Delegate Type of Handling events
-        public NPC(string code, int group, int genre, string name, ushort str, string[] skills, int hero)
+        public NPC(string code, int group, int genre, string name, ushort str,
+            string[] skills, int hero, char gender)
         {
             this.Name = name; this.Code = code;
             this.Group = group; this.Genre = genre;
             this.STR = this.STRb = str; this.Skills = skills;
-            this.Hero = hero;
+            this.Hero = hero; this.Gender = gender;
             ROMUshort = 0;
         }
 
@@ -77,7 +80,8 @@ namespace PSD.Base.Card
             dicts = new Dictionary<ushort, NPC>();
             sql = new Utils.ReadonlySQL("psd.db3");
             List<string> list = new string[] {
-                "ID", "CODE", "VALID", "NAME", "STR", "ACTION", "ORG", "DEBUTTEXT", "GENRE"
+                "ID", "CODE", "VALID", "NAME", "STR", "ACTION", "ORG", "GENDER",
+                "DEBUTTEXT", "GENRE"
             }.ToList();
             System.Data.DataRowCollection datas = sql.Query(list, "Npc");
             foreach (System.Data.DataRow data in datas)
@@ -91,8 +95,10 @@ namespace PSD.Base.Card
                 string action = (string)data["ACTION"];
                 string[] npcskills = !string.IsNullOrEmpty(action) ? action.Split(',') : new string[0];
                 int org = (int)((long)data["ORG"]);
+                char gender = ((string)data["GENDER"])[0];
                 string debutText = data["DEBUTTEXT"] as string;
-                dicts.Add(id, new NPC(code, valid, genre, name, str, npcskills, org) { DebutText = debutText ?? "" });
+                dicts.Add(id, new NPC(code, valid, genre, name,
+                    str, npcskills, org, gender) { DebutText = debutText ?? "" });
             }
         }
 
