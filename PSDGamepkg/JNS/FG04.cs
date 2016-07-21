@@ -2721,8 +2721,8 @@ namespace PSD.PSDGamepkg.JNS
             {
                 Zone = Artiad.ImperialLeft.ZoneType.M1,
                 Trigger = player.Uid,
-                Source = me,
-                Card = player.Uid
+                Source = player.Uid,
+                Card = me
             }.ToMessage());
         }
         public void GSH2Debut()

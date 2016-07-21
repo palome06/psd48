@@ -72,7 +72,7 @@ namespace PSD.PSDGamepkg
             //10603, 10605, 17030, 17027, 17029, 17034,
             //17024, 10107, 10605, 10106, 10504, 17001
             //20004, 17045, 10605, 20003, 17019, 19011
-            18008, 17045, 19011, 20005, 17019, 19019
+            10403, 18008, 19011, 20002, 17019, 18001
         };
 
         private void DebugCondition()
@@ -154,7 +154,8 @@ namespace PSD.PSDGamepkg
             Board.RestNPCPiles.PushBack(1109);
             //Board.MonDises.Add(1107);
             // Board.HeroPiles.PushBack(19003);
-            Board.EvePiles.PushBack(27);
+            Board.EvePiles.PushBack(9);
+            // Board.EvePiles.PushBack(27);
             //while (Board.MonPiles.Count > 0)
             //    Board.MonPiles.Dequeue();
             //Board.MonPiles.PushBack(74);
@@ -166,7 +167,7 @@ namespace PSD.PSDGamepkg
             //Board.MonPiles.PushBack(1019);
             Board.MonPiles.PushBack(1061);
             //Board.MonPiles.PushBack(1022);
-            Board.MonPiles.PushBack(7);
+            Board.MonPiles.PushBack(27);
             //Board.MonPiles.PushBack(1015);
             //Board.MonPiles.PushBack(28);
             //Board.MonPiles.PushBack(1013);
@@ -379,7 +380,7 @@ namespace PSD.PSDGamepkg
             //RaiseGMessage("G0HD,5,0,0,6");
             //RaiseGMessage("G0HD,5,0,0,17");
             //RaiseGMessage("G0HD,2,0,0,24");
-            //RaiseGMessage("G0HD,1,0,0,50");
+            RaiseGMessage("G0HD,1,0,0,50");
             //RaiseGMessage("G0HD,5,0,0,36");
             //RaiseGMessage("G0HD,6,0,0,16");
             //RaiseGMessage("G0HD,2,0,0,51");

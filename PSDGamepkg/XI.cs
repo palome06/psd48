@@ -544,6 +544,7 @@ namespace PSD.PSDGamepkg
                 RegisterBasicSKTs(dict, "G2" + g2event, 100);
 
             RegisterBasicSKTs(dict, "G1TH", 200);
+            RegisterBasicSKTs(dict, "G0ZH", 200);
             RegisterBasicSKTs(dict, "G0ZW", 0);
             RegisterBasicSKTs(dict, "G0ZW", 200);
             RegisterBasicSKTs(dict, "G0ZW", 300);

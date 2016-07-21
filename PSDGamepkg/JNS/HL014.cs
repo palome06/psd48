@@ -3573,19 +3573,19 @@ namespace PSD.PSDGamepkg.JNS
                 return Artiad.Cure.Parse(fuse).Any(p => p.N > 0 && p.Who == XI.Board.Rounder.Uid);
             else if (type == 1)
                 return XI.Board.Garden.Values.Any(p => p.HP == 0 && p.IsAlive &&
-                    !player.RFM.GetUshortArray("ICU").Contains(p.Uid));
+                    !player.RFM.GetOrSetUshortArray("ICU").Contains(p.Uid));
             else
                 return false;
         }
-        public void JNE0102Action(Player player, int type, string fuse)
+        public void JNE0102Action(Player player, int type, string fuse, string argst)
         {
             string sel = XI.AsyncInput(player.Uid, "#补牌,T1" + AAllTareds(player), "JNE0102", "0");
             ushort who = ushort.Parse(sel);
             XI.RaiseGMessage("G0DH," + who + ",0,1");
             if (type == 1)
             {
-                player.RFM.GetUshortArray("ICU").Add(XI.Board.Garden.Values.First(p => p.HP == 0 &&
-                    p.IsAlive && !player.RFM.GetUshortArray("ICU").Contains(p.Uid)).Uid);
+                player.RFM.GetOrSetUshortArray("ICU").Add(XI.Board.Garden.Values.First(p => p.HP == 0 &&
+                    p.IsAlive && !player.RFM.GetOrSetUshortArray("ICU").Contains(p.Uid)).Uid);
             }
         }
         #endregion E3W07 - Sitang
@@ -4181,16 +4181,16 @@ namespace PSD.PSDGamepkg.JNS
         {
             if (type == 0)
             {
-                ushort[] pops = XI.Board.RestNPCPiles.Dequeue(5);
-                XI.RaiseGMessage("G0IJ," + player.Uid + ",1,5," + string.Join(",", pops.Select(p => "M" + p)));
+                int init = 5;
+                ushort[] pops = XI.Board.RestNPCPiles.Dequeue(init);
+                XI.RaiseGMessage("G0IJ," + player.Uid + ",1," + init + "," + string.Join(",", pops.Select(p => "M" + p)));
                 XI.RaiseGMessage("G2TZ," + player.Uid + ",0," + string.Join(",", pops.Select(p => "M" + p)));
                 XI.RaiseGMessage(new Artiad.InnateChange()
                 {
                     Item = Artiad.InnateChange.Prop.HP,
                     Who = player.Uid,
-                    NewValue = 5
+                    NewValue = init
                 }.ToMessage());
-                Cure(player, player, 5);
                 int female = pops.Count(p => XI.LibTuple.NL.Decode(NMBLib.OriginalNPC(p)).Gender == 'F');
                 if (female > 0)
                     XI.RaiseGMessage("G0IA," + player.Uid + ",0," + female);
@@ -4290,6 +4290,11 @@ namespace PSD.PSDGamepkg.JNS
                 if (XI.LibTuple.NL.Decode(NMBLib.OriginalNPC(inSoul)).Gender == 'F')
                     ++delta;
 
+                XI.RaiseGMessage(new Artiad.ImperialLeft()
+                {
+                    Zone = il.Zone,
+                    IsReset = true
+                }.ToMessage());
                 il.Card = outSoul;
                 il.Handle100(XI, XI.WI);
                 XI.InnerGMessage(il.ToMessage(), 111);
@@ -4322,32 +4327,37 @@ namespace PSD.PSDGamepkg.JNS
                     Genre = Card.Genre.NMB,
                     SingleUnit = new Artiad.CustomsUnit() { SingleCard = outSoul }
                 }.ToMessage());
-                string next = XI.AsyncInput(player.Uid,
-                    "#请选择『离魂汤』执行项##获得手牌##获得宠物,Y2", "JNE0603", "0");
-                Player tr = XI.Board.Garden[tar];
-                if (next == "2")
+                if (player.IsAlive && player.Skills.Contains("JNE0803"))
                 {
-                    if (tr.GetPetCount() > 0)
+                    string next = XI.AsyncInput(player.Uid,
+                        "#请选择『离魂汤』执行项##获得手牌##获得宠物,Y2", "JNE0803", "0");
+                    Player tr = XI.Board.Garden[tar];
+                    if (next == "2")
                     {
-                        string selPet = XI.AsyncInput(player.Uid, "#获得,M1(p" + string.Join(
-                            "p", XI.Board.Garden[tar].Pets.Where(p => p != 0)) + ")", "JNE0603", "1");
-                        ushort pet = ushort.Parse(selPet);
-                        XI.RaiseGMessage(new Artiad.HarvestPet()
+                        List<ushort> pets = tr.Pets.Where(p => p != 0 &&
+                            XI.LibTuple.ML.Decode(p).Level != Monster.ClLevel.BOSS).ToList();
+                        if (pets.Count > 0)
                         {
-                            Farmer = player.Uid,
-                            Farmland = tar,
-                            SinglePet = pet,
-                            TreatyAct = Artiad.HarvestPet.Treaty.ACTIVE
-                        }.ToMessage());
+                            string selPet = XI.AsyncInput(player.Uid, "#获得,M1(p" +
+                                string.Join("p", pets) + ")", "JNE0803", "1");
+                            ushort pet = ushort.Parse(selPet);
+                            XI.RaiseGMessage(new Artiad.HarvestPet()
+                            {
+                                Farmer = player.Uid,
+                                Farmland = tar,
+                                SinglePet = pet,
+                                TreatyAct = Artiad.HarvestPet.Treaty.ACTIVE
+                            }.ToMessage());
+                        }
+                    }
+                    else
+                    {
+                        if (tr.Tux.Count > 0)
+                            XI.RaiseGMessage("G0HQ,0," + player.Uid + "," + tar + ",1," + tr.Tux.ListToString());
                     }
                 }
-                else
-                {
-                    if (tr.Tux.Count > 0)
-                        XI.RaiseGMessage("G0HQ,0," + player.Uid + "," + tar + ",1," + tr.Tux.ListToString());
-                }
                 if (XI.Board.Garden.Values.Any(p => p.HP == 0 && p.IsAlive))
-                    XI.RaiseGMessage("G0ZH,-20");
+                    XI.InnerGMessage("G0ZH,0", 180);
             }
         }
         public string JNE0803Input(Player player, int type, string fuse, string prev)

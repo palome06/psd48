@@ -163,6 +163,169 @@ namespace PSD.PSDGamepkg
                     else if (priority == 200)
                         Artiad.Procedure.ArticuloMortis(this, WI, true);
                     break;
+                case "G0ZH": // cmdrst of G0ZH won't affect the operations.
+                    if (priority == 100)
+                    {
+                        IDictionary<ushort, int> loses = new Dictionary<ushort, int>();
+                        IDictionary<ushort, List<string>> gains = new Dictionary<ushort, List<string>>();
+                        List<Player> zeros = Board.Garden.Values.Where(p => p.IsAlive && p.HP == 0 && !p.Loved).ToList();
+                        foreach (Player player in zeros)
+                        {
+                            List<string> candidates = new List<string>();
+                            Hero hero = LibTuple.HL.InstanceHero(player.SelectHero);
+                            List<string> spCollection = hero.Spouses.ToList();
+                            spCollection.AddRange(player.ExSpouses);
+                            foreach (string spos in spCollection.Distinct())
+                            {
+                                if (!spos.StartsWith("!"))
+                                {
+                                    int spo = int.Parse(spos); // 10303,danshiwoyou,10304
+                                    //var pys = Board.Garden.Values.Where(
+                                    //    p => p.IsAlive && p.HP > 0 && spo == p.SelectHero);
+                                    HashSet<Player> pys = new HashSet<Player>();
+                                    foreach (Player py in Board.Garden.Values)
+                                    {
+                                        if (py.IsAlive && py.HP > 0)
+                                        {
+                                            if (py.SelectHero == spo)
+                                                pys.Add(py);
+                                            else
+                                            {
+                                                Hero hro = LibTuple.HL.InstanceHero(py.SelectHero);
+                                                if (hro != null && hro.Archetype == spo)
+                                                    pys.Add(py);
+                                            }
+                                        }
+                                    }
+                                    if (pys.Count > 0)
+                                    {
+                                        Player py = pys.First();
+                                        candidates.Add(py.Uid.ToString());
+                                        player.Loved = true;
+                                        if (loses.ContainsKey(py.Uid))
+                                            loses[py.Uid] = loses[py.Uid] + 1;
+                                        else
+                                            loses.Add(py.Uid, 1);
+                                    }
+                                }
+                                else
+                                {
+                                    int spo = int.Parse(spos.Substring("!".Length));
+                                    //!1:MurongZiying, !5:Yushen, !6:Kongxiu
+                                    if (spo == 1 || spo == 5 || spo == 6)
+                                    {
+                                        Func<Player, bool> genJudge;
+                                        if (spo == 5)
+                                            genJudge = p => p.Gender == 'F';
+                                        else if (spo == 6)
+                                            genJudge = p => p.Gender == 'M';
+                                        else
+                                            genJudge = p => true;
+                                        var pos = Board.Garden.Values.Where(p => p.IsAlive &&
+                                            p.HP > 0 && p.Uid != player.Uid && genJudge(p)).Select(p => p.Uid);
+                                        if (pos.Any())
+                                        {
+                                            string input = AsyncInput(player.Uid, "#您倾慕,/T1(p" +
+                                                string.Join("p", pos) + ")", "G0LV", "0");
+                                            player.Loved = true;
+                                            if (input != "0" && input != "" && !input.StartsWith("/"))
+                                            {
+                                                ushort ut = ushort.Parse(input);
+                                                candidates.Add(ut.ToString());
+                                                if (loses.ContainsKey(ut))
+                                                    loses[ut] = loses[ut] + 1;
+                                                else
+                                                    loses.Add(ut, 1);
+                                            }
+                                        }
+                                    }
+                                    else if (spo == 2) // !2:Baiyue
+                                    {
+                                        ushort card = LibTuple.ML.Encode("GS04");
+                                        if (Board.Monster1 == card || Board.Monster2 == card ||
+                                            Board.Garden.Values.Where(p => p.Pets.Contains(card)).Any())
+                                        {
+                                            player.Loved = true;
+                                            candidates.Add("!PT" + card);
+                                        }
+                                    }
+                                    // !3:TR-Lingyin, !4:TR-Xuanji, !7-QiliXiaoyuan
+                                    else if (spo == 3 || spo == 4 || spo == 7)
+                                    {
+                                        Func<Player, bool> genJudge;
+                                        if (spo == 3)
+                                            genJudge = p => LibTuple.HL
+                                                .InstanceHero(p.SelectHero).Bio.Contains("A");
+                                        else if (spo == 4)
+                                            genJudge = p => LibTuple.HL
+                                                .InstanceHero(p.SelectHero).Bio.Contains("B");
+                                        else if (spo == 7)
+                                            genJudge = p => LibTuple.HL
+                                                .InstanceHero(p.SelectHero).Bio.Contains("D");
+                                        else
+                                            genJudge = p => true;
+                                        var pys = Board.Garden.Values.Where(p => p.IsAlive && p.HP > 0 &&
+                                            p.SelectHero != player.SelectHero && genJudge(p)).ToList();
+                                        foreach (Player py in pys)
+                                        {
+                                            candidates.Add(py.Uid.ToString());
+                                            player.Loved = true;
+                                            if (loses.ContainsKey(py.Uid))
+                                                loses[py.Uid] = loses[py.Uid] + 1;
+                                            else
+                                                loses.Add(py.Uid, 1);
+                                        }
+                                    }
+                                    else if (spo == 8) // !8:Mojian
+                                    {
+                                        ushort cardId = (LibTuple.TL.EncodeTuxCode("WQ04") as TuxEqiup).SingleEntry;
+                                        bool found = false;
+                                        foreach (Player py in Board.Garden.Values)
+                                        {
+                                            foreach (ushort eq in py.ListOutAllEquips())
+                                            {
+                                                if (eq == cardId)
+                                                    found = true;
+                                                Tux tux = LibTuple.TL.DecodeTux(eq);
+                                                if (tux.IsTuxEqiup())
+                                                {
+                                                    TuxEqiup tue = tux as TuxEqiup;
+                                                    if (tue.IsLuggage())
+                                                    {
+                                                        Luggage lg = tue as Luggage;
+                                                        if (lg.Capacities.Contains("C" + cardId))
+                                                            found = true;
+                                                    }
+                                                }
+                                            }
+                                            if (py.TokenExcl.Contains("C" + cardId))
+                                                found = true;
+                                        }
+                                        if (found)
+                                        {
+                                            player.Loved = true;
+                                            candidates.Add("!WQ04");
+                                        }
+                                    }
+                                }
+                            }
+                            if (candidates.Count > 0)
+                                gains.Add(player.Uid, candidates);
+                        }
+                        if (gains.Count > 0)
+                        {
+                            RaiseGMessage(Artiad.Love.ToMessage(gains.Select(p =>
+                                new Artiad.Love(p.Key, p.Value))));
+                        }
+                    }
+                    else if (priority == 200)
+                    {
+                        // if HP is still 0, then marked as death
+                        List<Player> zeros = Board.Garden.Values.Where(p => p.IsAlive && p.HP == 0).ToList();
+                        if (zeros.Count > 0)
+                            RaiseGMessage("G0ZW," + string.Join(",", zeros.Select(p => p.Uid)));
+                    }
+                    break;
                 case "G0ZW":
                     if (priority == 0)
                     {
@@ -1209,165 +1372,6 @@ namespace PSD.PSDGamepkg
                 case "G1CH":
                     Artiad.HpIssueSemaphore.Telegraph(WI.BCast, Artiad.Cure.Parse(cmd).Select(p =>
                         new Artiad.HpIssueSemaphore(p.Who, false, p.Element, p.N, Board.Garden[p.Who].HP)));
-                    break;
-                case "G0ZH": // cmdrst of G0ZH won't affect the operations.
-                    {
-                        IDictionary<ushort, int> loses = new Dictionary<ushort, int>();
-                        IDictionary<ushort, List<string>> gains = new Dictionary<ushort, List<string>>();
-                        List<Player> zeros = Board.Garden.Values.Where(p => p.IsAlive && p.HP == 0 && !p.Loved).ToList();
-                        foreach (Player player in zeros)
-                        {
-                            List<string> candidates = new List<string>();
-                            Hero hero = LibTuple.HL.InstanceHero(player.SelectHero);
-                            List<string> spCollection = hero.Spouses.ToList();
-                            spCollection.AddRange(player.ExSpouses);
-                            foreach (string spos in spCollection.Distinct())
-                            {
-                                if (!spos.StartsWith("!"))
-                                {
-                                    int spo = int.Parse(spos); // 10303,danshiwoyou,10304
-                                    //var pys = Board.Garden.Values.Where(
-                                    //    p => p.IsAlive && p.HP > 0 && spo == p.SelectHero);
-                                    HashSet<Player> pys = new HashSet<Player>();
-                                    foreach (Player py in Board.Garden.Values)
-                                    {
-                                        if (py.IsAlive && py.HP > 0)
-                                        {
-                                            if (py.SelectHero == spo)
-                                                pys.Add(py);
-                                            else
-                                            {
-                                                Hero hro = LibTuple.HL.InstanceHero(py.SelectHero);
-                                                if (hro != null && hro.Archetype == spo)
-                                                    pys.Add(py);
-                                            }
-                                        }
-                                    }
-                                    if (pys.Count > 0)
-                                    {
-                                        Player py = pys.First();
-                                        candidates.Add(py.Uid.ToString());
-                                        player.Loved = true;
-                                        if (loses.ContainsKey(py.Uid))
-                                            loses[py.Uid] = loses[py.Uid] + 1;
-                                        else
-                                            loses.Add(py.Uid, 1);
-                                    }
-                                }
-                                else
-                                {
-                                    int spo = int.Parse(spos.Substring("!".Length));
-                                    //!1:MurongZiying, !5:Yushen, !6:Kongxiu
-                                    if (spo == 1 || spo == 5 || spo == 6)
-                                    {
-                                        Func<Player, bool> genJudge;
-                                        if (spo == 5)
-                                            genJudge = p => p.Gender == 'F';
-                                        else if (spo == 6)
-                                            genJudge = p => p.Gender == 'M';
-                                        else
-                                            genJudge = p => true;
-                                        var pos = Board.Garden.Values.Where(p => p.IsAlive &&
-                                            p.HP > 0 && p.Uid != player.Uid && genJudge(p)).Select(p => p.Uid);
-                                        if (pos.Any())
-                                        {
-                                            string input = AsyncInput(player.Uid, "#您倾慕,/T1(p" +
-                                                string.Join("p", pos) + ")", "G0LV", "0");
-                                            player.Loved = true;
-                                            if (input != "0" && input != "" && !input.StartsWith("/"))
-                                            {
-                                                ushort ut = ushort.Parse(input);
-                                                candidates.Add(ut.ToString());
-                                                if (loses.ContainsKey(ut))
-                                                    loses[ut] = loses[ut] + 1;
-                                                else
-                                                    loses.Add(ut, 1);
-                                            }
-                                        }
-                                    }
-                                    else if (spo == 2) // !2:Baiyue
-                                    {
-                                        ushort card = LibTuple.ML.Encode("GS04");
-                                        if (Board.Monster1 == card || Board.Monster2 == card ||
-                                            Board.Garden.Values.Where(p => p.Pets.Contains(card)).Any())
-                                        {
-                                            player.Loved = true;
-                                            candidates.Add("!PT" + card);
-                                        }
-                                    }
-                                    // !3:TR-Lingyin, !4:TR-Xuanji, !7-QiliXiaoyuan
-                                    else if (spo == 3 || spo == 4 || spo == 7)
-                                    {
-                                        Func<Player, bool> genJudge;
-                                        if (spo == 3)
-                                            genJudge = p => LibTuple.HL
-                                                .InstanceHero(p.SelectHero).Bio.Contains("A");
-                                        else if (spo == 4)
-                                            genJudge = p => LibTuple.HL
-                                                .InstanceHero(p.SelectHero).Bio.Contains("B");
-                                        else if (spo == 7)
-                                            genJudge = p => LibTuple.HL
-                                                .InstanceHero(p.SelectHero).Bio.Contains("D");
-                                        else
-                                            genJudge = p => true;
-                                        var pys = Board.Garden.Values.Where(p => p.IsAlive && p.HP > 0 &&
-                                            p.SelectHero != player.SelectHero && genJudge(p)).ToList();
-                                        foreach (Player py in pys)
-                                        {
-                                            candidates.Add(py.Uid.ToString());
-                                            player.Loved = true;
-                                            if (loses.ContainsKey(py.Uid))
-                                                loses[py.Uid] = loses[py.Uid] + 1;
-                                            else
-                                                loses.Add(py.Uid, 1);
-                                        }
-                                    }
-                                    else if (spo == 8) // !8:Mojian
-                                    {
-                                        ushort cardId = (LibTuple.TL.EncodeTuxCode("WQ04") as TuxEqiup).SingleEntry;
-                                        bool found = false;
-                                        foreach (Player py in Board.Garden.Values)
-                                        {
-                                            foreach (ushort eq in py.ListOutAllEquips())
-                                            {
-                                                if (eq == cardId)
-                                                    found = true;
-                                                Tux tux = LibTuple.TL.DecodeTux(eq);
-                                                if (tux.IsTuxEqiup())
-                                                {
-                                                    TuxEqiup tue = tux as TuxEqiup;
-                                                    if (tue.IsLuggage())
-                                                    {
-                                                        Luggage lg = tue as Luggage;
-                                                        if (lg.Capacities.Contains("C" + cardId))
-                                                            found = true;
-                                                    }
-                                                }
-                                            }
-                                            if (py.TokenExcl.Contains("C" + cardId))
-                                                found = true;
-                                        }
-                                        if (found)
-                                        {
-                                            player.Loved = true;
-                                            candidates.Add("!WQ04");
-                                        }
-                                    }
-                                }
-                            }
-                            if (candidates.Count > 0)
-                                gains.Add(player.Uid, candidates);
-                        }
-                        if (gains.Count > 0)
-                        {
-                            RaiseGMessage(Artiad.Love.ToMessage(gains.Select(p =>
-                                new Artiad.Love(p.Key, p.Value))));
-                        }
-                        // if HP is still 0, then marked as death
-                        zeros = Board.Garden.Values.Where(p => p.IsAlive && p.HP == 0).ToList();
-                        if (zeros.Count > 0)
-                            RaiseGMessage("G0ZW," + string.Join(",", zeros.Select(p => p.Uid)));
-                    }
                     break;
                 case "G0LV":
                     {
