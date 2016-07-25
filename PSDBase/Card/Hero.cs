@@ -222,7 +222,7 @@ namespace PSD.Base.Card
         {
             List<Hero> first = ListAllJoinableHeroes(groups);
             string[] pair = { "XJ505", "TR011", "TR012", "R5Q05", "XJ302", "RM302", "XJ202", "RM202",
-                "X3W01", "R3W01" };
+                "X3W01", "R3W01", "TR004", "RM509" };
             for (int i = 0; i < pair.Length; i += 2)
             {
                 if (first.Any(p => p.Ofcode == pair[i + 1]))
@@ -248,10 +248,10 @@ namespace PSD.Base.Card
         {
             if (codes == null)
                 return new List<Hero>();
-            if (codes.Length > 6)
-                codes = codes.Take(6).ToArray();
-            List<Hero> list = ListAllHeros(level).Where(p => codes.Contains(p.Ofcode)).ToList();
+            List<Hero> list = ListAllSeleable(level).Where(p => codes.Contains(p.Ofcode)).ToList();
             list.AddRange(ListHeroesInTest(level).Where(p => codes.Contains(p.Ofcode)));
+            if (list.Count > 6)
+                list = list.Take(6).ToList();
             return list;
         }
 

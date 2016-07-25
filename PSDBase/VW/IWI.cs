@@ -1,4 +1,6 @@
-﻿namespace PSD.Base.VW
+using System.Collections.Generic;
+
+namespace PSD.Base.VW
 {
     //public interface IWI
     //{
@@ -30,28 +32,20 @@
     {
         // Standard receive from $from to $me
         string Recv(ushort me, ushort from);
-        //// Receive multiple raw message from multiple $from, need gather
-        //string[] RecvAll(ushort[] from);
-        // infinite process starts
-        void RecvInfStart();
         // receive each message during the process
         Msgs RecvInfRecv();
-        // receive message that is not null, might cause pending
-        Msgs RecvInfRecvPending();
-        // infinite process ends
-        void RecvInfEnd();
-        // reset the terminate flag to 0, start new stage
-        void RecvInfTermin();
         // Send raw message from $me to $to
         void Send(string msg, ushort me, ushort to);
         // Send raw message to multiple $to
-        void Send(string msg, ushort[] tos);
+        void Send(string msg, IEnumerable<ushort> tos);
         // live message to all watchers
         void Live(string msg);
         // Send raw message to the whole
         void BCast(string msg);
-        //// Hear any text message from others
-        //Msgs Hear();
+        // send in general, might get combined results
+        void Send(IDictionary<ushort, string> table, string live);
+        // send $msg to who and nofify the others with live
+        void Focus(ushort who, string msg, string live);
     }
 
     public interface IWICL : System.IDisposable
@@ -60,12 +54,8 @@
         string Recv(ushort me, ushort from);
         // Send raw message from $me to $to
         void Send(string msg, ushort me, ushort to);
-        // Send direct message that won't be caught by RecvInfRecv from $me to 0
-        void SendDirect(string msg, ushort me);
         // Close the socket for recycling
-        void Close();
-        // Talk text message to others
-        //void Talk(string msg);
+        void Shutdown();
         // Hear any text message from others
         string Hear();
     }
@@ -76,6 +66,7 @@
         public ushort From { private set; get; }
         public ushort To { private set; get; }
         public bool Direct { private set; get; } // TODO: maybe remove the property
+        // public int Serial { private set; get; }
         public Msgs(string msg, ushort from, ushort to)
         {
             Msg = msg; From = from; To = to; Direct = false;

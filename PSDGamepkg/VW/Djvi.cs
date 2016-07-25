@@ -14,15 +14,12 @@ namespace PSD.PSDGamepkg.VW
 
         private Log Log { set; get; }
 
-        private int playerCount;
-
         public string CinSentinel { get { return "\\"; } }
 
         private CancellationTokenSource ctoken;
 
         public Djvi(int playerCount, Log log)
         {
-            this.playerCount = playerCount;
             ayvis = new Ayvi[playerCount];
             for (int i = 0; i < ayvis.Length; ++i)
                 ayvis[i] = new Ayvi();

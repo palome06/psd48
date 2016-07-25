@@ -49,6 +49,10 @@ namespace PSD.Base.Utils
         {
             return line.Split(new string[] { sepeator }, StringSplitOptions.RemoveEmptyEntries);
         }
+        public static int CountItemFromComma(string line)
+        {
+            return string.IsNullOrEmpty(line) ? 0 : (line.Count(p => p == ',') + 1);
+        }
         public static void AddToMultiMap<K, V>(IDictionary<K, List<V>> dict, K key, V value)
         {
             if (dict.ContainsKey(key))

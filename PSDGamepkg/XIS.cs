@@ -138,15 +138,13 @@ namespace PSD.PSDGamepkg
                 aywi.TcpListenerStart();
                 Board.Garden = aywi.Connect(VI, teamMode, null);
 
-                WI.RecvInfStart();
                 int count = Board.Garden.Count;
                 while (count > 0)
                 {
-                    Base.VW.Msgs msg = WI.RecvInfRecvPending();
+                    Base.VW.Msgs msg = WI.RecvInfRecv();
                     if (msg.Msg.StartsWith("C2ST,"))
                         --count;
                 }
-                WI.RecvInfEnd();
                 isFinished = false;
                 WI.BCast("H0SD," + string.Join(",", Board.Garden.Values.Select(
                     p => p.Uid + "," + p.AUid + "," + p.Name)));
@@ -182,12 +180,11 @@ namespace PSD.PSDGamepkg
                 int count = Board.Garden.Count;
                 while (count > 0)
                 {
-                    Base.VW.Msgs msg = WI.RecvInfRecvPending();
+                    Base.VW.Msgs msg = WI.RecvInfRecv();
                     Console.WriteLine("We received message : " + msg.Msg);
                     if (msg.Msg.StartsWith("C2ST,"))
                         --count;
                 }
-                WI.RecvInfEnd();
             });
             bool allReady = readyTask.Wait(Constants.ROOM_READY_TIMEOUT);
             if (!allReady)

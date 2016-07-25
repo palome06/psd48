@@ -520,8 +520,11 @@ namespace PSD.PSDGamepkg.JNS
                 int result = 0;
                 XI.RaiseGMessage("G0TT," + lesser.Uid);
                 result += XI.Board.DiceValue;
-                XI.RaiseGMessage("G0TT," + lesser.Uid);
-                result += XI.Board.DiceValue;
+                if (result < 3)
+                {
+                    XI.RaiseGMessage("G0TT," + lesser.Uid);
+                    result += XI.Board.DiceValue;
+                }
                 Artiad.Procedure.AssignCurePointToTeam(XI, lesser, result, "SJT14",
                     p => Cure(null, p.Keys.ToList(), p.Values.ToList()));
             }

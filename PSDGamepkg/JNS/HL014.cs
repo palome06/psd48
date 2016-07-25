@@ -4268,5 +4268,91 @@ namespace PSD.PSDGamepkg.JNS
                 return "";
         }
         #endregion R3W01 - NangongHuang
+        #region RM509 - Lingyin
+        public bool JNR0501Valid(Player player, int type, string fuse)
+        {
+            if (type == 0)
+                return IsMathISOS("JNR0501", player, fuse);
+            else if (type == 1)
+                return IsMathISOS("JNR0501", player, fuse) && player.TokenExcl.Count < 5;
+            else if (type == 2)
+                return JNT0403Valid(player, 0, fuse);
+            else
+                return false;
+        }
+        public void JNR0501Action(Player player, int type, string fuse, string argst)
+        {
+            if (type == 0)
+            {
+                XI.RaiseGMessage("G0IJ," + player.Uid + ",1,5,I1,I2,I3,I4,I5");
+                XI.RaiseGMessage("G2TZ," + player.Uid + ",0,I1,I2,I3,I4,I5");
+            }
+            else if (type == 1)
+            {
+                if (player.TokenExcl.Count > 0)
+                    XI.RaiseGMessage("G0OJ," + player.Uid + ",1," + Algo.ListToString(player.TokenExcl));
+                XI.RaiseGMessage("G0OA," + player.Uid + ",0,5");
+            }
+            else if (type == 2)
+                JNT0403Action(player, 0, fuse, argst);
+        }
+        public bool JNR0502Valid(Player player, int type, string fuse)
+        {
+            bool meLose = (player.Team == XI.Board.Rounder.Team && !XI.Board.IsBattleWin)
+                   || (player.Team == XI.Board.Rounder.OppTeam && XI.Board.IsBattleWin);
+            Monster mon1 = XI.LibTuple.ML.Decode(XI.Board.Monster1);
+            Monster mon2 = XI.LibTuple.ML.Decode(XI.Board.Monster2);
+            return meLose && player.RFM.GetBool("Light") == false && (JNT0402Valid(player, 0, fuse) ||
+                (mon1 != null && (mon1.Element == FiveElement.YINN || mon1.Element == FiveElement.SOLARIS)) ||
+                (mon2 != null && (mon2.Element == FiveElement.YINN || mon2.Element == FiveElement.SOLARIS)));
+        }
+        public void JNR0502Action(Player player, int type, string fuse, string argst)
+        {
+            player.RFM.Set("Light", true);
+            int idx = argst.IndexOf(',');
+            int card = int.Parse(argst.Substring(0, idx));
+            ushort to = ushort.Parse(argst.Substring(idx + 1));
+
+            TargetPlayer(player.Uid, to);
+            XI.RaiseGMessage("G0OJ," + player.Uid + ",1,1,I" + card);
+            XI.RaiseGMessage("G2TZ,0," + player.Uid + ",I" + card);
+            if (XI.Board.Garden[to].Tux.Count > 0)
+                XI.RaiseGMessage("G0DH," + to + ",1,1");
+            XI.RaiseGMessage("G0DH," + to + ",0,1");
+        }
+        public string JNR0502Input(Player player, int type, string fuse, string prev)
+        {
+            if (prev == "")
+            {
+                List<int> sets = new List<int>();
+                Monster mon1 = XI.LibTuple.ML.Decode(XI.Board.Monster1);
+                if (mon1 != null && player.TokenExcl.Contains("I" + mon1.Element.Elem2Int()))
+                    sets.Add(mon1.Element.Elem2Int());
+                if (mon1 != null && (mon1.Element == FiveElement.YINN || mon1.Element == FiveElement.SOLARIS))
+                    sets.AddRange(player.TokenExcl.Select(p => int.Parse(p.Substring("I".Length))));
+                Monster mon2 = XI.LibTuple.ML.Decode(XI.Board.Monster2);
+                if (mon2 != null && player.TokenExcl.Contains("I" + mon2.Element.Elem2Int()))
+                    sets.Add(mon2.Element.Elem2Int());
+                if (mon2 != null && (mon2.Element == FiveElement.YINN || mon2.Element == FiveElement.SOLARIS))
+                    sets.AddRange(player.TokenExcl.Select(p => int.Parse(p.Substring("I".Length))));
+                return "/I1(p" + string.Join("p", sets.Distinct()) + "),#弃牌补牌,/T1" + AAlls(player);
+            }
+            else
+                return "";
+        }
+        public bool JNR0503Valid(Player player, int type, string fuse)
+        {
+            return player.RFM.GetBool("Light") == false && JNT0401Valid(player, 0, fuse);
+        }
+        public void JNR0503Action(Player player, int type, string fuse, string argst)
+        {
+            player.RFM.Set("Light", true);
+            JNT0401Action(player, 0, fuse, argst);
+        }
+        public string JNR0503Input(Player player, int type, string fuse, string prev)
+        {
+            return JNT0401Input(player, 0, fuse, prev);
+        }
+        #endregion RM509 - Lingyin
     }
 }
