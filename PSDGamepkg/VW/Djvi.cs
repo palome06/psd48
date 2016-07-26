@@ -41,7 +41,8 @@ namespace PSD.PSDGamepkg.VW
                     int idx = line.IndexOf('>', match.Index);
                     ushort usr = ushort.Parse(Base.Utils.Algo.Substring(line, match.Index + 1, idx));
                     string content = Base.Utils.Algo.Substring(line, idx + 1, -1);
-                    ayvis[usr - 1].Offer(content);
+                    if (usr >= 0 && usr <= ayvis.Length)
+                        ayvis[usr - 1].Offer(content);
                 }
             }
         }

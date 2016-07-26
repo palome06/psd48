@@ -84,7 +84,7 @@ namespace PSD.PSDGamepkg.Artiad
                 case ZoneType.W:
                     if (IsReset && XI.Board.Wang.Count > 0)
                         XI.Board.Wang.Pop();
-                    else
+                    else if (!IsReset)
                         XI.Board.Wang.Push(Card);
                     break;
             }

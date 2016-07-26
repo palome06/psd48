@@ -2676,15 +2676,14 @@ namespace PSD.ClientZero
                 {
                     cinCalled = StartCinEtc();
                     string input = VI.Cin(Uid, "您无法行动，输入任意键声明行动结束.");
+                    VI.CloseCinTunnel(Uid);
                     if (input != VI.CinSentinel)
                         WI.Send("U2," + uvsn + ",0", Uid, 0);
-                    VI.CloseCinTunnel(Uid);
                     return cinCalled;
                 }
                 else
                 {
                     WI.Send("U2," + uvsn + ",0", Uid, 0);
-                    VI.CloseCinTunnel(Uid);
                     return false;
                 }
             }

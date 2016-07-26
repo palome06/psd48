@@ -563,21 +563,39 @@ namespace PSD.PSDGamepkg.JNS
                 if (!pick.StartsWith("/"))
                 {
                     ushort substitude = ushort.Parse(pick);
-                    XI.RaiseGMessage(new Artiad.Abandon()
-                    {
-                        Zone = Artiad.CustomsHelper.ZoneType.EXPLICIT,
-                        Genre = Card.Genre.NMB,
-                        SingleUnit = new Artiad.CustomsUnit() { SingleCard = me }
-                    }.ToMessage());
+                    Artiad.ImperialLeft.ZoneType zoneType = Artiad.ImperialLeft.ZoneType.NIL;
+                    if (XI.Board.Monster1 == me)
+                        zoneType = Artiad.ImperialLeft.ZoneType.M1;
+                    else if (XI.Board.Monster2 == me)
+                        zoneType = Artiad.ImperialLeft.ZoneType.M2;
+                    else if (XI.Board.Wang.Count > 0 && XI.Board.Wang.Peek() == me)
+                        zoneType = Artiad.ImperialLeft.ZoneType.W;
 
-                    XI.Board.MonDises.Remove(substitude);
-                    XI.RaiseGMessage("G2CN,1,1");
-                    XI.RaiseGMessage(new Artiad.ImperialLeft()
+                    if (zoneType != Artiad.ImperialLeft.ZoneType.NIL)
                     {
-                        Zone = Artiad.ImperialLeft.ZoneType.M2,
-                        Trigger = trigger.Uid,
-                        Card = substitude
-                    }.ToMessage());
+                        XI.RaiseGMessage(new Artiad.ImperialLeft()
+                        {
+                            Zone = zoneType,
+                            IsReset = true
+                        }.ToMessage());
+
+                        XI.RaiseGMessage(new Artiad.Abandon()
+                        {
+                            Zone = Artiad.CustomsHelper.ZoneType.EXPLICIT,
+                            Genre = Card.Genre.NMB,
+                            SingleUnit = new Artiad.CustomsUnit() { SingleCard = me }
+                        }.ToMessage());
+
+                        XI.Board.MonDises.Remove(substitude);
+                        XI.RaiseGMessage("G2CN,1,1");
+
+                        XI.RaiseGMessage(new Artiad.ImperialLeft()
+                        {
+                            Zone = zoneType,
+                            Trigger = trigger.Uid,
+                            Card = substitude
+                        }.ToMessage());
+                    }
                 }
             }
         }

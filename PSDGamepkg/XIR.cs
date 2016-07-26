@@ -659,16 +659,16 @@ namespace PSD.PSDGamepkg
                                 {
                                     ushort[] wangs = Board.Wang.ToArray();
                                     Board.Wang.Clear();
-                                    RaiseGMessage(new Artiad.ImperialLeft()
-                                    {
-                                        Zone = Artiad.ImperialLeft.ZoneType.W,
-                                        IsReset = true
-                                    }.ToMessage());
                                     RaiseGMessage(new Artiad.Abandon()
                                     {
                                         Zone = Artiad.CustomsHelper.ZoneType.IMPLICIT,
                                         Genre = Card.Genre.NMB,
                                         SingleUnit = new Artiad.CustomsUnit() { Cards = wangs }
+                                    }.ToMessage());
+                                    RaiseGMessage(new Artiad.ImperialLeft()
+                                    {
+                                        Zone = Artiad.ImperialLeft.ZoneType.W,
+                                        IsReset = true
                                     }.ToMessage());
                                 }
                                 if (Board.Eve != 0)
@@ -684,7 +684,6 @@ namespace PSD.PSDGamepkg
                                         Zone = Artiad.ImperialLeft.ZoneType.E,
                                         IsReset = true
                                     }.ToMessage());
-                                    Board.Eve = 0;
                                 }
                                 foreach (Player player in Board.Garden.Values)
                                     RaiseGMessage("G0AX," + player.Uid);
