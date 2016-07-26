@@ -744,11 +744,11 @@ namespace PSD.PSDGamepkg.JNS
         #region Package of 4
         public void JPT1Action(Player player, int type, string fuse, string argst)
         {
-            JPT1FullOperation(player, true);
+            JPT1FullOperation(player, true, type == 1);
         }
-        private void JPT1FullOperation(Player player, bool needDiscard)
+        private void JPT1FullOperation(Player player, bool needDiscard, bool domestOnly)
         {
-            bool b1 = XI.Board.Garden.Values.Any(p => p.IsAlive && p.GetPetCount() > 0);
+            bool b1 = XI.Board.Garden.Values.Any(p => p.IsAlive && p.GetPetCount() > 0) && !domestOnly;
             bool b2 = ((!needDiscard || player.Tux.Count > 0) && XI.Board.Garden.Values.Any(p => p.IsAlive && p.GetPetCount() > 0 &&
                 XI.Board.Garden.Values.Any(q => q.IsTared && q.Team == p.Team && p.Uid != q.Uid)));
             
@@ -858,7 +858,7 @@ namespace PSD.PSDGamepkg.JNS
             bool b1 = XI.Board.Garden.Values.Where(p => p.IsAlive && p.GetPetCount() > 0).Any();
             bool b2 = player.Tux.Count > 1 && XI.Board.Garden.Values.Where(p => p.IsAlive && p.GetPetCount() > 0 &&
                 XI.Board.Garden.Values.Where(q => q.IsTared && q.Team == p.Team && p.Uid != q.Uid).Any()).Any();
-            return b1 || b2;
+            return (type == 0 && b1) || b2;
         }
         public void JPT2Action(Player player, int type, string fuse, string argst)
         {
@@ -2934,7 +2934,7 @@ namespace PSD.PSDGamepkg.JNS
         }
         public void JPR1Action(Player player, int type, string fuse, string argst)
         {
-            JPT1FullOperation(player, false);
+            JPT1FullOperation(player, false, type == 1);
         }
         public void JPR2Action(Player player, int type, string fuse, string argst)
         {

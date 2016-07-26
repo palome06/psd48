@@ -4316,6 +4316,7 @@ namespace PSD.ClientAo
                     break;
                 case "H09N":
                     {
+                        A0P.Clear();
                         AoPlayer[] players = new AoPlayer[] {ad.yfPlayerR2.AoPlayer,
                             ad.yfPlayerO2.AoPlayer, ad.yfPlayerR3.AoPlayer, ad.yfPlayerO3.AoPlayer,
                             ad.yfPlayerR1.AoPlayer, ad.yfPlayerO1.AoPlayer};
@@ -4488,6 +4489,7 @@ namespace PSD.ClientAo
                     break;
                 case "H09F":
                     {
+                        A0M.Reset();
                         string[] blocks = cmdrst.Split(',');
                         int idx = 0;
                         int tuxCount = int.Parse(blocks[idx]);
@@ -4570,6 +4572,7 @@ namespace PSD.ClientAo
             if (!A0P.ContainsKey(who)) { return; }
             AoPlayer ap = A0P[who];
             ap.Rank = who; ap.Team = (ap.Rank == 0 ? 0 : (ap.Rank % 2 == 1 ? 1 : 2));
+            ap.Reset();
         }
         // from H09G now
         private void InitPlayerFullFromLongMessage(ushort who, string key, object value)

@@ -57,6 +57,7 @@ namespace PSD.ClientAo
             foreach (ushort ut in uts)
                 delTux(ut);
         }
+        public void clearTux() { Tux.ToList().ForEach(delTux); }
 
         public void ResumeTux()
         {
@@ -69,6 +70,11 @@ namespace PSD.ClientAo
             Tux = new List<ushort>();
 
             Tuple = libGroup;
+        }
+
+        public void Reset()
+        {
+            clearTux();
         }
     }
 }

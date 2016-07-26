@@ -377,12 +377,13 @@ namespace PSD.PSDGamepkg.JNS
                 }
                 if (!isContinue)
                 {
-                    XI.RaiseGMessage(new Artiad.Abandon()
-                    {
-                        Zone = Artiad.CustomsHelper.ZoneType.EXPLICIT,
-                        Genre = Card.Genre.Tux,
-                        SingleUnit = new Artiad.CustomsUnit() { SingleCard = ut }
-                    }.ToMessage());
+                    XI.RaiseGMessage("G0HQ,2," + player.Uid + ",0,0," + ut);
+                    //XI.RaiseGMessage(new Artiad.Abandon()
+                    //{
+                    //    Zone = Artiad.CustomsHelper.ZoneType.EXPLICIT,
+                    //    Genre = Card.Genre.Tux,
+                    //    SingleUnit = new Artiad.CustomsUnit() { SingleCard = ut }
+                    //}.ToMessage());
                     break;
                 }
             }
@@ -421,35 +422,38 @@ namespace PSD.PSDGamepkg.JNS
             else if (tux.Type == Tux.TuxType.TP)
                 tar.SetAllTuxDisabled("JNH0206", true);
             else if (tux.IsTuxEqiup())
+            {
                 XI.RaiseGMessage(new Artiad.EquipStandard()
                 {
-                    Who = ut,
+                    Who = player.Uid,
                     Source = ut,
                     SingleCard = randomCard
                 }.ToMessage());
-
-            if (!tux.IsTuxEqiup())
-            {
-                string willAsk = string.Format("#是否弃置{0}的【{1}】##是##否,Y2",
-                    XI.DisplayPlayer(ut), tux.Name);
-                string willDiscard = XI.AsyncInput(player.Uid, willAsk, "JNH0206", "1");
-                if (willDiscard == "1")
-                {
-                    if (tar.ListOutAllCards().Contains(randomCard))
-                        XI.RaiseGMessage("G0QZ," + ut + "," + randomCard);
-                    XI.RaiseGMessage("G0DH," + ut + ",0,1");
-                }
-                else
-                {
-                    willDiscard = XI.AsyncInput(ut, willAsk, "JNH0206", "2");
-                    if (willDiscard == "1")
-                    {
-                        if (tar.ListOutAllCards().Contains(randomCard))
-                            XI.RaiseGMessage("G0QZ," + ut + "," + randomCard);
-                        XI.RaiseGMessage("G0DH," + ut + ",0,1");
-                    }
-                }
+                XI.RaiseGMessage("G0DH," + ut + ",0,1");
             }
+
+            //if (!tux.IsTuxEqiup())
+            //{
+            //    string willAsk = string.Format("#是否弃置{0}的【{1}】##是##否,Y2",
+            //        XI.DisplayPlayer(ut), tux.Name);
+            //    string willDiscard = XI.AsyncInput(player.Uid, willAsk, "JNH0206", "1");
+            //    if (willDiscard == "1")
+            //    {
+            //        if (tar.ListOutAllCards().Contains(randomCard))
+            //            XI.RaiseGMessage("G0QZ," + ut + "," + randomCard);
+            //        XI.RaiseGMessage("G0DH," + ut + ",0,1");
+            //    }
+            //    else
+            //    {
+            //        willDiscard = XI.AsyncInput(ut, willAsk, "JNH0206", "2");
+            //        if (willDiscard == "1")
+            //        {
+            //            if (tar.ListOutAllCards().Contains(randomCard))
+            //                XI.RaiseGMessage("G0QZ," + ut + "," + randomCard);
+            //            XI.RaiseGMessage("G0DH," + ut + ",0,1");
+            //        }
+            //    }
+            //}
             XI.RaiseGMessage("G1CK," + player.Uid + ",JNH0206,0");
         }
         public string JNH0206Input(Player player, int type, string fuse, string prev)
@@ -1194,7 +1198,7 @@ namespace PSD.PSDGamepkg.JNS
             {
                 ushort npcUt = ushort.Parse(argst);
                 NPC npc = XI.LibTuple.NL.Decode(NMBLib.OriginalNPC(npcUt));
-                int rest = System.Math.Max(npc.STR, player.TokenExcl.Count) + 1;
+                int rest = System.Math.Max(npc.STR, player.TokenExcl.Count);
                 foreach (ushort ut in XI.Board.OrderedPlayer())
                 {
                     Player py = XI.Board.Garden[ut];
@@ -2465,9 +2469,18 @@ namespace PSD.PSDGamepkg.JNS
                 if (player.Guardian != 0)
                 {
                     XI.RaiseGMessage("G0MA," + player.Uid + ",0");
-                    int ki = guardian - 10 + 3;
-                    string skillName = ki < 10 ? ("JNH160" + ki) : ("JNH16" + ki);
-                    XI.RaiseGMessage("G0OS," + player.Uid + ",1," + skillName);
+                    int ki = 0;
+                    if (guardian >= 10 && guardian <= 14)
+                        ki = guardian - 10 + 3;
+                    if (guardian >= 15 && guardian <= 17)
+                        ki = guardian - 15 + 10;
+                    else if (guardian >= 20 && guardian <= 21)
+                        ki = guardian - 20 + 8;
+                    if (ki != 0)
+                    {
+                        string skillName = ki < 10 ? ("JNH160" + ki) : ("JNH16" + ki);
+                        XI.RaiseGMessage("G0OS," + player.Uid + ",1," + skillName);
+                    }
                 }
                 if (player.TokenExcl.Count > 0)
                 {
@@ -2775,22 +2788,37 @@ namespace PSD.PSDGamepkg.JNS
         }
         public bool JNH1612BKValid(Player player, int type, string fuse, ushort owner)
         {
-            if (player.Uid == XI.Board.Rounder.Uid && player.Tux.Count > 0)
+            if (player.Uid == XI.Board.Rounder.Uid)
             {
-                Tux copiee = XI.LibTuple.TL.EncodeTuxCode("JP03");
-                return copiee.Bribe(player, type, fuse) && copiee.Valid(player, type, fuse);
+                if (type == 0 && player.Tux.Count > 0)
+                {
+                    Tux copiee = XI.LibTuple.TL.EncodeTuxCode("JPR1");
+                    if (!XI.LibTuple.TL.IsTuxInGroup(copiee, XI.PCS.Level))
+                        copiee = XI.LibTuple.TL.EncodeTuxCode("JPT1");
+                    return copiee.Bribe(player, 1, fuse) && copiee.Valid(player, 1, fuse);
+                }
+                else if (type == 1)
+                    return true;
             }
-            else
-                return false;
+            return false;
         }
         public void JNH1612Action(Player player, int type, string fuse, string argst)
         {
-            ushort ut = ushort.Parse(argst.Substring(argst.IndexOf(',') + 1));
-            XI.RaiseGMessage("G0CC," + player.Uid + ",0," + player.Uid + ",JP03," + ut + ";0," + fuse);
+            if (type == 0)
+            {
+                Tux copiee = XI.LibTuple.TL.EncodeTuxCode("JPR1");
+                if (!XI.LibTuple.TL.IsTuxInGroup(copiee, XI.PCS.Level))
+                    copiee = XI.LibTuple.TL.EncodeTuxCode("JPT1");
+                ushort ut = ushort.Parse(argst.Substring(argst.IndexOf(',') + 1));
+                XI.RaiseGMessage("G0CC," + player.Uid + ",0," +
+                    player.Uid + "," + copiee.Code + "," + ut + ";1," + fuse);
+            }
+            else if (type == 1)
+                Cure(player, XI.Board.Garden.Values.Where(p => XI.Board.IsAttendWar(p)), 1);
         }
         public string JNH1612Input(Player player, int type, string fuse, string prev)
         {
-            if (prev.IndexOf(',') < 0)
+            if (type == 0 && prev.IndexOf(',') < 0)
             {
                 List<ushort> tuxes = player.Tux.Where(p =>
                     XI.LibTuple.TL.DecodeTux(p).Type == Tux.TuxType.JP).ToList();
@@ -4266,7 +4294,7 @@ namespace PSD.PSDGamepkg.JNS
             }
             else if (type == 1)
             {
-                return XI.Board.Garden.Values.Any(p => p.HP == 0 && p.IsTared) &&
+                return XI.Board.Garden.Values.Any(p => p.HP == 0 && p.Uid != player.Uid && p.IsTared) &&
                     player.TokenExcl.Any(p => Artiad.ContentRule.IsNPCJoinable(
                     XI.LibTuple.NL.Decode(NMBLib.OriginalNPC(ushort.Parse(p.Substring("M".Length)))), XI));
             }

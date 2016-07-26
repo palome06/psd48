@@ -35,6 +35,7 @@ namespace PSD.ClientAo
             TuxCount = 0;
             Weapon = 0;
             Armor = 0;
+            Trove = 0;
             mExCards = new List<ushort>();
             Fakeq = new Dictionary<ushort, string>();
             Escue = new List<ushort>();
@@ -50,7 +51,7 @@ namespace PSD.ClientAo
             mSkills = new List<string>();
 
             IsLoved = false;
-            IsAlive = false;
+            IsAlive = true;
             Immobilized = false;
             PetDisabled = false;
         }
@@ -69,6 +70,31 @@ namespace PSD.ClientAo
                 Immobilized = false;
                 PetDisabled = false;
             }
+        }
+        // use when recovering the room
+        public void Reset()
+        {
+            DelPet(Pets.ToList());
+            TuxCount = 0;
+            DelExCards(mExCards.ToList());
+            Fakeq.Keys.ToList().ForEach(DelFakeq);
+            Escue.ToList().ForEach(DelEscue);
+            Runes.ToList().ForEach(DelRune);
+            if (Trove != 0)
+                DelIntoLuggage(Trove, mInLuggage.ToList());
+            FolderCount = 0;
+
+            Token = 0;
+            DelExSpCard(ExSpCards.ToList());
+            DelPlayerTar(PlayerTars.ToList());
+            DelMyFolder(mMyFolder.ToList());
+            ClearSkill();
+
+            Weapon = Armor = Trove = 0;
+            IsLoved = false;
+            IsAlive = true;
+            Immobilized = false;
+            PetDisabled = false;
         }
         #region Player Property
         private string mNick;
@@ -633,27 +659,27 @@ namespace PSD.ClientAo
         }
 
         private List<ushort> mExCards;
-        public void InsExCards(ushort ut)
-        {
-            mExCards.Add(ut);
-            pb.Dispatcher.BeginInvoke((Action)(() =>
-            {
-                pb.excardBar.Visibility = System.Windows.Visibility.Visible;
-                Base.Card.Hero hro = Tuple.HL.InstanceHero(mHero);
-                string alias = (hro != null) ? (hro.ExCardsAlias ?? "特殊装备") : "特殊装备";
-                pb.excardText.Text = alias + " (" + mExCards.Count + ")";
-                if (pb.AD != null && pb.AD.IsTVDictContains(Rank + "EC"))
-                    pb.AD.yhTV.Show(GetExCardsMatList(), Rank + "EC");
-            }));
-        }
+        public void InsExCards(ushort ut) { InsExCards(new ushort[] { ut }); }
         public void InsExCards(IEnumerable<ushort> uts)
         {
-            foreach (ushort ut in uts)
-                InsExCards(ut);
+            if (uts.Any())
+            {
+                mExCards.AddRange(uts);
+                pb.Dispatcher.BeginInvoke((Action)(() =>
+                {
+                    pb.excardBar.Visibility = System.Windows.Visibility.Visible;
+                    Base.Card.Hero hro = Tuple.HL.InstanceHero(mHero);
+                    string alias = (hro != null) ? (hro.ExCardsAlias ?? "特殊装备") : "特殊装备";
+                    pb.excardText.Text = alias + " (" + mExCards.Count + ")";
+                    if (pb.AD != null && pb.AD.IsTVDictContains(Rank + "EC"))
+                        pb.AD.yhTV.Show(GetExCardsMatList(), Rank + "EC");
+                }));
+            }
         }
-        public void DelExCards(ushort ut)
+        public void DelExCards(ushort ut) { DelExCards(new ushort[] { ut }); }
+        public void DelExCards(IEnumerable<ushort> uts)
         {
-            mExCards.Remove(ut);
+            mExCards.RemoveAll(p => uts.Contains(p));
             pb.Dispatcher.BeginInvoke((Action)(() =>
             {
                 if (mExCards.Count > 0)
