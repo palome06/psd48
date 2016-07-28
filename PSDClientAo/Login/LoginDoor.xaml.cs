@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.IO;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using PSD.Base.Rules;
-using System.Linq;
 
 namespace PSD.ClientAo.Login
 {
@@ -139,7 +139,17 @@ namespace PSD.ClientAo.Login
                     {
                         int port = Base.NetworkCode.HALL_PORT;
                         zi = new ZI(nick, addr, port, record, this);
-                        ziThread = new Thread(delegate() { zi.StartWatchHall(); });
+                        ziThread = new Thread(delegate ()
+                        {
+                            bool success = zi.StartWatchHall();
+                            if (!success)
+                            {
+                                Dispatcher.BeginInvoke((Action)(() =>
+                                {
+                                    Auxs.MessageHouse.Show("找不到远端服务器", addr + "对您一开始是拒绝的。");
+                                }));
+                            }
+                        });
                         ziThread.Start();
                         IsRoomGained = true;
                     }

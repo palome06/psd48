@@ -182,7 +182,9 @@ namespace PSD.ClientAo
 
         public bool StartWatchHall()
         {
-            TcpClient client = new TcpClient(server, port);
+            TcpClient client = null;
+            try { client = new TcpClient(server, port); }
+            catch (SocketException) { return false; }
             NetworkStream tcpStream = client.GetStream();
             Base.VW.WHelper.SentByteLine(tcpStream, "C0QI," + name);
             while (true)

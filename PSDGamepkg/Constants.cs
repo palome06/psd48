@@ -2,6 +2,6 @@
 {
     public class Constants
     {
-        public const int ROOM_READY_TIMEOUT = 8 * 1000;
+        public const int ROOM_READY_TIMEOUT = 16 * 1000;
     }
 }

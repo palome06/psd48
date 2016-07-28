@@ -4760,19 +4760,14 @@ namespace PSD.PSDGamepkg.JNS
             XI.RaiseGMessage("G0OY,0," + who);
             XI.RaiseGMessage("G0IY,2," + who + "," + avatar + "," + hp);
 
-            List<ushort> hasCard = XI.Board.Garden.Values.Where(p => p.Team == player.Team &&
-                 p.IsTared && p.Tux.Count > 0).Select(p => p.Uid).ToList();
-            if (hasCard.Count > 0)
+            string discardAll = XI.AsyncInput(player.Uid, "#弃置所有牌,T1" + FormatPlayers(p =>
+                p.Team == player.Team && p.IsTared), "JNT4501", "0");
+            ushort giver = ushort.Parse(discardAll);
+            int dHp = XI.Board.Garden[giver].GetAllCardsCount();
+            if (dHp > 0)
             {
-                string discardAll = XI.AsyncInput(player.Uid, "#弃置手牌以回复,/T1(p" +
-                    string.Join("p", hasCard) + ")", "JNT4501", "0");
-                if (!discardAll.StartsWith("/") && !discardAll.Contains(VI.CinSentinel))
-                {
-                    ushort dwho = ushort.Parse(discardAll);
-                    int dhp = XI.Board.Garden[dwho].Tux.Count;
-                    XI.RaiseGMessage("G0QZ," + dwho + "," + string.Join(",", XI.Board.Garden[dwho].Tux));
-                    Cure(player, XI.Board.Garden[who], dhp);
-                }
+                XI.RaiseGMessage("G0DH," + giver + ",3");
+                Cure(player, XI.Board.Garden[who], dHp);
             }
         }
         public string JNT4501Input(Player player, int type, string fuse, string prev)

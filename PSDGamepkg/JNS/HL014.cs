@@ -418,7 +418,10 @@ namespace PSD.PSDGamepkg.JNS
             if (tux.Type == Tux.TuxType.JP)
                 Harm(player, new Player[] { player, tar }, 1);
             else if (tux.Type == Tux.TuxType.ZP)
+            {
                 XI.RaiseGMessage("G0OA," + ut + ",1,2");
+                XI.RaiseGMessage("G0OX," + ut + ",1,1");
+            }
             else if (tux.Type == Tux.TuxType.TP)
                 tar.SetAllTuxDisabled("JNH0206", true);
             else if (tux.IsTuxEqiup())
