@@ -2212,7 +2212,7 @@ namespace PSD.PSDGamepkg.JNS
                     XI.RaiseGMessage("G0CZ,0," + provider.Uid);
                 }
                 else if (type == 1 || type == 2)
-                    GeneralDecrIllusion(user, "XBT5");
+                    GeneralClearIllusion(user, "XBT5");
                 else if (type == 3)
                 {
                     TuxEqiup fjt1 = XI.LibTuple.TL.EncodeTuxCode("FJT1") as TuxEqiup;
@@ -2313,7 +2313,7 @@ namespace PSD.PSDGamepkg.JNS
                     }
                 }
                 else if (type == 2 || type == 3)
-                    GeneralDecrIllusion(player, "XBT6");
+                    GeneralClearIllusion(player, "XBT6");
             }
             else if (consumeType == 1)
             {
@@ -2408,7 +2408,7 @@ namespace PSD.PSDGamepkg.JNS
                     provider.RFM.GetOrSetDiva("XBT7").Set("Used", true);
                 }
                 else if (type == 2 || type == 3)
-                    GeneralDecrIllusion(user, "XBT7");
+                    GeneralClearIllusion(user, "XBT7");
             }
             else if (consumeType == 1)
             {
@@ -2711,8 +2711,12 @@ namespace PSD.PSDGamepkg.JNS
         }
         public bool TPH2Valid(Player player, int type, string fuse)
         {
-            Artiad.HarvestPet hpt = Artiad.HarvestPet.Parse(fuse);
-            return XI.Board.Garden[hpt.Farmer].IsTared && hpt.Trophy;
+            if (Artiad.KittyHelper.IsHarvest(fuse))
+            {
+                Artiad.HarvestPet hpt = Artiad.HarvestPet.Parse(fuse);
+                return XI.Board.Garden[hpt.Farmer].IsTared && hpt.Trophy;
+            }
+            else return false;
         }
         public void TPH3Action(Player player, int type, string fuse, string argst)
         {
@@ -3049,20 +3053,6 @@ namespace PSD.PSDGamepkg.JNS
         //     GeneralIncrIllusion(player, illCode, ushort.Parse(argst.Substring(0, idx)),
         //         ushort.Parse(argst.Substring(idx + 1)));
         // }
-        private void GeneralDecrIllusion(Player player, string illCode)
-        {
-            Illusion ill = XI.LibTuple.TL.EncodeTuxCode(illCode) as Illusion;
-            XI.RaiseGMessage(new Artiad.EqExport()
-            {
-                SingleUnit = new Artiad.CardAsUnit()
-                {
-                    Who = player.Uid,
-                    Card = ill.SingleEntry,
-                    CardAs = ill.ILAS
-                }
-            }.ToMessage());
-            ill.ILAS = null;
-        }
         private void GeneralClearIllusion(Player player, string illCode)
         {
             Illusion ill = XI.LibTuple.TL.EncodeTuxCode(illCode) as Illusion;
@@ -3078,6 +3068,7 @@ namespace PSD.PSDGamepkg.JNS
                     }
                 }.ToMessage());
             }
+            ill.ILAS = null;
         }
         // private bool GeneralIllusionValid(Player player, string illCode, string[] candidates)
         // {

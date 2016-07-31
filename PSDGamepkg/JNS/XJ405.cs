@@ -1424,46 +1424,76 @@ namespace PSD.PSDGamepkg.JNS
         }
         #endregion XJ402 - HanLingsha
         #region XJ403 - LiuMengli
-        public void JN50301Action(Player player, int type, string fuse, string argst)
-        {
-            if (type == 0)
-            {
-                Artiad.JoinPetEffects jpes = Artiad.JoinPetEffects.Parse(fuse);
-                jpes.List.ForEach(p => XI.RaiseGMessage("G0IA," + p.Owner + ",0," + p.Pets.Length));
-            }
-            else if (type == 1)
-            {
-                Artiad.CollapsePetEffects cpes = Artiad.CollapsePetEffects.Parse(fuse);
-                cpes.List.ForEach(p => XI.RaiseGMessage("G0OA," + p.Owner + ",0," + p.Pets.Length));
-            }
-            else if (type == 2 || type == 3)
-            {
-                string title = (type == 2) ? "G0IA" : "G0OA";
-                foreach (Player py in XI.Board.Garden.Values)
-                    if (py.IsAlive && py.Team == player.Team && !py.PetDisabled)
-                    {
-                        int count = py.GetActivePetCount(XI.Board);
-                        if (count > 0)
-                            XI.RaiseGMessage(title + "," + py.Uid + ",0," + count);
-                    }
-            }
-        }
         public bool JN50301Valid(Player player, int type, string fuse)
         {
-            if (type == 0)
+            if (type >= 0 && type <= 2)
             {
-                return Artiad.JoinPetEffects.Parse(fuse).List.Any(p =>
-                    XI.Board.Garden[p.Owner].Team == player.Team);
+                List<Player> invs = new List<Player>();
+                var g = XI.Board.Garden;
+                if (type == 0)
+                {
+                    invs = Artiad.JoinPetEffects.Parse(fuse).List.Select(p =>
+                        g[p.Owner]).Where(p => p.IsAlive && p.Team == player.Team).ToList();
+                }
+                else if (type == 1)
+                {
+                    invs = Artiad.CollapsePetEffects.Parse(fuse).List.Select(p =>
+                        g[p.Owner]).Where(p => p.IsAlive && p.Team == player.Team).ToList();
+                }
+                else if (type == 2 && IsMathISOS("JN50301", player, fuse))
+                    invs = g.Values.Where(p => p.IsAlive && p.Team == player.Team).ToList();
+                return invs.Any(p => p.GetActivePetCount(XI.Board) !=
+                    player.ROM.GetOrSetDiva("Enhanced").GetInt(p.Uid.ToString()));
             }
-            else if (type == 1)
+            else if (type == 3)
             {
-                return Artiad.CollapsePetEffects.Parse(fuse).List.Any(p =>
-                   XI.Board.Garden[p.Owner].Team == player.Team);
+                return IsMathISOS("JN50301", player, fuse) && XI.Board.Garden.Values.Any(p => 
+                    p.Team == player.Team && player.ROM.GetOrSetDiva("Enhanced").GetInt(p.Uid.ToString()) > 0);
             }
-            else if (type == 2 || type == 3)
-                return IsMathISOS("JN50301", player, fuse) && XI.Board.Garden.Values.Any(p =>
-                    p.Team == player.Team && p.GetActivePetCount(XI.Board) > 0);
             else return false;
+        }
+        public void JN50301Action(Player player, int type, string fuse, string argst)
+        {
+            if (type >= 0 && type <= 2)
+            {
+                List<Player> invs = new List<Player>();
+                var g = XI.Board.Garden;
+                if (type == 0)
+                {
+                    invs = Artiad.JoinPetEffects.Parse(fuse).List.Select(p =>
+                        g[p.Owner]).Where(p => p.IsAlive && p.Team == player.Team).ToList();
+                }
+                else if (type == 1)
+                {
+                    invs = Artiad.CollapsePetEffects.Parse(fuse).List.Select(p =>
+                        g[p.Owner]).Where(p => p.IsAlive && p.Team == player.Team).ToList();
+                }
+                else if (type == 2)
+                    invs = g.Values.Where(p => p.IsAlive && p.Team == player.Team).ToList();
+                foreach (Player py in invs)
+                {
+                    string who = py.Uid.ToString();
+                    int history = player.ROM.GetOrSetDiva("Enhanced").GetInt(who);
+                    int current = py.GetActivePetCount(XI.Board);
+                    if (history < current)
+                        XI.RaiseGMessage("G0IA," + py.Uid + ",0," + (current - history));
+                    else if (history < current)
+                        XI.RaiseGMessage("G0OA," + py.Uid + ",0," + (history - current));
+                    player.ROM.GetOrSetDiva("Enhanced").Set(who, current);
+                }
+            }
+            else if (type == 3)
+            {
+                foreach (Player py in XI.Board.Garden.Values)
+                {
+                    if (py.Team == player.Team)
+                    {
+                        int count = player.ROM.GetOrSetDiva("Enhanced").GetInt(py.Uid.ToString());
+                        if (count > 0)
+                            XI.RaiseGMessage("G0OA," + py.Uid + ",0," + count);
+                    }
+                }
+            }
         }
         public void JN50302Action(Player player, int type, string fuse, string argst)
         {
@@ -1491,6 +1521,10 @@ namespace PSD.PSDGamepkg.JNS
                     blocks[idx] = blocks[blocks.Length - 1];
                     XI.InnerGMessage(string.Join(",", Algo.TakeRange(blocks, 0, blocks.Length - 1)), 351);
                 }
+                if (XI.Board.Rounder.Uid == player.Uid)
+                    XI.RaiseGMessage(new Artiad.Goto() { Terminal = "R" + player.Uid + "ED" }.ToMessage());
+                if (XI.Board.PoolEnabled && XI.Board.IsAttendWar(player))
+                    XI.RaiseGMessage(new Artiad.PondRefresh() { CheckHit = true }.ToMessage());
             }
             else if (type == 1)
             {
