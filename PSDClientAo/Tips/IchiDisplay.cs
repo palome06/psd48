@@ -101,6 +101,8 @@ namespace PSD.ClientAo.Tips
                     spouses.Add("全体衡道众统领");
                 else if (sp == "!8")
                     spouses.Add("魔剑");
+                else if (sp == "!9")
+                    spouses.Add("金翅凤凰");
             }
 
             if (spouses.Count > 0)
@@ -528,6 +530,8 @@ namespace PSD.ClientAo.Tips
                             spouses.Add("全体衡道众统领");
                         else if (sp == "!8")
                             spouses.Add("魔剑");
+                        else if (sp == "!9")
+                            spouses.Add("金翅凤凰");
                     }
                     if (spouses.Count > 0)
                     {

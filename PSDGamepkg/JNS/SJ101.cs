@@ -373,7 +373,7 @@ namespace PSD.PSDGamepkg.JNS
                 {
                     Zone = Artiad.CustomsHelper.ZoneType.EXPLICIT,
                     Genre = Card.Genre.NMB,
-                    SingleUnit = new Artiad.CustomsUnit() { SingleCard = pop }
+                    SingleUnit = new Artiad.CustomsUnit() { SingleCard = wang }
                 }.ToMessage());
             }
         }

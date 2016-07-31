@@ -235,6 +235,7 @@
     <Image x:Key="heroHead18005" Source="Heros/18005.png"/>
     <Image x:Key="heroHead18007" Source="Heros/18007.png"/>
     <Image x:Key="heroHead18008" Source="Heros/18008.png"/>
+    <Image x:Key="heroHead18010" Source="Heros/18010.png"/>
 
     <Image x:Key="heroHead19001" Source="Heros/19001.png"/>
     <Image x:Key="heroHead19002" Source="Heros/19002.png"/>
@@ -347,6 +348,7 @@
     <ImageBrush x:Key="nameBarTR045" ImageSource="NameBar/NameTR045.png"/>
 
     <ImageBrush x:Key="nameBarE3W07" ImageSource="NameBar/NameE3W07.png"/>
+    <ImageBrush x:Key="nameBarEX116" ImageSource="NameBar/NameEX116.png"/>
     <ImageBrush x:Key="nameBarEX119" ImageSource="NameBar/NameEX119.png"/>
     <ImageBrush x:Key="nameBarEX408" ImageSource="NameBar/NameEX408.png"/>
     <ImageBrush x:Key="nameBarEX506" ImageSource="NameBar/NameEX506.png"/>
@@ -448,7 +450,6 @@
     <BitmapImage x:Key="snapTAHL004" UriSource="Token/TAH0401.png"/>
     <BitmapImage x:Key="snapTAHL005" UriSource="Token/TAH0501.png"/>
     <BitmapImage x:Key="snapTAHL006" UriSource="Token/TAH0601.png"/>
-    <BitmapImage x:Key="snapTAHL011" UriSource="Token/TAH1101.png"/>
     <BitmapImage x:Key="snapTAHL014" UriSource="Token/TAH1401.png"/>
     <BitmapImage x:Key="snapTKHL019_1" UriSource="Token/TKH1901.png"/>
     <BitmapImage x:Key="snapTKHL019_2" UriSource="Token/TKH1902.png"/>
@@ -465,6 +466,7 @@
     <BitmapImage x:Key="snapTKEX301_5" UriSource="Token/TKE0205.png"/>
     <BitmapImage x:Key="snapTREX506" UriSource="Token/TRE04.png"/>
     <BitmapImage x:Key="snapTAEX515" UriSource="Token/TAE05.png"/>
+    <BitmapImage x:Key="snapTAEX116" UriSource="Token/TAE1001.png"/>
 
     <Image x:Key="exspCard1" Source="Card/ExSp/EP001.png"/>
     <Image x:Key="exspCard2" Source="Card/ExSp/EP002.png"/>
@@ -894,6 +896,7 @@
     <Image x:Key="hroCardTR045" Source="Card/Heros/TR045.png"/>
 
     <Image x:Key="hroCardE3W07" Source="Card/Heros/E3W07.png"/>
+    <Image x:Key="hroCardEX116" Source="Card/Heros/EX116.png"/>
     <Image x:Key="hroCardEX119" Source="Card/Heros/EX119.png"/>
     <Image x:Key="hroCardEX301" Source="Card/Heros/EX301.png"/>
     <Image x:Key="hroCardEX408" Source="Card/Heros/EX408.png"/>

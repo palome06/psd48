@@ -239,11 +239,25 @@ namespace PSD.PSDGamepkg
                                             }
                                         }
                                     }
-                                    else if (spo == 2) // !2:Baiyue
+                                    else if (spo == 2 || spo == 9) // !2:Baiyue, !9:Shizhanglao
                                     {
-                                        ushort card = LibTuple.ML.Encode("GS04");
-                                        if (Board.Monster1 == card || Board.Monster2 == card ||
-                                            Board.Garden.Values.Where(p => p.Pets.Contains(card)).Any())
+                                        ushort card = LibTuple.ML.Encode(spo == 2 ? "GS04" : "GFT2");
+                                        bool exist = false;
+                                        if (Board.Monster1 == card || Board.Monster2 == card)
+                                            exist = true;
+                                        foreach (Player py in Board.Garden.Values)
+                                        {
+                                            if (py.Pets.Contains(card)) exist = true;
+                                            if (py.TokenExcl.Contains("M" + card)) exist = true;
+                                            Tux tux = LibTuple.TL.DecodeTux(py.Trove);
+                                            if (tux != null && tux.IsTuxEqiup() && (tux as TuxEqiup).IsLuggage())
+                                            {
+                                                Luggage lug = tux as Luggage;
+                                                if (lug.Capacities.Contains("M" + card)) exist = true;
+                                            }
+                                            if (exist) break;
+                                        }
+                                        if (exist)
                                         {
                                             player.Loved = true;
                                             candidates.Add("!PT" + card);

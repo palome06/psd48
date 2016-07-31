@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
-using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -85,9 +84,12 @@ namespace PSD.ClientAo
             FolderCount = 0;
 
             Token = 0;
-            DelExSpCard(ExSpCards.ToList());
-            DelPlayerTar(PlayerTars.ToList());
-            DelMyFolder(mMyFolder.ToList());
+            if (Tuple.HL.InstanceHero(SelectHero) != null)
+            {
+                DelExSpCard(ExSpCards.ToList());
+                DelPlayerTar(PlayerTars.ToList());
+                DelMyFolder(mMyFolder.ToList());
+            }
             ClearSkill();
 
             Weapon = Armor = Trove = 0;

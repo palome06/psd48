@@ -538,6 +538,8 @@ namespace PSD.ClientZero
                             return "全体衡道众统领";
                         else if (p == "!8")
                             return "魔剑";
+                        else if (p == "!9")
+                            return "金翅凤凰";
                         else
                             return "";
                     })));

@@ -3487,14 +3487,10 @@ namespace PSD.PSDGamepkg.JNS
                             Encrypted = false,
                             SingleCard = ut
                         }.ToMessage());
-                        if (tux.IsTuxEqiup())
-                            XI.RaiseGMessage("G1UE," + player.Uid + ",0," + ut);
-                        else
-                        {
-                            string tfuse = tux.IsLinked(pt) ? fuse : pureFuse;
-                            XI.RaiseGMessage("G0CC,0,0," + player.Uid +
+                        string tfuse = tux.IsLinked(pt) ? fuse : pureFuse;
+                        XI.RaiseGMessage("G0CZ,0," + player.Uid);
+                        XI.RaiseGMessage("G0CC,0,0," + player.Uid +
                                 "," + tux.Code + "," + ut + ";" + pt + "," + tfuse);
-                        }
                     }
                 }
                 else
