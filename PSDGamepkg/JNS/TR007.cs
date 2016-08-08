@@ -2036,16 +2036,11 @@ namespace PSD.PSDGamepkg.JNS
             else if (type == 1)
             {
                 player.RAM.Set("AquaHit", 2);
-                if (player.Team == XI.Board.Rounder.Team)
-                {
-                    TargetPlayer(player.Uid, XI.Board.Supporter.Uid);
-                    XI.RaiseGMessage("G0IX," + XI.Board.Supporter.Uid + ",2");
-                }
-                else
-                {
-                    TargetPlayer(player.Uid, XI.Board.Hinder.Uid);
-                    XI.RaiseGMessage("G0IX," + XI.Board.Hinder.Uid + ",2");
-                }
+                List<Player> attenders = XI.Board.GetAllAttenders().Where(p =>
+                    p.Team == player.Team && p.DEXi != 1).ToList();
+                TargetPlayer(player.Uid, attenders.Where(p => p.IsReal).Select(p => p.Uid));
+                foreach (Player py in attenders)
+                    XI.RaiseGMessage("G0IX," + py.Uid + ",2");
             }
             else if (type == 2)
             {
@@ -2085,10 +2080,12 @@ namespace PSD.PSDGamepkg.JNS
                 }
                 return false;
             }
-            else if (type == 1 && player.RAM.GetInt("AquaHit") == 1 && Artiad.PondRefresh.Parse(fuse).CheckHit)
+            else if (type == 1 && Artiad.PondRefresh.Parse(fuse).CheckHit)
             {
-                return (player.Team == XI.Board.Rounder.Team && XI.Board.Supporter.Uid != 0) ||
-                    (player.Team == XI.Board.Rounder.OppTeam && XI.Board.Hinder.Uid != 0);
+                if (player.RAM.GetInt("AquaHit") == 1)
+                    return XI.Board.GetAllAttenders().Any(p => p.Team == player.Team);
+                else if (player.RAM.GetInt("AquaHit") == 2)
+                    return XI.Board.GetAllAttenders().Any(p => p.Team == player.Team && p.DEXi != 1);
             }
             else if (type == 2)
             {

@@ -96,7 +96,7 @@ namespace PSD.PSDGamepkg.JNS
         {
             string[] args = fuse.Split(',');
             //Board.IsTangled = true;
-            ushort who = ushort.Parse(args[1]);
+            // ushort who = ushort.Parse(args[1]);
             ushort mon2ut = XI.Board.Monster2;
             Monster mon1 = XI.LibTuple.ML.Decode(XI.Board.Monster1);
             if (NMBLib.IsMonster(mon2ut))
@@ -111,7 +111,8 @@ namespace PSD.PSDGamepkg.JNS
                 Monster mon2 = XI.LibTuple.ML.Decode(XI.Board.Monster2);
                 if (mon2.STR >= mon1.STR)
                 {
-                    mon1.Curtain();
+                    if (XI.Board.IsMonsterDebut)
+                        mon1.Curtain();
                     if (XI.Board.Mon1From != 0)
                     {
                         XI.RaiseGMessage(new Artiad.LosePet()
@@ -1866,8 +1867,6 @@ namespace PSD.PSDGamepkg.JNS
             {
                 int idx = fuse.IndexOf(';');
                 string[] g0cc = fuse.Substring(0, idx).Split(',');
-                string kn = g0cc[4];
-                ushort[] txs = Algo.TakeRange(g0cc, 5, g0cc.Length).Select(p => ushort.Parse(p)).ToArray();
                 ushort trigger = ushort.Parse(g0cc[3]);
                 Player py = XI.Board.Garden[trigger];
                 return py.Team == player.OppTeam;
@@ -1897,7 +1896,7 @@ namespace PSD.PSDGamepkg.JNS
                 player.RAM.Set("Scared", null);
                 if (txs.Length > 0)
                 {
-                    ushort provider = ushort.Parse(g0cc[1]);
+                    // ushort provider = ushort.Parse(g0cc[1]);
                     string cardname = g0cc[4];
                     foreach (ushort p in txs)
                         XI.Board.PendingTux.Remove(trigger + ",G0CC," + p);
@@ -2979,7 +2978,7 @@ namespace PSD.PSDGamepkg.JNS
         #region HL018 - Xu'Nansong
         public bool JNH1801Valid(Player player, int type, string fuse)
         {
-            return XI.Board.Supporter.Uid == player.Uid && XI.Board.Hinder.IsReal;
+            return XI.Board.Supporter.Uid == player.Uid && XI.Board.Hinder.Uid != 0;
         }
         public void JNH1801Action(Player player, int type, string fuse, string argst)
         {

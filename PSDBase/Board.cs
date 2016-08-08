@@ -199,6 +199,18 @@ namespace PSD.Base
         {
             get { return RDrums.Keys.Select(p => p.Uid).Concat(ODrums.Keys.Select(p => p.Uid)).ToList(); }
         }
+        public List<Player> GetAllAttenders()
+        {
+            List<Player> pys = new List<Player>();
+            pys.Add(Rounder);
+            if (Supporter.Uid != 0)
+                pys.Add(Supporter);
+            if (Hinder.Uid != 0)
+                pys.Add(Hinder);
+            pys.AddRange(RDrums.Keys);
+            pys.AddRange(ODrums.Keys);
+            return pys;
+        }
 
         public int CalculateRPool()
         {

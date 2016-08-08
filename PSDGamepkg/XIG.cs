@@ -2154,89 +2154,75 @@ namespace PSD.PSDGamepkg
                         break;
                     }
                 case "G0IX":
+                    if (args[1] != "0")
                     {
                         ushort me = ushort.Parse(args[1]);
                         int type = int.Parse(args[2]);
-                        Player player = null;
-                        if (me < 1000)
-                            player = Board.Garden[me];
-                        else if (Board.Hinder.Uid == me)
-                            player = Board.Hinder;
-                        else if (Board.Supporter.Uid == me)
-                            player = Board.Supporter;
-                        if (player.Uid != 0)
+                        Player player = me < 1000 ? Board.Garden[me] : Board.GetAllAttenders()
+                            .Where(p => p.Uid == me).SingleOrDefault();
+                        if (type == 0 || type == 1 || type == 3)
                         {
-                            if (type == 0 || type == 1 || type == 3)
+                            int n = int.Parse(args[3]);
+                            if (type == 3)
+                                player.DEXh += n;
+                            if (type == 0 || type == 3)
+                                player.DEXb = player.mDEXb + n;
+                            if (Board.PlayerPoolEnabled)
                             {
-                                int n = int.Parse(args[3]);
-                                if (type == 3)
-                                    player.DEXh += n;
-                                if (type == 0 || type == 3)
-                                    player.DEXb = player.mDEXb + n;
-                                if (Board.PlayerPoolEnabled)
-                                {
-                                    player.DEXc = player.DEXc + n;
-                                    WI.BCast("E0IX," + me + "," + type + "," + n + "," + player.DEXa + "," + player.DEXc);
-                                }
-                                else if (Board.PoolEnabled)
-                                {
-                                    player.DEXa = player.mDEXa + n;
-                                    WI.BCast("E0IX," + me + "," + type + "," + n + "," + player.DEXa);
-                                }
-                                else
-                                    WI.BCast("E0IX," + me + "," + type + "," + n + "," + player.DEXb);
+                                player.DEXc = player.DEXc + n;
+                                WI.BCast("E0IX," + me + "," + type + "," + n + "," + player.DEXa + "," + player.DEXc);
                             }
-                            else if (type == 2)
+                            else if (Board.PoolEnabled)
                             {
-                                player.DEXi = 1;
-                                WI.BCast("E0IX," + me + ",2");
+                                player.DEXa = player.mDEXa + n;
+                                WI.BCast("E0IX," + me + "," + type + "," + n + "," + player.DEXa);
                             }
-                            if (Board.PoolEnabled)
-                                RaiseGMessage(new Artiad.PondRefresh() { CheckHit = true }.ToMessage());
+                            else
+                                WI.BCast("E0IX," + me + "," + type + "," + n + "," + player.DEXb);
                         }
-                        break;
+                        else if (type == 2)
+                        {
+                            player.DEXi = 1;
+                            WI.BCast("E0IX," + me + ",2");
+                        }
+                        if (Board.PoolEnabled)
+                            RaiseGMessage(new Artiad.PondRefresh() { CheckHit = true }.ToMessage());
                     }
+                    break;
                 case "G0OX":
+                    if (args[1] != "0")
                     {
                         ushort me = ushort.Parse(args[1]);
                         int type = int.Parse(args[2]);
-                        Player player = null;
-                        if (me < 1000)
-                            player = Board.Garden[me];
-                        else if (Board.Hinder.Uid == me)
-                            player = Board.Hinder;
-                        else if (Board.Supporter.Uid == me)
-                            player = Board.Supporter;
-                        if (player.Uid != 0)
+                        Player player = me < 1000 ? Board.Garden[me] : Board.GetAllAttenders()
+                            .Where(p => p.Uid == me).SingleOrDefault();
+                        if (type == 0 || type == 1 || type == 3)
                         {
-                            if (type == 0 || type == 1 || type == 3)
+                            int n = int.Parse(args[3]);
+                            if (type == 3)
+                                player.DEXh -= n;
+                            if (type == 0 || type == 3)
+                                player.DEXb = player.mDEXb - n;
+                            if (Board.PlayerPoolEnabled)
                             {
-                                int n = int.Parse(args[3]);
-                                if (type == 3)
-                                    player.DEXh -= n;
-                                if (type == 0 || type == 3)
-                                    player.DEXb = player.mDEXb - n;
-                                if (Board.PlayerPoolEnabled)
-                                {
-                                    player.DEXc = player.DEXc - n;
-                                    WI.BCast("E0OX," + me + "," + type + "," + n + "," + player.DEXa + "," + player.DEXc);
-                                }
-                                else if (Board.PoolEnabled)
-                                {
-                                    player.DEXa = player.mDEXa - n;
-                                    WI.BCast("E0OX," + me + "," + type + "," + n + "," + player.DEXa);
-                                }
-                                else
-                                    WI.BCast("E0OX," + me + "," + type + "," + n + "," + player.DEXb);
+                                player.DEXc = player.DEXc - n;
+                                WI.BCast("E0OX," + me + "," + type + "," + n + "," + player.DEXa + "," + player.DEXc);
                             }
-                            else if (type == 2)
+                            else if (Board.PoolEnabled)
                             {
-                                player.DEXi = 1;
-                                WI.BCast("E0OX," + me + ",2");
+                                player.DEXa = player.mDEXa - n;
+                                WI.BCast("E0OX," + me + "," + type + "," + n + "," + player.DEXa);
                             }
-                            if (Board.PoolEnabled)
-                                RaiseGMessage(new Artiad.PondRefresh() { CheckHit = true }.ToMessage());
+                            else
+                                WI.BCast("E0OX," + me + "," + type + "," + n + "," + player.DEXb);
                         }
+                        else if (type == 2)
+                        {
+                            player.DEXi = 1;
+                            WI.BCast("E0OX," + me + ",2");
+                        }
+                        if (Board.PoolEnabled)
+                            RaiseGMessage(new Artiad.PondRefresh() { CheckHit = true }.ToMessage());
                     }
                     break;
                 case "G0AX":

@@ -1861,10 +1861,10 @@ namespace PSD.ClientZero
                                 Z0D[who].DEXa = bs;
                             }
                             else
-                                VI.Cout(Uid, "{0}命中+{1},当前命中为{2}.", zd.Monster((ushort)(who - 1000)), n, tp);
+                                VI.Cout(Uid, "{0}命中+{1},当前命中为{2}.", zd.Warrior(who), n, tp);
                         }
                         else if (type == 2)
-                            VI.Cout(Uid, "{0}强制命中.", zd.Player(who));
+                            VI.Cout(Uid, "{0}强制命中.", zd.Warrior(who));
                         break;
                     }
                 case "E0OX":
@@ -1883,10 +1883,10 @@ namespace PSD.ClientZero
                                 Z0D[who].DEXa = bs;
                             }
                             else
-                                VI.Cout(Uid, "{0}命中-{1},当前命中为{2}.", zd.Monster((ushort)(who - 1000)), n, tp);
+                                VI.Cout(Uid, "{0}命中-{1},当前命中为{2}.", zd.Warrior(who), n, tp);
                         }
                         else if (type == 2)
-                            VI.Cout(Uid, "{0}强制被闪避.", zd.Player(who));
+                            VI.Cout(Uid, "{0}强制被闪避.", zd.Warrior(who));
                         break;
                     }
                 case "E0AX":
