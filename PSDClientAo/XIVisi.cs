@@ -2538,7 +2538,7 @@ namespace PSD.ClientAo
                                     case BCard.Genre.TuxSerial: text = zd.TuxDbSerial(invs); break;
                                     case BCard.Genre.Rune: text = "标记" + zd.Rune(invs); break;
                                     case BCard.Genre.Five: text = "属性" + zd.Prop(invs.Select(p => (int)p)); break;
-                                    case BCard.Genre.Exsp: text = zd.ExspIWithCode(invs.Select(p => (int)p)); break;
+                                    case BCard.Genre.Exsp: text = zd.ExspI(invs.Select(p => (int)p)); break;
                                 }
                                 VI.Cout(Uid, "{0}{1}了{2}.", zd.Player(who), actionText, text);
                             }

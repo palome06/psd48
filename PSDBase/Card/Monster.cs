@@ -53,6 +53,8 @@ namespace PSD.Base.Card
         public Utils.Diva RFM { private set; get; } // Alive in a round
         public Utils.Diva RAM { private set; get; } // Alive in a period
         public bool TeamBursted { set; get; } // whether brust in the team, only reset when changing side
+        // whether the monster is taking effect now
+        public bool InSupply { set; get; }
         #endregion Memory
 
         #region SPI Info
@@ -262,6 +264,7 @@ namespace PSD.Base.Card
             RFM = new Utils.Diva();
             RAM = new Utils.Diva();
             TeamBursted = false;
+            InSupply = false;
         }
 
         public bool IsMonster() { return true; }

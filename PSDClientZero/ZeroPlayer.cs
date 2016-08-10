@@ -270,8 +270,12 @@ namespace PSD.ClientZero
         {
             StringBuilder sb = new StringBuilder();
             Aps(sb, "{0}P: {1}({2}) {3}{4}{5}{6} {7}", Uid, xic.zd.Hero(SelectHero), Name,
-                IsAlive ? "" : "已阵亡 ", IsLoved ? "已倾慕 " : "", Immobilized ? "定 " : "",
-                PetDisabled ? "禁宠 " : "", Guardian != 0 ? xic.zd.GuardAlias(SelectHero, Coss) : "");
+                IsAlive ? "" : "已阵亡 ",
+                IsLoved ? "已倾慕 " : "",
+                Immobilized ? "横置 " : "",
+                PetDisabled ? "禁宠 " : "",
+                Guardian != 0 ? (xic.zd.GuardAlias(SelectHero, Coss) +
+                    "：" + xic.zd.Guard(Guardian)) : "");
             Aps(sb, "手牌数:{0} HP:{1}/{2} STR:{3}/{4} DEX:{5}/{6}",
                 TuxCount, HP, HPa, STR, STRa, DEX, DEXa);
             string equipBase = "装备: {0} {1}" + (((xic.LevelCode >> 1) >= 3 || xic.LevelCode == 0) ?

@@ -1120,8 +1120,9 @@ namespace PSD.PSDGamepkg.JNS
         }
         public void FJT2UseAction(ushort cardUt, Player player, ushort source)
         {
-            string tarStr = XI.AsyncInput(player.Uid, "#装备的,T1(p" + string.Join("p",
-                XI.Board.Garden.Values.Where(p => p.IsTared).Select(p => p.Uid)) + ")", "FJT2", "0");
+            TuxEqiup me = XI.LibTuple.TL.EncodeTuxCode("FJT2") as TuxEqiup;
+            string tarStr = XI.AsyncInput(player.Uid, "#装备的,T1" + FormatPlayers(p =>
+                p.IsTared && !me.RFM.GetOrSetUshortArray("Used").Contains(p.Uid)), "FJT2", "0");
             if (tarStr != VI.CinSentinel)
             {
                 ushort tar = ushort.Parse(tarStr);
@@ -1129,6 +1130,7 @@ namespace PSD.PSDGamepkg.JNS
                 {
                     Who = tar, Source = source, SingleCard = cardUt
                 }.ToMessage());
+                me.RFM.GetOrSetUshortArray("Used").Add(tar);
             }
         }
         public void FJT2InsAction(Player player)
@@ -2860,8 +2862,9 @@ namespace PSD.PSDGamepkg.JNS
         }
         public void FJH1UseAction(ushort cardUt, Player player, ushort source)
         {
-            string tarStr = XI.AsyncInput(player.Uid, "#装备的,T1(p" + string.Join("p",
-                XI.Board.Garden.Values.Where(p => p.IsTared).Select(p => p.Uid)) + ")", "FJH1", "0");
+            TuxEqiup me = XI.LibTuple.TL.EncodeTuxCode("FJH1") as TuxEqiup;
+            string tarStr = XI.AsyncInput(player.Uid, "#装备的,T1" + FormatPlayers(p =>
+                p.IsTared && !me.RFM.GetOrSetUshortArray("Used").Contains(p.Uid)), "FJH1", "0");
             if (tarStr != VI.CinSentinel)
             {
                 ushort tar = ushort.Parse(tarStr);
@@ -2869,6 +2872,7 @@ namespace PSD.PSDGamepkg.JNS
                 {
                     Who = tar, Source = source, SingleCard = cardUt
                 }.ToMessage());
+                me.RFM.GetOrSetUshortArray("Used").Add(tar);
             }
         }
         public void FJH1DelAction(Player player)

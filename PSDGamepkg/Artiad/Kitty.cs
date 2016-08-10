@@ -255,6 +255,7 @@ namespace PSD.PSDGamepkg.Artiad
                         // pet.SetIncrOption(player);
                     }
                     pet.IncrAction(player);
+                    pet.InSupply = true;
                 }
                 new JoinPetSemaphore() { Owner = jpes.Owner, Pets = jpes.Pets }.Telegraph(WI.BCast);
             });
@@ -286,6 +287,7 @@ namespace PSD.PSDGamepkg.Artiad
                         pet.ResetROM();
                     if (jpes.Reload == PetEffectUnit.ReloadType.NEW)
                         pet.TeamBursted = false;
+                    pet.InSupply = false;
                     XI.RaiseGMessage("G0WB," + pt);
                 }
                 new CollapsePetSemaphore() { Owner = jpes.Owner, Pets = jpes.Pets }.Telegraph(WI.BCast);

@@ -1749,51 +1749,70 @@ namespace PSD.PSDGamepkg.JNS
         }
         public bool JNH1002Valid(Player player, int type, string fuse)
         {
-            if (type == 0) // G0IC
+            if (type >= 0 && type <= 2)
             {
-                return Artiad.JoinPetEffects.Parse(fuse).List.Any(p =>
-                    XI.Board.Garden[p.Owner].IsAlive && XI.Board.Garden[p.Owner].Team == player.Team);
-            }
-            else if (type == 1) // G0OC
-            {
-                return Artiad.CollapsePetEffects.Parse(fuse).List.Any(p =>
-                    XI.Board.Garden[p.Owner].IsAlive && XI.Board.Garden[p.Owner].Team == player.Team);
-            }
-            else if (type == 2 || type == 3) // G0IS, G0OS
-                return IsMathISOS("JNH1002", player, fuse) && XI.Board.Garden.Values
-                    .Any(p => p.IsAlive && p.Team == player.Team && p.GetActivePetCount(XI.Board) > 0);
-            else
-                return false;
-        }
-        public void JNH1002Action(Player player, int type, string fuse, string argst)
-        {
-            if (type == 0)
-            {
-                Artiad.JoinPetEffects jpes = Artiad.JoinPetEffects.Parse(fuse);
-                jpes.List.ForEach(p => XI.Board.Garden[p.Owner].TuxLimit += p.Pets.Length);
-            }
-            else if (type == 1)
-            {
-                Artiad.CollapsePetEffects cpes = Artiad.CollapsePetEffects.Parse(fuse);
-                cpes.List.ForEach(p => XI.Board.Garden[p.Owner].TuxLimit -= p.Pets.Length);
-            }
-            else if (type == 2)
-            {
-                foreach (Player py in XI.Board.Garden.Values)
-                    if (py.IsAlive && py.Team == player.Team)
-                    {
-                        int count = py.GetActivePetCount(XI.Board);
-                        py.TuxLimit += count;
-                    }
+                List<Player> invs = new List<Player>();
+                var g = XI.Board.Garden;
+                if (type == 0)
+                {
+                    invs = Artiad.JoinPetEffects.Parse(fuse).List.Select(p =>
+                        g[p.Owner]).Where(p => p.IsAlive && p.Team == player.Team).ToList();
+                }
+                else if (type == 1)
+                {
+                    invs = Artiad.CollapsePetEffects.Parse(fuse).List.Select(p =>
+                        g[p.Owner]).Where(p => p.IsAlive && p.Team == player.Team).ToList();
+                }
+                else if (type == 2 && IsMathISOS("JNH1002", player, fuse))
+                    invs = g.Values.Where(p => p.IsAlive && p.Team == player.Team).ToList();
+                return invs.Any(p => p.GetInSupplyPetCount(XI.LibTuple.ML) !=
+                    player.ROM.GetOrSetDiva("Enhanced").GetInt(p.Uid.ToString()));
             }
             else if (type == 3)
             {
-                foreach (Player py in XI.Board.Garden.Values)
-                    if (py.IsAlive && py.Team == player.Team)
-                    {
-                        int count = py.GetActivePetCount(XI.Board);
+                return IsMathISOS("JNH1002", player, fuse) && XI.Board.Garden.Values.Any(p =>
+                    p.Team == player.Team && player.ROM.GetOrSetDiva("Enhanced").GetInt(p.Uid.ToString()) > 0);
+            }
+            else return false;
+        }
+        public void JNH1002Action(Player player, int type, string fuse, string argst)
+        {
+            if (type >= 0 && type <= 2)
+            {
+                List<Player> invs = new List<Player>();
+                var g = XI.Board.Garden;
+                if (type == 0)
+                {
+                    invs = Artiad.JoinPetEffects.Parse(fuse).List.Select(p =>
+                        g[p.Owner]).Where(p => p.IsAlive && p.Team == player.Team).ToList();
+                }
+                else if (type == 1)
+                {
+                    invs = Artiad.CollapsePetEffects.Parse(fuse).List.Select(p =>
+                        g[p.Owner]).Where(p => p.IsAlive && p.Team == player.Team).ToList();
+                }
+                else if (type == 2)
+                    invs = g.Values.Where(p => p.IsAlive && p.Team == player.Team).ToList();
+                foreach (Player py in invs)
+                {
+                    string who = py.Uid.ToString();
+                    int history = player.ROM.GetOrSetDiva("Enhanced").GetInt(who);
+                    int current = py.GetInSupplyPetCount(XI.LibTuple.ML);
+                    if (history < current)
+                        py.TuxLimit += (current - history);
+                    else if (history > current)
+                        py.TuxLimit -= (history - current);
+                    player.ROM.GetOrSetDiva("Enhanced").Set(who, current);
+                }
+            }
+            else if (type == 3)
+            {
+                foreach (Player py in XI.Board.Garden.Values.Where(p => p.Team == player.Team))
+                {
+                    int count = player.ROM.GetOrSetDiva("Enhanced").GetInt(py.Uid.ToString());
+                    if (count > 0)
                         py.TuxLimit -= count;
-                    }
+                }
             }
         }
         public bool JNH1003Valid(Player player, int type, string fuse)

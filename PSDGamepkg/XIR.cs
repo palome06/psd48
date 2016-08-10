@@ -708,6 +708,11 @@ namespace PSD.PSDGamepkg
                             player.Pets.Where(p => p != 0).Select(p => LibTuple.ML.Decode(p))
                                 .Where(p => p != null).ToList().ForEach(p => p.ResetRFM());
                         }
+                        foreach (Tux tux in LibTuple.TL.ListAllTuxSeleable(PCS.Level))
+                        {
+                            if (tux.IsTuxEqiup())
+                                (tux as TuxEqiup).ResetRFM();
+                        }
                         break;
                 }
             }

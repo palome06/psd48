@@ -1442,12 +1442,12 @@ namespace PSD.PSDGamepkg.JNS
                 }
                 else if (type == 2 && IsMathISOS("JN50301", player, fuse))
                     invs = g.Values.Where(p => p.IsAlive && p.Team == player.Team).ToList();
-                return invs.Any(p => p.GetActivePetCount(XI.Board) !=
+                return invs.Any(p => p.GetInSupplyPetCount(XI.LibTuple.ML) !=
                     player.ROM.GetOrSetDiva("Enhanced").GetInt(p.Uid.ToString()));
             }
             else if (type == 3)
             {
-                return IsMathISOS("JN50301", player, fuse) && XI.Board.Garden.Values.Any(p => 
+                return IsMathISOS("JN50301", player, fuse) && XI.Board.Garden.Values.Any(p =>
                     p.Team == player.Team && player.ROM.GetOrSetDiva("Enhanced").GetInt(p.Uid.ToString()) > 0);
             }
             else return false;
@@ -1474,10 +1474,10 @@ namespace PSD.PSDGamepkg.JNS
                 {
                     string who = py.Uid.ToString();
                     int history = player.ROM.GetOrSetDiva("Enhanced").GetInt(who);
-                    int current = py.GetActivePetCount(XI.Board);
+                    int current = py.GetInSupplyPetCount(XI.LibTuple.ML);
                     if (history < current)
                         XI.RaiseGMessage("G0IA," + py.Uid + ",0," + (current - history));
-                    else if (history < current)
+                    else if (history > current)
                         XI.RaiseGMessage("G0OA," + py.Uid + ",0," + (history - current));
                     player.ROM.GetOrSetDiva("Enhanced").Set(who, current);
                 }
@@ -1494,6 +1494,33 @@ namespace PSD.PSDGamepkg.JNS
                     }
                 }
             }
+        }
+        public bool JN50302Valid(Player player, int type, string fuse)
+        {
+            if (type == 0 && !player.IsAlive)
+            {
+                string[] blocks = fuse.Split(',');
+                for (int i = 1; i < blocks.Length; ++i)
+                {
+                    if (blocks[i].Equals(player.Uid.ToString()))
+                        return true;
+                }
+                return false;
+            }
+            else if (type == 1 && !player.IsAlive)
+                return true;
+            else if (type == 2)
+            {
+                // GOIY,0/1,A,S
+                string[] blocks = fuse.Split(',');
+                int heroCode = int.Parse(blocks[3]);
+                var hero = XI.LibTuple.HL.InstanceHero(heroCode);
+                if (hero != null && hero.Avatar == 10503)
+                    return true;
+                else return false;
+            }
+            else
+                return false;
         }
         public void JN50302Action(Player player, int type, string fuse, string argst)
         {
@@ -1537,33 +1564,6 @@ namespace PSD.PSDGamepkg.JNS
             }
             else if (type == 2)
                 XI.RaiseGMessage("G0OY,2," + player.Uid);
-        }
-        public bool JN50302Valid(Player player, int type, string fuse)
-        {
-            if (type == 0 && !player.IsAlive)
-            {
-                string[] blocks = fuse.Split(',');
-                for (int i = 1; i < blocks.Length; ++i)
-                {
-                    if (blocks[i].Equals(player.Uid.ToString()))
-                        return true;
-                }
-                return false;
-            }
-            else if (type == 1 && !player.IsAlive)
-                return true;
-            else if (type == 2)
-            {
-                // GOIY,0/1,A,S
-                string[] blocks = fuse.Split(',');
-                int heroCode = int.Parse(blocks[3]);
-                var hero = XI.LibTuple.HL.InstanceHero(heroCode);
-                if (hero != null && hero.Avatar == 10503)
-                    return true;
-                else return false;
-            }
-            else
-                return false;
         }
         #endregion XJ403 - LiuMengli
         #region XJ404 - MurongZiying

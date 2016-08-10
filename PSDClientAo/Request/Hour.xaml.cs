@@ -70,7 +70,7 @@ namespace PSD.ClientAo.Request
             InitializeComponent();
             string[] genreName = new string[] { "稻草人", "标准包", "凤鸣玉誓", "SP", "EX",
                 "三世轮回", "云来奇缘", "含笑九泉", "界限突破", "宿命篇", "重铸之心" };
-            int[] genreIndex = new int[] { 1, 2, 3, 5, 6, 4, 7, 9, 10 };
+            int[] genreIndex = new int[] { 1, 2, 3, 5, 6, 7, 9, 4, 10 };
             wrapPanels = new WrapPanel[genreName.Length];
             foreach (int index in genreIndex)
             {

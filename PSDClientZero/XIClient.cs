@@ -2629,7 +2629,7 @@ namespace PSD.ClientZero
         #region F
         private void HandleF0Message(string readLine)
         {
-            Console.WriteLine("Now dealing with F0 Msg: " + readLine + "...");
+            // Console.WriteLine("Now dealing with F0 Msg: " + readLine + "...");
             // lock (listOfThreads)
             // {
             //     foreach (Thread td in listOfThreads)

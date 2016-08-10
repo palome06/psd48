@@ -212,26 +212,10 @@ namespace PSD.ClientZero
         {
             return "{" + string.Join(",", codes.Select(p => ExspI(p))) + "}";
         }
-        internal string ExspIWithCode(int code)
-        {
-            return code + ":" + ExspI(code);
-        }
-        internal string ExspIWithCode(IEnumerable<int> codes)
-        {
-            return "{" + string.Join(",", codes.Select(p => ExspIWithCode(p))) + "}";
-        }
-        internal object Guard(ushort code)
+        internal string Guard(ushort code)
         {
             Base.Card.Exsp exsp = tuple.ESL.Encode("L" + code);
             return (exsp != null) ? (code + ":" + exsp.Name) : "0:喵";
-        }
-        internal string GuardWithCode(int code)
-        {
-            return code + ":" + ExspI(code);
-        }
-        internal string GuardWithCode(IEnumerable<int> codes)
-        {
-            return "{" + string.Join(",", codes.Select(p => GuardWithCode(p))) + "}";
         }
         internal string Rune(ushort code)
         {

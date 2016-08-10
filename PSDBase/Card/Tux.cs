@@ -377,6 +377,8 @@ namespace PSD.Base.Card
         //public int IncrOfHP { set; get; }
 
         public ushort SingleEntry { set; get; }
+        // global memory to store information
+        public Utils.Diva RFM { set; get; }
 
         public int[][] CsPriorites { private set; get; }
         public string[][] CsOccur { private set; get; }
@@ -652,23 +654,19 @@ namespace PSD.Base.Card
                 if (index < 0)
                     return 0;
                 else if (growup[index + 1] == '-')
-                    return int.Parse(Substring(growup, index + 1, index + 3));
+                    return int.Parse(Utils.Algo.Substring(growup, index + 1, index + 3));
                 else
-                    return int.Parse(Substring(growup, index + 1, index + 2));
+                    return int.Parse(Utils.Algo.Substring(growup, index + 1, index + 2));
             };
             IncrOfSTR = getValue('A');
             IncrOfDEX = getValue('X');
             //IncrOfHP = getValue(growup.IndexOf('H'));
+            RFM = new Utils.Diva();
         }
 
-        private static string Substring(string @string, int idx, int jdx)
+        public void ResetRFM()
         {
-            if (idx < 0)
-                return "";
-            else if (jdx == -1)
-                return @string.Substring(idx);
-            else
-                return @string.Substring(idx, jdx - idx);
+            RFM.Clear();
         }
     }
 

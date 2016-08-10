@@ -223,6 +223,11 @@ namespace PSD.Base
             cz01PriceDict = new Dictionary<string, List<string>>();
         }
         public int GetPetCount() { return Pets.Count(p => p != 0); }
+        public int GetInSupplyPetCount(Base.Card.MonsterLib ml)
+        {
+            return Pets.Count(p => p != 0 && ml.Decode(p) != null && ml.Decode(p).InSupply);
+        }
+        // get number of pets that can be activated, thus not forciblity banned
         public int GetActivePetCount(Board board)
         {
             return PetDisabled ? 0 : Pets.Count(p => p != 0 && !board.NotActionPets.Contains(p));
