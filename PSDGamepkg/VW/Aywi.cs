@@ -388,8 +388,8 @@ namespace PSD.PSDGamepkg.VW
                 }
                 else if (!string.IsNullOrEmpty(line) && !IsHangedUp)
                 {
+                    Log.Logger(0 + "<" + ny.Uid + ":" + line);
                     inf0Msgs.Add(new Base.VW.Msgs(line, ny.Uid, 0), ctoken.Token);
-                    //Log.Logger(0 + "<" + ny.Uid + ":" + line);
                 }
                 else
                     Thread.Sleep(80);
