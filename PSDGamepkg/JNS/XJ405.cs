@@ -1642,12 +1642,10 @@ namespace PSD.PSDGamepkg.JNS
                     "#『结拜』的,/T1" + AOthersTared(player), "JN50502", "0");
                 XI.RaiseGMessage("G0IJ," + player.Uid + ",2,1," + ushort.Parse(target));
                 TargetPlayer(player.Uid, player.SingleTokenTar);
-                XI.SendOutUAMessage(player.Uid, "JN50502," + target, "0");
             }
             else if (type == 1)
             {
                 TargetPlayer(player.Uid, player.SingleTokenTar);
-                VI.Cout(0, "玄霄触发「结拜」，对玩家{0}的命中+1.", XI.DisplayPlayer(player.SingleTokenTar));
                 XI.RaiseGMessage("G0IX," + player.Uid + ",1,1");
             }
             else if (type == 2)
@@ -1655,7 +1653,6 @@ namespace PSD.PSDGamepkg.JNS
                 if (player.SingleTokenTar == XI.Board.Rounder.Uid)
                 {
                     XI.RaiseGMessage("G0OX," + player.Uid + ",1,1");
-                    VI.Cout(0, "玄霄失去「结拜」目标.");
                     XI.RaiseGMessage("G0OJ," + player.Uid + ",2,1," + player.SingleTokenTar);
                 }
                 //XI.InnerGMessage(fuse, 111);

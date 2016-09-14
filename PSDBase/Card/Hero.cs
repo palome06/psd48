@@ -222,7 +222,7 @@ namespace PSD.Base.Card
         {
             List<Hero> first = ListAllJoinableHeroes(groups);
             string[] pair = { "XJ505", "TR011", "TR012", "R5Q05", "XJ302", "RM302", "XJ202", "RM202",
-                "X3W01", "R3W01", "TR004", "RM509" };
+                "X3W01", "R3W01", "TR004", "RM509", "XJ405", "RM405" };
             for (int i = 0; i < pair.Length; i += 2)
             {
                 if (first.Any(p => p.Ofcode == pair[i + 1]))

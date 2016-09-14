@@ -481,16 +481,9 @@ namespace PSD.ClientAo.Card
 
         public static List<Ruban> GenRubanList(IEnumerable<string> s, FrameworkElement uc, Base.LibGroup tuple)
         {
-            List<Ruban> hi = new List<Ruban>();
-            if (s == null || s.Count() == 0)
-                return hi;            
-            foreach (string str in s)
-            {
-                Ruban ru = GenRuban(str, uc, tuple);
-                if (ru != null)
-                    hi.Add(ru);
-            }
-            return hi;
+            if (s == null)
+                return new List<Ruban>();
+            return s.Select(p => GenRuban(p, uc, tuple)).Where(p => p != null).ToList();
         }
         #endregion Factory Utils
     }

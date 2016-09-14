@@ -126,7 +126,7 @@ namespace PSD.Base.Card
         {
             List<ushort> all = ListAllNPC(groups);
             string[] pair = { "NCR01", "NCT12", "NCR02", "NC302", "NCR03", "NC202", "NCR04", "N3W01",
-                "NCR05", "NCT04" };
+                "NCR05", "NCT04", "NCR06", "NC405" };
             for (int i = 0; i < pair.Length; i += 2)
             {
                 if (all.Any(p => dicts[p].Code == pair[i]))

@@ -3249,8 +3249,8 @@ namespace PSD.PSDGamepkg.JNS
                 }
                 else if (type == 1 || type == 2)
                 {
-                    if (player.DEX > 0)
-                        XI.RaiseGMessage("G0OX," + player.Uid + ",1," + player.DEX);
+                    if (player.Tux.Count > 2)
+                        XI.RaiseGMessage("G0DH," + player.Uid + ",1," + (player.Tux.Count / 2));
                 }
             }
         }

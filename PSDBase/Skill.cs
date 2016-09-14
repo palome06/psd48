@@ -198,46 +198,6 @@ namespace PSD.Base
         //private IDictionary<string, Skill> dicts;
         private Utils.ReadonlySQL sql;
 
-        public SkillLib(string path)
-        {
-            Firsts = new List<Skill>();
-            //dicts = new Dictionary<string, Skill>();
-            string[] lines = System.IO.File.ReadAllLines("..\\..\\data\\SkillDict.txt");
-            foreach (string line in lines)
-            {
-                if (line != null && line.Length > 0 && !line.StartsWith("#"))
-                {
-                    bool isBless = false;
-                    string[] content = line.Split('\t');
-                    string code = content[0]; // code, e.g. (JN10102)
-                    if (code.StartsWith("o"))
-                    {
-                        code = code.Substring(1);
-                        isBless = true;
-                    }
-                    string name = content[1]; // name, e.g. (Feilongtanyunshou)
-                    string occurs = content[2];
-                    string priorites = content[3];
-                    string onces = content[4];
-                    string parasitismStr = content[5];
-                    string terminiStr = content[6];
-                    if (isBless)
-                    {
-                        var skill = new Bless(name, code, occurs,
-                            priorites, onces, null, parasitismStr, terminiStr);
-                        Firsts.Add(skill);
-                        //dicts.Add(code, skill);
-                    }
-                    else
-                    {
-                        var skill = new Skill(name, code, occurs,
-                            priorites, onces, null, parasitismStr, terminiStr);
-                        Firsts.Add(skill);
-                    }
-                }
-            }
-        }
-
         public SkillLib()
         {
             Firsts = new List<Skill>();
@@ -250,7 +210,7 @@ namespace PSD.Base
             foreach (System.Data.DataRow data in datas)
             {
                 string type = (string)data["TYPE"];
-                if (type != "^")
+                if (type != "^" && !type.Contains("X"))
                 {
                     string code = (string)data["CODE"];
                     string name = (string)data["NAME"];

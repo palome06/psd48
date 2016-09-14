@@ -407,7 +407,7 @@ namespace PSD.PSDGamepkg.Artiad
 
         public static bool IsEquipable(Player player, Tux.TuxType tuxType)
         {
-            if (!player.AllTuxDisabled)
+            if (!player.XPDisabled)
             {
                 if (tuxType == Tux.TuxType.WQ)
                     return (player.FyMask & 0x1) == 0;

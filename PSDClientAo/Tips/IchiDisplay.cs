@@ -608,6 +608,10 @@ namespace PSD.ClientAo.Tips
 
         public static ToolTip GetExspTip(LibGroup Tuple, string code)
         {
+            return GetExspTip(Tuple, code, 0);
+        }
+        public static ToolTip GetExspTip(LibGroup Tuple, string code, int count)
+        {
             Exsp exsp = Tuple.ESL.Encode(code);
             if (exsp == null)
                 return null;
@@ -635,6 +639,13 @@ namespace PSD.ClientAo.Tips
                 Foreground = new SolidColorBrush(Colors.Yellow),
                 FontSize = LSIZE
             });
+            if (exsp.Type == 2)
+                pr.Inlines.Add(new Run(" (" + count + ")")
+                {
+                    FontWeight = FontWeights.Bold,
+                    Foreground = new SolidColorBrush(Colors.LightYellow),
+                    FontSize = LSIZE
+                });
             foreach (string skillstr in exsp.Skills)
             {
                 Skill skill = Tuple.SL.EncodeSkill(skillstr);

@@ -54,7 +54,7 @@ namespace PSD.PSDGamepkg.JNS
                 else
                     tux.Bribe += new Tux.ValidDelegate(delegate (Player player, int type, string fuse)
                     {
-                        return (bool)GeneralTuxBribe(player);
+                        return (bool)GeneralTuxBribe(tux.Type, player);
                     });
                 var methodValid = tc.GetType().GetMethod(cardCode + "Valid");
                 if (methodValid != null)
@@ -452,10 +452,10 @@ namespace PSD.PSDGamepkg.JNS
             if (type == 0)
             {
                 Player r = XI.Board.Rounder;
-                return r != null && r.Uid == player.Uid && !r.AllTuxDisabled;
+                return r != null && r.Uid == player.Uid && !r.TPDisabled;
             }
             else
-                return !player.AllTuxDisabled;
+                return !player.TPDisabled;
         }
         public void TP02Action(Player player, int type, string fuse, string args)
         {
@@ -1003,10 +1003,10 @@ namespace PSD.PSDGamepkg.JNS
             if (type == 0)
             {
                 Player r = XI.Board.Rounder;
-                return r != null && r.Uid == player.Uid && !r.AllTuxDisabled;
+                return r != null && r.Uid == player.Uid && !r.TPDisabled;
             }
             else
-                return !player.AllTuxDisabled;
+                return !player.TPDisabled;
         }
         public void TPT2Vestige(Player player, int type, string fuse, ushort it)
         {
@@ -3003,13 +3003,18 @@ namespace PSD.PSDGamepkg.JNS
         #endregion Equip Util
 
         #region Tux Util
-        private bool GeneralTuxBribe(Player player)
+        private bool GeneralTuxBribe(Tux.TuxType tuxType, Player player)
         {
-            return !player.AllTuxDisabled;
+            if (tuxType == Tux.TuxType.JP) return !player.JPDisabled;
+            if (tuxType == Tux.TuxType.TP) return !player.TPDisabled;
+            if (tuxType == Tux.TuxType.ZP) return !player.ZPDisabled;
+            if (tuxType == Tux.TuxType.WQ || tuxType == Tux.TuxType.FJ || tuxType == Tux.TuxType.XB)
+                return !player.XPDisabled;
+            return false;
         }
         private bool GeneralZPBribe(Player player)
         {
-            return player.RestZP > 0 && !player.ZPDisabled && !player.AllTuxDisabled;
+            return player.RestZP > 0 && !player.ZPDisabled && !player.ZPDisabled;
         }
         private bool GeneralEquipmentBribe(Player player, Tux.TuxType tuxType)
         {

@@ -79,6 +79,9 @@ namespace PSD.Base
         #region Status
         // cause reason (GL04) / mask code (3)
         private IDictionary<string, int> cardDisabled;
+        private IDictionary<string, int> cardEffDisabled;
+        // silence the board so that active skills are banned, set of reasons
+        private ISet<string> mSilence;
 
         public bool IsAlive { set; get; }
         // indicate whether a player is in processing of leaving
@@ -103,7 +106,7 @@ namespace PSD.Base
         public List<ushort> Runes { private set; get; }
         public List<string> ExSpouses { private set; get; }
 
-        private void SetTuxDisabledLevel(string tag, bool value, int maskCode)
+        private void SetDisabledLevel(IDictionary<string, int> table, string tag, bool value, int maskCode)
         {
             if (value)
             {
@@ -122,23 +125,48 @@ namespace PSD.Base
                 }
             }
         }
-        private int GetTuxDisabledLevel()
+        private int GetDisabledLevel(IDictionary<string, int> table)
         {
             return cardDisabled.Values.Aggregate(0, (acc, x) => acc | x);
         }
-        public bool EquipDisabled { get { return (GetTuxDisabledLevel() & 7) != 0; } }
-        public void SetEquipDisabled(string tag, bool value) { SetTuxDisabledLevel(tag, value, 7); }
-        public bool WeaponDisabled { get { return (GetTuxDisabledLevel() & 1) != 0; } }
-        public void SetWeaponDisabled(string tag, bool value) { SetTuxDisabledLevel(tag, value, 1); }
-        public bool ArmorDisabled { get { return (GetTuxDisabledLevel() & 2) != 0; } }
-        public void SetArmorDisabled(string tag, bool value) { SetTuxDisabledLevel(tag, value, 2); }
-        public bool TroveDisabled { get { return (GetTuxDisabledLevel() & 4) != 0; } }
-        public void SetTroveDisabled(string tag, bool value) { SetTuxDisabledLevel(tag, value, 4); }
+        private void SetTuxEffDisabledLevel(string tag, bool value, int maskCode)
+        {
+            SetDisabledLevel(cardEffDisabled, tag, value, maskCode);
+        }
+        private int GetTuxEffDisabledLevel()
+        {
+            return GetDisabledLevel(cardEffDisabled);
+        }
+        private void SetTuxDisabledLevel(string tag, bool value, int maskCode)
+        {
+            SetDisabledLevel(cardDisabled, tag, value, maskCode);
+        }
+        private int GetTuxDisabledLevel()
+        {
+            return GetDisabledLevel(cardDisabled);
+        }
+        public bool EquipDisabled { get { return (GetTuxEffDisabledLevel() & 7) != 0; } }
+        public void SetEquipDisabled(string tag, bool value) { SetTuxEffDisabledLevel(tag, value, 7); }
+        public bool WeaponDisabled { get { return (GetTuxEffDisabledLevel() & 1) != 0; } }
+        public void SetWeaponDisabled(string tag, bool value) { SetTuxEffDisabledLevel(tag, value, 1); }
+        public bool ArmorDisabled { get { return (GetTuxEffDisabledLevel() & 2) != 0; } }
+        public void SetArmorDisabled(string tag, bool value) { SetTuxEffDisabledLevel(tag, value, 2); }
+        public bool TroveDisabled { get { return (GetTuxEffDisabledLevel() & 4) != 0; } }
+        public void SetTroveDisabled(string tag, bool value) { SetTuxEffDisabledLevel(tag, value, 4); }
 
-        public bool ZPDisabled { get { return (GetTuxDisabledLevel() & 0x8) != 0; } }
-        public void SetZPDisabled(string tag, bool value) { SetTuxDisabledLevel(tag, value, 0x8); }
-        public bool AllTuxDisabled { get { return (GetTuxDisabledLevel() & 0x10) != 0; } }
-        public void SetAllTuxDisabled(string tag, bool value) { SetTuxDisabledLevel(tag, value, 0x10); }
+        public bool ZPDisabled { get { return (GetTuxDisabledLevel() & 1) != 0; } }
+        public void SetZPDisabled(string tag, bool value) { SetTuxDisabledLevel(tag, value, 0x1); }
+        public bool JPDisabled { get { return (GetTuxDisabledLevel() & 2) != 0; } }
+        public void SetJPDisabled(string tag, bool value) { SetTuxDisabledLevel(tag, value, 0x2); }
+        public bool TPDisabled { get { return (GetTuxDisabledLevel() & 4) != 0; } }
+        public void SetTPDisabled(string tag, bool value) { SetTuxDisabledLevel(tag, value, 0x4); }
+        public bool XPDisabled { get { return (GetTuxDisabledLevel() & 8) != 0; } }
+        public void SetXPDisabled(string tag, bool value) { SetTuxDisabledLevel(tag, value, 0x8); }
+        public void SetAllTuxDisabled(string tag, bool value) { SetTuxDisabledLevel(tag, value, 0xF); }
+
+        public void SetSilence(string tag) { mSilence.Add(tag); }
+        public void ResetSilence(string tag) { mSilence.Remove(tag); }
+        public bool IsSilenced { get { return mSilence.Count > 0; } }
         // whether the player is rounder and dead to cause continuous procedure
         public bool IsRan { set; get; }
         // whether the player is added and needed push back to pocket
@@ -206,6 +234,8 @@ namespace PSD.Base
 
             Immobilized = false;
             cardDisabled = new Dictionary<string, int>();
+            cardEffDisabled = new Dictionary<string, int>();
+            mSilence = new HashSet<string>();
             PetDisabled = false;
             IsAlive = false;
             Nineteen = false;
@@ -238,6 +268,8 @@ namespace PSD.Base
         {
             Immobilized = false;
             cardDisabled.Clear();
+            cardEffDisabled.Clear();
+            mSilence.Clear();
             PetDisabled = false;
             Loved = false;
             DEXi = 0; STRi = 0;

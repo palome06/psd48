@@ -463,54 +463,38 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Resources\Token\TRH03.png" />
-    <Resource Include="Resources\Token\TK50801.png" />
-    <Resource Include="Resources\Token\TK50802.png" />
-    <Resource Include="Resources\Token\TK50803.png" />
-    <Resource Include="Resources\Token\TK50804.png" />
-    <Resource Include="Resources\Token\TKH0101.png" />
-    <Resource Include="Resources\Token\TKH0102.png" />
-    <Resource Include="Resources\Token\TKH0103.png" />
-    <Resource Include="Resources\Token\TKH0104.png" />
-    <Resource Include="Resources\Token\TKH0105.png" />
-    <Resource Include="Resources\Token\TKH0106.png" />
-    <Resource Include="Resources\Token\TKH0107.png" />
-    <Resource Include="Resources\Token\TKH0108.png" />
-    <Resource Include="Resources\Token\TKH0901.png" />
-    <Resource Include="Resources\Token\TKH0902.png" />
-    <Resource Include="Resources\Token\TKH0903.png" />
-    <Resource Include="Resources\Token\TKH0904.png" />
-    <Resource Include="Resources\Token\TKH0905.png" />
-    <Resource Include="Resources\Token\TKH0906.png" />
-    <Resource Include="Resources\Token\TKH0907.png" />
-    <Resource Include="Resources\Token\TKH0908.png" />
-    <Resource Include="Resources\Token\TKH0909.png" />
-    <Resource Include="Resources\Token\TKH1901.png" />
-    <Resource Include="Resources\Token\TKH1902.png" />
-    <Resource Include="Resources\Token\TKH1903.png" />
-    <Resource Include="Resources\Token\TKH1904.png" />
-    <Resource Include="Resources\Token\TKH1905.png" />
-    <Resource Include="Resources\Token\TKH1906.png" />
+    <Resource Include="Resources\Token\N01.png" />
+    <Resource Include="Resources\Token\N02.png" />
+    <Resource Include="Resources\Token\N03.png" />
+    <Resource Include="Resources\Token\N04.png" />
+    <Resource Include="Resources\Token\N05.png" />
+    <Resource Include="Resources\Token\N06.png" />
+    <Resource Include="Resources\Token\N07.png" />
+    <Resource Include="Resources\Token\N08.png" />
+    <Resource Include="Resources\Token\N09.png" />
+    <Resource Include="Resources\Token\N10.png" />
+    <Resource Include="Resources\Token\TK508.png" />
+    <Resource Include="Resources\Token\TKH01.png" />
+    <Resource Include="Resources\Token\TKH09.png" />
+    <Resource Include="Resources\Token\TKH19.png" />
     <Resource Include="Resources\Token\TR405.png" />
     <Resource Include="Resources\Token\TRH02.png" />
+    <Resource Include="Resources\Token\TRH03.png" />
     <Resource Include="Resources\Token\TRH05.png" />
     <Resource Include="Resources\Token\TRH19.png" />
     <Resource Include="Resources\Token\TRS05.png" />
     <Resource Include="Resources\Token\TRT08.png" />
     <Resource Include="Resources\Token\TRT28.png" />
     <Resource Include="Resources\Token\TRT32.png" />
-    <Resource Include="Resources\Token\TAH0401.png" />
-    <Resource Include="Resources\Token\TAH0501.png" />
-    <Resource Include="Resources\Token\TAH0601.png" />
-    <Resource Include="Resources\Token\TAH1401.png" />
-    <Resource Include="Resources\Token\TKE0201.png" />
-    <Resource Include="Resources\Token\TKE0202.png" />
-    <Resource Include="Resources\Token\TKE0203.png" />
-    <Resource Include="Resources\Token\TKE0204.png" />
-    <Resource Include="Resources\Token\TKE0205.png" />
+    <Resource Include="Resources\Token\TAH04.png" />
+    <Resource Include="Resources\Token\TAH05.png" />
+    <Resource Include="Resources\Token\TAH06.png" />
+    <Resource Include="Resources\Token\TAH14.png" />
+    <Resource Include="Resources\Token\TAH19.png" />
+    <Resource Include="Resources\Token\TKE02.png" />
+    <Resource Include="Resources\Token\TKE05.png" />
     <Resource Include="Resources\Token\TRE04.png" />
-    <Resource Include="Resources\Token\TAE05.png" />
-    <Resource Include="Resources\Token\TAE1001.png" />
+    <Resource Include="Resources\Token\TAE10.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Card\Eve\S3W01.png" />
@@ -904,6 +888,7 @@
     <Resource Include="Resources\Card\NMB\NCR03.png" />
     <Resource Include="Resources\Card\NMB\NCR04.png" />
     <Resource Include="Resources\Card\NMB\NCR05.png" />
+    <Resource Include="Resources\Card\NMB\NCR06.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\PetsSnap\NC506.png" />
@@ -1443,6 +1428,7 @@
     <Resource Include="Resources\Heros\20003.png" />
     <Resource Include="Resources\Heros\20004.png" />
     <Resource Include="Resources\Heros\20005.png" />
+    <Resource Include="Resources\Heros\20006.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Card\Heros\E3W07.png" />
@@ -1483,6 +1469,7 @@
     <Resource Include="Resources\Card\Heros\RM202.png" />
     <Resource Include="Resources\Card\Heros\R3W01.png" />
     <Resource Include="Resources\Card\Heros\RM509.png" />
+    <Resource Include="Resources\Card\Heros\RM405.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Guard\L0.png" />

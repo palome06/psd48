@@ -3488,6 +3488,13 @@ namespace PSD.PSDGamepkg.JNS
             List<Artiad.Harm> harm = Artiad.Harm.Parse(fuse);
             List<ushort> invs = harm.Where(p => g[p.Who].IsTared && g[p.Who].Team == player.Team &&
                 p.Who != player.Uid && p.Element.IsPropedElement() && p.N > 0).Select(p => p.Who).Distinct().ToList();
+            System.Func<Player, ushort, bool> canUseRule = (py, ut) =>
+            {
+                Tux tux = XI.LibTuple.TL.DecodeTux(ut);
+                return tux != null &&
+                    ((tux.Type == Tux.TuxType.JP && !py.JPDisabled) || (tux.IsTuxEqiup() && !py.XPDisabled)) &&
+                    tux.Valid(py, 0, fuse);
+            };
             while (invs.Count > 0 && player.Tux.Count > 0)
             {
                 string giver = XI.AsyncInput(player.Uid, "#给予,/T1(p" + string.Join("p", invs) + ")", "JNT2901", "0");
@@ -3505,21 +3512,14 @@ namespace PSD.PSDGamepkg.JNS
                     invs.Remove(who);
 
                     XI.RaiseGMessage("G0HQ,0," + who + "," + player.Uid + ",1," + cardUts.Length + "," + give);
-                    List<ushort> canUse = py.Tux.Where(p => XI.LibTuple.TL.DecodeTux(p) != null && (XI.LibTuple.TL
-                        .DecodeTux(p).Type == Tux.TuxType.JP || XI.LibTuple.TL.DecodeTux(p).IsTuxEqiup()) &&
-                        XI.LibTuple.TL.DecodeTux(p).Valid(py, 0, fuse)).ToList();
-                    if (canUse.Count != 0)
+                    List<ushort> canUse = py.Tux.Where(p => canUseRule(py, p)).ToList();
+                    string uses = XI.AsyncInput(who, canUse.Count > 0 ?
+                        ("#使用,/Q1(p" + string.Join("p", canUse) + ")") : "/", "JNT2901", "2");
+                    if (!uses.StartsWith("/") && !uses.Contains(VI.CinSentinel))
                     {
-                        string uses = XI.AsyncInput(who, "#使用,/Q1(p" +
-                            string.Join("p", canUse) + ")", "JNT2901", "2");
-                        if (!uses.StartsWith("/") && !uses.Contains(VI.CinSentinel))
-                        {
-                            ushort useUt = ushort.Parse(uses);
-                            Artiad.Procedure.UseCardDirectly(g[who], useUt, fuse, XI, who);
-                        }
+                        ushort useUt = ushort.Parse(uses);
+                        Artiad.Procedure.UseCardDirectly(py, useUt, fuse, XI, who);
                     }
-                    else
-                        XI.AsyncInput(who, "/", "JNT2901", "2");
                     if (player.Tux.Count == 0)
                         XI.RaiseGMessage("G0DH," + player.Uid + ",0,1");
                 }

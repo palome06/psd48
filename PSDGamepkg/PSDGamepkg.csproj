@@ -73,6 +73,7 @@
     <Compile Include="DS\UFSet.cs" />
     <Compile Include="JNS\CZ02.cs" />
     <Compile Include="JNS\FG04.cs" />
+    <Content Include="JNS\Garbage.txt" />
     <Compile Include="JNS\HL014.cs" />
     <Compile Include="JNS\JNSBase.cs" />
     <Compile Include="JNS\JP06.cs" />

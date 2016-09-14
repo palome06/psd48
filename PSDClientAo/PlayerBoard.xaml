@@ -194,8 +194,11 @@
 
             <StackPanel x:Name="tokenStack" Orientation="Horizontal" FlowDirection="RightToLeft"
                         Canvas.Right="100" Canvas.Top="98">
-                <Image x:Name="tkTake" Source="{StaticResource snapTKXJ508_4}" Height="18" Width="18"
-                        Visibility="Collapsed"/>
+                <Grid x:Name="tkTake" Height="18" Width="18" Visibility="Collapsed">
+                    <Image x:Name="tkTuyang" Source="{StaticResource snapTKXJ508}" Height="18" Width="18"/>
+                    <Image x:Name="tkTusenpo" Source="{StaticResource snapN01}" Height="12.5" IsHitTestVisible="False"
+                           HorizontalAlignment="Left" VerticalAlignment="Bottom"/>
+                </Grid>
                 <Image x:Name="awTake" Source="{StaticResource snapTAHL005}" Height="18" Width="18"
                         Visibility="Collapsed"/>
             </StackPanel>

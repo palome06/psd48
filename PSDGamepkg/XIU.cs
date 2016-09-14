@@ -541,6 +541,7 @@ namespace PSD.PSDGamepkg
                     int idx = "U8,".Length, jdx = input.IndexOf(',', idx);
                     int ruvsn = int.Parse(Algo.Substring(input, idx, jdx));
                     if (ruvsn != uvMsgSerialNum) continue;
+                    MatchedPopFromLastUV(who, "U8");
                     return Algo.Substring(input, jdx + prev.Length + 2, -1);
                 } while (true);
             }

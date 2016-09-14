@@ -264,6 +264,7 @@
     <Image x:Key="heroHead20003" Source="Heros/20003.png"/>
     <Image x:Key="heroHead20004" Source="Heros/20004.png"/>
     <Image x:Key="heroHead20005" Source="Heros/20005.png"/>
+    <Image x:Key="heroHead20006" Source="Heros/20006.png"/>
 
     <ImageBrush x:Key="nameBar000Brush" ImageSource="NameBar/Name000.png"/>
     <ImageBrush x:Key="nameBarXJ101" ImageSource="NameBar/NameXJ101.png"/>
@@ -420,53 +421,39 @@
     <BitmapImage x:Key="status0pt" UriSource="StatusIcon/nopet.png"/>
 
     <BitmapImage x:Key="snapTRXJ405" UriSource="Token/TR405.png"/>
-    <BitmapImage x:Key="snapTKXJ508_1" UriSource="Token/TK50801.png"/>
-    <BitmapImage x:Key="snapTKXJ508_2" UriSource="Token/TK50802.png"/>
-    <BitmapImage x:Key="snapTKXJ508_3" UriSource="Token/TK50803.png"/>
-    <BitmapImage x:Key="snapTKXJ508_4" UriSource="Token/TK50804.png"/>
+    <BitmapImage x:Key="snapTKXJ508" UriSource="Token/TK508.png"/>
     <BitmapImage x:Key="snapTRSP502" UriSource="Token/TRS05.png"/>
     <BitmapImage x:Key="snapTRTR008" UriSource="Token/TRT08.png"/>
     <BitmapImage x:Key="snapTRTR028" UriSource="Token/TRT28.png"/>
     <BitmapImage x:Key="snapTRTR032" UriSource="Token/TRT32.png"/>
-    <BitmapImage x:Key="snapTKHL001_1" UriSource="Token/TKH0101.png"/>
-    <BitmapImage x:Key="snapTKHL001_2" UriSource="Token/TKH0102.png"/>
-    <BitmapImage x:Key="snapTKHL001_3" UriSource="Token/TKH0103.png"/>
-    <BitmapImage x:Key="snapTKHL001_4" UriSource="Token/TKH0104.png"/>
-    <BitmapImage x:Key="snapTKHL001_5" UriSource="Token/TKH0105.png"/>
-    <BitmapImage x:Key="snapTKHL001_6" UriSource="Token/TKH0106.png"/>
-    <BitmapImage x:Key="snapTKHL001_7" UriSource="Token/TKH0107.png"/>
-    <BitmapImage x:Key="snapTKHL001_8" UriSource="Token/TKH0108.png"/>
-    <BitmapImage x:Key="snapTKHL009_1" UriSource="Token/TKH0901.png"/>
-    <BitmapImage x:Key="snapTKHL009_2" UriSource="Token/TKH0902.png"/>
-    <BitmapImage x:Key="snapTKHL009_3" UriSource="Token/TKH0903.png"/>
-    <BitmapImage x:Key="snapTKHL009_4" UriSource="Token/TKH0904.png"/>
-    <BitmapImage x:Key="snapTKHL009_5" UriSource="Token/TKH0905.png"/>
-    <BitmapImage x:Key="snapTKHL009_6" UriSource="Token/TKH0906.png"/>
-    <BitmapImage x:Key="snapTKHL009_7" UriSource="Token/TKH0907.png"/>
-    <BitmapImage x:Key="snapTKHL009_8" UriSource="Token/TKH0908.png"/>
-    <BitmapImage x:Key="snapTKHL009_9" UriSource="Token/TKH0909.png"/>
+    <BitmapImage x:Key="snapTKHL001" UriSource="Token/TKH01.png"/>
+    <BitmapImage x:Key="snapTKHL009" UriSource="Token/TKH09.png"/>
     <BitmapImage x:Key="snapTRHL002" UriSource="Token/TRH02.png"/>
     <BitmapImage x:Key="snapTRHL003" UriSource="Token/TRH03.png"/>
-    <BitmapImage x:Key="snapTAHL004" UriSource="Token/TAH0401.png"/>
-    <BitmapImage x:Key="snapTAHL005" UriSource="Token/TAH0501.png"/>
-    <BitmapImage x:Key="snapTAHL006" UriSource="Token/TAH0601.png"/>
-    <BitmapImage x:Key="snapTAHL014" UriSource="Token/TAH1401.png"/>
-    <BitmapImage x:Key="snapTKHL019_1" UriSource="Token/TKH1901.png"/>
-    <BitmapImage x:Key="snapTKHL019_2" UriSource="Token/TKH1902.png"/>
-    <BitmapImage x:Key="snapTKHL019_3" UriSource="Token/TKH1903.png"/>
-    <BitmapImage x:Key="snapTKHL019_4" UriSource="Token/TKH1904.png"/>
-    <BitmapImage x:Key="snapTKHL019_5" UriSource="Token/TKH1905.png"/>
-    <BitmapImage x:Key="snapTKHL019_6" UriSource="Token/TKH1906.png"/>
+    <BitmapImage x:Key="snapTAHL004" UriSource="Token/TAH04.png"/>
+    <BitmapImage x:Key="snapTAHL005" UriSource="Token/TAH05.png"/>
+    <BitmapImage x:Key="snapTAHL006" UriSource="Token/TAH06.png"/>
+    <BitmapImage x:Key="snapTAHL014" UriSource="Token/TAH14.png"/>
+    <BitmapImage x:Key="snapTAHL019" UriSource="Token/TAH19.png"/>
+    <BitmapImage x:Key="snapTKHL019" UriSource="Token/TKH19.png"/>
     <BitmapImage x:Key="snapTRHL005" UriSource="Token/TRH05.png"/>
     <BitmapImage x:Key="snapTRHL019" UriSource="Token/TRH19.png"/>
-    <BitmapImage x:Key="snapTKEX301_1" UriSource="Token/TKE0201.png"/>
-    <BitmapImage x:Key="snapTKEX301_2" UriSource="Token/TKE0202.png"/>
-    <BitmapImage x:Key="snapTKEX301_3" UriSource="Token/TKE0203.png"/>
-    <BitmapImage x:Key="snapTKEX301_4" UriSource="Token/TKE0204.png"/>
-    <BitmapImage x:Key="snapTKEX301_5" UriSource="Token/TKE0205.png"/>
+    <BitmapImage x:Key="snapTKEX301" UriSource="Token/TKE02.png"/>
     <BitmapImage x:Key="snapTREX506" UriSource="Token/TRE04.png"/>
-    <BitmapImage x:Key="snapTAEX515" UriSource="Token/TAE05.png"/>
-    <BitmapImage x:Key="snapTAEX116" UriSource="Token/TAE1001.png"/>
+    <BitmapImage x:Key="snapTKEX515" UriSource="Token/TKE05.png"/>
+    <BitmapImage x:Key="snapTAEX116" UriSource="Token/TAE10.png"/>
+    <BitmapImage x:Key="snapTRRM405" UriSource="Token/TR405.png"/>
+	
+    <BitmapImage x:Key="snapN01" UriSource="Token/N01.png"/>
+    <BitmapImage x:Key="snapN02" UriSource="Token/N02.png"/>
+    <BitmapImage x:Key="snapN03" UriSource="Token/N03.png"/>
+    <BitmapImage x:Key="snapN04" UriSource="Token/N04.png"/>
+    <BitmapImage x:Key="snapN05" UriSource="Token/N05.png"/>
+    <BitmapImage x:Key="snapN06" UriSource="Token/N06.png"/>
+    <BitmapImage x:Key="snapN07" UriSource="Token/N07.png"/>
+    <BitmapImage x:Key="snapN08" UriSource="Token/N08.png"/>
+    <BitmapImage x:Key="snapN09" UriSource="Token/N09.png"/>
+    <BitmapImage x:Key="snapN10" UriSource="Token/N10.png"/>
 
     <Image x:Key="exspCard1" Source="Card/ExSp/EP001.png"/>
     <Image x:Key="exspCard2" Source="Card/ExSp/EP002.png"/>
@@ -715,6 +702,7 @@
     <Image x:Key="monCardNCR03" Source="Card/NMB/NCR03.png"/>
     <Image x:Key="monCardNCR04" Source="Card/NMB/NCR04.png"/>
     <Image x:Key="monCardNCR05" Source="Card/NMB/NCR05.png"/>
+    <Image x:Key="monCardNCR06" Source="Card/NMB/NCR06.png"/>
 
     <Image x:Key="tuxCard000" Source="Card/Tux00.png"/>
     <Image x:Key="tuxCardJP01" Source="Card/Tux/JP01.png"/>
@@ -931,6 +919,7 @@
     <Image x:Key="hroCardRM202" Source="Card/Heros/RM202.png"/>
     <Image x:Key="hroCardR3W01" Source="Card/Heros/R3W01.png"/>
     <Image x:Key="hroCardRM509" Source="Card/Heros/RM509.png"/>
+    <Image x:Key="hroCardRM405" Source="Card/Heros/RM405.png"/>
 
     <ImageBrush x:Key="dt01Bg" ImageSource="Logo/DT01.png" Opacity="0.9"/>
     <ImageBrush x:Key="dt02Bg" ImageSource="Logo/DT02.png" Opacity="0.9"/>

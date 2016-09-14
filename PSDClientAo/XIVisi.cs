@@ -2965,7 +2965,7 @@ namespace PSD.ClientAo
                                         zd.Player(who), n, offset);
                                     A0F.TuxCount += n;
                                 }
-                                else if (genre == BCard.Genre.NMB)
+                                else if (genre == BCard.Genre.NMB || genre == BCard.Genre.NPC)
                                 {
                                     VI.Cout(Uid, (who != 0 ? "{0}将" : "") + "{1}张牌放回怪牌堆顶{2}.",
                                         zd.Player(who), n, offset);

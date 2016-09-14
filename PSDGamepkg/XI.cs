@@ -694,9 +694,10 @@ namespace PSD.PSDGamepkg
                 //skt.CardCode = 0;
                 Skill skill = sk01[ske.Name];
                 string lf = (skill.IsLinked(ske.InType) ? ske.LinkFrom + ":" : "") + ske.Fuse;
-                if ((!ske.IsOnce || ske.Tick == 0) && skill.Valid(garden[ske.Tg], ske.InType, lf))
+                Player tgp = garden[ske.Tg];
+                if ((!ske.IsOnce || ske.Tick == 0) && !tgp.IsSilenced && skill.Valid(tgp, ske.InType, lf))
                 {
-                    if (ske.Lock == false || (ske.Lock == null && !garden[ske.Tg].IsSKOpt))
+                    if (ske.Lock == false || (ske.Lock == null && !tgp.IsSKOpt))
                     {
                         string msg = ske.Name;
                         // Only report the first param
@@ -717,9 +718,10 @@ namespace PSD.PSDGamepkg
                 //skt.CardCode = 0;
                 Bless skill = (Bless)sk01[ske.Name];
                 string lf = (skill.IsLinked(ske.InType) ? ske.LinkFrom + ":" : "") + ske.Fuse;
-                if ((!ske.IsOnce || ske.Tick == 0) && skill.BKValid(garden[ske.Tg], ske.InType, lf, ske.Owner))
+                Player tgp = garden[ske.Tg];
+                if ((!ske.IsOnce || ske.Tick == 0) && !tgp.IsSilenced && skill.BKValid(tgp, ske.InType, lf, ske.Owner))
                 {
-                    if (ske.Lock == false || (ske.Lock == null && !garden[ske.Tg].IsSKOpt))
+                    if (ske.Lock == false || (ske.Lock == null && !tgp.IsSKOpt))
                     {
                         string msg = ske.Name + "(" + ske.Owner + ")";
                         // Only report the first param
@@ -749,8 +751,6 @@ namespace PSD.PSDGamepkg
                     //    involved[0] |= true;  // All involved.
                     //    isAnySet |= true;
                     //}
-                    //else // TODO: compete mode only
-                    //{
                     if (ske.Type == SKTType.TX && player.Tux.Count > 0)
                     {
                         involved[ske.Tg] |= true;
@@ -758,7 +758,6 @@ namespace PSD.PSDGamepkg
                             isAnySet |= true;
                         //isAnySet |= true;
                     }
-                    //}
                     foreach (ushort handCode in player.Tux)
                     {
                         Base.Card.Tux hand = LibTuple.TL.DecodeTux(handCode);

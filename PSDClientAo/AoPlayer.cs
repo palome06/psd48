@@ -1105,7 +1105,7 @@ namespace PSD.ClientAo
                     {
                         if (mToken > 0)
                         {
-                            pb.tkTake.Visibility = System.Windows.Visibility.Visible;
+                            pb.tkTake.Visibility = Visibility.Visible;
                             Base.Card.Hero hero = Tuple.HL.InstanceHero(SelectHero);
                             if (string.IsNullOrEmpty(hero.TokenAlias) && Coss != 0)
                             {
@@ -1115,15 +1115,18 @@ namespace PSD.ClientAo
                             }
                             if (hero != null)
                             {
-                                string rename = "snapTK" + hero.Ofcode + "_" + mToken;
-                                pb.tkTake.ToolTip = Tips.IchiDisplay.GetExspTip(Tuple, "TK" + hero.Ofcode);
-                                if (pb.tkTake.ToolTip == null)
-                                    pb.tkTake.ToolTip = hero.TokenAlias;
-                                pb.tkTake.Source = pb.TryFindResource(rename) as ImageSource;
+                                string rename = "snapTK" + hero.Ofcode;
+                                pb.tkTuyang.ToolTip = Tips.IchiDisplay.GetExspTip(Tuple, "TK" + hero.Ofcode, mToken);
+                                if (pb.tkTuyang.ToolTip == null)
+                                    pb.tkTuyang.ToolTip = hero.TokenAlias;
+                                pb.tkTuyang.Source = pb.TryFindResource(rename) as ImageSource;
+                                
+                                string nname = string.Format("snapN{0:D2}", mToken > 9 ? 10 : mToken);
+                                pb.tkTusenpo.Source = pb.TryFindResource(nname) as ImageSource;
                             }
                         }
                         else
-                            pb.tkTake.Visibility = System.Windows.Visibility.Collapsed;
+                            pb.tkTake.Visibility = Visibility.Collapsed;
                     }));
                 }
             }
