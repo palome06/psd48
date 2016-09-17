@@ -66,6 +66,7 @@
     <Compile Include="Artiad\ImperialOrder.cs" />
     <Compile Include="Artiad\JanuaryMan.cs" />
     <Compile Include="Artiad\Kitty.cs" />
+    <Compile Include="Artiad\Little.cs" />
     <Compile Include="Artiad\Pond.cs" />
     <Compile Include="Artiad\Procedure.cs" />
     <Compile Include="Constants.cs" />

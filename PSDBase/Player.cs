@@ -106,28 +106,28 @@ namespace PSD.Base
         public List<ushort> Runes { private set; get; }
         public List<string> ExSpouses { private set; get; }
 
-        private void SetDisabledLevel(IDictionary<string, int> table, string tag, bool value, int maskCode)
+        private static void SetDisabledLevel(IDictionary<string, int> table, string tag, bool value, int maskCode)
         {
             if (value)
             {
-                if (cardDisabled.ContainsKey(tag))
-                    cardDisabled[tag] |= maskCode;
+                if (table.ContainsKey(tag))
+                    table[tag] |= maskCode;
                 else
-                    cardDisabled.Add(tag, maskCode);
+                    table.Add(tag, maskCode);
             }
             else
             {
-                if (cardDisabled.ContainsKey(tag))
+                if (table.ContainsKey(tag))
                 {
-                    cardDisabled[tag] &= (~maskCode);
-                    if (cardDisabled[tag] == 0)
-                        cardDisabled.Remove(tag);
+                    table[tag] &= (~maskCode);
+                    if (table[tag] == 0)
+                        table.Remove(tag);
                 }
             }
         }
-        private int GetDisabledLevel(IDictionary<string, int> table)
+        private static int GetDisabledLevel(IDictionary<string, int> table)
         {
-            return cardDisabled.Values.Aggregate(0, (acc, x) => acc | x);
+            return table.Values.Aggregate(0, (acc, x) => acc | x);
         }
         private void SetTuxEffDisabledLevel(string tag, bool value, int maskCode)
         {
@@ -177,7 +177,7 @@ namespace PSD.Base
         #region Memory
         // TODO: formalize and classify memories
         public bool TokenAwake { set; get; } // 0 (e.g. XJ401.2)
-        public ushort TokenCount { set; get; } // 1 (e.g. XJ608.1)
+        public int TokenCount { set; get; } // 1 (e.g. XJ608.1)
         public List<ushort> TokenTars { set; get; } // 2 (e.g. XJ405,2)
         public List<string> TokenExcl { set; get; } // 3 (e.g. XJ606,1)
         public List<ushort> TokenFold { set; get; } // 4 (e.g. HL011.2)

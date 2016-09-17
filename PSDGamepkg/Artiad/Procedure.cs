@@ -13,14 +13,18 @@ namespace PSD.PSDGamepkg.Artiad
         public static void ErasePlayerToken(Player player, Board board, Action<string> raiseG, int hero = 0)
         {
             if (player.TokenCount != 0)
-                raiseG("G0OJ," + player.Uid + ",0," + player.TokenCount);
+                raiseG(new DecrTokenCount() { Who = player.Uid, Delta = player.TokenCount }.ToMessage());
             if (player.TokenExcl.Count > 0)
             {
                 char exclType = player.TokenExcl[0][0];
                 Card.Genre exclGenre = Card.Char2Genre(exclType);
                 ushort[] cards = player.TokenExcl.Select(p => ushort.Parse(p.Substring(1))).ToArray();
-                raiseG("G2TZ,0," + player.Uid + "," + string.Join(",", player.TokenExcl));
-                raiseG("G0OJ," + player.Uid + ",1," + Algo.ListToString(player.TokenExcl));
+                raiseG(new DecrTokenExcl()
+                {
+                    Who = player.Uid,
+                    Delta = player.TokenExcl.ToArray(),
+                    Public = true
+                }.ToMessage());
                 if (Algo.Include(exclGenre, Card.Genre.Tux, Card.Genre.NMB, Card.Genre.Eve))
                     raiseG(new Abandon()
                     {
@@ -30,15 +34,13 @@ namespace PSD.PSDGamepkg.Artiad
                     }.ToMessage());
             }
             if (player.TokenTars.Count > 0)
-                raiseG("G0OJ," + player.Uid + ",2," + player.TokenTars.Count
-                    + "," + string.Join(",", player.TokenTars));
+                raiseG(new DecrTokenTar() { Who = player.Uid, Tars = player.TokenTars.ToArray() }.ToMessage());
             if (player.TokenAwake)
-                raiseG("G0OJ," + player.Uid + ",3");
+                raiseG(new DecrTokenAwake() { Who = player.Uid }.ToMessage());
             if (player.TokenFold.Count > 0)
             {
                 List<ushort> folds = player.TokenFold.ToList();
-                raiseG("G2TZ,0," + player.Uid + "," + string.Join(",", folds.Select(p => "C" + p)));
-                raiseG("G0OJ," + player.Uid + ",4," + folds.Count + "," + string.Join(",", folds));
+                raiseG(new DecrTokenFold() { Who = player.Uid, Delta = folds.ToArray() }.ToMessage());
                 raiseG(new Abandon()
                 {
                     Zone = CustomsHelper.ZoneType.PLAYER,
@@ -51,7 +53,7 @@ namespace PSD.PSDGamepkg.Artiad
             foreach (Player py in board.Garden.Values)
             {
                 if (py.IsAlive && py != player && py.TokenTars.Contains(player.Uid))
-                    raiseG("G0OJ," + py.Uid + ",2,1," + player.Uid);
+                    raiseG(new DecrTokenTar() { Who = py.Uid, SingleTar = player.Uid }.ToMessage());
             }
         }
 

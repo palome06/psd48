@@ -130,5 +130,29 @@ namespace PSD.PSDGamepkg.Artiad
             abandon.List.RemoveAll(p => p.Cards.Length == 0);
             return abandon.List.Count > 0;
         }
+        // excl to abandon, happens if the luggage is removed when disabled
+        public static void ExclToAbandon(ushort lugCode, ushort who, XI XI)
+        {
+            Luggage lug = XI.LibTuple.TL.DecodeTux(lugCode) as Luggage;
+            if (lug == null || lug.Capacities.Count == 0)
+                return;
+            lug.Pull = true;
+            Card.Genre genre = lug.Capacities[0][0].Char2Genre();
+            List<string> cap = lug.Capacities.ToList();
+            XI.RaiseGMessage("G0SN," + who + "," + lugCode
+                + ",1," + string.Join(",", cap));
+            XI.RaiseGMessage("G2TZ,0," + who + "," + string.Join(",", cap));
+            XI.RaiseGMessage(new Abandon()
+            {
+                Zone = ZoneType.PLAYER,
+                Genre = genre,
+                SingleUnit = new CustomsUnit()
+                {
+                    Source = who,
+                    Cards = cap.Select(p => ushort.Parse(p.Substring(1))).ToArray()
+                }
+            }.ToMessage());
+            lug.Pull = false;
+        }
     }
 }

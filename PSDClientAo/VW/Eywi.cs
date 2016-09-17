@@ -832,6 +832,11 @@ namespace PSD.ClientAo.VW
                     }
                 }
             }
+            if (Version <= 173)
+            {
+                line = line.Replace("JNH1803", "JNH1802").Replace("JNH1302", "JNH1303")
+                    .Replace("JNE0501", "||001||").Replace("JNE0502", "JN0501").Replace("||001||", "JNE0502");
+            }
         }
         #endregion Version
     }

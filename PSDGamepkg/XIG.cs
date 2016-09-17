@@ -934,12 +934,11 @@ namespace PSD.PSDGamepkg
                                 }
                                 if (py.Trove == card)
                                 {
+                                    TuxEqiup te = LibTuple.TL.DecodeTux(py.Trove) as TuxEqiup;
                                     if (!py.TroveDisabled)
-                                    {
-                                        Tux tx = LibTuple.TL.DecodeTux(py.Trove);
-                                        TuxEqiup te = tx as TuxEqiup;
                                         te.DelAction(py);
-                                    }
+                                    else if (te.IsLuggage()) // luggage still need to clean the capacities
+                                        Artiad.CustomsHelper.ExclToAbandon(card, who, this);
                                     RaiseGMessage(new Artiad.EqExport() { SingleUnit =
                                         new Artiad.CardAsUnit() { Who = who, Card = py.Trove } }.ToMessage());
                                     py.Trove = 0; bright.Add(card);
@@ -957,10 +956,13 @@ namespace PSD.PSDGamepkg
                                         TuxEqiup te = tx as TuxEqiup;
                                         te.DelAction(py);
                                     }
-                                    else if (tx.Type == Tux.TuxType.XB && !py.TroveDisabled)
+                                    else if (tx.Type == Tux.TuxType.XB)
                                     {
                                         TuxEqiup te = tx as TuxEqiup;
-                                        te.DelAction(py);
+                                        if (!py.TroveDisabled)
+                                            te.DelAction(py);
+                                        else if (te.IsLuggage())
+                                            Artiad.CustomsHelper.ExclToAbandon(card, who, this);
                                     }
                                     RaiseGMessage(new Artiad.EqExport() { SingleUnit =
                                         new Artiad.CardAsUnit() { Who = who, Card = py.ExEquip } }.ToMessage());
@@ -2826,112 +2828,28 @@ namespace PSD.PSDGamepkg
                     }
                     break;
                 case "G0IJ":
-                    {
-                        ushort who = ushort.Parse(args[1]);
-                        Player py = Board.Garden[who];
-                        ushort type = ushort.Parse(args[2]);
-                        if (type == 0)
-                        {
-                            ushort n = ushort.Parse(args[3]);
-                            py.TokenCount += n;
-                            WI.BCast("E0IJ," + who + ",0," + n + "," + py.TokenCount);
-                        }
-                        else if (type == 1)
-                        {
-                            int n = int.Parse(args[3]);
-                            List<string> heros = Algo.TakeRange(args, 4, 4 + n).ToList();
-                            py.TokenExcl.AddRange(heros);
-                            WI.BCast("E0IJ," + who + ",1," + n + "," + string.Join(",", heros) +
-                                "," + py.TokenExcl.Count + "," + string.Join(",", py.TokenExcl));
-                        }
-                        else if (type == 2)
-                        {
-                            int n = int.Parse(args[3]);
-                            List<ushort> tars = Algo.TakeRange(args, 4, 4 + n)
-                                .Select(p => ushort.Parse(p)).ToList();
-                            py.TokenTars.AddRange(tars);
-                            WI.BCast("E0IJ," + who + ",2," + n + "," + string.Join(",", tars) +
-                                "," + py.TokenTars.Count + "," + string.Join(",", py.TokenTars));
-                        }
-                        else if (type == 3)
-                        {
-                            if (!py.TokenAwake)
-                            {
-                                py.TokenAwake = true;
-                                WI.BCast("E0IJ," + who + ",3");
-                            }
-                        }
-                        else if (type == 4)
-                        {
-                            int n = int.Parse(args[3]);
-                            List<ushort> folders = Algo.TakeRange(args, 4, 4 + n)
-                                .Select(p => ushort.Parse(p)).ToList();
-                            py.TokenFold.AddRange(folders);
-                            WI.Send("E0IJ," + who + ",4,0," + n + "," + string.Join(",", folders) +
-                                "," + py.TokenFold.Count + "," + string.Join(",", py.TokenFold), 0, who);
-                            WI.Send("E0IJ," + who + ",4,1," + n + "," + py.TokenFold.Count, ExceptStaff(who));
-                            WI.Live("E0IJ," + who + ",4,1," + n + "," + py.TokenFold.Count);
-                        }
-                    }
+                    if (Artiad.LittleHelper.IsCount(cmd))
+                        Artiad.IncrTokenCount.Parse(cmd).Handle(this, WI);
+                    else if (Artiad.LittleHelper.IsExcl(cmd))
+                        Artiad.IncrTokenExcl.Parse(cmd).Handle(this, WI);
+                    else if (Artiad.LittleHelper.IsTars(cmd))
+                        Artiad.IncrTokenTar.Parse(cmd).Handle(this, WI);
+                    else if (Artiad.LittleHelper.IsAwake(cmd))
+                        Artiad.IncrTokenAwake.Parse(cmd).Handle(this, WI);
+                    else if (Artiad.LittleHelper.IsFold(cmd))
+                        Artiad.IncrTokenFold.Parse(cmd).Handle(this, WI);
                     break;
                 case "G0OJ":
-                    {
-                        ushort who = ushort.Parse(args[1]);
-                        Player py = Board.Garden[who];
-                        ushort type = ushort.Parse(args[2]);
-                        if (type == 0)
-                        {
-                            ushort n = ushort.Parse(args[3]);
-                            py.TokenCount -= n;
-                            WI.BCast("E0OJ," + who + ",0," + n + "," + py.TokenCount);
-                        }
-                        else if (type == 1)
-                        {
-                            int n = int.Parse(args[3]);
-                            List<string> heros = Algo.TakeRange(args, 4, 4 + n).ToList();
-                            py.TokenExcl.RemoveAll(p => heros.Contains(p));
-                            if (py.TokenExcl.Count > 0)
-                                WI.BCast("E0OJ," + who + ",1," + n + "," + string.Join(",", heros) +
-                                    "," + py.TokenExcl.Count + "," + string.Join(",", py.TokenExcl));
-                            else
-                                WI.BCast("E0OJ," + who + ",1," + n + "," + string.Join(",", heros) + ",0");
-                        }
-                        else if (type == 2)
-                        {
-                            int n = int.Parse(args[3]);
-                            List<ushort> tars = Algo.TakeRange(args, 4, 4 + n)
-                                .Select(p => ushort.Parse(p)).ToList();
-                            py.TokenTars.RemoveAll(p => tars.Contains(p));
-                            if (py.TokenTars.Count > 0)
-                                WI.BCast("E0OJ," + who + ",2," + n + "," + string.Join(",", tars) +
-                                    "," + py.TokenTars.Count + "," + string.Join(",", py.TokenTars));
-                            else
-                                WI.BCast("E0OJ," + who + ",2," + n + "," + string.Join(",", tars) + ",0");
-                        }
-                        else if (type == 3)
-                        {
-                            if (py.TokenAwake)
-                            {
-                                py.TokenAwake = false;
-                                WI.BCast("E0OJ," + who + ",3");
-                            }
-                        }
-                        else if (type == 4)
-                        {
-                            int n = int.Parse(args[3]);
-                            List<ushort> folders = Algo.TakeRange(args, 4, 4 + n)
-                                .Select(p => ushort.Parse(p)).ToList();
-                            py.TokenFold.RemoveAll(p => folders.Contains(p));
-                            if (py.TokenFold.Count > 0)
-                                WI.Send("E0OJ," + who + ",4,0," + n + "," + string.Join(",", folders) +
-                                    "," + py.TokenFold.Count + "," + string.Join(",", py.TokenFold), 0, who);
-                            else
-                                WI.Send("E0OJ," + who + ",4,0," + n + ","
-                                    + string.Join(",", folders) + ",0", 0, who);
-                            WI.Send("E0OJ," + who + ",4,1," + n + "," + py.TokenFold.Count, ExceptStaff(who));
-                            WI.Live("E0OJ," + who + ",4,1," + n + "," + py.TokenFold.Count);
-                        }
-                    }
+                    if (Artiad.LittleHelper.IsCount(cmd))
+                        Artiad.DecrTokenCount.Parse(cmd).Handle(this, WI);
+                    else if (Artiad.LittleHelper.IsExcl(cmd))
+                        Artiad.DecrTokenExcl.Parse(cmd).Handle(this, WI);
+                    else if (Artiad.LittleHelper.IsTars(cmd))
+                        Artiad.DecrTokenTar.Parse(cmd).Handle(this, WI);
+                    else if (Artiad.LittleHelper.IsAwake(cmd))
+                        Artiad.DecrTokenAwake.Parse(cmd).Handle(this, WI);
+                    else if (Artiad.LittleHelper.IsFold(cmd))
+                        Artiad.DecrTokenFold.Parse(cmd).Handle(this, WI);
                     break;
                 case "G0IE":
                     if (Artiad.KittyHelper.IsEnablePlayerPetEffect(cmd))

@@ -317,11 +317,14 @@ namespace PSD.PSDGamepkg.JNS
         // Kui Ce Tian Ji
         public void JP02Action(Player player, int type, string fuse, string argst)
         {
-            XI.RaiseGMessage("G0XZ," + player.Uid + ",2,1,2");
+            if (XI.Board.MonPiles.Count >= 2)
+                XI.RaiseGMessage("G0XZ," + player.Uid + ",2,1,2");
+            else
+                XI.RaiseGMessage("G0XZ," + player.Uid + ",2,0,1");
         }
         public bool JP02Valid(Player player, int type, string fuse)
         {
-            return XI.Board.MonPiles.Count >= 2;
+            return XI.Board.MonPiles.Count > 0;
         }
         // Wu Qi Chao Yuan
         public void JP03Action(Player player, int type, string fuse, string argst)

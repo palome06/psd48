@@ -29,7 +29,7 @@ namespace PSD.PSDGamepkg.JNS
             if (cnt + player.TokenCount > 8)
                 cnt = (ushort)(8 - player.TokenCount);
             if (cnt > 0)
-                XI.RaiseGMessage("G0IJ," + player.Uid + ",0," + cnt);
+                XI.RaiseGMessage(new Artiad.IncrTokenCount() { Who = player.Uid, Delta = cnt }.ToMessage());
         }
         public bool JNH0101Valid(Player player, int type, string fuse)
         {
@@ -39,7 +39,7 @@ namespace PSD.PSDGamepkg.JNS
         {
             int cnt = player.TokenCount;
             XI.RaiseGMessage("G0DS," + player.Uid + ",0,1");
-            XI.RaiseGMessage("G0OJ," + player.Uid + ",0," + cnt);
+            XI.RaiseGMessage(new Artiad.DecrTokenCount() { Who = player.Uid, Delta = cnt }.ToMessage());
             if (XI.Board.IsAttendWarSucc(player))
                 XI.RaiseGMessage("G0IP," + player.Team + "," + (cnt + 3));
             else
@@ -212,8 +212,12 @@ namespace PSD.PSDGamepkg.JNS
         {
             if (type == 0)
             {
-                XI.RaiseGMessage("G0IJ," + player.Uid + ",1,2,I23,I24");
-                XI.RaiseGMessage("G2TZ," + player.Uid + ",0,I23,I24");
+                XI.RaiseGMessage(new Artiad.IncrTokenExcl()
+                {
+                    Who = player.Uid,
+                    Delta = new string[] { "I23", "I24" },
+                    Public = true
+                }.ToMessage());
                 XI.RaiseGMessage("G0MA," + player.Uid + ",18");
                 XI.RaiseGMessage("G0IS," + player.Uid + ",1,JNH0203,JNH0204");
             }
@@ -233,13 +237,14 @@ namespace PSD.PSDGamepkg.JNS
                     XI.RaiseGMessage("G0IS," + player.Uid + ",1,JNH0203,JNH0204");
                 }
             }
-            else if (type == 2)
+            else if (type == 2 && player.SingleTokenTar != 0)
             {
-                if (player.SingleTokenTar != 0)
+                XI.Board.Garden[player.SingleTokenTar].SetAllTuxDisabled("JNH0206", false);
+                XI.RaiseGMessage(new Artiad.DecrTokenTar()
                 {
-                    XI.Board.Garden[player.SingleTokenTar].SetAllTuxDisabled("JNH0206", false);
-                    XI.RaiseGMessage("G0OJ," + player.Uid + ",2,1," + player.SingleTokenTar);
-                }
+                    Who = player.Uid,
+                    SingleTar = player.SingleTokenTar
+                }.ToMessage());
             }
         }
         public bool JNH0202Valid(Player player, int type, string fuse)
@@ -395,7 +400,7 @@ namespace PSD.PSDGamepkg.JNS
         public void JNH0206Action(Player player, int type, string fuse, string argst)
         {
             ushort ut = ushort.Parse(argst);
-            XI.RaiseGMessage("G0IJ," + player.Uid + ",2,1," + ut);
+            XI.RaiseGMessage(new Artiad.IncrTokenTar() { Who = player.Uid, SingleTar = ut }.ToMessage());
 
             Player tar = XI.Board.Garden[ut];
             TargetPlayer(player.Uid, tar.Uid);
@@ -540,12 +545,20 @@ namespace PSD.PSDGamepkg.JNS
                     if (!another.StartsWith("/") && another != VI.CinSentinel)
                     {
                         ushort to = ushort.Parse(another);
-                        XI.RaiseGMessage("G0IJ," + player.Uid + ",2,1," + to);
+                        XI.RaiseGMessage(new Artiad.IncrTokenTar()
+                        {
+                            Who = player.Uid,
+                            SingleTar = to
+                        }.ToMessage());
                         Player py = XI.Board.Garden[to];
                         rotation(py, false);
                     }
                     else
-                        XI.RaiseGMessage("G0IJ," + player.Uid + ",2,1," + player.Uid);
+                        XI.RaiseGMessage(new Artiad.IncrTokenTar()
+                        {
+                            Who = player.Uid,
+                            SingleTar = player.Uid
+                        }.ToMessage());
                 }
                 else
                 {
@@ -554,7 +567,11 @@ namespace PSD.PSDGamepkg.JNS
                     XI.RaiseGMessage("G0HR,0,1");
                     if (player.SingleTokenTar != player.Uid)
                         rotation(XI.Board.Garden[player.SingleTokenTar], true);
-                    XI.RaiseGMessage("G0OJ," + player.Uid + ",2,1," + player.SingleTokenTar);
+                    XI.RaiseGMessage(new Artiad.DecrTokenTar()
+                    {
+                        Who = player.Uid,
+                        SingleTar = player.SingleTokenTar
+                    }.ToMessage());
                 }
             }
             else if (type == 1) // Leave of myself
@@ -563,13 +580,25 @@ namespace PSD.PSDGamepkg.JNS
                 if (player.SingleTokenTar != 0)
                 {
                     rotation(XI.Board.Garden[player.SingleTokenTar], true);
-                    XI.RaiseGMessage("G0OJ," + player.Uid + ",2,1," + player.SingleTokenTar);
+                    XI.RaiseGMessage(new Artiad.DecrTokenTar()
+                    {
+                        Who = player.Uid,
+                        SingleTar = player.SingleTokenTar
+                    }.ToMessage());
                 }
             }
             else if (type == 2) // Leave of the target
             {
-                XI.RaiseGMessage("G0OJ," + player.Uid + ",2,1," + player.SingleTokenTar);
-                XI.RaiseGMessage("G0IJ," + player.Uid + ",2,1," + player.Uid);
+                XI.RaiseGMessage(new Artiad.DecrTokenTar()
+                {
+                    Who = player.Uid,
+                    SingleTar = player.SingleTokenTar
+                }.ToMessage());
+                XI.RaiseGMessage(new Artiad.IncrTokenTar()
+                {
+                    Who = player.Uid,
+                    SingleTar = player.Uid
+                }.ToMessage());
             }
             else if (type == 3) // still fold the one taking same change
                 rotation(XI.Board.Garden[player.SingleTokenTar], false);
@@ -702,7 +731,7 @@ namespace PSD.PSDGamepkg.JNS
         {
             if (type == 0)
             {
-                XI.RaiseGMessage("G0IJ," + player.Uid + ",3");
+                XI.RaiseGMessage(new Artiad.IncrTokenAwake() { Who = player.Uid }.ToMessage());
                 player.RAM.Set("+1tux", true);
                 player.SetZPDisabled("JNH0402", true);
             }
@@ -713,7 +742,7 @@ namespace PSD.PSDGamepkg.JNS
             }
             else if (type == 3)
             {
-                XI.RaiseGMessage("G0OJ," + player.Uid + ",3");
+                XI.RaiseGMessage(new Artiad.DecrTokenAwake() { Who = player.Uid }.ToMessage());
                 player.SetZPDisabled("JNH0402", false);
                 if (player.RAM.GetBool("+1tux"))
                     XI.RaiseGMessage("G0DH," + player.Uid + ",0,1");
@@ -812,7 +841,7 @@ namespace PSD.PSDGamepkg.JNS
                     XI.RaiseGMessage("G0HI," + args[1] + "," + args[2]);
                 else if (args[0] == "2") // Discard Equips
                     XI.RaiseGMessage("G0ZI," + args[1] + "," + args[2]);
-                XI.RaiseGMessage("G0IJ," + player.Uid + ",3");
+                XI.RaiseGMessage(new Artiad.IncrTokenAwake() { Who = player.Uid }.ToMessage());
             }
             else if (type == 1)
             {
@@ -823,7 +852,7 @@ namespace PSD.PSDGamepkg.JNS
                     XI.InnerGMessage(Artiad.Cure.ToMessage(cures), 51);
             }
             else if (type == 2)
-                XI.RaiseGMessage("G0OJ," + player.Uid + ",3");
+                XI.RaiseGMessage(new Artiad.DecrTokenAwake() { Who = player.Uid }.ToMessage());
         }
         public string JNH0502Input(Player player, int type, string fuse, string prev)
         {
@@ -893,12 +922,6 @@ namespace PSD.PSDGamepkg.JNS
                 return harms.Any(p => p.Who == player.SingleTokenTar
                      && p.N > 0 && !HPEvoMask.DECR_INVAO.IsSet(p.Mask));
             }
-            else if (type == 3)
-            {
-                string[] g0oj = fuse.Split(',');
-                ushort who = ushort.Parse(g0oj[1]);
-                return who == player.Uid && g0oj[2] == "2";
-            }
             else
                 return false;
         }
@@ -909,11 +932,15 @@ namespace PSD.PSDGamepkg.JNS
             {
                 XI.RaiseGMessage("G0DS," + player.Uid + ",0,1");
                 ushort tar = ushort.Parse(argst);
-                XI.RaiseGMessage("G0IJ," + player.Uid + ",2,1," + tar);
+                XI.RaiseGMessage(new Artiad.IncrTokenTar() { Who = player.Uid, SingleTar = tar }.ToMessage());
                 XI.Board.Garden[tar].SetSilence("JNH0503");
             }
             else if (type == 1)
-                XI.RaiseGMessage("G0OJ," + player.Uid + ",2,1," + player.SingleTokenTar);
+            {
+                Player py = XI.Board.Garden[player.SingleTokenTar];
+                py.ResetSilence("JNH0503");
+                XI.RaiseGMessage(new Artiad.DecrTokenTar() { Who = player.Uid, SingleTar = py.Uid }.ToMessage());
+            }
             else if (type == 2)
             {
                 List<Artiad.Harm> harms = Artiad.Harm.Parse(fuse);
@@ -921,14 +948,6 @@ namespace PSD.PSDGamepkg.JNS
                      && p.N > 0 && !HPEvoMask.DECR_INVAO.IsSet(p.Mask));
                 if (harms.Count > 0)
                     XI.InnerGMessage(Artiad.Harm.ToMessage(harms), -44);
-            }
-            else if (type == 3)
-            {
-                string[] g0oj = fuse.Split(',');
-                int last;
-                ushort[] outer = Algo.TakeArrayWithSize(g0oj, 3, out last);
-                outer.Select(p => XI.Board.Garden[p]).Where(p => p.IsAlive).ToList()
-                    .ForEach(p => p.ResetSilence("JNH0503"));
             }
         }
         public string JNH0503Input(Player player, int type, string fuse, string prev)
@@ -1095,7 +1114,7 @@ namespace PSD.PSDGamepkg.JNS
         public void JNH0602Action(Player player, int type, string fuse, string argst)
         {
             if (type == 0)
-                XI.RaiseGMessage("G0IJ," + player.Uid + ",3");
+                XI.RaiseGMessage(new Artiad.IncrTokenAwake() { Who = player.Uid }.ToMessage());
             else if (type == 1)
             {
                 List<Artiad.Harm> harms = Artiad.Harm.Parse(fuse);
@@ -1109,7 +1128,7 @@ namespace PSD.PSDGamepkg.JNS
                     XI.InnerGMessage(Artiad.Harm.ToMessage(harms), -149);
             }
             else if (type == 2)
-                XI.RaiseGMessage("G0OJ," + player.Uid + ",3");
+                XI.RaiseGMessage(new Artiad.DecrTokenAwake() { Who = player.Uid }.ToMessage());
         }
         public bool JNH0603Valid(Player player, int type, string fuse)
         {
@@ -1207,8 +1226,12 @@ namespace PSD.PSDGamepkg.JNS
                 }
                 if (rest == 0)
                 {
-                    XI.RaiseGMessage("G0IJ," + player.Uid + ",1,1,M" + npcUt);
-                    XI.RaiseGMessage("G2TZ," + player.Uid + ",0,M" + npcUt);
+                    XI.RaiseGMessage(new Artiad.IncrTokenExcl()
+                    {
+                        Who = player.Uid,
+                        SingleDelta = "M" + npcUt,
+                        Public = true
+                    }.ToMessage());
                     Artiad.Abandon abandon = Artiad.Abandon.Parse(fuse);
                     if (Artiad.CustomsHelper.RemoveCards(abandon, npcUt))
                         XI.InnerGMessage(abandon.ToMessage(), 30);
@@ -1645,31 +1668,19 @@ namespace PSD.PSDGamepkg.JNS
                 ushort who = ushort.Parse(g1ue[1]);
                 return who == player.Uid;
             }
-            else if (type == 3) // R*TM
-                return player.RFM.GetInt("MemoryCount") > player.HP;
-            else if (type == 4) // R*ED
+            else if (type == 3 || type == 4) // R*TM/R*ED
                 return player.TokenCount > 0;
             else return false;
         }
         public void JNH0903Action(Player player, int type, string fuse, string argst)
         {
-            System.Action<int> add = n =>
-            {
-                int now = player.RFM.GetInt("MemoryCount") + n;
-                player.RFM.Set("MemoryCount", now);
-                if (now > 8 && player.TokenCount <= 8)
-                    XI.RaiseGMessage("G0IJ," + player.Uid + ",0," + (9 - player.TokenCount));
-                else if (player.TokenCount <= 8)
-                    XI.RaiseGMessage("G0IJ," + player.Uid + ",0," + n);
-            };
-
             if (type == 0)
             {
                 string[] g0cc = Algo.Substring(fuse, 0, fuse.IndexOf(';')).Split(',');
                 int n = g0cc.Length - 5;
                 if (g0cc[5] == "0")
                     --n;
-                add(n);
+                XI.RaiseGMessage(new Artiad.IncrTokenCount() { Who = player.Uid, Delta = n }.ToMessage());
             }
             else if (type == 1)
             {
@@ -1680,22 +1691,22 @@ namespace PSD.PSDGamepkg.JNS
                     bool drIn = g1di[idx + 1] == "0";
                     int n = int.Parse(g1di[idx + 2]);
                     if (who == player.Uid && !drIn && n > 0)
-                        add(n);
+                        XI.RaiseGMessage(new Artiad.IncrTokenCount() { Who = player.Uid, Delta = n }.ToMessage());
                     idx += (4 + n);
                 }
             }
             else if (type == 2)
-                add(1);
+                XI.RaiseGMessage(new Artiad.IncrTokenCount() { Who = player.Uid, Delta = 1 }.ToMessage());
             else if (type == 3)
             {
-                XI.RaiseGMessage("G0OJ," + player.Uid + ",0," + player.TokenCount);
+                XI.RaiseGMessage(new Artiad.DecrTokenCount() { Who = player.Uid, Delta = player.TokenCount }.ToMessage());
                 XI.RaiseGMessage("G0OY,1," + player.Uid);
                 XI.RaiseGMessage("G0OS," + player.Uid + ",0,JNH0901,JNH0902,JNH0903");
                 XI.RaiseGMessage("G0IY,1," + player.Uid + ",19015");
                 XI.RaiseGMessage("G0IS," + player.Uid + ",0,JNH1501,JNH1502");
             }
             else if (type == 4)
-                XI.RaiseGMessage("G0OJ," + player.Uid + ",0," + player.TokenCount);
+                XI.RaiseGMessage(new Artiad.DecrTokenCount() { Who = player.Uid, Delta = player.TokenCount }.ToMessage());
         }
         #endregion HL009 - Lingjian
         #region HL010 - ShuiLingjing
@@ -1904,10 +1915,9 @@ namespace PSD.PSDGamepkg.JNS
         {
             if (type == 0)
             {
-                List<ushort> ijs = player.Tux.ToList();
-                int n = player.Tux.Count;
-                XI.RaiseGMessage("G0OT," + player.Uid + "," + n + "," + string.Join(",", ijs));
-                XI.RaiseGMessage("G0IJ," + player.Uid + ",4," + n + "," + string.Join(",", ijs));
+                ushort[] ijs = player.Tux.ToArray();
+                XI.RaiseGMessage(new Artiad.IncrTokenFold() { Who = player.Uid, Delta = ijs }.ToMessage());
+                XI.RaiseGMessage("G0OT," + player.Uid + "," + Algo.ListToString(ijs));
                 player.RAM.Set("Scared", true);
             }
             else if (type == 1)
@@ -1957,9 +1967,9 @@ namespace PSD.PSDGamepkg.JNS
             {
                 if (player.TokenFold.Count > 0)
                 {
-                    List<ushort> ijs = player.TokenFold.ToList();
-                    XI.RaiseGMessage("G0OJ," + player.Uid + ",4," + ijs.Count + "," + string.Join(",", ijs));
-                    XI.RaiseGMessage("G0IT," + player.Uid + "," + ijs.Count + "," + string.Join(",", ijs));
+                    ushort[] ijs = player.TokenFold.ToArray();
+                    XI.RaiseGMessage(new Artiad.DecrTokenFold() { Who = player.Uid, Delta = ijs }.ToMessage());
+                    XI.RaiseGMessage("G0IT," + player.Uid + "," + Algo.ListToString(ijs));
                 }
                 player.RAM.Set("Scared", null);
                 // Artiad.Procedure.SetPlayerAllEqEnable(XI, new Player[] { player }, 0x1, "JNH1102");
@@ -2069,14 +2079,22 @@ namespace PSD.PSDGamepkg.JNS
                 int delta = mon.STR / 2;
                 if (delta > 0)
                     XI.RaiseGMessage("G0IA," + player.Uid + ",1," + delta);
-                XI.RaiseGMessage("G2TZ," + player.Uid + ",0,M" + pop);
-                XI.RaiseGMessage("G0IJ," + player.Uid + ",1,1,M" + pop);
+                XI.RaiseGMessage(new Artiad.IncrTokenExcl()
+                {
+                    Who = player.Uid,
+                    SingleDelta = "M" + pop,
+                    Public = true
+                }.ToMessage());
             }
             else if (type == 1)
             {
                 List<string> animals = player.TokenExcl.ToList();
-                string sanimals = string.Join(",", animals);
-                XI.RaiseGMessage("G0OJ," + player.Uid + ",1," + animals.Count + "," + sanimals);
+                XI.RaiseGMessage(new Artiad.DecrTokenExcl()
+                {
+                    Who = player.Uid,
+                    Delta = player.TokenExcl.ToArray(),
+                    Public = true
+                }.ToMessage());
                 XI.RaiseGMessage(new Artiad.Abandon()
                 {
                     Zone = Artiad.CustomsHelper.ZoneType.PLAYER,
@@ -2087,13 +2105,19 @@ namespace PSD.PSDGamepkg.JNS
                         Cards = animals.Select(p => ushort.Parse(p.Substring("M".Length))).ToArray()
                     }
                 }.ToMessage());
-                XI.RaiseGMessage("G2TZ,0," + player.Uid + "," + sanimals);
             }
         }
         public bool JNH1302Valid(Player player, int type, string fuse)
         {
-            string[] blocks = fuse.Split(',');
-            return (blocks[1] == player.Uid.ToString() && blocks[2] == "1" && blocks[3] != "0");
+            if (Artiad.LittleHelper.IsExcl(fuse))
+            {
+                if (type == 0)
+                    return Artiad.IncrTokenExcl.Parse(fuse).Who == player.Uid;
+                else if (type == 1)
+                    return Artiad.DecrTokenExcl.Parse(fuse).Who == player.Uid;
+                else return false;
+            }
+            else return false;
         }
         public void JNH1302Action(Player player, int type, string fuse, string argst)
         {
@@ -2106,9 +2130,16 @@ namespace PSD.PSDGamepkg.JNS
                 XI.RaiseGMessage("G0IX," + player.Uid + ",0," + (-delta));
             player.ROM.Set("aglsum", agl);
 
-            string[] blocks = fuse.Split(',');
-            int n = int.Parse(blocks[3]);
-            XI.RaiseGMessage((type == 0 ? "G0IA," : "G0OA,") + player.Uid + ",0," + n);
+            if (type == 0)
+            {
+                XI.RaiseGMessage("G0IA," + player.Uid + ",0," +
+                    Artiad.IncrTokenExcl.Parse(fuse).Delta.Length);
+            }
+            else if (type == 1)
+            {
+                XI.RaiseGMessage("G0OA," + player.Uid + ",0," +
+                    Artiad.DecrTokenExcl.Parse(fuse).Delta.Length);
+            }
         }
         public bool JNH1303Valid(Player player, int type, string fuse)
         {
@@ -2220,7 +2251,7 @@ namespace PSD.PSDGamepkg.JNS
         public void JNH1403Action(Player player, int type, string fuse, string argst)
         {
             if (type == 0)
-                XI.RaiseGMessage("G0IJ," + player.Uid + ",3");
+                XI.RaiseGMessage(new Artiad.IncrTokenAwake() { Who = player.Uid }.ToMessage());
             else if (type == 1)
                 XI.RaiseGMessage("G1WJ,0");
         }
@@ -2418,11 +2449,12 @@ namespace PSD.PSDGamepkg.JNS
             reg(20, 15, 10); reg(21, 16, 11); reg(22, 17, 12);
 
             if (type == 0)
-            {
-                string part = string.Join(",", im.Keys.Select(p => "I" + p));
-                XI.RaiseGMessage("G0IJ," + player.Uid + ",1," + im.Keys.Count + "," + part);
-                XI.RaiseGMessage("G2TZ," + player.Uid + ",0," + part);
-            }
+                XI.RaiseGMessage(new Artiad.IncrTokenExcl()
+                {
+                    Who = player.Uid,
+                    Delta = im.Keys.Select(p => "I" + p).ToArray(),
+                    Public = true
+                }.ToMessage());
             else if (type == 1 || type == 2)
             {
                 ushort iNo = player.Guardian;
@@ -2440,7 +2472,12 @@ namespace PSD.PSDGamepkg.JNS
                         XI.RaiseGMessage("G0MA," + player.Uid + "," + im[pick]);
                         XI.RaiseGMessage("G0IS," + player.Uid + ",1," + isk[pick]);
                     }
-                    XI.RaiseGMessage("G0OJ," + player.Uid + ",1,1,I" + pick);
+                    XI.RaiseGMessage(new Artiad.DecrTokenExcl()
+                    {
+                        Who = player.Uid,
+                        SingleDelta = "I" + pick,
+                        Public = true
+                    }.ToMessage());
                 }
             }
         }
@@ -2497,9 +2534,12 @@ namespace PSD.PSDGamepkg.JNS
                 }
                 if (player.TokenExcl.Count > 0)
                 {
-                    XI.RaiseGMessage("G0OJ," + player.Uid + ",1," + player.TokenExcl.Count
-                        + "," + string.Join(",", player.TokenExcl));
-                    XI.RaiseGMessage("G2TZ,0," + player.Uid + "," + string.Join(",", player.TokenExcl));
+                    XI.RaiseGMessage(new Artiad.DecrTokenExcl()
+                    {
+                        Who = player.Uid,
+                        Delta = player.TokenExcl.ToArray(),
+                        Public = true
+                    }.ToMessage());
                 }
                 XI.RaiseGMessage(new Artiad.InnateChange()
                 {
@@ -3158,7 +3198,7 @@ namespace PSD.PSDGamepkg.JNS
         public void JNH1901Action(Player player, int type, string fuse, string argst)
         {
             if (type == 0)
-                XI.RaiseGMessage("G0IJ," + player.Uid + ",0,5");
+                XI.RaiseGMessage(new Artiad.IncrTokenCount() { Who = player.Uid, Delta = 5 }.ToMessage());
             else if (type == 1 || type == 2)
                 XI.RaiseGMessage("G0ZW," + player.Uid);
         }
@@ -3171,11 +3211,8 @@ namespace PSD.PSDGamepkg.JNS
                 System.Func<Player, bool> yes = p => p.IsReal && p.Team == player.OppTeam && p.Gender == 'F';
                 return player.TokenAwake && (yes(XI.Board.Supporter) || yes(XI.Board.Hinder));
             }
-            else if (type == 2) // OJ
-            {
-                string[] g0oj = fuse.Split(',');
-                return g0oj.Length == 3 && g0oj[1] == player.Uid.ToString() && g0oj[2] == "3";
-            }
+            else if (type == 2 && Artiad.LittleHelper.IsAwake(fuse)) // OJ
+                return Artiad.DecrTokenAwake.Parse(fuse).Who == player.Uid;
             else if (type == 3) // IY
             {
                 string[] g0iy = fuse.Split(',');
@@ -3212,7 +3249,7 @@ namespace PSD.PSDGamepkg.JNS
         {
             if (type == 0)
             {
-                XI.RaiseGMessage("G0IJ," + player.Uid + ",3");
+                XI.RaiseGMessage(new Artiad.IncrTokenAwake() { Who = player.Uid }.ToMessage());
                 XI.Board.Garden.Values.Where(p => p.IsAlive && p.Team == player.OppTeam && p.Gender == 'F')
                     .ToList().ForEach(py =>
                     {
@@ -3258,8 +3295,8 @@ namespace PSD.PSDGamepkg.JNS
                             if (value < 5)
                             {
                                 TargetPlayer(ut, player.Uid);
-                                XI.RaiseGMessage("G0OJ," + player.Uid + ",3");
-                                XI.RaiseGMessage("G0OJ," + player.Uid + ",0,1");
+                                XI.RaiseGMessage(new Artiad.DecrTokenAwake() { Who = player.Uid }.ToMessage());
+                                XI.RaiseGMessage(new Artiad.DecrTokenCount() { Who = player.Uid, Delta = 1 }.ToMessage());
                             }
                         }
                     }
@@ -3349,12 +3386,12 @@ namespace PSD.PSDGamepkg.JNS
                 ushort tar = ushort.Parse(argst);
                 Player py = XI.Board.Garden[tar];
                 TargetPlayer(player.Uid, tar);
-                XI.RaiseGMessage("G0OJ," + player.Uid + ",0,1");
+                XI.RaiseGMessage(new Artiad.DecrTokenCount() { Who = player.Uid, Delta = 1 }.ToMessage());
                 if (py.STR > player.STR)
                     XI.RaiseGMessage("G0IA," + player.Uid + ",1," + (py.STR - player.STR));
                 else if (py.STR < player.STR)
                     XI.RaiseGMessage("G0OA," + player.Uid + ",1," + (player.STR - py.STR));
-                XI.RaiseGMessage("G0IJ," + player.Uid + ",2,1," + tar);
+                XI.RaiseGMessage(new Artiad.IncrTokenTar() { Who = player.Uid, SingleTar = tar }.ToMessage());
             }
             else if (type == 1)
             {
@@ -3375,7 +3412,7 @@ namespace PSD.PSDGamepkg.JNS
             else if (type == 3)
             {
                 if (player.SingleTokenTar != 0)
-                    XI.RaiseGMessage("G0OJ," + player.Uid + ",2,1," + player.SingleTokenTar);
+                    XI.RaiseGMessage(new Artiad.DecrTokenTar() { Who = player.Uid, SingleTar = player.SingleTokenTar }.ToMessage());
             }
         }
         public string JNH1903Input(Player player, int type, string fuse, string prev)
@@ -3435,7 +3472,7 @@ namespace PSD.PSDGamepkg.JNS
                 {
                     ushort ut = ushort.Parse(select);
                     XI.RaiseGMessage("G0OT," + player.Uid + ",1," + ut);
-                    XI.RaiseGMessage("G0IJ," + player.Uid + ",4,1," + ut);
+                    XI.RaiseGMessage(new Artiad.IncrTokenFold() { Who = player.Uid, SingleDelta = ut }.ToMessage());
                 }
             }
         }
@@ -3461,15 +3498,18 @@ namespace PSD.PSDGamepkg.JNS
             player.RFM.Set("InJNH2002", true);
             if (type == 0)
             {
-                XI.RaiseGMessage("G0OJ," + player.Uid + ",4,1," + argst);
+                XI.RaiseGMessage(new Artiad.DecrTokenFold()
+                {
+                    Who = player.Uid,
+                    SingleDelta = ushort.Parse(argst),
+                    Public = true
+                }.ToMessage());
                 XI.RaiseGMessage(new Artiad.Abandon()
                 {
                     Zone = Artiad.CustomsHelper.ZoneType.PLAYER,
                     Genre = Card.Genre.Tux,
                     SingleUnit = new Artiad.CustomsUnit() { Source = player.Uid, Cards = uargs }
                 }.ToMessage());
-                XI.RaiseGMessage("G2TZ,0," + player.Uid + ",C" + argst);
-                //XI.RaiseGMessage("G1XR,1,1,1," + player.Uid);
                 XI.RaiseGMessage("G0OP," + player.Team + ",2");
                 ++player.RestZP;
             }
@@ -3479,27 +3519,35 @@ namespace PSD.PSDGamepkg.JNS
                 ushort card = ushort.Parse(args[1]);
                 TargetPlayer(player.Uid, who);
                 ushort[] utokens = Algo.TakeRange(uargs, 2, uargs.Length);
-                XI.RaiseGMessage("G0OJ," + player.Uid + ",4,2," + string.Join(",", utokens));
+                XI.RaiseGMessage(new Artiad.DecrTokenFold()
+                {
+                    Who = player.Uid,
+                    Delta = utokens,
+                    Public = true
+                }.ToMessage());
                 XI.RaiseGMessage(new Artiad.Abandon()
                 {
                     Zone = Artiad.CustomsHelper.ZoneType.PLAYER,
                     Genre = Card.Genre.Tux,
                     SingleUnit = new Artiad.CustomsUnit() { Source = player.Uid, Cards = utokens }
                 }.ToMessage());
-                XI.RaiseGMessage("G2TZ,0," + player.Uid + "," + string.Join(",", utokens.Select(p => "C" + p)));
                 XI.RaiseGMessage("G0HQ,0," + who + "," + who + ",0,1," + card);
             }
             else if (type == 2)
             {
                 ushort[] utokens = Algo.TakeRange(uargs, 1, uargs.Length);
-                XI.RaiseGMessage("G0OJ," + player.Uid + ",4,3," + string.Join(",", utokens));
+                XI.RaiseGMessage(new Artiad.DecrTokenFold()
+                {
+                    Who = player.Uid,
+                    Delta = utokens,
+                    Public = true
+                }.ToMessage());
                 XI.RaiseGMessage(new Artiad.Abandon()
                 {
                     Zone = Artiad.CustomsHelper.ZoneType.PLAYER,
                     Genre = Card.Genre.Tux,
                     SingleUnit = new Artiad.CustomsUnit() { Source = player.Uid, Cards = utokens }
                 }.ToMessage());
-                XI.RaiseGMessage("G2TZ,0," + player.Uid + "," + string.Join(",", utokens.Select(p => "C" + p)));
                 ushort pop = ushort.Parse(args[0]);
                 XI.Board.MonDises.Remove(pop);
                 XI.RaiseGMessage("G2CN,1,1");
@@ -3512,27 +3560,35 @@ namespace PSD.PSDGamepkg.JNS
             }
             else if (type == 3)
             {
-                XI.RaiseGMessage("G0OJ," + player.Uid + ",4,4," + argst);
+                XI.RaiseGMessage(new Artiad.DecrTokenFold()
+                {
+                    Who = player.Uid,
+                    Delta = uargs,
+                    Public = true
+                }.ToMessage());
                 XI.RaiseGMessage(new Artiad.Abandon()
                 {
                     Zone = Artiad.CustomsHelper.ZoneType.PLAYER,
                     Genre = Card.Genre.Tux,
                     SingleUnit = new Artiad.CustomsUnit() { Source = player.Uid, Cards = uargs }
                 }.ToMessage());
-                XI.RaiseGMessage("G2TZ,0," + player.Uid + "," + string.Join(",", args.Select(p => "C" + p)));
                 XI.RaiseGMessage("G0DH," + player.Uid + ",0,2");
                 XI.RaiseGMessage("G0IF," + player.Uid + ",2");
             }
             else if (type == 4)
             {
-                XI.RaiseGMessage("G0OJ," + player.Uid + ",4,5," + argst);
+                XI.RaiseGMessage(new Artiad.DecrTokenFold()
+                {
+                    Who = player.Uid,
+                    Delta = uargs,
+                    Public = true
+                }.ToMessage());
                 XI.RaiseGMessage(new Artiad.Abandon()
                 {
                     Zone = Artiad.CustomsHelper.ZoneType.PLAYER,
                     Genre = Card.Genre.Tux,
                     SingleUnit = new Artiad.CustomsUnit() { Source = player.Uid, Cards = uargs }
                 }.ToMessage());
-                XI.RaiseGMessage("G2TZ,0," + player.Uid + "," + string.Join(",", args.Select(p => "C" + p)));
                 int total = XI.Board.Garden.Values.Where(p => p.IsAlive && p.Team == player.OppTeam)
                     .Sum(p => p.GetEquipCount() + p.Runes.Count);
                 while (total > 0)
@@ -3653,7 +3709,7 @@ namespace PSD.PSDGamepkg.JNS
             }
         }
         #endregion E3W07 (01) - Sitang
-        #region EX301 - JingTian
+        #region EX301 (02) - JingTian
         public bool JNE0201Valid(Player player, int type, string fuse)
         {
             var v = XI.Board.Garden.Values;
@@ -3817,8 +3873,8 @@ namespace PSD.PSDGamepkg.JNS
             else
                 return "";
         }
-        #endregion EX301 - JingTian
-        #region EX408 - Chanyou
+        #endregion EX301 (02) - JingTian
+        #region EX408 (03) - Chanyou
         public bool JNE0301Valid(Player player, int type, string fuse)
         {
             if (type == 0)
@@ -3834,15 +3890,23 @@ namespace PSD.PSDGamepkg.JNS
             {
                 ushort[] uts = XI.DequeueOfPile(XI.Board.TuxPiles, 2);
                 XI.RaiseGMessage("G2IN,0,2");
-                XI.RaiseGMessage("G0IJ," + player.Uid + ",1,2,C" + uts[0] + ",C" + uts[1]);
-                XI.RaiseGMessage("G2TZ," + player.Uid + ",0,C" + uts[0] + ",C" + uts[1]);
+                XI.RaiseGMessage(new Artiad.IncrTokenExcl()
+                {
+                    Who = player.Uid,
+                    Delta = uts.Select(p => "C" + p).ToArray(),
+                    Public = true
+                }.ToMessage());
             }
             else if (type == 1)
             {
                 ushort ut = XI.DequeueOfPile(XI.Board.TuxPiles);
                 XI.RaiseGMessage("G2IN,0,1");
-                XI.RaiseGMessage("G0IJ," + player.Uid + ",1,1,C" + ut);
-                XI.RaiseGMessage("G2TZ," + player.Uid + ",0,C" + ut);
+                XI.RaiseGMessage(new Artiad.IncrTokenExcl()
+                {
+                    Who = player.Uid,
+                    SingleDelta = "C" + ut,
+                    Public = true
+                }.ToMessage());
             }
         }
         public bool JNE0302Valid(Player player, int type, string fuse)
@@ -3854,8 +3918,12 @@ namespace PSD.PSDGamepkg.JNS
             int idx = argst.IndexOf(',');
             bool incr = argst.Substring(0, idx) == "1";
             List<string> uts = argst.Substring(idx + 1).Split(',').Select(p => "C" + p).ToList();
-            XI.RaiseGMessage("G0OJ," + player.Uid + ",1," + uts.Count + "," + string.Join(",", uts));
-            XI.RaiseGMessage("G2TZ,0," + player.Uid + "," + string.Join(",", uts));
+            XI.RaiseGMessage(new Artiad.DecrTokenExcl()
+            {
+                Who = player.Uid,
+                Delta = uts.ToArray(),
+                Public = true
+            }.ToMessage());
             if (incr)
                 XI.RaiseGMessage("G0IW," + XI.Board.Monster1 + "," + uts.Count);
             else
@@ -3909,7 +3977,11 @@ namespace PSD.PSDGamepkg.JNS
                     XI.AsyncInput(player.Uid, "#作为「幻」的,C1(" + c0 + ")", "JNE0303", "1");
                     vals.Shuffle();
                     XI.RaiseGMessage("G0OT," + tar + ",1," + vals[0]);
-                    XI.RaiseGMessage("G0IJ," + player.Uid + ",1,1,C" + vals[0]);
+                    XI.RaiseGMessage(new Artiad.IncrTokenExcl()
+                    {
+                        Who = player.Uid,
+                        SingleDelta = "C" + vals[0]
+                    }.ToMessage());
                 }
                 else
                 {
@@ -3919,7 +3991,11 @@ namespace PSD.PSDGamepkg.JNS
                     {
                         ushort card = ushort.Parse(select);
                         XI.RaiseGMessage("G0OT," + tar + ",1," + card);
-                        XI.RaiseGMessage("G0IJ," + player.Uid + ",1,1,C" + card);
+                        XI.RaiseGMessage(new Artiad.IncrTokenExcl()
+                        {
+                            Who = player.Uid,
+                            SingleDelta = "C" + card
+                        }.ToMessage());
                     }
                 }
                 XI.RaiseGMessage(new Artiad.InnateChange()
@@ -3951,8 +4027,8 @@ namespace PSD.PSDGamepkg.JNS
             else
                 return "";
         }
-        #endregion EX408 - Chanyou
-        #region EX506 - Kumu
+        #endregion EX408 (03) - Chanyou
+        #region EX506 (04) - Kumu
         public bool JNE0401Valid(Player player, int type, string fuse)
         {
             // G0HQ,0,A,B,utype,n
@@ -4047,8 +4123,7 @@ namespace PSD.PSDGamepkg.JNS
                     sets.Add(ut);
                 }
                 TargetPlayer(player.Uid, sets);
-                XI.RaiseGMessage("G0IJ," + player.Uid + ",2," +
-                    sets.Count + "," + string.Join(",", sets));
+                XI.RaiseGMessage(new Artiad.IncrTokenTar() { Who = player.Uid, Tars = sets.ToArray() }.ToMessage());
             }
             else if (type == 1)
             {
@@ -4099,7 +4174,7 @@ namespace PSD.PSDGamepkg.JNS
             else
                 return "";
         }
-        #endregion EX506 - Kumu
+        #endregion EX506 (04) - Kumu
         #region EX515 (05) - Qingshi
         public bool JNE0501Valid(Player player, int type, string fuse)
         {
@@ -4121,34 +4196,23 @@ namespace PSD.PSDGamepkg.JNS
                     XI.Board.Rounder.Team == player.OppTeam;
             }
             else if (type == 2)
-            {
                 return player.Tux.Count > 0 && player.TokenCount > 0;
-            }
             else if (type == 3)
                 return player.TokenCount > 0;
             else return false;
         }
         public void JNE0501Action(Player player, int type, string fuse, string argst)
         {
-            System.Action<int> add = n =>
-            {
-                int now = player.RFM.GetInt("MemoryCount") + n;
-                player.RFM.Set("MemoryCount", now);
-                if (now > 8 && player.TokenCount <= 8)
-                    XI.RaiseGMessage("G0IJ," + player.Uid + ",0," + (9 - player.TokenCount));
-                else if (player.TokenCount <= 8)
-                    XI.RaiseGMessage("G0IJ," + player.Uid + ",0," + n);
-            };
             if (type == 0)
             {
                 string[] g0cc = Algo.Substring(fuse, 0, fuse.IndexOf(';')).Split(',');
                 int n = g0cc.Length - 5;
                 if (g0cc[5] == "0")
                     --n;
-                add(n);
+                XI.RaiseGMessage(new Artiad.IncrTokenCount() { Who = player.Uid, Delta = n }.ToMessage());
             }
             else if (type == 1)
-                add(1);
+                XI.RaiseGMessage(new Artiad.IncrTokenCount() { Who = player.Uid, Delta = 1 }.ToMessage());
             else if (type == 2)
             {
                 ushort[] show = argst.Split(',').Select(p => ushort.Parse(p)).ToArray();
@@ -4167,15 +4231,19 @@ namespace PSD.PSDGamepkg.JNS
                 if (!decision.StartsWith("/"))
                 {
                     XI.RaiseGMessage("G0QZ," + r.Uid + "," + decision);
-                    XI.RaiseGMessage("G0OJ," + player.Uid + ",0," + player.TokenCount);
+                    XI.RaiseGMessage(new Artiad.DecrTokenCount() { Who = player.Uid, Delta = player.TokenCount }.ToMessage());
                 }
                 else
+                {
                     XI.RaiseGMessage("G0IX," + player.Uid + ",0," + player.TokenCount);
+                    player.RFM.Set("Caught", true);
+                }
             }
             else if (type == 3)
             {
-                XI.RaiseGMessage("G0OX," + player.Uid + ",0," + player.TokenCount);
-                XI.RaiseGMessage("G0OJ," + player.Uid + ",0," + player.TokenCount);
+                if (player.RFM.GetBool("Caught"))
+                    XI.RaiseGMessage("G0OX," + player.Uid + ",0," + player.TokenCount);
+                XI.RaiseGMessage(new Artiad.DecrTokenCount() { Who = player.Uid, Delta = player.TokenCount }.ToMessage());
             }
         }
         public string JNE0501Input(Player player, int type, string fuse, string prev)
@@ -4195,7 +4263,7 @@ namespace PSD.PSDGamepkg.JNS
             {
                 string[] blocks = fuse.Split(',');
                 ushort who = ushort.Parse(blocks[1]);
-                return who == player.Uid;
+                return who == player.Uid && XI.Board.PoolEnabled;
             }
             else if (type == 3)
             {
@@ -4229,7 +4297,7 @@ namespace PSD.PSDGamepkg.JNS
             else
             {
                 XI.RaiseGMessage("G0DH," + player.Uid + ",0,1");
-                XI.RaiseGMessage("G2YS,M,1,T, " + player.Uid);
+                XI.RaiseGMessage("G2YS,M,1,T," + player.Uid);
             }
         }
         #endregion EX515 (05) - Qingshi
@@ -4280,8 +4348,12 @@ namespace PSD.PSDGamepkg.JNS
             {
                 int init = 5;
                 ushort[] pops = XI.Board.RestNPCPiles.Dequeue(init);
-                XI.RaiseGMessage("G0IJ," + player.Uid + ",1," + init + "," + string.Join(",", pops.Select(p => "M" + p)));
-                XI.RaiseGMessage("G2TZ," + player.Uid + ",0," + string.Join(",", pops.Select(p => "M" + p)));
+                XI.RaiseGMessage(new Artiad.IncrTokenExcl()
+                {
+                    Who = player.Uid,
+                    Delta = pops.Select(p => "M" + p).ToArray(),
+                    Public = true
+                }.ToMessage());
                 XI.RaiseGMessage(new Artiad.InnateChange()
                 {
                     Item = Artiad.InnateChange.Prop.HP,
@@ -4308,8 +4380,12 @@ namespace PSD.PSDGamepkg.JNS
                     if (female > 0)
                         XI.RaiseGMessage("G0OA," + player.Uid + ",0," + female);
                 }
-                XI.RaiseGMessage("G2TZ,0," + player.Uid + "," + string.Join(",", player.TokenExcl));
-                XI.RaiseGMessage("G0OJ," + player.Uid + ",1," + Algo.ListToString(player.TokenExcl));
+                XI.RaiseGMessage(new Artiad.DecrTokenExcl()
+                {
+                    Who = player.Uid,
+                    Delta = player.TokenExcl.ToArray(),
+                    Public = true
+                }.ToMessage());
             }
             else if (type == 2)
             {
@@ -4377,10 +4453,18 @@ namespace PSD.PSDGamepkg.JNS
                 Artiad.ImperialLeft il = Artiad.ImperialLeft.Parse(fuse);
                 ushort outSoul = ushort.Parse(argst);
                 ushort inSoul = il.Card;
-                XI.RaiseGMessage("G0OJ," + player.Uid + ",1,1,M" + outSoul);
-                XI.RaiseGMessage("G2TZ," + player.Uid + ",0,M" + outSoul);
-                XI.RaiseGMessage("G0IJ," + player.Uid + ",1,1,M" + inSoul);
-                XI.RaiseGMessage("G2TZ,0," + player.Uid + ",M" + inSoul);
+                XI.RaiseGMessage(new Artiad.DecrTokenExcl()
+                {
+                    Who = player.Uid,
+                    SingleDelta = "M" + outSoul,
+                    Public = true
+                }.ToMessage());
+                XI.RaiseGMessage(new Artiad.IncrTokenExcl()
+                {
+                    Who = player.Uid,
+                    SingleDelta = "M" + inSoul,
+                    Public = true
+                }.ToMessage());
                 int delta = 0;
                 if (XI.LibTuple.NL.Decode(NMBLib.OriginalNPC(outSoul)).Gender == 'F')
                     --delta;
@@ -4405,8 +4489,12 @@ namespace PSD.PSDGamepkg.JNS
                 int idx = argst.IndexOf(',');
                 ushort tar = ushort.Parse(argst.Substring(0, idx));
                 ushort outSoul = ushort.Parse(argst.Substring(idx + 1));
-                XI.RaiseGMessage("G0OJ," + player.Uid + ",1,1,M" + outSoul);
-                XI.RaiseGMessage("G2TZ," + player.Uid + ",0,M" + outSoul);
+                XI.RaiseGMessage(new Artiad.DecrTokenExcl()
+                {
+                    Who = player.Uid,
+                    SingleDelta = "M" + outSoul,
+                    Public = true
+                }.ToMessage());
                 NPC npc = XI.LibTuple.NL.Decode(NMBLib.OriginalNPC(outSoul));
                 XI.RaiseGMessage(new Artiad.InnateChange()
                 {
@@ -4520,7 +4608,7 @@ namespace PSD.PSDGamepkg.JNS
                     XI.RaiseGMessage("G0IA," + player.Uid + ",0," + player.STR);
                 if (player.DEX > 0)
                     XI.RaiseGMessage("G0IX," + player.Uid + ",0," + player.DEX);
-                XI.RaiseGMessage("G0IJ," + player.Uid + ",3");
+                XI.RaiseGMessage(new Artiad.IncrTokenAwake() { Who = player.Uid }.ToMessage());
             }
             else if (type == 1 || type == 2)
             {
@@ -4665,12 +4753,17 @@ namespace PSD.PSDGamepkg.JNS
         #region R3W01 - NangongHuang
         public bool JNR0401Valid(Player player, int type, string fuse)
         {
-            return XI.Board.MonPiles.Count >= 3;
+            return XI.Board.MonPiles.Count > 0;
         }
         public void JNR0401Action(Player player, int type, string fuse, string args)
         {
             ushort[] first = XI.Board.MonPiles.Watch(3);
-            XI.RaiseGMessage("G0XZ," + player.Uid + ",2,1,3,1");
+            if (first.Length == 2)
+                XI.RaiseGMessage("G0XZ," + player.Uid + ",1,1,2,1");
+            else if (first.Length == 1)
+                XI.RaiseGMessage("G0XZ," + player.Uid + ",2,0,1");
+            else
+                XI.RaiseGMessage("G0XZ," + player.Uid + ",2,1,3,1");
             if (player.Tux.Count > 0 && first.Intersect(XI.Board.MonDises).Any(p => Base.Card.NMBLib.IsMonster(p)))
                 XI.RaiseGMessage("G0DH," + player.Uid + ",1,1");
         }
@@ -4730,14 +4823,21 @@ namespace PSD.PSDGamepkg.JNS
         public void JNR0501Action(Player player, int type, string fuse, string argst)
         {
             if (type == 0)
-            {
-                XI.RaiseGMessage("G0IJ," + player.Uid + ",1,5,I1,I2,I3,I4,I5");
-                XI.RaiseGMessage("G2TZ," + player.Uid + ",0,I1,I2,I3,I4,I5");
-            }
+                XI.RaiseGMessage(new Artiad.IncrTokenExcl()
+                {
+                    Who = player.Uid,
+                    Delta = new string[] { "I1", "I2", "I3", "I4", "I5" },
+                    Public = true
+                }.ToMessage());
             else if (type == 1)
             {
                 if (player.TokenExcl.Count > 0)
-                    XI.RaiseGMessage("G0OJ," + player.Uid + ",1," + Algo.ListToString(player.TokenExcl));
+                    XI.RaiseGMessage(new Artiad.DecrTokenExcl()
+                    {
+                        Who = player.Uid,
+                        Delta = player.TokenExcl.ToArray(),
+                        Public = true
+                    }.ToMessage());
                 XI.RaiseGMessage("G0OA," + player.Uid + ",0,5");
             }
             else if (type == 2)
@@ -4761,8 +4861,12 @@ namespace PSD.PSDGamepkg.JNS
             ushort to = ushort.Parse(argst.Substring(idx + 1));
 
             TargetPlayer(player.Uid, to);
-            XI.RaiseGMessage("G0OJ," + player.Uid + ",1,1,I" + card);
-            XI.RaiseGMessage("G2TZ,0," + player.Uid + ",I" + card);
+            XI.RaiseGMessage(new Artiad.DecrTokenExcl()
+            {
+                Who = player.Uid,
+                SingleDelta = "I" + card,
+                Public = true
+            }.ToMessage());
             if (XI.Board.Garden[to].Tux.Count > 0)
                 XI.RaiseGMessage("G0DH," + to + ",1,1");
             XI.RaiseGMessage("G0DH," + to + ",0,1");
@@ -4829,15 +4933,31 @@ namespace PSD.PSDGamepkg.JNS
                     XI.InnerGMessage(Artiad.Harm.ToMessage(harms), -39);
             }
             else if (type == 1)
-                XI.RaiseGMessage("G0IJ," + player.Uid + ",1,2,V1,V2");
+            {
+                XI.RaiseGMessage(new Artiad.IncrTokenExcl()
+                {
+                    Who = player.Uid,
+                    Delta = new string[] { "V1", "V2" },
+                    Public = true
+                }.ToMessage());
+            }
             else if (type == 2)
             {
-                if (player.TokenExcl.Count > 0)
-                    XI.RaiseGMessage("G0OJ," + player.Uid + ",1," + Algo.ListToString(player.TokenExcl));
+                XI.RaiseGMessage(new Artiad.DecrTokenExcl()
+                {
+                    Who = player.Uid,
+                    Delta = player.TokenExcl.ToArray(),
+                    Public = true
+                }.ToMessage());
             }
             else if (type == 3)
             {
-                XI.RaiseGMessage("G0IJ," + player.Uid + ",1,1,V" + argst);
+                XI.RaiseGMessage(new Artiad.IncrTokenExcl()
+                {
+                    Who = player.Uid,
+                    SingleDelta = "V" + argst,
+                    Public = true
+                }.ToMessage());
                 XI.RaiseGMessage(new Artiad.InnateChange()
                 {
                     Item = Artiad.InnateChange.Prop.HP,
