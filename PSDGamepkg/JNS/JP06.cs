@@ -2800,7 +2800,7 @@ namespace PSD.PSDGamepkg.JNS
                     XI.RaiseGMessage("G0IA," + to + ",1," + nt);
             }
         }
-        public bool ZHP3Valid(Player player, int type, string fuse)
+        public bool ZPH3Valid(Player player, int type, string fuse)
         {
             return XI.Board.Garden.Values.Any(p => p.IsTared && XI.Board.IsAttendWar(p) && p.GetPetCount() > 0);
         }
