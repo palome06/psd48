@@ -105,7 +105,8 @@ namespace PSD.PSDGamepkg.JNS
                     Trigger = player.Uid,
                     Card = mon2ut
                 }.ToMessage());
-                Monster mon2 = XI.LibTuple.ML.Decode(XI.Board.Monster2);
+                mon2ut = XI.Board.Monster2;
+                Monster mon2 = XI.LibTuple.ML.Decode(mon2ut);
                 if (mon2.STR >= mon1.STR)
                 {
                     if (XI.Board.IsMonsterDebut)
@@ -136,7 +137,7 @@ namespace PSD.PSDGamepkg.JNS
                     }.ToMessage());
                     XI.Board.Monster1 = 0;
 
-                    XI.RaiseGMessage("G1GE,W," + mon2);
+                    XI.RaiseGMessage("G1GE,W," + mon2ut);
                     XI.RaiseGMessage("G0WB," + XI.Board.Monster2);
                     XI.RaiseGMessage(new Artiad.Abandon()
                     {
