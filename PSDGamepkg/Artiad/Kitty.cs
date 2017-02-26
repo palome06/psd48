@@ -46,6 +46,209 @@ namespace PSD.PSDGamepkg.Artiad
             if (Plow) { mask |= 0x10; }
             return "G0HC,0," + Farmer + "," + Farmland + "," + mask + "," + string.Join(",", Pets);
         }
+        public void Handle(XI XI, Base.VW.IWISV WI)
+        {
+            new HarvestPetSemaphore()
+            {
+                Farmer = Farmer,
+                Pets = Pets
+            }.Telegraph(WI.BCast);
+            // Item,         HL, ON
+            // Farmland = 0  Y   -
+            //          / 0  -   -
+            // Reposite = T  N   N
+            //          = F  -   -
+            // Plow     = T  Y   Y
+            //          = F  N   Y
+            Player player = XI.Board.Garden[Farmer];
+            int fivepc = FiveElementHelper.PropCount;
+            List<ushort>[] cpets = new List<ushort>[fivepc];
+            for (int i = 0; i < fivepc; ++i)
+            {
+                cpets[i] = new List<ushort>();
+                if (player.Pets[i] != 0)
+                    cpets[i].Add(player.Pets[i]);
+            }
+            foreach (ushort petUt in Pets)
+            {
+                Monster pet = XI.LibTuple.ML.Decode(petUt);
+                int pe = pet.Element.Elem2Index();
+                if (!cpets[pe].Contains(petUt))
+                    cpets[pe].Add(petUt);
+            }
+            List<ushort> result = new List<ushort>();
+            List<ushort> giveBack = new List<ushort>();
+            bool needHL = Farmland != 0 && Plow;
+            for (int i = 0; i < fivepc; ++i)
+            {
+                if (cpets[i].Count == 0)
+                    continue;
+                else if (cpets[i].Count == 1)
+                {
+                    ushort pt = cpets[i].First();
+                    if (Pets.Contains(pt))
+                    {
+                        if (needHL)
+                        {
+                            XI.RaiseGMessage(new Artiad.LosePet()
+                            {
+                                Owner = Farmland,
+                                SinglePet = pt,
+                                Stepper = Farmer,
+                                Recycle = false
+                            }.ToMessage());
+                        }
+                        result.Add(pt);
+                    }
+                    continue;
+                }
+                Treaty treaty = TreatyAct;
+                if (cpets[i].Count > 2)
+                    treaty = Treaty.ACTIVE; // more than two selection
+                if (Farmland == 0 && treaty == Artiad.HarvestPet.Treaty.KOKAN)
+                    treaty = Treaty.ACTIVE;
+                ushort myPt = player.Pets[i];
+                if (treaty == Treaty.KOKAN) // KOKAN always recycle
+                {
+                    ushort ayPt = SinglePet;
+                    if (needHL)
+                    {
+                        XI.RaiseGMessage(new Artiad.LosePet()
+                        {
+                            Owner = Farmland,
+                            SinglePet = ayPt,
+                            Stepper = Farmer,
+                            Recycle = false
+                        }.ToMessage());
+                    }
+                    result.Add(ayPt);
+                    XI.RaiseGMessage(new Artiad.LosePet()
+                    {
+                        Owner = Farmer,
+                        SinglePet = myPt,
+                        Stepper = Farmland,
+                        Recycle = false
+                    }.ToMessage());
+                    giveBack.Add(myPt);
+                }
+                else if (treaty == Artiad.HarvestPet.Treaty.PASSIVE)
+                {
+                    ushort ayPt = SinglePet;
+                    XI.RaiseGMessage(new Artiad.LosePet()
+                    {
+                        Owner = Farmer,
+                        SinglePet = myPt
+                    }.ToMessage());
+                    if (needHL)
+                    {
+                        XI.RaiseGMessage(new Artiad.LosePet()
+                        {
+                            Owner = Farmland,
+                            SinglePet = ayPt,
+                            Stepper = Farmer,
+                            Recycle = false
+                        }.ToMessage());
+                    }
+                    result.Add(ayPt);
+                }
+                else // ACTIVE
+                {
+                    List<ushort> others = cpets[i].ToList(); others.Remove(myPt);
+                    string mai = "#保留的,M1(p" + string.Join("p", cpets[i]) + ")";
+                    ushort sel = ushort.Parse(XI.AsyncInput(Farmer, mai, "G0HC", "0"));
+                    if (sel == myPt) // Keep the old one
+                    {
+                        if (!Reposit) // if reposit, then leave it where it was
+                        {
+                            if (needHL)
+                            {
+                                XI.RaiseGMessage(new Artiad.LosePet()
+                                {
+                                    Owner = Farmland,
+                                    Pets = others.ToArray(),
+                                    Recycle = false
+                                }.ToMessage());
+                            }
+                            XI.RaiseGMessage(new Artiad.Abandon()
+                            {
+                                Zone = Artiad.CustomsHelper.ZoneType.PLAYER,
+                                Genre = Card.Genre.NMB,
+                                SingleUnit = new Artiad.CustomsUnit()
+                                {
+                                    Source = Farmland,
+                                    Cards = others.ToArray()
+                                }
+                            }.ToMessage());
+                        }
+                    }
+                    else
+                    {
+                        others.Remove(sel);
+                        // lose old myself
+                        XI.RaiseGMessage(new Artiad.LosePet()
+                        {
+                            Owner = Farmer,
+                            SinglePet = myPt
+                        }.ToMessage());
+                        // lose the selection
+                        if (needHL)
+                        {
+                            XI.RaiseGMessage(new Artiad.LosePet()
+                            {
+                                Owner = Farmland,
+                                SinglePet = sel,
+                                Stepper = Farmer,
+                                Recycle = false
+                            }.ToMessage());
+                        }
+                        result.Add(sel);
+                        // remove if reposit is not set, otherwise put it back
+                        if (others.Count > 0 && !Reposit)
+                        {
+                            if (needHL)
+                            {
+                                XI.RaiseGMessage(new Artiad.LosePet()
+                                {
+                                    Owner = Farmland,
+                                    Pets = others.ToArray(),
+                                    Recycle = false
+                                }.ToMessage());
+                            }
+                            XI.RaiseGMessage(new Artiad.Abandon()
+                            {
+                                Zone = Artiad.CustomsHelper.ZoneType.PLAYER,
+                                Genre = Card.Genre.NMB,
+                                SingleUnit = new Artiad.CustomsUnit()
+                                {
+                                    Source = Farmland,
+                                    Cards = others.ToArray()
+                                }
+                            }.ToMessage());
+                        }
+                    }
+                }
+            }
+            if (result.Count > 0)
+            {
+                XI.RaiseGMessage(new Artiad.ObtainPet()
+                {
+                    Farmer = Farmer,
+                    Farmland = Farmland,
+                    Trophy = Trophy,
+                    Pets = result.ToArray()
+                }.ToMessage());
+            }
+            if (giveBack.Count > 0)
+            {
+                XI.RaiseGMessage(new Artiad.ObtainPet()
+                {
+                    Farmer = Farmland,
+                    Farmland = Farmer,
+                    Trophy = Trophy,
+                    Pets = giveBack.ToArray()
+                }.ToMessage());
+            }
+        }
         public static HarvestPet Parse(string line)
         {
             ushort[] g0hc = line.Substring("G0HC,0,".Length).Split(',').Select(p => ushort.Parse(p)).ToArray();
@@ -93,6 +296,43 @@ namespace PSD.PSDGamepkg.Artiad
                 B = g0hc[index],
                 BGoods = Algo.TakeArrayWithSize(g0hc, index + 1, out index)
             };
+        }
+        public void Handle(XI XI, Base.VW.IWISV WI)
+        {
+            if (AGoods.Length > 0)
+                XI.RaiseGMessage(new Artiad.LosePet()
+                {
+                    Owner = A,
+                    Pets = AGoods,
+                    Stepper = B,
+                    Recycle = false
+                }.ToMessage());
+            if (BGoods.Length > 0)
+                XI.RaiseGMessage(new Artiad.LosePet()
+                {
+                    Owner = B,
+                    Pets = BGoods,
+                    Stepper = A,
+                    Recycle = false
+                }.ToMessage());
+            if (BGoods.Length > 0)
+                XI.RaiseGMessage(new Artiad.HarvestPet()
+                {
+                    Farmer = A,
+                    Farmland = B,
+                    Pets = BGoods.ToArray(),
+                    Reposit = false,
+                    Plow = false
+                }.ToMessage());
+            if (AGoods.Length > 0)
+                XI.RaiseGMessage(new Artiad.HarvestPet()
+                {
+                    Farmer = B,
+                    Farmland = A,
+                    Pets = AGoods.ToArray(),
+                    Reposit = false,
+                    Plow = false
+                }.ToMessage());
         }
     }
     // actually obtain the pet
