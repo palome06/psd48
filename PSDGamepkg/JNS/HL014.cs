@@ -1782,7 +1782,7 @@ namespace PSD.PSDGamepkg.JNS
                 }
                 else if (type == 2 && IsMathISOS("JNH1002", player, fuse))
                     invs = g.Values.Where(p => p.IsAlive && p.Team == player.Team).ToList();
-                return invs.Any(p => p.GetInSupplyPetCount(XI.LibTuple.ML) !=
+                return invs.Any(p => p.GetInServicePetCount(XI.LibTuple.ML) !=
                     player.ROM.GetOrSetDiva("Enhanced").GetInt(p.Uid.ToString()));
             }
             else if (type == 3)
@@ -1814,7 +1814,7 @@ namespace PSD.PSDGamepkg.JNS
                 {
                     string who = py.Uid.ToString();
                     int history = player.ROM.GetOrSetDiva("Enhanced").GetInt(who);
-                    int current = py.GetInSupplyPetCount(XI.LibTuple.ML);
+                    int current = py.GetInServicePetCount(XI.LibTuple.ML);
                     if (history < current)
                         py.TuxLimit += (current - history);
                     else if (history > current)
@@ -2658,39 +2658,37 @@ namespace PSD.PSDGamepkg.JNS
             }
             else if (type == 2)
             {
+                var v = XI.Board.Garden.Values;
                 int thisEle = elem.Elem2Index();
                 int advEle = adv.Elem2Index();
-                List<ushort> actionPets = new List<ushort>();
-                foreach (Player py in XI.Board.Garden.Values.Where(p => p.IsAlive && !p.PetDisabled))
-                {
-                    if (py.Pets[thisEle] != 0 && !XI.Board.NotActionPets.Contains(py.Pets[thisEle]))
+                v.Where(p => p.IsAlive && !p.PetDisabled && p.Pets[thisEle] != 0 &&
+                    XI.LibTuple.ML.Decode(p.Pets[thisEle]).Seals.Count == 0).ToList().ForEach(p =>
                     {
-                        XI.RaiseGMessage("G0IA," + py.Uid + ",0,1");
-                        XI.RaiseGMessage("G0IX," + py.Uid + ",0,1");
-                    }
-                    if (py.Pets[advEle] != 0)
-                        actionPets.Add(py.Pets[advEle]);
-                }
-                if (actionPets.Count > 0)
-                    XI.RaiseGMessage(new Artiad.DisableItPetEffect() { Its = actionPets.ToArray() }.ToMessage());
+                        XI.RaiseGMessage("G0IA," + p.Uid + ",0,1");
+                        XI.RaiseGMessage("G0IX," + p.Uid + ",0,1");
+                    });
+                new Artiad.DisableItPetEffect()
+                {
+                    Its = v.Select(p => p.Pets[advEle]).Where(p => p != 0).ToArray(),
+                    Reason = player.Uid + ":" + skillName
+                }.Hotel(XI);
             }
             else if (type == 3)
             {
+                var v = XI.Board.Garden.Values;
                 int thisEle = elem.Elem2Index();
                 int advEle = adv.Elem2Index();
-                List<ushort> actionPets = new List<ushort>();
-                foreach (Player py in XI.Board.Garden.Values.Where(p => p.IsAlive && !p.PetDisabled))
-                {
-                    if (py.Pets[thisEle] != 0 && !XI.Board.NotActionPets.Contains(py.Pets[thisEle]))
+                v.Where(p => p.IsAlive && !p.PetDisabled && p.Pets[thisEle] != 0 &&
+                    XI.LibTuple.ML.Decode(p.Pets[thisEle]).Seals.Count == 0).ToList().ForEach(p =>
                     {
-                        XI.RaiseGMessage("G0OA," + py.Uid + ",0,1");
-                        XI.RaiseGMessage("G0OX," + py.Uid + ",0,1");
-                    }
-                    if (py.Pets[advEle] != 0)
-                        actionPets.Add(py.Pets[advEle]);
-                }
-                if (actionPets.Count > 0)
-                    XI.RaiseGMessage(new Artiad.EnableItPetEffect() { Its = actionPets.ToArray() }.ToMessage());
+                        XI.RaiseGMessage("G0OA," + p.Uid + ",0,1");
+                        XI.RaiseGMessage("G0OX," + p.Uid + ",0,1");
+                    });
+                new Artiad.EnableItPetEffect()
+                {
+                    Its = v.Select(p => p.Pets[advEle]).Where(p => p != 0).ToArray(),
+                    Reason = player.Uid + ":" + skillName
+                }.Hotel(XI);
             }
             else if (type == 4)
                 XI.Board.IsMonsterDebut = true;
@@ -2699,14 +2697,20 @@ namespace PSD.PSDGamepkg.JNS
             else if (type == 6)
             {
                 Artiad.ObtainPet opt = Artiad.ObtainPet.Parse(fuse);
-                opt.Pets.Where(p => XI.LibTuple.ML.Decode(p).Element == adv)
-                    .ToList().ForEach(p => XI.Board.NotActionPets.Add(p));
+                XI.RaiseGMessage(new Artiad.DisableItPetEffect()
+                {
+                    Its = opt.Pets.Where(p => XI.LibTuple.ML.Decode(p).Element == adv).ToArray(),
+                    Reason = player.Uid + ":" + skillName
+                }.ToMessage());
             }
             else if (type == 7)
             {
                 Artiad.LosePet lpt = Artiad.LosePet.Parse(fuse);
-                lpt.Pets.Where(p => XI.LibTuple.ML.Decode(p).Element == adv)
-                    .ToList().ForEach(p => XI.Board.NotActionPets.Add(p));
+                XI.RaiseGMessage(new Artiad.EnableItPetEffect()
+                {
+                    Its = lpt.Pets.Where(p => XI.LibTuple.ML.Decode(p).Element == adv).ToArray(),
+                    Reason = player.Uid + ":" + skillName
+                }.ToMessage());
             }
         }
         public bool JNH1603Valid(Player player, int type, string fuse)

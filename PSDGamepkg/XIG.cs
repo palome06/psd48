@@ -450,7 +450,7 @@ namespace PSD.PSDGamepkg
                             if (!player.PetDisabled)
                             {
                                 ushort[] pets = player.Pets.Where(p => p != 0 &&
-                                    !Board.NotActionPets.Contains(p)).ToArray();
+                                    LibTuple.ML.Decode(p).Seals.Count == 0).ToArray();
                                 if (pets.Length > 0)
                                 {
                                     peuList.Add(new Artiad.PetEffectUnit()
@@ -1443,6 +1443,8 @@ namespace PSD.PSDGamepkg
                         if (changeType == 0 || changeType == 2)
                         {
                             player.ResetROM(Board);
+                            //if (player.PetDisabled)
+                            //    RaiseGMessage(new Artiad.EnablePlayerPetEffect() { SingleWho = who }.ToMessage());
                             player.InitFromHero(hero, true, Board.PoolEnabled, Board.PlayerPoolEnabled);
                             Artiad.ContentRule.LoadDefaultPrice(player);
                         }
@@ -1493,7 +1495,7 @@ namespace PSD.PSDGamepkg
                         if (!player.PetDisabled)
                         {
                             ushort[] pets = player.Pets.Where(p => p != 0 &&
-                                 !Board.NotActionPets.Contains(p)).ToArray();
+                                LibTuple.ML.Decode(p).Seals.Count == 0).ToArray();
                             if (pets.Length > 0)
                             {
                                 RaiseGMessage(new Artiad.JoinPetEffects() { SingleUnit = new Artiad.PetEffectUnit()

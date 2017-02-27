@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using PSD.Base;
 using PSD.Base.Card;
 using Algo = PSD.Base.Utils.Algo;
@@ -380,17 +379,17 @@ namespace PSD.PSDGamepkg.Artiad
             }
             if (!player.PetDisabled)
             {
-                ushort[] apets = Pets.Where(p => !XI.Board.NotActionPets.Contains(p)).ToArray();
-                if (apets.Length > 0)
+                new JoinPetEffects()
                 {
-                    XI.RaiseGMessage(new JoinPetEffects() { SingleUnit = new PetEffectUnit()
+                    SingleUnit = new PetEffectUnit()
                     {
                         Owner = Farmer,
-                        Pets = apets,
+                        Pets = Pets.Where(p => p != 0 &&
+                            XI.LibTuple.ML.Decode(p).Seals.Count == 0).ToArray(),
                         Reload = (Farmland == 0 || XI.Board.Garden[Farmland].Team != player.Team) ?
                             PetEffectUnit.ReloadType.NEW : PetEffectUnit.ReloadType.BORROW
-                    } }.ToMessage());
-                }
+                    }
+                }.Hotel(XI);
             }
             new ObtainPetSemaphore() { Farmer = Farmer, Farmland = Farmland, Pets = Pets }.Telegraph(WI.BCast);
             XI.RaiseGMessage("G2WK," + string.Join(",",
@@ -434,17 +433,17 @@ namespace PSD.PSDGamepkg.Artiad
             {
                 if (!player.PetDisabled)
                 {
-                    ushort[] apets = Pets.Where(p => !XI.Board.NotActionPets.Contains(p)).ToArray();
-                    if (apets.Length > 0)
+                    new CollapsePetEffects()
                     {
-                        XI.RaiseGMessage(new CollapsePetEffects() { SingleUnit = new PetEffectUnit()
+                        SingleUnit = new PetEffectUnit()
                         {
                             Owner = Owner,
-                            Pets = apets,
+                            Pets = Pets.Where(p => p != 0 &&
+                                XI.LibTuple.ML.Decode(p).Seals.Count == 0).ToArray(),
                             Reload = (Stepper == 0 || XI.Board.Garden[Stepper].Team != player.Team) ?
                                 PetEffectUnit.ReloadType.NEW : PetEffectUnit.ReloadType.BORROW
-                        } }.ToMessage());
-                    }
+                        }
+                    }.Hotel(XI);
                 }
                 foreach (ushort pet in Pets)
                 {
@@ -466,14 +465,22 @@ namespace PSD.PSDGamepkg.Artiad
         }
     }
     // Pet's effect take action, specially to handle with buffer Incr
-    public class JoinPetEffects
+    public class JoinPetEffects : NGT
     {
         public List<PetEffectUnit> List { set; get; }
         public PetEffectUnit SingleUnit
         {
             set { List = new List<PetEffectUnit>() { value }; }
         }
-        public string ToMessage() { return "G0IC," + string.Join(",", List.Select(p => p.ToRawMessage())); }
+
+        public override bool Legal()
+        {
+            return List.Count > 0 && List.Any(peu => peu.Pets.Length > 0);
+        }
+        public override string ToMessage()
+        {
+            return "G0IC," + string.Join(",", List.Select(p => p.ToRawMessage()));
+        }
         public static JoinPetEffects Parse(string line)
         {
             return new JoinPetEffects() { List = PetEffectUnit.ParseFromLine(line) };
@@ -495,21 +502,28 @@ namespace PSD.PSDGamepkg.Artiad
                         // pet.SetIncrOption(player);
                     }
                     pet.IncrAction(player);
-                    pet.InSupply = true;
                 }
                 new JoinPetSemaphore() { Owner = jpes.Owner, Pets = jpes.Pets }.Telegraph(WI.BCast);
             });
         }
     }
     // Pet's effect lost, especially to handle with buffer Incr
-    public class CollapsePetEffects
+    public class CollapsePetEffects : NGT
     {
         public List<PetEffectUnit> List { set; get; }
         public PetEffectUnit SingleUnit
         {
             set { List = new List<PetEffectUnit>() { value }; }
         }
-        public string ToMessage() { return "G0OC," + string.Join(",", List.Select(p => p.ToRawMessage())); }
+
+        public override bool Legal()
+        {
+            return List.Count > 0 && List.Any(peu => peu.Pets.Length > 0);
+        }
+        public override string ToMessage()
+        {
+            return "G0OC," + string.Join(",", List.Select(p => p.ToRawMessage()));
+        }
         public static CollapsePetEffects Parse(string line)
         {
             return new CollapsePetEffects() { List = PetEffectUnit.ParseFromLine(line) };
@@ -527,7 +541,6 @@ namespace PSD.PSDGamepkg.Artiad
                         pet.ResetROM();
                     if (jpes.Reload == PetEffectUnit.ReloadType.NEW)
                         pet.TeamBursted = false;
-                    pet.InSupply = false;
                     XI.RaiseGMessage("G0WB," + pt);
                 }
                 new CollapsePetSemaphore() { Owner = jpes.Owner, Pets = jpes.Pets }.Telegraph(WI.BCast);
@@ -599,13 +612,13 @@ namespace PSD.PSDGamepkg.Artiad
             if (pys.Count > 0)
             {
                 List<Player> pyis = pys.Where(p => p.Pets.Any(q => q != 0 &&
-                    !XI.Board.NotActionPets.Contains(q))).ToList();
+                    !XI.LibTuple.ML.Decode(q).Seals.Any())).ToList();
                 XI.RaiseGMessage(new Artiad.JoinPetEffects()
                 {
                     List = pyis.Select(p => new Artiad.PetEffectUnit()
                     {
                         Owner = p.Uid,
-                        Pets = p.Pets.Where(q => q != 0 && !XI.Board.NotActionPets.Contains(q)).ToArray(),
+                        Pets = p.Pets.Where(q => q != 0 && !XI.LibTuple.ML.Decode(q).Seals.Any()).ToArray(),
                         Reload = Artiad.PetEffectUnit.ReloadType.ABLE
                     }).ToList()
                 }.ToMessage());
@@ -619,7 +632,7 @@ namespace PSD.PSDGamepkg.Artiad
         }
     }
     // enable pet effect of a pet, might be shielded by player-level disable
-    public class EnableItPetEffect
+    public class EnableItPetEffect : NGT
     {
         public ushort[] Its { set; get; }
         public ushort SingleIt
@@ -627,30 +640,38 @@ namespace PSD.PSDGamepkg.Artiad
             set { Its = new ushort[] { value }; }
             get { return (Its != null && Its.Length == 1) ? Its[0] : (ushort)0; }
         }
-        public string ToMessage() { return "G0IE,1," + string.Join(",", Its); }
+        public string Reason { set; get; }
+
+        public override bool Legal() { return Its.Length > 0 && !string.IsNullOrEmpty(Reason); }
+        public override string ToMessage() { return "G0IE,1," + Reason + "," + string.Join(",", Its); }
         public static EnableItPetEffect Parse(string line)
         {
             string[] g0ie = line.Split(',');
             return new EnableItPetEffect()
             {
-                Its = Algo.TakeRange(g0ie, 2, g0ie.Length).Select(p => ushort.Parse(p)).ToArray()
+                Reason = g0ie[2],
+                Its = Algo.TakeRange(g0ie, 3, g0ie.Length).Select(p => ushort.Parse(p)).ToArray()
             };
         }
         public void Handle(XI XI, Base.VW.IWISV WI)
         {
-            List<ushort> pets = Its.Where(p => XI.Board.NotActionPets.Contains(p)).ToList();
+            // 1. find those did matters
+            List<ushort> pets = Its.Where(p => p != 0 && Artiad.ContentRule.GetPetOwnership(p, XI) != 0 &&
+                !XI.Board.Garden[Artiad.ContentRule.GetPetOwnership(p, XI)].PetDisabled &&
+                XI.LibTuple.ML.Decode(p).Seals.Count == 1 && XI.LibTuple.ML.Decode(p).Seals.Contains(Reason)).ToList();
+            // 2. erase the reason from valid pets
+            Its.Where(p => p != 0).Select(p => XI.LibTuple.ML.Decode(p)).ToList().ForEach(p => p.Seals.Remove(Reason));
+            // 3. change whether a pet is totally freed
             if (pets.Count > 0)
             {
-                pets.ForEach(p => XI.Board.NotActionPets.Remove(p));
-                List<Artiad.PetEffectUnit> peuList = Artiad.ContentRule.GetPetOwnershipTable(pets, XI)
-                    .Where(p => !XI.Board.Garden[p.Key].PetDisabled).Select(p => new Artiad.PetEffectUnit()
+                List<Artiad.PetEffectUnit> peuList = Artiad.ContentRule.GetPetOwnershipTable(
+                    pets, XI).Select(p => new Artiad.PetEffectUnit()
                     {
                         Owner = p.Key,
                         Pets = p.ToArray(),
                         Reload = Artiad.PetEffectUnit.ReloadType.ABLE
                     }).ToList();
-                if (peuList.Count > 0)
-                    XI.RaiseGMessage(new Artiad.JoinPetEffects() { List = peuList }.ToMessage());
+                XI.RaiseGMessage(new Artiad.JoinPetEffects() { List = peuList }.ToMessage());
                 new EnablePetEffectSemaphore() { IsPlayer = false, Targets = pets.ToArray() }.Telegraph(WI.BCast);
             }
         }
@@ -679,14 +700,14 @@ namespace PSD.PSDGamepkg.Artiad
             if (pys.Count > 0)
             {
                 List<Player> pyis = pys.Where(p => p.Pets.Any(q => q != 0 &&
-                    !XI.Board.NotActionPets.Contains(q))).ToList();
+                    !XI.LibTuple.ML.Decode(q).Seals.Any())).ToList();
                 if (pyis.Count > 0)
                     XI.RaiseGMessage(new CollapsePetEffects()
                     {
                         List = pyis.Select(p => new PetEffectUnit()
                         {
                             Owner = p.Uid,
-                            Pets = p.Pets.Where(q => q != 0 && !XI.Board.NotActionPets.Contains(q)).ToArray(),
+                            Pets = p.Pets.Where(q => q != 0 && !XI.LibTuple.ML.Decode(q).Seals.Any()).ToArray(),
                             Reload = PetEffectUnit.ReloadType.ABLE
                         }).ToList()
                     }.ToMessage());
@@ -700,7 +721,7 @@ namespace PSD.PSDGamepkg.Artiad
         }
     }
     // disable pet effect of a pet, might be shielded by player-level disable
-    public class DisableItPetEffect
+    public class DisableItPetEffect : NGT
     {
         public ushort[] Its { set; get; }
         public ushort SingleIt
@@ -708,30 +729,38 @@ namespace PSD.PSDGamepkg.Artiad
             set { Its = new ushort[] { value }; }
             get { return (Its != null && Its.Length == 1) ? Its[0] : (ushort)0; }
         }
-        public string ToMessage() { return "G0OE,1," + string.Join(",", Its); }
+        public string Reason { set; get; }
+
+        public override bool Legal() { return Its.Length > 0 && !string.IsNullOrEmpty(Reason); }
+        public override string ToMessage() { return "G0OE,1," + Reason + "," + string.Join(",", Its); }
         public static DisableItPetEffect Parse(string line)
         {
             string[] g0oe = line.Split(',');
             return new DisableItPetEffect()
             {
-                Its = Algo.TakeRange(g0oe, 2, g0oe.Length).Select(p => ushort.Parse(p)).ToArray()
+                Reason = g0oe[2],
+                Its = Algo.TakeRange(g0oe, 3, g0oe.Length).Select(p => ushort.Parse(p)).ToArray()
             };
         }
         public void Handle(XI XI, Base.VW.IWISV WI)
-        {
-            List<ushort> pets = Its.Where(p => !XI.Board.NotActionPets.Contains(p)).ToList();
+        {         
+            // 1. find those did matters
+            List<ushort> pets = Its.Where(p => p != 0 && Artiad.ContentRule.GetPetOwnership(p, XI) != 0 &&
+                !XI.Board.Garden[Artiad.ContentRule.GetPetOwnership(p, XI)].PetDisabled &&
+                XI.LibTuple.ML.Decode(p).Seals.Count == 0).ToList();
+            // 2. erase the reason from valid pets
+            Its.Where(p => p != 0).Select(p => XI.LibTuple.ML.Decode(p)).ToList().ForEach(p => p.Seals.Add(Reason));
+            // 3. change whether a pet is totally freed
             if (pets.Count > 0)
             {
-                pets.ForEach(p => XI.Board.NotActionPets.Add(p));
-                List<PetEffectUnit> peuList = ContentRule.GetPetOwnershipTable(pets, XI)
-                    .Where(p => !XI.Board.Garden[p.Key].PetDisabled).Select(p => new Artiad.PetEffectUnit()
+                List<Artiad.PetEffectUnit> peuList = Artiad.ContentRule.GetPetOwnershipTable(
+                    pets, XI).Select(p => new Artiad.PetEffectUnit()
                     {
                         Owner = p.Key,
                         Pets = p.ToArray(),
                         Reload = Artiad.PetEffectUnit.ReloadType.ABLE
                     }).ToList();
-                if (peuList.Count > 0)
-                    XI.RaiseGMessage(new CollapsePetEffects() { List = peuList }.ToMessage());
+                XI.RaiseGMessage(new CollapsePetEffects() { List = peuList }.ToMessage());
                 new DisablePetEffectSemaphore() { IsPlayer = false, Targets = pets.ToArray() }.Telegraph(WI.BCast);
             }
         }

@@ -117,8 +117,6 @@ namespace PSD.Base
         public Utils.Rueue<string> PendingTux { private set; get; }
         // Player that won't lose pets in battle
         public List<ushort> PetProtecedPlayer { private set; get; }
-        // List of monsters that is disabled
-        public ISet<ushort> NotActionPets { private set; get; }
         // permit the use of escue, set of reasons
         public ISet<string> EscueBanned { private set; get; }
         // silence the board so that active skills are banned, set of reasons
@@ -295,7 +293,6 @@ namespace PSD.Base
             PendingTux = new Utils.Rueue<string>();
             ProtectedTux = new List<ushort>();
             PetProtecedPlayer = new List<ushort>();
-            NotActionPets = new HashSet<ushort>();
             UseCardRound = 0; ClockWised = true;
             JumpTable = new Dictionary<string, string>();
             FinalAkaScore = 0; FinalAoScore = 0;

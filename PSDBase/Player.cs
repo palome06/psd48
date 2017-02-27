@@ -96,7 +96,7 @@ namespace PSD.Base
         }
         public bool Immobilized { set; get; }
         public bool Loved { set; get; }
-        public bool PetDisabled { set; get; }
+        public bool PetDisabled { set; get; } // General Status, don't need a reason
         // How many ZPs the player can still use
         public int RestZP { set; get; }
         // Extend Equip Mask, 0 = disabled, 1 = weapon, 2 = armor, 4 = trove
@@ -253,14 +253,11 @@ namespace PSD.Base
             cz01PriceDict = new Dictionary<string, List<string>>();
         }
         public int GetPetCount() { return Pets.Count(p => p != 0); }
-        public int GetInSupplyPetCount(Base.Card.MonsterLib ml)
-        {
-            return Pets.Count(p => p != 0 && ml.Decode(p) != null && ml.Decode(p).InSupply);
-        }
         // get number of pets that can be activated, thus not forciblity banned
-        public int GetActivePetCount(Board board)
+        public int GetInServicePetCount(Card.MonsterLib ml)
         {
-            return PetDisabled ? 0 : Pets.Count(p => p != 0 && !board.NotActionPets.Contains(p));
+            return Pets.Count(p => p != 0 && ml.Decode(p) != null &&
+                ml.Decode(p).Seals.Count == 0);
         }
         public int OppTeam { get { return 3 - Team; } }
 

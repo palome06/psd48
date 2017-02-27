@@ -1446,7 +1446,7 @@ namespace PSD.PSDGamepkg.JNS
                 }
                 else if (type == 2 && IsMathISOS("JN50301", player, fuse))
                     invs = g.Values.Where(p => p.IsAlive && p.Team == player.Team).ToList();
-                return invs.Any(p => p.GetInSupplyPetCount(XI.LibTuple.ML) !=
+                return invs.Any(p => p.GetInServicePetCount(XI.LibTuple.ML) !=
                     player.ROM.GetOrSetDiva("Enhanced").GetInt(p.Uid.ToString()));
             }
             else if (type == 3)
@@ -1478,7 +1478,7 @@ namespace PSD.PSDGamepkg.JNS
                 {
                     string who = py.Uid.ToString();
                     int history = player.ROM.GetOrSetDiva("Enhanced").GetInt(who);
-                    int current = py.GetInSupplyPetCount(XI.LibTuple.ML);
+                    int current = py.GetInServicePetCount(XI.LibTuple.ML);
                     if (history < current)
                         XI.RaiseGMessage("G0IA," + py.Uid + ",0," + (current - history));
                     else if (history > current)

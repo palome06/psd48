@@ -891,8 +891,6 @@ namespace PSD.PSDGamepkg
             else if ((!ske.IsOnce || ske.Tick == 0) && ske.Type == SKTType.PT && mt01.ContainsKey(ske.Name))
             {
                 Base.Card.Monster mt = mt01[ske.Name];
-                int consumeType = ske.Consume;
-
                 if (ske.Consume != 2)
                 {
                     Player player = Board.Garden[ske.Tg];
@@ -900,17 +898,17 @@ namespace PSD.PSDGamepkg
                     {
                         foreach (ushort petCode in player.Pets)
                         {
-                            if (petCode == 0 || Board.NotActionPets.Contains(petCode)) continue;
-                            if (petCode == Board.Monster1 && consumeType == 1) continue;
+                            if (petCode == Board.Monster1 && ske.Consume == 1) continue;
                             Base.Card.Monster pet = LibTuple.ML.Decode(petCode);
+                            if (pet == null || pet.Seals.Count > 0) continue;
                             string lf = (pet.IsLinked(ske.Consume, ske.InType) ? ske.LinkFrom + ":" : "") + ske.Fuse;
-                            if (pet.Code.Equals(mt.Code) && mt.ConsumeValid(player, consumeType, ske.InType, lf))
+                            if (pet.Code.Equals(mt.Code) && mt.ConsumeValid(player, ske.Consume, ske.InType, lf))
                             {
-                                if (consumeType == 1 && Board.CsPets.Contains(player.Uid + "," + petCode))
+                                if (ske.Consume == 1 && Board.CsPets.Contains(player.Uid + "," + petCode))
                                     continue;
                                 if (ske.Lock == false)
                                 {
-                                    string req = pet.ConsumeInput(player, consumeType, ske.InType, lf, "");
+                                    string req = pet.ConsumeInput(player, ske.Consume, ske.InType, lf, "");
                                     string msg = string.IsNullOrEmpty(req) ? "" : "," + req;
                                     pris[player.Uid] += ";PT" + petCode + msg;
                                     //iTypes[skt.Tg] += "," + skt.InType;
@@ -932,11 +930,11 @@ namespace PSD.PSDGamepkg
                     {
                         Base.Card.Monster mon = LibTuple.ML.Decode(mon1);
                         string lf = (mon.IsLinked(ske.Consume, ske.InType) ? ske.LinkFrom + ":" : "") + ske.Fuse;
-                        if (mon != null && mon == mt && mt.ConsumeValid(player, consumeType, ske.InType, lf))
+                        if (mon != null && mon == mt && mt.ConsumeValid(player, ske.Consume, ske.InType, lf))
                         {
                             if (ske.Lock == false)
                             {
-                                string req = mon.ConsumeInput(player, consumeType, ske.InType, lf, "");
+                                string req = mon.ConsumeInput(player, ske.Consume, ske.InType, lf, "");
                                 string msg = string.IsNullOrEmpty(req) ? "" : "," + req;
                                 pris[player.Uid] += ";PT" + mon1 + msg;
                                 //iTypes[skt.Tg] += "," + skt.InType;
