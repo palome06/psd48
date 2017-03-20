@@ -954,7 +954,7 @@ namespace PSD.PSDGamepkg.JNS
         public string JNH0503Input(Player player, int type, string fuse, string prev)
         {
             if (type == 0 && prev == "")
-                return "/Q1(p" + string.Join("p", player.Tux) + "),/T1" + AAllTareds(player);
+                return "/T1" + AAllTareds(player);
             else
                 return "";
         }
