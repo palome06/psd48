@@ -1118,7 +1118,8 @@ namespace PSD.PSDGamepkg.JNS
                 });
                 if (harms.Count > 0)
                     XI.InnerGMessage(Artiad.Harm.ToMessage(harms), 85);
-                XI.RaiseGMessage("G0DH," + player.Uid + ",0,1");
+                if (player.IsAlive)
+                    XI.RaiseGMessage("G0DH," + player.Uid + ",0,1");
             }
         }
         public void FJT2UseAction(ushort cardUt, Player player, ushort source)
